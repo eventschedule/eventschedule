@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AdminPlanUpdateRequest;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\AnalyticsReferrersDaily;
@@ -1213,7 +1214,7 @@ class AdminController extends Controller
     /**
      * Update a role's plan.
      */
-    public function updatePlan(Request $request, $roleId)
+    public function updatePlan(AdminPlanUpdateRequest $request, $roleId)
     {
         if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
@@ -1222,11 +1223,7 @@ class AdminController extends Controller
         $decodedId = UrlUtils::decodeId($roleId);
         $role = Role::findOrFail($decodedId);
 
-        $validated = $request->validate([
-            'plan_type' => 'required|in:free,pro,enterprise',
-            'plan_term' => 'nullable|in:month,year',
-            'plan_expires' => 'nullable|date',
-        ]);
+        $validated = $request->validated();
 
         $role->plan_type = $validated['plan_type'];
         $role->plan_term = $validated['plan_term'] ?? 'year';

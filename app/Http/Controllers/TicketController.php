@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TicketCheckoutRequest;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\User;
-use App\Rules\NoFakeEmail;
-use App\Rules\ValidTurnstile;
 use App\Services\AuditService;
 use App\Services\EmailService;
 use App\Utils\InvoiceNinja;
@@ -76,7 +75,7 @@ class TicketController extends Controller
         }
     }
 
-    public function checkout(Request $request, $subdomain)
+    public function checkout(TicketCheckoutRequest $request, $subdomain)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($request->event_id));
 
@@ -95,21 +94,7 @@ class TicketController extends Controller
             }
         }
 
-        // Validate basic required fields for all checkout requests
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255'],
-            'tickets' => ['required', 'array'],
-            'cf-turnstile-response' => [new ValidTurnstile],
-        ]);
-
         if (! $user && $request->create_account && config('app.hosted')) {
-
-            $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class, new NoFakeEmail],
-                'password' => ['required', 'string', 'min:8'],
-            ]);
 
             $utmParams = session('utm_params', []);
 

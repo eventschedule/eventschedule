@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\EventCommentSubmitRequest;
 use App\Http\Requests\EventCreateRequest;
+use App\Http\Requests\EventParseRequest;
+use App\Http\Requests\EventPartsSaveRequest;
 use App\Http\Requests\EventUpdateRequest;
+use App\Http\Requests\EventVideoSubmitRequest;
 use App\Jobs\SendQueuedEmail;
 use App\Mail\EventAccepted;
 use App\Mail\EventDeclined;
@@ -888,13 +892,8 @@ class EventController extends Controller
         return view('event.guest-import', ['role' => $role, 'isGuest' => true, 'venues' => [], 'currencies' => $currencies, 'defaultCurrency' => MoneyUtils::getCurrencyForCountry($role->country_code)]);
     }
 
-    public function parse(Request $request, $subdomain)
+    public function parse(EventParseRequest $request, $subdomain)
     {
-        $request->validate([
-            'event_details' => 'nullable|string|max:10000',
-            'details_image' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp|max:10240',
-        ]);
-
         $details = request()->input('event_details');
         $file = null;
 
@@ -977,13 +976,8 @@ class EventController extends Controller
         }
     }
 
-    public function guestParse(Request $request, $subdomain)
+    public function guestParse(EventParseRequest $request, $subdomain)
     {
-        $request->validate([
-            'event_details' => 'nullable|string|max:10000',
-            'details_image' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp|max:10240',
-        ]);
-
         $details = request()->input('event_details');
         $file = null;
 
@@ -1255,7 +1249,7 @@ class EventController extends Controller
         return redirect($redirectUrl);
     }
 
-    public function submitVideo(Request $request, $subdomain, $event_hash)
+    public function submitVideo(EventVideoSubmitRequest $request, $subdomain, $event_hash)
     {
         $role = Role::where('subdomain', $subdomain)->firstOrFail();
         if (is_demo_role($role)) {
@@ -1268,12 +1262,6 @@ class EventController extends Controller
         if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
             abort(404);
         }
-
-        $request->validate([
-            'youtube_url' => ['required', 'string', 'url', 'max:500'],
-            'event_part_id' => ['nullable', 'string'],
-            'event_date' => ['nullable', 'string', 'date_format:Y-m-d'],
-        ]);
 
         $youtubeUrl = trim($request->input('youtube_url'));
         $embedUrl = UrlUtils::getYouTubeEmbed($youtubeUrl);
@@ -1357,7 +1345,7 @@ class EventController extends Controller
         return $redirect;
     }
 
-    public function submitComment(Request $request, $subdomain, $event_hash)
+    public function submitComment(EventCommentSubmitRequest $request, $subdomain, $event_hash)
     {
         $role = Role::where('subdomain', $subdomain)->firstOrFail();
         if (is_demo_role($role)) {
@@ -1370,12 +1358,6 @@ class EventController extends Controller
         if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
             abort(404);
         }
-
-        $request->validate([
-            'comment' => ['required', 'string', 'max:1000'],
-            'event_part_id' => ['nullable', 'string'],
-            'event_date' => ['nullable', 'string', 'date_format:Y-m-d'],
-        ]);
 
         $comment = strip_tags(trim($request->input('comment')));
 
@@ -1551,7 +1533,7 @@ class EventController extends Controller
         ]);
     }
 
-    public function saveEventParts(Request $request, $subdomain)
+    public function saveEventParts(EventPartsSaveRequest $request, $subdomain)
     {
         if (! auth()->user()->isMember($subdomain)) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
@@ -1562,15 +1544,6 @@ class EventController extends Controller
         if (! auth()->user()->isAdmin() && ! $role->isEnterprise()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
-
-        $request->validate([
-            'event_id' => 'required|string',
-            'parts' => 'required|array',
-            'parts.*.name' => 'required|string|max:255',
-            'parts.*.description' => 'nullable|string|max:1000',
-            'parts.*.start_time' => 'nullable|string|max:10',
-            'parts.*.end_time' => 'nullable|string|max:10',
-        ]);
 
         $eventId = UrlUtils::decodeId($request->input('event_id'));
         $event = Event::findOrFail($eventId);
