@@ -82,15 +82,15 @@
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="{{ $title ?? 'Event Schedule' }}">
     <meta property="og:site_name" content="Event Schedule">
-    <meta property="og:locale" content="{{ str_replace('-', '_', app()->getLocale()) }}">
     @php
         $ogLocaleMap = [
             'en' => 'en_US', 'es' => 'es_ES', 'de' => 'de_DE',
             'fr' => 'fr_FR', 'it' => 'it_IT', 'pt' => 'pt_PT',
             'he' => 'he_IL', 'nl' => 'nl_NL', 'ar' => 'ar_SA', 'et' => 'et_EE', 'ru' => 'ru_RU',
         ];
-        $currentOgLocale = str_replace('-', '_', app()->getLocale());
+        $currentOgLocale = $ogLocaleMap[app()->getLocale()] ?? 'en_US';
     @endphp
+    <meta property="og:locale" content="{{ $currentOgLocale }}">
     @foreach($ogLocaleMap as $lang => $ogLocale)
         @if($ogLocale !== $currentOgLocale)
     <meta property="og:locale:alternate" content="{{ $ogLocale }}">
@@ -122,7 +122,12 @@
         "@type": "Organization",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
-        "logo": "{{ config('app.url') }}/images/dark_logo.png",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "{{ config('app.url') }}/images/dark_logo.png",
+            "width": 712,
+            "height": 140
+        },
         "sameAs": [
             "https://github.com/eventschedule/eventschedule",
             "https://www.facebook.com/appeventschedule",
