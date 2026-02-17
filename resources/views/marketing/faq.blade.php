@@ -218,6 +218,54 @@
                     "@type": "Answer",
                     "text": "The interface is available in 11 languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, and Russian. You can also use AI-powered translation to automatically translate your event descriptions."
                 }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I customize my schedule's appearance?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. You can customize colors, fonts, backgrounds, header images, profile images, and choose between grid or list layouts. Pro users can also add custom CSS and use a custom domain for complete brand control."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Does Event Schedule support multiple languages?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. The interface supports 11 languages, and each schedule can have its own language setting. You can also use AI-powered translation to automatically translate event descriptions into other languages."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I track who views my schedule?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Built-in analytics track page views, unique visitors, devices, browsers, and traffic sources. Analytics is a Pro feature and uses privacy-first tracking with no external trackers."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Does Event Schedule integrate with Google Analytics?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Event Schedule has its own built-in analytics dashboard with page views, unique visitors, device breakdowns, and traffic sources. No external analytics integration is needed."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I import events from a flyer or image?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. The AI-powered import feature can extract event details from images, flyers, and pasted text. Simply drop an image or paste event information and the AI will parse it into structured event data."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can others submit events to my schedule?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Enable 'Accept Event Requests' in your schedule settings to let others submit events. You can optionally require approval before submitted events appear on your schedule."
+                }
             }
         ]
     }
@@ -554,6 +602,120 @@
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
                             <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. The built-in <a href="{{ marketing_url('/docs/newsletters') }}" class="text-blue-600 hover:text-blue-700 underline">newsletter feature</a> includes audience segmentation, A/B testing, scheduled sends, and open/click tracking. You can target all followers, ticket buyers, specific sub-schedules, or a manual list of email addresses.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customization -->
+            <div class="mb-16">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/25">
+                        <svg aria-hidden="true" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Customization</h2>
+                </div>
+
+                <div class="space-y-4">
+                    <div x-data="{ open: false }" class="faq-item bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
+                        <button @click="open = !open" class="w-full px-6 py-5 text-left flex items-center justify-between gap-4">
+                            <span class="font-semibold text-gray-900 dark:text-white">Can I customize my schedule's appearance?</span>
+                            <svg aria-hidden="true" :class="{ 'rotate-180': open }" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="open" x-collapse class="px-6 pb-5">
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. You can customize colors, fonts, backgrounds, header images, profile images, and choose between grid or list layouts. Pro users can also add custom CSS and use a custom domain for complete brand control. See our <a href="{{ marketing_url('/docs/schedule-styling') }}" class="text-blue-600 hover:text-blue-700 underline">schedule styling guide</a> for details.</p>
+                        </div>
+                    </div>
+
+                    <div x-data="{ open: false }" class="faq-item bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
+                        <button @click="open = !open" class="w-full px-6 py-5 text-left flex items-center justify-between gap-4">
+                            <span class="font-semibold text-gray-900 dark:text-white">Does Event Schedule support multiple languages?</span>
+                            <svg aria-hidden="true" :class="{ 'rotate-180': open }" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="open" x-collapse class="px-6 pb-5">
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. The interface supports 11 languages, and each schedule can have its own language setting. You can also use <a href="{{ marketing_url('/features/ai') }}" class="text-blue-600 hover:text-blue-700 underline">AI-powered translation</a> to automatically translate event descriptions into other languages.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics -->
+            <div class="mb-16">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-teal-500/25">
+                        <svg aria-hidden="true" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Analytics</h2>
+                </div>
+
+                <div class="space-y-4">
+                    <div x-data="{ open: false }" class="faq-item bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
+                        <button @click="open = !open" class="w-full px-6 py-5 text-left flex items-center justify-between gap-4">
+                            <span class="font-semibold text-gray-900 dark:text-white">Can I track who views my schedule?</span>
+                            <svg aria-hidden="true" :class="{ 'rotate-180': open }" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="open" x-collapse class="px-6 pb-5">
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. Built-in analytics track page views, unique visitors, devices, browsers, and traffic sources. Analytics is a Pro feature and uses privacy-first tracking with no external trackers. See our <a href="{{ marketing_url('/docs/analytics') }}" class="text-blue-600 hover:text-blue-700 underline">analytics documentation</a> for details.</p>
+                        </div>
+                    </div>
+
+                    <div x-data="{ open: false }" class="faq-item bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
+                        <button @click="open = !open" class="w-full px-6 py-5 text-left flex items-center justify-between gap-4">
+                            <span class="font-semibold text-gray-900 dark:text-white">Does Event Schedule integrate with Google Analytics?</span>
+                            <svg aria-hidden="true" :class="{ 'rotate-180': open }" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="open" x-collapse class="px-6 pb-5">
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Event Schedule has its own built-in <a href="{{ marketing_url('/docs/analytics') }}" class="text-blue-600 hover:text-blue-700 underline">analytics dashboard</a> with page views, unique visitors, device breakdowns, and traffic sources. No external analytics integration is needed.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Management -->
+            <div class="mb-16">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+                        <svg aria-hidden="true" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Event Management</h2>
+                </div>
+
+                <div class="space-y-4">
+                    <div x-data="{ open: false }" class="faq-item bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
+                        <button @click="open = !open" class="w-full px-6 py-5 text-left flex items-center justify-between gap-4">
+                            <span class="font-semibold text-gray-900 dark:text-white">Can I import events from a flyer or image?</span>
+                            <svg aria-hidden="true" :class="{ 'rotate-180': open }" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="open" x-collapse class="px-6 pb-5">
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. The AI-powered import feature can extract event details from images, flyers, and pasted text. Simply drop an image or paste event information and the AI will parse it into structured event data. Learn more in our <a href="{{ marketing_url('/docs/creating-events') }}" class="text-blue-600 hover:text-blue-700 underline">creating events guide</a>.</p>
+                        </div>
+                    </div>
+
+                    <div x-data="{ open: false }" class="faq-item bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
+                        <button @click="open = !open" class="w-full px-6 py-5 text-left flex items-center justify-between gap-4">
+                            <span class="font-semibold text-gray-900 dark:text-white">Can others submit events to my schedule?</span>
+                            <svg aria-hidden="true" :class="{ 'rotate-180': open }" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="open" x-collapse class="px-6 pb-5">
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. Enable "Accept Event Requests" in your schedule settings to let others submit events. You can optionally require approval before submitted events appear on your schedule. See <a href="{{ marketing_url('/docs/schedule-basics') }}" class="text-blue-600 hover:text-blue-700 underline">schedule basics</a> for setup details.</p>
                         </div>
                     </div>
                 </div>

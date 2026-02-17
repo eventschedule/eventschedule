@@ -89,6 +89,11 @@
 
                             <p class="text-gray-600 dark:text-gray-300 mb-6">All styling changes update in real-time, so you can experiment freely and see exactly how your schedule will look before saving.</p>
 
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">New here?</div>
+                                <p>If you haven't created your account and first schedule yet, start with <a href="{{ route('marketing.docs.getting_started') }}" class="text-cyan-400 hover:text-cyan-300">Getting Started</a>.</p>
+                            </div>
+
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Getting Started</div>
                                 <p>If you haven't set up your schedule's basic information yet, see <a href="{{ route('marketing.docs.schedule_basics') }}" class="text-cyan-400 hover:text-cyan-300">Schedule Basics</a> first.</p>
