@@ -23,6 +23,7 @@
     @endif
     </x-slot>
 
+    <x-slot name="structuredData">
     <!-- BlogPosting Structured Data -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -54,6 +55,7 @@
         @endif
     }
     </script>
+    </x-slot>
 
     <style {!! nonce_attr() !!}>
         @keyframes pulse-slow {
@@ -67,13 +69,6 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .text-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
         /* Override any existing hover styles that might conflict */
