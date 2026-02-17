@@ -445,6 +445,8 @@ if (config('app.is_nexus')) {
             Route::get('/newsletters', fn () => redirect()->route('marketing.newsletters', [], 301));
             Route::get('/recurring-events', fn () => redirect()->route('marketing.recurring_events', [], 301));
             Route::get('/embed-calendar', fn () => redirect()->route('marketing.embed_calendar', [], 301));
+            Route::get('/wp/analytics', fn () => redirect()->route('marketing.analytics', [], 301));
+            Route::get('/wp/newsletters', fn () => redirect()->route('marketing.newsletters', [], 301));
             Route::get('/for-talent', [MarketingController::class, 'forTalent'])->name('marketing.for_talent');
             Route::get('/for-venues', [MarketingController::class, 'forVenues'])->name('marketing.for_venues');
             Route::get('/for-curators', [MarketingController::class, 'forCurators'])->name('marketing.for_curators');
@@ -597,6 +599,11 @@ if (config('app.is_nexus')) {
             Route::get('/for-ai-agents', fn () => redirect('https://eventschedule.com/for-ai-agents', 301));
             Route::get('/use-cases', fn () => redirect('https://eventschedule.com/use-cases', 301));
             Route::get('/compare', fn () => redirect('https://eventschedule.com/compare', 301));
+            Route::get('/eventbrite-alternative', fn () => redirect('https://eventschedule.com/eventbrite-alternative', 301));
+            Route::get('/luma-alternative', fn () => redirect('https://eventschedule.com/luma-alternative', 301));
+            Route::get('/ticket-tailor-alternative', fn () => redirect('https://eventschedule.com/ticket-tailor-alternative', 301));
+            Route::get('/google-calendar-alternative', fn () => redirect('https://eventschedule.com/google-calendar-alternative', 301));
+            Route::get('/why-create-account', fn () => redirect('https://eventschedule.com/why-create-account', 301));
             Route::get('/contact', fn () => redirect('https://eventschedule.com/contact', 301));
             Route::get('/privacy', fn () => redirect('https://eventschedule.com/privacy', 301));
             Route::get('/terms-of-service', fn () => redirect('https://eventschedule.com/terms-of-service', 301));
