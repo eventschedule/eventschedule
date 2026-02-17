@@ -588,7 +588,7 @@
                             <x-input-label for="category_id_@{{ idx }}" :value="__('messages.category')" />
                             <select
                                 id="category_id_@{{ idx }}"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl') }}"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
                                 v-model="preview.parsed[idx].category_id"
                                 v-bind:disabled="savedEvents[idx]">
                                 <option value="">{{ __('messages.please_select') }}</option>
@@ -603,7 +603,7 @@
                             <x-input-label for="group_id_@{{ idx }}" :value="__('messages.schedule')" />
                             <select
                                 id="group_id_@{{ idx }}"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl') }}"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
                                 v-model="preview.parsed[idx].group_id"
                                 v-bind:disabled="savedEvents[idx]">
                                 <option value="">{{ __('messages.please_select') }}</option>
