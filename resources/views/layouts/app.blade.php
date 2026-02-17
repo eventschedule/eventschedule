@@ -595,37 +595,55 @@
 
 
             @if (session('message'))
-            Toastify({
-                text: @json(session('message'), JSON_UNESCAPED_UNICODE),
-                duration: 3000,
-                position: 'center',
-                stopOnFocus: true,
-                style: {
-                    background: '#4BB543',
+            (function() {
+                var key = '{{ uniqid("toast_") }}';
+                if (!sessionStorage.getItem(key)) {
+                    sessionStorage.setItem(key, '1');
+                    Toastify({
+                        text: @json(session('message'), JSON_UNESCAPED_UNICODE),
+                        duration: 3000,
+                        position: 'center',
+                        stopOnFocus: true,
+                        style: {
+                            background: '#4BB543',
+                        }
+                    }).showToast();
                 }
-            }).showToast();
+            })();
             @elseif (session('error'))
-            Toastify({
-                text: @json(session('error'), JSON_UNESCAPED_UNICODE),
-                close: true,
-                duration: 10000,
-                position: 'center',
-                stopOnFocus: true,
-                style: {
-                    background: '#FF0000',
+            (function() {
+                var key = '{{ uniqid("toast_") }}';
+                if (!sessionStorage.getItem(key)) {
+                    sessionStorage.setItem(key, '1');
+                    Toastify({
+                        text: @json(session('error'), JSON_UNESCAPED_UNICODE),
+                        close: true,
+                        duration: 10000,
+                        position: 'center',
+                        stopOnFocus: true,
+                        style: {
+                            background: '#FF0000',
+                        }
+                    }).showToast();
                 }
-            }).showToast();
+            })();
             @elseif (session('warning'))
-            Toastify({
-                text: @json(session('warning'), JSON_UNESCAPED_UNICODE),
-                close: true,
-                duration: 8000,
-                position: 'center',
-                stopOnFocus: true,
-                style: {
-                    background: '#F59E0B',
+            (function() {
+                var key = '{{ uniqid("toast_") }}';
+                if (!sessionStorage.getItem(key)) {
+                    sessionStorage.setItem(key, '1');
+                    Toastify({
+                        text: @json(session('warning'), JSON_UNESCAPED_UNICODE),
+                        close: true,
+                        duration: 8000,
+                        position: 'center',
+                        stopOnFocus: true,
+                        style: {
+                            background: '#F59E0B',
+                        }
+                    }).showToast();
                 }
-            }).showToast();
+            })();
             @endif
         });
 
