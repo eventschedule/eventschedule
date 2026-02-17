@@ -36,6 +36,12 @@ class ApiEventController extends Controller
                 'starts_before' => 'nullable|date_format:Y-m-d',
                 'subdomain' => 'nullable|string',
                 'per_page' => 'nullable|integer|min:1|max:500',
+                'venue_id' => 'nullable|string',
+                'category_id' => 'nullable|integer',
+                'name' => 'nullable|string',
+                'schedule_type' => 'nullable|string|in:single,recurring',
+                'tickets_enabled' => 'nullable|boolean',
+                'group_id' => 'nullable|string',
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -76,6 +82,47 @@ class ApiEventController extends Controller
 
         if ($request->has('starts_before')) {
             $events->where('starts_at', '<=', $request->starts_before.' 23:59:59');
+        }
+
+        // Filter by venue
+        if ($request->has('venue_id')) {
+            $venueId = UrlUtils::decodeId($request->venue_id);
+            $events->whereHas('roles', function ($q) use ($venueId) {
+                $q->where('roles.id', $venueId)->where('roles.type', 'venue');
+            });
+        }
+
+        // Filter by category
+        if ($request->has('category_id')) {
+            $events->where('category_id', $request->category_id);
+        }
+
+        // Filter by name
+        if ($request->has('name')) {
+            $name = str_replace(['%', '_'], ['\\%', '\\_'], $request->name);
+            $events->where('name', 'like', '%'.$name.'%');
+        }
+
+        // Filter by schedule type
+        if ($request->has('schedule_type')) {
+            if ($request->schedule_type === 'recurring') {
+                $events->whereNotNull('recurring_frequency');
+            } else {
+                $events->whereNull('recurring_frequency');
+            }
+        }
+
+        // Filter by tickets enabled
+        if ($request->has('tickets_enabled')) {
+            $events->where('tickets_enabled', $request->boolean('tickets_enabled'));
+        }
+
+        // Filter by sub-schedule (group)
+        if ($request->has('group_id')) {
+            $groupId = UrlUtils::decodeId($request->group_id);
+            $events->whereHas('roles', function ($q) use ($groupId) {
+                $q->where('event_role.group_id', $groupId);
+            });
         }
 
         $events = $events->orderBy('starts_at', 'desc')->paginate($perPage);

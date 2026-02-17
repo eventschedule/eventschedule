@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
 use App\Models\Sale;
+use App\Services\AuditService;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -14,6 +16,220 @@ use Illuminate\Validation\ValidationException;
 
 class ApiSaleController extends Controller
 {
+    protected const MAX_PER_PAGE = 500;
+
+    protected const DEFAULT_PER_PAGE = 100;
+
+    public function index(Request $request)
+    {
+        try {
+            $request->validate([
+                'event_id' => 'nullable|string',
+                'subdomain' => 'nullable|string',
+                'status' => 'nullable|string|in:unpaid,paid,cancelled,refunded,expired',
+                'email' => 'nullable|string|email',
+                'event_date' => 'nullable|date_format:Y-m-d',
+                'per_page' => 'nullable|integer|min:1|max:500',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }
+
+        $perPage = min(
+            (int) $request->input('per_page', self::DEFAULT_PER_PAGE),
+            self::MAX_PER_PAGE
+        );
+
+        $sales = Sale::with(['saleTickets.ticket', 'event'])
+            ->where('is_deleted', false)
+            ->whereHas('event.roles', function ($q) {
+                $q->whereIn('roles.id', auth()->user()->roles()
+                    ->wherePivotIn('level', ['owner', 'admin'])
+                    ->pluck('roles.id'));
+            })
+            ->whereHas('event.roles', function ($q) {
+                $q->wherePro();
+            });
+
+        if ($request->has('event_id')) {
+            $sales->where('event_id', UrlUtils::decodeId($request->event_id));
+        }
+
+        if ($request->has('subdomain')) {
+            $sales->where('subdomain', $request->subdomain);
+        }
+
+        if ($request->has('status')) {
+            $sales->where('status', $request->status);
+        }
+
+        if ($request->has('email')) {
+            $sales->where('email', $request->email);
+        }
+
+        if ($request->has('event_date')) {
+            $sales->where('event_date', $request->event_date);
+        }
+
+        $sales = $sales->orderBy('created_at', 'desc')->paginate($perPage);
+
+        return response()->json([
+            'data' => $sales->map(function ($sale) {
+                return $sale->toApiData();
+            })->values(),
+            'meta' => [
+                'current_page' => $sales->currentPage(),
+                'from' => $sales->firstItem(),
+                'last_page' => $sales->lastPage(),
+                'per_page' => $sales->perPage(),
+                'to' => $sales->lastItem(),
+                'total' => $sales->total(),
+                'path' => $request->url(),
+            ],
+        ], 200, [], JSON_PRETTY_PRINT);
+    }
+
+    public function show(Request $request, $id)
+    {
+        $sale = Sale::with(['saleTickets.ticket', 'event'])->where('is_deleted', false)->find(UrlUtils::decodeId($id));
+
+        if (! $sale) {
+            return response()->json(['error' => 'Sale not found'], 404);
+        }
+
+        if (! auth()->user()->canEditEvent($sale->event)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        if (! $sale->event->isPro()) {
+            return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
+        }
+
+        return response()->json([
+            'data' => $sale->toApiData(),
+        ], 200, [], JSON_PRETTY_PRINT);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $sale = Sale::with(['saleTickets.ticket', 'event'])->where('is_deleted', false)->find(UrlUtils::decodeId($id));
+
+        if (! $sale) {
+            return response()->json(['error' => 'Sale not found'], 404);
+        }
+
+        if (! auth()->user()->canEditEvent($sale->event)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        if (! $sale->event->isPro()) {
+            return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
+        }
+
+        try {
+            $request->validate([
+                'action' => 'required|string|in:mark_paid,refund,cancel',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }
+
+        $previousStatus = $sale->status;
+        $actionPerformed = false;
+
+        switch ($request->action) {
+            case 'mark_paid':
+                if ($sale->status === 'unpaid') {
+                    $sale->status = 'paid';
+                    $sale->transaction_reference = 'Manual payment (API)';
+                    $sale->save();
+                    $actionPerformed = true;
+
+                    AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+                }
+                break;
+
+            case 'refund':
+                if ($sale->status === 'paid') {
+                    $sale->status = 'refunded';
+                    $sale->save();
+                    $actionPerformed = true;
+                }
+                break;
+
+            case 'cancel':
+                if (in_array($sale->status, ['unpaid', 'paid'])) {
+                    $sale->status = 'cancelled';
+                    $sale->save();
+                    $actionPerformed = true;
+                }
+                break;
+        }
+
+        if (! $actionPerformed) {
+            return response()->json([
+                'error' => 'Action "'.$request->action.'" cannot be performed on a sale with status "'.$sale->status.'"',
+            ], 422);
+        }
+
+        $auditAction = match ($request->action) {
+            'refund' => AuditService::SALE_REFUND,
+            default => AuditService::SALE_CHECKIN,
+        };
+        AuditService::log($auditAction, auth()->id(), 'Sale', $sale->id,
+            ['status' => $previousStatus],
+            ['status' => $sale->status],
+            $request->action.':event_id:'.$sale->event_id
+        );
+
+        $sale->load(['saleTickets.ticket', 'event']);
+
+        return response()->json([
+            'data' => $sale->toApiData(),
+            'meta' => [
+                'message' => 'Sale updated successfully',
+            ],
+        ], 200, [], JSON_PRETTY_PRINT);
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        $sale = Sale::with('event')->where('is_deleted', false)->find(UrlUtils::decodeId($id));
+
+        if (! $sale) {
+            return response()->json(['error' => 'Sale not found'], 404);
+        }
+
+        if (! auth()->user()->canEditEvent($sale->event)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        if (! $sale->event->isPro()) {
+            return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
+        }
+
+        $sale->is_deleted = true;
+        $sale->save();
+
+        AuditService::log(AuditService::SALE_CHECKIN, auth()->id(), 'Sale', $sale->id,
+            null,
+            ['is_deleted' => true],
+            'delete:event_id:'.$sale->event_id
+        );
+
+        return response()->json([
+            'data' => [
+                'message' => 'Sale deleted successfully',
+            ],
+        ], 200, [], JSON_PRETTY_PRINT);
+    }
+
     public function store(Request $request)
     {
         try {

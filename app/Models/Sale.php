@@ -77,6 +77,8 @@ class Sale extends Model
 
         $data->id = UrlUtils::encodeId($this->id);
         $data->event_id = UrlUtils::encodeId($this->event_id);
+        $data->event_name = $this->event?->name;
+        $data->subdomain = $this->subdomain;
         $data->name = $this->name;
         $data->email = $this->email;
         $data->event_date = $this->event_date;

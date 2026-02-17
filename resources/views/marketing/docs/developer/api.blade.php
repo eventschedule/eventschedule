@@ -93,7 +93,11 @@
                         <a href="#upload-flyer" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Upload Flyer</a>
                         <a href="#list-categories" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">List Categories</a>
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 mt-6">Sales</div>
+                        <a href="#list-sales" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">List Sales</a>
+                        <a href="#show-sale" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Show Sale</a>
                         <a href="#create-sale" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Create Sale</a>
+                        <a href="#update-sale" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Update Sale</a>
+                        <a href="#delete-sale" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Delete Sale</a>
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 mt-6">Reference</div>
                         <a href="#error-handling" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Error Handling</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
@@ -608,6 +612,30 @@
                                             <td><code class="doc-inline-code">starts_before</code></td>
                                             <td>Events starting before this date (Y-m-d)</td>
                                         </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">venue_id</code></td>
+                                            <td>Filter by venue (encoded venue schedule ID)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">category_id</code></td>
+                                            <td>Filter by category ID</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">name</code></td>
+                                            <td>Filter by event name (partial match)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">schedule_type</code></td>
+                                            <td>Filter by type: <code class="doc-inline-code">single</code> or <code class="doc-inline-code">recurring</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">tickets_enabled</code></td>
+                                            <td>Filter by whether tickets are enabled (boolean)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">group_id</code></td>
+                                            <td>Filter by sub-schedule (encoded sub-schedule ID)</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -888,6 +916,68 @@
                             </div>
                         </section>
 
+                        <!-- List Sales -->
+                        <section id="list-sales" class="doc-section">
+                            <h2 class="doc-heading">List Sales</h2>
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">GET</span>
+                                <code class="doc-inline-code">/api/sales</code>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a paginated list of sales for events you own or administer. Supports filtering:</p>
+
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">event_id</code></td>
+                                            <td>Filter by event (encoded event ID)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">subdomain</code></td>
+                                            <td>Filter by schedule subdomain</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">status</code></td>
+                                            <td>Filter by status: unpaid, paid, cancelled, refunded, or expired</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">email</code></td>
+                                            <td>Filter by buyer email (exact match)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">event_date</code></td>
+                                            <td>Filter by event date (Y-m-d)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="doc-code-block">
+                                <div class="doc-code-header">
+                                    <span>cURL</span>
+                                    <button class="doc-copy-btn">Copy</button>
+                                </div>
+                                <pre><code><span class="code-keyword">curl</span> -X GET <span class="code-string">"{{ config('app.url') }}/api/sales?status=paid&subdomain=my-venue"</span> \
+     -H <span class="code-string">"X-API-Key: your_api_key_here"</span></code></pre>
+                            </div>
+                        </section>
+
+                        <!-- Show Sale -->
+                        <section id="show-sale" class="doc-section">
+                            <h2 class="doc-heading">Show Sale</h2>
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">GET</span>
+                                <code class="doc-inline-code">/api/sales/{id}</code>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a single sale by encoded ID, including ticket details.</p>
+                        </section>
+
                         <!-- Create Sale -->
                         <section id="create-sale" class="doc-section">
                             <h2 class="doc-heading">Create Sale</h2>
@@ -895,7 +985,7 @@
                                 <span class="bg-green-600 text-white px-2 py-1 rounded text-sm font-medium">POST</span>
                                 <code class="doc-inline-code">/api/sales</code>
                             </div>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Create a new sale manually for an event.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Create a new sale manually for an event. Sales are created as unpaid (free tickets are auto-marked as paid).</p>
 
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
@@ -951,6 +1041,66 @@
          "tickets": {"General Admission": 2}
      }'</span></code></pre>
                             </div>
+                        </section>
+
+                        <!-- Update Sale -->
+                        <section id="update-sale" class="doc-section">
+                            <h2 class="doc-heading">Update Sale Status</h2>
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="bg-yellow-600 text-white px-2 py-1 rounded text-sm font-medium">PUT</span>
+                                <code class="doc-inline-code">/api/sales/{id}</code>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Perform a status action on a sale. Available actions depend on the current status.</p>
+
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Action</th>
+                                            <th>From Status</th>
+                                            <th>To Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">mark_paid</code></td>
+                                            <td>unpaid</td>
+                                            <td>paid</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">refund</code></td>
+                                            <td>paid</td>
+                                            <td>refunded</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">cancel</code></td>
+                                            <td>unpaid, paid</td>
+                                            <td>cancelled</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="doc-code-block">
+                                <div class="doc-code-header">
+                                    <span>cURL</span>
+                                    <button class="doc-copy-btn">Copy</button>
+                                </div>
+                                <pre><code><span class="code-keyword">curl</span> -X PUT <span class="code-string">"{{ config('app.url') }}/api/sales/abc123"</span> \
+     -H <span class="code-string">"X-API-Key: your_api_key_here"</span> \
+     -H <span class="code-string">"Content-Type: application/json"</span> \
+     -d <span class="code-string">'{"action": "mark_paid"}'</span></code></pre>
+                            </div>
+                        </section>
+
+                        <!-- Delete Sale -->
+                        <section id="delete-sale" class="doc-section">
+                            <h2 class="doc-heading">Delete Sale</h2>
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="bg-red-600 text-white px-2 py-1 rounded text-sm font-medium">DELETE</span>
+                                <code class="doc-inline-code">/api/sales/{id}</code>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Soft-delete a sale. The sale will no longer appear in listings.</p>
                         </section>
 
                         <!-- Error Handling -->

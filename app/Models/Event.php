@@ -82,22 +82,24 @@ class Event extends Model
             if ($model->isDirty('starts_at') && ! $model->days_of_week) {
                 $model->load(['tickets', 'sales']);
 
-                $model->tickets->each(function ($ticket) use ($model) {
-                    if ($ticket->sold) {
-                        $sold = json_decode($ticket->sold, true);
-                        if ($oldDate = array_key_first($sold)) {
-                            $quantity = $sold[$oldDate];
-                            $newDate = Carbon::parse($model->starts_at)->format('Y-m-d');
-                            $sold = [$newDate => $quantity];
-                            $ticket->sold = json_encode($sold);
-                            $ticket->save();
+                DB::transaction(function () use ($model) {
+                    $model->tickets->each(function ($ticket) use ($model) {
+                        if ($ticket->sold) {
+                            $sold = json_decode($ticket->sold, true);
+                            if ($oldDate = array_key_first($sold)) {
+                                $quantity = $sold[$oldDate];
+                                $newDate = Carbon::parse($model->starts_at)->format('Y-m-d');
+                                $sold = [$newDate => $quantity];
+                                $ticket->sold = json_encode($sold);
+                                $ticket->save();
+                            }
                         }
-                    }
-                });
+                    });
 
-                $model->sales->each(function ($sale) use ($model) {
-                    $sale->event_date = Carbon::parse($model->starts_at)->format('Y-m-d');
-                    $sale->save();
+                    $model->sales->each(function ($sale) use ($model) {
+                        $sale->event_date = Carbon::parse($model->starts_at)->format('Y-m-d');
+                        $sale->save();
+                    });
                 });
             }
 
@@ -797,9 +799,9 @@ class Event extends Model
         $str = $this->translatedName();
 
         if ($this->venue) {
-            $str .= ' ' . __('messages.at') . ' '.$this->venue->getDisplayName();
+            $str .= ' '.__('messages.at').' '.$this->venue->getDisplayName();
         } elseif ($this->getEventUrlDomain()) {
-            $str .= ' ' . __('messages.at') . ' '.$this->getEventUrlDomain();
+            $str .= ' '.__('messages.at').' '.$this->getEventUrlDomain();
         }
 
         $str .= ' | '.$this->localStartsAt(true, $date);
@@ -1022,9 +1024,13 @@ class Event extends Model
         $data->starts_at = $this->starts_at;
         $data->duration = $this->duration;
         $data->category_id = $this->category_id;
+        $data->category_name = $this->category_id ? (config('app.event_categories')[$this->category_id] ?? null) : null;
         $data->event_url = $this->event_url;
         $data->registration_url = $this->registration_url;
         $data->venue_id = $this->venue ? UrlUtils::encodeId($this->venue->id) : null;
+        $data->venue_name = $this->venue?->name;
+        $data->venue_address1 = $this->venue?->address1;
+        $data->venue_subdomain = $this->venue?->subdomain;
 
         // Flyer image URL
         $rawFlyer = $this->getAttributes()['flyer_image_url'] ?? null;
@@ -1071,6 +1077,41 @@ class Event extends Model
                 'end_time' => $part->end_time,
             ];
         })->values();
+
+        $data->ticket_currency_code = $this->ticket_currency_code;
+        $data->payment_method = $this->payment_method;
+        $data->terms_url = $this->terms_url;
+
+        // Schedules associated with this event
+        if ($this->relationLoaded('roles')) {
+            // Batch-load groups to avoid N+1 queries on pivot->group
+            $groupIds = $this->roles->pluck('pivot.group_id')->filter()->unique()->values();
+            $groups = $groupIds->isNotEmpty()
+                ? Group::whereIn('id', $groupIds)->get()->keyBy('id')
+                : collect();
+
+            $data->schedules = $this->roles->map(function ($role) use ($groups) {
+                $schedule = [
+                    'id' => UrlUtils::encodeId($role->id),
+                    'subdomain' => $role->subdomain,
+                    'name' => $role->name,
+                    'type' => $role->type,
+                ];
+
+                if ($role->pivot && $role->pivot->group_id) {
+                    $group = $groups->get($role->pivot->group_id);
+                    if ($group) {
+                        $schedule['group'] = [
+                            'id' => UrlUtils::encodeId($group->id),
+                            'name' => $group->name,
+                            'slug' => $group->slug,
+                        ];
+                    }
+                }
+
+                return $schedule;
+            })->values();
+        }
 
         $data->created_at = $this->created_at ? $this->created_at->toIso8601String() : null;
         $data->updated_at = $this->updated_at ? $this->updated_at->toIso8601String() : null;

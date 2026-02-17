@@ -459,16 +459,24 @@ class TicketController extends Controller
                 ]);
             }
 
+            // Verify the session belongs to this sale to prevent cross-sale session reuse
+            $sessionSaleId = $session->metadata->sale_id ?? null;
+            if ($sessionSaleId !== UrlUtils::encodeId($sale->id)) {
+                \Log::warning('Stripe session sale_id mismatch in success()', [
+                    'url_sale_id' => $sale->id,
+                    'session_sale_id' => $sessionSaleId,
+                    'session_id' => request()->session_id,
+                ]);
+
+                return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+            }
+
             if ($session->payment_status === 'paid' && $sale->status !== 'paid') {
                 $sale->status = 'paid';
                 $sale->payment_amount = $session->amount_total / 100;
                 $sale->transaction_reference = $session->payment_intent;
-                // For hosted mode (non-direct), record analytics here because
-                // the webhook cannot reliably find the sale by transaction_reference
-                if (! $isDirect) {
-                    AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-                }
-                // For selfhosted (direct) mode, analytics are recorded by the checkout.session.completed webhook
+                // Analytics are recorded by the webhook handler (payment_intent.succeeded
+                // or checkout.session.completed) to avoid double-counting from race conditions
             }
             $sale->save();
         } catch (\Exception $e) {
