@@ -2,7 +2,6 @@
     <x-slot name="title">Availability Calendar Documentation - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Availability Calendar</x-slot>
     <x-slot name="description">Learn how to mark your available and unavailable dates using Event Schedule's availability calendar feature.</x-slot>
-    <x-slot name="keywords">availability calendar, available dates, unavailable dates, talent availability, venue availability, event schedule</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>

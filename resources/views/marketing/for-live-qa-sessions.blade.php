@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Live Q&A Sessions | Host, Schedule & Manage Interactive Q&As</x-slot>
     <x-slot name="description">Free live Q&A scheduling software with registration, ticketing, and email notifications. Works with Zoom, YouTube Live, and any platform. Zero platform fees.</x-slot>
-    <x-slot name="keywords">live Q&A platform, schedule Q&A sessions, interactive Q&A events, online Q&A hosting, live audience questions, Q&A session scheduling, virtual Q&A events, live Q&A ticketing</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Live Q&A Sessions</x-slot>
 

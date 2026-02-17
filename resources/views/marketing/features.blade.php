@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Management Features | Ticketing, Calendar Sync & More - Event Schedule</x-slot>
     <x-slot name="description">Discover all the features that make Event Schedule a simple, powerful way to manage events, sell tickets, and engage your audience.</x-slot>
-    <x-slot name="keywords">event management features, online ticketing, QR code check-in, Google Calendar sync, AI event parsing, custom domain events, recurring events, event API</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Features</x-slot>
 

@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Theaters | Ticketing & Show Calendar Software</x-slot>
     <x-slot name="description">Sell out every performance. Manage show runs from opening night to closing curtain, sell tickets with zero platform fees, and email your patrons directly. Built for community theaters, regional playhouses, and performing arts centers.</x-slot>
-    <x-slot name="keywords">theater ticketing software, theater box office system, playhouse calendar, performing arts ticketing, theater show management, community theater software, regional theater ticketing, show run management</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Theaters</x-slot>
 

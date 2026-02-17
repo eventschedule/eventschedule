@@ -24,7 +24,7 @@
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="{{ marketing_url('/') }}" class="inline-flex items-center px-6 py-3 text-base font-semibold text-white bg-gradient-to-r from-violet-600 to-indigo-600 rounded-xl hover:scale-105 transition-all shadow-lg shadow-violet-500/25">
+                <a href="{{ marketing_url('/') }}" class="inline-flex items-center px-6 py-3 text-base font-semibold text-white bg-gradient-to-r from-[#4E81FA] to-sky-500 rounded-xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
                     Go to homepage
                     <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />

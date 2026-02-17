@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Blog Post Deleted | Event Schedule</x-slot>
     <x-slot name="description">The blog post has been successfully deleted.</x-slot>
-    <x-slot name="keywords">blog, deleted</x-slot>
 
     <div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center py-20">
         <div class="max-w-lg mx-auto px-4 text-center">

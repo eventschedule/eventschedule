@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Ticketing with No Platform Fees | QR Check-in - Event Schedule</x-slot>
     <x-slot name="description">Sell tickets directly through your event schedule with QR codes, multiple ticket types, and secure payment processing.</x-slot>
-    <x-slot name="keywords">event ticketing, sell tickets online, QR code tickets, Stripe ticketing, no platform fees tickets, event check-in, ticket reservations, multiple ticket types</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Ticketing</x-slot>
 

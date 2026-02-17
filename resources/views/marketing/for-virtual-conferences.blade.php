@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Virtual Conferences | Schedule, Sell & Manage Online Conferences</x-slot>
     <x-slot name="description">Schedule and sell virtual conferences with multi-day agendas, tiered ticketing, speaker lineups, and attendee email notifications. Works with Zoom, Teams, YouTube Live, and any platform. Zero platform fees.</x-slot>
-    <x-slot name="keywords">virtual conference platform, online conference scheduling, virtual conference ticketing, host virtual conference, online conference software, virtual summit platform, virtual event management, conference scheduling tool</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Virtual Conferences</x-slot>
 

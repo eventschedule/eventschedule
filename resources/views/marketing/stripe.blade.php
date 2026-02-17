@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Stripe Payments - Event Schedule</x-slot>
     <x-slot name="description">Accept credit cards, Apple Pay, and Google Pay for ticket sales. Secure Stripe Checkout with direct payouts and no platform fees.</x-slot>
-    <x-slot name="keywords">Stripe payments, event tickets, credit card payments, Apple Pay, Google Pay, Stripe Connect, ticket sales, payment processing</x-slot>
     <x-slot name="breadcrumbTitle">Stripe</x-slot>
     <x-slot name="socialImage">social/integrations.png</x-slot>
 

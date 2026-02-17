@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Magicians | Share Your Shows & Get Booked</x-slot>
     <x-slot name="description">Share your magic shows, sell tickets directly, and reach your audience with newsletters. Built for magicians, mentalists, illusionists, and variety performers. Zero platform fees.</x-slot>
-    <x-slot name="keywords">magician schedule, magic show calendar, illusionist booking, mentalist events, variety performer schedule, magic show tickets, corporate magician, wedding magician</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Magicians</x-slot>
 

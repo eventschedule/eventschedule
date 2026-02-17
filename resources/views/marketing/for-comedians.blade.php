@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Comedians | Track Your Spots, Fill Your Shows</x-slot>
     <x-slot name="description">One link for every set. Track your mics, guest spots, and headlines. Email fans directly - algorithms can't bury it. Zero fees when you sell tickets. Free forever.</x-slot>
-    <x-slot name="keywords">comedian schedule, stand-up comedy calendar, open mic tracker, comedy show tickets, tight 5, comedy club spots, headliner schedule, improv shows, comedy tour dates</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Comedians</x-slot>
 

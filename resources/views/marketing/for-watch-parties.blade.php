@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Watch Parties | Host, Schedule & Manage Virtual Watch Parties</x-slot>
     <x-slot name="description">Free, open-source watch party scheduling software with registration, ticketing, and email notifications. Works with any streaming platform. Zero platform fees.</x-slot>
-    <x-slot name="keywords">watch party platform, schedule watch parties, virtual watch party, online watch party hosting, group streaming events, watch party ticketing, movie night scheduling, premiere screening platform</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Watch Parties</x-slot>
 

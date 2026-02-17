@@ -2,7 +2,6 @@
     <x-slot name="title">Getting Started - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Getting Started</x-slot>
     <x-slot name="description">Get started with Event Schedule. Learn how to create your account, set up your first schedule, and start sharing events.</x-slot>
-    <x-slot name="keywords">getting started, event schedule tutorial, create schedule, event calendar setup, beginner guide</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>

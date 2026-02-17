@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Farmers Markets | Grow Your Market Community</x-slot>
     <x-slot name="description">Grow your farmers market community. Email shoppers directly - no algorithm. Share vendor lineups, seasonal schedules, and special events. Free forever.</x-slot>
-    <x-slot name="keywords">farmers market calendar, outdoor market events, farmers market newsletter, market vendor lineup, seasonal market schedule, farmers market software, community market events, artisan market calendar, flea market scheduling</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Farmers Markets</x-slot>
 

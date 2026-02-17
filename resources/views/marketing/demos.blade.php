@@ -2,7 +2,6 @@
     {{-- SEO Slots --}}
     <x-slot name="title">Event Schedule Examples | Live Demo Schedules to Explore</x-slot>
     <x-slot name="description">Explore {{ $scheduleCount }} live demo schedules showcasing Event Schedule. See real examples for fitness studios, music venues, yoga retreats, community groups, and more.</x-slot>
-    <x-slot name="keywords">event schedule examples, event calendar demos, live schedule examples, event management demo, calendar widget examples, venue schedule examples, fitness class schedule, music venue calendar</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Examples</x-slot>
 

@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Live Concerts | Stream, Schedule & Sell Virtual Tickets</x-slot>
     <x-slot name="description">Stream live concerts to fans worldwide. Sell virtual tickets alongside venue tickets, email fans directly, and manage your streaming schedule. Zero platform fees.</x-slot>
-    <x-slot name="keywords">live concert streaming, virtual concert tickets, live stream concerts, online concert schedule, sell virtual tickets, concert livestream, live music streaming, virtual concert platform</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Live Concerts</x-slot>
 

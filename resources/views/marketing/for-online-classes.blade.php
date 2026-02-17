@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Online Classes | Schedule, Sell & Manage Virtual Classes</x-slot>
     <x-slot name="description">Schedule and sell online classes with built-in registration, recurring sessions, student email notifications, and payment processing. Works with Zoom, Google Meet, and any platform. Zero platform fees.</x-slot>
-    <x-slot name="keywords">online class scheduling, virtual class platform, sell online classes, online class registration, schedule virtual classes, online teaching platform, recurring online classes, online class ticketing</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">For Online Classes</x-slot>
 
