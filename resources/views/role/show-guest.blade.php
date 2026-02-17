@@ -196,7 +196,7 @@
               @if($role->translatedDescription())
               <div class="w-full mt-2">
                 @if(str_word_count(strip_tags($role->translatedDescription())) > 5)
-                <div x-data="{ expanded: false }" class="text-start text-sm text-[#33383C] dark:text-gray-300">
+                <div x-data="{ expanded: false, collapse() { if (window.scrollY < 5) { this.expanded = false; return; } window.scrollTo({ top: 0, behavior: 'smooth' }); let f = 0; const check = () => { if (window.scrollY < 5 || f++ > 300) this.expanded = false; else requestAnimationFrame(check); }; requestAnimationFrame(check); } }" class="text-start text-sm text-[#33383C] dark:text-gray-300">
                   <div x-show="!expanded">
                     <span>{{ Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...') }}</span>
                     <button @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">
@@ -207,7 +207,7 @@
                     <div class="custom-content [&>*:first-child]:mt-0">
                       {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                     </div>
-                    <button @click="expanded = false; $nextTick(() => window.scrollTo({ top: 0, behavior: 'smooth' }))" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
+                    <button @click="collapse()" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
                       {{ __('messages.show_less') }}
                     </button>
                   </div>
@@ -376,7 +376,7 @@
               {{-- Description below (full width) --}}
               @if($role->translatedDescription())
               @if(str_word_count(strip_tags($role->translatedDescription())) > 5)
-              <div x-data="{ expanded: false }" class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
+              <div x-data="{ expanded: false, collapse() { if (window.scrollY < 5) { this.expanded = false; return; } window.scrollTo({ top: 0, behavior: 'smooth' }); let f = 0; const check = () => { if (window.scrollY < 5 || f++ > 300) this.expanded = false; else requestAnimationFrame(check); }; requestAnimationFrame(check); } }" class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
                 <div x-show="!expanded">
                   <span>{{ Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...') }}</span>
                   <button @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">
@@ -387,7 +387,7 @@
                   <div class="custom-content [&>*:first-child]:mt-0">
                     {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                   </div>
-                  <button @click="expanded = false; $nextTick(() => window.scrollTo({ top: 0, behavior: 'smooth' }))" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
+                  <button @click="collapse()" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
                     {{ __('messages.show_less') }}
                   </button>
                 </div>
