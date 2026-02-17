@@ -1575,6 +1575,7 @@ class RoleController extends Controller
                 'short_description' => (bool) $request->input('import_fields.short_description'),
                 'description' => (bool) $request->input('import_fields.description'),
                 'ticket_price' => (bool) $request->input('import_fields.ticket_price'),
+                'coupon_code' => (bool) $request->input('import_fields.coupon_code'),
                 'registration_url' => (bool) $request->input('import_fields.registration_url'),
                 'category_id' => (bool) $request->input('import_fields.category_id'),
                 'group_id' => (bool) $request->input('import_fields.group_id'),

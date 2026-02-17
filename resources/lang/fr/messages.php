@@ -341,6 +341,7 @@ return [
     'terms_url' => 'URL des conditions',
     'terms_url_help' => 'URL personnalisée des conditions générales pour les billets. Laisser vide pour utiliser la valeur par défaut.',
     'price' => 'Prix',
+    'coupon_code' => 'Code promo',
     'quantity' => 'Quantité',
     'unlimited' => 'Illimité',
     'free' => 'Gratuit',

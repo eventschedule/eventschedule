@@ -441,6 +441,11 @@
                                             <td>Lowest ticket price (or price range)</td>
                                             <td>10 or 10-25</td>
                                         </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{coupon_code}</code></td>
+                                            <td>Coupon code</td>
+                                            <td>SAVE20</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>

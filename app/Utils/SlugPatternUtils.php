@@ -148,6 +148,7 @@ class SlugPatternUtils
         $replacements = array_merge($replacements, [
             '{currency}' => $event?->ticket_currency_code ?? '',
             '{price}' => self::getPrice($event),
+            '{coupon_code}' => $event?->coupon_code ?? '',
         ]);
 
         // Add custom field replacements using stable indices

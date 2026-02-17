@@ -181,6 +181,7 @@ return [
     'terms_url' => 'Voorwaarden URL',
     'terms_url_help' => 'Aangepaste URL voor algemene voorwaarden voor tickets. Laat leeg om standaard te gebruiken.',
     'price' => 'Prijs',
+    'coupon_code' => 'Kortingscode',
     'quantity' => 'Aantal',
     'unlimited' => 'Onbeperkt',
     'free' => 'Gratis',

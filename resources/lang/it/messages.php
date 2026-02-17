@@ -184,6 +184,7 @@ return [
     'terms_url' => 'URL termini',
     'terms_url_help' => 'URL personalizzato per termini e condizioni dei biglietti. Lasciare vuoto per usare il predefinito.',
     'price' => 'Prezzo',
+    'coupon_code' => 'Codice coupon',
     'quantity' => 'Quantità',
     'unlimited' => 'Illimitato',
     'free' => 'Gratuito',

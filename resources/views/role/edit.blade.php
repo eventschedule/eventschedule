@@ -1778,6 +1778,10 @@
                                     label="{{ __('messages.price') }}"
                                     checked="{{ old('import_fields.ticket_price', $importFields['ticket_price'] ?? false) }}"
                                     data-custom-attribute="value" />
+                                <x-checkbox name="import_fields[coupon_code]"
+                                    label="{{ __('messages.coupon_code') }}"
+                                    checked="{{ old('import_fields.coupon_code', $importFields['coupon_code'] ?? false) }}"
+                                    data-custom-attribute="value" />
                                 <x-checkbox name="import_fields[registration_url]"
                                     label="{{ __('messages.registration_url') }}"
                                     checked="{{ old('import_fields.registration_url', $importFields['registration_url'] ?? false) }}"

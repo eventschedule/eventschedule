@@ -1066,6 +1066,7 @@ class Role extends Model implements MustVerifyEmail
                 'short_description' => false,
                 'description' => false,
                 'ticket_price' => false,
+                'coupon_code' => false,
                 'registration_url' => false,
                 'category_id' => false,
                 'group_id' => false,

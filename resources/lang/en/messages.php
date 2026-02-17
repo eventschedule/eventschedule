@@ -392,6 +392,7 @@ return [
     'combined_total' => 'Combined Total',
     'combined_total_help' => 'All ticket types are combined into a single pool',
     'price' => 'Price',
+    'coupon_code' => 'Coupon Code',
     'quantity' => 'Quantity',
     'unlimited' => 'Unlimited',
     'free' => 'Free',
