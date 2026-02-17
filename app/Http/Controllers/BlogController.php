@@ -111,7 +111,7 @@ class BlogController extends Controller
 
         // Set published_at if not provided but is_published is true
         if ($request->is_published && ! $request->published_at) {
-            $data['published_at'] = now()->addSeconds(rand(-60 * 60 * 60, 0));
+            $data['published_at'] = now()->addSeconds(rand(-60 * 60, 0));
         }
 
         BlogPost::create($data);
