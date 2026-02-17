@@ -525,7 +525,7 @@
 
                         <!-- Short Description -->
                         <div class="mt-4" v-if="importFields.short_description || showAllFields" v-show="!savedEvents[idx]">
-                            <x-input-label for="short_description_@{{ idx }}" :value="__('messages.short_description')" />
+                            <x-input-label for="short_description_@{{ idx }}">{{ __('messages.short_description') }}<span v-if="requiredFields.short_description" class="text-red-500"> *</span></x-input-label>
                             <x-text-input
                                 id="short_description_@{{ idx }}"
                                 type="text"
@@ -538,7 +538,7 @@
 
                         <!-- Description -->
                         <div class="mt-4" v-if="importFields.description || showAllFields" v-show="!savedEvents[idx]">
-                            <x-input-label for="description_@{{ idx }}" :value="__('messages.description')" />
+                            <x-input-label for="description_@{{ idx }}">{{ __('messages.description') }}<span v-if="requiredFields.description" class="text-red-500"> *</span></x-input-label>
                             <textarea
                                 :id="'import_description_' + idx"
                                 :ref="'descriptionEditor_' + idx"
@@ -550,7 +550,7 @@
 
                         <!-- Price -->
                         <div class="mt-4" v-if="importFields.ticket_price || showAllFields" v-show="!savedEvents[idx]">
-                            <x-input-label :value="__('messages.price')" />
+                            <x-input-label>{{ __('messages.price') }}<span v-if="requiredFields.ticket_price" class="text-red-500"> *</span></x-input-label>
                             <div class="mt-1 flex gap-3">
                                 <select v-model="preview.parsed[idx].ticket_currency_code"
                                     v-bind:disabled="savedEvents[idx]"
@@ -572,7 +572,7 @@
 
                         <!-- Coupon Code -->
                         <div class="mt-4" v-if="importFields.coupon_code || showAllFields" v-show="!savedEvents[idx]">
-                            <x-input-label for="coupon_code_@{{ idx }}" :value="__('messages.coupon_code')" />
+                            <x-input-label for="coupon_code_@{{ idx }}">{{ __('messages.coupon_code') }}<span v-if="requiredFields.coupon_code" class="text-red-500"> *</span></x-input-label>
                             <x-text-input id="coupon_code_@{{ idx }}" type="text" class="mt-1 block w-full"
                                 maxlength="255" v-model="preview.parsed[idx].coupon_code"
                                 v-bind:readonly="savedEvents[idx]" autocomplete="off" />
@@ -580,7 +580,7 @@
 
                         <!-- Registration URL -->
                         <div class="mt-4" v-if="importFields.registration_url || showAllFields" v-show="!savedEvents[idx]">
-                            <x-input-label for="registration_url_@{{ idx }}" :value="__('messages.registration_url')" />
+                            <x-input-label for="registration_url_@{{ idx }}">{{ __('messages.registration_url') }}<span v-if="requiredFields.registration_url" class="text-red-500"> *</span></x-input-label>
                             <x-text-input
                                 id="registration_url_@{{ idx }}"
                                 type="url"
@@ -593,7 +593,7 @@
 
                         <!-- Category -->
                         <div class="mt-4" v-if="importFields.category_id || showAllFields" v-show="!savedEvents[idx]">
-                            <x-input-label for="category_id_@{{ idx }}" :value="__('messages.category')" />
+                            <x-input-label for="category_id_@{{ idx }}">{{ __('messages.category') }}<span v-if="requiredFields.category_id" class="text-red-500"> *</span></x-input-label>
                             <select
                                 id="category_id_@{{ idx }}"
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
@@ -608,7 +608,7 @@
 
                         <!-- Sub-schedule -->
                         <div class="mt-4" v-if="(importFields.group_id || showAllFields) && groups.length > 0" v-show="!savedEvents[idx]">
-                            <x-input-label for="group_id_@{{ idx }}" :value="__('messages.schedule')" />
+                            <x-input-label for="group_id_@{{ idx }}">{{ __('messages.schedule') }}<span v-if="requiredFields.group_id" class="text-red-500"> *</span></x-input-label>
                             <select
                                 id="group_id_@{{ idx }}"
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
@@ -1004,6 +1004,7 @@
                 isDragActive: false,
                 showAllFields: false,
                 importFields: @json($role->import_config['fields'] ?? []),
+                requiredFields: @json($role->import_config['required_fields'] ?? []),
                 groups: @json(($role->groups ?? collect())->map(fn($g) => ['id' => \App\Utils\UrlUtils::encodeId($g->id), 'name' => $g->translatedName()])),
                 descriptionEditors: {},
                 isCurator: {{ $role->isCurator() ? 'true' : 'false' }},
@@ -1044,12 +1045,21 @@
                 const eventFieldsValid = this.preview?.parsed?.every(event => {
                     const hasName = event.event_name?.trim();
                     const hasDate = event.event_date && event.event_start_time;
-                    
+
                     // Any venue field (name, address, or city) is sufficient
                     const hasVenueInfo = event.venue_name?.trim() ||
                                          event.event_address?.trim() ||
                                          event.event_city?.trim() ||
                                          ({{ $role->isCurator() ? 'true' : 'false' }} && '{{ $role->city }}');
+
+                    // Check required import fields
+                    if (this.requiredFields.short_description && !event.short_description?.trim()) return false;
+                    if (this.requiredFields.description && !event.event_details?.trim()) return false;
+                    if (this.requiredFields.ticket_price && !event.ticket_price) return false;
+                    if (this.requiredFields.coupon_code && !event.coupon_code?.trim()) return false;
+                    if (this.requiredFields.registration_url && !event.registration_url?.trim()) return false;
+                    if (this.requiredFields.category_id && !event.category_id) return false;
+                    if (this.requiredFields.group_id && !event.group_id) return false;
 
                     return hasName && hasVenueInfo && hasDate;
                 }) || false;
