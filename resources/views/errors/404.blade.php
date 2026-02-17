@@ -5,8 +5,8 @@
     <section class="relative bg-[#0a0a0f] min-h-[70vh] flex items-center justify-center overflow-hidden">
         <!-- Animated background -->
         <div class="absolute inset-0">
-            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-fuchsia-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-sky-500/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
 
         <!-- Grid -->

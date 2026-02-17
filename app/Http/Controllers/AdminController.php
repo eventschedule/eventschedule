@@ -448,7 +448,7 @@ class AdminController extends Controller
             ->count();
 
         $refundedSales = Sale::where('status', 'refunded')->count();
-        $refundRate = $totalSales > 0 ? round(($refundedSales / ($totalSales + $refundedSales)) * 100, 1) : 0;
+        $refundRate = ($totalSales + $refundedSales) > 0 ? round(($refundedSales / ($totalSales + $refundedSales)) * 100, 1) : 0;
 
         $pendingSales = Sale::where('status', 'pending')->count();
         $pendingRevenue = Sale::where('status', 'pending')->sum('payment_amount');
