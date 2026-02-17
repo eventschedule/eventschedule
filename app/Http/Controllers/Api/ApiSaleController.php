@@ -415,7 +415,7 @@ class ApiSaleController extends Controller
         }
 
         // Reload sale with relationships for API response
-        $sale->load('saleTickets.ticket');
+        $sale->load(['saleTickets.ticket', 'event']);
 
         return response()->json([
             'data' => $sale->toApiData(),

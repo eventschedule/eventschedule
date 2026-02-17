@@ -150,7 +150,7 @@
                             <div class="prose dark:prose-invert">
                                 <p>List endpoints support pagination through query parameters:</p>
                                 <ul class="mt-2">
-                                    <li><code>per_page</code>: Number of items per page (default: 100, max: 1000)</li>
+                                    <li><code>per_page</code>: Number of items per page (default: 100, max: 500)</li>
                                     <li><code>page</code>: Page number to retrieve</li>
                                 </ul>
                                 <p class="mt-4">Example request:</p>

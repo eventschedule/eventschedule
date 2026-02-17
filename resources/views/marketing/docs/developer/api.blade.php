@@ -219,7 +219,7 @@
                                         <tr>
                                             <td><code class="doc-inline-code">per_page</code></td>
                                             <td>100</td>
-                                            <td>Number of items per page (max: 1000)</td>
+                                            <td>Number of items per page (max: 500)</td>
                                         </tr>
                                     </tbody>
                                 </table>
