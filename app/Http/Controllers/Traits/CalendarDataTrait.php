@@ -84,6 +84,7 @@ trait CalendarDataTrait
             'uniqueKey' => UrlUtils::encodeId($event->id),
             'submit_video_url' => isset($role) ? route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => UrlUtils::encodeId($event->id)]) : null,
             'submit_comment_url' => isset($role) ? route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => UrlUtils::encodeId($event->id)]) : null,
+            'custom_field_values' => $event->custom_field_values ?? [],
         ];
     }
 
