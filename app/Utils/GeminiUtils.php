@@ -901,6 +901,41 @@ class GeminiUtils
         return [];
     }
 
+    /**
+     * Batch translate custom field dropdown option values to English using Gemini API
+     */
+    public static function translateCustomFieldOptions($optionValues, $fromLanguage = 'auto')
+    {
+        if (empty($optionValues)) {
+            return [];
+        }
+
+        $prompt = "Translate these dropdown option values from {$fromLanguage} to English. Return a JSON object where each key is the original value and the value is the English translation:\n";
+        $prompt .= json_encode($optionValues);
+
+        try {
+            $response = self::sendRequest($prompt);
+
+            if ($response === null || empty($response)) {
+                return [];
+            }
+
+            UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE_FIELD_OPTIONS);
+
+            if (! empty($response) && is_array($response)) {
+                $translations = $response[0];
+
+                if (is_array($translations)) {
+                    return $translations;
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('Custom field option translation failed: '.$e->getMessage());
+        }
+
+        return [];
+    }
+
     public static function searchYouTube($query, $maxResults = 6)
     {
         // Always limit to maximum 6 videos for consistency

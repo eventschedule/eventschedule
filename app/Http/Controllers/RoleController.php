@@ -1599,11 +1599,18 @@ class RoleController extends Controller
             $eventCustomFields = [];
             $fieldsNeedingTranslation = [];
 
-            // Collect all used indices from existing fields being preserved
+            // Collect all used indices from existing fields and submitted indices
             $usedIndices = [];
             foreach ($submittedFields as $fieldKey => $fieldData) {
-                if (! empty($fieldData['name']) && isset($existingCustomFields[$fieldKey]['index'])) {
-                    $usedIndices[] = $existingCustomFields[$fieldKey]['index'];
+                if (! empty($fieldData['name'])) {
+                    if (isset($existingCustomFields[$fieldKey]['index'])) {
+                        $usedIndices[] = $existingCustomFields[$fieldKey]['index'];
+                    } elseif (! empty($fieldData['index'])) {
+                        $submittedIndex = (int) $fieldData['index'];
+                        if ($submittedIndex >= 1 && $submittedIndex <= 8) {
+                            $usedIndices[] = $submittedIndex;
+                        }
+                    }
                 }
             }
 
@@ -1616,12 +1623,21 @@ class RoleController extends Controller
                 // Preserve existing index or assign next available (1-8)
                 $fieldIndex = $existingCustomFields[$fieldKey]['index'] ?? null;
                 if (! $fieldIndex) {
-                    // Find the next available index
-                    for ($i = 1; $i <= 8; $i++) {
-                        if (! in_array($i, $usedIndices)) {
-                            $fieldIndex = $i;
-                            $usedIndices[] = $i;
-                            break;
+                    // Try client-submitted index
+                    if (! empty($fieldData['index'])) {
+                        $submittedIndex = (int) $fieldData['index'];
+                        if ($submittedIndex >= 1 && $submittedIndex <= 8 && in_array($submittedIndex, $usedIndices)) {
+                            $fieldIndex = $submittedIndex;
+                        }
+                    }
+                    // Fall back to next available
+                    if (! $fieldIndex) {
+                        for ($i = 1; $i <= 8; $i++) {
+                            if (! in_array($i, $usedIndices)) {
+                                $fieldIndex = $i;
+                                $usedIndices[] = $i;
+                                break;
+                            }
                         }
                     }
                 }
@@ -1634,6 +1650,13 @@ class RoleController extends Controller
                     'ai_prompt' => $fieldData['ai_prompt'] ?? '',
                     'index' => $fieldIndex,
                 ];
+
+                // Preserve options_en if dropdown options haven't changed
+                $existingField = $existingCustomFields[$fieldKey] ?? null;
+                if ($existingField && ! empty($existingField['options_en'])
+                    && ($existingField['options'] ?? '') === ($fieldData['options'] ?? '')) {
+                    $eventCustomFields[$fieldKey]['options_en'] = $existingField['options_en'];
+                }
 
                 // Handle name_en - preserve manually entered value or check if translation needed
                 if (! empty($fieldData['name_en'])) {

@@ -162,10 +162,19 @@
     if (isset($role) && $role->event_custom_fields) {
         foreach ($role->getEventCustomFields() as $key => $field) {
             if (($field['type'] ?? '') === 'dropdown' && !empty($field['options'])) {
+                $originalOptions = array_values(array_filter(array_map('trim', explode(',', $field['options']))));
+                $optionsMap = new \stdClass();
+                if (app()->getLocale() === 'en' && !empty($field['options_en'])) {
+                    $translatedOptions = array_values(array_filter(array_map('trim', explode(',', $field['options_en']))));
+                    if (count($originalOptions) === count($translatedOptions)) {
+                        $optionsMap = (object) array_combine($originalOptions, $translatedOptions);
+                    }
+                }
                 $dropdownCustomFields[] = [
                     'key' => (string) $key,
                     'name' => (app()->getLocale() === 'en' && !empty($field['name_en'])) ? $field['name_en'] : $field['name'],
-                    'options' => array_values(array_filter(array_map('trim', explode(',', $field['options'])))),
+                    'options' => $originalOptions,
+                    'optionsMap' => $optionsMap,
                 ];
             }
         }
@@ -1278,7 +1287,7 @@
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
                     <option value="">@{{ field.name }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
                     <option v-for="opt in availableCustomFieldOptions[field.key]" :key="opt" :value="opt">
-                        @{{ opt }} (@{{ (eventCountByCustomField[field.key] || {})[opt] || 0 }})
+                        @{{ field.optionsMap[opt] || opt }} (@{{ (eventCountByCustomField[field.key] || {})[opt] || 0 }})
                     </option>
                 </select>
             </div>
@@ -1393,7 +1402,7 @@
                                    bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
                         <option value="">@{{ field.name }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
                         <option v-for="opt in availableCustomFieldOptions[field.key]" :key="opt" :value="opt">
-                            @{{ opt }} (@{{ (eventCountByCustomField[field.key] || {})[opt] || 0 }})
+                            @{{ field.optionsMap[opt] || opt }} (@{{ (eventCountByCustomField[field.key] || {})[opt] || 0 }})
                         </option>
                     </select>
                 </div>

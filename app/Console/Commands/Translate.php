@@ -283,6 +283,48 @@ class Translate extends Command
                         $this->error('Failed to translate custom field names: '.$e->getMessage());
                     }
                 }
+
+                // Translate dropdown option values
+                $allOptionValues = [];
+                $dropdownFieldKeys = [];
+                foreach ($customFields as $fieldKey => $fieldConfig) {
+                    if (($fieldConfig['type'] ?? '') === 'dropdown' && ! empty($fieldConfig['options']) && empty($fieldConfig['options_en'])) {
+                        $options = array_filter(array_map('trim', explode(',', $fieldConfig['options'])));
+                        foreach ($options as $opt) {
+                            $allOptionValues[$opt] = $opt;
+                        }
+                        $dropdownFieldKeys[] = $fieldKey;
+                    }
+                }
+
+                if (! empty($allOptionValues)) {
+                    if ($debug) {
+                        $this->info('Translating '.count($allOptionValues).' custom field option values');
+                    }
+
+                    try {
+                        $optionTranslations = GeminiUtils::translateCustomFieldOptions(
+                            array_values($allOptionValues),
+                            $role->language_code
+                        );
+
+                        foreach ($dropdownFieldKeys as $fieldKey) {
+                            $options = array_filter(array_map('trim', explode(',', $customFields[$fieldKey]['options'])));
+                            $translatedOptions = [];
+                            foreach ($options as $opt) {
+                                $translatedOptions[] = $optionTranslations[$opt] ?? $opt;
+                            }
+                            $customFields[$fieldKey]['options_en'] = implode(', ', $translatedOptions);
+                            if ($debug) {
+                                $this->info("Translated options for field '{$customFields[$fieldKey]['name']}': {$customFields[$fieldKey]['options_en']}");
+                            }
+                        }
+
+                        $role->event_custom_fields = $customFields;
+                    } catch (\Exception $e) {
+                        $this->error('Failed to translate custom field options: '.$e->getMessage());
+                    }
+                }
             }
 
             $role->save();

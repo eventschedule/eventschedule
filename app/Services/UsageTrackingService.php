@@ -30,6 +30,8 @@ class UsageTrackingService
 
     const GEMINI_TRANSLATE_FIELDS = 'gemini_translate_fields';
 
+    const GEMINI_TRANSLATE_FIELD_OPTIONS = 'gemini_translate_field_options';
+
     // YouTube
     const YOUTUBE_SEARCH = 'youtube_search';
 

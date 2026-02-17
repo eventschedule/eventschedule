@@ -1815,6 +1815,7 @@
                             <input type="hidden" name="event_custom_fields_submitted" value="1">
                             @php
                                 $eventCustomFields = $role->event_custom_fields ?? [];
+                                uasort($eventCustomFields, fn($a, $b) => ($a['index'] ?? 999) <=> ($b['index'] ?? 999));
                                 $fieldIndex = 0;
                             @endphp
                             @foreach($eventCustomFields as $fieldKey => $field)
@@ -1873,6 +1874,7 @@
                                                 class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
                                             <label for="event_field_required_{{ $fieldKey }}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
                                         </div>
+                                        <input type="hidden" name="event_custom_fields[{{ $fieldKey }}][index]" value="{{ $field['index'] ?? '' }}">
                                         @if(!empty($field['index']))
                                         <span class="text-xs text-gray-400 dark:text-gray-500 font-mono">→ {custom_{{ $field['index'] }}}</span>
                                         @endif
@@ -3614,7 +3616,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Event Custom Fields Management
-let eventCustomFieldCounter = {{ count($role->event_custom_fields ?? []) }};
+let eventCustomFieldCounter = {{ max(array_map(function($key) { return str_starts_with($key, 'new_') ? (int) substr($key, 4) + 1 : 0; }, array_keys($role->event_custom_fields ?? ['_' => 0]))) }};
 // Track used indices for stable custom field variables
 let usedEventFieldIndices = @json(array_values(array_filter(array_map(fn($f) => $f['index'] ?? null, $role->event_custom_fields ?? []))));
 const aiPromptExamples = @json(array_map(fn($i) => __("messages.ai_prompt_example_$i"), range(1, 20)));
@@ -3719,6 +3721,7 @@ function addEventCustomField() {
                             class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
                         <label for="event_field_required_${fieldKey}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{!! __('messages.field_required') !!}</label>
                     </div>
+                    <input type="hidden" name="event_custom_fields[${fieldKey}][index]" value="${fieldIndex || ''}">
                     ${fieldIndex ? `<span class="text-xs text-gray-400 dark:text-gray-500 font-mono">→ {custom_${fieldIndex}}</span>` : ''}
                 </div>
                 <button type="button" data-action="remove-custom-field" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
