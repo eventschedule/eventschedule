@@ -46,20 +46,20 @@ class NewsletterRecipient extends Model
 
     public function recordOpen(): void
     {
+        $this->increment('open_count');
+
         if (! $this->opened_at) {
-            $this->opened_at = now();
+            $this->update(['opened_at' => now()]);
         }
-        $this->open_count++;
-        $this->save();
     }
 
     public function recordClick(string $url, ?string $ipAddress = null, ?string $userAgent = null): void
     {
+        $this->increment('click_count');
+
         if (! $this->clicked_at) {
-            $this->clicked_at = now();
+            $this->update(['clicked_at' => now()]);
         }
-        $this->click_count++;
-        $this->save();
 
         $this->clicks()->create([
             'url' => $url,

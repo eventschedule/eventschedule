@@ -2,6 +2,7 @@
 
 return [
     'home' => 'Home',
+    'at' => 'bij',
     'venues' => 'Locaties',
     'event_deleted' => 'Evenement succesvol verwijderd',
     'edit_event' => 'Evenement Bewerken',
@@ -1379,6 +1380,7 @@ return [
     'ab_test_results' => 'A/B-testresultaten',
     'ab_test_sending' => 'A/B-test wordt verzonden',
     'ab_test_needs_variants' => 'A/B-test heeft beide varianten nodig',
+    'ab_test_already_sent' => 'Deze A/B-test is al verzonden',
     'no_ab_test' => 'Geen A/B-test geconfigureerd',
     'test_field' => 'Te testen veld',
     'sample_percentage' => 'Steekproefgrootte (%)',

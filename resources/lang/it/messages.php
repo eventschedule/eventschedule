@@ -2,6 +2,7 @@
 
 return [
     'home' => 'Home',
+    'at' => 'presso',
     'venues' => 'Luoghi',
     'event_deleted' => 'Evento eliminato con successo',
     'edit_event' => 'Modifica Evento',
@@ -1381,6 +1382,7 @@ return [
     'ab_test_results' => 'Risultati test A/B',
     'ab_test_sending' => 'Il test A/B e in fase di invio',
     'ab_test_needs_variants' => 'Il test A/B necessita di entrambe le varianti',
+    'ab_test_already_sent' => 'Questo test A/B e stato gia inviato',
     'no_ab_test' => 'Nessun test A/B configurato',
     'test_field' => 'Campo da testare',
     'sample_percentage' => 'Dimensione campione (%)',

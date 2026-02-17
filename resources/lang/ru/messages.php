@@ -2,6 +2,7 @@
 
 return [
     'home' => 'Главная',
+    'at' => 'в',
     'venues' => 'Места проведения',
     'event_deleted' => 'Мероприятие успешно удалено',
     'edit_event' => 'Редактировать событие',
@@ -1386,6 +1387,7 @@ return [
     'ab_test_results' => 'Результаты A/B-тестирования',
     'ab_test_sending' => 'A/B-тест отправляется',
     'ab_test_needs_variants' => 'A/B-тесту нужны оба варианта',
+    'ab_test_already_sent' => 'Этот A/B-тест уже был отправлен',
     'no_ab_test' => 'A/B-тест не настроен.',
     'test_field' => 'Поле для тестирования',
     'sample_percentage' => 'Размер выборки (%)',

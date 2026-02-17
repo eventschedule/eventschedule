@@ -59,8 +59,10 @@ class NewsletterEmail extends Mailable
             $this->newsletter->style_settings ?? []
         );
         $newsletterService = app(\App\Services\NewsletterService::class);
-        $events = $newsletterService
-            ->getUpcomingEvents($this->newsletter->role, $this->newsletter->event_ids);
+        $role = $this->newsletter->role;
+        $events = $role
+            ? $newsletterService->getUpcomingEvents($role, $this->newsletter->event_ids)
+            : collect();
         $blocks = $newsletterService->processBlocks($this->newsletter);
         $unsubscribeUrl = url('/nl/u/'.$this->recipient->token);
 
@@ -70,7 +72,7 @@ class NewsletterEmail extends Mailable
             with: [
                 'renderedHtml' => $this->renderedHtml,
                 'newsletter' => $this->newsletter,
-                'role' => $this->newsletter->role,
+                'role' => $role,
                 'events' => $events,
                 'style' => $style,
                 'unsubscribeUrl' => $unsubscribeUrl,
@@ -101,7 +103,7 @@ class NewsletterEmail extends Mailable
                 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
                 'Precedence' => 'bulk',
                 'X-Entity-Ref-ID' => $this->recipient->id.'.'.uniqid(),
-                'Content-Language' => $role->language_code ?? 'en',
+                'Content-Language' => $role?->language_code ?? 'en',
             ],
         );
     }

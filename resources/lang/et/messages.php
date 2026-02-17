@@ -2,6 +2,7 @@
 
 return [
     'home' => 'Avaleht',
+    'at' => 'kohas',
     'venues' => 'Toimumiskohad',
     'event_deleted' => 'Sündmuse kustutamine õnnestus',
     'edit_event' => 'Redigeeri sündmust',
@@ -1384,6 +1385,7 @@ return [
     'ab_test_results' => 'A/B testi tulemused',
     'ab_test_sending' => 'A/B test saadetakse',
     'ab_test_needs_variants' => 'A/B test vajab mõlemat varianti',
+    'ab_test_already_sent' => 'See A/B test on juba saadetud',
     'no_ab_test' => 'A/B-testi pole konfigureeritud',
     'test_field' => 'Testitav väli',
     'sample_percentage' => 'Proovi suurus (%)',

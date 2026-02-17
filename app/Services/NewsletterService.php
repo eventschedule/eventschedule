@@ -20,20 +20,21 @@ class NewsletterService
 {
     public function send(Newsletter $newsletter): bool
     {
-        if (in_array($newsletter->status, ['sending', 'sent'])) {
-            return false;
-        }
-
         $role = $newsletter->role;
         if ($role && ! $role->canSendNewsletter()) {
             return false;
         }
 
         $sendToken = Str::random(64);
-        $newsletter->update([
-            'status' => 'sending',
-            'send_token' => $sendToken,
-        ]);
+        $updated = Newsletter::where('id', $newsletter->id)
+            ->whereNotIn('status', ['sending', 'sent'])
+            ->update(['status' => 'sending', 'send_token' => $sendToken]);
+
+        if ($updated === 0) {
+            return false;
+        }
+
+        $newsletter->refresh();
 
         $segmentIds = $newsletter->segment_ids ?? [];
         $recipients = $this->resolveRecipients($newsletter->role, $segmentIds);
@@ -179,7 +180,9 @@ class NewsletterService
             if ($type === 'events') {
                 $useAll = $block['data']['useAllEvents'] ?? true;
                 $eventIds = $block['data']['eventIds'] ?? [];
-                $block['data']['resolvedEvents'] = $this->getUpcomingEvents($role, $useAll ? null : $eventIds);
+                $block['data']['resolvedEvents'] = $role
+                    ? $this->getUpcomingEvents($role, $useAll ? null : $eventIds)
+                    : collect();
             }
         }
 
@@ -424,8 +427,10 @@ class NewsletterService
             '@localhost',
         ];
 
+        $emailDomain = substr($email, strrpos($email, '@'));
+
         foreach ($testDomains as $domain) {
-            if (str_contains($email, $domain)) {
+            if ($emailDomain === $domain) {
                 return true;
             }
         }

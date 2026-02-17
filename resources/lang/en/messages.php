@@ -2,6 +2,7 @@
 
 return [
     'home' => 'Home',
+    'at' => 'at',
     'venues' => 'Venues',
     'event_deleted' => 'Successfully deleted event',
     'edit_event' => 'Edit Event',
@@ -1386,6 +1387,7 @@ return [
     'ab_test_results' => 'A/B Test Results',
     'ab_test_sending' => 'A/B test is being sent',
     'ab_test_needs_variants' => 'A/B test needs both variants',
+    'ab_test_already_sent' => 'This A/B test has already been sent',
     'no_ab_test' => 'No A/B test configured',
     'test_field' => 'Field to Test',
     'sample_percentage' => 'Sample Size (%)',

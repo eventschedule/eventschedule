@@ -2,6 +2,7 @@
 
 return [
     'home' => 'الرئيسية',
+    'at' => 'في',
     'venues' => 'الأماكن',
     'event_deleted' => 'تم حذف الحدث بنجاح',
     'edit_event' => 'تعديل الحدث',
@@ -1373,6 +1374,7 @@ return [
     'ab_test_results' => 'نتائج اختبار A/B',
     'ab_test_sending' => 'جاري إرسال اختبار A/B',
     'ab_test_needs_variants' => 'اختبار A/B يحتاج إلى نسختين',
+    'ab_test_already_sent' => 'تم إرسال اختبار A/B هذا بالفعل',
     'no_ab_test' => 'لم يتم إعداد اختبار A/B',
     'test_field' => 'الحقل للاختبار',
     'sample_percentage' => 'حجم العينة (%)',

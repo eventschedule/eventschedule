@@ -347,7 +347,7 @@
                     {
                         "@type": "ListItem",
                         "position": 1,
-                        "name": "Home",
+                        "name": "{{ __('messages.home') }}",
                         "item": "{{ marketing_url() }}"
                     },
                     {
@@ -374,7 +374,7 @@
                     {
                         "@type": "ListItem",
                         "position": 1,
-                        "name": "Home",
+                        "name": "{{ __('messages.home') }}",
                         "item": "{{ marketing_url() }}"
                     },
                     {

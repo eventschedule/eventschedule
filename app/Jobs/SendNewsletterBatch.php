@@ -80,11 +80,10 @@ class SendNewsletterBatch implements ShouldQueue
 
         // Check if all recipients have been processed
         $pendingCount = $newsletter->recipients()->where('status', 'pending')->count();
-        if ($pendingCount === 0 && $newsletter->status === 'sending') {
-            $newsletter->update([
-                'status' => 'sent',
-                'sent_at' => now(),
-            ]);
+        if ($pendingCount === 0) {
+            Newsletter::where('id', $newsletter->id)
+                ->where('status', 'sending')
+                ->update(['status' => 'sent', 'sent_at' => now()]);
         }
     }
 }

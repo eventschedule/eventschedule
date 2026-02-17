@@ -2,6 +2,7 @@
 
 return [
     'home' => 'Startseite',
+    'at' => 'bei',
     'venues' => 'Veranstaltungsorte',
     'event_deleted' => 'Veranstaltung erfolgreich gelöscht',
     'edit_event' => 'Veranstaltung bearbeiten',
@@ -1376,6 +1377,7 @@ return [
     'ab_test_results' => 'A/B-Test-Ergebnisse',
     'ab_test_sending' => 'A/B-Test wird gesendet',
     'ab_test_needs_variants' => 'A/B-Test benotigt beide Varianten',
+    'ab_test_already_sent' => 'Dieser A/B-Test wurde bereits gesendet',
     'no_ab_test' => 'Kein A/B-Test konfiguriert',
     'test_field' => 'Zu testendes Feld',
     'sample_percentage' => 'Stichprobengrosse (%)',
