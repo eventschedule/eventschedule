@@ -1634,4 +1634,5 @@ return [
     'admin_confirm_password' => 'Per sicurezza, conferma la tua password per accedere all\'area di amministrazione.',
     'admin_session_changed' => 'I dettagli della tua sessione sono cambiati. Per favore, conferma di nuovo la tua password.',
     'admin_password_required' => 'Devi impostare una password prima di accedere all\'area di amministrazione.',
+    'view_schedule_for' => 'Visualizza il programma degli eventi di :name',
 ];

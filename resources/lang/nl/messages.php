@@ -1632,4 +1632,5 @@ return [
     'admin_confirm_password' => 'Bevestig voor de veiligheid uw wachtwoord om toegang te krijgen tot het beheergebied.',
     'admin_session_changed' => 'Uw sessiegegevens zijn gewijzigd. Bevestig uw wachtwoord opnieuw.',
     'admin_password_required' => 'U moet een wachtwoord instellen voordat u toegang kunt krijgen tot het beheergebied.',
+    'view_schedule_for' => 'Bekijk het evenementenschema van :name',
 ];

@@ -22,9 +22,12 @@
         @endif
 
         @if ($role->language_code != 'en')
-            <link rel="alternate" hreflang="en" href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => 'en'])) }}">
-            <link rel="alternate" hreflang="{{ $role->language_code }}" href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => $role->language_code])) }}">
-            <link rel="alternate" hreflang="x-default" href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => $role->language_code])) }}">
+            @php
+                $hreflangBase = ($event && $event->exists) ? $event->getGuestUrl(false, $date ?? null) : $role->getGuestUrl();
+            @endphp
+            <link rel="alternate" hreflang="en" href="{{ $hreflangBase }}?lang=en">
+            <link rel="alternate" hreflang="{{ $role->language_code }}" href="{{ $hreflangBase }}?lang={{ $role->language_code }}">
+            <link rel="alternate" hreflang="x-default" href="{{ $hreflangBase }}?lang={{ $role->language_code }}">
         @endif
 
         @php
@@ -39,11 +42,7 @@
             @else
                 <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}">
             @endif
-            @if ($event->description_html)
-            <meta name="description" content="{{ Str::limit(trim(strip_tags($event->translatedDescription())), 155) }}">
-            @elseif ($event->role() && $event->role()->description_html)
-            <meta name="description" content="{{ Str::limit(trim(strip_tags($event->role()->translatedDescription())), 155) }}">
-            @endif
+            <meta name="description" content="{{ $event->getMetaDescription($date) }}">
             <meta property="og:type" content="event">
             <meta property="og:title" content="{{ $event->translatedName() }}">
             <meta property="og:description" content="{{ $event->getMetaDescription($date) }}">
@@ -61,6 +60,7 @@
             <meta name="twitter:image" content="{{ $eventOgImage }}">
             <meta name="twitter:image:alt" content="{{ $event->translatedName() }}">
             <meta name="twitter:card" content="summary_large_image">
+            <meta name="twitter:site" content="@ScheduleEvent">
         @elseif ($role->exists)
             @if ($role->language_code != 'en')
                 <link rel="canonical" href="{{ $role->getGuestUrl() }}?{{ 'lang=' . (request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code)) }}">
@@ -73,7 +73,7 @@
             <meta name="twitter:description" content="{{ $description }}">
             @else
             @php
-                $description = 'View the event schedule for ' . $role->translatedName();
+                $description = __('messages.view_schedule_for', ['name' => $role->translatedName()]);
                 if ($role->translatedShortDescription()) {
                     $description .= ' - ' . $role->translatedShortDescription();
                 }
@@ -106,6 +106,7 @@
             <meta property="og:url" content="{{ $role->getGuestUrl() }}">
             <meta property="og:site_name" content="Event Schedule">
             <meta name="twitter:card" content="summary_large_image">
+            <meta name="twitter:site" content="@ScheduleEvent">
         @endif
     </x-slot>
 
