@@ -1640,14 +1640,14 @@
                                 <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="general">
                                     {{ __('messages.general') }}
                                 </button>
+                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
+                                    {{ __('messages.custom_fields') }}
+                                </button>
                                 @if ($role->isCurator() || ((config('app.hosted') || config('app.is_testing')) && $role->isVenue()))
                                 <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="requests">
                                     {{ __('messages.requests') }}
                                 </button>
                                 @endif
-                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
-                                    {{ __('messages.custom_fields') }}
-                                </button>
                                 <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="advanced">
                                     {{ __('messages.advanced') }}
                                 </button>
@@ -1723,87 +1723,6 @@
 
                         </div>
                         <!-- End Tab Content: General -->
-
-                        <!-- Tab Content: Requests -->
-                        @if ($role->isCurator() || ((config('app.hosted') || config('app.is_testing')) && $role->isVenue()))
-                        <div id="settings-tab-requests" class="settings-tab-content hidden">
-
-                        @if ((config('app.hosted') || config('app.is_testing')) && ($role->isVenue() || $role->isCurator()))
-                        <div class="mb-6">
-                            <x-checkbox name="accept_requests"
-                                label="{{ __('messages.accept_requests') }}"
-                                checked="{{ old('accept_requests', $role->accept_requests) }}"
-                                data-custom-attribute="value" />
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.accept_requests_help') }}</p>
-                            <x-input-error class="mt-2" :messages="$errors->get('accept_requests')" />
-                        </div>
-                        <div class="mb-6" id="require_approval_section">
-                            <x-checkbox name="require_approval"
-                                label="{{ __('messages.require_approval') }}"
-                                checked="{{ old('require_approval', $role->exists ? $role->require_approval : true) }}"
-                                data-custom-attribute="value" />
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.require_approval_help') }}</p>
-                            <x-input-error class="mt-2" :messages="$errors->get('require_approval')" />
-                        </div>
-                        <div class="mb-6" id="request_terms_section">
-                            <x-input-label for="request_terms" :value="__('messages.request_terms')" />
-                            <textarea id="request_terms" name="request_terms"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
-                                rows="4"
-                                dir="auto"
-                                placeholder="{{ __('messages.enter_request_terms') }}">{{ old('request_terms', $role->request_terms) }}</textarea>
-                            <x-input-error class="mt-2" :messages="$errors->get('request_terms')" />
-                        </div>
-                        <div class="mb-6" id="import_form_fields_section">
-                            <x-input-label :value="__('messages.import_form_fields')" />
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.import_form_fields_help') }}</p>
-                            @php
-                                $importFields = $role->import_config['fields'] ?? [];
-                                $requiredFields = $role->import_config['required_fields'] ?? [];
-                                $fieldItems = [
-                                    'short_description' => __('messages.short_description'),
-                                    'description' => __('messages.description'),
-                                    'ticket_price' => __('messages.price'),
-                                    'coupon_code' => __('messages.coupon_code'),
-                                    'registration_url' => __('messages.registration_url'),
-                                    'category_id' => __('messages.category'),
-                                ];
-                                if (($role->groups ?? collect())->count() > 0) {
-                                    $fieldItems['group_id'] = __('messages.subschedules');
-                                }
-                            @endphp
-                            <div class="space-y-3">
-                                @foreach ($fieldItems as $fieldKey => $fieldLabel)
-                                @php
-                                    $isChecked = old('import_fields.' . $fieldKey, $importFields[$fieldKey] ?? false);
-                                    $isRequired = old('required_fields.' . $fieldKey, $requiredFields[$fieldKey] ?? false);
-                                @endphp
-                                <div class="flex items-center gap-3">
-                                    <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                        <input type="hidden" name="import_fields[{{ $fieldKey }}]" value="0">
-                                        <input type="checkbox" id="import_field_{{ $fieldKey }}" name="import_fields[{{ $fieldKey }}]" value="1"
-                                            {{ $isChecked ? 'checked' : '' }}
-                                            class="sr-only peer import-field-toggle" data-field="{{ $fieldKey }}">
-                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
-                                        <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                    </label>
-                                    <label for="import_field_{{ $fieldKey }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 w-36 cursor-pointer">{{ $fieldLabel }}</label>
-                                    <label id="required_label_{{ $fieldKey }}" class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 cursor-pointer" style="{{ $isChecked ? '' : 'display: none;' }}">
-                                        <input type="hidden" name="required_fields[{{ $fieldKey }}]" value="0">
-                                        <input type="checkbox" name="required_fields[{{ $fieldKey }}]" value="1"
-                                            {{ $isRequired ? 'checked' : '' }}
-                                            class="h-3.5 w-3.5 rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                        {{ __('messages.required') }}
-                                    </label>
-                                </div>
-                                @endforeach
-                            </div>
-                        </div>
-                        @endif
-
-                        </div>
-                        @endif
-                        <!-- End Tab Content: Requests -->
 
                         <!-- Tab Content: Custom Fields -->
                         <div id="settings-tab-custom-fields" class="settings-tab-content hidden">
@@ -1897,6 +1816,42 @@
                         </div>
                         <!-- End Tab Content: Custom Fields -->
 
+                        <!-- Tab Content: Requests -->
+                        @if ($role->isCurator() || ((config('app.hosted') || config('app.is_testing')) && $role->isVenue()))
+                        <div id="settings-tab-requests" class="settings-tab-content hidden">
+
+                        @if ((config('app.hosted') || config('app.is_testing')) && ($role->isVenue() || $role->isCurator()))
+                        <div class="mb-6">
+                            <x-checkbox name="accept_requests"
+                                label="{{ __('messages.accept_requests') }}"
+                                checked="{{ old('accept_requests', $role->accept_requests) }}"
+                                data-custom-attribute="value" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.accept_requests_help') }}</p>
+                            <x-input-error class="mt-2" :messages="$errors->get('accept_requests')" />
+                        </div>
+                        <div class="mb-6" id="require_approval_section">
+                            <x-checkbox name="require_approval"
+                                label="{{ __('messages.require_approval') }}"
+                                checked="{{ old('require_approval', $role->exists ? $role->require_approval : true) }}"
+                                data-custom-attribute="value" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.require_approval_help') }}</p>
+                            <x-input-error class="mt-2" :messages="$errors->get('require_approval')" />
+                        </div>
+                        <div class="mb-6" id="request_terms_section">
+                            <x-input-label for="request_terms" :value="__('messages.request_terms')" />
+                            <textarea id="request_terms" name="request_terms"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                rows="4"
+                                dir="auto"
+                                placeholder="{{ __('messages.enter_request_terms') }}">{{ old('request_terms', $role->request_terms) }}</textarea>
+                            <x-input-error class="mt-2" :messages="$errors->get('request_terms')" />
+                        </div>
+                        @endif
+
+                        </div>
+                        @endif
+                        <!-- End Tab Content: Requests -->
+
                         <!-- Tab Content: Advanced -->
                         <div id="settings-tab-advanced" class="settings-tab-content hidden">
                             <div class="mb-6">
@@ -1911,6 +1866,55 @@
                                 </select>
                                 <x-input-error class="mt-2" :messages="$errors->get('first_day_of_week')" />
                             </div>
+
+                        @if ((config('app.hosted') || config('app.is_testing')) && ($role->isVenue() || $role->isCurator()))
+                        <div class="mb-6" id="import_form_fields_section">
+                            <x-input-label :value="__('messages.import_form_fields')" />
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.import_form_fields_help') }}</p>
+                            @php
+                                $importFields = $role->import_config['fields'] ?? [];
+                                $requiredFields = $role->import_config['required_fields'] ?? [];
+                                $fieldItems = [
+                                    'short_description' => __('messages.short_description'),
+                                    'description' => __('messages.description'),
+                                    'ticket_price' => __('messages.price'),
+                                    'coupon_code' => __('messages.coupon_code'),
+                                    'registration_url' => __('messages.registration_url'),
+                                    'category_id' => __('messages.category'),
+                                ];
+                                if (($role->groups ?? collect())->count() > 0) {
+                                    $fieldItems['group_id'] = __('messages.subschedules');
+                                }
+                            @endphp
+                            <div class="space-y-3">
+                                @foreach ($fieldItems as $fieldKey => $fieldLabel)
+                                @php
+                                    $isChecked = old('import_fields.' . $fieldKey, $importFields[$fieldKey] ?? false);
+                                    $isRequired = old('required_fields.' . $fieldKey, $requiredFields[$fieldKey] ?? false);
+                                @endphp
+                                <div class="flex items-center gap-3">
+                                    <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                        <input type="hidden" name="import_fields[{{ $fieldKey }}]" value="0">
+                                        <input type="checkbox" id="import_field_{{ $fieldKey }}" name="import_fields[{{ $fieldKey }}]" value="1"
+                                            {{ $isChecked ? 'checked' : '' }}
+                                            class="sr-only peer import-field-toggle" data-field="{{ $fieldKey }}">
+                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
+                                        <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                    </label>
+                                    <label for="import_field_{{ $fieldKey }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 w-36 cursor-pointer">{{ $fieldLabel }}</label>
+                                    <label id="required_label_{{ $fieldKey }}" class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 cursor-pointer" style="{{ $isChecked ? '' : 'display: none;' }}">
+                                        <input type="hidden" name="required_fields[{{ $fieldKey }}]" value="0">
+                                        <input type="checkbox" name="required_fields[{{ $fieldKey }}]" value="1"
+                                            {{ $isRequired ? 'checked' : '' }}
+                                            class="h-3.5 w-3.5 rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                        {{ __('messages.required') }}
+                                    </label>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
                         </div>
                         <!-- End Tab Content: Advanced -->
 
