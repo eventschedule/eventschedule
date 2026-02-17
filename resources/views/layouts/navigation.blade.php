@@ -247,8 +247,8 @@
         let theme = 'system';
         if (window.getCurrentTheme) {
             theme = window.getCurrentTheme();
-        } else if (typeof Storage !== 'undefined') {
-            theme = localStorage.getItem('theme') || 'system';
+        } else {
+            try { theme = localStorage.getItem('theme') || 'system'; } catch (e) {}
         }
         
         // Get all theme buttons
