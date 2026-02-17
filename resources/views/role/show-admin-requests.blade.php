@@ -125,15 +125,4 @@
     @endforeach
 </ul>
 
-<script {!! nonce_attr() !!}>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.form-confirm').forEach(function(form) {
-        form.addEventListener('submit', function(e) {
-            if (!confirm(this.getAttribute('data-confirm'))) {
-                e.preventDefault();
-            }
-        });
-    });
-});
-</script>
 @endif
