@@ -108,6 +108,18 @@ jobs:
           php artisan dusk tests/Browser/ApiTest.php
           php artisan cache:clear
           php artisan dusk tests/Browser/GroupsTest.php
+          php artisan cache:clear
+          php artisan dusk tests/Browser/AvailabilityTest.php
+          php artisan cache:clear
+          php artisan dusk tests/Browser/EventManagementTest.php
+          php artisan cache:clear
+          php artisan dusk tests/Browser/ImageTest.php
+          php artisan cache:clear
+          php artisan dusk tests/Browser/ProfileTest.php
+          php artisan cache:clear
+          php artisan dusk tests/Browser/PasswordTest.php
+          php artisan cache:clear
+          php artisan dusk tests/Browser/FollowerTest.php
         env:
           APP_ENV: local
           APP_URL: http://127.0.0.1:8000
