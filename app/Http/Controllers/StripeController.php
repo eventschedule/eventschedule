@@ -122,6 +122,16 @@ class StripeController extends Controller
                 $sale = Sale::where('payment_method', 'stripe')
                     ->where('transaction_reference', $paymentIntent->id)
                     ->first();
+
+                // Fallback: find by sale_id in payment intent metadata (when success page wasn't reached)
+                if (! $sale && isset($paymentIntent->metadata->sale_id)) {
+                    $saleId = UrlUtils::decodeId($paymentIntent->metadata->sale_id);
+                    $sale = Sale::where('payment_method', 'stripe')->find($saleId);
+                    if ($sale) {
+                        $sale->transaction_reference = $paymentIntent->id;
+                    }
+                }
+
                 if ($sale && $sale->status !== 'paid') {
                     $webhookAmount = $paymentIntent->amount / 100;
 
