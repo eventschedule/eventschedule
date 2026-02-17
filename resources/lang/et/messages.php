@@ -391,6 +391,7 @@ return [
     'combined_total' => 'Kombineeritud Kokku',
     'combined_total_help' => 'Kõik piletitüübid on ühendatud üheks basseiniks',
     'price' => 'Hind',
+    'coupon_code' => 'Kupongikood',
     'quantity' => 'Kogus',
     'unlimited' => 'Piiramatu',
     'free' => 'Tasuta',

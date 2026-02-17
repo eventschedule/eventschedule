@@ -570,6 +570,14 @@
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.external_price_help') }}</p>
                         </div>
 
+                        <!-- Coupon Code -->
+                        <div class="mt-4" v-if="importFields.coupon_code || showAllFields" v-show="!savedEvents[idx]">
+                            <x-input-label for="coupon_code_@{{ idx }}" :value="__('messages.coupon_code')" />
+                            <x-text-input id="coupon_code_@{{ idx }}" type="text" class="mt-1 block w-full"
+                                maxlength="255" v-model="preview.parsed[idx].coupon_code"
+                                v-bind:readonly="savedEvents[idx]" autocomplete="off" />
+                        </div>
+
                         <!-- Registration URL -->
                         <div class="mt-4" v-if="importFields.registration_url || showAllFields" v-show="!savedEvents[idx]">
                             <x-input-label for="registration_url_@{{ idx }}" :value="__('messages.registration_url')" />
@@ -1781,6 +1789,7 @@
                             social_image: parsed.social_image,
                             registration_url: parsed.registration_url,
                             ticket_price: parsed.ticket_price,
+                            coupon_code: parsed.coupon_code,
                             ticket_currency_code: parsed.ticket_currency_code,
                             current_role_group_id: parsed.group_id || null,
                             custom_field_values: parsed.custom_field_values || {},

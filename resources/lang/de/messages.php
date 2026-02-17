@@ -334,6 +334,7 @@ return [
     'terms_url' => 'AGB-URL',
     'terms_url_help' => 'Benutzerdefinierte URL für Allgemeine Geschäftsbedingungen für Tickets. Leer lassen für Standard.',
     'price' => 'Preis',
+    'coupon_code' => 'Gutscheincode',
     'quantity' => 'Menge',
     'unlimited' => 'Unbegrenzt',
     'free' => 'Kostenlos',

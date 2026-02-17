@@ -2130,6 +2130,12 @@
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.external_price_help') }}</p>
                             </div>
 
+                            <div class="mb-6" v-show="!event.tickets_enabled">
+                                <x-input-label for="coupon_code" :value="__('messages.coupon_code')" />
+                                <x-text-input id="coupon_code" name="coupon_code" type="text" class="mt-1 block w-full"
+                                    v-model="event.coupon_code" maxlength="255" />
+                            </div>
+
                             @if ($role->isPro())
                             <div v-show="event.tickets_enabled">
 
@@ -2399,6 +2405,12 @@
                                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                         {{ __('messages.terms_url_help') }}
                                     </p>
+                                </div>
+
+                                <div class="mb-6">
+                                    <x-input-label for="coupon_code_ticketed" :value="__('messages.coupon_code')" />
+                                    <x-text-input id="coupon_code_ticketed" name="coupon_code" type="text" class="mt-1 block w-full"
+                                        v-model="event.coupon_code" maxlength="255" />
                                 </div>
 
                                 <div v-if="hasLimitedPaidTickets">

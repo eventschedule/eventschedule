@@ -342,6 +342,7 @@ return [
     'terms_url' => 'URL de términos',
     'terms_url_help' => 'URL personalizada de términos y condiciones para entradas. Dejar en blanco para usar el predeterminado.',
     'price' => 'Precio',
+    'coupon_code' => 'Código de cupón',
     'quantity' => 'Cantidad',
     'unlimited' => 'Ilimitado',
     'free' => 'Gratis',

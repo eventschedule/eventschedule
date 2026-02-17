@@ -182,6 +182,7 @@ return [
     'terms_url' => 'URL dos termos',
     'terms_url_help' => 'URL personalizada de termos e condições para ingressos. Deixe em branco para usar o padrão.',
     'price' => 'Preço',
+    'coupon_code' => 'Código de cupom',
     'quantity' => 'Quantidade',
     'unlimited' => 'Ilimitado',
     'free' => 'Gratuito',

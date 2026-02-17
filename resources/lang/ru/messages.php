@@ -392,6 +392,7 @@ return [
     'combined_total' => 'Общий итог',
     'combined_total_help' => 'Все типы билетов объединены в единый пул',
     'price' => 'Цена',
+    'coupon_code' => 'Код купона',
     'quantity' => 'Количество',
     'unlimited' => 'Безлимитный',
     'free' => 'Бесплатно',
