@@ -42,12 +42,12 @@ class AvailabilityTest extends DuskTestCase
             $this->assertTrue($isDisabled[0], 'Save button should be disabled initially');
 
             // Click the 15th to mark it unavailable
-            $browser->click('.day-element[data-date="' . $targetDate . '"]')
+            $browser->click('.day-element[data-date="'.$targetDate.'"]')
                 ->pause(500);
 
             // Verify .day-x overlay appeared on the clicked date
             $hasDayX = $browser->script(
-                "return document.querySelector('.day-element[data-date=\"" . $targetDate . "\"] .day-x') !== null;"
+                "return document.querySelector('.day-element[data-date=\"".$targetDate."\"] .day-x') !== null;"
             );
             $this->assertTrue($hasDayX[0], 'Day-x overlay should appear after clicking');
 
@@ -71,16 +71,16 @@ class AvailabilityTest extends DuskTestCase
                 ->pause(500);
 
             $hasDayX = $browser->script(
-                "return document.querySelector('.day-element[data-date=\"" . $targetDate . "\"] .day-x') !== null;"
+                "return document.querySelector('.day-element[data-date=\"".$targetDate."\"] .day-x') !== null;"
             );
             $this->assertTrue($hasDayX[0], 'Day-x overlay should persist after reload');
 
             // Toggle back to available
-            $browser->click('.day-element[data-date="' . $targetDate . '"]')
+            $browser->click('.day-element[data-date="'.$targetDate.'"]')
                 ->pause(500);
 
             $hasDayX = $browser->script(
-                "return document.querySelector('.day-element[data-date=\"" . $targetDate . "\"] .day-x') !== null;"
+                "return document.querySelector('.day-element[data-date=\"".$targetDate."\"] .day-x') !== null;"
             );
             $this->assertFalse($hasDayX[0], 'Day-x overlay should be removed after toggling back');
 

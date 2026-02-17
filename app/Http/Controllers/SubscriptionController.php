@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SubscriptionStoreRequest;
+use App\Http\Requests\SubscriptionSwapRequest;
 use App\Models\Role;
 use App\Services\UsageTrackingService;
 use Illuminate\Http\Request;
@@ -33,18 +35,13 @@ class SubscriptionController extends Controller
     /**
      * Create a new subscription.
      */
-    public function store(Request $request, $subdomain)
+    public function store(SubscriptionStoreRequest $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (auth()->user()->id != $role->user_id) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
-
-        $request->validate([
-            'payment_method' => 'required|string',
-            'plan' => 'required|in:monthly,yearly',
-        ]);
 
         $priceId = $request->plan === 'yearly'
             ? config('services.stripe_platform.price_yearly')
@@ -158,17 +155,13 @@ class SubscriptionController extends Controller
     /**
      * Swap between monthly and yearly plans.
      */
-    public function swap(Request $request, $subdomain)
+    public function swap(SubscriptionSwapRequest $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (auth()->user()->id != $role->user_id) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
-
-        $request->validate([
-            'plan' => 'required|in:monthly,yearly',
-        ]);
 
         $priceId = $request->plan === 'yearly'
             ? config('services.stripe_platform.price_yearly')

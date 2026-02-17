@@ -5,7 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\MemberAddRequest;
 use App\Http\Requests\RoleCreateRequest;
 use App\Http\Requests\RoleEmailVerificationRequest;
+use App\Http\Requests\RoleLinkRemoveRequest;
+use App\Http\Requests\RoleLinkUpdateRequest;
 use App\Http\Requests\RoleUpdateRequest;
+use App\Http\Requests\RoleVideoSaveRequest;
+use App\Http\Requests\RoleVideosSaveRequest;
 use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsReferrersDaily;
@@ -1848,16 +1852,11 @@ class RoleController extends Controller
             ->with('message', __('messages.updated_schedule'));
     }
 
-    public function updateLinks(Request $request, $subdomain): RedirectResponse
+    public function updateLinks(RoleLinkUpdateRequest $request, $subdomain): RedirectResponse
     {
         if (! auth()->user()->isMember($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
-
-        $request->validate([
-            'link_type' => 'required|in:social_links,payment_links,youtube_links',
-            'link' => 'required|string|max:1000',
-        ]);
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
@@ -1904,16 +1903,11 @@ class RoleController extends Controller
             ->with('message', __('messages.added_link'));
     }
 
-    public function removeLinks(Request $request, $subdomain): RedirectResponse
+    public function removeLinks(RoleLinkRemoveRequest $request, $subdomain): RedirectResponse
     {
         if (! auth()->user()->isMember($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
-
-        $request->validate([
-            'remove_link_type' => 'required|in:social_links,payment_links,youtube_links',
-            'remove_link' => 'required|string|max:1000',
-        ]);
 
         $role = Role::subdomain($subdomain)->firstOrFail();
         if ($request->remove_link_type == 'social_links') {
@@ -2611,7 +2605,7 @@ class RoleController extends Controller
         }
     }
 
-    public function saveVideo(Request $request, $subdomain)
+    public function saveVideo(RoleVideoSaveRequest $request, $subdomain)
     {
         if (! auth()->user()->isMember($subdomain)) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
@@ -2622,12 +2616,6 @@ class RoleController extends Controller
         if (! $role->isCurator()) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
-
-        $request->validate([
-            'role_id' => 'required|integer',
-            'video_url' => 'required|url',
-            'video_title' => 'required|string',
-        ]);
 
         $talentRole = Role::find($request->role_id);
 
@@ -2667,7 +2655,7 @@ class RoleController extends Controller
         ]);
     }
 
-    public function saveVideos(Request $request, $subdomain)
+    public function saveVideos(RoleVideosSaveRequest $request, $subdomain)
     {
         if (! auth()->user()->isMember($subdomain)) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
@@ -2677,19 +2665,6 @@ class RoleController extends Controller
 
         if (! $role->isCurator()) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
-        }
-
-        $request->validate([
-            'role_id' => 'required|integer',
-            'videos' => 'array|max:2',
-        ]);
-
-        // Only validate video details if videos are provided
-        if (! empty($request->videos)) {
-            $request->validate([
-                'videos.*.url' => 'required|url',
-                'videos.*.title' => 'required|string',
-            ]);
         }
 
         $talentRole = Role::find($request->role_id);
