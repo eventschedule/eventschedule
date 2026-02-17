@@ -1071,6 +1071,15 @@ class Role extends Model implements MustVerifyEmail
                 'category_id' => false,
                 'group_id' => false,
             ],
+            'required_fields' => [
+                'short_description' => false,
+                'description' => false,
+                'ticket_price' => false,
+                'coupon_code' => false,
+                'registration_url' => false,
+                'category_id' => false,
+                'group_id' => false,
+            ],
         ];
 
         if (! $value) {
@@ -1086,6 +1095,7 @@ class Role extends Model implements MustVerifyEmail
         $config['urls'] = $config['urls'] ?? [];
         $config['cities'] = $config['cities'] ?? [];
         $config['fields'] = array_merge($defaults['fields'], $config['fields'] ?? []);
+        $config['required_fields'] = array_merge($defaults['required_fields'], $config['required_fields'] ?? []);
 
         return $config;
     }

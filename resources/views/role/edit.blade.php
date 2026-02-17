@@ -154,13 +154,6 @@
                 });
             }
 
-            const importFormFieldsSection = document.getElementById('import_form_fields_section');
-            if (acceptRequestsCheckbox && importFormFieldsSection) {
-                importFormFieldsSection.style.display = acceptRequestsCheckbox.checked ? 'block' : 'none';
-                acceptRequestsCheckbox.addEventListener('change', function() {
-                    importFormFieldsSection.style.display = this.checked ? 'block' : 'none';
-                });
-            }
 
             $('#profile_image').on('change', function() {
                 previewImage(this, 'profile_image_preview');
@@ -1764,38 +1757,46 @@
                         <div class="mb-6" id="import_form_fields_section">
                             <x-input-label :value="__('messages.import_form_fields')" />
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.import_form_fields_help') }}</p>
-                            @php $importFields = $role->import_config['fields'] ?? []; @endphp
-                            <div class="space-y-2">
-                                <x-checkbox name="import_fields[short_description]"
-                                    label="{{ __('messages.short_description') }}"
-                                    checked="{{ old('import_fields.short_description', $importFields['short_description'] ?? false) }}"
-                                    data-custom-attribute="value" />
-                                <x-checkbox name="import_fields[description]"
-                                    label="{{ __('messages.description') }}"
-                                    checked="{{ old('import_fields.description', $importFields['description'] ?? false) }}"
-                                    data-custom-attribute="value" />
-                                <x-checkbox name="import_fields[ticket_price]"
-                                    label="{{ __('messages.price') }}"
-                                    checked="{{ old('import_fields.ticket_price', $importFields['ticket_price'] ?? false) }}"
-                                    data-custom-attribute="value" />
-                                <x-checkbox name="import_fields[coupon_code]"
-                                    label="{{ __('messages.coupon_code') }}"
-                                    checked="{{ old('import_fields.coupon_code', $importFields['coupon_code'] ?? false) }}"
-                                    data-custom-attribute="value" />
-                                <x-checkbox name="import_fields[registration_url]"
-                                    label="{{ __('messages.registration_url') }}"
-                                    checked="{{ old('import_fields.registration_url', $importFields['registration_url'] ?? false) }}"
-                                    data-custom-attribute="value" />
-                                <x-checkbox name="import_fields[category_id]"
-                                    label="{{ __('messages.category') }}"
-                                    checked="{{ old('import_fields.category_id', $importFields['category_id'] ?? false) }}"
-                                    data-custom-attribute="value" />
-                                @if (($role->groups ?? collect())->count() > 0)
-                                <x-checkbox name="import_fields[group_id]"
-                                    label="{{ __('messages.subschedules') }}"
-                                    checked="{{ old('import_fields.group_id', $importFields['group_id'] ?? false) }}"
-                                    data-custom-attribute="value" />
-                                @endif
+                            @php
+                                $importFields = $role->import_config['fields'] ?? [];
+                                $requiredFields = $role->import_config['required_fields'] ?? [];
+                                $fieldItems = [
+                                    'short_description' => __('messages.short_description'),
+                                    'description' => __('messages.description'),
+                                    'ticket_price' => __('messages.price'),
+                                    'coupon_code' => __('messages.coupon_code'),
+                                    'registration_url' => __('messages.registration_url'),
+                                    'category_id' => __('messages.category'),
+                                ];
+                                if (($role->groups ?? collect())->count() > 0) {
+                                    $fieldItems['group_id'] = __('messages.subschedules');
+                                }
+                            @endphp
+                            <div class="space-y-3">
+                                @foreach ($fieldItems as $fieldKey => $fieldLabel)
+                                @php
+                                    $isChecked = old('import_fields.' . $fieldKey, $importFields[$fieldKey] ?? false);
+                                    $isRequired = old('required_fields.' . $fieldKey, $requiredFields[$fieldKey] ?? false);
+                                @endphp
+                                <div class="flex items-center gap-3">
+                                    <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                        <input type="hidden" name="import_fields[{{ $fieldKey }}]" value="0">
+                                        <input type="checkbox" id="import_field_{{ $fieldKey }}" name="import_fields[{{ $fieldKey }}]" value="1"
+                                            {{ $isChecked ? 'checked' : '' }}
+                                            class="sr-only peer import-field-toggle" data-field="{{ $fieldKey }}">
+                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
+                                        <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                    </label>
+                                    <label for="import_field_{{ $fieldKey }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 w-36 cursor-pointer">{{ $fieldLabel }}</label>
+                                    <label id="required_label_{{ $fieldKey }}" class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 cursor-pointer" style="{{ $isChecked ? '' : 'display: none;' }}">
+                                        <input type="hidden" name="required_fields[{{ $fieldKey }}]" value="0">
+                                        <input type="checkbox" name="required_fields[{{ $fieldKey }}]" value="1"
+                                            {{ $isRequired ? 'checked' : '' }}
+                                            class="h-3.5 w-3.5 rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                        {{ __('messages.required') }}
+                                    </label>
+                                </div>
+                                @endforeach
                             </div>
                         </div>
                         @endif
@@ -2479,6 +2480,21 @@ document.documentElement.scrollTop = 0;
 if (document.body) {
     document.body.scrollTop = 0;
 }
+
+// Toggle "Required" label visibility for import fields
+document.querySelectorAll('.import-field-toggle').forEach(function(toggle) {
+    var field = toggle.dataset.field;
+    var label = document.getElementById('required_label_' + field);
+    if (!label) return;
+    label.style.display = toggle.checked ? '' : 'none';
+    toggle.addEventListener('change', function() {
+        label.style.display = this.checked ? '' : 'none';
+        if (!this.checked) {
+            var cb = label.querySelector('input[type=checkbox]');
+            if (cb) cb.checked = false;
+        }
+    });
+});
 
 // Style sub-tab navigation
 function showStyleTab(tabName) {

@@ -1580,6 +1580,15 @@ class RoleController extends Controller
                 'category_id' => (bool) $request->input('import_fields.category_id'),
                 'group_id' => (bool) $request->input('import_fields.group_id'),
             ];
+            $importConfig['required_fields'] = [
+                'short_description' => (bool) $request->input('required_fields.short_description'),
+                'description' => (bool) $request->input('required_fields.description'),
+                'ticket_price' => (bool) $request->input('required_fields.ticket_price'),
+                'coupon_code' => (bool) $request->input('required_fields.coupon_code'),
+                'registration_url' => (bool) $request->input('required_fields.registration_url'),
+                'category_id' => (bool) $request->input('required_fields.category_id'),
+                'group_id' => (bool) $request->input('required_fields.group_id'),
+            ];
             $role->import_config = $importConfig;
         }
 
