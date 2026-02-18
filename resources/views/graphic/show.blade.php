@@ -94,6 +94,37 @@
                 });
             }
 
+            function shareGraphic() {
+                if (!graphicData) return;
+
+                const img = document.getElementById('graphicImage');
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                ctx.drawImage(img, 0, 0);
+
+                canvas.toBlob(function(blob) {
+                    const file = new File([blob], '{{ $role->subdomain }}-upcoming-events.png', { type: 'image/png' });
+                    const text = document.getElementById('eventText').value;
+
+                    navigator.share({ files: [file], text: text }).then(function() {
+                        const button = document.getElementById('shareBtn');
+                        const originalText = button.innerHTML;
+                        button.innerHTML = `<svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>{{ __("messages.shared") }}`;
+
+                        setTimeout(function() {
+                            button.innerHTML = originalText;
+                        }, 2000);
+                    }).catch(function(err) {
+                        if (err.name === 'AbortError') return;
+                        console.error('Could not share: ', err);
+                        alert('{{ __("messages.share_failed") }}');
+                    });
+                }, 'image/png');
+            }
+
             function getFormSettings() {
                 // Check desktop first, fall back to mobile
                 const aiPrompt = document.getElementById('ai_prompt')?.value ||
@@ -1199,6 +1230,24 @@
                     });
                 }
 
+                // Share button
+                const shareBtn = document.getElementById('shareBtn');
+                if (shareBtn) {
+                    shareBtn.addEventListener('click', function() {
+                        shareGraphic();
+                    });
+
+                    // Show button only if browser supports file sharing
+                    try {
+                        const testFile = new File([new Blob(['test'], { type: 'text/plain' })], 'test.txt', { type: 'text/plain' });
+                        if (navigator.canShare && navigator.canShare({ files: [testFile] })) {
+                            shareBtn.classList.remove('hidden');
+                        }
+                    } catch (e) {
+                        // Browser doesn't support canShare, keep button hidden
+                    }
+                }
+
                 // Event delegation for dynamically created delete header image buttons
                 document.addEventListener('click', function(e) {
                     const deleteBtn = e.target.closest('[data-action="delete-header-image"]');
@@ -1929,12 +1978,21 @@
                 <div class="flex flex-col gap-6">
                     <!-- Event Text Section (Desktop always visible, Mobile only on text tab) -->
                     <div x-show="activeTab === 'text'" x-cloak class="lg:!block bg-white dark:bg-gray-800 lg:bg-gray-50 lg:dark:bg-gray-900/50 rounded-lg shadow lg:shadow-none dark:shadow-gray-900/50 overflow-hidden flex flex-col lg:border lg:border-gray-200 lg:dark:border-gray-700">
-                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-end">
+                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-end gap-2">
+                            <button
+                                id="shareBtn"
+                                class="hidden inline-flex items-center justify-center w-[8.5rem] px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-md transition-colors"
+                            >
+                                <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                                </svg>
+                                {{ __('messages.share') }}
+                            </button>
                             <button
                                 id="copyTextBtn"
-                                class="inline-flex items-center px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors"
+                                class="inline-flex items-center justify-center w-[8.5rem] px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors"
                             >
-                                <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                                 </svg>
                                 {{ __('messages.copy_text') }}
@@ -1959,18 +2017,18 @@
                         <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-end gap-2">
                             <button
                                 id="downloadBtn"
-                                class="inline-flex items-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-md transition-colors"
+                                class="inline-flex items-center justify-center w-[8.5rem] px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-md transition-colors"
                             >
-                                <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                                 </svg>
                                 {{ __('messages.download') }}
                             </button>
                             <button
                                 id="copyImageBtn"
-                                class="inline-flex items-center px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors"
+                                class="inline-flex items-center justify-center w-[8.5rem] px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors"
                             >
-                                <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
                                 </svg>
                                 {{ __('messages.copy_image') }}

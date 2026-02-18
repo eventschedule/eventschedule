@@ -218,7 +218,7 @@
             @php
                 // Use translation if available, otherwise fall back to event methods
                 $eventName = (isset($translation) && $translation && $translation->name_translated) ? $translation->name_translated : $event->translatedName();
-                $eventDescriptionRaw = (isset($translation) && $translation && $translation->description_translated) ? $translation->description_translated : $event->translatedDescription();
+                $eventDescriptionRaw = (isset($translation) && $translation && $translation->description_translated) ? ($translation->description_html_translated ?: $translation->description_translated) : $event->translatedDescription();
                 $eventDescription = trim(strip_tags($eventDescriptionRaw));
                 if (empty($eventDescription)) {
                     $eventDescription = $event->translatedName() . ' - ' . __('messages.event');
