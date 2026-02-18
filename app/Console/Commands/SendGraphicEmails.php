@@ -127,8 +127,10 @@ class SendGraphicEmails extends Command
                 break;
 
             case 'weekly':
-                // send_day: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-                if ($currentDayOfWeek !== (int) $sendDay) {
+                // send_days: array of day numbers (0 = Sunday, ..., 6 = Saturday)
+                // Falls back to [send_day] for backward compatibility
+                $sendDays = $settings['send_days'] ?? [(int) $sendDay];
+                if (! in_array($currentDayOfWeek, array_map('intval', $sendDays))) {
                     return false;
                 }
                 break;
@@ -164,8 +166,8 @@ class SendGraphicEmails extends Command
                     break;
 
                 case 'weekly':
-                    // Don't send more than once per week
-                    if ($hoursSinceLastSend < 24 * 6) {
+                    // Don't send more than once per day (may send on consecutive days)
+                    if ($hoursSinceLastSend < 20) {
                         return false;
                     }
                     break;

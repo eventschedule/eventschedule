@@ -2696,12 +2696,49 @@ const calendarApp = createApp({
                 this.loadingPastEvents = false;
             }
         },
+        onEventsReady() {
+            this.$nextTick(() => {
+                this.initPopups();
+                const showPastEventsBtn = document.getElementById('showPastEventsBtn');
+                const pastEventEls = document.querySelectorAll('.past-event');
+                if (pastEventEls.length > 0 && showPastEventsBtn) {
+                    showPastEventsBtn.classList.remove('hidden');
+                    showPastEventsBtn.onclick = function() {
+                        pastEventEls.forEach(event => {
+                            event.classList.remove('hidden');
+                        });
+                        showPastEventsBtn.classList.add('hidden');
+                    };
+                }
+            });
+        },
         async fetchCalendarEvents() {
             if (this.tab === 'availability') {
                 this.isLoadingEvents = false;
                 return;
             }
-            this.isLoadingEvents = true;
+
+            const cacheKey = `es_cal_${this.route}_${this.subdomain}_{{ $month }}_{{ $year }}`;
+
+            // Show cached data immediately if available
+            try {
+                const cached = sessionStorage.getItem(cacheKey);
+                if (cached) {
+                    const data = JSON.parse(cached);
+                    if (data && data.events && data.eventsMap && data.filterMeta) {
+                        this.allEvents = data.events;
+                        this.eventsMap = data.eventsMap;
+                        this.pastEvents = data.pastEvents || [];
+                        this.hasMorePastEvents = data.hasMorePastEvents || false;
+                        this.uniqueCategoryIds = data.filterMeta.uniqueCategoryIds;
+                        this.isLoadingEvents = false;
+                        this.onEventsReady();
+                    }
+                }
+            } catch (e) {
+                // sessionStorage unavailable
+            }
+
             try {
                 let url;
                 if (this.route === 'home') {
@@ -2723,25 +2760,18 @@ const calendarApp = createApp({
                 this.hasMorePastEvents = data.hasMorePastEvents || false;
                 this.uniqueCategoryIds = data.filterMeta.uniqueCategoryIds;
 
+                // Cache for stale-while-revalidate on next visit
+                try {
+                    sessionStorage.setItem(cacheKey, JSON.stringify(data));
+                } catch (e) {
+                    // Quota exceeded or unavailable
+                }
+
             } catch (e) {
                 console.error('Failed to load calendar events:', e);
             } finally {
                 this.isLoadingEvents = false;
-                this.$nextTick(() => {
-                    this.initPopups();
-                    // Re-trigger past events button logic
-                    const showPastEventsBtn = document.getElementById('showPastEventsBtn');
-                    const pastEventEls = document.querySelectorAll('.past-event');
-                    if (pastEventEls.length > 0 && showPastEventsBtn) {
-                        showPastEventsBtn.classList.remove('hidden');
-                        showPastEventsBtn.addEventListener('click', function() {
-                            pastEventEls.forEach(event => {
-                                event.classList.remove('hidden');
-                            });
-                            showPastEventsBtn.classList.add('hidden');
-                        });
-                    }
-                });
+                this.onEventsReady();
             }
         },
         updateUrlWithGroup(newGroupSlug) {
@@ -2806,12 +2836,14 @@ const calendarApp = createApp({
                 if (pastEvents.length > 0) {
                     showPastEventsBtn?.classList.remove('hidden');
 
-                    showPastEventsBtn?.addEventListener('click', function() {
-                        pastEvents.forEach(event => {
-                            event.classList.remove('hidden');
-                        });
-                        showPastEventsBtn.classList.add('hidden');
-                    });
+                    if (showPastEventsBtn) {
+                        showPastEventsBtn.onclick = function() {
+                            pastEvents.forEach(event => {
+                                event.classList.remove('hidden');
+                            });
+                            showPastEventsBtn.classList.add('hidden');
+                        };
+                    }
                 }
             });
         }

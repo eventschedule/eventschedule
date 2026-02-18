@@ -955,6 +955,7 @@ return [
     'daily' => 'Daily',
     'weekly' => 'Weekly',
     'send_on' => 'Send On',
+    'send_on_days' => 'Send on Days',
     'day_of_month' => 'Day of Month',
     'send_at_hour' => 'Send At',
     'ai_text_prompt' => 'AI Text Prompt',

@@ -20,6 +20,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **No co-author on commits** - Do not add "Co-Authored-By: Claude" to git commit messages
 - **Never use em-dashes** - Use hyphens, "to", or "or" instead of em-dashes (—) in all written content
 - **Use "schedule" not "role", "sub-schedule" not "group"** - In the code, `Role` = schedule and `Group` = sub-schedule. Always use "schedule" and "sub-schedule" in UI text and conversations, never "role" or "group"
+- **MySQL only** - Only MySQL is supported; do not add SQLite compatibility to migrations or tests
 
 ## Terminology
 
@@ -58,7 +59,7 @@ php artisan storage:link
 
 ## Testing
 
-**Warning: Running tests will empty the database.**
+**Warning: Running tests will empty the database.** Tests run against a MySQL `eventschedule` database (configured in `phpunit.xml`).
 
 ```bash
 # Run all browser tests
