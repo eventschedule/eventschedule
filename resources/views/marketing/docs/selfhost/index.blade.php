@@ -19,7 +19,9 @@
             "name": "Event Schedule",
             "logo": {
                 "@type": "ImageObject",
-                "url": "{{ config('app.url') }}/images/light_logo.png"
+                "url": "{{ config('app.url') }}/images/light_logo.png",
+                "width": 712,
+                "height": 140
             }
         },
         "mainEntityOfPage": {

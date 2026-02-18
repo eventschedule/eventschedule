@@ -54,7 +54,9 @@
             "name": "Event Schedule",
             "logo": {
                 "@type": "ImageObject",
-                "url": "{{ config('app.url') }}/images/light_logo.png"
+                "url": "{{ config('app.url') }}/images/light_logo.png",
+                "width": 712,
+                "height": 140
             }
         }
         @if($posts->count() > 0)
@@ -167,7 +169,7 @@
                                         <div class="mb-4 overflow-hidden rounded-xl">
                                             <picture>
                                                 <source srcset="{{ webp_path($post->featured_image_url) }}" type="image/webp">
-                                                <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105">
+                                                <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" width="672" height="192" loading="lazy" decoding="async" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105">
                                             </picture>
                                         </div>
                                     @endif

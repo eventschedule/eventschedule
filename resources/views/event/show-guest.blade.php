@@ -190,17 +190,17 @@
                         @endphp
                       @endif
                       <a href="{{ $talentUrl }}" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}">
-                        <h2 class="inline text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ $each->font_family }}', sans-serif;">
+                        <span class="inline text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ $each->font_family }}', sans-serif;">
                           {{ $each->translatedName() }}
                           <svg class="inline-block w-5 h-5 {{ $role->isRtl() ? 'ms-1 scale-x-[-1]' : 'ms-1' }} align-text-bottom fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                           </svg>
-                        </h2>
+                        </span>
                       </a>
                     @else
-                      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ $otherRole->font_family ?? 'sans-serif' }}', sans-serif;">
+                      <p class="text-lg font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ $otherRole->font_family ?? 'sans-serif' }}', sans-serif;">
                         {{ $each->translatedName() }}
-                      </h2>
+                      </p>
                     @endif
                   </div>
 
@@ -310,17 +310,17 @@
                   $venuePanelUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
                 @endphp
                 <a href="{{ $venuePanelUrl }}" class="group inline-flex items-center gap-2 w-fit hover:opacity-80 transition-opacity duration-200 {{ $role->isRtl() ? 'rtl' : '' }}">
-                  <h2 class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ $event->venue->font_family }}', sans-serif;">
+                  <span class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ $event->venue->font_family }}', sans-serif;">
                     {{ $event->venue->translatedName() }}
-                  </h2>
+                  </span>
                   <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                   </svg>
                 </a>
               @else
-                <h2 class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ $event->venue->font_family }}', sans-serif;">
+                <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ $event->venue->font_family }}', sans-serif;">
                   {{ $event->venue->translatedName() }}
-                </h2>
+                </p>
               @endif
               @if ($event->venue->translatedDescription())
                 <div x-data="{ expanded: false, needsExpand: false }" x-init="$nextTick(() => { let el = $refs.collapsed; needsExpand = el.scrollHeight > el.clientHeight })">
@@ -472,9 +472,9 @@
         {{-- Create your own card --}}
         @if (config('app.hosted') && ! $event->isPro())
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5 flex flex-col gap-6 {{ $role->isRtl() ? 'rtl' : '' }}">
-          <h2 class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100">
+          <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100">
             {{ __('messages.create_your_own_event_schedule') }}
-          </h2>
+          </p>
           <a href="{{ marketing_url() }}" target="_blank" rel="noopener noreferrer">
             <button
               type="button"

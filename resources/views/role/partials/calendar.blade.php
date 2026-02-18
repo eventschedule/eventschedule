@@ -85,6 +85,7 @@
                 'registration_url' => $event->registration_url,
                 'ticket_price' => $event->ticket_price,
                 'ticket_currency_code' => $event->ticket_currency_code,
+                'coupon_code' => $event->coupon_code,
                 'description_excerpt' => Str::words(strip_tags($event->translatedDescription()), 25, '...'),
                 'duration' => $event->duration,
                 'parts' => $event->parts->map(fn($part) => [
@@ -552,12 +553,15 @@
                                                     </svg>
                                                     <span v-text="getEventTime(event)"></span>
                                                 </div>
-                                                <div v-if="event.registration_url && event.ticket_price != null" class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                                    <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                <div v-if="event.registration_url && event.ticket_price != null" class="mt-1 flex items-start text-sm text-gray-500 dark:text-gray-400">
+                                                    <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                                                         <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
                                                     </svg>
-                                                    <span v-if="event.ticket_price == 0">{{ __('messages.free_entry') }}</span>
-                                                    <span v-else v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span>
+                                                    <div class="flex flex-col">
+                                                        <span v-if="event.ticket_price == 0">{{ __('messages.free_entry') }}</span>
+                                                        <span v-else v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span>
+                                                        <span v-if="event.coupon_code" class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.coupon_code') }}: <span v-text="event.coupon_code"></span></span>
+                                                    </div>
                                                 </div>
                                                 <div v-if="event.can_edit" class="mt-auto pt-3">
                                                     <a :href="event.edit_url"
@@ -695,6 +699,24 @@
                                                 </svg>
                                             </div>
                                             <span class="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                        </div>
+
+                                        {{-- Ticket Price Badge --}}
+                                        <div v-if="event.registration_url && event.ticket_price != null" class="flex items-center gap-4">
+                                            <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
+                                                <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
+                                                    <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="text-lg font-semibold text-gray-900 dark:text-white">
+                                                    <span v-if="event.ticket_price == 0">{{ __('messages.free_entry') }}</span>
+                                                    <span v-else v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span>
+                                                </span>
+                                                <span v-if="event.coupon_code" class="text-sm text-gray-500 dark:text-gray-400">
+                                                    {{ __('messages.coupon_code') }}: <span v-text="event.coupon_code"></span>
+                                                </span>
+                                            </div>
                                         </div>
 
                                         {{-- Talent Avatars + Names --}}
@@ -907,6 +929,24 @@
                                             </svg>
                                         </div>
                                         <span class="text-lg font-semibold text-gray-900 dark:text-white truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                    </div>
+
+                                    {{-- Ticket Price Badge --}}
+                                    <div v-if="event.registration_url && event.ticket_price != null" class="flex items-center gap-4">
+                                        <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
+                                            <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
+                                                <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <span class="text-lg font-semibold text-gray-900 dark:text-white">
+                                                <span v-if="event.ticket_price == 0">{{ __('messages.free_entry') }}</span>
+                                                <span v-else v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span>
+                                            </span>
+                                            <span v-if="event.coupon_code" class="text-sm text-gray-500 dark:text-gray-400">
+                                                {{ __('messages.coupon_code') }}: <span v-text="event.coupon_code"></span>
+                                            </span>
+                                        </div>
                                     </div>
 
                                     {{-- Talent Avatars + Names --}}
@@ -1181,12 +1221,14 @@
                                                 </svg>
                                                 <span v-text="getEventTime(event)"></span>
                                             </div>
-                                            <div v-if="event.registration_url && event.ticket_price != null" class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                                <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                            <div v-if="event.registration_url && event.ticket_price != null" class="mt-1 flex items-start text-sm text-gray-500 dark:text-gray-400">
+                                                <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                                                     <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
                                                 </svg>
                                                 <span v-if="event.ticket_price == 0">{{ __('messages.free_entry') }}</span>
-                                                <span v-else v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span>
+                                                <span v-else>
+                                                    <span v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span><span v-if="event.coupon_code"> | <span v-text="event.coupon_code"></span></span>
+                                                </span>
                                             </div>
                                             <div v-if="event.can_edit" class="mt-auto pt-3">
                                                 <a :href="event.edit_url"
@@ -1481,6 +1523,15 @@
                         <path fill-rule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clip-rule="evenodd" />
                     </svg>
                     <span id="event-popup-time-text"></span>
+                </div>
+                <div id="event-popup-price" class="event-popup-detail" style="display: none;">
+                    <svg class="event-popup-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                    </svg>
+                    <span id="event-popup-price-text"></span>
+                </div>
+                <div id="event-popup-coupon" class="event-popup-detail" style="display: none;">
+                    <span id="event-popup-coupon-text" style="margin-inline-start: 20px;"></span>
                 </div>
             </div>
             <p id="event-popup-description" class="event-popup-description" style="display: none;"></p>
@@ -2404,7 +2455,11 @@ const calendarApp = createApp({
                 venue_name: event.venue_name || '',
                 time: time || '',
                 image_url: event.image_url || '',
-                description: '' // Description not currently in event data
+                description: '', // Description not currently in event data
+                ticket_price: event.ticket_price,
+                ticket_currency_code: event.ticket_currency_code || '',
+                registration_url: event.registration_url || '',
+                coupon_code: event.coupon_code || ''
             };
         },
         getEventDisplayName(event) {
@@ -2603,6 +2658,31 @@ const calendarApp = createApp({
                     timeEl.style.display = 'flex';
                 } else {
                     timeEl.style.display = 'none';
+                }
+            }
+
+            const priceEl = document.getElementById('event-popup-price');
+            const priceTextEl = document.getElementById('event-popup-price-text');
+            const couponEl = document.getElementById('event-popup-coupon');
+            const couponTextEl = document.getElementById('event-popup-coupon-text');
+
+            if (priceEl && priceTextEl) {
+                if (popupData.registration_url && popupData.ticket_price != null) {
+                    priceTextEl.textContent = popupData.ticket_price == 0
+                        ? '{{ __('messages.free_entry') }}'
+                        : this.formatPrice(popupData.ticket_price, popupData.ticket_currency_code);
+                    priceEl.style.display = 'flex';
+                } else {
+                    priceEl.style.display = 'none';
+                }
+            }
+
+            if (couponEl && couponTextEl) {
+                if (popupData.coupon_code && popupData.registration_url && popupData.ticket_price != null) {
+                    couponTextEl.textContent = '{{ __('messages.coupon_code') }}: ' + popupData.coupon_code;
+                    couponEl.style.display = 'flex';
+                } else {
+                    couponEl.style.display = 'none';
                 }
             }
 

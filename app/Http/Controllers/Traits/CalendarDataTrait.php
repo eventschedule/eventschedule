@@ -54,6 +54,7 @@ trait CalendarDataTrait
             'registration_url' => $event->registration_url,
             'ticket_price' => $event->ticket_price,
             'ticket_currency_code' => $event->ticket_currency_code,
+            'coupon_code' => $event->coupon_code,
             'description_excerpt' => Str::words(strip_tags($event->translatedDescription()), 25, '...'),
             'duration' => $event->duration,
             'parts' => $event->parts->map(fn ($part) => [

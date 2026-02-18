@@ -20,6 +20,7 @@
             <meta property="article:tag" content="{{ $tag }}">
         @endforeach
     @endif
+    <meta property="article:publisher" content="https://www.facebook.com/appeventschedule">
     </x-slot>
 
     <x-slot name="structuredData">
@@ -40,7 +41,9 @@
             "name": "Event Schedule",
             "logo": {
                 "@type": "ImageObject",
-                "url": "{{ config('app.url') }}/images/light_logo.png"
+                "url": "{{ config('app.url') }}/images/light_logo.png",
+                "width": 712,
+                "height": 140
             }
         },
         "datePublished": "{{ $post->published_at ? $post->published_at->toISOString() : '' }}",
@@ -48,6 +51,10 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "{{ url()->current() }}"
+        },
+        "speakable": {
+            "@type": "SpeakableSpecification",
+            "cssSelector": ["[itemprop='headline']", "[itemprop='description']"]
         }
         @if($post->tags)
         ,"keywords": "{{ implode(', ', $post->tags) }}"
@@ -124,7 +131,7 @@
                 @endif
 
                 <!-- Title -->
-                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 leading-tight">
+                <h1 itemprop="headline" class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 leading-tight">
                     {{ $post->title }}
                 </h1>
 
@@ -151,7 +158,7 @@
 
                 <!-- Excerpt -->
                 @if($post->excerpt)
-                    <p class="text-lg sm:text-xl text-gray-300 leading-relaxed max-w-2xl mx-auto">
+                    <p itemprop="description" class="text-lg sm:text-xl text-gray-300 leading-relaxed max-w-2xl mx-auto">
                         {{ $post->excerpt }}
                     </p>
                 @endif
