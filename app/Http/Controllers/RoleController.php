@@ -1699,6 +1699,23 @@ class RoleController extends Controller
                 }
             }
 
+            // De-duplicate indices as a safety net
+            $usedIndices = [];
+            foreach ($eventCustomFields as $fieldKey => $fieldData) {
+                $index = $fieldData['index'] ?? null;
+                if ($index && ! in_array($index, $usedIndices)) {
+                    $usedIndices[] = $index;
+                } elseif ($index) {
+                    for ($i = 1; $i <= 8; $i++) {
+                        if (! in_array($i, $usedIndices)) {
+                            $eventCustomFields[$fieldKey]['index'] = $i;
+                            $usedIndices[] = $i;
+                            break;
+                        }
+                    }
+                }
+            }
+
             $role->event_custom_fields = ! empty($eventCustomFields) ? $eventCustomFields : null;
         }
 
