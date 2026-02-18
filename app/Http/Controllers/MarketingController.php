@@ -46,6 +46,16 @@ class MarketingController extends Controller
     }
 
     /**
+     * What's New page
+     */
+    public function whatsNew()
+    {
+        return view('marketing.whats-new', [
+            'releases' => $this->getReleases(),
+        ]);
+    }
+
+    /**
      * FAQ page
      */
     public function faq()
@@ -1608,5 +1618,131 @@ class MarketingController extends Controller
                 'description' => 'Buyers receive confirmation emails with their tickets automatically.',
             ],
         ];
+    }
+
+    /**
+     * Get release entries for the What's New page
+     */
+    protected function getReleases(): array
+    {
+        $palettes = [
+            [
+                'gradient' => 'bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900/30 dark:to-sky-900/30',
+                'border' => 'border-blue-200 dark:border-white/10',
+                'icon_bg' => 'bg-gradient-to-br from-blue-500 to-sky-500',
+                'icon_shadow' => 'shadow-lg shadow-blue-500/25',
+                'tag_bg' => 'bg-blue-500/20 text-blue-700 dark:text-blue-300',
+            ],
+            [
+                'gradient' => 'bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900/30 dark:to-cyan-900/30',
+                'border' => 'border-sky-200 dark:border-white/10',
+                'icon_bg' => 'bg-gradient-to-br from-sky-500 to-cyan-500',
+                'icon_shadow' => 'shadow-lg shadow-sky-500/25',
+                'tag_bg' => 'bg-sky-500/20 text-sky-700 dark:text-sky-300',
+            ],
+            [
+                'gradient' => 'bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30',
+                'border' => 'border-amber-200 dark:border-white/10',
+                'icon_bg' => 'bg-gradient-to-br from-amber-500 to-orange-500',
+                'icon_shadow' => 'shadow-lg shadow-amber-500/25',
+                'tag_bg' => 'bg-amber-500/20 text-amber-700 dark:text-amber-300',
+            ],
+            [
+                'gradient' => 'bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30',
+                'border' => 'border-emerald-200 dark:border-white/10',
+                'icon_bg' => 'bg-gradient-to-br from-emerald-500 to-teal-500',
+                'icon_shadow' => 'shadow-lg shadow-emerald-500/25',
+                'tag_bg' => 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300',
+            ],
+        ];
+
+        $releases = [
+            [
+                'title' => 'Event Graphics',
+                'description' => 'Generate shareable event graphics directly from your schedule. Perfect for promoting events on social media without any design skills.',
+                'date' => 'February 2026',
+                'tag' => 'Design',
+                'icon' => 'image',
+                'link' => '/features/ai',
+            ],
+            [
+                'title' => 'Coupon Codes',
+                'description' => 'Offer discounts on ticket sales with coupon codes. Create percentage or fixed-amount discounts with optional usage limits.',
+                'date' => 'January 2026',
+                'tag' => 'Ticketing',
+                'icon' => 'ticket',
+                'link' => '/features/ticketing',
+            ],
+            [
+                'title' => 'Required Custom Fields',
+                'description' => 'Mark custom fields as required for event creation, ensuring your team always fills in the information that matters.',
+                'date' => 'January 2026',
+                'tag' => 'Scheduling',
+                'icon' => 'form',
+                'link' => '/features/custom-fields',
+            ],
+            [
+                'title' => 'Russian Language',
+                'description' => 'Full Russian language support added as the 11th supported language, making Event Schedule accessible to more communities worldwide.',
+                'date' => 'December 2025',
+                'tag' => 'Localization',
+                'icon' => 'globe',
+                'link' => null,
+            ],
+            [
+                'title' => 'AI Agent Support',
+                'description' => 'A REST API optimized for AI agents with agentic workflows, enabling automated event management and scheduling.',
+                'date' => 'November 2025',
+                'tag' => 'API',
+                'icon' => 'ai',
+                'link' => '/for-ai-agents',
+            ],
+            [
+                'title' => 'Event Slug Editing',
+                'description' => 'Customize event URL slugs for better SEO and cleaner links. Choose exactly how your event URLs appear.',
+                'date' => 'November 2025',
+                'tag' => 'SEO',
+                'icon' => 'link',
+                'link' => null,
+            ],
+            [
+                'title' => 'Embed Theme and Calendar Dates',
+                'description' => 'Theme support and calendar date display on embedded schedule views, giving you more control over how embeds look on your site.',
+                'date' => 'November 2025',
+                'tag' => 'Embed',
+                'icon' => 'code',
+                'link' => '/features/embed-calendar',
+            ],
+            [
+                'title' => 'Security Hardening',
+                'description' => 'Encoded IDs in URLs, authorization policies, and rate limiting for a more secure platform.',
+                'date' => 'October 2025',
+                'tag' => 'Security',
+                'icon' => 'shield',
+                'link' => null,
+            ],
+            [
+                'title' => 'Newsletter A/B Testing',
+                'description' => 'Test subject lines and content with a portion of your audience, then automatically send the winning version to the rest.',
+                'date' => 'September 2025',
+                'tag' => 'Newsletters',
+                'icon' => 'mail',
+                'link' => '/features/newsletters',
+            ],
+            [
+                'title' => 'Blog Post Email Notifications',
+                'description' => 'Notify followers automatically when new blog posts are published, keeping your audience engaged with your latest content.',
+                'date' => 'September 2025',
+                'tag' => 'Newsletters',
+                'icon' => 'bell',
+                'link' => null,
+            ],
+        ];
+
+        foreach ($releases as $index => &$release) {
+            $release = array_merge($release, $palettes[$index % count($palettes)]);
+        }
+
+        return $releases;
     }
 }

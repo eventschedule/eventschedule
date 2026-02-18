@@ -86,6 +86,8 @@ class GraphicController extends Controller
             'text_template' => 'nullable|string|max:2000',
             'layout' => 'in:grid,list,row',
             'send_day' => 'integer|min:0|max:31',
+            'send_days' => 'array',
+            'send_days.*' => 'integer|min:0|max:6',
             'send_hour' => 'integer|min:0|max:23',
             'use_screen_capture' => 'boolean',
             'recipient_emails' => 'nullable|string|max:1000',

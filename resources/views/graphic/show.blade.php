@@ -210,12 +210,11 @@
                     frequencyMobile.value = frequencyDesktop.value;
                 }
 
-                // Sync weekly day
-                const weeklyDayDesktop = document.getElementById('weekly_day');
-                const weeklyDayMobile = document.getElementById('weekly_day_mobile');
-                if (weeklyDayDesktop && weeklyDayMobile) {
-                    weeklyDayMobile.value = weeklyDayDesktop.value;
-                }
+                // Sync weekly day checkboxes
+                document.querySelectorAll('.weekly-day-checkbox[data-form="desktop"]').forEach(cb => {
+                    const mobileCb = document.querySelector(`.weekly-day-checkbox[data-form="mobile"][value="${cb.value}"]`);
+                    if (mobileCb) mobileCb.checked = cb.checked;
+                });
 
                 // Sync monthly day
                 const monthlyDayDesktop = document.getElementById('monthly_day');
@@ -380,14 +379,14 @@
                 });
                 updateDaySelector();
 
-                // Set send_day value for both weekly and monthly selectors
-                const sendDayValue = currentSettings.send_day || 1;
-                ['weekly_day', 'weekly_day_mobile'].forEach(id => {
-                    const weeklyDay = document.getElementById(id);
-                    if (weeklyDay) {
-                        weeklyDay.value = sendDayValue;
-                    }
+                // Set send_days checkboxes (falling back to [send_day] for backward compatibility)
+                const sendDays = currentSettings.send_days || [currentSettings.send_day || 1];
+                document.querySelectorAll('.weekly-day-checkbox').forEach(cb => {
+                    cb.checked = sendDays.includes(parseInt(cb.value));
                 });
+
+                // Set send_day value for monthly selector
+                const sendDayValue = currentSettings.send_day || 1;
                 ['monthly_day', 'monthly_day_mobile'].forEach(id => {
                     const monthlyDay = document.getElementById(id);
                     if (monthlyDay) {
@@ -647,9 +646,19 @@
                 const frequencyEl = document.getElementById('frequency') || document.getElementById('frequency_mobile');
                 const frequency = frequencyEl ? frequencyEl.value : 'weekly';
                 let sendDay = 1;
+                let sendDays = [];
                 if (frequency === 'weekly') {
-                    const weeklyDayEl = document.getElementById('weekly_day') || document.getElementById('weekly_day_mobile');
-                    sendDay = weeklyDayEl ? weeklyDayEl.value : 1;
+                    document.querySelectorAll('.weekly-day-checkbox[data-form="desktop"]').forEach(cb => {
+                        if (cb.checked) sendDays.push(parseInt(cb.value));
+                    });
+                    if (sendDays.length === 0) {
+                        // Fallback: try mobile checkboxes
+                        document.querySelectorAll('.weekly-day-checkbox[data-form="mobile"]').forEach(cb => {
+                            if (cb.checked) sendDays.push(parseInt(cb.value));
+                        });
+                    }
+                    if (sendDays.length === 0) sendDays = [1]; // Default to Monday
+                    sendDay = sendDays[0];
                 } else if (frequency === 'monthly') {
                     const monthlyDayEl = document.getElementById('monthly_day') || document.getElementById('monthly_day_mobile');
                     sendDay = monthlyDayEl ? monthlyDayEl.value : 1;
@@ -687,6 +696,7 @@
                     enabled: emailEnabled ? emailEnabled.checked : false,
                     frequency: frequency,
                     send_day: parseInt(sendDay),
+                    send_days: sendDays,
                     send_hour: sendHour ? parseInt(sendHour.value) : 9,
                     ai_prompt: aiPrompt ? aiPrompt.value : '',
                     text_template: textTemplate ? textTemplate.value : '',
@@ -1046,6 +1056,15 @@
                             updateDaySelector();
                         });
                     }
+                });
+
+                // Add change listeners for weekly day checkboxes to sync between forms
+                document.querySelectorAll('.weekly-day-checkbox').forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        const otherForm = this.dataset.form === 'desktop' ? 'mobile' : 'desktop';
+                        const otherCb = document.querySelector(`.weekly-day-checkbox[data-form="${otherForm}"][value="${this.value}"]`);
+                        if (otherCb) otherCb.checked = this.checked;
+                    });
                 });
 
                 // Add change listeners for email enabled checkboxes
@@ -1575,16 +1594,15 @@
                                         </div>
 
                                         <div id="weekly_day_container_mobile" class="hidden">
-                                            <label for="weekly_day_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_on') }}</label>
-                                            <select id="weekly_day_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                                                <option value="0">{{ __('messages.sunday') }}</option>
-                                                <option value="1">{{ __('messages.monday') }}</option>
-                                                <option value="2">{{ __('messages.tuesday') }}</option>
-                                                <option value="3">{{ __('messages.wednesday') }}</option>
-                                                <option value="4">{{ __('messages.thursday') }}</option>
-                                                <option value="5">{{ __('messages.friday') }}</option>
-                                                <option value="6">{{ __('messages.saturday') }}</option>
-                                            </select>
+                                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_on_days') }}</label>
+                                            <div class="flex flex-wrap gap-2">
+                                                @foreach ([0 => __('messages.sun'), 1 => __('messages.mon'), 2 => __('messages.tue'), 3 => __('messages.wed'), 4 => __('messages.thu'), 5 => __('messages.fri'), 6 => __('messages.sat')] as $dayVal => $dayLabel)
+                                                    <label class="inline-flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300">
+                                                        <input type="checkbox" class="weekly-day-checkbox rounded border-gray-300 dark:border-gray-600 text-blue-500 focus:ring-blue-500 dark:bg-gray-700" value="{{ $dayVal }}" data-form="mobile">
+                                                        {{ $dayLabel }}
+                                                    </label>
+                                                @endforeach
+                                            </div>
                                         </div>
 
                                         <div id="monthly_day_container_mobile" class="hidden">
@@ -1894,16 +1912,15 @@
                                             </div>
 
                                             <div id="weekly_day_container" class="hidden">
-                                                <label for="weekly_day" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_on') }}</label>
-                                                <select id="weekly_day" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
-                                                    <option value="0">{{ __('messages.sunday') }}</option>
-                                                    <option value="1">{{ __('messages.monday') }}</option>
-                                                    <option value="2">{{ __('messages.tuesday') }}</option>
-                                                    <option value="3">{{ __('messages.wednesday') }}</option>
-                                                    <option value="4">{{ __('messages.thursday') }}</option>
-                                                    <option value="5">{{ __('messages.friday') }}</option>
-                                                    <option value="6">{{ __('messages.saturday') }}</option>
-                                                </select>
+                                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_on_days') }}</label>
+                                                <div class="flex flex-wrap gap-2">
+                                                    @foreach ([0 => __('messages.sun'), 1 => __('messages.mon'), 2 => __('messages.tue'), 3 => __('messages.wed'), 4 => __('messages.thu'), 5 => __('messages.fri'), 6 => __('messages.sat')] as $dayVal => $dayLabel)
+                                                        <label class="inline-flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300">
+                                                            <input type="checkbox" class="weekly-day-checkbox rounded border-gray-300 dark:border-gray-600 text-blue-500 focus:ring-blue-500 dark:bg-gray-700" value="{{ $dayVal }}" data-form="desktop">
+                                                            {{ $dayLabel }}
+                                                        </label>
+                                                    @endforeach
+                                                </div>
                                             </div>
 
                                             <div id="monthly_day_container" class="hidden">

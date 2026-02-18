@@ -295,6 +295,7 @@ if (config('app.is_nexus')) {
         Route::get('/features', [MarketingController::class, 'features'])->name('marketing.features');
         Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
         Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
+        Route::get('/whats-new', [MarketingController::class, 'whatsNew'])->name('marketing.whats_new');
         Route::get('/examples', [MarketingController::class, 'demos'])->name('marketing.demos');
         Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
         Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
@@ -411,6 +412,7 @@ if (config('app.is_nexus')) {
             Route::get('/features', [MarketingController::class, 'features'])->name('marketing.features');
             Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
             Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
+            Route::get('/whats-new', [MarketingController::class, 'whatsNew'])->name('marketing.whats_new');
             Route::get('/examples', [MarketingController::class, 'demos'])->name('marketing.demos');
             Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
             Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
@@ -530,6 +532,7 @@ if (config('app.is_nexus')) {
             Route::get('/features', fn () => redirect('https://eventschedule.com/features', 301));
             Route::get('/pricing', fn () => redirect('https://eventschedule.com/pricing', 301));
             Route::get('/about', fn () => redirect('https://eventschedule.com/about', 301));
+            Route::get('/whats-new', fn () => redirect('https://eventschedule.com/whats-new', 301));
             Route::get('/demos', fn () => redirect('https://eventschedule.com/examples', 301));
             Route::get('/examples', fn () => redirect('https://eventschedule.com/examples', 301));
             Route::get('/faq', fn () => redirect('https://eventschedule.com/faq', 301));
@@ -647,6 +650,7 @@ if (config('app.is_nexus')) {
     Route::get('/features', fn () => redirect()->route('home'));
     Route::get('/pricing', fn () => redirect()->route('home'));
     Route::get('/about', fn () => redirect()->route('home'));
+    Route::get('/whats-new', fn () => redirect()->route('home'));
     Route::get('/demos', fn () => redirect()->route('home'));
     Route::get('/examples', fn () => redirect()->route('home'));
     Route::get('/faq', fn () => redirect()->route('home'));

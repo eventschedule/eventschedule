@@ -18,7 +18,7 @@ use Illuminate\Support\Str;
 
 class NewsletterController extends Controller
 {
-    protected function authorize()
+    protected function authorizeAccess()
     {
         if (auth()->user()->isAdmin()) {
             return;
@@ -178,7 +178,7 @@ class NewsletterController extends Controller
 
     public function index(Request $request)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $roles = $this->getRoles();
 
         $selectedRoleId = $request->role_id ? UrlUtils::decodeId($request->role_id) : null;
@@ -208,7 +208,7 @@ class NewsletterController extends Controller
 
     public function create(Request $request)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $segments = NewsletterSegment::where('role_id', $role->id)->get();
@@ -233,7 +233,7 @@ class NewsletterController extends Controller
 
     public function store(Request $request)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $validated = $request->validate([
@@ -270,7 +270,7 @@ class NewsletterController extends Controller
 
     public function edit(Request $request, string $hash)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $newsletter = Newsletter::where('role_id', $role->id)
@@ -288,7 +288,7 @@ class NewsletterController extends Controller
 
     public function update(Request $request, string $hash)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $newsletter = Newsletter::where('role_id', $role->id)
@@ -327,7 +327,7 @@ class NewsletterController extends Controller
 
     public function delete(Request $request, string $hash)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $newsletter = Newsletter::where('role_id', $role->id)
@@ -346,7 +346,7 @@ class NewsletterController extends Controller
 
     public function send(Request $request, string $hash, NewsletterService $service)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $newsletter = Newsletter::where('role_id', $role->id)
@@ -372,7 +372,7 @@ class NewsletterController extends Controller
 
     public function schedule(Request $request, string $hash)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $newsletter = Newsletter::where('role_id', $role->id)
@@ -400,7 +400,7 @@ class NewsletterController extends Controller
 
     public function cancel(Request $request, string $hash)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $newsletter = Newsletter::where('role_id', $role->id)
@@ -421,7 +421,7 @@ class NewsletterController extends Controller
 
     public function cloneNewsletter(Request $request, string $hash)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $newsletter = Newsletter::where('role_id', $role->id)
@@ -448,7 +448,7 @@ class NewsletterController extends Controller
 
     public function previewDraft(Request $request, NewsletterService $service)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $blocks = $this->parseBlocks($request);
@@ -469,7 +469,7 @@ class NewsletterController extends Controller
 
     public function preview(Request $request, string $hash, NewsletterService $service)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $newsletter = Newsletter::where('role_id', $role->id)
@@ -491,7 +491,7 @@ class NewsletterController extends Controller
 
     public function testSend(Request $request, string $hash, NewsletterService $service)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         if (empty($role->email)) {
@@ -531,7 +531,7 @@ class NewsletterController extends Controller
 
     public function stats(Request $request, string $hash)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $newsletter = Newsletter::where('role_id', $role->id)
@@ -586,7 +586,7 @@ class NewsletterController extends Controller
 
     public function getEvents(Request $request)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $events = $role->events()
@@ -605,7 +605,7 @@ class NewsletterController extends Controller
 
     public function segments(Request $request)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $segments = NewsletterSegment::where('role_id', $role->id)
@@ -622,7 +622,7 @@ class NewsletterController extends Controller
 
     public function storeSegment(Request $request)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $validated = $request->validate([
@@ -662,7 +662,7 @@ class NewsletterController extends Controller
 
     public function updateSegment(Request $request, string $hash)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $segment = NewsletterSegment::where('role_id', $role->id)
@@ -684,7 +684,7 @@ class NewsletterController extends Controller
 
     public function deleteSegment(Request $request, string $hash)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $segment = NewsletterSegment::where('role_id', $role->id)
@@ -698,7 +698,7 @@ class NewsletterController extends Controller
 
     public function createAbTest(Request $request, string $hash)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         $newsletter = Newsletter::where('role_id', $role->id)
@@ -748,7 +748,7 @@ class NewsletterController extends Controller
 
     public function sendAbTest(Request $request, string $hash, NewsletterService $service)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $role = $this->getRole($request);
 
         if (! $role->canSendNewsletter()) {
@@ -841,7 +841,7 @@ class NewsletterController extends Controller
 
     public function importForm(Request $request)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $this->authorizeImport();
         $role = $this->getRole($request);
 
@@ -854,7 +854,7 @@ class NewsletterController extends Controller
 
     public function importStore(Request $request)
     {
-        $this->authorize();
+        $this->authorizeAccess();
         $this->authorizeImport();
         $role = $this->getRole($request);
 

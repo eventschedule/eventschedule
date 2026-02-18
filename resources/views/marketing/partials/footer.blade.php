@@ -63,6 +63,11 @@
                     </li>
                     @endif
                     <li>
+                        <a href="{{ marketing_url('/whats-new') }}" class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                            What's New
+                        </a>
+                    </li>
+                    <li>
                         <a href="{{ marketing_url('/examples') }}" class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                             Examples
                         </a>

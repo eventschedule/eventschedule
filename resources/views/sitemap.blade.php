@@ -26,6 +26,12 @@
         <priority>0.8</priority>
     </url>
     <url>
+        <loc>{{ url('/whats-new') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
         <loc>{{ url('/examples') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>weekly</changefreq>
