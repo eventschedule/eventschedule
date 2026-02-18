@@ -15,6 +15,14 @@ trait CalendarDataTrait
     {
         $groupId = $role ? $event->getGroupIdForSubdomain($role->subdomain) : null;
 
+        $curatorTranslation = null;
+        if ($role && $role->isCurator()) {
+            $curatorPivot = $event->roles->where('id', $role->id)->first();
+            if ($curatorPivot && $curatorPivot->pivot && $curatorPivot->pivot->name_translated) {
+                $curatorTranslation = $curatorPivot->pivot;
+            }
+        }
+
         $user = auth()->user();
         $canEdit = false;
         if ($user && $userAdminRoleIds !== null) {
@@ -28,8 +36,8 @@ trait CalendarDataTrait
             'id' => UrlUtils::encodeId($event->id),
             'group_id' => $groupId ? UrlUtils::encodeId($groupId) : null,
             'category_id' => $event->category_id,
-            'name' => $event->translatedName(),
-            'short_description' => $event->translatedShortDescription(),
+            'name' => $curatorTranslation ? $curatorTranslation->name_translated : $event->translatedName(),
+            'short_description' => $curatorTranslation && $curatorTranslation->short_description_translated ? $curatorTranslation->short_description_translated : $event->translatedShortDescription(),
             'venue_name' => $event->getVenueDisplayName(),
             'venue_subdomain' => $event->venue?->subdomain ?: null,
             'is_free' => $event->isFree(),
@@ -55,7 +63,7 @@ trait CalendarDataTrait
             'ticket_price' => $event->ticket_price,
             'ticket_currency_code' => $event->ticket_currency_code,
             'coupon_code' => $event->coupon_code,
-            'description_excerpt' => Str::words(strip_tags($event->translatedDescription()), 25, '...'),
+            'description_excerpt' => Str::words(strip_tags($curatorTranslation && $curatorTranslation->description_html_translated ? $curatorTranslation->description_html_translated : $event->translatedDescription()), 25, '...'),
             'duration' => $event->duration,
             'parts' => $event->parts->map(fn ($part) => [
                 'id' => UrlUtils::encodeId($part->id),

@@ -801,7 +801,7 @@
           </h2>
           <div class="{{ $role->isRtl() || ($translation && $translation->role->isRtl()) ? 'rtl' : '' }}">
             <div class="text-gray-700 dark:text-gray-300 text-base custom-content [&>*:first-child]:mt-0">
-              {!! \App\Utils\UrlUtils::convertUrlsToLinks($translation ? $translation->description_translated : $event->translatedDescription()) !!}
+              {!! \App\Utils\UrlUtils::convertUrlsToLinks($translation ? ($translation->description_html_translated ?: $translation->description_translated) : $event->translatedDescription()) !!}
             </div>
           </div>
         </div>

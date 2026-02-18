@@ -528,10 +528,13 @@ class Translate extends Command
                 }
             }
 
-            if (! $eventRole->description_translated) {
+            if (! $eventRole->description_translated && $eventRole->event->description) {
                 $fromLang = $eventRole->event->getLanguageCode();
                 $toLang = $eventRole->role->language_code;
                 $eventRole->description_translated = GeminiUtils::translate($eventRole->event->description, $fromLang, $toLang);
+                if ($eventRole->description_translated) {
+                    $eventRole->description_html_translated = \App\Utils\MarkdownUtils::convertToHtml($eventRole->description_translated);
+                }
                 if ($debug) {
                     $this->info("Translated event description from {$fromLang} to {$toLang}: '{$eventRole->event->description}' → '{$eventRole->description_translated}'");
                 }
