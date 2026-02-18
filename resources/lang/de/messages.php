@@ -793,6 +793,7 @@ return [
     'text' => 'Text',
     'download' => 'Herunterladen',
     'copy' => 'Kopieren',
+    'copy_text' => 'Text Kopieren',
     'add_custom_field' => 'Benutzerdefiniertes Feld hinzufügen',
     'add_field' => 'Feld hinzufügen',
     'custom_field' => 'Benutzerdefiniertes Feld',

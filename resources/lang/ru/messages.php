@@ -812,6 +812,7 @@ return [
     'text' => 'Текст',
     'download' => 'Скачать',
     'copy' => 'Копировать',
+    'copy_text' => 'Копировать Текст',
     'deletion_feedback_label' => 'Почему ты уходишь?',
     'deletion_feedback_placeholder' => 'Optional: Расскажите, почему вы удаляете свой аккаунт...',
     'add_custom_field' => 'Добавить настраиваемое поле',

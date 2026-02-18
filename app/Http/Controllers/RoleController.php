@@ -355,7 +355,7 @@ class RoleController extends Controller
 
             if ($event) {
                 // Handle direct registration redirect when URL has trailing slash
-                if ($request->attributes->get('has_trailing_slash')) {
+                if ($request->attributes->get('has_trailing_slash') && $role->direct_registration) {
                     if (! auth()->user()?->isAdmin()) {
                         app(AnalyticsService::class)->recordView($role, $event, $request);
                     }

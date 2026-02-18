@@ -811,6 +811,7 @@ return [
     'text' => 'Tekst',
     'download' => 'Laadi alla',
     'copy' => 'Kopeeri',
+    'copy_text' => 'Kopeeri Tekst',
     'deletion_feedback_label' => 'Miks sa lahkud?',
     'deletion_feedback_placeholder' => 'Valikuline: andke meile teada, miks te oma kontot kustutate...',
     'add_custom_field' => 'Lisa kohandatud väli',
