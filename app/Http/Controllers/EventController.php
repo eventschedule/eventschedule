@@ -747,6 +747,7 @@ class EventController extends Controller
         }
 
         session()->forget('pending_request');
+        session()->forget('pending_request_allow_guest');
 
         if ($event->starts_at) {
             $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
@@ -863,6 +864,11 @@ class EventController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! auth()->check() && $role->require_account) {
+            session(['pending_request' => $subdomain]);
+            return redirect(route('sign_up'));
+        }
 
         if ($request->lang) {
             // Validate the language code before setting it
@@ -1069,6 +1075,7 @@ class EventController extends Controller
 
         // Clear the pending request session
         session()->forget('pending_request');
+        session()->forget('pending_request_allow_guest');
 
         return response()->json([
             'success' => true,
@@ -1226,6 +1233,7 @@ class EventController extends Controller
     {
         // Clear the pending request session
         session()->forget('pending_request');
+        session()->forget('pending_request_allow_guest');
 
         // Get the redirect URL from the form, or fall back to the current URL
         $redirectUrl = $request->input('redirect_url', url()->current());

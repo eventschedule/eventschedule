@@ -52,6 +52,7 @@ class Role extends Model implements MustVerifyEmail
         'short_description',
         'short_description_en',
         'accept_requests',
+        'require_account',
         'use_24_hour_time',
         'timezone',
         'formatted_address',

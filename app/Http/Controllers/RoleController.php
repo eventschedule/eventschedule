@@ -2044,6 +2044,7 @@ class RoleController extends Controller
         $role = Role::whereSubdomain($subdomain)->firstOrFail();
 
         session(['pending_request' => $subdomain]);
+        session(['pending_request_allow_guest' => ! $role->require_account]);
 
         $mainDomain = config('app.url');
 

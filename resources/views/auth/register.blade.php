@@ -590,7 +590,7 @@
         @endif
     </form>
 
-    @if(session('pending_request') && config('app.hosted'))
+    @if(session('pending_request') && session('pending_request_allow_guest') && config('app.hosted'))
     <div id="guest-option" class="w-full mt-2">
         <div class="relative mb-6">
             <div class="absolute inset-0 flex items-center">
