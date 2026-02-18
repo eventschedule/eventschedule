@@ -645,6 +645,32 @@
         </div>
         @endif
 
+        {{-- Ticket price --}}
+        @if ($event->registration_url && $event->ticket_price !== null)
+        <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
+          <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
+                      bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
+            <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
+              <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-lg font-semibold text-gray-900 dark:text-white">
+              @if ($event->ticket_price == 0)
+                {{ __('messages.free_entry') }}
+              @else
+                {{ \App\Utils\MoneyUtils::format($event->ticket_price, $event->ticket_currency_code) }}
+              @endif
+            </span>
+            @if ($event->coupon_code)
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+              {{ __('messages.coupon_code') }}: {{ $event->coupon_code }}
+            </span>
+            @endif
+          </div>
+        </div>
+        @endif
+
         {{-- CTA buttons --}}
         <div style="font-family: sans-serif" class="relative inline-block text-left hidden sm:block self-start {{ $role->isRtl() ? 'rtl' : '' }}">
         @if ($event->canSellTickets($date) || $event->registration_url)
