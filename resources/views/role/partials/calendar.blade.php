@@ -83,6 +83,8 @@
                 'start_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
                 'is_online' => !empty($event->event_url),
                 'registration_url' => $event->registration_url,
+                'ticket_price' => $event->ticket_price,
+                'ticket_currency_code' => $event->ticket_currency_code,
                 'description_excerpt' => Str::words(strip_tags($event->translatedDescription()), 25, '...'),
                 'duration' => $event->duration,
                 'parts' => $event->parts->map(fn($part) => [
@@ -372,19 +374,6 @@
                     @endfor
                 </div>
             </div>
-            {{-- Mobile skeleton --}}
-            <div class="md:hidden {{ (isset($force_mobile) && $force_mobile) ? '!block' : '' }} space-y-3 px-1 py-4 animate-pulse">
-                @for ($i = 0; $i < 5; $i++)
-                <div class="flex items-center bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3">
-                    <div class="flex-1 space-y-2">
-                        <div class="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                        <div class="h-3 w-1/2 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                        <div class="h-3 w-1/3 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    </div>
-                    <div class="w-24 h-16 bg-gray-200 dark:bg-gray-700 rounded ml-3"></div>
-                </div>
-                @endfor
-            </div>
         </div>
         <div v-show="!isLoadingEvents" class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
             <div
@@ -468,7 +457,7 @@
                                     class="flex event-link-popup"
                                     :data-event-id="event.id"
                                     @click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
-                                    <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 dark:text-gray-100 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }} truncate">
+                                    <p class="flex-auto font-medium text-gray-900 dark:text-gray-100 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }} truncate">
                                         <span class="flex items-start gap-1.5">
                                             <span v-if="getEventGroupColor(event)" class="inline-block w-2 h-2 rounded-full flex-shrink-0 mt-1.5" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
                                             <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'"
@@ -498,6 +487,21 @@
 
 
         @if (($tab ?? '') != 'availability')
+        {{-- Mobile calendar skeleton --}}
+        <div v-show="currentView === 'calendar' && isLoadingEvents" class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
+            <div class="space-y-3 px-1 py-4 animate-pulse">
+                @for ($i = 0; $i < 5; $i++)
+                <div class="flex items-center bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3">
+                    <div class="flex-1 space-y-2">
+                        <div class="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div class="h-3 w-1/2 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div class="h-3 w-1/3 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                    <div class="w-24 h-16 bg-gray-200 dark:bg-gray-700 rounded ml-3"></div>
+                </div>
+                @endfor
+            </div>
+        </div>
         <div v-show="currentView === 'calendar' && !isLoadingEvents" class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
             <div v-if="mobileEventsList.length">
                 <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden mb-4 w-full text-center">
@@ -547,6 +551,13 @@
                                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
                                                     </svg>
                                                     <span v-text="getEventTime(event)"></span>
+                                                </div>
+                                                <div v-if="event.registration_url && event.ticket_price != null" class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                                    <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    <span v-if="event.ticket_price == 0">{{ __('messages.free_entry') }}</span>
+                                                    <span v-else v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span>
                                                 </div>
                                                 <div v-if="event.can_edit" class="mt-auto pt-3">
                                                     <a :href="event.edit_url"
@@ -1170,6 +1181,13 @@
                                                 </svg>
                                                 <span v-text="getEventTime(event)"></span>
                                             </div>
+                                            <div v-if="event.registration_url && event.ticket_price != null" class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                                <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                                                </svg>
+                                                <span v-if="event.ticket_price == 0">{{ __('messages.free_entry') }}</span>
+                                                <span v-else v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span>
+                                            </div>
                                             <div v-if="event.can_edit" class="mt-auto pt-3">
                                                 <a :href="event.edit_url"
                                                     class="hover-accent inline-flex items-center px-4 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md border transition-all duration-200 hover:scale-105"
@@ -1241,7 +1259,7 @@
             <select v-model="selectedGroup" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-                <option value="">{{ __('messages.all_schedules') }} (@{{ eventCountByGroup[''] }})</option>
+                <option value="">{{ __('messages.show_all') }} (@{{ eventCountByGroup[''] }})</option>
                 <option v-for="group in groups" :key="group.slug" :value="group.slug">
                     @{{ group.name }} (@{{ eventCountByGroup[group.slug] || 0 }})
                 </option>
@@ -1255,7 +1273,7 @@
             <select v-model="selectedCategory" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                <option value="">{{ __('messages.all_categories') }} (@{{ eventCountByCategory[''] }})</option>
+                <option value="">{{ __('messages.show_all') }} (@{{ eventCountByCategory[''] }})</option>
                 <option v-for="category in availableCategories" :key="category.id" :value="category.id">
                     @{{ category.name }} (@{{ eventCountByCategory[category.id] || 0 }})
                 </option>
@@ -1268,7 +1286,7 @@
             <select v-model="selectedVenue" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                <option value="">{{ __('messages.all_venues') }} (@{{ eventCountByVenue[''] }})</option>
+                <option value="">{{ __('messages.show_all') }} (@{{ eventCountByVenue[''] }})</option>
                 <option v-for="venue in uniqueVenues" :key="venue.subdomain" :value="venue.subdomain">
                     @{{ venue.name }} (@{{ eventCountByVenue[venue.subdomain] || 0 }})
                 </option>
@@ -1285,7 +1303,7 @@
                 <select v-model="selectedCustomFields[field.key]" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                    <option value="">@{{ field.name }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
+                    <option value="">{{ __('messages.show_all') }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
                     <option v-for="opt in availableCustomFieldOptions[field.key]" :key="opt" :value="opt">
                         @{{ field.optionsMap[opt] || opt }} (@{{ (eventCountByCustomField[field.key] || {})[opt] || 0 }})
                     </option>
@@ -1296,7 +1314,7 @@
         {{-- Price Filter --}}
         <div v-if="hasFreeEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <div @click="showFreeOnly = !showFreeOnly" class="flex items-center justify-between cursor-pointer">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.free') }}</span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.free_entry') }}</span>
                 <button role="switch" :aria-checked="showFreeOnly.toString()"
                         class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
                         :class="showFreeOnly ? 'bg-[#4E81FA]' : 'bg-gray-300 dark:bg-gray-600'">
@@ -1356,7 +1374,7 @@
                 <select v-model="selectedGroup" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-                    <option value="">{{ __('messages.all_schedules') }} (@{{ eventCountByGroup[''] }})</option>
+                    <option value="">{{ __('messages.show_all') }} (@{{ eventCountByGroup[''] }})</option>
                     <option v-for="group in groups" :key="group.slug" :value="group.slug">
                         @{{ group.name }} (@{{ eventCountByGroup[group.slug] || 0 }})
                     </option>
@@ -1370,7 +1388,7 @@
                 <select v-model="selectedCategory" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                    <option value="">{{ __('messages.all_categories') }} (@{{ eventCountByCategory[''] }})</option>
+                    <option value="">{{ __('messages.show_all') }} (@{{ eventCountByCategory[''] }})</option>
                     <option v-for="category in availableCategories" :key="category.id" :value="category.id">
                         @{{ category.name }} (@{{ eventCountByCategory[category.id] || 0 }})
                     </option>
@@ -1383,7 +1401,7 @@
                 <select v-model="selectedVenue" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                    <option value="">{{ __('messages.all_venues') }} (@{{ eventCountByVenue[''] }})</option>
+                    <option value="">{{ __('messages.show_all') }} (@{{ eventCountByVenue[''] }})</option>
                     <option v-for="venue in uniqueVenues" :key="venue.subdomain" :value="venue.subdomain">
                         @{{ venue.name }} (@{{ eventCountByVenue[venue.subdomain] || 0 }})
                     </option>
@@ -1400,7 +1418,7 @@
                     <select v-model="selectedCustomFields[field.key]" style="font-family: sans-serif"
                             class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                    bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                        <option value="">@{{ field.name }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
+                        <option value="">{{ __('messages.show_all') }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
                         <option v-for="opt in availableCustomFieldOptions[field.key]" :key="opt" :value="opt">
                             @{{ field.optionsMap[opt] || opt }} (@{{ (eventCountByCustomField[field.key] || {})[opt] || 0 }})
                         </option>
@@ -1411,7 +1429,7 @@
             {{-- Price Filter --}}
             <div v-if="hasFreeEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                 <div @click="showFreeOnly = !showFreeOnly" class="flex items-center justify-between cursor-pointer">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.free') }}</span>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.free_entry') }}</span>
                     <button role="switch" :aria-checked="showFreeOnly.toString()"
                             class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
                             :class="showFreeOnly ? 'bg-[#4E81FA]' : 'bg-gray-300 dark:bg-gray-600'">
@@ -2263,7 +2281,7 @@ const calendarApp = createApp({
             this.showOnlineOnly = false;
             this.selectedVenue = '';
             this.showFreeOnly = false;
-            this.selectedCustomFields = {};
+            this.selectedCustomFields = Object.fromEntries(this.dropdownCustomFields.map(f => [f.key, '']));
         },
         getEventsForDate(dateStr) {
             // Use the pre-calculated events map from the backend
@@ -2403,6 +2421,12 @@ const calendarApp = createApp({
             } else {
                 return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
             }
+        },
+        formatPrice(price, currencyCode) {
+            return new Intl.NumberFormat('{{ app()->getLocale() }}', {
+                style: 'currency',
+                currency: currencyCode
+            }).format(price);
         },
         isRoleAMember(event) {
             // This would need to be determined server-side and passed to the frontend
