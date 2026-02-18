@@ -713,7 +713,7 @@ class EventRepo
         $slugRole = Role::where('subdomain', $slug)->first();
 
         // Find events attached to both roles (handles all combinations: venue+talent, curator+venue, curator+talent, etc.)
-        if ($subdomainRole && $slugRole) {
+        if ($subdomainRole && $slugRole && $slugRole->isClaimed()) {
             // Try local timezone interpretation first
             if ($eventDateLocal) {
                 $event = $this->findEventForBothRoles($subdomainRole, $slugRole, $eventDateLocal);
