@@ -215,11 +215,15 @@
         <!-- Request Terms Panel -->
         <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg mb-4 mt-4">
             <div class="max-w-3xl mx-auto">
-                <div class="flex items-start">
-                    <div class="text-sm text-gray-700 dark:text-gray-300" 
-                         dir="{{ is_rtl() ? 'rtl' : 'ltr' }}"
-                         style="{{ is_rtl() ? 'text-align: right;' : 'text-align: left;' }}">
-                        <p>{!! nl2br(e($role->translatedRequestTerms())) !!}</p>
+                <div class="flex justify-center">
+                    <div class="w-full max-w-2xl md:max-w-xl lg:max-w-2xl">
+                        <div class="flex items-start">
+                            <div class="text-sm text-gray-700 dark:text-gray-300"
+                                 dir="{{ is_rtl() ? 'rtl' : 'ltr' }}"
+                                 style="{{ is_rtl() ? 'text-align: right;' : 'text-align: left;' }}">
+                                <p>{!! nl2br(e($role->translatedRequestTerms())) !!}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

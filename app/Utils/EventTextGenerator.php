@@ -70,7 +70,7 @@ class EventTextGenerator
 
         // Remove event ID from URL if not wanted (but always keep for recurring events)
         if (! $urlIncludeId && ! $isRecurring) {
-            $eventUrl = preg_replace('#/[A-Za-z0-9+/=]+(\?|$)#', '$1', $eventUrl);
+            $eventUrl = preg_replace('#/[A-Za-z0-9+=]+(\?|$)#', '$1', $eventUrl);
         }
 
         // Build replacements array
