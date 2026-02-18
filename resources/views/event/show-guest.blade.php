@@ -774,7 +774,7 @@
 
         {{-- Ticket section OR Description/Content --}}
         @if (request()->get('tickets') === 'true' && $event->isPro())
-        <div class="flex flex-col xl:flex-row gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">
+        <div class="flex flex-col {{ $event->flyer_image_url ? 'xl:flex-row' : '' }} gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">
           <div class="flex-1">
             <div class="flex flex-col gap-4">
               <h2 class="text-[28px] leading-snug text-gray-900 dark:text-gray-100">
@@ -785,11 +785,11 @@
               </p>
             </div>
           </div>
+          @if ($event->flyer_image_url)
           <div class="flex-1">
-            @if ($event->flyer_image_url)
               <img src="{{ $event->flyer_image_url }}" alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.flyer') }}" class="block rounded-lg" loading="lazy" decoding="async"/>
-            @endif
           </div>
+          @endif
         </div>
         @else
 
