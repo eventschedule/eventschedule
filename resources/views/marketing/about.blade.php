@@ -11,7 +11,12 @@
         "@type": "Organization",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
-        "logo": "{{ config('app.url') }}/images/dark_logo.png",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "{{ config('app.url') }}/images/dark_logo.png",
+            "width": 712,
+            "height": 140
+        },
         "foundingDate": "2024",
         "description": "Event Schedule helps talent, venues, and organizers share events and sell tickets. Open source, privacy-focused, and community-driven.",
         "knowsAbout": ["Event Management", "Ticketing", "Calendar Synchronization", "Open Source Software"],

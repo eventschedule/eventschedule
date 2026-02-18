@@ -190,7 +190,9 @@
                                     <img src="{{ url($schedule['header_image_url']) }}"
                                          alt="{{ $schedule['name'] }} header image"
                                          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                         loading="lazy">
+                                         loading="lazy"
+                                         width="400"
+                                         height="280">
                                 </picture>
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"></div>
                             </div>

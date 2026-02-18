@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <link rel="icon" href="{{ asset('images/favicon.png') }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}" sizes="32x32">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/favicon.png') }}">
 
     <!-- Preconnect to external resources -->
     @if (config('services.google.analytics'))
@@ -135,11 +135,27 @@
             "https://x.com/ScheduleEvent",
             "https://www.linkedin.com/company/eventschedule/"
         ],
+        "foundingDate": "2024",
         "contactPoint": {
             "@type": "ContactPoint",
             "email": "support@eventschedule.com",
             "contactType": "customer service"
         }
+    }
+    </script>
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SiteNavigationElement",
+        "name": ["Features", "Pricing", "Integrations", "Selfhost", "Docs", "About"],
+        "url": [
+            "{{ config('app.url') }}/features",
+            "{{ config('app.url') }}/pricing",
+            "{{ config('app.url') }}/features/integrations",
+            "{{ config('app.url') }}/selfhost",
+            "{{ config('app.url') }}/docs",
+            "{{ config('app.url') }}/about"
+        ]
     }
     </script>
     {{ $structuredData ?? '' }}

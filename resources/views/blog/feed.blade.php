@@ -10,6 +10,11 @@
         <lastBuildDate>{{ $posts->first()->published_at->toRssString() }}</lastBuildDate>
         @endif
         <atom:link href="{{ route('blog.feed') }}" rel="self" type="application/rss+xml" />
+        <image>
+            <url>{{ config('app.url') }}/images/dark_logo.png</url>
+            <title>Event Schedule Blog</title>
+            <link>{{ route('blog.index') }}</link>
+        </image>
         @foreach($posts as $post)
         <item>
             <title>{{ htmlspecialchars($post->title, ENT_XML1, 'UTF-8') }}</title>
