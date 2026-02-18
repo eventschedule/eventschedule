@@ -52,6 +52,8 @@ trait CalendarDataTrait
             'start_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
             'is_online' => ! empty($event->event_url),
             'registration_url' => $event->registration_url,
+            'ticket_price' => $event->ticket_price,
+            'ticket_currency_code' => $event->ticket_currency_code,
             'description_excerpt' => Str::words(strip_tags($event->translatedDescription()), 25, '...'),
             'duration' => $event->duration,
             'parts' => $event->parts->map(fn ($part) => [

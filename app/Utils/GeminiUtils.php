@@ -286,7 +286,7 @@ class GeminiUtils
             } elseif ($fieldType === 'date') {
                 $typeHint = 'YYYY-MM-DD format';
             } elseif ($fieldType === 'dropdown' && ! empty($fieldConfig['options'])) {
-                $typeHint = 'Choose from: '.$fieldConfig['options'];
+                $typeHint = 'Choose from: '.($fieldConfig['options_en'] ?? $fieldConfig['options']);
             }
 
             $hint = $fieldName;
@@ -444,7 +444,61 @@ class GeminiUtils
                             $value = in_array(strtolower($value), ['yes', 'true', '1', 'on']) ? '1' : '0';
                         }
 
-                        $customFieldValues[$originalKey] = $value;
+                        // Fuzzy match dropdown values against allowed options
+                        if (($fieldConfig['type'] ?? '') === 'dropdown' && ! empty($fieldConfig['options'])) {
+                            $options = array_map('trim', explode(',', $fieldConfig['options']));
+                            $matchOptions = $options;
+                            if (! empty($fieldConfig['options_en'])) {
+                                $matchOptions = array_map('trim', explode(',', $fieldConfig['options_en']));
+                            }
+                            $matchedIndex = null;
+
+                            // Try exact match first (case-insensitive)
+                            foreach ($matchOptions as $i => $option) {
+                                if (strcasecmp($option, $value) === 0) {
+                                    $matchedIndex = $i;
+                                    break;
+                                }
+                            }
+
+                            // If no exact match, try partial match
+                            if ($matchedIndex === null) {
+                                foreach ($matchOptions as $i => $option) {
+                                    if (stripos($option, $value) !== false || stripos($value, $option) !== false) {
+                                        $matchedIndex = $i;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            // If still no match, try fuzzy matching
+                            if ($matchedIndex === null) {
+                                $bestIndex = null;
+                                $bestScore = 0;
+
+                                foreach ($matchOptions as $i => $option) {
+                                    similar_text(strtolower($option), strtolower($value), $percent);
+                                    if ($percent > $bestScore) {
+                                        $bestScore = $percent;
+                                        $bestIndex = $i;
+                                    }
+                                }
+
+                                // Only use fuzzy match if similarity is above 70%
+                                if ($bestScore > 70) {
+                                    $matchedIndex = $bestIndex;
+                                }
+                            }
+
+                            // Map back to original language option
+                            $value = $matchedIndex !== null && isset($options[$matchedIndex])
+                                ? $options[$matchedIndex]
+                                : null;
+                        }
+
+                        if ($value !== null) {
+                            $customFieldValues[$originalKey] = $value;
+                        }
                     }
                     // Remove the raw custom_field_* key from the data
                     unset($data[$key][$customFieldKey]);
