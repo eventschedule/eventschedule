@@ -101,7 +101,7 @@
     @endif
 
     <!-- Continue as Guest option for step 1 -->
-    @if (session('pending_request') && ! auth()->user())
+    @if (session('pending_request') && session('pending_request_allow_guest') && ! auth()->user())
     <div class="mt-6 mb-2 flex items-start justify-center space-x-6 relative z-10">
         <div class="flex flex-col items-center">
             <!-- Or divider -->

@@ -137,11 +137,19 @@
             
             // Handle accept_requests checkbox
             const acceptRequestsCheckbox = document.querySelector('input[name="accept_requests"][type="checkbox"]');
+            const requireAccountSection = document.getElementById('require_account_section');
             const requireApprovalSection = document.getElementById('require_approval_section');
             const requestTermsSection = document.getElementById('request_terms_section');
 
+            if (acceptRequestsCheckbox && requireAccountSection) {
+                requireAccountSection.style.display = acceptRequestsCheckbox.checked ? 'block' : 'none';
+                acceptRequestsCheckbox.addEventListener('change', function() {
+                    requireAccountSection.style.display = this.checked ? 'block' : 'none';
+                });
+            }
+
             if (acceptRequestsCheckbox && requireApprovalSection) {
-                requireApprovalSection.style.display = acceptRequestsCheckbox.checked ? 'block' : 'none';                
+                requireApprovalSection.style.display = acceptRequestsCheckbox.checked ? 'block' : 'none';
                 acceptRequestsCheckbox.addEventListener('change', function() {
                     requireApprovalSection.style.display = this.checked ? 'block' : 'none';
                 });
@@ -1712,15 +1720,6 @@
                             <x-input-error class="mt-2" :messages="$errors->get('slug_pattern')" />
                         </div>
 
-                        <div class="mb-6">
-                            <x-checkbox name="direct_registration"
-                                label="{{ __('messages.direct_registration') }}"
-                                checked="{{ old('direct_registration', $role->direct_registration) }}"
-                                data-custom-attribute="value" />
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.direct_registration_help') }}</p>
-                            <x-input-error class="mt-2" :messages="$errors->get('direct_registration')" />
-                        </div>
-
                         </div>
                         <!-- End Tab Content: General -->
 
@@ -1829,6 +1828,14 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.accept_requests_help') }}</p>
                             <x-input-error class="mt-2" :messages="$errors->get('accept_requests')" />
                         </div>
+                        <div class="mb-6" id="require_account_section">
+                            <x-checkbox name="require_account"
+                                label="{{ __('messages.require_account') }}"
+                                checked="{{ old('require_account', $role->exists ? $role->require_account : true) }}"
+                                data-custom-attribute="value" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.require_account_help') }}</p>
+                            <x-input-error class="mt-2" :messages="$errors->get('require_account')" />
+                        </div>
                         <div class="mb-6" id="require_approval_section">
                             <x-checkbox name="require_approval"
                                 label="{{ __('messages.require_approval') }}"
@@ -1914,6 +1921,15 @@
                             </div>
                         </div>
                         @endif
+
+                        <div class="mb-6">
+                            <x-checkbox name="direct_registration"
+                                label="{{ __('messages.direct_registration') }}"
+                                checked="{{ old('direct_registration', $role->direct_registration) }}"
+                                data-custom-attribute="value" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.direct_registration_help') }}</p>
+                            <x-input-error class="mt-2" :messages="$errors->get('direct_registration')" />
+                        </div>
 
                         </div>
                         <!-- End Tab Content: Advanced -->

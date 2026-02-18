@@ -635,6 +635,8 @@ return [
     'no_events_found' => 'No events found',
     'url' => 'URL',
     'skip' => 'Skip',
+    'require_account' => 'Require Account',
+    'require_account_help' => 'When enabled, people must create an account to submit events. When disabled, they can submit as a guest.',
     'require_approval' => 'Require Approval',
     'require_approval_help' => 'When enabled, submitted events must be approved before appearing on your schedule. When disabled, they are added automatically.',
     'actions' => 'Actions',
