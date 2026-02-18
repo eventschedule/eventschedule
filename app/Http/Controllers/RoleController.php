@@ -1599,17 +1599,12 @@ class RoleController extends Controller
             $eventCustomFields = [];
             $fieldsNeedingTranslation = [];
 
-            // Collect all used indices from existing fields and submitted indices
+            // Collect indices already used by existing (persisted) fields
             $usedIndices = [];
             foreach ($submittedFields as $fieldKey => $fieldData) {
                 if (! empty($fieldData['name'])) {
                     if (isset($existingCustomFields[$fieldKey]['index'])) {
                         $usedIndices[] = $existingCustomFields[$fieldKey]['index'];
-                    } elseif (! empty($fieldData['index'])) {
-                        $submittedIndex = (int) $fieldData['index'];
-                        if ($submittedIndex >= 1 && $submittedIndex <= 8) {
-                            $usedIndices[] = $submittedIndex;
-                        }
                     }
                 }
             }
@@ -1626,8 +1621,9 @@ class RoleController extends Controller
                     // Try client-submitted index
                     if (! empty($fieldData['index'])) {
                         $submittedIndex = (int) $fieldData['index'];
-                        if ($submittedIndex >= 1 && $submittedIndex <= 8 && in_array($submittedIndex, $usedIndices)) {
+                        if ($submittedIndex >= 1 && $submittedIndex <= 8 && ! in_array($submittedIndex, $usedIndices)) {
                             $fieldIndex = $submittedIndex;
+                            $usedIndices[] = $submittedIndex;
                         }
                     }
                     // Fall back to next available
