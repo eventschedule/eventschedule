@@ -792,6 +792,7 @@ return [
     'text' => 'Testo',
     'download' => 'Scarica',
     'copy' => 'Copia',
+    'copy_text' => 'Copia Testo',
     'add_custom_field' => 'Aggiungi Campo Personalizzato',
     'add_field' => 'Aggiungi Campo',
     'custom_field' => 'Campo Personalizzato',

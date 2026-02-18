@@ -789,6 +789,7 @@ return [
     'text' => 'Texte',
     'download' => 'Télécharger',
     'copy' => 'Copier',
+    'copy_text' => 'Copier le Texte',
     'add_custom_field' => 'Ajouter un champ personnalisé',
     'add_field' => 'Ajouter un champ',
     'custom_field' => 'Champ personnalisé',

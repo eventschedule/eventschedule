@@ -15,12 +15,14 @@
                 navigator.clipboard.writeText(text).then(function() {
                     const button = document.getElementById(buttonId);
                     const originalText = button.innerHTML;
+                    button.style.minWidth = button.offsetWidth + 'px';
                     button.innerHTML = `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>{{ __("messages.copied") }}`;
                     button.classList.add('bg-green-500', 'hover:bg-green-600');
                     button.classList.remove('bg-[#4E81FA]', 'hover:bg-[#3D6FE8]');
 
                     setTimeout(function() {
                         button.innerHTML = originalText;
+                        button.style.minWidth = '';
                         button.classList.remove('bg-green-500', 'hover:bg-green-600');
                         button.classList.add('bg-[#4E81FA]', 'hover:bg-[#3D6FE8]');
                     }, 2000);
@@ -51,6 +53,45 @@
                     document.body.removeChild(link);
                     URL.revokeObjectURL(url);
                 }, 'image/png');
+            }
+
+            function copyImage() {
+                if (!graphicData) return;
+
+                const img = document.getElementById('graphicImage');
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                ctx.drawImage(img, 0, 0);
+
+                navigator.clipboard.write([
+                    new ClipboardItem({
+                        'image/png': new Promise(function(resolve) {
+                            canvas.toBlob(function(blob) {
+                                resolve(blob);
+                            }, 'image/png');
+                        })
+                    })
+                ]).then(function() {
+                    const button = document.getElementById('copyImageBtn');
+                    const originalText = button.innerHTML;
+                    button.style.minWidth = button.offsetWidth + 'px';
+                    button.innerHTML = `<svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>{{ __("messages.copied") }}`;
+                    button.classList.add('bg-green-500', 'hover:bg-green-600');
+                    button.classList.remove('bg-[#4E81FA]', 'hover:bg-[#3D6FE8]');
+
+                    setTimeout(function() {
+                        button.innerHTML = originalText;
+                        button.style.minWidth = '';
+                        button.classList.remove('bg-green-500', 'hover:bg-green-600');
+                        button.classList.add('bg-[#4E81FA]', 'hover:bg-[#3D6FE8]');
+                    }, 2000);
+                }).catch(function(err) {
+                    console.error('Could not copy image: ', err);
+                    alert('{{ __("messages.copy_failed") }}');
+                });
             }
 
             function getFormSettings() {
@@ -1150,6 +1191,14 @@
                     });
                 }
 
+                // Copy image button
+                const copyImageBtn = document.getElementById('copyImageBtn');
+                if (copyImageBtn) {
+                    copyImageBtn.addEventListener('click', function() {
+                        copyImage();
+                    });
+                }
+
                 // Event delegation for dynamically created delete header image buttons
                 document.addEventListener('click', function(e) {
                     const deleteBtn = e.target.closest('[data-action="delete-header-image"]');
@@ -1888,7 +1937,7 @@
                                 <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                                 </svg>
-                                {{ __('messages.copy') }}
+                                {{ __('messages.copy_text') }}
                             </button>
                         </div>
                         <div class="p-4 flex-1 bg-gray-50 dark:bg-gray-900/50">
@@ -1907,7 +1956,7 @@
 
                     <!-- Graphic Image Section (Desktop always visible, Mobile only on graphic tab) -->
                     <div x-show="activeTab === 'graphic'" x-cloak class="lg:!block bg-white dark:bg-gray-800 lg:bg-gray-50 lg:dark:bg-gray-900/50 rounded-lg shadow lg:shadow-none dark:shadow-gray-900/50 overflow-hidden lg:border lg:border-gray-200 lg:dark:border-gray-700">
-                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-end">
+                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-end gap-2">
                             <button
                                 id="downloadBtn"
                                 class="inline-flex items-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-md transition-colors"
@@ -1916,6 +1965,15 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                                 </svg>
                                 {{ __('messages.download') }}
+                            </button>
+                            <button
+                                id="copyImageBtn"
+                                class="inline-flex items-center px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors"
+                            >
+                                <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                                </svg>
+                                {{ __('messages.copy_image') }}
                             </button>
                         </div>
                         <div class="p-4 flex items-center justify-center bg-gray-50 dark:bg-gray-900/50" style="min-height: 300px;">

@@ -790,6 +790,7 @@ return [
     'text' => 'نص',
     'download' => 'تحميل',
     'copy' => 'نسخ',
+    'copy_text' => 'نسخ النص',
     'add_custom_field' => 'إضافة حقل مخصص',
     'add_field' => 'إضافة حقل',
     'custom_field' => 'حقل مخصص',

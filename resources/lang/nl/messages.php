@@ -789,6 +789,7 @@ return [
     'text' => 'Tekst',
     'download' => 'Downloaden',
     'copy' => 'Kopiëren',
+    'copy_text' => 'Tekst Kopiëren',
     'add_custom_field' => 'Aangepast Veld Toevoegen',
     'add_field' => 'Veld Toevoegen',
     'custom_field' => 'Aangepast Veld',

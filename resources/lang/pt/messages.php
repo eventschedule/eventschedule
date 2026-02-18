@@ -790,6 +790,7 @@ return [
     'text' => 'Texto',
     'download' => 'Baixar',
     'copy' => 'Copiar',
+    'copy_text' => 'Copiar Texto',
     'add_custom_field' => 'Adicionar Campo Personalizado',
     'add_field' => 'Adicionar Campo',
     'custom_field' => 'Campo Personalizado',

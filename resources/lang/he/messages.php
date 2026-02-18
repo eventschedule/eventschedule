@@ -784,6 +784,7 @@ return [
     'text' => 'טקסט',
     'download' => 'הורדה',
     'copy' => 'העתקה',
+    'copy_text' => 'העתקת טקסט',
     'add_custom_field' => 'הוסף שדה מותאם',
     'add_field' => 'הוסף שדה',
     'custom_field' => 'שדה מותאם',
