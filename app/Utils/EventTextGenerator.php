@@ -22,6 +22,12 @@ class EventTextGenerator
             $text .= "\n\n";
         }
 
+        // Prepend Right-to-Left Mark for RTL languages so text
+        // displays correctly when pasted in apps like WhatsApp
+        if ($role->isRtl()) {
+            $text = "\u{200F}" . $text;
+        }
+
         return $text;
     }
 
