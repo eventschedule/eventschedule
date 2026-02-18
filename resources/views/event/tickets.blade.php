@@ -158,7 +158,7 @@
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
-        <div class="mb-12">
+        <div class="mb-6">
             <label for="email" class="text-gray-900 dark:text-gray-100">{{ __('messages.email') . ' *' }}</label>
             <input type="email" name="email" id="email" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
                 v-model="email" required autocomplete="email" />
@@ -201,7 +201,7 @@
         </div>
 
         <!-- Event-level Custom Fields -->
-        <div v-if="hasEventCustomFields" class="mb-12">
+        <div v-if="hasEventCustomFields" class="mb-6">
             <div v-for="(field, fieldKey) in eventCustomFields" :key="fieldKey" class="mb-4">
                 <label :for="`event_custom_${fieldKey}`" class="text-gray-900 dark:text-gray-100">
                     @{{ field.name }}@{{ field.required ? ' *' : '' }}
@@ -254,7 +254,7 @@
             </div>
         </div>
 
-        <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-4 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4 border-[#4E81FA]">
+        <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-6 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4 border-[#4E81FA]">
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ ticket.type }}</h3>
@@ -334,7 +334,7 @@
             </div>
         </div>
 
-        <div class="mt-6 bg-white dark:bg-gray-700/50 rounded-lg p-4">
+        <div class="mb-6 bg-white dark:bg-gray-700/50 rounded-lg p-4">
             <div class="flex justify-between items-center">
                 <span class="text-gray-600 dark:text-gray-400">@lang('messages.total')</span>
                 <span class="text-xl font-bold text-gray-900 dark:text-gray-100">@{{ formatPrice(totalAmount) }}</span>
@@ -348,7 +348,7 @@
             <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2" />
         </div>
 
-        <div class="flex justify-center items-center py-4 gap-8">
+        <div class="flex justify-end items-center pt-2 gap-8">
             <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
                 {{ strtoupper(__('messages.cancel')) }}
             </a>
