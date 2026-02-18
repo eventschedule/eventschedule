@@ -69,6 +69,21 @@ class AnalyticsEventsDaily extends Model
     }
 
     /**
+     * Decrement sale count and revenue for an event when a sale is refunded or cancelled
+     */
+    public static function decrementSale(int $eventId, float $amount): void
+    {
+        $date = now()->toDateString();
+
+        DB::statement(
+            'UPDATE analytics_events_daily
+             SET sales_count = GREATEST(sales_count - 1, 0), revenue = GREATEST(revenue - ?, 0)
+             WHERE event_id = ? AND date = ?',
+            [$amount, $eventId, $date]
+        );
+    }
+
+    /**
      * Scope to filter by event
      */
     public function scopeByEvent($query, int $eventId)

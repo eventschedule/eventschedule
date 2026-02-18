@@ -45,8 +45,10 @@ class ReleaseTickets extends Command
         \Log::info('Found '.$expiredSales->count().' expired sales to process');
 
         foreach ($expiredSales as $sale) {
-            $sale->status = 'expired';
-            $sale->save();
+            \DB::transaction(function () use ($sale) {
+                $sale->status = 'expired';
+                $sale->save();
+            });
         }
     }
 }
