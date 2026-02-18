@@ -4,7 +4,7 @@
         <span v-if="getEventGroupColor(event)" class="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
         <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto" v-text="event.name"></h3>
     </div>
-    <p v-if="event.short_description" class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-1" dir="auto" v-text="event.short_description"></p>
+    <p v-if="event.short_description" class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2" dir="auto" v-text="event.short_description"></p>
     <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="w-fit mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 hover:opacity-80 transition-opacity">
         <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 24 24" fill="currentColor">
             <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
