@@ -309,6 +309,26 @@ class EventRepo
                 }
             }
 
+            // De-duplicate indices as a safety net
+            if (! empty($customFields)) {
+                $usedIndices = [];
+                foreach ($customFields as $fieldKey => $fieldData) {
+                    $index = $fieldData['index'] ?? null;
+                    if ($index && ! in_array($index, $usedIndices)) {
+                        $usedIndices[] = $index;
+                    } elseif ($index) {
+                        // Duplicate index - reassign
+                        for ($i = 1; $i <= 8; $i++) {
+                            if (! in_array($i, $usedIndices)) {
+                                $customFields[$fieldKey]['index'] = $i;
+                                $usedIndices[] = $i;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
             $request->merge([
                 'custom_fields' => $customFields,
             ]);
@@ -592,6 +612,25 @@ class EventRepo
                             }
                         } catch (\Exception $e) {
                             \Log::error('Failed to translate ticket custom field names: '.$e->getMessage());
+                        }
+                    }
+                }
+
+                // De-duplicate indices as a safety net
+                if (! empty($ticketCustomFields)) {
+                    $usedIndices = [];
+                    foreach ($ticketCustomFields as $fieldKey => $fieldData) {
+                        $index = $fieldData['index'] ?? null;
+                        if ($index && ! in_array($index, $usedIndices)) {
+                            $usedIndices[] = $index;
+                        } elseif ($index) {
+                            for ($i = 1; $i <= 8; $i++) {
+                                if (! in_array($i, $usedIndices)) {
+                                    $ticketCustomFields[$fieldKey]['index'] = $i;
+                                    $usedIndices[] = $i;
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
