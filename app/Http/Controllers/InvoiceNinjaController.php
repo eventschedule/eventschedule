@@ -84,8 +84,13 @@ class InvoiceNinjaController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Sale not found'], 400);
         }
 
-        // Idempotency check: only process if not already paid
-        if ($sale->status !== 'paid') {
+        // Use lockForUpdate to prevent race conditions from webhook retries
+        \DB::transaction(function () use ($sale, $payload, $invoiceId) {
+            $sale = Sale::lockForUpdate()->find($sale->id);
+            if ($sale->status === 'paid') {
+                return;
+            }
+
             $webhookAmount = $payload['paymentables'][0]['amount'];
 
             // Validate that the webhook amount matches the expected sale amount
@@ -109,7 +114,7 @@ class InvoiceNinjaController extends Controller
             $sale->save();
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
-        }
+        });
 
         return response()->json(['status' => 'success']);
     }

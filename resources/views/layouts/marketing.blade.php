@@ -49,19 +49,9 @@
         }
     @endphp
     <link rel="canonical" href="{{ $canonicalPath }}">
-    <!-- Hreflang tags for all supported languages -->
+    <!-- Hreflang tags -->
     <link rel="alternate" hreflang="x-default" href="{{ $basePath }}">
-    <link rel="alternate" hreflang="en" href="{{ $basePath }}?lang=en">
-    <link rel="alternate" hreflang="es" href="{{ $basePath }}?lang=es">
-    <link rel="alternate" hreflang="de" href="{{ $basePath }}?lang=de">
-    <link rel="alternate" hreflang="fr" href="{{ $basePath }}?lang=fr">
-    <link rel="alternate" hreflang="it" href="{{ $basePath }}?lang=it">
-    <link rel="alternate" hreflang="pt" href="{{ $basePath }}?lang=pt">
-    <link rel="alternate" hreflang="he" href="{{ $basePath }}?lang=he">
-    <link rel="alternate" hreflang="nl" href="{{ $basePath }}?lang=nl">
-    <link rel="alternate" hreflang="ar" href="{{ $basePath }}?lang=ar">
-    <link rel="alternate" hreflang="et" href="{{ $basePath }}?lang=et">
-    <link rel="alternate" hreflang="ru" href="{{ $basePath }}?lang=ru">
+    <link rel="alternate" hreflang="en" href="{{ $basePath }}">
     <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">
     <meta name="robots" content="{{ $robots ?? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' }}">
     <meta name="author" content="Event Schedule">

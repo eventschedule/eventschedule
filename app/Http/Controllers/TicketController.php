@@ -456,14 +456,14 @@ class TicketController extends Controller
                 return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
             }
 
-            if ($session->payment_status === 'paid' && $sale->status !== 'paid') {
-                $sale->status = 'paid';
+            // Store the transaction reference so the webhook can find this sale,
+            // but don't set status=paid here - the webhook handles that with proper
+            // locking to avoid race conditions with analytics double-counting
+            if ($sale->status !== 'paid') {
                 $sale->payment_amount = $session->amount_total / 100;
                 $sale->transaction_reference = $session->payment_intent;
-                // Analytics are recorded by the webhook handler (payment_intent.succeeded
-                // or checkout.session.completed) to avoid double-counting from race conditions
+                $sale->save();
             }
-            $sale->save();
         } catch (\Exception $e) {
             // Log the error but don't fail - webhook will handle payment confirmation
             \Log::warning('Stripe session retrieval failed in success(): '.$e->getMessage());
@@ -486,8 +486,10 @@ class TicketController extends Controller
             return redirect($sale->event->getGuestUrl($subdomain, $sale->event_date).'&tickets=true');
         }
 
-        $sale->status = 'cancelled';
-        $sale->save();
+        DB::transaction(function () use ($sale) {
+            $sale->status = 'cancelled';
+            $sale->save();
+        });
 
         $event = $sale->event;
 
@@ -506,16 +508,19 @@ class TicketController extends Controller
             abort(403, 'Invalid secret');
         }
 
-        // Idempotency check: only process if not already paid
-        if ($sale->status !== 'paid') {
-            // Mark the sale as paid
+        // Use lockForUpdate to prevent race conditions from concurrent requests
+        DB::transaction(function () use ($sale) {
+            $sale = Sale::lockForUpdate()->find($sale->id);
+            if ($sale->status === 'paid') {
+                return;
+            }
+
             $sale->status = 'paid';
             $sale->transaction_reference = __('messages.manual_payment');
             $sale->save();
 
-            // Record sale in analytics
             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-        }
+        });
 
         return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
     }
@@ -532,8 +537,10 @@ class TicketController extends Controller
             abort(403, 'Invalid secret');
         }
 
-        $sale->status = 'cancelled';
-        $sale->save();
+        DB::transaction(function () use ($sale) {
+            $sale->status = 'cancelled';
+            $sale->save();
+        });
 
         return redirect($event->getGuestUrl($sale->subdomain, $sale->event_date).'&tickets=true');
     }
@@ -664,17 +671,28 @@ class TicketController extends Controller
 
             case 'refund':
                 if ($sale->status === 'paid') {
-                    $sale->status = 'refunded';
-                    $sale->save();
+                    DB::transaction(function () use ($sale) {
+                        $sale->status = 'refunded';
+                        $sale->save();
+
+                        AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+                    });
                     $actionPerformed = true;
                 }
                 break;
 
             case 'cancel':
                 if (in_array($sale->status, ['unpaid', 'paid'])) {
-                    $sale->status = 'cancelled';
-                    $sale->save();
+                    $wasPaid = $sale->status === 'paid';
+                    DB::transaction(function () use ($sale) {
+                        $sale->status = 'cancelled';
+                        $sale->save();
+                    });
                     $actionPerformed = true;
+
+                    if ($wasPaid) {
+                        AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+                    }
                 }
                 break;
 

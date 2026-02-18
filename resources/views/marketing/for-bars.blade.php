@@ -23,6 +23,46 @@
         }
     }
     </script>
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "How do I let my regulars know what's on this week?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Customers follow your bar's schedule and get your weekly lineup sent straight to their inbox. One click sends the whole week's events - trivia, live music, specials - to everyone who wants to know. No algorithm deciding who sees it."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I set up recurring weekly events?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Set up trivia night, live music, karaoke, or any weekly event once and it automatically repeats on your calendar. You can still add one-off specials like tap takeovers or watch parties alongside your recurring lineup."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Do I need to pay to list my bar's events?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. Event Schedule is free forever for creating and sharing your bar's event calendar. You can upgrade to Pro for ticketing and newsletters, but there are never any platform fees on ticket sales - you only pay Stripe's standard processing fees."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can bands and musicians request to play at my bar?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Turn on the booking inbox and performers can submit requests directly. You review each one and approve or decline. Approved acts are added to your calendar automatically - no back-and-forth emails needed."
+                }
+            }
+        ]
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section -->
@@ -659,6 +699,86 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="bg-gray-100 dark:bg-black/30 py-24">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Frequently asked questions
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400">
+                    Everything bar owners ask about Event Schedule.
+                </p>
+            </div>
+
+            <div class="space-y-4" x-data="{ open: null }">
+                <div class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-2xl border border-amber-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            How do I let my regulars know what's on this week?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 1" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Customers follow your bar's schedule and get your weekly lineup sent straight to their inbox. One click sends the whole week's events - trivia, live music, specials - to everyone who wants to know. No algorithm deciding who sees it.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900 dark:to-amber-900 rounded-2xl border border-orange-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I set up recurring weekly events?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 2" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Set up trivia night, live music, karaoke, or any weekly event once and it automatically repeats on your calendar. You can still add one-off specials like tap takeovers or watch parties alongside your recurring lineup.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900 dark:to-amber-900 rounded-2xl border border-yellow-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Do I need to pay to list my bar's events?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 3" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            No. Event Schedule is free forever for creating and sharing your bar's event calendar. You can upgrade to Pro for ticketing and newsletters, but there are never any platform fees on ticket sales - you only pay Stripe's standard processing fees.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 rounded-2xl border border-green-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can bands and musicians request to play at my bar?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 4" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Turn on the booking inbox and performers can submit requests directly. You review each one and approve or decline. Approved acts are added to your calendar automatically - no back-and-forth emails needed.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

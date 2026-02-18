@@ -157,17 +157,28 @@ class ApiSaleController extends Controller
 
             case 'refund':
                 if ($sale->status === 'paid') {
-                    $sale->status = 'refunded';
-                    $sale->save();
+                    DB::transaction(function () use ($sale) {
+                        $sale->status = 'refunded';
+                        $sale->save();
+
+                        AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+                    });
                     $actionPerformed = true;
                 }
                 break;
 
             case 'cancel':
                 if (in_array($sale->status, ['unpaid', 'paid'])) {
-                    $sale->status = 'cancelled';
-                    $sale->save();
+                    $wasPaid = $sale->status === 'paid';
+                    DB::transaction(function () use ($sale) {
+                        $sale->status = 'cancelled';
+                        $sale->save();
+                    });
                     $actionPerformed = true;
+
+                    if ($wasPaid) {
+                        AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+                    }
                 }
                 break;
         }

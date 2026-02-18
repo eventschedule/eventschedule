@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Services\GoogleCalendarService;
+use App\Utils\UrlUtils;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -204,7 +205,7 @@ class GoogleCalendarController extends Controller
         }
 
         try {
-            $event = \App\Models\Event::findOrFail($eventId);
+            $event = \App\Models\Event::findOrFail(UrlUtils::decodeId($eventId));
 
             // Check if user has permission to sync this event
             if (! $event->roles->contains(function ($role) use ($user) {
@@ -269,7 +270,7 @@ class GoogleCalendarController extends Controller
         }
 
         try {
-            $event = \App\Models\Event::findOrFail($eventId);
+            $event = \App\Models\Event::findOrFail(UrlUtils::decodeId($eventId));
 
             // Check if user has permission to unsync this event
             if (! $event->roles->contains(function ($role) use ($user) {
