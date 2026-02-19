@@ -6,6 +6,14 @@ use Sqids\Sqids;
 
 class UrlUtils
 {
+    private const SUBDOMAIN_PLATFORMS = [
+        'bandcamp.com' => 'Bandcamp',
+        'tumblr.com' => 'Tumblr',
+        'substack.com' => 'Substack',
+        'wordpress.com' => 'Wordpress',
+        'blogspot.com' => 'Blogspot',
+    ];
+
     private static ?Sqids $sqids = null;
 
     private static function getSqids(): Sqids
@@ -88,18 +96,42 @@ class UrlUtils
         return $slug;
     }
 
+    private static function getSubdomainPlatform($url)
+    {
+        $url = strtolower($url);
+        foreach (self::SUBDOMAIN_PLATFORMS as $domain => $brand) {
+            if (str_contains($url, $domain)) {
+                return ['domain' => $domain, 'brand' => $brand];
+            }
+        }
+
+        return null;
+    }
+
     public static function getBrand($url)
     {
-        $url = self::clean($url);
-        $url = strtolower($url);
+        $platform = self::getSubdomainPlatform($url);
+        if ($platform) {
+            return $platform['brand'];
+        }
 
-        $parts = explode('.', $url);
+        $url = self::clean($url);
+        $parts = explode('.', strtolower($url));
 
         return ucfirst($parts[0]);
     }
 
     public static function getHandle($url)
     {
+        $platform = self::getSubdomainPlatform($url);
+        if ($platform) {
+            $cleaned = self::clean($url);
+            $domain = explode('/', $cleaned)[0];
+            $subdomain = explode('.', $domain)[0];
+
+            return '@'.$subdomain;
+        }
+
         $url = self::clean($url);
         $parts = explode('/', $url);
 

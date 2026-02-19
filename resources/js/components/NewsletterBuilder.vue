@@ -78,7 +78,7 @@
                                             </span>
                                             <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ blockIcon(block.type) }} {{ blockLabel(block.type) }}</span>
                                         </div>
-                                        <div v-show="!showBlockPalette" class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div v-show="!showBlockPalette" class="flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                                             <button type="button" @click.stop="cloneBlock(block.id)" class="p-1 text-gray-400 hover:text-[#4E81FA]" :title="t.clone_block">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                             </button>
@@ -107,6 +107,10 @@
                                         <span v-else-if="block.type === 'social_links'">{{ (block.data.links || []).length + ' ' + t.links }}</span>
                                         <span v-else-if="block.type === 'divider'" class="text-gray-400">---</span>
                                         <span v-else-if="block.type === 'spacer'" class="text-gray-400">{{ (block.data.height || 20) + 'px' }}</span>
+                                        <span v-else-if="block.type === 'offer'">
+                                            <template v-if="block.data.title">{{ block.data.title }}<template v-if="block.data.salePrice"> - {{ block.data.salePrice }}</template></template>
+                                            <span v-else class="italic text-gray-400 dark:text-gray-500">{{ t.no_content }}</span>
+                                        </span>
                                         <span v-else-if="block.type === 'profile_image'" class="text-gray-400">{{ t.profile_image }}</span>
                                         <span v-else-if="block.type === 'header_banner'" class="text-gray-400">{{ t.header_image }}</span>
                                     </div>
@@ -314,6 +318,54 @@
                                             </div>
                                             <button type="button" @click="addSocialLink(block.id)"
                                                 class="text-sm text-[#4E81FA] hover:text-blue-700">+ {{ t.add_link }}</button>
+                                        </div>
+
+                                        <!-- Offer block settings -->
+                                        <div v-if="block.type === 'offer'" class="space-y-3">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.offer_title }}</label>
+                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                                    :value="block.data.title"
+                                                    @input="updateBlockData(block.id, 'title', $event.target.value)" />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.offer_description }}</label>
+                                                <textarea class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm" rows="3"
+                                                    :value="block.data.description"
+                                                    @input="updateBlockData(block.id, 'description', $event.target.value)"></textarea>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.original_price }}</label>
+                                                    <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                                        :value="block.data.originalPrice"
+                                                        @input="updateBlockData(block.id, 'originalPrice', $event.target.value)" />
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.sale_price }}</label>
+                                                    <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                                        :value="block.data.salePrice"
+                                                        @input="updateBlockData(block.id, 'salePrice', $event.target.value)" />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.coupon_code_label }}</label>
+                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                                    :value="block.data.couponCode"
+                                                    @input="updateBlockData(block.id, 'couponCode', $event.target.value)" />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.button_text }}</label>
+                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                                    :value="block.data.buttonText"
+                                                    @input="updateBlockData(block.id, 'buttonText', $event.target.value)" />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.button_url }}</label>
+                                                <input type="url" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                                    :value="block.data.buttonUrl"
+                                                    @input="updateBlockData(block.id, 'buttonUrl', $event.target.value)" />
+                                            </div>
                                         </div>
 
                                         <!-- Profile image / header banner: no settings -->
@@ -621,6 +673,7 @@ const props = defineProps({
     abTestHtml: { type: String, default: '' },
     roleSocialLinks: { type: Array, default: () => [] },
     roleName: { type: String, default: '' },
+    availableBlockTypes: { type: Array, default: null },
 });
 
 const t = props.translations;
@@ -655,7 +708,7 @@ function showSection(id) {
 
 const templateNames = ['modern', 'classic', 'minimal', 'bold', 'compact'];
 
-const blockTypes = [
+const allBlockTypes = [
     { type: 'heading', label: t.block_heading, icon: 'H', defaultData: { text: '', level: 'h1', align: 'center' } },
     { type: 'text', label: t.block_text, icon: '\u00b6', defaultData: { content: '' } },
     { type: 'events', label: t.block_events, icon: '\ud83d\udcc5', defaultData: { layout: 'cards', useAllEvents: true, eventIds: [] } },
@@ -666,7 +719,12 @@ const blockTypes = [
     { type: 'social_links', label: t.block_social_links, icon: '@', defaultData: { links: props.roleSocialLinks.length ? JSON.parse(JSON.stringify(props.roleSocialLinks)) : [{ platform: 'website', url: '' }] } },
     { type: 'profile_image', label: t.block_profile_image, icon: '\ud83d\udc64', defaultData: {} },
     { type: 'header_banner', label: t.block_header_banner, icon: '\ud83c\udff3', defaultData: {} },
+    { type: 'offer', label: t.block_offer, icon: '\ud83c\udff7', defaultData: { title: '', description: '', originalPrice: '', salePrice: '', couponCode: '', buttonText: '', buttonUrl: '', align: 'center' } },
 ];
+
+const blockTypes = props.availableBlockTypes
+    ? allBlockTypes.filter(bt => props.availableBlockTypes.includes(bt.type))
+    : allBlockTypes;
 
 const blockPalette = ref(null);
 const blockCanvas = ref(null);
@@ -739,12 +797,12 @@ function generateId() {
 }
 
 function blockLabel(type) {
-    const bt = blockTypes.find(b => b.type === type);
+    const bt = allBlockTypes.find(b => b.type === type);
     return bt ? bt.label : type;
 }
 
 function blockIcon(type) {
-    const bt = blockTypes.find(b => b.type === type);
+    const bt = allBlockTypes.find(b => b.type === type);
     return bt ? bt.icon : '';
 }
 
@@ -904,10 +962,11 @@ function debouncedPreview() {
 function fetchPreview() {
     if (previewAbortController) previewAbortController.abort();
     previewAbortController = new AbortController();
-    previewLoading.value = true;
 
     const form = document.querySelector('#newsletter-builder')?.closest('form');
     if (!form) return;
+
+    previewLoading.value = true;
 
     const formData = new FormData(form);
     formData.delete('_method');
@@ -941,16 +1000,28 @@ function openPreviewInNewTab() {
 
 function confirmSend() {
     if (confirm(t.newsletter_send_confirm)) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = props.routes.send;
-        const token = document.createElement('input');
-        token.type = 'hidden';
-        token.name = '_token';
-        token.value = props.csrfToken;
-        form.appendChild(token);
-        document.body.appendChild(form);
-        form.submit();
+        const form = document.querySelector('#newsletter-builder')?.closest('form');
+        if (!form) return;
+
+        // Save content via fetch, then POST to send
+        const formData = new FormData(form);
+        formData.delete('_method');
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+        }).then(() => {
+            const sendForm = document.createElement('form');
+            sendForm.method = 'POST';
+            sendForm.action = props.routes.send;
+            const token = document.createElement('input');
+            token.type = 'hidden';
+            token.name = '_token';
+            token.value = props.csrfToken;
+            sendForm.appendChild(token);
+            document.body.appendChild(sendForm);
+            sendForm.submit();
+        });
     }
 }
 
@@ -1028,5 +1099,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
     destroyAllEasyMDE();
     window.removeEventListener('hashchange', onHashChange);
+    clearTimeout(previewDebounceTimer);
+    if (previewAbortController) previewAbortController.abort();
 });
 </script>

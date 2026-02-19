@@ -844,6 +844,30 @@
             </button>
             <div id="event-actions-pop-up-menu" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="event-actions-menu-button" tabindex="-1">
                 <div class="py-2" role="none" id="event-actions-pop-up-menu-items" data-popup-target="event-actions-pop-up-menu">
+                    @if ($event->name && $event->starts_at && \Carbon\Carbon::parse($event->starts_at)->isFuture())
+                    @php
+                        $activeBoost = $event->boostCampaigns()->whereIn('status', ['active', 'paused'])->first();
+                    @endphp
+                    @if ($activeBoost)
+                    <a href="{{ route('boost.show', ['hash' => $activeBoost->hashedId()]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                        <svg class="me-3 h-5 w-5 text-green-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
+                        </svg>
+                        <div>
+                            {{ __('messages.boosted') }} - {{ number_format($activeBoost->reach) }} {{ __('messages.reach') }}
+                        </div>
+                    </a>
+                    @else
+                    <a href="{{ route('boost.create', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                        <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
+                        </svg>
+                        <div>
+                            {{ __('messages.boost_event') }}
+                        </div>
+                    </a>
+                    @endif
+                    @endif
                     <a href="{{ route('event.clone', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                         <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
@@ -1216,6 +1240,7 @@
                                     <div class="flex items-center">
                                         <input id="in_person" name="event_type" type="checkbox" v-model="isInPerson"
                                             class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
+                                            :disabled="roleIsVenue"
                                             @change="onChangeVenueType('in_person')">
                                         <label for="in_person" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.in_person') }}
@@ -1391,7 +1416,7 @@
                                         <button v-if="!selectedVenue.user_id" @click="editSelectedVenue" type="button" class="text-sm text-[#4E81FA] hover:text-blue-700">
                                             {{ __('messages.edit') }}
                                         </button>
-                                        <button @click="clearSelectedVenue" type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                        <button v-if="!roleIsVenue" @click="clearSelectedVenue" type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                             {{ __('messages.remove') }}
                                         </button>
                                     </div>
@@ -1520,7 +1545,7 @@
                                             <button v-if="!member.user_id" @click="editMember(member)" type="button" class="text-sm text-[#4E81FA] hover:text-blue-700">
                                                 {{ __('messages.edit') }}
                                             </button>
-                                            <button @click="removeMember(member)" type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                            <button v-if="!(roleIsTalent && member.id === roleEncodedId)" @click="removeMember(member)" type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                 {{ __('messages.remove') }}
                                             </button>
                                         </div>
@@ -2787,6 +2812,9 @@
         venueSearchEmail: "",
         venueSearchResults: [],
         selectedVenue: @json($selectedVenue ? $selectedVenue->toData() : ""),
+        roleIsVenue: {{ $role->isVenue() ? 'true' : 'false' }},
+        roleIsTalent: {{ $role->isTalent() ? 'true' : 'false' }},
+        roleEncodedId: '{{ \App\Utils\UrlUtils::encodeId($role->id) }}',
         selectedMembers: @json($selectedMembers ?? []),
         memberSearchResults: [],
         selectedMember: "",
@@ -2956,6 +2984,9 @@
         this.showMemberTypeRadio = false;
       },
       removeMember(member) {
+        if (this.roleIsTalent && member.id === this.roleEncodedId) {
+          return;
+        }
         this.selectedMembers = this.selectedMembers.filter(m => m.id !== member.id);
         // Remove from sendEmailToMembers
         if (member.email && this.sendEmailToMembers[member.email] !== undefined) {
@@ -3313,7 +3344,7 @@
         this.partsText = '';
       },
       onChangeVenueType(type) {
-        if (type === 'in_person' && !this.isInPerson) {
+        if (type === 'in_person' && !this.isInPerson && !this.roleIsVenue) {
             this.venueType = '{{ (count($venues) > 0 ? 'use_existing' : 'create_new'); }}';
             this.selectedVenue = '';
             this.venueName = '';

@@ -21,13 +21,13 @@ class NewsletterService
     public function send(Newsletter $newsletter): bool
     {
         $role = $newsletter->role;
-        if ($role && ! $role->canSendNewsletter()) {
+        if (! $newsletter->isAdmin() && (! $role || ! $role->canSendNewsletter())) {
             return false;
         }
 
         $sendToken = Str::random(64);
         $updated = Newsletter::where('id', $newsletter->id)
-            ->whereNotIn('status', ['sending', 'sent'])
+            ->whereIn('status', ['draft', 'scheduled'])
             ->update(['status' => 'sending', 'send_token' => $sendToken]);
 
         if ($updated === 0) {
@@ -37,7 +37,9 @@ class NewsletterService
         $newsletter->refresh();
 
         $segmentIds = $newsletter->segment_ids ?? [];
-        $recipients = $this->resolveRecipients($newsletter->role, $segmentIds);
+        $recipients = $newsletter->isAdmin()
+            ? $this->resolveAdminRecipients($segmentIds)
+            : $this->resolveRecipients($newsletter->role, $segmentIds);
 
         if ($recipients->isEmpty()) {
             $newsletter->update(['status' => 'sent', 'sent_at' => now(), 'sent_count' => 0]);
@@ -67,10 +69,10 @@ class NewsletterService
         return true;
     }
 
-    public function sendToRecipient(Newsletter $newsletter, NewsletterRecipient $recipient): bool
+    public function sendToRecipient(Newsletter $newsletter, NewsletterRecipient $recipient, bool $isTest = false): bool
     {
-        if ($this->isTestEmail($recipient->email)) {
-            $recipient->update(['status' => 'sent', 'sent_at' => now()]);
+        if (! $isTest && $this->isTestEmail($recipient->email)) {
+            $recipient->update(['status' => 'skipped']);
 
             return false;
         }
@@ -165,6 +167,49 @@ class NewsletterService
         return $allRecipients->values();
     }
 
+    public function resolveAdminRecipients(array $segmentIds): Collection
+    {
+        if (empty($segmentIds)) {
+            // Default to all subscribed, verified users
+            $allRecipients = \App\Models\User::whereNotNull('email_verified_at')
+                ->where('is_subscribed', true)
+                ->whereNull('admin_newsletter_unsubscribed_at')
+                ->select('id', 'email', 'name')
+                ->get()
+                ->map(fn ($user) => (object) [
+                    'user_id' => $user->id,
+                    'email' => strtolower($user->email),
+                    'name' => $user->name,
+                ]);
+        } else {
+            $segments = NewsletterSegment::whereNull('role_id')
+                ->whereIn('id', $segmentIds)
+                ->get();
+
+            $allRecipients = collect();
+            foreach ($segments as $segment) {
+                $allRecipients = $allRecipients->merge($segment->resolveRecipients());
+            }
+
+            // Safety net: filter unsubscribed users regardless of segment implementation
+            $unsubscribedEmails = \App\Models\User::whereNotNull('admin_newsletter_unsubscribed_at')
+                ->orWhere('is_subscribed', false)
+                ->pluck('email')
+                ->map(fn ($e) => strtolower($e))
+                ->all();
+            $allRecipients = $allRecipients->reject(fn ($r) => in_array($r->email, $unsubscribedEmails));
+        }
+
+        // Deduplicate by lowercase email
+        $allRecipients = $allRecipients->unique('email');
+
+        $allRecipients = $allRecipients->filter(function ($recipient) {
+            return ! $this->isTestEmail($recipient->email);
+        });
+
+        return $allRecipients->values();
+    }
+
     public function processBlocks(Newsletter $newsletter): array
     {
         $blocks = $newsletter->blocks ?? [];
@@ -221,13 +266,15 @@ class NewsletterService
             : '#';
 
         $role = $newsletter->role;
-        $isRtl = $role && $role->isRtl();
+        $isRtl = $role ? $role->isRtl() : false;
 
         $originalLocale = app()->getLocale();
 
         try {
             if ($role && is_valid_language_code($role->language_code)) {
                 app()->setLocale($role->language_code);
+            } elseif (! $role) {
+                app()->setLocale('en');
             }
 
             return view('emails.newsletter', [
@@ -237,7 +284,7 @@ class NewsletterService
                 'role' => $role,
                 'unsubscribeUrl' => $unsubscribeUrl,
                 'recipient' => $recipient,
-                'showBranding' => $role ? $role->showBranding() : false,
+                'showBranding' => $role ? $role->showBranding() : true,
                 'isRtl' => $isRtl,
             ])->render();
         } finally {
@@ -262,7 +309,7 @@ class NewsletterService
             function ($matches) use ($recipient) {
                 $url = $matches[2];
                 // Don't rewrite unsubscribe links or mailto links
-                if (str_contains($url, '/nl/u/') || str_starts_with($url, 'mailto:') || $url === '#') {
+                if (str_contains($url, '/nl/u/') || str_starts_with($url, 'mailto:') || str_starts_with($url, 'tel:') || $url === '#') {
                     return $matches[0];
                 }
                 $encodedUrl = rtrim(strtr(base64_encode($url), '+/', '-_'), '=');
@@ -288,7 +335,7 @@ class NewsletterService
 
     public function getUpcomingEvents(Role $role, ?array $eventIds = null): Collection
     {
-        if ($eventIds) {
+        if ($eventIds !== null) {
             $events = $role->events()
                 ->whereIn('events.id', $eventIds)
                 ->get();
@@ -338,14 +385,15 @@ class NewsletterService
 
     protected function calculateVariantScore(Newsletter $newsletter, string $criteria): float
     {
-        $sentCount = $newsletter->recipients->where('status', 'sent')->count();
+        $sent = $newsletter->recipients->where('status', 'sent');
+        $sentCount = $sent->count();
         if ($sentCount === 0) {
             return 0;
         }
 
         return match ($criteria) {
-            'click_rate' => $newsletter->recipients->whereNotNull('clicked_at')->count() / $sentCount,
-            default => $newsletter->recipients->whereNotNull('opened_at')->count() / $sentCount, // open_rate
+            'click_rate' => $sent->whereNotNull('clicked_at')->count() / $sentCount,
+            default => $sent->whereNotNull('opened_at')->count() / $sentCount, // open_rate
         };
     }
 
@@ -367,7 +415,9 @@ class NewsletterService
             ->toArray();
 
         // Resolve full recipient list and remove already-sent
-        $allRecipients = $this->resolveRecipients($winnerNewsletter->role, $winnerNewsletter->segment_ids ?? []);
+        $allRecipients = $winnerNewsletter->isAdmin()
+            ? $this->resolveAdminRecipients($winnerNewsletter->segment_ids ?? [])
+            : $this->resolveRecipients($winnerNewsletter->role, $winnerNewsletter->segment_ids ?? []);
         $remaining = $allRecipients->filter(fn ($r) => ! in_array($r->email, $sentEmails));
 
         if (! $remainderNewsletter) {

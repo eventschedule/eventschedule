@@ -388,6 +388,32 @@
             </script>
         @endif
 
+        {{-- Meta Pixel for boosted events --}}
+        @if ($event && $event->exists && $event->activeBoostCampaign)
+        @php $metaPixelId = config('services.meta.pixel_id'); @endphp
+        @if ($metaPixelId)
+        <script {!! nonce_attr() !!}>
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '{{ $metaPixelId }}');
+            fbq('track', 'PageView');
+            fbq('track', 'ViewContent', {
+                content_ids: ['{{ $event->id }}'],
+                content_name: @json($event->translatedName()),
+                content_type: 'product',
+                content_category: '{{ $event->getSchemaAttendanceMode() === "https://schema.org/OnlineEventAttendanceMode" ? "online_event" : "event" }}'
+            });
+        </script>
+        <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id={{ $metaPixelId }}&ev=PageView&noscript=1" /></noscript>
+        @endif
+        @endif
+
         {{ isset($head) ? $head : '' }}
     </x-slot>
     

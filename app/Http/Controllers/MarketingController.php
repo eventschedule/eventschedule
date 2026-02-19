@@ -156,6 +156,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Boost page
+     */
+    public function boost()
+    {
+        return view('marketing.boost');
+    }
+
+    /**
      * Embed Calendar page
      */
     public function embedCalendar()

@@ -23,7 +23,8 @@
             "Custom Fields",
             "Recurring Events",
             "Sub-schedules",
-            "Team Scheduling"
+            "Team Scheduling",
+            "Event Boost Ad Campaigns"
         ],
         "offers": {
             "@type": "Offer",
@@ -943,7 +944,75 @@
             </div>
         </section>
 
-        <!-- Banner 13: Open Source (Visual Left, Text Right) -->
+        <!-- Banner 13: Event Boost (Text Left, Visual Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-orange-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
+                <div class="absolute bottom-10 right-1/3 w-[300px] h-[300px] bg-amber-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ marketing_url('/features/boost') }}" class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                                </svg>
+                                Event Boost
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-orange-600 dark:group-hover:text-orange-300 transition-colors">Amplify your events</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Turn any event into a live Facebook and Instagram ad. Set your budget, pick your audience, and launch in minutes. No ad manager required.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Facebook & Instagram</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Smart targeting</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Real-time analytics</span>
+                            </div>
+                            <span class="inline-flex items-center text-orange-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float" style="animation-delay: 0.4s;">
+                                <div class="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900 dark:to-amber-900 rounded-xl border border-orange-200 dark:border-orange-500/30 p-4 w-56">
+                                    <!-- Ad preview card -->
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <div class="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-amber-500"></div>
+                                        <div class="text-[10px] text-gray-500 dark:text-white/70">Sponsored</div>
+                                    </div>
+                                    <div class="bg-gradient-to-br from-orange-400 to-amber-500 rounded-lg p-3 mb-3 text-center">
+                                        <div class="text-white font-bold text-xs">Summer Music Fest</div>
+                                        <div class="text-white/80 text-[10px] mt-0.5">Sat, Jul 12 at 6 PM</div>
+                                    </div>
+                                    <!-- Budget -->
+                                    <div class="mb-3">
+                                        <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">Budget</div>
+                                        <div class="h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+                                            <div class="h-full w-3/5 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full"></div>
+                                        </div>
+                                        <div class="text-[10px] text-orange-600 dark:text-orange-300 mt-1 font-medium">$50 / 7 days</div>
+                                    </div>
+                                    <!-- Reach -->
+                                    <div class="bg-white dark:bg-white/10 rounded-lg p-2 text-center">
+                                        <div class="text-[10px] text-gray-500 dark:text-white/70">Est. reach</div>
+                                        <div class="text-sm font-bold text-orange-600 dark:text-orange-300">2,400 - 6,800</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Banner 14: Open Source (Visual Left, Text Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">

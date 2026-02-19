@@ -966,6 +966,11 @@ class Role extends Model implements MustVerifyEmail
         return $this->hasMany(\App\Models\Newsletter::class);
     }
 
+    public function boostCampaigns()
+    {
+        return $this->hasMany(\App\Models\BoostCampaign::class);
+    }
+
     public function actualPlanTier(): string
     {
         if (! config('app.hosted')) {

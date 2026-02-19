@@ -14,13 +14,13 @@
                         <td style="padding: {{ $template === 'compact' ? '8px 0' : '12px 0' }}; border-bottom: 1px solid {{ $template === 'bold' ? '#2a3a5c' : '#eee' }};">
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                                 <tr>
-                                    <td style="width: {{ $template === 'compact' ? '100px' : '120px' }}; font-size: {{ $template === 'compact' ? '12px' : '13px' }}; color: {{ $template === 'bold' ? '#e0e0e0' : $style['accentColor'] }}; font-weight: bold; font-family: {{ $style['fontFamily'] }}, sans-serif; vertical-align: top; {{ $endPadding ?? 'padding-right' }}: 15px;">
+                                    <td style="width: {{ $template === 'compact' ? '100px' : '120px' }}; font-size: {{ $template === 'compact' ? '12px' : '13px' }}; color: {{ $template === 'bold' ? '#e0e0e0' : $style['accentColor'] }}; font-weight: bold; font-family: '{{ $style['fontFamily'] }}', sans-serif; vertical-align: top; {{ $endPadding ?? 'padding-right' }}: 15px;">
                                         {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format('M j, Y') : '' }}
                                         @if ($event->starts_at)
-                                        <br><span style="font-weight: normal; font-size: {{ $template === 'compact' ? '11px' : '12px' }}; color: {{ $template === 'bold' ? '#888' : '#999' }};">{{ \Carbon\Carbon::parse($event->starts_at)->format($role->use_24_hour_time ? 'H:i' : 'g:i A') }}</span>
+                                        <br><span style="font-weight: normal; font-size: {{ $template === 'compact' ? '11px' : '12px' }}; color: {{ $template === 'bold' ? '#888' : '#999' }};">{{ \Carbon\Carbon::parse($event->starts_at)->format(($role?->use_24_hour_time ?? false) ? 'H:i' : 'g:i A') }}</span>
                                         @endif
                                     </td>
-                                    <td style="font-size: {{ $template === 'compact' ? '14px' : '15px' }}; font-family: {{ $style['fontFamily'] }}, sans-serif; vertical-align: top;">
+                                    <td style="font-size: {{ $template === 'compact' ? '14px' : '15px' }}; font-family: '{{ $style['fontFamily'] }}', sans-serif; vertical-align: top;">
                                         @if ($template === 'minimal')
                                         <a href="{{ $event->getGuestUrl() }}" style="color: {{ $style['accentColor'] }}; text-decoration: underline; font-weight: bold;">{{ $event->name }}</a>
                                         @else
@@ -30,12 +30,12 @@
                                             $venue = $event->venue ?? ($event->roles ? $event->roles->where('type', 'venue')->first() : null);
                                         @endphp
                                         @if ($venue)
-                                        <br><span style="font-size: {{ $template === 'compact' ? '12px' : '13px' }}; color: {{ $template === 'bold' ? '#888' : '#888' }};">{{ $venue->name }}</span>
+                                        <br><span style="font-size: {{ $template === 'compact' ? '12px' : '13px' }}; color: #888;">{{ $venue->name }}</span>
                                         @endif
                                     </td>
                                     @if ($template !== 'minimal')
                                     <td style="width: 60px; text-align: {{ $endAlign ?? 'right' }}; vertical-align: top;">
-                                        <a href="{{ $event->getGuestUrl() }}" style="display: inline-block; padding: {{ $template === 'compact' ? '4px 10px' : '6px 12px' }}; background-color: {{ $style['accentColor'] }}; color: #ffffff; text-decoration: none; font-size: {{ $template === 'compact' ? '11px' : '12px' }}; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 4px;' : '' }} font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ __('messages.view') }}</a>
+                                        <a href="{{ $event->getGuestUrl() }}" style="display: inline-block; padding: {{ $template === 'compact' ? '4px 10px' : '6px 12px' }}; background-color: {{ $style['accentColor'] }}; color: #ffffff; text-decoration: none; font-size: {{ $template === 'compact' ? '11px' : '12px' }}; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 4px;' : '' }} font-family: '{{ $style['fontFamily'] }}', sans-serif;">{{ __('messages.view') }}</a>
                                     </td>
                                     @endif
                                 </tr>
@@ -49,10 +49,10 @@
                 @foreach ($blockEvents as $event)
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 12px; border-bottom: 1px solid #eee;">
                     <tr>
-                        <td style="padding: 12px 0; vertical-align: top; font-family: {{ $style['fontFamily'] }}, sans-serif;">
+                        <td style="padding: 12px 0; vertical-align: top; font-family: '{{ $style['fontFamily'] }}', sans-serif;">
                             <h3 style="margin: 0 0 4px 0; font-size: 15px; color: {{ $style['textColor'] }}; font-weight: 600;">{{ $event->name }}</h3>
                             <p style="margin: 0 0 4px 0; font-size: 13px; color: {{ $style['accentColor'] }};">
-                                {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format($role->use_24_hour_time ? 'M j, Y - H:i' : 'M j, Y - g:i A') : '' }}
+                                {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format(($role?->use_24_hour_time ?? false) ? 'M j, Y - H:i' : 'M j, Y - g:i A') : '' }}
                             </p>
                             @php
                                 $venue = $event->venue ?? ($event->roles ? $event->roles->where('type', 'venue')->first() : null);
@@ -60,7 +60,7 @@
                             @if ($venue)
                             <p style="margin: 0 0 6px 0; font-size: 13px; color: #888;">{{ $venue->name }}</p>
                             @endif
-                            <a href="{{ $event->getGuestUrl() }}" style="color: {{ $style['accentColor'] }}; text-decoration: underline; font-size: 13px; font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ __('messages.view_event') ?: 'View Event' }} {!! $arrow ?? '&rarr;' !!}</a>
+                            <a href="{{ $event->getGuestUrl() }}" style="color: {{ $style['accentColor'] }}; text-decoration: underline; font-size: 13px; font-family: '{{ $style['fontFamily'] }}', sans-serif;">{{ __('messages.view_event') ?: 'View Event' }} {!! $arrow ?? '&rarr;' !!}</a>
                         </td>
                     </tr>
                 </table>
@@ -70,10 +70,10 @@
                 @foreach ($blockEvents as $event)
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 8px; border: 1px solid #eee;">
                     <tr>
-                        <td style="padding: 8px 12px; vertical-align: top; font-family: {{ $style['fontFamily'] }}, sans-serif;">
+                        <td style="padding: 8px 12px; vertical-align: top; font-family: '{{ $style['fontFamily'] }}', sans-serif;">
                             <h3 style="margin: 0 0 2px 0; font-size: 14px; color: {{ $style['textColor'] }};">{{ $event->name }}</h3>
                             <p style="margin: 0 0 2px 0; font-size: 11px; color: {{ $style['accentColor'] }}; font-weight: bold;">
-                                {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format($role->use_24_hour_time ? 'M j, Y - H:i' : 'M j, Y - g:i A') : '' }}
+                                {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format(($role?->use_24_hour_time ?? false) ? 'M j, Y - H:i' : 'M j, Y - g:i A') : '' }}
                             </p>
                             @php
                                 $venue = $event->venue ?? ($event->roles ? $event->roles->where('type', 'venue')->first() : null);
@@ -81,7 +81,7 @@
                             @if ($venue)
                             <p style="margin: 0 0 4px 0; font-size: 11px; color: #888;">{{ $venue->name }}</p>
                             @endif
-                            <a href="{{ $event->getGuestUrl() }}" style="display: inline-block; padding: 4px 10px; background-color: {{ $style['accentColor'] }}; color: #ffffff; text-decoration: none; font-size: 11px; font-weight: bold; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 3px;' : '' }} font-family: {{ $style['fontFamily'] }}, sans-serif;">{{ __('messages.view_event') ?: 'View Event' }}</a>
+                            <a href="{{ $event->getGuestUrl() }}" style="display: inline-block; padding: 4px 10px; background-color: {{ $style['accentColor'] }}; color: #ffffff; text-decoration: none; font-size: 11px; font-weight: bold; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 3px;' : '' }} font-family: '{{ $style['fontFamily'] }}', sans-serif;">{{ __('messages.view_event') ?: 'View Event' }}</a>
                         </td>
                     </tr>
                 </table>
@@ -111,13 +111,13 @@
                     <tr>
                         @if ($event->getImageUrl() && $template !== 'classic')
                         <td style="width: 120px; vertical-align: top;">
-                            <img src="{{ $event->getImageUrl() }}" alt="{{ $event->name }}" width="120" style="width: 120px; height: auto; display: block; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 8px 0 0 8px;' : '' }}" />
+                            <img src="{{ $event->getImageUrl() }}" alt="{{ $event->name }}" width="120" style="width: 120px; height: auto; display: block; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: ' . ($isRtl ? '0 8px 8px 0' : '8px 0 0 8px') . ';' : '' }}" />
                         </td>
                         @endif
-                        <td style="padding: 14px 16px; vertical-align: top; font-family: {{ $style['fontFamily'] }}, sans-serif;">
+                        <td style="padding: 14px 16px; vertical-align: top; font-family: '{{ $style['fontFamily'] }}', sans-serif;">
                             <h3 style="margin: 0 0 6px 0; font-size: 16px; color: {{ $titleColor }}; {{ $template === 'classic' ? 'font-family: Georgia, serif;' : '' }}">{{ $event->name }}</h3>
                             <p style="margin: 0 0 4px 0; font-size: 13px; color: {{ $template === 'bold' ? '#e0e0e0' : $style['accentColor'] }}; font-weight: bold;">
-                                {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format($role->use_24_hour_time ? 'M j, Y - H:i' : 'M j, Y - g:i A') : '' }}
+                                {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format(($role?->use_24_hour_time ?? false) ? 'M j, Y - H:i' : 'M j, Y - g:i A') : '' }}
                             </p>
                             @php
                                 $venue = $event->venue ?? ($event->roles ? $event->roles->where('type', 'venue')->first() : null);
