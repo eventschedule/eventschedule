@@ -284,7 +284,7 @@ class NewsletterService
                 'role' => $role,
                 'unsubscribeUrl' => $unsubscribeUrl,
                 'recipient' => $recipient,
-                'showBranding' => $role ? $role->showBranding() : true,
+                'showBranding' => $role ? $role->showBranding() : false,
                 'isRtl' => $isRtl,
             ])->render();
         } finally {
