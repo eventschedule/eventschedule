@@ -1,4 +1,6 @@
 @php
+$isAdmin = $isAdmin ?? false;
+
 $templateDefaults = [
     'modern' => \App\Models\Newsletter::templateDefaults('modern'),
     'classic' => \App\Models\Newsletter::templateDefaults('classic'),
@@ -11,14 +13,26 @@ $initialBlocks = isset($defaultBlocks) ? $defaultBlocks : ($newsletter->blocks ?
 
 $segmentTypeLabels = [];
 foreach (($segments ?? collect()) as $segment) {
-    if ($segment->type === 'all_followers') {
-        $segmentTypeLabels[$segment->id] = __('messages.all_followers');
-    } elseif ($segment->type === 'ticket_buyers') {
-        $segmentTypeLabels[$segment->id] = __('messages.ticket_buyers');
-    } elseif ($segment->type === 'manual') {
-        $segmentTypeLabels[$segment->id] = __('messages.manual');
+    if ($isAdmin) {
+        if ($segment->type === 'all_users') {
+            $segmentTypeLabels[$segment->id] = __('messages.all_platform_users');
+        } elseif ($segment->type === 'plan_tier') {
+            $segmentTypeLabels[$segment->id] = __('messages.plan_tier');
+        } elseif ($segment->type === 'signup_date') {
+            $segmentTypeLabels[$segment->id] = __('messages.signup_date');
+        } else {
+            $segmentTypeLabels[$segment->id] = $segment->type;
+        }
     } else {
-        $segmentTypeLabels[$segment->id] = __('messages.group');
+        if ($segment->type === 'all_followers') {
+            $segmentTypeLabels[$segment->id] = __('messages.all_followers');
+        } elseif ($segment->type === 'ticket_buyers') {
+            $segmentTypeLabels[$segment->id] = __('messages.ticket_buyers');
+        } elseif ($segment->type === 'manual') {
+            $segmentTypeLabels[$segment->id] = __('messages.manual');
+        } else {
+            $segmentTypeLabels[$segment->id] = __('messages.group');
+        }
     }
 }
 
@@ -47,25 +61,40 @@ if (isset($newsletter) && $newsletter->exists) {
     ];
 }
 
-$routesData = [
-    'manage_segments' => route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]),
-];
-if (isset($newsletter) && $newsletter->exists) {
-    $routesData['test_send'] = route('newsletter.test_send', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
-    $routesData['schedule'] = route('newsletter.schedule', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
-    $routesData['send'] = route('newsletter.send', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
+if ($isAdmin) {
+    $routesData = [
+        'manage_segments' => route('admin.newsletters.segments'),
+    ];
+    if (isset($newsletter) && $newsletter->exists) {
+        $routesData['test_send'] = route('admin.newsletters.test_send', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
+        $routesData['schedule'] = route('admin.newsletters.schedule', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
+        $routesData['send'] = route('admin.newsletters.send', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
+    }
+
+    $previewUrl = isset($newsletter) && $newsletter->exists
+        ? route('admin.newsletters.preview', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)])
+        : route('admin.newsletters.preview_draft');
+} else {
+    $routesData = [
+        'manage_segments' => route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]),
+    ];
+    if (isset($newsletter) && $newsletter->exists) {
+        $routesData['test_send'] = route('newsletter.test_send', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
+        $routesData['schedule'] = route('newsletter.schedule', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
+        $routesData['send'] = route('newsletter.send', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
+    }
+
+    $previewUrl = isset($newsletter) && $newsletter->exists
+        ? route('newsletter.preview', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)])
+        : route('newsletter.preview_draft', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]);
 }
 
-$previewUrl = isset($newsletter) && $newsletter->exists
-    ? route('newsletter.preview', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)])
-    : route('newsletter.preview_draft', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]);
-
 $abTestHtml = '';
-if (isset($newsletter) && $newsletter->exists) {
+if (!$isAdmin && isset($newsletter) && $newsletter->exists) {
     $abTestHtml = view('newsletter.partials._ab-test-panel', ['newsletter' => $newsletter, 'role' => $role])->render();
 }
 
-$roleSocialLinks = \App\Models\Newsletter::buildSocialLinksForRole($role);
+$roleSocialLinks = $isAdmin ? [] : \App\Models\Newsletter::buildSocialLinksForRole($role);
 
 $builderProps = [
     'initialBlocks' => $initialBlocks,
@@ -81,9 +110,12 @@ $builderProps = [
     'csrfToken' => csrf_token(),
     'newsletter' => $newsletterData,
     'routes' => $routesData,
-    'roleEmail' => $role->email ?? '',
-    'roleName' => $role->name ?? '',
+    'roleEmail' => $isAdmin ? (auth()->user()->email ?? '') : ($role->email ?? ''),
+    'roleName' => $isAdmin ? config('app.name') : ($role->name ?? ''),
     'abTestHtml' => $abTestHtml,
+    'availableBlockTypes' => $isAdmin
+        ? ['heading', 'text', 'button', 'image', 'divider', 'spacer', 'social_links', 'offer']
+        : ['heading', 'text', 'events', 'button', 'image', 'divider', 'spacer', 'social_links', 'profile_image', 'header_banner'],
     'translations' => [
         'add_block' => __('messages.add_block'),
         'blocks' => __('messages.blocks'),
@@ -145,7 +177,9 @@ $builderProps = [
         'rounded' => __('messages.rounded'),
         'square' => __('messages.square'),
         'no_segments' => __('messages.no_segments'),
-        'default_all_followers' => __('messages.default_all_followers'),
+        'default_all_followers' => $isAdmin
+            ? __('messages.default_all_platform_users')
+            : __('messages.default_all_followers'),
         'manage_segments' => __('messages.manage_segments'),
         'email' => __('messages.email'),
         'cancel' => __('messages.cancel'),
@@ -163,6 +197,12 @@ $builderProps = [
         'block_social_links' => __('messages.block_social_links'),
         'block_profile_image' => __('messages.block_profile_image'),
         'block_header_banner' => __('messages.block_header_banner'),
+        'block_offer' => __('messages.block_offer'),
+        'offer_title' => __('messages.offer_title'),
+        'original_price' => __('messages.original_price'),
+        'sale_price' => __('messages.sale_price'),
+        'coupon_code_label' => __('messages.coupon_code_label'),
+        'offer_description' => __('messages.offer_description'),
         'style' => __('messages.style'),
         'settings' => __('messages.settings'),
         'done' => __('messages.done'),

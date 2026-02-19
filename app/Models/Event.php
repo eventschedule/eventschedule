@@ -1717,6 +1717,16 @@ class Event extends Model
         return $values[$key] ?? null;
     }
 
+    public function boostCampaigns()
+    {
+        return $this->hasMany(BoostCampaign::class);
+    }
+
+    public function activeBoostCampaign()
+    {
+        return $this->hasOne(BoostCampaign::class)->where('status', 'active')->latest();
+    }
+
     /**
      * Set a specific custom field value
      */

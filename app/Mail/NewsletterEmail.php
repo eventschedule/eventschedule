@@ -60,9 +60,6 @@ class NewsletterEmail extends Mailable
         );
         $newsletterService = app(\App\Services\NewsletterService::class);
         $role = $this->newsletter->role;
-        $events = $role
-            ? $newsletterService->getUpcomingEvents($role, $this->newsletter->event_ids)
-            : collect();
         $blocks = $newsletterService->processBlocks($this->newsletter);
         $unsubscribeUrl = url('/nl/u/'.$this->recipient->token);
 
@@ -73,7 +70,6 @@ class NewsletterEmail extends Mailable
                 'renderedHtml' => $this->renderedHtml,
                 'newsletter' => $this->newsletter,
                 'role' => $role,
-                'events' => $events,
                 'style' => $style,
                 'unsubscribeUrl' => $unsubscribeUrl,
                 'blocks' => $blocks,

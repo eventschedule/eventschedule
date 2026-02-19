@@ -17,12 +17,31 @@
 @elseif ($blockType === 'events' && !empty($block['data']['resolvedEvents']))
 @foreach ($block['data']['resolvedEvents'] as $event)
 * {{ $event->name }}
-  {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format($role->use_24_hour_time ? 'M j, Y - H:i' : 'M j, Y - g:i A') : '' }}
-  {{ $role->getGuestUrl() }}
+  {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format(($role?->use_24_hour_time ?? false) ? 'M j, Y - H:i' : 'M j, Y - g:i A') : '' }}
+  {{ $event->getGuestUrl() }}
 
 @endforeach
 @elseif ($blockType === 'button' && !empty($block['data']['text']))
 {{ $block['data']['text'] }}: {{ $block['data']['url'] ?? '' }}
+
+@elseif ($blockType === 'offer')
+@if (!empty($block['data']['title']))
+{{ $block['data']['title'] }}
+@endif
+@if (!empty($block['data']['description']))
+{{ $block['data']['description'] }}
+@endif
+@if (!empty($block['data']['originalPrice']) && !empty($block['data']['salePrice']))
+{{ $block['data']['originalPrice'] }} -> {{ $block['data']['salePrice'] }}
+@elseif (!empty($block['data']['salePrice']))
+{{ $block['data']['salePrice'] }}
+@endif
+@if (!empty($block['data']['couponCode']))
+{{ __('messages.coupon_code_label') }}: {{ $block['data']['couponCode'] }}
+@endif
+@if (!empty($block['data']['buttonText']))
+{{ $block['data']['buttonText'] }}: {{ $block['data']['buttonUrl'] ?? '' }}
+@endif
 
 @elseif ($blockType === 'divider')
 ---
@@ -37,5 +56,5 @@
 @endif
 @endforeach
 --
-{{ !empty($style['footerText']) ? $style['footerText'] : $role->name }}
+{{ !empty($style['footerText']) ? $style['footerText'] : ($role?->name ?? config('app.name')) }}
 {{ __('messages.unsubscribe') }}: {{ $unsubscribeUrl }}

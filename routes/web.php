@@ -5,6 +5,7 @@ use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\Api\ApiSettingsController;
 use App\Http\Controllers\AppController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\BoostController;
 use App\Http\Controllers\CalDAVController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\GoogleCalendarController;
@@ -13,6 +14,8 @@ use App\Http\Controllers\GraphicController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvoiceNinjaController;
 use App\Http\Controllers\MarketingController;
+use App\Http\Controllers\MetaAdsWebhookController;
+use App\Http\Controllers\AdminNewsletterController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\NewsletterTrackingController;
 use App\Http\Controllers\ProfileController;
@@ -93,6 +96,10 @@ Route::post('/invoiceninja/webhook/{secret?}', [InvoiceNinjaController::class, '
 Route::get('/google-calendar/webhook', [GoogleCalendarWebhookController::class, 'verify'])->name('google.calendar.webhook.verify')->middleware('throttle:10,1');
 Route::post('/google-calendar/webhook', [GoogleCalendarWebhookController::class, 'handle'])->name('google.calendar.webhook.handle')->middleware('throttle:60,1');
 
+// Meta Ads webhook routes (no auth required)
+Route::get('/webhooks/meta', [MetaAdsWebhookController::class, 'verify'])->name('meta.webhook.verify')->middleware('throttle:10,1');
+Route::post('/webhooks/meta', [MetaAdsWebhookController::class, 'handle'])->name('meta.webhook.handle')->middleware('throttle:60,1');
+
 Route::get('/release_tickets', [TicketController::class, 'release'])->name('release_tickets')->middleware('throttle:5,1');
 Route::get('/translate_data', [AppController::class, 'translateData'])->name('translate_data')->middleware('throttle:5,1');
 
@@ -141,6 +148,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/newsletter-segments/{hash}', [NewsletterController::class, 'deleteSegment'])->name('newsletter.segment.delete');
     Route::get('/newsletter-import', [NewsletterController::class, 'importForm'])->name('newsletter.import');
     Route::post('/newsletter-import', [NewsletterController::class, 'importStore'])->name('newsletter.import.store');
+
+    // Boost routes
+    Route::get('/boost', [BoostController::class, 'index'])->name('boost.index');
+    Route::get('/boost/create', [BoostController::class, 'create'])->name('boost.create');
+    Route::post('/boost', [BoostController::class, 'store'])->name('boost.store');
+    Route::post('/boost/payment-intent', [BoostController::class, 'createPaymentIntent'])->name('boost.payment_intent');
+    Route::get('/boost/search-interests', [BoostController::class, 'searchInterests'])->name('boost.search_interests');
+    Route::get('/boost/estimate-reach', [BoostController::class, 'estimateReach'])->name('boost.estimate_reach');
+    Route::post('/boost/generate-content', [BoostController::class, 'generateContent'])->name('boost.generate_content');
+    Route::get('/boost/{hash}', [BoostController::class, 'show'])->name('boost.show');
+    Route::post('/boost/{hash}/toggle-pause', [BoostController::class, 'togglePause'])->name('boost.toggle_pause');
+    Route::post('/boost/{hash}/cancel', [BoostController::class, 'cancel'])->name('boost.cancel');
 
     Route::get('/settings', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/settings', [ProfileController::class, 'update'])->name('profile.update');
@@ -275,6 +294,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/admin/queue/clear-failed', [AdminController::class, 'queueClearFailed'])->name('admin.queue.clear-failed');
         Route::post('/admin/queue/flush-pending', [AdminController::class, 'queueFlushPending'])->name('admin.queue.flush-pending');
 
+        // Admin newsletter routes
+        Route::get('/admin/newsletters', [AdminNewsletterController::class, 'index'])->name('admin.newsletters.index');
+        Route::get('/admin/newsletters/create', [AdminNewsletterController::class, 'create'])->name('admin.newsletters.create');
+        Route::post('/admin/newsletters', [AdminNewsletterController::class, 'store'])->name('admin.newsletters.store');
+        Route::post('/admin/newsletters/preview-draft', [AdminNewsletterController::class, 'previewDraft'])->name('admin.newsletters.preview_draft');
+        Route::get('/admin/newsletters/{hash}/edit', [AdminNewsletterController::class, 'edit'])->name('admin.newsletters.edit');
+        Route::put('/admin/newsletters/{hash}', [AdminNewsletterController::class, 'update'])->name('admin.newsletters.update');
+        Route::delete('/admin/newsletters/{hash}', [AdminNewsletterController::class, 'delete'])->name('admin.newsletters.delete');
+        Route::post('/admin/newsletters/{hash}/send', [AdminNewsletterController::class, 'send'])->name('admin.newsletters.send');
+        Route::post('/admin/newsletters/{hash}/schedule', [AdminNewsletterController::class, 'schedule'])->name('admin.newsletters.schedule');
+        Route::post('/admin/newsletters/{hash}/cancel', [AdminNewsletterController::class, 'cancel'])->name('admin.newsletters.cancel');
+        Route::post('/admin/newsletters/{hash}/clone', [AdminNewsletterController::class, 'cloneNewsletter'])->name('admin.newsletters.clone');
+        Route::post('/admin/newsletters/{hash}/preview', [AdminNewsletterController::class, 'preview'])->name('admin.newsletters.preview');
+        Route::post('/admin/newsletters/{hash}/test-send', [AdminNewsletterController::class, 'testSend'])->name('admin.newsletters.test_send');
+        Route::get('/admin/newsletters/{hash}/stats', [AdminNewsletterController::class, 'stats'])->name('admin.newsletters.stats');
+        Route::get('/admin/newsletter-segments', [AdminNewsletterController::class, 'segments'])->name('admin.newsletters.segments');
+        Route::post('/admin/newsletter-segments', [AdminNewsletterController::class, 'storeSegment'])->name('admin.newsletters.segment.store');
+        Route::delete('/admin/newsletter-segments/{hash}', [AdminNewsletterController::class, 'deleteSegment'])->name('admin.newsletters.segment.delete');
+
         // Admin blog routes
         Route::get('/admin/blog', [BlogController::class, 'adminIndex'])->name('blog.admin.index');
         Route::get('/admin/blog/create', [BlogController::class, 'create'])->name('blog.create');
@@ -316,6 +354,7 @@ if (config('app.is_nexus')) {
         Route::get('/features/recurring-events', [MarketingController::class, 'recurringEvents'])->name('marketing.recurring_events');
         Route::get('/features/embed-calendar', [MarketingController::class, 'embedCalendar'])->name('marketing.embed_calendar');
         Route::get('/features/fan-videos', [MarketingController::class, 'fanVideos'])->name('marketing.fan_videos');
+        Route::get('/features/boost', [MarketingController::class, 'boost'])->name('marketing.boost');
         // Redirects from old feature URLs
         Route::get('/wp/analytics', fn () => redirect()->route('marketing.analytics', [], 301));
         Route::get('/wp/newsletters', fn () => redirect()->route('marketing.newsletters', [], 301));
@@ -432,6 +471,7 @@ if (config('app.is_nexus')) {
             Route::get('/features/recurring-events', [MarketingController::class, 'recurringEvents'])->name('marketing.recurring_events');
             Route::get('/features/embed-calendar', [MarketingController::class, 'embedCalendar'])->name('marketing.embed_calendar');
             Route::get('/features/fan-videos', [MarketingController::class, 'fanVideos'])->name('marketing.fan_videos');
+            Route::get('/features/boost', [MarketingController::class, 'boost'])->name('marketing.boost');
             // Redirects from old feature URLs
             Route::get('/ticketing', fn () => redirect()->route('marketing.ticketing', [], 301));
             Route::get('/ai', fn () => redirect()->route('marketing.ai', [], 301));
@@ -563,6 +603,7 @@ if (config('app.is_nexus')) {
             Route::get('/features/recurring-events', fn () => redirect('https://eventschedule.com/features/recurring-events', 301));
             Route::get('/features/embed-calendar', fn () => redirect('https://eventschedule.com/features/embed-calendar', 301));
             Route::get('/features/fan-videos', fn () => redirect('https://eventschedule.com/features/fan-videos', 301));
+            Route::get('/features/boost', fn () => redirect('https://eventschedule.com/features/boost', 301));
             Route::get('/for-talent', fn () => redirect('https://eventschedule.com/for-talent', 301));
             Route::get('/for-venues', fn () => redirect('https://eventschedule.com/for-venues', 301));
             Route::get('/for-curators', fn () => redirect('https://eventschedule.com/for-curators', 301));
@@ -666,6 +707,7 @@ if (config('app.is_nexus')) {
     Route::get('/features/recurring-events', fn () => redirect()->route('home'));
     Route::get('/features/embed-calendar', fn () => redirect()->route('home'));
     Route::get('/features/fan-videos', fn () => redirect()->route('home'));
+    Route::get('/features/boost', fn () => redirect()->route('home'));
     Route::get('/features/analytics', fn () => redirect()->route('home'));
     // Old URLs still redirect to home
     Route::get('/ticketing', fn () => redirect()->route('home'));

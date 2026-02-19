@@ -24,6 +24,7 @@ class Newsletter extends Model
         'sent_count',
         'open_count',
         'click_count',
+        'type',
     ];
 
     protected $casts = [
@@ -34,6 +35,21 @@ class Newsletter extends Model
         'scheduled_at' => 'datetime',
         'sent_at' => 'datetime',
     ];
+
+    public function isAdmin(): bool
+    {
+        return $this->type === 'admin';
+    }
+
+    public function scopeAdmin($query)
+    {
+        return $query->where('type', 'admin');
+    }
+
+    public function scopeSchedule($query)
+    {
+        return $query->where('type', 'schedule');
+    }
 
     public function role()
     {

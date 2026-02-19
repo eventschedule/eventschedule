@@ -31,9 +31,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'google-calendar/webhook',
             'stripe/webhook',
+            'stripe/subscription-webhook',
             'invoiceninja/webhook/*',
             'test_database',
             'nl/u/*',
+            'webhooks/meta',
         ]);
 
         // Sanitize user agent before session middleware processes it

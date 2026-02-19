@@ -18,6 +18,8 @@ use Illuminate\Support\Str;
 
 class NewsletterController extends Controller
 {
+    use Traits\SanitizesNewsletterContent;
+
     protected function authorizeAccess()
     {
         if (auth()->user()->isAdmin()) {
@@ -25,22 +27,6 @@ class NewsletterController extends Controller
         }
 
         // Allow owners/members of enterprise roles
-        $hasEnterpriseRole = auth()->user()->roles()
-            ->wherePivot('level', '!=', 'follower')
-            ->get()
-            ->contains(fn ($role) => $role->isEnterprise());
-
-        if (! $hasEnterpriseRole) {
-            abort(403, __('messages.not_authorized'));
-        }
-    }
-
-    protected function authorizeImport()
-    {
-        if (auth()->user()->isAdmin()) {
-            return;
-        }
-
         $hasEnterpriseRole = auth()->user()->roles()
             ->wherePivot('level', '!=', 'follower')
             ->get()
@@ -88,94 +74,6 @@ class NewsletterController extends Controller
         return ['role_id' => UrlUtils::encodeId($role->id)];
     }
 
-    protected function sanitizeStyleSettings(?array $settings): array
-    {
-        $defaults = Newsletter::defaultStyleSettings();
-        if (! $settings) {
-            return $defaults;
-        }
-
-        $allowedFonts = ['Arial', 'Georgia', 'Verdana', 'Trebuchet MS', 'Times New Roman', 'Courier New', 'Helvetica', 'Tahoma'];
-        $allowedRadii = ['rounded', 'square'];
-        $allowedLayouts = ['cards', 'list'];
-
-        $sanitized = [];
-        $sanitized['backgroundColor'] = $this->sanitizeHexColor($settings['backgroundColor'] ?? null, $defaults['backgroundColor']);
-        $sanitized['accentColor'] = $this->sanitizeHexColor($settings['accentColor'] ?? null, $defaults['accentColor']);
-        $sanitized['textColor'] = $this->sanitizeHexColor($settings['textColor'] ?? null, $defaults['textColor']);
-        $sanitized['fontFamily'] = in_array($settings['fontFamily'] ?? '', $allowedFonts) ? $settings['fontFamily'] : $defaults['fontFamily'];
-        $sanitized['buttonRadius'] = in_array($settings['buttonRadius'] ?? '', $allowedRadii) ? $settings['buttonRadius'] : $defaults['buttonRadius'];
-        $sanitized['eventLayout'] = in_array($settings['eventLayout'] ?? '', $allowedLayouts) ? $settings['eventLayout'] : $defaults['eventLayout'];
-        $sanitized['footerText'] = mb_substr(strip_tags(trim($settings['footerText'] ?? '')), 0, 500);
-
-        return $sanitized;
-    }
-
-    protected function sanitizeHexColor(?string $value, string $default): string
-    {
-        if ($value && preg_match('/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', $value)) {
-            return $value;
-        }
-
-        return $default;
-    }
-
-    protected function parseBlocks(Request $request): ?array
-    {
-        $blocksJson = $request->input('blocks');
-        if (! $blocksJson) {
-            return null;
-        }
-
-        if (is_string($blocksJson)) {
-            $blocks = json_decode($blocksJson, true);
-        } else {
-            $blocks = $blocksJson;
-        }
-
-        if (! is_array($blocks)) {
-            return null;
-        }
-
-        // Sanitize blocks
-        $allowed = ['profile_image', 'header_banner', 'heading', 'text', 'events', 'button', 'divider', 'spacer', 'image', 'social_links'];
-        $dangerousSchemes = ['javascript:', 'data:', 'vbscript:'];
-
-        $blocks = array_values(array_filter($blocks, function ($block) use ($allowed) {
-            return isset($block['type']) && in_array($block['type'], $allowed) && isset($block['id']);
-        }));
-
-        // Sanitize URLs in blocks to prevent javascript: and other dangerous URI schemes
-        foreach ($blocks as &$block) {
-            if (isset($block['data']['url'])) {
-                $urlLower = strtolower(trim($block['data']['url']));
-                foreach ($dangerousSchemes as $scheme) {
-                    if (str_starts_with($urlLower, $scheme)) {
-                        $block['data']['url'] = '#';
-                        break;
-                    }
-                }
-            }
-            if (isset($block['data']['links']) && is_array($block['data']['links'])) {
-                foreach ($block['data']['links'] as &$link) {
-                    if (isset($link['url'])) {
-                        $urlLower = strtolower(trim($link['url']));
-                        foreach ($dangerousSchemes as $scheme) {
-                            if (str_starts_with($urlLower, $scheme)) {
-                                $link['url'] = '#';
-                                break;
-                            }
-                        }
-                    }
-                }
-                unset($link);
-            }
-        }
-        unset($block);
-
-        return $blocks;
-    }
-
     public function index(Request $request)
     {
         $this->authorizeAccess();
@@ -198,6 +96,7 @@ class NewsletterController extends Controller
         if ($selectedRoleId) {
             $role = $roles->firstWhere('id', $selectedRoleId);
             $newsletters = Newsletter::where('role_id', $selectedRoleId)
+                ->where('type', 'schedule')
                 ->where('status', '!=', 'cancelled')
                 ->orderBy('created_at', 'desc')
                 ->paginate(20);
@@ -239,9 +138,10 @@ class NewsletterController extends Controller
         $validated = $request->validate([
             'subject' => 'required|string|max:255',
             'blocks' => 'nullable|string',
-            'template' => 'required|string|max:50',
+            'template' => 'required|in:modern,classic,minimal,bold,compact',
             'style_settings' => 'nullable|array',
             'segment_ids' => 'nullable|array',
+            'segment_ids.*' => 'integer',
         ]);
 
         $blocks = $this->parseBlocks($request);
@@ -254,8 +154,9 @@ class NewsletterController extends Controller
             'blocks' => $blocks,
             'template' => $validated['template'],
             'style_settings' => $this->sanitizeStyleSettings($validated['style_settings'] ?? null),
-            'segment_ids' => $validated['segment_ids'] ?? null,
+            'segment_ids' => !empty($validated['segment_ids']) ? array_map('intval', $validated['segment_ids']) : null,
             'status' => 'draft',
+            'type' => 'schedule',
         ]);
 
         // Derive event_ids from blocks for the send pipeline
@@ -302,9 +203,10 @@ class NewsletterController extends Controller
         $validated = $request->validate([
             'subject' => 'required|string|max:255',
             'blocks' => 'nullable|string',
-            'template' => 'required|string|max:50',
+            'template' => 'required|in:modern,classic,minimal,bold,compact',
             'style_settings' => 'nullable|array',
             'segment_ids' => 'nullable|array',
+            'segment_ids.*' => 'integer',
         ]);
 
         $blocks = $this->parseBlocks($request);
@@ -315,7 +217,7 @@ class NewsletterController extends Controller
             'blocks' => $blocks,
             'template' => $validated['template'],
             'style_settings' => $this->sanitizeStyleSettings($validated['style_settings'] ?? null),
-            'segment_ids' => $validated['segment_ids'] ?? null,
+            'segment_ids' => !empty($validated['segment_ids']) ? array_map('intval', $validated['segment_ids']) : null,
         ]);
 
         // Derive event_ids from blocks
@@ -378,6 +280,10 @@ class NewsletterController extends Controller
         $newsletter = Newsletter::where('role_id', $role->id)
             ->where('id', UrlUtils::decodeId($hash))
             ->firstOrFail();
+
+        if (! in_array($newsletter->status, ['draft', 'scheduled'])) {
+            return back()->with('error', __('messages.newsletter_already_sent'));
+        }
 
         if (! $role->canSendNewsletter()) {
             $limit = $role->newsletterLimit();
@@ -517,14 +423,17 @@ class NewsletterController extends Controller
         ]);
         $recipient->save();
 
-        $result = $service->sendToRecipient($newsletter, $recipient);
-        $recipient->update(['status' => 'test']);
-
-        RateLimiter::hit($rateLimitKey, 60);
+        $result = $service->sendToRecipient($newsletter, $recipient, isTest: true);
 
         if (! $result) {
+            $recipient->delete();
+            RateLimiter::hit($rateLimitKey, 60);
+
             return back()->with('error', __('messages.test_email_failed'));
         }
+
+        $recipient->update(['status' => 'test']);
+        RateLimiter::hit($rateLimitKey, 60);
 
         return back()->with('status', __('messages.test_email_sent_to', ['email' => $role->email]));
     }
@@ -545,7 +454,7 @@ class NewsletterController extends Controller
 
         // Top clicked links
         $topLinks = \App\Models\NewsletterClick::whereHas('recipient', function ($q) use ($newsletter) {
-            $q->where('newsletter_id', $newsletter->id);
+            $q->where('newsletter_id', $newsletter->id)->where('status', '!=', 'test');
         })
             ->selectRaw('url, COUNT(*) as click_count')
             ->groupBy('url')
@@ -555,6 +464,7 @@ class NewsletterController extends Controller
 
         // Open timeline data (group by hour for first 48h, then by day)
         $openTimeline = $newsletter->recipients()
+            ->where('status', '!=', 'test')
             ->whereNotNull('opened_at')
             ->selectRaw('DATE(opened_at) as date, COUNT(*) as count')
             ->groupBy('date')
@@ -563,7 +473,7 @@ class NewsletterController extends Controller
 
         // Click timeline data
         $clickTimeline = \App\Models\NewsletterClick::whereHas('recipient', function ($q) use ($newsletter) {
-            $q->where('newsletter_id', $newsletter->id);
+            $q->where('newsletter_id', $newsletter->id)->where('status', '!=', 'test');
         })
             ->selectRaw('DATE(clicked_at) as date, COUNT(*) as count')
             ->groupBy('date')
@@ -826,8 +736,9 @@ class NewsletterController extends Controller
             }
 
             $chunks = array_chunk($recipientIds, 50);
-            foreach ($chunks as $chunk) {
-                \App\Jobs\SendNewsletterBatch::dispatch($vn->id, $chunk);
+            foreach ($chunks as $index => $chunk) {
+                \App\Jobs\SendNewsletterBatch::dispatch($vn->id, $chunk)
+                    ->delay(now()->addSeconds($index * 15));
             }
         }
 
@@ -842,7 +753,6 @@ class NewsletterController extends Controller
     public function importForm(Request $request)
     {
         $this->authorizeAccess();
-        $this->authorizeImport();
         $role = $this->getRole($request);
 
         $manualSegments = NewsletterSegment::where('role_id', $role->id)
@@ -855,7 +765,6 @@ class NewsletterController extends Controller
     public function importStore(Request $request)
     {
         $this->authorizeAccess();
-        $this->authorizeImport();
         $role = $this->getRole($request);
 
         $validated = $request->validate([
@@ -891,7 +800,7 @@ class NewsletterController extends Controller
                 ->toArray();
 
             $allEmails = collect($validated['entries'])->pluck('email')->map(fn ($e) => strtolower(trim($e)))->unique();
-            $existingUsers = User::whereIn('email', $allEmails)->get()->keyBy('email');
+            $existingUsers = User::whereIn('email', $allEmails)->get()->keyBy(fn ($u) => strtolower($u->email));
             $existingFollowerIds = DB::table('role_user')->where('role_id', $role->id)
                 ->whereIn('user_id', $existingUsers->pluck('id'))->pluck('user_id')->flip();
 
@@ -940,65 +849,4 @@ class NewsletterController extends Controller
             ->with('status', __('messages.emails_imported', ['count' => $imported]));
     }
 
-    protected function parseEmailInput(string $text): array
-    {
-        $results = [];
-        $seen = [];
-
-        $lines = preg_split('/\r?\n/', $text);
-
-        foreach ($lines as $line) {
-            $line = trim($line);
-            if (empty($line)) {
-                continue;
-            }
-
-            // Try "Name <email>" format
-            if (preg_match('/^(.+?)\s*<([^>]+)>/', $line, $matches)) {
-                $name = trim($matches[1]);
-                $email = strtolower(trim($matches[2]));
-                if (filter_var($email, FILTER_VALIDATE_EMAIL) && ! isset($seen[$email])) {
-                    $seen[$email] = true;
-                    $results[] = ['email' => $email, 'name' => $name];
-                }
-
-                continue;
-            }
-
-            // Split by comma for CSV-style or comma-separated
-            $parts = array_map('trim', explode(',', $line));
-
-            if (count($parts) === 2 && filter_var($parts[0], FILTER_VALIDATE_EMAIL) && ! filter_var($parts[1], FILTER_VALIDATE_EMAIL)) {
-                // "email, Name" format
-                $email = strtolower($parts[0]);
-                $name = $parts[1];
-                if (! isset($seen[$email])) {
-                    $seen[$email] = true;
-                    $results[] = ['email' => $email, 'name' => $name];
-                }
-            } else {
-                // Comma-separated emails or single email
-                foreach ($parts as $part) {
-                    $part = trim($part);
-                    // Check for "Name <email>" within comma-separated list
-                    if (preg_match('/^(.+?)\s*<([^>]+)>/', $part, $matches)) {
-                        $name = trim($matches[1]);
-                        $email = strtolower(trim($matches[2]));
-                        if (filter_var($email, FILTER_VALIDATE_EMAIL) && ! isset($seen[$email])) {
-                            $seen[$email] = true;
-                            $results[] = ['email' => $email, 'name' => $name];
-                        }
-                    } elseif (filter_var($part, FILTER_VALIDATE_EMAIL)) {
-                        $email = strtolower($part);
-                        if (! isset($seen[$email])) {
-                            $seen[$email] = true;
-                            $results[] = ['email' => $email, 'name' => null];
-                        }
-                    }
-                }
-            }
-        }
-
-        return $results;
-    }
 }

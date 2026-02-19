@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\Sale;
 use App\Services\AuditService;
+use App\Services\MetaAdsService;
 use App\Services\UsageTrackingService;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
@@ -161,6 +162,9 @@ class StripeController extends Controller
 
                         AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
                         UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
+
+                        // Send conversion event to Meta CAPI if event has active boost
+                        $this->sendMetaConversion($sale, $webhookAmount);
                     });
                 }
                 break;
@@ -205,6 +209,9 @@ class StripeController extends Controller
 
                             // Record sale in analytics
                             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+
+                            // Send conversion event to Meta CAPI if event has active boost
+                            $this->sendMetaConversion($sale, $sale->payment_amount);
                         });
                     }
                 }
@@ -215,5 +222,33 @@ class StripeController extends Controller
         }
 
         return response()->json(['status' => 'success']);
+    }
+
+    private function sendMetaConversion(Sale $sale, float $amount): void
+    {
+        try {
+            $event = $sale->event;
+            if (! $event || ! $event->activeBoostCampaign) {
+                return;
+            }
+
+            $metaService = app()->make(MetaAdsService::class);
+            $metaService->sendConversionEvent('Purchase', [
+                'event_id' => 'es_sale_' . $sale->id,
+                'user_data' => [
+                    'em' => [hash('sha256', strtolower(trim($sale->email)))],
+                ],
+                'custom_data' => [
+                    'value' => $amount,
+                    'currency' => config('services.meta.default_currency', 'USD'),
+                    'content_name' => $event->name,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            \Log::warning('Failed to send Meta conversion event', [
+                'sale_id' => $sale->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

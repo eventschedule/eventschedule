@@ -21,6 +21,8 @@ class SendNewsletterBatch implements ShouldQueue
 
     public $backoff = 60;
 
+    public $timeout = 300;
+
     protected $newsletterId;
 
     protected $recipientIds;
@@ -44,6 +46,8 @@ class SendNewsletterBatch implements ShouldQueue
             $role = $newsletter->role;
             if ($role && is_valid_language_code($role->language_code)) {
                 app()->setLocale($role->language_code);
+            } elseif (! $role) {
+                app()->setLocale('en');
             }
 
             $recipients = NewsletterRecipient::whereIn('id', $this->recipientIds)
@@ -53,7 +57,9 @@ class SendNewsletterBatch implements ShouldQueue
             foreach ($recipients as $recipient) {
                 try {
                     $service->sendToRecipient($newsletter, $recipient);
-                    UsageTrackingService::track(UsageTrackingService::EMAIL_NEWSLETTER, $newsletter->role_id ?? 0);
+                    if ($newsletter->role_id) {
+                        UsageTrackingService::track(UsageTrackingService::EMAIL_NEWSLETTER, $newsletter->role_id);
+                    }
                 } catch (\Exception $e) {
                     Log::error('Newsletter batch send error: '.$e->getMessage(), [
                         'newsletter_id' => $this->newsletterId,

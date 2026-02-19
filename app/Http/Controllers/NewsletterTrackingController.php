@@ -15,7 +15,7 @@ class NewsletterTrackingController extends Controller
         if ($recipient) {
             $isFirstOpen = $recipient->recordOpen();
 
-            if ($isFirstOpen) {
+            if ($isFirstOpen && $recipient->status !== 'test') {
                 $newsletter = $recipient->newsletter;
                 if ($newsletter) {
                     $newsletter->increment('open_count');
@@ -52,7 +52,7 @@ class NewsletterTrackingController extends Controller
         $recipient = NewsletterRecipient::where('token', $token)->first();
 
         if (! $recipient) {
-            return redirect($url, 302);
+            abort(404);
         }
 
         $isFirstClick = $recipient->recordClick(
@@ -61,7 +61,7 @@ class NewsletterTrackingController extends Controller
             request()->userAgent()
         );
 
-        if ($isFirstClick) {
+        if ($isFirstClick && $recipient->status !== 'test') {
             $newsletter = $recipient->newsletter;
             if ($newsletter) {
                 $newsletter->increment('click_count');
@@ -75,19 +75,27 @@ class NewsletterTrackingController extends Controller
     {
         $recipient = NewsletterRecipient::where('token', $token)->with('newsletter.role')->first();
 
-        if (! $recipient || ! $recipient->newsletter || ! $recipient->newsletter->role) {
+        if (! $recipient || ! $recipient->newsletter) {
             abort(404);
         }
 
-        $role = $recipient->newsletter->role;
+        $newsletter = $recipient->newsletter;
+        $isAdminNewsletter = $newsletter->isAdmin();
 
-        if (is_valid_language_code($role->language_code)) {
+        if (! $isAdminNewsletter && ! $newsletter->role) {
+            abort(404);
+        }
+
+        $role = $newsletter->role;
+
+        if ($role && is_valid_language_code($role->language_code)) {
             app()->setLocale($role->language_code);
         }
 
         return view('newsletter.unsubscribe', [
             'recipient' => $recipient,
             'role' => $role,
+            'isAdminNewsletter' => $isAdminNewsletter,
         ]);
     }
 
@@ -95,25 +103,46 @@ class NewsletterTrackingController extends Controller
     {
         $recipient = NewsletterRecipient::where('token', $token)->with('newsletter.role')->first();
 
-        if (! $recipient || ! $recipient->newsletter || ! $recipient->newsletter->role) {
+        if (! $recipient || ! $recipient->newsletter) {
             abort(404);
         }
 
-        $role = $recipient->newsletter->role;
+        $newsletter = $recipient->newsletter;
+        $isAdminNewsletter = $newsletter->isAdmin();
 
-        if (is_valid_language_code($role->language_code)) {
+        if (! $isAdminNewsletter && ! $newsletter->role) {
+            abort(404);
+        }
+
+        $role = $newsletter->role;
+
+        if ($role && is_valid_language_code($role->language_code)) {
             app()->setLocale($role->language_code);
         }
 
-        NewsletterUnsubscribe::firstOrCreate(
-            ['role_id' => $role->id, 'email' => strtolower($recipient->email)],
-            ['unsubscribed_at' => now()]
-        );
+        $unsubscribed = false;
+
+        if ($isAdminNewsletter) {
+            $user = $recipient->user_id
+                ? \App\Models\User::find($recipient->user_id)
+                : \App\Models\User::where('email', strtolower($recipient->email))->first();
+            if ($user) {
+                $user->update(['admin_newsletter_unsubscribed_at' => now()]);
+                $unsubscribed = true;
+            }
+        } else {
+            NewsletterUnsubscribe::firstOrCreate(
+                ['role_id' => $role->id, 'email' => strtolower($recipient->email)],
+                ['unsubscribed_at' => now()]
+            );
+            $unsubscribed = true;
+        }
 
         return view('newsletter.unsubscribe', [
             'recipient' => $recipient,
             'role' => $role,
-            'unsubscribed' => true,
+            'isAdminNewsletter' => $isAdminNewsletter,
+            'unsubscribed' => $unsubscribed,
         ]);
     }
 }
