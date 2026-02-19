@@ -2407,12 +2407,6 @@
                                     </p>
                                 </div>
 
-                                <div class="mb-6">
-                                    <x-input-label for="coupon_code_ticketed" :value="__('messages.coupon_code')" />
-                                    <x-text-input id="coupon_code_ticketed" name="coupon_code" type="text" class="mt-1 block w-full"
-                                        v-model="event.coupon_code" maxlength="255" />
-                                </div>
-
                                 <div v-if="hasLimitedPaidTickets">
                                     <div class="mb-6">
                                         <div class="flex items-center">
