@@ -1859,7 +1859,7 @@ const calendarApp = createApp({
             if (this.activeFilterCount > 0) return [];
 
             // Start with server-provided past events (one-time)
-            const events = this.pastEvents.filter(event => this.isEventVisible(event));
+            const events = this.pastEvents.filter(event => this.isEventVisible(event) && event.occurrenceDate && this.isPastEvent(event.occurrenceDate));
 
             // Also generate past occurrences from recurring events
             let today = new Date();
