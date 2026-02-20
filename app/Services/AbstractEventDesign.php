@@ -296,9 +296,6 @@ abstract class AbstractEventDesign
                         $this->fonts[$lang][$weight] = $this->fonts['en']['regular'];
                     }
                 }
-
-                // Debug: Log font status
-                error_log("Font {$lang} {$weight}: {$path} - exists: ".(file_exists($path) ? 'yes' : 'no').', readable: '.(is_readable($path) ? 'yes' : 'no'));
             }
         }
     }
@@ -326,14 +323,8 @@ abstract class AbstractEventDesign
             return $this->fonts['en'][$weight] ?? $this->fonts['en']['regular'];
         }
 
-        // If text contains only RTL characters, use role language font
-        if (! $this->containsLTRCharacters($text)) {
-            return $this->getFontPath($weight);
-        }
-
-        // For mixed content (including text with apostrophes), prefer the role language font as base
-        // The mixed content handler will use appropriate fonts for each segment
-        return $this->getFontPath($weight);
+        // For RTL or mixed content, use the role's language font
+        return $this->getFontPathForLanguage($this->lang, $weight);
     }
 
     /**
@@ -452,6 +443,11 @@ abstract class AbstractEventDesign
         // Adjust position for RTL text
         if ($isRtl) {
             $x = $x - $textWidth;
+        }
+
+        // Reverse characters for RTL so imagettftext (which always renders L-to-R) displays correctly
+        if ($isRtl && $this->containsRTLCharacters($text)) {
+            $text = $this->reverseUTF8String($text);
         }
 
         // Add text with TTF font
@@ -1219,6 +1215,16 @@ abstract class AbstractEventDesign
     }
 
     /**
+     * Reverse a UTF-8 string character by character
+     */
+    protected function reverseUTF8String(string $text): string
+    {
+        $chars = mb_str_split($text, 1, 'UTF-8');
+
+        return implode('', array_reverse($chars));
+    }
+
+    /**
      * Check if text contains mixed content (Hebrew/Arabic + English)
      */
     protected function containsMixedContent(string $text): bool
@@ -1244,9 +1250,8 @@ abstract class AbstractEventDesign
         // Calculate total width for proper positioning
         $totalWidth = $this->calculateMixedTextWidth($segments, $fontSize, $color, $weight);
 
-        // Determine starting position based on first character's RTL status
-        $firstCharRTL = $this->isRTLCharacter($text[0] ?? '');
-        if ($firstCharRTL) {
+        // Determine starting position based on the overall RTL direction
+        if ($isRtl) {
             $currentX = $x - $totalWidth;
         } else {
             $currentX = $x;
@@ -1273,15 +1278,17 @@ abstract class AbstractEventDesign
             // Calculate segment width
             $segmentWidth = $this->getTextWidth($segmentText, $fontSize, $fontPath);
 
-            // Debug: Log which font is being used
-            error_log("Segment: '{$segmentText}' using font: {$fontPath}, lang: {$segmentLang}");
+            // Reverse RTL segment characters so imagettftext renders them correctly
+            if ($segmentRTL) {
+                $segmentText = $this->reverseUTF8String($segmentText);
+            }
 
             if (file_exists($fontPath) && is_readable($fontPath) && function_exists('imagettftext')) {
-                // Use TTF font for this segment
-                $this->addTextWithTTF($segmentText, $currentX, $adjustedY, $fontSize, $color, $fontPath, $segmentRTL);
+                // Use TTF font for this segment - pass false for RTL since positioning is handled by $currentX
+                $this->addTextWithTTF($segmentText, $currentX, $adjustedY, $fontSize, $color, $fontPath, false);
             } else {
                 // Fallback to GD fonts
-                $this->addTextWithGDFonts($segmentText, $currentX, $adjustedY, $fontSize, $color, $segmentRTL);
+                $this->addTextWithGDFonts($segmentText, $currentX, $adjustedY, $fontSize, $color, false);
             }
 
             // Move to next position
