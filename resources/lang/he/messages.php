@@ -1003,10 +1003,6 @@ return [
     'enterprise_feature_ai_prompt' => 'המרת טקסט באמצעות AI היא תכונת Enterprise.',
     'enterprise_feature_email_scheduling' => 'תזמון דוא"ל הוא תכונת Enterprise.',
 
-    // Screen capture rendering
-    'screen_capture_rendering' => 'עיבוד לכידת מסך',
-    'enable_screen_capture' => 'השתמש בלכידת מסך ליצירת גרפיקה',
-    'screen_capture_help' => 'משתמש בעיבוד מבוסס דפדפן לתמיכה טובה יותר בשפות RTL',
     'sync_direction_updated' => 'כיוון הסנכרון עודכן.',
 
     // Text template

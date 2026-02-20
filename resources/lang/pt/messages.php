@@ -1009,10 +1009,6 @@ return [
     'enterprise_feature_ai_prompt' => 'Transformação de texto com IA é um recurso Enterprise.',
     'enterprise_feature_email_scheduling' => 'Agendamento de e-mail é um recurso Enterprise.',
 
-    // Screen capture rendering
-    'screen_capture_rendering' => 'Renderização de captura de tela',
-    'enable_screen_capture' => 'Usar captura de tela para geração de gráficos',
-    'screen_capture_help' => 'Usa renderização baseada em navegador para melhor suporte a idiomas RTL',
     'sync_direction_updated' => 'Direção de sincronização atualizada.',
 
     // Text template

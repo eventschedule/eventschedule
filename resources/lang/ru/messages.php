@@ -982,9 +982,6 @@ return [
     'upgrade_to_enterprise' => 'Обновление до предприятия',
     'enterprise_feature_ai_prompt' => 'Преобразование текста с помощью ИИ — это функция Enterprise.',
     'enterprise_feature_email_scheduling' => 'Планирование электронной почты — это функция Enterprise.',
-    'screen_capture_rendering' => 'Рендеринг снимков экрана',
-    'enable_screen_capture' => 'Используйте снимок экрана для создания графики',
-    'screen_capture_help' => 'Использует рендеринг на основе браузера для лучшей поддержки языка RTL.',
 
     // Event graphic layout and options
     'layout_type' => 'Тип макета',

@@ -1008,10 +1008,6 @@ return [
     'enterprise_feature_ai_prompt' => 'La transformation de texte par IA est une fonctionnalité Enterprise.',
     'enterprise_feature_email_scheduling' => 'La planification des e-mails est une fonctionnalité Enterprise.',
 
-    // Screen capture rendering
-    'screen_capture_rendering' => 'Rendu par capture d\'écran',
-    'enable_screen_capture' => 'Utiliser la capture d\'écran pour la génération de graphiques',
-    'screen_capture_help' => 'Utilise le rendu basé sur le navigateur pour une meilleure prise en charge des langues RTL',
     'sync_direction_updated' => 'Direction de synchronisation mise à jour.',
 
     // Text template

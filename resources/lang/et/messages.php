@@ -981,9 +981,6 @@ return [
     'upgrade_to_enterprise' => 'Minge üle ettevõtte versioonile',
     'enterprise_feature_ai_prompt' => 'AI teksti teisendus on ettevõtte funktsioon.',
     'enterprise_feature_email_scheduling' => 'Meili ajastamine on ettevõtte funktsioon.',
-    'screen_capture_rendering' => 'Ekraanipildi renderdamine',
-    'enable_screen_capture' => 'Kasutage graafika genereerimiseks ekraanipilti',
-    'screen_capture_help' => 'Kasutab brauseripõhist renderdamist parema RTL-keele toe jaoks',
 
     // Event graphic layout and options
     'layout_type' => 'Paigutuse tüüp',

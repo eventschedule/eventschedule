@@ -928,7 +928,6 @@ return [
     'feature_team_members' => 'Add team members to manage your schedule',
     'feature_api_access' => 'API access for integrations',
     'upgrade_to_pro_plan' => 'Upgrade to Pro',
-    'screen_capture_help' => 'يستخدم العرض المستند إلى المتصفح لدعم أفضل للغات من اليمين إلى اليسار',
 
     // CalDAV Calendar Integration
     'caldav_calendar' => 'تقويم CalDAV',
@@ -1010,9 +1009,6 @@ return [
     'enterprise_feature_ai_prompt' => 'تحويل النص بالذكاء الاصطناعي هو ميزة Enterprise.',
     'enterprise_feature_email_scheduling' => 'جدولة البريد الإلكتروني هي ميزة Enterprise.',
 
-    // Screen capture rendering
-    'screen_capture_rendering' => 'عرض التقاط الشاشة',
-    'enable_screen_capture' => 'استخدام التقاط الشاشة لتوليد الرسومات',
     'sync_direction_updated' => 'تم تحديث اتجاه المزامنة.',
 
     // Text template
