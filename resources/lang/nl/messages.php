@@ -1008,10 +1008,6 @@ return [
     'enterprise_feature_ai_prompt' => 'AI-teksttransformatie is een Enterprise-functie.',
     'enterprise_feature_email_scheduling' => 'E-mail planning is een Enterprise-functie.',
 
-    // Screen capture rendering
-    'screen_capture_rendering' => 'Schermopname rendering',
-    'enable_screen_capture' => 'Gebruik schermopname voor het genereren van afbeeldingen',
-    'screen_capture_help' => 'Gebruikt browsergebaseerde rendering voor betere RTL-taalondersteuning',
     'sync_direction_updated' => 'Synchronisatierichting bijgewerkt.',
 
     // Text template

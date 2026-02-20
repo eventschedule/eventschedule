@@ -65,10 +65,6 @@ return [
         'api_key' => env('INVOICENINJA_API_KEY'),
     ],
 
-    'capturekit' => [
-        'key' => env('CAPTURE_KIT_ACCESS_KEY'),
-    ],
-
     'turnstile' => [
         'site_key' => env('TURNSTILE_SITE_KEY'),
         'secret_key' => env('TURNSTILE_SECRET_KEY'),

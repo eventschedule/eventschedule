@@ -131,8 +131,6 @@
                                  document.getElementById('ai_prompt_mobile')?.value || '';
                 const textTemplate = document.getElementById('text_template')?.value ||
                                      document.getElementById('text_template_mobile')?.value || '';
-                const useScreenCapture = document.getElementById('use_screen_capture')?.checked ||
-                                         document.getElementById('use_screen_capture_mobile')?.checked || false;
                 const excludeRecurring = document.getElementById('exclude_recurring')?.checked ||
                                          document.getElementById('exclude_recurring_mobile')?.checked || false;
                 const layout = document.querySelector('input[name="layout"]:checked')?.value ||
@@ -154,7 +152,6 @@
                     direct_registration: directRegistration,
                     ai_prompt: aiPrompt,
                     text_template: textTemplate,
-                    use_screen_capture: useScreenCapture,
                     exclude_recurring: excludeRecurring,
                     layout: layout,
                     date_position: datePosition,
@@ -180,13 +177,6 @@
                 const textTemplateMobile = document.getElementById('text_template_mobile');
                 if (textTemplateDesktop && textTemplateMobile) {
                     textTemplateMobile.value = textTemplateDesktop.value;
-                }
-
-                // Sync screen capture
-                const screenCaptureDesktop = document.getElementById('use_screen_capture');
-                const screenCaptureMobile = document.getElementById('use_screen_capture_mobile');
-                if (screenCaptureDesktop && screenCaptureMobile) {
-                    screenCaptureMobile.checked = screenCaptureDesktop.checked;
                 }
 
                 // Sync exclude recurring
@@ -310,7 +300,6 @@
                 const formSettings = getFormSettings();
                 const layoutParam = '?layout=' + encodeURIComponent(formSettings.layout);
                 const directParam = formSettings.direct_registration ? '&direct=1' : '';
-                const screenCaptureParam = formSettings.use_screen_capture ? '&use_screen_capture=1' : '';
                 const aiPromptParam = formSettings.ai_prompt ? '&ai_prompt=' + encodeURIComponent(formSettings.ai_prompt) : '';
                 const textTemplateParam = formSettings.text_template ? '&text_template=' + encodeURIComponent(formSettings.text_template) : '';
                 const excludeRecurringParam = formSettings.exclude_recurring ? '&exclude_recurring=1' : '';
@@ -321,7 +310,7 @@
                 const urlIncludeHttpsParam = formSettings.url_include_https ? '&url_include_https=1' : '';
                 const urlIncludeIdParam = formSettings.url_include_id ? '&url_include_id=1' : '';
 
-                fetch('{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + screenCaptureParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam + urlIncludeHttpsParam + urlIncludeIdParam)
+                fetch('{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam + urlIncludeHttpsParam + urlIncludeIdParam)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Network response was not ok');
@@ -419,13 +408,6 @@
 {venue} | {city}
 {url}`;
                         textTemplate.value = savedValue || defaultTemplate;
-                    }
-                });
-
-                ['use_screen_capture', 'use_screen_capture_mobile'].forEach(id => {
-                    const useScreenCapture = document.getElementById(id);
-                    if (useScreenCapture) {
-                        useScreenCapture.checked = currentSettings.use_screen_capture || false;
                     }
                 });
 
@@ -556,35 +538,6 @@
                 });
             }
 
-            function toggleScreenCapture() {
-                const useScreenCapture = document.getElementById('use_screen_capture')?.checked ||
-                                         document.getElementById('use_screen_capture_mobile')?.checked || false;
-
-                // Elements to hide when screen capture is enabled
-                const containerIds = [
-                    'layout_type_container', 'layout_type_container_mobile',
-                    'date_position_container', 'date_position_container_mobile',
-                    'max_per_row_container', 'max_per_row_container_mobile'
-                ];
-
-                containerIds.forEach(id => {
-                    const container = document.getElementById(id);
-                    if (container) {
-                        if (useScreenCapture) {
-                            container.classList.add('hidden');
-                        } else {
-                            container.classList.remove('hidden');
-                        }
-                    }
-                });
-
-                // Re-apply layout visibility rules when turning off screen capture
-                if (!useScreenCapture) {
-                    toggleDatePositionVisibility();
-                    toggleMaxPerRowVisibility();
-                }
-            }
-
             function updateDaySelector() {
                 // Update both desktop and mobile day selectors
                 [
@@ -668,7 +621,6 @@
                 const sendHour = document.getElementById('send_hour') || document.getElementById('send_hour_mobile');
                 const aiPrompt = document.getElementById('ai_prompt') || document.getElementById('ai_prompt_mobile');
                 const textTemplate = document.getElementById('text_template') || document.getElementById('text_template_mobile');
-                const useScreenCapture = document.getElementById('use_screen_capture') || document.getElementById('use_screen_capture_mobile');
                 const excludeRecurring = document.getElementById('exclude_recurring') || document.getElementById('exclude_recurring_mobile');
                 const recipientEmails = document.getElementById('recipient_emails') || document.getElementById('recipient_emails_mobile');
 
@@ -701,7 +653,6 @@
                     ai_prompt: aiPrompt ? aiPrompt.value : '',
                     text_template: textTemplate ? textTemplate.value : '',
                     layout: layoutChecked ? layoutChecked.value : 'grid',
-                    use_screen_capture: useScreenCapture ? useScreenCapture.checked : false,
                     exclude_recurring: excludeRecurring ? excludeRecurring.checked : false,
                     recipient_emails: recipientEmails ? recipientEmails.value : '',
                     date_position: datePosition ? datePosition.value || null : null,
@@ -1143,9 +1094,6 @@
                     }
                 });
 
-                // Apply initial screen capture visibility state
-                toggleScreenCapture();
-
                 // Initialize header image preview if exists
                 initHeaderImagePreview();
 
@@ -1174,16 +1122,6 @@
                         document.getElementById('header_image_mobile').click();
                     });
                 }
-
-                // Screen capture toggle checkboxes
-                ['use_screen_capture', 'use_screen_capture_mobile'].forEach(id => {
-                    const checkbox = document.getElementById(id);
-                    if (checkbox) {
-                        checkbox.addEventListener('change', function() {
-                            toggleScreenCapture();
-                        });
-                    }
-                });
 
                 // syncFormFields checkboxes
                 ['url_include_https', 'url_include_https_mobile', 'url_include_id', 'url_include_id_mobile', 'exclude_recurring', 'exclude_recurring_mobile'].forEach(id => {
@@ -1488,21 +1426,6 @@
                             <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.graphic_header_help') }}</p>
                         </div>
 
-                        <!-- Screen Capture Rendering (Enterprise Feature) -->
-                        @if ($isEnterprise)
-                        <div class="mb-5">
-                            <div class="flex items-center justify-between mb-3">
-                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.screen_capture_rendering') }}</h4>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <label class="flex items-center cursor-pointer">
-                                    <input type="checkbox" id="use_screen_capture_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_screen_capture') }}</span>
-                                </label>
-                            </div>
-                            <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.screen_capture_help') }}</p>
-                        </div>
-                        @endif
                     </div>
 
                     <!-- Text Tab Content -->
@@ -1806,21 +1729,6 @@
                                 <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.graphic_header_help') }}</p>
                             </div>
 
-                            <!-- Screen Capture Rendering (Enterprise Feature) -->
-                            @if ($isEnterprise)
-                            <div class="mb-5">
-                                <div class="flex items-center justify-between mb-3">
-                                    <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.screen_capture_rendering') }}</h4>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <label class="flex items-center cursor-pointer">
-                                        <input type="checkbox" id="use_screen_capture" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_screen_capture') }}</span>
-                                    </label>
-                                </div>
-                                <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.screen_capture_help') }}</p>
-                            </div>
-                            @endif
                         </div>
 
                         <!-- Text Tab Content -->

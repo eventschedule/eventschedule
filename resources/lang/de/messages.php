@@ -1012,10 +1012,6 @@ return [
     'enterprise_feature_ai_prompt' => 'KI-Texttransformation ist eine Enterprise-Funktion.',
     'enterprise_feature_email_scheduling' => 'E-Mail-Planung ist eine Enterprise-Funktion.',
 
-    // Screen capture rendering
-    'screen_capture_rendering' => 'Bildschirmaufnahme-Rendering',
-    'enable_screen_capture' => 'Bildschirmaufnahme für Grafikgenerierung verwenden',
-    'screen_capture_help' => 'Verwendet browserbasiertes Rendering für bessere RTL-Sprachunterstützung',
     'sync_direction_updated' => 'Synchronisierungsrichtung aktualisiert.',
 
     // Text template
