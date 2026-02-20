@@ -13,7 +13,7 @@ class ListDesign extends AbstractEventDesign
     // List-specific configuration
     protected const FLYER_WIDTH = 200;
 
-    protected const FLYER_HEIGHT = 120;
+    protected const FLYER_HEIGHT = 135;
 
     protected const ITEM_HEIGHT = 140;
 
@@ -60,16 +60,24 @@ class ListDesign extends AbstractEventDesign
 
     protected function generateEventListItem(Event $event, int $y): void
     {
-        $x = self::MARGIN;
+        $imageYOffset = (int) ((self::ITEM_HEIGHT - self::FLYER_HEIGHT) / 2);
 
-        // Add the event flyer image on the left
-        $this->addEventFlyerImage($event, $x, $y);
+        if ($this->rtl) {
+            // RTL: flyer on the right, text on the left
+            $flyerX = $this->totalWidth - self::MARGIN - self::FLYER_WIDTH;
+            $textX = self::MARGIN;
 
-        // Add event details on the right
-        $this->addEventDetails($event, $x + self::TEXT_LEFT_MARGIN, $y);
+            $this->addEventFlyerImage($event, $flyerX, $y + $imageYOffset);
+            $this->addEventDetails($event, $textX, $y);
+            $this->addEventQRCode($event, $flyerX + self::QR_CODE_PADDING, $y + self::ITEM_HEIGHT - self::QR_CODE_SIZE - self::QR_CODE_PADDING);
+        } else {
+            // LTR: flyer on the left, text on the right
+            $flyerX = self::MARGIN;
 
-        // Add QR code to the bottom left (consistent with other layouts)
-        $this->addEventQRCode($event, $x + self::QR_CODE_PADDING, $y + self::ITEM_HEIGHT - self::QR_CODE_SIZE - self::QR_CODE_PADDING);
+            $this->addEventFlyerImage($event, $flyerX, $y + $imageYOffset);
+            $this->addEventDetails($event, $flyerX + self::TEXT_LEFT_MARGIN, $y);
+            $this->addEventQRCode($event, $flyerX + self::QR_CODE_PADDING, $y + self::ITEM_HEIGHT - self::QR_CODE_SIZE - self::QR_CODE_PADDING);
+        }
 
         // Add separator line between items (except for the last one)
         if ($y + self::ITEM_HEIGHT < $this->totalHeight - self::MARGIN) {
@@ -522,30 +530,35 @@ class ListDesign extends AbstractEventDesign
         // Calculate text panel dimensions
         $panelWidth = 520; // Slightly wider for better text spacing
         $panelHeight = $event->short_description ? 135 : 110; // Taller if short description present
-        $panelX = $x - 20; // Slightly more left padding for better visual balance
-        $panelY = $y + 8; // Slightly higher for better vertical centering
+        $panelY = $y + (int) ((self::ITEM_HEIGHT - $panelHeight) / 2);
+
+        if ($this->rtl) {
+            // RTL: text panel on the left side
+            $panelX = $x;
+            $textStartX = $x + $panelWidth - 20; // Right edge of panel for RTL text alignment
+        } else {
+            // LTR: text panel on the right side
+            $panelX = $x - 20; // Slightly more left padding for better visual balance
+            $textStartX = $x;
+        }
 
         // Create the rounded corner text panel background
         $this->createTextPanelBackground($panelX, $panelY, $panelWidth, $panelHeight);
 
-        // Adjust text starting position to be centered within the panel
-        $textStartX = $x;
-        $textStartY = $y + 30; // Better vertical centering within the larger panel
+        $textStartY = $panelY + 22;
+
+        // Force RTL alignment for all text lines when schedule is RTL
+        $isRtl = $this->rtl ? true : null;
 
         // Event title - use bold font with black color
         $title = $event->name ?? 'Untitled Event';
-
-        // Debug: log what we're trying to render
-        if (in_array($this->lang, ['he', 'ar'])) {
-            error_log("Rendering Hebrew/Arabic text: '{$title}' at ({$textStartX}, {$textStartY})");
-        }
 
         // Truncate long titles
         if (mb_strlen($title) > 35) {
             $title = mb_substr($title, 0, 35).'...';
         }
 
-        $this->addText($title, $textStartX, $textStartY, self::TITLE_FONT_SIZE, $this->c['black'], 'bold');
+        $this->addText($title, $textStartX, $textStartY, self::TITLE_FONT_SIZE, $this->c['black'], 'bold', $isRtl);
         $textStartY += self::LINE_HEIGHT;
 
         // Short description
@@ -555,21 +568,21 @@ class ListDesign extends AbstractEventDesign
             if (mb_strlen($shortDesc) > 80) {
                 $shortDesc = mb_substr($shortDesc, 0, 80).'...';
             }
-            $this->addText($shortDesc, $textStartX, $textStartY, 12, $this->c['gray'], 'regular');
+            $this->addText($shortDesc, $textStartX, $textStartY, 12, $this->c['gray'], 'regular', $isRtl);
             $textStartY += self::LINE_HEIGHT;
         }
 
         // Venue
         if ($event->venue) {
             $venue = $event->venue->shortVenue();
-            $this->addText($venue, $textStartX, $textStartY, self::VENUE_FONT_SIZE, $this->c['black'], 'regular');
+            $this->addText($venue, $textStartX, $textStartY, self::VENUE_FONT_SIZE, $this->c['black'], 'regular', $isRtl);
             $textStartY += self::LINE_HEIGHT;
         }
 
         // Date and time
         if ($event->starts_at) {
             $dateTime = $this->formatEventDateTime($event);
-            $this->addText($dateTime, $textStartX, $textStartY, self::DATE_FONT_SIZE, $this->c['black'], 'regular');
+            $this->addText($dateTime, $textStartX, $textStartY, self::DATE_FONT_SIZE, $this->c['black'], 'regular', $isRtl);
         }
     }
 
@@ -597,12 +610,6 @@ class ListDesign extends AbstractEventDesign
 
         // Create panel colors
         $panelBgColor = imagecolorallocatealpha($tempImage, 255, 255, 255, 0); // White, fully opaque
-        $panelBorderColor = imagecolorallocatealpha($tempImage,
-            imagecolorsforindex($tempImage, $this->c['accent'])['red'],
-            imagecolorsforindex($tempImage, $this->c['accent'])['green'],
-            imagecolorsforindex($tempImage, $this->c['accent'])['blue'],
-            0 // Fully opaque
-        );
 
         // Create subtle shadow colors for depth
         $shadowColor1 = imagecolorallocatealpha($tempImage, 0, 0, 0, 0); // Black, fully opaque
@@ -616,9 +623,6 @@ class ListDesign extends AbstractEventDesign
 
         // Fill the main panel background
         imagefilledrectangle($tempImage, 0, 0, $width, $height, $panelBgColor);
-
-        // Add subtle accent border with rounded corners effect
-        imagerectangle($tempImage, 0, 0, $width, $height, $panelBorderColor);
 
         // Add subtle inner highlight for depth
         $highlightColor = imagecolorallocatealpha($tempImage, 255, 255, 255, 0); // White highlight
@@ -645,7 +649,6 @@ class ListDesign extends AbstractEventDesign
     {
         // Create panel colors
         $panelBgColor = $this->c['white'];
-        $panelBorderColor = $this->c['accent'];
 
         // Add layered shadow effect for depth
         $shadowColor = $this->c['black'];
@@ -656,9 +659,6 @@ class ListDesign extends AbstractEventDesign
 
         // Fill the main panel background
         imagefilledrectangle($this->im, $x, $y, $x + $width, $y + $height, $panelBgColor);
-
-        // Add subtle border
-        imagerectangle($this->im, $x, $y, $x + $width, $y + $height, $panelBorderColor);
 
         // Add subtle inner highlight for depth
         $highlightColor = $this->c['white'];
