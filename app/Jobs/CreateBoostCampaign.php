@@ -161,7 +161,7 @@ class CreateBoostCampaign implements ShouldBeUnique, ShouldQueue
 
     protected function getMetaService(): MetaAdsService
     {
-        if (config('app.is_testing') || empty(config('services.meta.access_token'))) {
+        if (! MetaAdsService::isBoostConfigured()) {
             return new MetaAdsServiceFake;
         }
 

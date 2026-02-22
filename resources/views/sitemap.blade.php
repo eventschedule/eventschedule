@@ -524,13 +524,7 @@
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>{{ url('/docs/saas/setup') }}</loc>
-        <lastmod>{{ $lastmod }}</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
-    </url>
-    <url>
-        <loc>{{ url('/docs/saas/boost') }}</loc>
+        <loc>{{ url('/docs/selfhost/boost') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>

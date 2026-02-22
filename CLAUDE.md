@@ -15,6 +15,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Use "selfhost" not "self-host"** - Always write "selfhost" and "selfhosted" (no hyphen) except for "self-hosting"
 - **Keep the sitemap up-to-date** - When adding new pages, add them to `resources/views/sitemap.blade.php`
 - **Complete bento grids** - When using bento grids, ensure all cells are filled (especially the bottom right corner)
+- **Align card actions to bottom** - In grids of cards/panels with varying content lengths, use `flex flex-col` on the card and `mt-auto` on the bottom element (e.g. links, buttons) so they align across cards
 - **Support light and dark mode** - Always consider both light mode and dark mode when working on UI
 - **Forward button at the end** - In button pairs (e.g. cancel/submit), place the forward action button at the end (right in LTR, left in RTL)
 - **No co-author on commits** - Do not add "Co-Authored-By: Claude" to git commit messages
