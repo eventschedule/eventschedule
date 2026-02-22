@@ -440,7 +440,7 @@ class RoleController extends Controller
 
         // Calculate month boundaries in user's/role's timezone, then convert to UTC for database query
         $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-        $endOfMonth = $startOfMonth->copy()->addMonths(3)->endOfMonth()->endOfDay();
+        $endOfMonth = $startOfMonth->copy()->addMonths(6)->endOfMonth()->endOfDay();
 
         // Convert to UTC for database query
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
@@ -737,7 +737,7 @@ class RoleController extends Controller
         $timezone = ($user ? $user->timezone : null) ?? $role->timezone ?? 'UTC';
 
         $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-        $endOfMonth = $startOfMonth->copy()->addMonths(3)->endOfMonth()->endOfDay();
+        $endOfMonth = $startOfMonth->copy()->addMonths(6)->endOfMonth()->endOfDay();
 
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
         $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
@@ -818,7 +818,7 @@ class RoleController extends Controller
         $timezone = $user->timezone ?? $role->timezone ?? 'UTC';
 
         $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-        $endOfMonth = $startOfMonth->copy()->addMonths(4)->endOfMonth()->endOfDay();
+        $endOfMonth = $startOfMonth->copy()->addMonths(6)->endOfMonth()->endOfDay();
 
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
         $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
@@ -908,8 +908,8 @@ class RoleController extends Controller
 
             // Calculate month boundaries in user's/role's timezone, then convert to UTC for database query
             $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-            // Load events for 4 months to support mobile view showing all upcoming events
-            $endOfMonth = $startOfMonth->copy()->addMonths(4)->endOfMonth()->endOfDay();
+            // Load events for 6 months to support mobile view showing all upcoming events
+            $endOfMonth = $startOfMonth->copy()->addMonths(6)->endOfMonth()->endOfDay();
 
             // Convert to UTC for database query
             $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
@@ -1260,6 +1260,7 @@ class RoleController extends Controller
             $role->plan_expires = now()->addDays(config('app.trial_days'))->format('Y-m-d');
             $role->plan_type = 'pro';
             $role->plan_term = 'year';
+            $role->trial_ends_at = now()->addDays(config('app.trial_days'));
         }
 
         if (! config('app.hosted')) {
@@ -2414,6 +2415,10 @@ class RoleController extends Controller
 
         if (auth()->user()->id != $role->user_id) {
             return redirect()->back()->with('error', __('messages.unauthorized'));
+        }
+
+        if ($role->hasActiveSubscription() || $role->onGracePeriod()) {
+            return redirect()->back()->with('error', __('messages.cancel_subscription_first'));
         }
 
         $role->plan_type = $plan_type;

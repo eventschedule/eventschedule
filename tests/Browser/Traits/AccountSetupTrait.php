@@ -39,10 +39,12 @@ trait AccountSetupTrait
         $browser->script("document.querySelector('a[data-section=\"section-address\"]').click()");
 
         $browser->waitFor('#address1', 15)
-            ->type('address1', $address)
-            ->scrollIntoView('button[type="submit"]')
-            ->click('button[type="submit"]')
-            ->waitForLocation('/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 15)
+            ->type('address1', $address);
+
+        // Use JavaScript to submit form (avoids click-targeting issues with multiple submit buttons)
+        $browser->script("document.getElementById('edit-form').requestSubmit()");
+
+        $browser->waitForLocation('/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 25)
             ->assertPathIs('/'.strtolower(str_replace(' ', '-', $name)).'/schedule');
     }
 

@@ -57,6 +57,8 @@ return [
         'webhook_secret' => env('STRIPE_PLATFORM_WEBHOOK_SECRET'),
         'price_monthly' => env('STRIPE_PRICE_MONTHLY'),
         'price_yearly' => env('STRIPE_PRICE_YEARLY'),
+        'price_monthly_amount' => env('STRIPE_PRICE_MONTHLY_AMOUNT', '5'),
+        'price_yearly_amount' => env('STRIPE_PRICE_YEARLY_AMOUNT', '50'),
         'enterprise_price_monthly' => env('STRIPE_ENTERPRISE_PRICE_MONTHLY'),
         'enterprise_price_yearly' => env('STRIPE_ENTERPRISE_PRICE_YEARLY'),
     ],

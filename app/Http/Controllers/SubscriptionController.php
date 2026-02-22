@@ -22,6 +22,12 @@ class SubscriptionController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        if ($role->hasActiveSubscription()) {
+            return redirect()
+                ->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])
+                ->with('message', __('messages.subscription_already_active'));
+        }
+
         $intent = $role->createSetupIntent();
 
         return view('subscription.show', [
@@ -94,7 +100,9 @@ class SubscriptionController extends Controller
                 [$exception->payment->id, 'redirect' => route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])]
             );
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            \Log::error('Subscription creation failed', ['error' => $e->getMessage(), 'role' => $role->id]);
+
+            return redirect()->back()->with('error', __('messages.subscription_error'));
         }
     }
 
@@ -127,14 +135,16 @@ class SubscriptionController extends Controller
 
         $subscription = $role->subscription('default');
 
-        if (! $subscription) {
+        if (! $subscription || ! $subscription->active()) {
             return redirect()->back()->with('error', __('messages.no_active_subscription'));
         }
 
         try {
             $subscription->cancel();
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            \Log::error('Subscription cancellation failed', ['error' => $e->getMessage(), 'role' => $role->id]);
+
+            return redirect()->back()->with('error', __('messages.subscription_error'));
         }
 
         return redirect()
@@ -162,7 +172,9 @@ class SubscriptionController extends Controller
         try {
             $subscription->resume();
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            \Log::error('Subscription resume failed', ['error' => $e->getMessage(), 'role' => $role->id]);
+
+            return redirect()->back()->with('error', __('messages.subscription_error'));
         }
 
         return redirect()
@@ -187,7 +199,7 @@ class SubscriptionController extends Controller
 
         $subscription = $role->subscription('default');
 
-        if (! $subscription) {
+        if (! $subscription || ! $subscription->active() || $subscription->onTrial()) {
             return redirect()->back()->with('error', __('messages.no_active_subscription'));
         }
 
@@ -198,7 +210,9 @@ class SubscriptionController extends Controller
             $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
             $role->save();
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            \Log::error('Subscription swap failed', ['error' => $e->getMessage(), 'role' => $role->id]);
+
+            return redirect()->back()->with('error', __('messages.subscription_error'));
         }
 
         return redirect()

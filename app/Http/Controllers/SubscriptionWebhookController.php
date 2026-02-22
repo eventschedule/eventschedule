@@ -59,8 +59,10 @@ class SubscriptionWebhookController extends WebhookController
         $role = Role::where('stripe_id', $payload['data']['object']['customer'])->first();
 
         if ($role) {
-            $role->plan_type = $role->hasActiveEnterpriseSubscription() ? 'enterprise' : 'pro';
-            $role->save();
+            if ($role->hasActiveSubscription()) {
+                $role->plan_type = $role->hasActiveEnterpriseSubscription() ? 'enterprise' : 'pro';
+                $role->save();
+            }
         }
 
         return new Response('Webhook Handled', 200);
@@ -97,13 +99,16 @@ class SubscriptionWebhookController extends WebhookController
         $role = Role::where('stripe_id', $data['customer'])->first();
 
         if ($role) {
-            // Update the plan term based on the price
+            // Update the plan type and term based on the price
             $yearlyPriceId = config('services.stripe_platform.price_yearly');
+            $enterpriseMonthlyPriceId = config('services.stripe_platform.enterprise_price_monthly');
             $enterpriseYearlyPriceId = config('services.stripe_platform.enterprise_price_yearly');
             $currentPrice = $data['items']['data'][0]['price']['id'] ?? null;
 
             if ($currentPrice) {
                 $isYearly = ($currentPrice === $yearlyPriceId) || ($currentPrice === $enterpriseYearlyPriceId);
+                $isEnterprise = ($currentPrice === $enterpriseMonthlyPriceId) || ($currentPrice === $enterpriseYearlyPriceId);
+                $role->plan_type = $isEnterprise ? 'enterprise' : 'pro';
                 $role->plan_term = $isYearly ? 'year' : 'month';
                 $role->save();
             }

@@ -435,7 +435,7 @@
                         class="relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-3 py-2 min-h-[100px] border-1 border-transparent">
                         @endif
                         <div class="flex justify-between">
-                        @if ($route == 'admin')
+                        @if ($route == 'admin' || $route == 'home')
                         <time datetime="{{ $currentDate->format('Y-m-d') }}"
                             class="{{ $currentDate->day == $today->day && $currentDate->month == $today->month && $currentDate->year == $today->year ? 'flex h-6 w-6 items-center justify-center rounded bg-[#4E81FA] font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
                         @else

@@ -90,7 +90,10 @@ trait RoleBillable
      */
     public function isEligibleForFreeYear()
     {
-        // If they've never had a Stripe subscription, they're eligible
+        if ($this->plan_expires || $this->trial_ends_at) {
+            return false;
+        }
+
         return ! $this->stripe_id || ! $this->subscriptions()->exists();
     }
 
