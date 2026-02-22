@@ -494,10 +494,12 @@
                     @if (config('app.hosted'))
                     turnstileWidgetId = turnstile.render('#turnstile-widget', {
                         sitekey: '{{ \App\Utils\TurnstileUtils::getSiteKey() }}',
+                        size: 'flexible',
                     });
                     @else
                     turnstile.render('#turnstile-widget', {
                         sitekey: '{{ \App\Utils\TurnstileUtils::getSiteKey() }}',
+                        size: 'flexible',
                     });
                     @endif
                 }
