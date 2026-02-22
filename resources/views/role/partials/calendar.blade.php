@@ -1798,7 +1798,7 @@ const calendarApp = createApp({
                         const checkDate = new Date(year, month - 1, day);
                         checkDate.setHours(0, 0, 0, 0);
                         
-                        if (checkDate >= today && checkDate <= endDate) {
+                        if (checkDate >= today) {
                             mobileEvents.push({
                                 ...event,
                                 occurrenceDate: eventDate,

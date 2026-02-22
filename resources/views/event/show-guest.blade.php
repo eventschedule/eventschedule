@@ -63,19 +63,14 @@
               $fallbackImage = $role->profile_image_url;
           }
         @endphp
+        @if ($fallbackImage)
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
-          @if ($fallbackImage)
             <img src="{{ $fallbackImage }}"
                  alt="{{ $event->translatedName() }}"
                  class="w-full aspect-square object-cover"
                  fetchpriority="high"/>
-          @else
-            <img src="{{ url('/images/logo.webp') }}"
-                 alt="{{ config('app.name') }}"
-                 class="w-full aspect-square object-contain bg-gray-50 dark:bg-gray-800 p-4"
-                 fetchpriority="high"/>
-          @endif
         </div>
+        @endif
         @endif
 
         @foreach ($talentMembers as $talentIndex => $each)
