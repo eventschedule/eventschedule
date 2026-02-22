@@ -1118,6 +1118,16 @@
             });
         },
 
+        watch: {
+            showAllFields(newVal) {
+                if (newVal && this.preview) {
+                    this.$nextTick(() => {
+                        this.initDescriptionEditors();
+                    });
+                }
+            },
+        },
+
         methods: {
             // Time picker dropdown methods
             generateTimeOptions() {
@@ -1799,7 +1809,7 @@
                             short_description_en: parsed.short_description_en,
                             starts_at: dateValue,
                             duration: computedDuration,
-                            description: this.descriptionEditors[idx] ? this.descriptionEditors[idx].value() : (this.eventDetails ? this.eventDetails : parsed.event_details),
+                            description: this.descriptionEditors[idx] ? this.descriptionEditors[idx].value() : parsed.event_details,
                             social_image: parsed.social_image,
                             registration_url: parsed.registration_url,
                             ticket_price: parsed.ticket_price,
