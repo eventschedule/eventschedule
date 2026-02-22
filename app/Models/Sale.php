@@ -27,6 +27,10 @@ class Sale extends Model
         'custom_value6',
         'custom_value7',
         'custom_value8',
+        'utm_source',
+        'utm_medium',
+        'utm_campaign',
+        'boost_campaign_id',
     ];
 
     protected static function booted()
@@ -48,6 +52,11 @@ class Sale extends Model
     public function saleTickets()
     {
         return $this->hasMany(SaleTicket::class);
+    }
+
+    public function boostCampaign()
+    {
+        return $this->belongsTo(BoostCampaign::class);
     }
 
     public function calculateTotal()

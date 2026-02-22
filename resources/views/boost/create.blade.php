@@ -1,10 +1,20 @@
 <x-app-admin-layout>
-    <div class="max-w-2xl mx-auto">
-        <div class="mb-6">
-            <a href="{{ route('boost.index') }}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">&larr; {{ __('messages.back_to_boost') }}</a>
+    <div class="max-w-5xl mx-auto">
+        <div class="flex justify-between items-center gap-6 mb-6">
+            @if (is_rtl())
+                <a href="{{ route('event.edit_admin', $event->hashedId()) }}"
+                   class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    {{ __('messages.cancel') }}
+                </a>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('messages.boost_event') }}</h1>
+            @else
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('messages.boost_event') }}</h1>
+                <a href="{{ route('event.edit_admin', $event->hashedId()) }}"
+                   class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    {{ __('messages.cancel') }}
+                </a>
+            @endif
         </div>
-
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">{{ __('messages.boost_event') }}</h1>
 
         @if (session('error'))
         <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300">
@@ -31,6 +41,9 @@
         </div>
         @endif
 
+        <div class="lg:grid lg:grid-cols-2 lg:gap-8">
+        <div>
+
         {{-- Event summary --}}
         <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-6">
             <div class="flex items-start gap-4">
@@ -56,6 +69,25 @@
                 {{ $warning }}
             </div>
             @endforeach
+        </div>
+        @endif
+
+        {{-- Boost credit banner --}}
+        @if (!empty($boostCredit) && $boostCredit > 0)
+        <div class="mb-0 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
+            <p class="text-sm text-green-700 dark:text-green-300 font-medium">
+                {{ __('messages.you_have') }} {{ $currencySymbol }}{{ number_format($boostCredit, 2) }} {{ __('messages.in_boost_credit') }}
+            </p>
+        </div>
+        @endif
+
+        {{-- Spending limit info --}}
+        @if ($isHosted)
+        <div class="mb-0 p-4 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+                {{ __('messages.boost_limit_info', ['limit' => $currencySymbol . number_format($maxBudget, 0)]) }}
+                {{ __('messages.boost_limit_grows') }}
+            </p>
         </div>
         @endif
 
@@ -101,20 +133,33 @@
                 </div>
             </div>
 
-            {{-- Ad preview --}}
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
-                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.ad_preview') }}</h3>
-                @include('boost.partials.ad-preview-mockup', [
-                    'headline' => $defaults['headline'],
-                    'primaryText' => $defaults['primary_text'],
-                    'imageUrl' => $defaults['image_url'],
-                    'cta' => $defaults['call_to_action'],
-                ])
+            {{-- Ad preview (mobile only; desktop version in right column) --}}
+            <div class="lg:hidden">
+                <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+                    <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.ad_preview') }}</h3>
+                    @include('boost.partials.ad-preview-mockup', [
+                        'headline' => $defaults['headline'],
+                        'primaryText' => $defaults['primary_text'],
+                        'imageUrl' => $defaults['image_url'],
+                        'cta' => $defaults['call_to_action'],
+                    ])
+                </div>
             </div>
 
-            {{-- Payment --}}
+            {{-- Credit payment (shown when credit covers full cost) --}}
+            <div id="credit-payment-section" class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 hidden">
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.payment') }}</h3>
+                <div class="flex items-center gap-2 text-green-700 dark:text-green-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-sm font-medium" id="credit-payment-text">{{ __('messages.will_be_paid_with_boost_credit') }}</span>
+                </div>
+            </div>
+
+            {{-- Stripe/testing payment --}}
             @if (!empty($isTesting) || empty($isHosted))
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+            <div id="stripe-payment-section" class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
                 <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.payment') }}</h3>
                 @if (!empty($isTesting))
                 <p class="text-sm text-yellow-600 dark:text-yellow-400">Testing mode: payment will be skipped.</p>
@@ -122,7 +167,7 @@
                 <div id="payment-errors" class="text-sm text-red-600 dark:text-red-400 hidden"></div>
             </div>
             @else
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+            <div id="stripe-payment-section" class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
                 <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.payment') }}</h3>
                 <div id="payment-element" class="mb-4"></div>
                 <div id="payment-errors" class="text-sm text-red-600 dark:text-red-400 hidden"></div>
@@ -147,6 +192,25 @@
                 </button>
             </div>
         </form>
+
+        </div>
+
+        {{-- Right column: ad preview (desktop only, sticky) --}}
+        <div class="hidden lg:block">
+            <div class="lg:sticky lg:top-6">
+                <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+                    <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.ad_preview') }}</h3>
+                    @include('boost.partials.ad-preview-mockup', [
+                        'headline' => $defaults['headline'],
+                        'primaryText' => $defaults['primary_text'],
+                        'imageUrl' => $defaults['image_url'],
+                        'cta' => $defaults['call_to_action'],
+                    ])
+                </div>
+            </div>
+        </div>
+
+        </div>
         @endif
     </div>
 
@@ -154,6 +218,7 @@
         // Budget slider (in its own script block so it works even if Stripe fails)
         const markupRate = {{ $markupRate }};
         const currencySymbol = '{{ $currencySymbol }}';
+        const boostCredit = {{ $boostCredit ?? 0 }};
 
         const slider = document.getElementById('budget-slider');
         const budgetDisplay = document.getElementById('budget-display');
@@ -163,6 +228,10 @@
         const costTotal = document.getElementById('cost-total');
         const submitAmount = document.getElementById('submit-amount');
         const submitBtn = document.getElementById('submit-btn');
+        const creditPaymentSection = document.getElementById('credit-payment-section');
+        const stripePaymentSection = document.getElementById('stripe-payment-section');
+
+        let usingCredit = false;
 
         function updateCosts() {
             const budget = parseFloat(slider.value);
@@ -179,9 +248,23 @@
             @else
             submitAmount.textContent = budget.toFixed(2);
             @endif
+
+            // Toggle credit vs Stripe payment
+            const totalCost = @if ($isHosted) total @else budget @endif;
+            if (boostCredit >= totalCost && boostCredit > 0) {
+                usingCredit = true;
+                creditPaymentSection.classList.remove('hidden');
+                stripePaymentSection.classList.add('hidden');
+            } else {
+                usingCredit = false;
+                creditPaymentSection.classList.add('hidden');
+                stripePaymentSection.classList.remove('hidden');
+            }
         }
 
         slider.addEventListener('input', updateCosts);
+        // Run on load to set initial state
+        updateCosts();
     </script>
 
     @if (!empty($isTesting) || empty($isHosted))
@@ -235,8 +318,25 @@
         let intentBudget = null;
         let pendingPayment = false;
 
+        // Helper: submit form directly (for credit or non-Stripe)
+        async function submitFormDirectly() {
+            const formData = new FormData(document.getElementById('boost-form'));
+            const response = await fetch('{{ route("boost.store") }}', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData,
+            });
+            return await response.json();
+        }
+
         // Initialize Stripe Payment Element
         async function initPayment() {
+            if (usingCredit) {
+                // Skip Stripe init when using credit
+                intentBudget = parseFloat(slider.value);
+                return;
+            }
+
             const budget = parseFloat(slider.value);
             const previousPaymentIntentId = document.getElementById('payment_intent_id').value || null;
             const response = await fetch('{{ route("boost.payment_intent") }}', {
@@ -260,6 +360,15 @@
                 return;
             }
 
+            // Server says credit covers it
+            if (data.use_credit) {
+                usingCredit = true;
+                intentBudget = budget;
+                creditPaymentSection.classList.remove('hidden');
+                stripePaymentSection.classList.add('hidden');
+                return;
+            }
+
             clientSecret = data.client_secret;
             intentBudget = budget;
             document.getElementById('payment_intent_id').value = data.payment_intent_id;
@@ -269,8 +378,14 @@
                 paymentElement = null;
             }
 
-            elements = stripe.elements({ clientSecret });
-            paymentElement = elements.create('payment');
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const appearance = {
+                theme: isDarkMode ? 'night' : 'stripe',
+            };
+            elements = stripe.elements({ clientSecret, appearance });
+            paymentElement = elements.create('payment', {
+                paymentMethodOrder: ['card'],
+            });
             paymentElement.mount('#payment-element');
         }
 
@@ -304,6 +419,29 @@
             submitSpinner.classList.remove('hidden');
             paymentErrors.classList.add('hidden');
 
+            // Credit payment path - submit directly without Stripe
+            if (usingCredit) {
+                try {
+                    const data = await submitFormDirectly();
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else if (data.error) {
+                        paymentErrors.textContent = data.error;
+                        paymentErrors.classList.remove('hidden');
+                        submitBtn.disabled = false;
+                        submitSpinner.classList.add('hidden');
+                    } else {
+                        window.location.href = '{{ route("boost.index") }}';
+                    }
+                } catch (err) {
+                    paymentErrors.textContent = @json(__("messages.boost_store_error"));
+                    paymentErrors.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitSpinner.classList.add('hidden');
+                }
+                return;
+            }
+
             // Ensure payment intent matches current budget
             const currentBudget = parseFloat(slider.value);
             if (!clientSecret || intentBudget !== currentBudget) {
@@ -316,6 +454,29 @@
                     submitSpinner.classList.add('hidden');
                     return;
                 }
+            }
+
+            // Check again in case initPayment switched to credit
+            if (usingCredit) {
+                try {
+                    const data = await submitFormDirectly();
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else if (data.error) {
+                        paymentErrors.textContent = data.error;
+                        paymentErrors.classList.remove('hidden');
+                        submitBtn.disabled = false;
+                        submitSpinner.classList.add('hidden');
+                    } else {
+                        window.location.href = '{{ route("boost.index") }}';
+                    }
+                } catch (err) {
+                    paymentErrors.textContent = @json(__("messages.boost_store_error"));
+                    paymentErrors.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitSpinner.classList.add('hidden');
+                }
+                return;
             }
 
             const { error, paymentIntent } = await stripe.confirmPayment({

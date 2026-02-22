@@ -22,7 +22,18 @@ class SubscriptionController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        if ($role->hasActiveSubscription()) {
+        $requestedTier = $request->query('tier', 'pro');
+
+        // Block if already on Enterprise, or if already on the requested tier
+        if ($role->hasActiveEnterpriseSubscription()) {
+            return redirect()
+                ->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])
+                ->with('message', __('messages.subscription_already_active'));
+        }
+
+        // If they have an active Pro subscription and aren't requesting Enterprise, block
+        // Also block trial subscriptions from upgrading to Enterprise
+        if ($role->hasActiveSubscription() && ($requestedTier !== 'enterprise' || $role->subscription('default')?->onTrial())) {
             return redirect()
                 ->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])
                 ->with('message', __('messages.subscription_already_active'));
@@ -35,6 +46,7 @@ class SubscriptionController extends Controller
             'intent' => $intent,
             'monthlyPrice' => config('services.stripe_platform.price_monthly'),
             'yearlyPrice' => config('services.stripe_platform.price_yearly'),
+            'selectedTier' => $requestedTier,
         ]);
     }
 
@@ -49,15 +61,47 @@ class SubscriptionController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        $tier = $request->input('tier', 'pro');
+
+        // If upgrading from Pro to Enterprise with existing subscription, use swap
+        if ($tier === 'enterprise' && $role->hasActiveSubscription() && ! $role->hasActiveEnterpriseSubscription()) {
+            $priceId = $request->plan === 'yearly'
+                ? config('services.stripe_platform.enterprise_price_yearly')
+                : config('services.stripe_platform.enterprise_price_monthly');
+
+            try {
+                $subscription = $role->subscription('default');
+                $subscription->swap($priceId);
+
+                $role->plan_type = 'enterprise';
+                $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
+                $role->save();
+
+                return redirect()
+                    ->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])
+                    ->with('message', __('messages.subscription_updated'));
+            } catch (\Exception $e) {
+                \Log::error('Subscription upgrade failed', ['error' => $e->getMessage(), 'role' => $role->id]);
+
+                return redirect()->back()->with('error', __('messages.subscription_error'));
+            }
+        }
+
         if ($role->hasActiveSubscription()) {
             return redirect()
                 ->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])
                 ->with('message', __('messages.subscription_already_active'));
         }
 
-        $priceId = $request->plan === 'yearly'
-            ? config('services.stripe_platform.price_yearly')
-            : config('services.stripe_platform.price_monthly');
+        if ($tier === 'enterprise') {
+            $priceId = $request->plan === 'yearly'
+                ? config('services.stripe_platform.enterprise_price_yearly')
+                : config('services.stripe_platform.enterprise_price_monthly');
+        } else {
+            $priceId = $request->plan === 'yearly'
+                ? config('services.stripe_platform.price_yearly')
+                : config('services.stripe_platform.price_monthly');
+        }
 
         try {
             // Set the payment method
@@ -84,7 +128,7 @@ class SubscriptionController extends Controller
             $subscriptionBuilder->create($request->payment_method);
 
             // Update the role's plan info
-            $role->plan_type = 'pro';
+            $role->plan_type = $tier;
             $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
             $role->save();
 
@@ -183,7 +227,7 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Swap between monthly and yearly plans.
+     * Swap between monthly/yearly plans and/or upgrade tier.
      */
     public function swap(SubscriptionSwapRequest $request, $subdomain)
     {
@@ -193,9 +237,17 @@ class SubscriptionController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        $priceId = $request->plan === 'yearly'
-            ? config('services.stripe_platform.price_yearly')
-            : config('services.stripe_platform.price_monthly');
+        $tier = $request->input('tier', $role->plan_type ?: 'pro');
+
+        if ($tier === 'enterprise') {
+            $priceId = $request->plan === 'yearly'
+                ? config('services.stripe_platform.enterprise_price_yearly')
+                : config('services.stripe_platform.enterprise_price_monthly');
+        } else {
+            $priceId = $request->plan === 'yearly'
+                ? config('services.stripe_platform.price_yearly')
+                : config('services.stripe_platform.price_monthly');
+        }
 
         $subscription = $role->subscription('default');
 
@@ -206,7 +258,8 @@ class SubscriptionController extends Controller
         try {
             $subscription->swap($priceId);
 
-            // Update the role's plan term
+            // Update the role's plan type and term
+            $role->plan_type = $tier;
             $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
             $role->save();
         } catch (\Exception $e) {

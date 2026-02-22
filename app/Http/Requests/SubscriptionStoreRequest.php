@@ -16,6 +16,7 @@ class SubscriptionStoreRequest extends FormRequest
         return [
             'payment_method' => ['required', 'string'],
             'plan' => ['required', 'in:monthly,yearly'],
+            'tier' => ['sometimes', 'in:pro,enterprise'],
         ];
     }
 }

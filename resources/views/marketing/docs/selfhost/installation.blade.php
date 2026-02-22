@@ -303,6 +303,7 @@
                             <ul class="doc-list">
                                 <li>Configure <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="text-cyan-400 hover:text-cyan-300">Stripe payments</a> for ticket sales</li>
                                 <li>Set up <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="text-cyan-400 hover:text-cyan-300">Google Calendar integration</a></li>
+                                <li>Set up <a href="https://www.twilio.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">Twilio SMS</a> for phone verification (set <code class="doc-inline-code">TWILIO_SID</code>, <code class="doc-inline-code">TWILIO_AUTH_TOKEN</code>, and <code class="doc-inline-code">TWILIO_FROM_NUMBER</code> in your <code class="doc-inline-code">.env</code>)</li>
                                 <li>Configure email settings for notifications</li>
                                 <li>Customize your branding and appearance</li>
                             </ul>

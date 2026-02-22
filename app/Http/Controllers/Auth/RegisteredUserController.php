@@ -317,6 +317,11 @@ class RegisteredUserController extends Controller
 
         session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page']);
 
+        // In selfhost mode, make the first user an admin
+        if (!config('app.hosted') && User::count() === 1) {
+            $user->is_admin = true;
+        }
+
         // Mark email as verified if code was validated (hosted mode) or in non-hosted/testing mode
         if ((config('app.hosted') && ! config('app.is_testing')) || ! config('app.hosted') || config('app.is_testing')) {
             $user->email_verified_at = now();

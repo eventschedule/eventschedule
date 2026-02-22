@@ -361,7 +361,7 @@
                 <option value="videos" {{ $tab == 'videos' ? 'selected' : '' }}>
                     {{ __('messages.videos') }}</option>
                 @endif
-                @if ($role->isTalent())
+                @if ($role->isTalent() && $role->isEnterprise())
                 <option value="availability" {{ $tab == 'availability' ? 'selected' : '' }}>{{ __('messages.availability') }}</option>
                 @endif
                 @if (count($requests))
@@ -391,7 +391,7 @@
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'videos']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'videos' ? 'border-[#4E81FA] px-3 pb-5 text-base font-medium text-[#4E81FA]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.videos') }}</a>
                 @endif
-                @if ($role->isTalent())
+                @if ($role->isTalent() && $role->isEnterprise())
                 <a href=" {{ route('role.view_admin', ((now()->year == $year && now()->month == $month) || $tab == 'availability') ? ['subdomain' => $role->subdomain, 'tab' => 'availability'] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'tab' => 'availability', 'month' => $month] : ['subdomain' => $role->subdomain, 'tab' => 'availability', 'year' => $year, 'month' => $month])) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'availability' ? 'border-[#4E81FA] px-3 pb-5 text-base font-medium text-[#4E81FA]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.availability') }}</a>
                 @endif

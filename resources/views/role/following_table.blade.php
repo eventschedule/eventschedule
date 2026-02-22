@@ -133,7 +133,9 @@
                                 @endif
                             </td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                {{ $role->phone }}
+                                @if ($role->show_phone && $role->phone_verified_at)
+                                    <a href="tel:{{ $role->phone }}" class="hover:underline">{{ $role->phone }}</a>
+                                @endif
                             </td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                                 <a href="{{ $role->website }}"

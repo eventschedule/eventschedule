@@ -6,9 +6,11 @@ use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\AnalyticsReferrersDaily;
+use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\PageView;
 use App\Models\Role;
+use App\Models\Sale;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -577,5 +579,148 @@ class AnalyticsService
                 'source' => $item->source,
                 'view_count' => (int) $item->view_count,
             ]);
+    }
+
+    /**
+     * Get boost-attributed page views for given roles in a date range
+     */
+    public function getBoostAttributedViews(Collection $roleIds, Carbon $start, Carbon $end): int
+    {
+        return (int) AnalyticsReferrersDaily::forRoles($roleIds)
+            ->inDateRange($start, $end)
+            ->bySource('boost')
+            ->sum('views');
+    }
+
+    /**
+     * Get boost-attributed sales and revenue for given roles in a date range
+     */
+    public function getBoostSalesStats(Collection $roleIds, Carbon $start, Carbon $end): array
+    {
+        $eventIds = DB::table('event_role')
+            ->whereIn('role_id', $roleIds)
+            ->pluck('event_id')
+            ->unique();
+
+        if ($eventIds->isEmpty()) {
+            return ['sales' => 0, 'revenue' => 0];
+        }
+
+        $result = Sale::whereIn('event_id', $eventIds)
+            ->whereNotNull('boost_campaign_id')
+            ->where('status', 'paid')
+            ->whereBetween('created_at', [$start, $end])
+            ->selectRaw('COUNT(*) as sales_count, COALESCE(SUM(payment_amount), 0) as total_revenue')
+            ->first();
+
+        return [
+            'sales' => (int) ($result->sales_count ?? 0),
+            'revenue' => (float) ($result->total_revenue ?? 0),
+        ];
+    }
+
+    /**
+     * Get boost views grouped by period for chart overlay
+     */
+    public function getBoostViewsByPeriod(User $user, string $period, Carbon $start, Carbon $end, ?int $roleId = null): Collection
+    {
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return collect();
+        }
+
+        $dateFormatExpr = match ($period) {
+            'daily' => DB::raw("DATE_FORMAT(date, '%Y-%m-%d') as period"),
+            'weekly' => DB::raw("DATE_FORMAT(date, '%x-%v') as period"),
+            'monthly' => DB::raw("DATE_FORMAT(date, '%Y-%m') as period"),
+            default => DB::raw("DATE_FORMAT(date, '%Y-%m-%d') as period"),
+        };
+
+        return AnalyticsReferrersDaily::select(
+            $dateFormatExpr,
+            DB::raw('SUM(views) as view_count')
+        )
+            ->forRoles($roleIds)
+            ->inDateRange($start, $end)
+            ->bySource('boost')
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get();
+    }
+
+    /**
+     * Get boost campaign stats for the analytics dashboard
+     */
+    public function getBoostStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null): array
+    {
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return ['has_data' => false];
+        }
+
+        $campaigns = BoostCampaign::with('event:id,name')
+            ->whereIn('role_id', $roleIds)
+            ->whereIn('status', ['active', 'paused', 'completed'])
+            ->where(function ($q) use ($start, $end) {
+                $q->whereBetween('created_at', [$start, $end])
+                    ->orWhere(function ($q2) use ($start, $end) {
+                        $q2->where('scheduled_start', '<=', $end)
+                            ->where(function ($q3) use ($start) {
+                                $q3->whereNull('scheduled_end')
+                                    ->orWhere('scheduled_end', '>=', $start);
+                            });
+                    });
+            })
+            ->orderByDesc('created_at')
+            ->get();
+
+        if ($campaigns->isEmpty()) {
+            return ['has_data' => false];
+        }
+
+        $totalSpend = $campaigns->sum('actual_spend') ?? 0;
+        $totalBudget = $campaigns->sum('user_budget') ?? 0;
+        $totalImpressions = $campaigns->sum('impressions') ?? 0;
+        $totalClicks = $campaigns->sum('clicks') ?? 0;
+        $totalConversions = $campaigns->sum('conversions') ?? 0;
+
+        $avgCtr = $totalImpressions > 0 ? round(($totalClicks / $totalImpressions) * 100, 2) : 0;
+        $avgCpc = $totalClicks > 0 ? round($totalSpend / $totalClicks, 2) : 0;
+
+        // Boost-attributed page views and sales
+        $boostViews = $this->getBoostAttributedViews($roleIds, $start, $end);
+        $boostSalesStats = $this->getBoostSalesStats($roleIds, $start, $end);
+
+        $costPerView = $boostViews > 0 ? round((float) $totalSpend / $boostViews, 2) : 0;
+        $costPerSale = $boostSalesStats['sales'] > 0 ? round((float) $totalSpend / $boostSalesStats['sales'], 2) : 0;
+        $roas = (float) $totalSpend > 0 ? round($boostSalesStats['revenue'] / (float) $totalSpend, 2) : 0;
+
+        return [
+            'has_data' => true,
+            'total_spend' => (float) $totalSpend,
+            'total_budget' => (float) $totalBudget,
+            'total_impressions' => (int) $totalImpressions,
+            'total_clicks' => (int) $totalClicks,
+            'total_conversions' => (int) $totalConversions,
+            'avg_ctr' => $avgCtr,
+            'avg_cpc' => $avgCpc,
+            'boost_views' => $boostViews,
+            'boost_sales' => $boostSalesStats['sales'],
+            'boost_revenue' => $boostSalesStats['revenue'],
+            'cost_per_view' => $costPerView,
+            'cost_per_sale' => $costPerSale,
+            'roas' => $roas,
+            'campaigns' => $campaigns->map(fn ($c) => [
+                'hash' => $c->hashedId(),
+                'name' => $c->name,
+                'event_name' => $c->event?->translatedName() ?? 'N/A',
+                'status' => $c->status,
+                'spend' => (float) ($c->actual_spend ?? 0),
+                'impressions' => (int) ($c->impressions ?? 0),
+                'clicks' => (int) ($c->clicks ?? 0),
+            ])->toArray(),
+        ];
     }
 }

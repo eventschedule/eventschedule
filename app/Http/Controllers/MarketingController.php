@@ -734,6 +734,14 @@ class MarketingController extends Controller
         return view('marketing.docs.availability', $this->getDocNavigation('marketing.docs.availability'));
     }
 
+    /**
+     * Boost documentation page
+     */
+    public function docsBoost()
+    {
+        return view('marketing.docs.boost', $this->getDocNavigation('marketing.docs.boost'));
+    }
+
     // ==========================================
     // Selfhost Section
     // ==========================================
@@ -1441,6 +1449,7 @@ class MarketingController extends Controller
             ['route' => 'marketing.docs.analytics', 'title' => 'Analytics'],
             ['route' => 'marketing.docs.account_settings', 'title' => 'Account Settings'],
             ['route' => 'marketing.docs.availability', 'title' => 'Availability Calendar'],
+            ['route' => 'marketing.docs.boost', 'title' => 'Boost'],
         ];
 
         $currentIndex = null;

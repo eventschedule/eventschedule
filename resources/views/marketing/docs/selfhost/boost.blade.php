@@ -367,6 +367,21 @@
                                             <td>No</td>
                                             <td>Maximum boost budget in currency units (default: 5000.00)</td>
                                         </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">META_API_VERSION</code></td>
+                                            <td>No</td>
+                                            <td>Meta Graph API version (default: v21.0)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">META_DEFAULT_CURRENCY</code></td>
+                                            <td>No</td>
+                                            <td>Default currency code (default: USD)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">META_MAX_CONCURRENT_BOOSTS</code></td>
+                                            <td>No</td>
+                                            <td>Maximum active boost campaigns per schedule (default: 3)</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>

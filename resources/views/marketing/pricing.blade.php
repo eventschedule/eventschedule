@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Calendar & Ticketing Pricing Plans - Event Schedule</x-slot>
-    <x-slot name="description">Start free with unlimited events and basic ticketing. Upgrade to Pro for custom domains, white-label branding, and priority support. No hidden fees.</x-slot>
+    <x-slot name="description">Start free with unlimited events. Upgrade to Pro for ticketing and white-label branding, or Enterprise for AI features, custom CSS, and priority support. No hidden fees.</x-slot>
     <x-slot name="socialImage">social/pricing.png</x-slot>
     <x-slot name="breadcrumbTitle">Pricing</x-slot>
 
@@ -27,7 +27,7 @@
                 "price": "5.00",
                 "priceCurrency": "USD",
                 "billingIncrement": "MON",
-                "description": "Everything in Free plus remove branding, ticketing with QR check-ins, Stripe payments, multiple account users, event graphics, and REST API access.",
+                "description": "Everything in Free plus remove branding, ticketing with QR check-ins, Stripe payments, event graphics, and REST API access.",
                 "availability": "https://schema.org/InStock",
                 "priceSpecification": [
                     {
@@ -44,6 +44,39 @@
                     {
                         "@type": "UnitPriceSpecification",
                         "price": "50.00",
+                        "priceCurrency": "USD",
+                        "unitText": "YEAR",
+                        "referenceQuantity": {
+                            "@type": "QuantitativeValue",
+                            "value": "1",
+                            "unitCode": "ANN"
+                        }
+                    }
+                ]
+            },
+            {
+                "@type": "Offer",
+                "name": "Enterprise",
+                "price": "15.00",
+                "priceCurrency": "USD",
+                "billingIncrement": "MON",
+                "description": "Everything in Pro plus AI text transformation, email scheduling, agenda scanning, custom CSS styling, multiple team members, 1,000 newsletters per month, and priority support.",
+                "availability": "https://schema.org/InStock",
+                "priceSpecification": [
+                    {
+                        "@type": "UnitPriceSpecification",
+                        "price": "15.00",
+                        "priceCurrency": "USD",
+                        "unitText": "MONTH",
+                        "referenceQuantity": {
+                            "@type": "QuantitativeValue",
+                            "value": "1",
+                            "unitCode": "MON"
+                        }
+                    },
+                    {
+                        "@type": "UnitPriceSpecification",
+                        "price": "150.00",
                         "priceCurrency": "USD",
                         "unitText": "YEAR",
                         "referenceQuantity": {
@@ -75,7 +108,15 @@
                 "name": "What does \"first year free\" mean?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "When you sign up for Pro, your first year is completely free. After that, it's $5/month or $50/year. You can cancel anytime."
+                    "text": "When you sign up for Pro or Enterprise, your first year is completely free. After that, Pro is $5/month or $50/year, and Enterprise is $15/month or $150/year. You can cancel anytime."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What is the difference between Pro and Enterprise?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Pro includes ticketing, white-label branding, event graphics, and REST API access. Enterprise adds multiple team members, AI text transformation, email scheduling, agenda scanning, custom CSS styling, 1,000 newsletters per month, and priority support."
                 }
             },
             {
@@ -83,7 +124,7 @@
                 "name": "Can I cancel anytime?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Absolutely. You can cancel your Pro subscription at any time and you'll keep access until the end of your billing period."
+                    "text": "Absolutely. You can cancel your subscription at any time and you'll keep access until the end of your billing period."
                 }
             },
             {
@@ -141,9 +182,9 @@
                     <span class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-200" :class="annual ? 'translate-x-6' : 'translate-x-0'"></span>
                 </button>
                 <span class="text-sm font-semibold transition-colors" :class="annual ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'">Annual</span>
-                <span class="absolute left-1/2 ml-[108px] px-2.5 py-1 text-xs font-semibold rounded-full transition-opacity duration-200" :class="annual ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 opacity-100' : 'opacity-0'">Save $10</span>
+                <span class="absolute left-1/2 ml-[108px] px-2.5 py-1 text-xs font-semibold rounded-full transition-opacity duration-200" :class="annual ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 opacity-100' : 'opacity-0'">Save up to $30</span>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 
                 <!-- Free Plan -->
                 <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800/50 dark:to-gray-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 flex flex-col">
@@ -190,14 +231,6 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-600 dark:text-gray-300">Team member collaboration</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg aria-hidden="true" class="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
                             <span class="text-gray-600 dark:text-gray-300">Venue location maps</span>
                         </li>
                         <li class="flex items-start gap-3">
@@ -214,7 +247,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-600 dark:text-gray-300">10 {{ __('messages.newsletters_per_month') }}</span>
+                            <span class="text-gray-600 dark:text-gray-300">Fan videos & comments on events</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -222,7 +255,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-600 dark:text-gray-300">Fan videos & comments on events</span>
+                            <span class="text-gray-600 dark:text-gray-300">10 {{ __('messages.newsletters_per_month') }}</span>
                         </li>
                     </ul>
 
@@ -293,14 +326,6 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-600 dark:text-gray-300">Multiple team members per account</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <div class="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg aria-hidden="true" class="w-3 h-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
                             <span class="text-gray-600 dark:text-gray-300">Generate event graphics</span>
                         </li>
                         <li class="flex items-start gap-3">
@@ -322,6 +347,101 @@
                     </ul>
 
                     <a href="{{ app_url('/sign_up') }}" class="mt-auto block w-full text-center px-6 py-4 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white font-semibold rounded-2xl transition-all shadow-lg shadow-blue-500/25">
+                        Start Free Trial
+                    </a>
+                </div>
+
+                <!-- Enterprise Plan -->
+                <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-900 dark:to-yellow-900 border-2 border-amber-300 dark:border-amber-500/50 p-8 lg:p-10 flex flex-col">
+                    <!-- First Year Free Banner -->
+                    <div class="bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-center py-3 px-4 -mx-8 lg:-mx-10 -mt-8 lg:-mt-10 mb-8">
+                        <div class="text-lg font-bold">First Year FREE</div>
+                        <div class="text-sm text-amber-100">No credit card required to start</div>
+                    </div>
+
+                    <div class="mb-8">
+                        <div class="mb-2 relative h-[68px]">
+                            <div x-show="annual" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform -translate-y-1" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform translate-y-1" class="absolute inset-0 flex items-baseline gap-2">
+                                <span class="text-6xl font-bold text-gray-900 dark:text-white">$150</span>
+                                <span class="text-gray-500 dark:text-gray-400">/year</span>
+                            </div>
+                            <div x-show="!annual" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform -translate-y-1" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform translate-y-1" class="absolute inset-0 flex items-baseline gap-2" x-cloak>
+                                <span class="text-6xl font-bold text-gray-900 dark:text-white">$15</span>
+                                <span class="text-gray-500 dark:text-gray-400">/month</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400" x-show="annual">Just $12.50/month, billed annually after your free year</p>
+                        <p class="text-gray-500 dark:text-gray-400" x-show="!annual" x-cloak>Billed monthly after your free year</p>
+                    </div>
+
+                    <ul class="space-y-4 mb-10">
+                        <li class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg aria-hidden="true" class="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-gray-600 dark:text-gray-300">Everything in Pro</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg aria-hidden="true" class="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-gray-600 dark:text-gray-300">AI text transformation</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg aria-hidden="true" class="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-gray-600 dark:text-gray-300">Email scheduling</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg aria-hidden="true" class="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-gray-600 dark:text-gray-300">Agenda scanning</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg aria-hidden="true" class="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-gray-600 dark:text-gray-300">Custom CSS styling</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg aria-hidden="true" class="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-gray-600 dark:text-gray-300">Priority support</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg aria-hidden="true" class="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-gray-600 dark:text-gray-300">Multiple team members per account</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg aria-hidden="true" class="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-gray-600 dark:text-gray-300">1,000 {{ __('messages.newsletters_per_month') }}</span>
+                        </li>
+                    </ul>
+
+                    <a href="{{ app_url('/sign_up') }}" class="mt-auto block w-full text-center px-6 py-4 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-white font-semibold rounded-2xl transition-all shadow-lg shadow-amber-500/25">
                         Start Free Trial
                     </a>
                 </div>
@@ -387,15 +507,15 @@
                     </button>
                     <div x-show="open === 2" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            When you sign up for Pro, your first year is completely free. After that, it's $5/month or $50/year. You can cancel anytime.
+                            When you sign up for Pro or Enterprise, your first year is completely free. After that, Pro is $5/month or $50/year, and Enterprise is $15/month or $150/year. You can cancel anytime.
                         </p>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                <div class="bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900 dark:to-yellow-900 rounded-2xl border border-amber-200 dark:border-white/10 shadow-sm overflow-hidden">
                     <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Can I cancel anytime?
+                            What is the difference between Pro and Enterprise?
                         </h3>
                         <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -403,21 +523,37 @@
                     </button>
                     <div x-show="open === 3" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Absolutely. You can cancel your Pro subscription at any time and you'll keep access until the end of your billing period.
+                            Pro includes ticketing, white-label branding, event graphics, and REST API access. Enterprise adds multiple team members, AI text transformation, email scheduling, agenda scanning, custom CSS styling, 1,000 newsletters per month, and priority support.
                         </p>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-2xl border border-amber-200 dark:border-white/10 shadow-sm overflow-hidden">
+                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
                     <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Do you take a cut of ticket sales?
+                            Can I cancel anytime?
                         </h3>
                         <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
                     <div x-show="open === 4" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Absolutely. You can cancel your subscription at any time and you'll keep access until the end of your billing period.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 5 ? null : 5" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Do you take a cut of ticket sales?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 5 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 5" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
                             No! We don't charge any fees on ticket sales. You only pay the standard Stripe processing fees (typically 2.9% + $0.30 per transaction).
                         </p>

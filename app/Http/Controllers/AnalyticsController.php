@@ -96,6 +96,14 @@ class AnalyticsController extends Controller
         // Get top referrer domains
         $topReferrers = $analytics->getTopReferrerDomains($user, 10, $start, $end, $selectedRoleId);
 
+        // Get boost stats
+        $boostStats = $analytics->getBoostStats($user, $start, $end, $selectedRoleId);
+
+        // Get boost views by period for chart overlay (only if boost data exists)
+        $boostViewsByPeriod = $boostStats['has_data']
+            ? $analytics->getBoostViewsByPeriod($user, $period, $start, $end, $selectedRoleId)
+            : collect();
+
         return view('analytics.index', compact(
             'roles',
             'selectedRoleId',
@@ -114,7 +122,9 @@ class AnalyticsController extends Controller
             'conversionStats',
             'topEventsByRevenue',
             'trafficSources',
-            'topReferrers'
+            'topReferrers',
+            'boostStats',
+            'boostViewsByPeriod'
         ));
     }
 }

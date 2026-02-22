@@ -61,7 +61,15 @@
                 "name": "Can I pause or cancel a Boost campaign?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. You can pause or cancel a running campaign at any time from your dashboard. You are only charged for the ad spend that has already been delivered."
+                    "text": "Yes. You can pause or cancel a running campaign at any time from your dashboard. If you cancel before any budget is spent, you receive a full refund. If Meta rejects the ad, you also receive a full refund. When a campaign completes, any unspent budget and the proportional service fee are automatically refunded."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What happens to unspent budget?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "If Meta rejects your ad or you cancel before any budget is spent, you receive a full refund. When a campaign completes with unspent budget, the remaining ad spend and the proportional service fee are automatically refunded. You receive email notifications when your campaign is created, when 75% of your budget has been spent, and when it completes with final stats."
                 }
             },
             {
@@ -131,6 +139,10 @@
                 </a>
             </div>
 
+            <p class="mt-6 text-gray-500 dark:text-gray-400">
+                <a href="{{ marketing_url('/docs/boost') }}" class="underline hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Read the Boost guide</a>
+            </p>
+
         </div>
     </section>
 
@@ -189,7 +201,7 @@
                                 Smart Targeting
                             </div>
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Reach the right people</h3>
-                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Your event's location, category, and details are used to build a relevant audience automatically. Target by radius, age range, and interests without touching an ad manager.</p>
+                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Your event's location, category, and details are used to build a relevant audience automatically. Boost auto-detects whether your event is in-person, online, or hybrid and adjusts targeting and creative accordingly. Target by radius, age range, and interests without touching an ad manager.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Location radius</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Interest targeting</span>
@@ -291,6 +303,7 @@
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Impressions</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Reach</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Clicks</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Click-through rate</span>
                             </div>
                         </div>
@@ -357,11 +370,11 @@
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-gray-600 dark:text-gray-400">Service fee</span>
-                                        <span class="font-semibold text-gray-900 dark:text-white">$11.25</span>
+                                        <span class="font-semibold text-gray-900 dark:text-white">$15.00</span>
                                     </div>
                                     <div class="border-t border-gray-200 dark:border-white/10 pt-3 flex justify-between">
                                         <span class="font-bold text-gray-900 dark:text-white">Total</span>
-                                        <span class="font-bold text-orange-600 dark:text-orange-400">$86.25</span>
+                                        <span class="font-bold text-orange-600 dark:text-orange-400">$90.00</span>
                                     </div>
                                 </div>
                             </div>
@@ -378,7 +391,7 @@
                         Pro Controls
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Advanced mode</h3>
-                    <p class="text-gray-600 dark:text-white/80 mb-6">Want more control? Write custom ad copy, fine-tune targeting parameters, and choose specific placements across Facebook and Instagram.</p>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">Want more control? Choose a campaign objective (awareness, traffic, or engagement), set daily or lifetime budgets, write custom ad copy, fine-tune targeting, and pick specific placements like Facebook Feed, Instagram Feed, Stories, or Reels.</p>
 
                     <div class="flex items-center justify-center gap-4">
                         <div class="flex gap-2">
@@ -566,7 +579,7 @@
                     </button>
                     <div x-show="open === 5" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes. You can pause or cancel a running campaign at any time from your dashboard. You are only charged for the ad spend that has already been delivered.
+                            Yes. You can pause or cancel a running campaign at any time from your dashboard. If you cancel before any budget is spent, you receive a full refund. If Meta rejects the ad, you also receive a full refund. When a campaign completes, any unspent budget and the proportional service fee are automatically refunded.
                         </p>
                     </div>
                 </div>
@@ -574,13 +587,29 @@
                 <div class="bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900 dark:to-yellow-900 rounded-2xl border border-amber-200 dark:border-white/10 shadow-sm overflow-hidden">
                     <button @click="open = open === 6 ? null : 6" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Do I need a Meta (Facebook) Ads account?
+                            What happens to unspent budget?
                         </h3>
                         <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" :class="{ 'rotate-180': open === 6 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
                     <div x-show="open === 6" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            If Meta rejects your ad or you cancel before any budget is spent, you receive a full refund. When a campaign completes with unspent budget, the remaining ad spend and the proportional service fee are automatically refunded. You receive email notifications when your campaign is created, when 75% of your budget has been spent, and when it completes with final stats.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900 dark:to-amber-900 rounded-2xl border border-orange-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 7 ? null : 7" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Do I need a Meta (Facebook) Ads account?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" :class="{ 'rotate-180': open === 7 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 7" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
                             No. Event Schedule handles the ad account, creative, and delivery on your behalf. You do not need to create or manage a Meta Ads account.
                         </p>

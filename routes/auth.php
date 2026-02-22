@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\PhoneVerificationController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Auth\TwoFactorChallengeController;
@@ -93,6 +94,14 @@ Route::middleware('auth')->group(function () {
     Route::post('two-factor/recovery-codes', [TwoFactorController::class, 'regenerateRecoveryCodes'])
         ->name('two-factor.recovery-codes')
         ->middleware('throttle:5,1');
+
+    Route::post('phone/send-code', [PhoneVerificationController::class, 'sendCode'])
+        ->name('phone.send_code')
+        ->middleware('throttle:5,1');
+
+    Route::post('phone/verify-code', [PhoneVerificationController::class, 'verifyCode'])
+        ->name('phone.verify_code')
+        ->middleware('throttle:10,1');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');

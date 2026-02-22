@@ -107,6 +107,10 @@
                                             <td>Your login email address, used for account recovery and notifications</td>
                                         </tr>
                                         <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Phone Number</span></td>
+                                            <td>Your phone number in international format. On the hosted platform, you'll need to verify your phone via SMS before it can be displayed on your schedules. Used for identity verification and displayed on schedules that have "Show phone number" enabled.</td>
+                                        </tr>
+                                        <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Timezone</span></td>
                                             <td>Controls how dates and times are displayed throughout the app. Event times are stored in UTC and converted to your timezone for display.</td>
                                         </tr>

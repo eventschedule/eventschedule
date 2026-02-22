@@ -278,9 +278,10 @@ class PageView
         // Increment schedule-level analytics
         AnalyticsDaily::incrementView($role->id, $deviceType);
 
-        // Track referrer source
+        // Track referrer source (boost UTM overrides referrer categorization)
         $referrer = $request->header('referer');
-        AnalyticsReferrersDaily::incrementView($role->id, $referrer, $role->custom_domain);
+        $sourceOverride = ($request->query('utm_source') === 'boost') ? 'boost' : null;
+        AnalyticsReferrersDaily::incrementView($role->id, $referrer, $role->custom_domain, $sourceOverride);
 
         // Increment event-level analytics if event exists
         if ($event) {

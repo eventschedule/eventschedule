@@ -211,7 +211,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Is Event Schedule free?</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Yes - free forever! The free plan includes unlimited events, unlimited schedules, a custom subdomain, and all core features. No trials, no credit card required. Pro features like custom domains, branding removal, and ticketing are available for just $5/month after the first year free.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Yes - free forever! The free plan includes unlimited events, unlimited schedules, a custom subdomain, and all core features. No trials, no credit card required. Pro features like custom domains, branding removal, and ticketing are available starting at just $5/month after the first year free.</p>
                                 </div>
                             </div>
                         </section>

@@ -198,7 +198,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Phone Number</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">A contact phone number. Displayed as a clickable link on mobile devices.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">A contact phone number in international format. Use the <strong class="text-gray-900 dark:text-white">"Show phone number"</strong> toggle to control whether this is visible to visitors. On the hosted platform, the phone number must be verified via SMS before it will be displayed publicly.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Website URL</h4>

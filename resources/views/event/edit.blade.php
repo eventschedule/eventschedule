@@ -827,12 +827,6 @@
     </h2>
 
     <div class="hidden lg:flex items-center gap-3">
-        {{-- Cancel button --}}
-        <a href="{{ route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']) }}"
-           class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-            {{ __('messages.cancel') }}
-        </a>
-
         @if ($event->exists)
         {{-- Boost button --}}
         @if (config('services.meta.app_id') && $event->name && $event->starts_at && \Carbon\Carbon::parse($event->starts_at)->isFuture())
@@ -841,7 +835,7 @@
         @endphp
         @if ($activeBoost)
         <a href="{{ route('boost.show', ['hash' => $activeBoost->hashedId()]) }}"
-           class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+           class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             <svg class="me-2 h-5 w-5 text-green-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
             </svg>
@@ -849,7 +843,7 @@
         </a>
         @else
         <a href="{{ route('boost.create', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-           class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+           class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             <svg class="me-2 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
             </svg>
@@ -860,7 +854,7 @@
 
         {{-- Actions dropdown --}}
         <div class="relative inline-block text-start">
-            <button type="button" class="popup-toggle inline-flex w-full justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600" id="event-actions-menu-button" data-popup-target="event-actions-pop-up-menu" aria-expanded="true" aria-haspopup="true">
+            <button type="button" class="popup-toggle inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800" id="event-actions-menu-button" data-popup-target="event-actions-pop-up-menu" aria-expanded="true" aria-haspopup="true">
                 {{ __('messages.actions') }}
                 <svg class="-me-1 ms-2 h-6 w-6 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
@@ -897,7 +891,66 @@
             </div>
         </div>
         @endif
+
+        {{-- Cancel button --}}
+        <a href="{{ route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']) }}"
+           class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+            {{ __('messages.cancel') }}
+        </a>
     </div>
+
+    {{-- Mobile Actions dropdown (header) --}}
+    @if ($event->exists)
+    <div class="lg:hidden relative inline-block text-start">
+        <button type="button" class="popup-toggle inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800" id="mobile-header-event-actions-menu-button" data-popup-target="mobile-header-event-actions-pop-up-menu" aria-expanded="false" aria-haspopup="true">
+            {{ __('messages.actions') }}
+            <svg class="-me-1 ms-1.5 h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            </svg>
+        </button>
+        <div id="mobile-header-event-actions-pop-up-menu" class="pop-up-menu hidden absolute {{ is_rtl() ? 'start-0' : 'end-0' }} z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="mobile-header-event-actions-menu-button" tabindex="-1">
+            <div class="py-2" role="none" id="mobile-header-event-actions-pop-up-menu-items" data-popup-target="mobile-header-event-actions-pop-up-menu">
+                @if (config('services.meta.app_id') && $event->name && $event->starts_at && \Carbon\Carbon::parse($event->starts_at)->isFuture())
+                @if ($activeBoost)
+                <a href="{{ route('boost.show', ['hash' => $activeBoost->hashedId()]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                    <svg class="me-3 h-5 w-5 text-green-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
+                    </svg>
+                    <div>{{ __('messages.boosted') }} - {{ number_format($activeBoost->reach) }} {{ __('messages.reach') }}</div>
+                </a>
+                @else
+                <a href="{{ route('boost.create', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                    <svg class="me-3 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
+                    </svg>
+                    <div>{{ __('messages.boost_event') }}</div>
+                </a>
+                @endif
+                <div class="py-2" role="none">
+                    <div class="border-t border-gray-100 dark:border-gray-700"></div>
+                </div>
+                @endif
+                <a href="{{ route('event.clone', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                    <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
+                    </svg>
+                    <div>{{ __('messages.clone_event') }}</div>
+                </a>
+                @if ($event->user_id == $user->id)
+                <div class="py-2" role="none">
+                    <div class="border-t border-gray-100 dark:border-gray-700"></div>
+                </div>
+                <button type="button" onclick="document.getElementById('event-delete-form').submit()" class="w-full group flex items-center px-5 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300 focus:bg-red-50 dark:focus:bg-red-900/20 focus:text-red-700 dark:focus:text-red-300 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                    <svg class="me-3 h-5 w-5 text-red-400 group-hover:text-red-500 dark:group-hover:text-red-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+                    </svg>
+                    <div>{{ __('messages.delete_event') }}</div>
+                </button>
+                @endif
+            </div>
+        </div>
+    </div>
+    @endif
   </div>
 
   <form method="POST"
@@ -1060,7 +1113,7 @@
                             <x-text-input id="event_name" name="name" type="text" class="mt-1 block w-full"
                                 :value="old('name', $event->name)"
                                 v-model="eventName"
-                                autofocus required autocomplete="off" />
+                                required autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                             @if ($event->exists)
                             <div id="event-url-display" class="text-sm text-gray-500 flex items-center gap-2">
@@ -4268,6 +4321,12 @@ document.addEventListener('DOMContentLoaded', function() {
         requestAnimationFrame(scrollToTop);
     });
 });
+
+// Focus event name field without scrolling (replaces HTML autofocus)
+var nameField = document.getElementById('event_name');
+if (nameField) {
+    nameField.focus({ preventScroll: true });
+}
 
 // Also scroll to top when window fully loads (backup)
 window.addEventListener('load', function() {

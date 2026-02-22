@@ -44,6 +44,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'facebook_id',
         'facebook_token',
         'facebook_token_expires_at',
+        'phone',
+        'phone_verified_at',
         'email_verified_at',
         'utm_source',
         'utm_medium',
@@ -99,12 +101,19 @@ class User extends Authenticatable implements MustVerifyEmail
 
         static::saving(function ($model) {
             $model->email = strtolower($model->email);
+            if (! config('app.hosted') && $model->isDirty('phone')) {
+                $model->phone_verified_at = $model->phone ? now() : null;
+            }
         });
 
         static::updating(function ($user) {
             if ($user->isDirty('email') && (config('app.hosted'))) {
                 $user->email_verified_at = null;
                 $user->sendEmailVerificationNotification();
+            }
+
+            if ($user->isDirty('phone') && config('app.hosted')) {
+                $user->phone_verified_at = null;
             }
         });
     }
@@ -131,6 +140,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'phone_verified_at' => 'datetime',
             'google_token_expires_at' => 'datetime',
             'facebook_token_expires_at' => 'datetime',
             'password' => 'hashed',
@@ -310,6 +320,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return (bool) $this->is_admin;
+    }
+
+    public function hasVerifiedPhone(): bool
+    {
+        return ! is_null($this->phone_verified_at);
     }
 
     /**

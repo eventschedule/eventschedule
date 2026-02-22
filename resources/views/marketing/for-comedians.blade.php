@@ -33,7 +33,7 @@
                 "name": "Is Event Schedule free for comedians?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your show dates and building a fan following. Ticketing and newsletters are available on the Pro plan, and there are zero platform fees on any ticket sales."
+                    "text": "Yes. Event Schedule is free forever for sharing your show dates and building a fan following. Ticketing and newsletters are available on the Pro and Enterprise plans, with zero platform fees on any ticket sales."
                 }
             },
             {
@@ -720,7 +720,7 @@
                     </button>
                     <div x-show="open === 1" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes. Event Schedule is free forever for sharing your show dates and building a fan following. Ticketing and newsletters are available on the Pro plan, and there are zero platform fees on any ticket sales.
+                            Yes. Event Schedule is free forever for sharing your show dates and building a fan following. Ticketing and newsletters are available on the Pro and Enterprise plans, with zero platform fees on any ticket sales.
                         </p>
                     </div>
                 </div>

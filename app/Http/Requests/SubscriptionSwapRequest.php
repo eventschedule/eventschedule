@@ -15,6 +15,7 @@ class SubscriptionSwapRequest extends FormRequest
     {
         return [
             'plan' => ['required', 'in:monthly,yearly'],
+            'tier' => ['sometimes', 'in:pro,enterprise'],
         ];
     }
 }
