@@ -431,14 +431,17 @@ if (config('app.is_nexus')) {
         // Selfhost section
         Route::get('/docs/selfhost', [MarketingController::class, 'docsSelfhostIndex'])->name('marketing.docs.selfhost');
         Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
-        Route::get('/docs/selfhost/saas', [MarketingController::class, 'docsSelfhostSaas'])->name('marketing.docs.selfhost.saas');
         Route::get('/docs/selfhost/stripe', [MarketingController::class, 'docsSelfhostStripe'])->name('marketing.docs.selfhost.stripe');
         Route::get('/docs/selfhost/google-calendar', [MarketingController::class, 'docsSelfhostGoogleCalendar'])->name('marketing.docs.selfhost.google_calendar');
+        // SaaS section
+        Route::get('/docs/saas', [MarketingController::class, 'docsSaasIndex'])->name('marketing.docs.saas');
+        Route::get('/docs/saas/setup', [MarketingController::class, 'docsSaasSetup'])->name('marketing.docs.saas.setup');
+        Route::get('/docs/saas/boost', [MarketingController::class, 'docsSaasBoost'])->name('marketing.docs.saas.boost');
         // Developer section
         Route::get('/docs/developer/api', [MarketingController::class, 'docsDeveloperApi'])->name('marketing.docs.developer.api');
         // Redirects from old URLs to new URLs
         Route::get('/docs/installation', fn () => redirect()->route('marketing.docs.selfhost.installation', [], 301));
-        Route::get('/docs/saas', fn () => redirect()->route('marketing.docs.selfhost.saas', [], 301));
+        Route::get('/docs/selfhost/saas', fn () => redirect()->route('marketing.docs.saas.setup', [], 301));
         Route::get('/docs/stripe', fn () => redirect()->route('marketing.docs.selfhost.stripe', [], 301));
         Route::get('/docs/google-calendar', fn () => redirect()->route('marketing.docs.selfhost.google_calendar', [], 301));
         Route::get('/docs/api', fn () => redirect()->route('marketing.docs.developer.api', [], 301));
@@ -550,14 +553,17 @@ if (config('app.is_nexus')) {
             // Selfhost section
             Route::get('/docs/selfhost', [MarketingController::class, 'docsSelfhostIndex'])->name('marketing.docs.selfhost');
             Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
-            Route::get('/docs/selfhost/saas', [MarketingController::class, 'docsSelfhostSaas'])->name('marketing.docs.selfhost.saas');
             Route::get('/docs/selfhost/stripe', [MarketingController::class, 'docsSelfhostStripe'])->name('marketing.docs.selfhost.stripe');
             Route::get('/docs/selfhost/google-calendar', [MarketingController::class, 'docsSelfhostGoogleCalendar'])->name('marketing.docs.selfhost.google_calendar');
+            // SaaS section
+            Route::get('/docs/saas', [MarketingController::class, 'docsSaasIndex'])->name('marketing.docs.saas');
+            Route::get('/docs/saas/setup', [MarketingController::class, 'docsSaasSetup'])->name('marketing.docs.saas.setup');
+            Route::get('/docs/saas/boost', [MarketingController::class, 'docsSaasBoost'])->name('marketing.docs.saas.boost');
             // Developer section
             Route::get('/docs/developer/api', [MarketingController::class, 'docsDeveloperApi'])->name('marketing.docs.developer.api');
             // Redirects from old URLs to new URLs
             Route::get('/docs/installation', fn () => redirect()->route('marketing.docs.selfhost.installation', [], 301));
-            Route::get('/docs/saas', fn () => redirect()->route('marketing.docs.selfhost.saas', [], 301));
+            Route::get('/docs/selfhost/saas', fn () => redirect()->route('marketing.docs.saas.setup', [], 301));
             Route::get('/docs/stripe', fn () => redirect()->route('marketing.docs.selfhost.stripe', [], 301));
             Route::get('/docs/google-calendar', fn () => redirect()->route('marketing.docs.selfhost.google_calendar', [], 301));
             Route::get('/docs/api', fn () => redirect()->route('marketing.docs.developer.api', [], 301));
@@ -668,14 +674,17 @@ if (config('app.is_nexus')) {
             // Selfhost section
             Route::get('/docs/selfhost', fn () => redirect('https://eventschedule.com/docs/selfhost', 301));
             Route::get('/docs/selfhost/installation', fn () => redirect('https://eventschedule.com/docs/selfhost/installation', 301));
-            Route::get('/docs/selfhost/saas', fn () => redirect('https://eventschedule.com/docs/selfhost/saas', 301));
+            Route::get('/docs/selfhost/saas', fn () => redirect('https://eventschedule.com/docs/saas/setup', 301));
             Route::get('/docs/selfhost/stripe', fn () => redirect('https://eventschedule.com/docs/selfhost/stripe', 301));
             Route::get('/docs/selfhost/google-calendar', fn () => redirect('https://eventschedule.com/docs/selfhost/google-calendar', 301));
+            // SaaS section
+            Route::get('/docs/saas', fn () => redirect('https://eventschedule.com/docs/saas', 301));
+            Route::get('/docs/saas/setup', fn () => redirect('https://eventschedule.com/docs/saas/setup', 301));
+            Route::get('/docs/saas/boost', fn () => redirect('https://eventschedule.com/docs/saas/boost', 301));
             // Developer section
             Route::get('/docs/developer/api', fn () => redirect('https://eventschedule.com/docs/developer/api', 301));
             Route::get('/docs/developer', fn () => redirect('https://eventschedule.com/docs/developer/api', 301));
             // Old URL redirects
-            Route::get('/docs/saas', fn () => redirect('https://eventschedule.com/docs/selfhost/saas', 301));
             Route::get('/docs/stripe', fn () => redirect('https://eventschedule.com/docs/selfhost/stripe', 301));
             Route::get('/docs/google-calendar', fn () => redirect('https://eventschedule.com/docs/selfhost/google-calendar', 301));
             Route::get('/docs/installation', fn () => redirect('https://eventschedule.com/docs/selfhost/installation', 301));
@@ -779,11 +788,14 @@ if (config('app.is_nexus')) {
     Route::get('/docs/selfhost/saas', fn () => redirect()->route('home'));
     Route::get('/docs/selfhost/stripe', fn () => redirect()->route('home'));
     Route::get('/docs/selfhost/google-calendar', fn () => redirect()->route('home'));
+    // SaaS section
+    Route::get('/docs/saas', fn () => redirect()->route('home'));
+    Route::get('/docs/saas/setup', fn () => redirect()->route('home'));
+    Route::get('/docs/saas/boost', fn () => redirect()->route('home'));
     // Developer section
     Route::get('/docs/developer', fn () => redirect()->route('home'));
     Route::get('/docs/developer/api', fn () => redirect()->route('home'));
     // Old URLs (still redirect to home)
-    Route::get('/docs/saas', fn () => redirect()->route('home'));
     Route::get('/docs/stripe', fn () => redirect()->route('home'));
     Route::get('/docs/google-calendar', fn () => redirect()->route('home'));
     Route::get('/docs/installation', fn () => redirect()->route('home'));

@@ -844,6 +844,7 @@
             </button>
             <div id="event-actions-pop-up-menu" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="event-actions-menu-button" tabindex="-1">
                 <div class="py-2" role="none" id="event-actions-pop-up-menu-items" data-popup-target="event-actions-pop-up-menu">
+                    @if (config('services.meta.app_id'))
                     @if ($event->name && $event->starts_at && \Carbon\Carbon::parse($event->starts_at)->isFuture())
                     @php
                         $activeBoost = $event->boostCampaigns()->whereIn('status', ['active', 'paused'])->first();
@@ -866,6 +867,7 @@
                             {{ __('messages.boost_event') }}
                         </div>
                     </a>
+                    @endif
                     @endif
                     @endif
                     <a href="{{ route('event.clone', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
