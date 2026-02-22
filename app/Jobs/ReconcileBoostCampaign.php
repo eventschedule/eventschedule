@@ -23,6 +23,8 @@ class ReconcileBoostCampaign implements ShouldBeUnique, ShouldQueue
 
     public $backoff = [300, 3600, 14400];
 
+    public $timeout = 300;
+
     public $deleteWhenMissingModels = true;
 
     public $uniqueFor = 86400;
@@ -78,7 +80,7 @@ class ReconcileBoostCampaign implements ShouldBeUnique, ShouldQueue
         $campaign->refresh();
 
         // Send completion email if still completed (not cancelled during reconciliation)
-        if ($campaign->status === 'completed') {
+        if ($campaign->status === 'completed' && $campaign->user) {
             try {
                 Mail::to($campaign->user->email)
                     ->send(new BoostCompleted($campaign));

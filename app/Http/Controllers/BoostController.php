@@ -155,7 +155,7 @@ class BoostController extends Controller
             'objective' => 'nullable|in:OUTCOME_AWARENESS,OUTCOME_TRAFFIC,OUTCOME_ENGAGEMENT',
             'targeting' => 'nullable|json',
             'placements' => 'nullable|json',
-            'scheduled_start' => 'nullable|date',
+            'scheduled_start' => 'nullable|date|after_or_equal:now',
             'scheduled_end' => 'nullable|date|after:scheduled_start|after:now',
         ]);
 
@@ -171,19 +171,6 @@ class BoostController extends Controller
         $role = $event->roles->firstWhere('id', $roleId);
         if (! $role) {
             abort(403);
-        }
-
-        // Check concurrent boost limit
-        $activeCampaigns = BoostCampaign::where('role_id', $roleId)
-            ->whereIn('status', ['active', 'pending_payment'])
-            ->count();
-
-        if ($activeCampaigns >= config('services.meta.max_concurrent_boosts', 3)) {
-            if ($isAjax) {
-                return response()->json(['error' => __('messages.boost_max_concurrent')], 422);
-            }
-
-            return back()->with('error', __('messages.boost_max_concurrent'));
         }
 
         // Prevent duplicate campaigns from the same payment
@@ -215,8 +202,24 @@ class BoostController extends Controller
         $budgetType = $request->budget_type ?? 'lifetime';
         $markupRate = config('app.hosted') ? config('services.meta.markup_rate', 0.20) : 0;
 
-        // Create campaign record
+        // Check concurrent boost limit and create campaign atomically
+        DB::beginTransaction();
         try {
+            DB::table('roles')->where('id', $roleId)->lockForUpdate()->first();
+
+            $activeCampaigns = BoostCampaign::where('role_id', $roleId)
+                ->whereIn('status', ['active', 'pending_payment'])
+                ->count();
+
+            if ($activeCampaigns >= config('services.meta.max_concurrent_boosts', 3)) {
+                DB::rollBack();
+                if ($isAjax) {
+                    return response()->json(['error' => __('messages.boost_max_concurrent')], 422);
+                }
+
+                return back()->with('error', __('messages.boost_max_concurrent'));
+            }
+
             $campaign = BoostCampaign::create([
                 'event_id' => $eventId,
                 'role_id' => $roleId,
@@ -237,7 +240,10 @@ class BoostController extends Controller
                 'billing_status' => config('app.hosted') ? 'pending' : 'charged',
                 'stripe_payment_intent_id' => $request->payment_intent_id ?? (config('app.is_testing') ? 'test_pi_'.\Illuminate\Support\Str::random(24) : null),
             ]);
+
+            DB::commit();
         } catch (QueryException $e) {
+            DB::rollBack();
             // Duplicate payment intent - look up existing campaign
             $existingCampaign = BoostCampaign::where('stripe_payment_intent_id', $request->payment_intent_id)->first();
             if ($existingCampaign && $existingCampaign->user_id === auth()->id()) {
@@ -289,6 +295,7 @@ class BoostController extends Controller
         }
 
         // Confirm Stripe payment
+        $billingService = new BoostBillingService;
         if (! config('app.hosted') || config('app.is_testing')) {
             $campaign->update([
                 'total_charged' => config('app.hosted') ? $campaign->getTotalCost() : 0,
@@ -296,7 +303,6 @@ class BoostController extends Controller
             ]);
             $paymentConfirmed = true;
         } else {
-            $billingService = new BoostBillingService;
             $paymentConfirmed = $billingService->confirmPayment($campaign, $request->payment_intent_id);
         }
 
@@ -550,7 +556,7 @@ class BoostController extends Controller
         }
 
         $budget = (float) $request->budget;
-        $markupRate = config('services.meta.markup_rate', 0.20);
+        $markupRate = config('app.hosted') ? config('services.meta.markup_rate', 0.20) : 0;
         $totalAmount = round($budget * (1 + $markupRate), 2);
 
         if (config('app.is_testing')) {

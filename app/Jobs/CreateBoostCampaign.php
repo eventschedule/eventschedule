@@ -24,6 +24,8 @@ class CreateBoostCampaign implements ShouldBeUnique, ShouldQueue
 
     public $backoff = [30, 120, 300];
 
+    public $timeout = 300;
+
     public $deleteWhenMissingModels = true;
 
     public $uniqueFor = 3600;

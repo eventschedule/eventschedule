@@ -1582,4 +1582,34 @@ class EventController extends Controller
             'view_url' => route('event.view_guest', ['subdomain' => $subdomain, 'slug' => $event->slug]),
         ]);
     }
+
+    public function downloadIcal($subdomain, $slug, $id, $date = null)
+    {
+        $event = Event::find(UrlUtils::decodeId($id));
+
+        if (! $event) {
+            abort(404);
+        }
+
+        $title = $event->getTitle();
+        $description = $event->description_html ? strip_tags($event->description_html) : ($event->role() ? strip_tags($event->role()->description_html) : '');
+        $location = $event->venue ? $event->venue->bestAddress() : '';
+        $duration = $event->duration > 0 ? $event->duration : 2;
+        $startAt = $event->getStartDateTime($date);
+        $startDate = $startAt->format('Ymd\THis\Z');
+        $endDate = $startAt->addSeconds($duration * 3600)->format('Ymd\THis\Z');
+
+        $ical = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\n";
+        $ical .= 'SUMMARY:'.$title."\r\n";
+        $ical .= 'DESCRIPTION:'.$description."\r\n";
+        $ical .= 'DTSTART:'.$startDate."\r\n";
+        $ical .= 'DTEND:'.$endDate."\r\n";
+        $ical .= 'LOCATION:'.$location."\r\n";
+        $ical .= "END:VEVENT\r\nEND:VCALENDAR";
+
+        return response($ical, 200, [
+            'Content-Type' => 'text/calendar; charset=utf-8',
+            'Content-Disposition' => 'inline; filename="event.ics"',
+        ]);
+    }
 }

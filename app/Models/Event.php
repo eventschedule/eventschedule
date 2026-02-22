@@ -851,23 +851,13 @@ class Event extends Model
 
     public function getAppleCalendarUrl($date = null)
     {
-        $title = $this->getTitle();
-        $description = $this->description_html ? strip_tags($this->description_html) : ($this->role() ? strip_tags($this->role()->description_html) : '');
-        $location = $this->venue ? $this->venue->bestAddress() : '';
-        $duration = $this->duration > 0 ? $this->duration : 2;
-        $startAt = $this->getStartDateTime($date);
-        $startDate = $startAt->format('Ymd\THis\Z');
-        $endDate = $startAt->addSeconds($duration * 3600)->format('Ymd\THis\Z');
+        $guestUrl = $this->getGuestUrl(false, $date);
 
-        $url = "BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\n";
-        $url .= 'SUMMARY:'.$title."\n";
-        $url .= 'DESCRIPTION:'.$description."\n";
-        $url .= 'DTSTART:'.$startDate."\n";
-        $url .= 'DTEND:'.$endDate."\n";
-        $url .= 'LOCATION:'.$location."\n";
-        $url .= "END:VEVENT\nEND:VCALENDAR";
+        if (! $guestUrl) {
+            return '';
+        }
 
-        return 'data:text/calendar;charset=utf8,'.urlencode($url);
+        return $guestUrl.'/ical';
     }
 
     public function getMicrosoftCalendarUrl($date = null)
