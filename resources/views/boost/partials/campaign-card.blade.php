@@ -20,7 +20,7 @@
             </span>
         </div>
 
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ $campaign->role->name }}</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ $campaign->role?->name ?? __('messages.deleted') }}</p>
 
         <div class="grid grid-cols-3 gap-3 text-center">
             <div>

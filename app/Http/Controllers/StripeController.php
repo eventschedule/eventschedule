@@ -234,13 +234,13 @@ class StripeController extends Controller
 
             $metaService = app()->make(MetaAdsService::class);
             $metaService->sendConversionEvent('Purchase', [
-                'event_id' => 'es_sale_' . $sale->id,
+                'event_id' => 'es_sale_'.$sale->id,
                 'user_data' => [
                     'em' => [hash('sha256', strtolower(trim($sale->email)))],
                 ],
                 'custom_data' => [
                     'value' => $amount,
-                    'currency' => config('services.meta.default_currency', 'USD'),
+                    'currency' => $sale->event->ticket_currency_code ?? config('services.meta.default_currency', 'USD'),
                     'content_name' => $event->name,
                 ],
             ]);

@@ -20,6 +20,8 @@ class SyncBoostAnalytics implements ShouldBeUnique, ShouldQueue
 
     public $backoff = [60, 300, 900];
 
+    public $timeout = 300;
+
     public $deleteWhenMissingModels = true;
 
     public $uniqueFor = 300;

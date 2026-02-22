@@ -135,6 +135,10 @@ class MetaAdsWebhookController extends Controller
         }
 
         $campaign = $ad->campaign;
+        if (! $campaign) {
+            return;
+        }
+
         $effectiveStatus = $value['effective_status'] ?? null;
 
         if ($effectiveStatus === 'DISAPPROVED') {
@@ -160,8 +164,12 @@ class MetaAdsWebhookController extends Controller
                 if ($updated > 0) {
                     $campaign->refresh();
 
-                    $billingService = app()->make(BoostBillingService::class);
-                    $refunded = $billingService->refundFull($campaign);
+                    if (config('app.hosted') && ! config('app.is_testing')) {
+                        $billingService = app()->make(BoostBillingService::class);
+                        $refunded = $billingService->refundFull($campaign);
+                    } else {
+                        $refunded = false;
+                    }
 
                     if (! $refunded) {
                         Log::error('Boost campaign rejected via webhook but refund failed', [
@@ -170,13 +178,15 @@ class MetaAdsWebhookController extends Controller
                     }
 
                     $campaign->loadMissing('user');
-                    try {
-                        Mail::to($campaign->user->email)->send(new BoostRejected($campaign, $refunded));
-                    } catch (\Exception $e) {
-                        Log::warning('Failed to send boost rejected email via webhook', [
-                            'campaign_id' => $campaign->id,
-                            'error' => $e->getMessage(),
-                        ]);
+                    if ($campaign->user) {
+                        try {
+                            Mail::to($campaign->user->email)->send(new BoostRejected($campaign, $refunded));
+                        } catch (\Exception $e) {
+                            Log::warning('Failed to send boost rejected email via webhook', [
+                                'campaign_id' => $campaign->id,
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
                     }
 
                     Log::info('Boost campaign rejected via webhook', ['campaign_id' => $campaign->id, 'refunded' => $refunded]);

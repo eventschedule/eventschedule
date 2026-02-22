@@ -764,9 +764,7 @@ class MetaAdsService
      */
     protected function apiGet(string $endpoint, array $params = []): array
     {
-        $params['access_token'] = $this->accessToken;
-
-        $response = Http::timeout(30)->get("{$this->baseUrl}/{$endpoint}", $params);
+        $response = Http::withToken($this->accessToken)->timeout(30)->get("{$this->baseUrl}/{$endpoint}", $params);
 
         if (! $response->successful()) {
             $error = $response->json('error.message', 'Unknown error');
@@ -781,9 +779,7 @@ class MetaAdsService
      */
     protected function apiPost(string $endpoint, array $data = []): array
     {
-        $data['access_token'] = $this->accessToken;
-
-        $response = Http::timeout(30)->post("{$this->baseUrl}/{$endpoint}", $data);
+        $response = Http::withToken($this->accessToken)->timeout(30)->post("{$this->baseUrl}/{$endpoint}", $data);
 
         if (! $response->successful()) {
             $error = $response->json('error.message', 'Unknown error');
@@ -798,9 +794,7 @@ class MetaAdsService
      */
     protected function apiDelete(string $endpoint): array
     {
-        $response = Http::timeout(30)->delete("{$this->baseUrl}/{$endpoint}", [
-            'access_token' => $this->accessToken,
-        ]);
+        $response = Http::withToken($this->accessToken)->timeout(30)->delete("{$this->baseUrl}/{$endpoint}");
 
         if (! $response->successful()) {
             $error = $response->json('error.message', 'Unknown error');

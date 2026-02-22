@@ -116,13 +116,15 @@ class SyncBoostCampaigns extends Command
                     ]);
                 }
 
-                try {
-                    Mail::to($campaign->user->email)->send(new BoostRejected($campaign, $refunded));
-                } catch (\Exception $e) {
-                    Log::warning('Failed to send boost rejected email', [
-                        'campaign_id' => $campaign->id,
-                        'error' => $e->getMessage(),
-                    ]);
+                if ($campaign->user) {
+                    try {
+                        Mail::to($campaign->user->email)->send(new BoostRejected($campaign, $refunded));
+                    } catch (\Exception $e) {
+                        Log::warning('Failed to send boost rejected email', [
+                            'campaign_id' => $campaign->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
                 }
 
                 Log::info('Boost campaign rejected', ['campaign_id' => $campaign->id, 'refunded' => $refunded]);
@@ -167,7 +169,7 @@ class SyncBoostCampaigns extends Command
                 ->where('status', 'active')
                 ->update(['budget_alert_sent_at' => now()]);
 
-            if ($updated > 0) {
+            if ($updated > 0 && $campaign->user) {
                 try {
                     Mail::to($campaign->user->email)->send(new BoostBudgetAlert($campaign));
                 } catch (\Exception $e) {
