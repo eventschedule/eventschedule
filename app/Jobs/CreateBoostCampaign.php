@@ -73,9 +73,25 @@ class CreateBoostCampaign implements ShouldBeUnique, ShouldQueue
                 'error' => $e->getMessage(),
             ]);
 
+            // Pause the now-active Meta campaign to stop spend
+            if (! empty($result['meta_campaign_id'])) {
+                $campaign->meta_campaign_id = $result['meta_campaign_id'];
+                try {
+                    $metaService->pauseCampaign($campaign);
+                } catch (\Exception $pauseError) {
+                    Log::critical('Failed to pause orphaned Meta campaign', [
+                        'campaign_id' => $campaign->id,
+                        'meta_campaign_id' => $result['meta_campaign_id'],
+                        'error' => $pauseError->getMessage(),
+                    ]);
+                }
+            }
+
             try {
                 $campaign->update([
                     'status' => 'failed',
+                    'meta_campaign_id' => $result['meta_campaign_id'] ?? null,
+                    'meta_adset_id' => $result['meta_adset_id'] ?? null,
                     'meta_status' => 'ERROR',
                     'meta_rejection_reason' => 'Created on Meta but failed to save locally: '.$e->getMessage(),
                 ]);

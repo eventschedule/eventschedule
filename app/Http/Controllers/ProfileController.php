@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Mail\SupportEmail;
+use App\Models\BoostCampaign;
 use App\Notifications\DeletedUserNotification;
 use App\Services\AuditService;
+use App\Services\BoostBillingService;
+use App\Services\MetaAdsService;
 use App\Utils\InvoiceNinja;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\RedirectResponse;
@@ -202,6 +205,56 @@ class ProfileController extends Controller
                     $path = 'public/'.$path;
                 }
                 Storage::delete($path);
+            }
+        }
+
+        // Cancel active boost campaigns before deletion (prevents orphaned Meta campaigns)
+        $activeCampaigns = BoostCampaign::where('user_id', $user->id)
+            ->whereIn('status', ['active', 'paused', 'pending_payment'])
+            ->get();
+
+        foreach ($activeCampaigns as $campaign) {
+            try {
+                $cancelled = \DB::transaction(function () use ($campaign) {
+                    $campaign = BoostCampaign::lockForUpdate()->find($campaign->id);
+                    if (! $campaign || ! $campaign->canBeCancelled()) {
+                        return false;
+                    }
+                    $campaign->update([
+                        'status' => 'cancelled',
+                        'meta_status' => $campaign->meta_campaign_id ? 'DELETED' : null,
+                    ]);
+
+                    return true;
+                });
+
+                if ($cancelled) {
+                    if ($campaign->meta_campaign_id) {
+                        (new MetaAdsService)->deleteCampaign($campaign);
+                    }
+
+                    if (config('app.hosted') && ! config('app.is_testing')) {
+                        $campaign->refresh();
+                        if (! in_array($campaign->billing_status, ['refunded', 'partially_refunded'])) {
+                            $billingService = new BoostBillingService;
+                            if ($campaign->billing_status === 'pending') {
+                                if ($campaign->stripe_payment_intent_id) {
+                                    $billingService->cancelPaymentIntent($campaign);
+                                }
+                            } else {
+                                $campaign->actual_spend && $campaign->actual_spend > 0
+                                    ? $billingService->refundUnspent($campaign)
+                                    : $billingService->refundFull($campaign);
+                            }
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Failed to cancel boost campaign during user deletion', [
+                    'campaign_id' => $campaign->id,
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
             }
         }
 

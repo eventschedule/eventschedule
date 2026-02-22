@@ -339,12 +339,10 @@ class BoostController extends Controller
         $campaign = BoostCampaign::with(['event', 'role', 'ads', 'billingRecords'])
             ->findOrFail($id);
 
-        if ($campaign->event) {
-            if (! auth()->user()->canEditEvent($campaign->event)) {
+        if ($campaign->user_id !== auth()->id()) {
+            if (! $campaign->event || ! auth()->user()->canEditEvent($campaign->event)) {
                 abort(403);
             }
-        } elseif ($campaign->user_id !== auth()->id()) {
-            abort(403);
         }
 
         return view('boost.show', [
@@ -360,12 +358,10 @@ class BoostController extends Controller
         $id = UrlUtils::decodeIdOrFail($hash);
         $campaign = BoostCampaign::with('event')->findOrFail($id);
 
-        if ($campaign->event) {
-            if (! auth()->user()->canEditEvent($campaign->event)) {
+        if ($campaign->user_id !== auth()->id()) {
+            if (! $campaign->event || ! auth()->user()->canEditEvent($campaign->event)) {
                 abort(403);
             }
-        } elseif ($campaign->user_id !== auth()->id()) {
-            abort(403);
         }
 
         if (! $campaign->meta_campaign_id) {
@@ -415,12 +411,10 @@ class BoostController extends Controller
         $id = UrlUtils::decodeIdOrFail($hash);
         $campaign = BoostCampaign::with('event')->findOrFail($id);
 
-        if ($campaign->event) {
-            if (! auth()->user()->canEditEvent($campaign->event)) {
+        if ($campaign->user_id !== auth()->id()) {
+            if (! $campaign->event || ! auth()->user()->canEditEvent($campaign->event)) {
                 abort(403);
             }
-        } elseif ($campaign->user_id !== auth()->id()) {
-            abort(403);
         }
 
         if (! $campaign->canBeCancelled()) {
