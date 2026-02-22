@@ -18,7 +18,7 @@ class BoostController extends Controller
 {
     protected function getMetaService(): MetaAdsService
     {
-        if (config('app.is_testing') || empty(config('services.meta.access_token'))) {
+        if (! MetaAdsService::isBoostConfigured()) {
             return new \App\Services\MetaAdsServiceFake;
         }
 
@@ -130,6 +130,7 @@ class BoostController extends Controller
             'minBudget' => config('services.meta.min_budget', 10),
             'maxBudget' => config('services.meta.max_budget', 5000),
             'currencySymbol' => $currencySymbol,
+            'isTesting' => config('app.is_testing'),
         ]);
     }
 
@@ -144,7 +145,7 @@ class BoostController extends Controller
             'event_id' => 'required|string',
             'role_id' => 'required|string',
             'budget' => 'required|numeric|min:'.config('services.meta.min_budget').'|max:'.config('services.meta.max_budget'),
-            'payment_intent_id' => 'required|string',
+            'payment_intent_id' => config('app.is_testing') ? 'nullable|string' : 'required|string',
             'headline' => 'nullable|string|max:40',
             'primary_text' => 'nullable|string|max:125',
             'description' => 'nullable|string|max:30',
@@ -231,7 +232,7 @@ class BoostController extends Controller
                 'user_budget' => $budget,
                 'markup_rate' => $markupRate,
                 'billing_status' => 'pending',
-                'stripe_payment_intent_id' => $request->payment_intent_id,
+                'stripe_payment_intent_id' => $request->payment_intent_id ?? (config('app.is_testing') ? 'test_pi_'.\Illuminate\Support\Str::random(24) : null),
             ]);
         } catch (QueryException $e) {
             // Duplicate payment intent - look up existing campaign
@@ -272,8 +273,10 @@ class BoostController extends Controller
                 'error' => $e->getMessage(),
             ]);
             $campaign->update(['status' => 'failed']);
-            $billingService = new BoostBillingService;
-            $billingService->cancelPaymentIntent($campaign->fresh());
+            if (! config('app.is_testing')) {
+                $billingService = new BoostBillingService;
+                $billingService->cancelPaymentIntent($campaign->fresh());
+            }
 
             if ($isAjax) {
                 return response()->json(['error' => __('messages.boost_payment_failed')], 422);
@@ -283,8 +286,16 @@ class BoostController extends Controller
         }
 
         // Confirm Stripe payment
-        $billingService = new BoostBillingService;
-        $paymentConfirmed = $billingService->confirmPayment($campaign, $request->payment_intent_id);
+        if (config('app.is_testing')) {
+            $campaign->update([
+                'total_charged' => $campaign->getTotalCost(),
+                'billing_status' => 'charged',
+            ]);
+            $paymentConfirmed = true;
+        } else {
+            $billingService = new BoostBillingService;
+            $paymentConfirmed = $billingService->confirmPayment($campaign, $request->payment_intent_id);
+        }
 
         if (! $paymentConfirmed) {
             $campaign->update(['status' => 'failed']);
@@ -437,24 +448,26 @@ class BoostController extends Controller
         }
 
         // Attempt refund outside the transaction (billing methods handle their own locking)
-        $campaign->refresh();
-        if (! in_array($campaign->billing_status, ['refunded', 'partially_refunded'])) {
-            $billingService = new BoostBillingService;
+        if (! config('app.is_testing')) {
+            $campaign->refresh();
+            if (! in_array($campaign->billing_status, ['refunded', 'partially_refunded'])) {
+                $billingService = new BoostBillingService;
 
-            if ($campaign->billing_status === 'pending') {
-                // Payment may not have been confirmed yet - cancel the intent
-                if ($campaign->stripe_payment_intent_id) {
-                    $billingService->cancelPaymentIntent($campaign);
-                }
-            } else {
-                $refunded = $campaign->actual_spend && $campaign->actual_spend > 0
-                    ? $billingService->refundUnspent($campaign)
-                    : $billingService->refundFull($campaign);
+                if ($campaign->billing_status === 'pending') {
+                    // Payment may not have been confirmed yet - cancel the intent
+                    if ($campaign->stripe_payment_intent_id) {
+                        $billingService->cancelPaymentIntent($campaign);
+                    }
+                } else {
+                    $refunded = $campaign->actual_spend && $campaign->actual_spend > 0
+                        ? $billingService->refundUnspent($campaign)
+                        : $billingService->refundFull($campaign);
 
-                if (! $refunded) {
-                    Log::warning('Boost cancellation refund failed', [
-                        'campaign_id' => $campaign->id,
-                    ]);
+                    if (! $refunded) {
+                        Log::warning('Boost cancellation refund failed', [
+                            'campaign_id' => $campaign->id,
+                        ]);
+                    }
                 }
             }
         }
@@ -536,6 +549,17 @@ class BoostController extends Controller
         $budget = (float) $request->budget;
         $markupRate = config('services.meta.markup_rate', 0.20);
         $totalAmount = round($budget * (1 + $markupRate), 2);
+
+        if (config('app.is_testing')) {
+            $fakeId = 'test_pi_'.\Illuminate\Support\Str::random(24);
+
+            return response()->json([
+                'client_secret' => $fakeId.'_secret_test',
+                'payment_intent_id' => $fakeId,
+                'total_amount' => $totalAmount,
+            ]);
+        }
+
         $amountInCents = (int) round($totalAmount * 100);
 
         try {

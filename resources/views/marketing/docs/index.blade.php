@@ -319,7 +319,7 @@
                 </a>
 
                 <!-- SaaS Section Card -->
-                <a href="{{ route('marketing.docs.saas') }}" class="section-card block group">
+                <a href="{{ route('marketing.docs.saas.setup') }}" class="section-card block group">
                     <div class="relative overflow-hidden rounded-2xl border border-sky-200 dark:border-white/10 p-8 h-full bg-gradient-to-br from-sky-100 via-sky-100 to-blue-100 dark:from-sky-900 dark:via-sky-900 dark:to-blue-900 group-hover:border-sky-500/30 transition-colors">
                         <!-- Glow effect -->
                         <div class="absolute -top-24 -right-24 w-48 h-48 bg-sky-500/20 rounded-full blur-[60px] group-hover:bg-sky-500/30 transition-colors"></div>

@@ -49,5 +49,7 @@ Schedule::call(function () {
 })->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
-    Artisan::call('boost:sync');
+    if (\App\Services\MetaAdsService::isBoostConfigured()) {
+        Artisan::call('boost:sync');
+    }
 })->everyFifteenMinutes()->name('boost-sync')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));

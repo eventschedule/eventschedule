@@ -755,14 +755,6 @@ class MarketingController extends Controller
     }
 
     /**
-     * SaaS section index page
-     */
-    public function docsSaasIndex()
-    {
-        return view('marketing.docs.saas.index');
-    }
-
-    /**
      * SaaS setup documentation page
      */
     public function docsSaasSetup()
@@ -773,9 +765,9 @@ class MarketingController extends Controller
     /**
      * Boost documentation page
      */
-    public function docsSaasBoost()
+    public function docsSelfhostBoost()
     {
-        return view('marketing.docs.saas.boost');
+        return view('marketing.docs.selfhost.boost');
     }
 
     /**

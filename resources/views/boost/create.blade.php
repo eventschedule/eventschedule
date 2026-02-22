@@ -111,11 +111,19 @@
             </div>
 
             {{-- Payment --}}
+            @if (!empty($isTesting))
+            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.payment') }}</h3>
+                <p class="text-sm text-yellow-600 dark:text-yellow-400">Testing mode: payment will be skipped.</p>
+                <div id="payment-errors" class="text-sm text-red-600 dark:text-red-400 hidden"></div>
+            </div>
+            @else
             <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
                 <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.payment') }}</h3>
                 <div id="payment-element" class="mb-4"></div>
                 <div id="payment-errors" class="text-sm text-red-600 dark:text-red-400 hidden"></div>
             </div>
+            @endif
 
             {{-- Submit --}}
             <div class="flex items-center justify-between">
@@ -168,6 +176,49 @@
         slider.addEventListener('input', updateCosts);
     </script>
 
+    @if (!empty($isTesting))
+    <script {!! nonce_attr() !!}>
+        // Testing mode: submit directly without Stripe
+        document.getElementById('boost-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const submitSpinner = document.getElementById('submit-spinner');
+            const paymentErrors = document.getElementById('payment-errors');
+
+            submitBtn.disabled = true;
+            submitSpinner.classList.remove('hidden');
+            paymentErrors.classList.add('hidden');
+
+            const formData = new FormData(document.getElementById('boost-form'));
+
+            try {
+                const response = await fetch('{{ route("boost.store") }}', {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                } else if (data.error) {
+                    paymentErrors.textContent = data.error;
+                    paymentErrors.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitSpinner.classList.add('hidden');
+                } else {
+                    window.location.href = '{{ route("boost.index") }}';
+                }
+            } catch (err) {
+                paymentErrors.textContent = '{{ __("messages.boost_store_error") }}';
+                paymentErrors.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitSpinner.classList.add('hidden');
+            }
+        });
+    </script>
+    @else
     <script src="https://js.stripe.com/v3/" {!! nonce_attr() !!}></script>
     <script {!! nonce_attr() !!}>
         const stripe = Stripe('{{ $stripeKey }}');
@@ -319,4 +370,5 @@
             document.getElementById('payment-errors').classList.remove('hidden');
         });
     </script>
+    @endif
 </x-app-admin-layout>

@@ -55,7 +55,7 @@ class SyncBoostCampaigns extends Command
 
     private function getMetaService(): MetaAdsService
     {
-        if (empty(config('services.meta.access_token')) || config('app.is_testing')) {
+        if (! MetaAdsService::isBoostConfigured()) {
             return app()->make(MetaAdsServiceFake::class);
         }
 
@@ -204,6 +204,15 @@ class SyncBoostCampaigns extends Command
 
         foreach ($staleCampaigns as $campaign) {
             try {
+                if (config('app.is_testing')) {
+                    // In testing mode, activate stale campaigns without Stripe check
+                    $campaign->update(['status' => 'active']);
+                    \App\Jobs\CreateBoostCampaign::dispatch($campaign);
+                    Log::info('Recovered stale pending_payment campaign (testing) - activated', ['campaign_id' => $campaign->id]);
+
+                    continue;
+                }
+
                 // Check if the Stripe payment actually succeeded
                 if ($campaign->stripe_payment_intent_id) {
                     $stripe = new \Stripe\StripeClient(config('services.stripe_platform.secret'));

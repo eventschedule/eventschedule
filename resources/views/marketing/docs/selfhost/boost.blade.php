@@ -43,7 +43,7 @@
         <div class="absolute inset-0 grid-pattern"></div>
 
         <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <x-docs-breadcrumb currentTitle="Boost Setup" section="saas" sectionTitle="SaaS" sectionRoute="marketing.docs.saas" />
+            <x-docs-breadcrumb currentTitle="Boost Setup" section="selfhost" sectionTitle="Selfhost" sectionRoute="marketing.docs.selfhost" />
 
             <div class="flex items-center gap-4 mb-4">
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-sky-500/20">

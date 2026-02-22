@@ -94,10 +94,10 @@
     <!-- Documentation Cards -->
     <section class="bg-white dark:bg-[#0a0a0f] py-16">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-3 gap-6">
+            <div class="grid md:grid-cols-4 gap-6">
                 <!-- Installation Guide -->
                 <a href="{{ route('marketing.docs.selfhost.installation') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900">
                         <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-cyan-100 dark:bg-cyan-500/20">
                             <svg aria-hidden="true" class="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -105,7 +105,7 @@
                         </div>
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Installation Guide</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Set up Event Schedule on your own server with this step-by-step guide.</p>
-                        <div class="inline-flex items-center text-sm font-medium text-cyan-600 dark:text-cyan-400">
+                        <div class="mt-auto inline-flex items-center text-sm font-medium text-cyan-600 dark:text-cyan-400">
                             Read Guide
                             <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -116,15 +116,15 @@
 
                 <!-- Stripe Integration -->
                 <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-sky-100 dark:bg-sky-500/20">
-                            <svg aria-hidden="true" class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-emerald-100 dark:bg-emerald-500/20">
+                            <svg aria-hidden="true" class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                             </svg>
                         </div>
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Stripe Integration</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Set up Stripe Connect for ticket sales and Laravel Cashier for subscription billing.</p>
-                        <div class="inline-flex items-center text-sm font-medium text-sky-600 dark:text-sky-400">
+                        <div class="mt-auto inline-flex items-center text-sm font-medium text-emerald-600 dark:text-emerald-400">
                             Read Guide
                             <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -135,7 +135,7 @@
 
                 <!-- Google Calendar -->
                 <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900">
                         <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-blue-100 dark:bg-blue-500/20">
                             <svg aria-hidden="true" class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -143,7 +143,26 @@
                         </div>
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Google Calendar</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Enable bidirectional sync between Event Schedule and Google Calendar.</p>
-                        <div class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400">
+                        <div class="mt-auto inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400">
+                            Read Guide
+                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Boost Setup -->
+                <a href="{{ route('marketing.docs.selfhost.boost') }}" class="doc-card block">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-amber-100 dark:bg-amber-500/20">
+                            <svg aria-hidden="true" class="w-6 h-6 text-amber-600 dark:text-amber-400" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Boost Setup</h2>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Configure Meta/Facebook ads integration to let users promote events through paid social media campaigns.</p>
+                        <div class="mt-auto inline-flex items-center text-sm font-medium text-amber-600 dark:text-amber-400">
                             Read Guide
                             <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

@@ -26,6 +26,11 @@ class MetaAdsService
         $this->adAccountId = config('services.meta.ad_account_id', '');
     }
 
+    public static function isBoostConfigured(): bool
+    {
+        return ! empty(config('services.meta.access_token'));
+    }
+
     public function isConfigured(): bool
     {
         return ! empty($this->accessToken) && ! empty($this->adAccountId);

@@ -81,7 +81,7 @@
                 </li>
                 @endif
 
-                @if (config('services.meta.app_id'))
+                @if (\App\Services\MetaAdsService::isBoostConfigured())
                 <li>
                     <a href="{{ route('boost.index') }}"
                         class="group flex gap-x-4 items-center rounded-md p-2 text-lg font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('boost*') ? 'bg-gray-800 text-white' : '' }}">
