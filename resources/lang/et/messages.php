@@ -55,6 +55,7 @@ return [
     'log_out' => 'Logi välja',
     'cancel' => 'Tühista',
     'delete' => 'Kustuta',
+    'delete_event' => 'Kustuta sündmus',
     'venue' => 'Toimumiskoht',
     'matched_venue' => 'Sobiv toimumiskoht',
     'type' => 'Tüüp',

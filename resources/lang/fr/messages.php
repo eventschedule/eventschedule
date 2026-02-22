@@ -51,6 +51,7 @@ return [
     'log_out' => 'Se déconnecter',
     'cancel' => 'Annuler',
     'delete' => 'Supprimer',
+    'delete_event' => 'Supprimer l\'événement',
     'venue' => 'Lieu',
     'type' => 'Type',
     'details' => 'Détails',

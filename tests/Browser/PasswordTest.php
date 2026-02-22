@@ -60,14 +60,8 @@ class PasswordTest extends DuskTestCase
             // -----------------------------------------------
             $this->logoutUser($browser, $name);
 
-            $browser->visit('/login')
-                ->waitFor('#email', 5)
-                ->type('email', $email)
-                ->type('password', $newPassword)
-                ->press('LOG IN')
-                ->waitForLocation('/events', 15)
-                ->assertPathIs('/events')
-                ->assertSee($name);
+            $this->loginUser($browser, $email, $newPassword);
+            $browser->assertSee($name);
         });
     }
 }

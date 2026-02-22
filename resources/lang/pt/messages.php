@@ -53,6 +53,7 @@ return [
     'log_out' => 'Sair',
     'cancel' => 'Cancelar',
     'delete' => 'Excluir',
+    'delete_event' => 'Excluir Evento',
     'deleted' => 'Excluído',
     'venue' => 'Local',
     'type' => 'Tipo',

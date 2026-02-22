@@ -97,6 +97,17 @@ jobs:
       - name: Start Laravel server in background
         run: php artisan serve > /dev/null 2>&1 &
 
+      - name: Wait for server to be ready
+        run: |
+          for i in $(seq 1 30); do
+            if curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/up | grep -q '200'; then
+              echo "Server is ready"
+              break
+            fi
+            echo "Waiting for server... attempt $i"
+            sleep 1
+          done
+
       - name: Run Laravel Dusk tests
         run: |
           cp .env .env.dusk.local

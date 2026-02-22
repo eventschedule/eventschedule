@@ -51,6 +51,7 @@ return [
     'log_out' => 'Abmelden',
     'cancel' => 'Abbrechen',
     'delete' => 'Löschen',
+    'delete_event' => 'Veranstaltung löschen',
     'venue' => 'Veranstaltungsort',
     'type' => 'Typ',
     'details' => 'Details',

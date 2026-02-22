@@ -51,6 +51,7 @@ return [
     'log_out' => 'تسجيل الخروج',
     'cancel' => 'إلغاء',
     'delete' => 'حذف',
+    'delete_event' => 'حذف الحدث',
     'venue' => 'مكان',
     'type' => 'نوع',
     'details' => 'التفاصيل',

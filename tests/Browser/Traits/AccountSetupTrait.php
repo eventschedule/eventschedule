@@ -169,6 +169,24 @@ trait AccountSetupTrait
     }
 
     /**
+     * Login user
+     */
+    protected function loginUser(Browser $browser, string $email, string $password): void
+    {
+        $browser->visit('/login')
+            ->waitFor('#email', 5)
+            ->pause(500)
+            ->type('email', $email)
+            ->type('password', $password);
+
+        // Use JavaScript to submit form (more reliable than press() in headless Chrome)
+        $browser->script("document.querySelector('form[method=\"POST\"]').requestSubmit()");
+
+        $browser->waitForLocation('/events', 15)
+            ->assertPathIs('/events');
+    }
+
+    /**
      * Logout user
      */
     protected function logoutUser(Browser $browser, string $name = 'John Doe'): void
