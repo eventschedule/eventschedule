@@ -43,6 +43,7 @@
                         if (typeof turnstile !== 'undefined') {
                             this.turnstileWidgetId = turnstile.render('#turnstile-checkout-widget', {
                                 sitekey: this.turnstileSiteKey,
+                                size: 'flexible',
                                 callback: (token) => {
                                     this.turnstileToken = token;
                                 },
