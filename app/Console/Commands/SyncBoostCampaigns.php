@@ -103,8 +103,12 @@ class SyncBoostCampaigns extends Command
 
                 $metaService->pauseCampaign($campaign);
 
-                $billingService = app()->make(BoostBillingService::class);
-                $refunded = $billingService->refundFull($campaign);
+                if (config('app.hosted') && ! config('app.is_testing')) {
+                    $billingService = app()->make(BoostBillingService::class);
+                    $refunded = $billingService->refundFull($campaign);
+                } else {
+                    $refunded = false;
+                }
 
                 if (! $refunded) {
                     Log::error('Boost campaign rejected but refund failed', [
