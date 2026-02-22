@@ -32,14 +32,15 @@ trait AccountSetupTrait
     {
         $browser->visit('/new/venue')
             ->waitFor('#name', 5)
-            ->pause(500)
-            ->clear('name')
-            ->type('name', $name)
             ->pause(1000)
-            ->click('a[data-section="section-address"]')
-            ->pause(500)
-            ->waitFor('#address1', 15)
+            ->value('#name', $name);
+
+        // Use JavaScript to switch to address section (more reliable than clicking the nav link)
+        $browser->script("document.querySelector('a[data-section=\"section-address\"]').click()");
+
+        $browser->waitFor('#address1', 15)
             ->type('address1', $address)
+            ->scrollIntoView('button[type="submit"]')
             ->click('button[type="submit"]')
             ->waitForLocation('/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 15)
             ->assertPathIs('/'.strtolower(str_replace(' ', '-', $name)).'/schedule');
@@ -52,10 +53,8 @@ trait AccountSetupTrait
     {
         $browser->visit('/new/talent')
             ->waitFor('#name', 5)
-            ->pause(500)
-            ->clear('name')
-            ->type('name', $name)
             ->pause(1000)
+            ->value('#name', $name)
             ->scrollIntoView('button[type="submit"]')
             ->click('button[type="submit"]')
             ->waitForLocation('/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 15)
@@ -69,15 +68,17 @@ trait AccountSetupTrait
     {
         $browser->visit('/new/curator')
             ->waitFor('#name', 5)
-            ->pause(500)
-            ->clear('name')
-            ->type('name', $name)
             ->pause(1000)
-            ->click('a[data-section="section-settings"]')
-            ->pause(500)
+            ->value('#name', $name);
+
+        // Use JavaScript to switch to settings section (more reliable than clicking the nav link)
+        $browser->script("document.querySelector('a[data-section=\"section-settings\"]').click()");
+
+        $browser->pause(500)
             ->click('button.settings-tab[data-tab="requests"]')
             ->waitFor('#accept_requests', 5)
             ->check('accept_requests')
+            ->scrollIntoView('button[type="submit"]')
             ->click('button[type="submit"]')
             ->waitForLocation('/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 15)
             ->assertPathIs('/'.strtolower(str_replace(' ', '-', $name)).'/schedule');

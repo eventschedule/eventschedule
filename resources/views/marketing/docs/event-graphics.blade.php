@@ -486,7 +486,7 @@ https://example.com/event/summer-concert</code></pre>
                         <section id="screen-capture" class="doc-section">
                             <h2 class="doc-heading">Screen Capture Rendering</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-500/20 text-blue-300 mr-2">Enterprise Feature</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-500/20 text-blue-700 dark:text-blue-300 mr-2">Enterprise Feature</span>
                                 Use browser-based rendering for the graphic image instead of the default server-side generation.
                             </p>
 
@@ -507,7 +507,7 @@ https://example.com/event/summer-concert</code></pre>
                         <section id="email-scheduling" class="doc-section">
                             <h2 class="doc-heading">Email Scheduling</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-500/20 text-blue-300 mr-2">Enterprise Feature</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-500/20 text-blue-700 dark:text-blue-300 mr-2">Enterprise Feature</span>
                                 Automatically send event graphics to your followers on a schedule. For designed email campaigns with more formatting options, see <a href="{{ route('marketing.docs.newsletters') }}" class="text-cyan-400 hover:text-cyan-300">Newsletters</a>.
                             </p>
 
