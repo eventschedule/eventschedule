@@ -358,7 +358,7 @@
             g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
             b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
             var luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-            return luminance > 0.179 ? '#000000' : '#ffffff';
+            return luminance > 0.25 ? '#000000' : '#ffffff';
         }
 
         function updatePreview() {

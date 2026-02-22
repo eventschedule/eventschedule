@@ -585,7 +585,6 @@ class RoleController extends Controller
                 'month',
                 'year',
                 'startOfMonth',
-                'endOfMonth',
                 'user',
                 'event',
                 'embed',
@@ -991,7 +990,6 @@ class RoleController extends Controller
             'month',
             'year',
             'startOfMonth',
-            'endOfMonth',
             'unscheduled',
             'datesUnavailable',
         ));

@@ -55,6 +55,6 @@ class ColorUtils
     {
         $luminance = self::getLuminance($backgroundColor);
 
-        return $luminance > 0.179 ? '#000000' : '#ffffff';
+        return $luminance > 0.25 ? '#000000' : '#ffffff';
     }
 }
