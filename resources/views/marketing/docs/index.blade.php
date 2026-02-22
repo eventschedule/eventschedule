@@ -276,7 +276,7 @@
     <!-- Selfhost & Developer Sections -->
     <section class="bg-white dark:bg-[#0a0a0f] py-16">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-2 gap-6">
+            <div class="grid md:grid-cols-3 gap-6">
                 <!-- Selfhost Section Card -->
                 <a href="{{ route('marketing.docs.selfhost') }}" class="section-card block group">
                     <div class="relative overflow-hidden rounded-2xl border border-blue-200 dark:border-white/10 p-8 h-full bg-gradient-to-br from-blue-100 via-blue-100 to-sky-100 dark:from-blue-900 dark:via-blue-900 dark:to-sky-900 group-hover:border-blue-500/30 transition-colors">
@@ -304,18 +304,53 @@
                                     <svg aria-hidden="true" class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
-                                    SaaS Multi-tenant Setup
-                                </div>
-                                <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                    <svg aria-hidden="true" class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                    </svg>
                                     Stripe & Google Calendar Integration
                                 </div>
                             </div>
 
                             <div class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
                                 View Selfhost Docs
+                                <svg aria-hidden="true" class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- SaaS Section Card -->
+                <a href="{{ route('marketing.docs.saas') }}" class="section-card block group">
+                    <div class="relative overflow-hidden rounded-2xl border border-sky-200 dark:border-white/10 p-8 h-full bg-gradient-to-br from-sky-100 via-sky-100 to-blue-100 dark:from-sky-900 dark:via-sky-900 dark:to-blue-900 group-hover:border-sky-500/30 transition-colors">
+                        <!-- Glow effect -->
+                        <div class="absolute -top-24 -right-24 w-48 h-48 bg-sky-500/20 rounded-full blur-[60px] group-hover:bg-sky-500/30 transition-colors"></div>
+
+                        <div class="relative z-10">
+                            <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-6 bg-sky-100 dark:bg-sky-500/20">
+                                <svg aria-hidden="true" class="w-7 h-7 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                                </svg>
+                            </div>
+
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">SaaS Platform</h2>
+                            <p class="text-gray-500 dark:text-gray-300 mb-6">Run Event Schedule as a multi-tenant SaaS with subscriptions and event promotion.</p>
+
+                            <div class="space-y-2 mb-6">
+                                <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                    <svg aria-hidden="true" class="w-4 h-4 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                    SaaS Multi-tenant Setup
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                    <svg aria-hidden="true" class="w-4 h-4 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                    Meta Ads Boost Integration
+                                </div>
+                            </div>
+
+                            <div class="inline-flex items-center text-sm font-medium text-sky-600 dark:text-sky-400 group-hover:text-sky-700 dark:group-hover:text-sky-300 transition-colors">
+                                View SaaS Docs
                                 <svg aria-hidden="true" class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                 </svg>

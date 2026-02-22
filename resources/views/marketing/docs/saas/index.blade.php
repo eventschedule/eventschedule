@@ -1,15 +1,15 @@
 <x-marketing-layout>
-    <x-slot name="title">Selfhost Documentation - Event Schedule</x-slot>
-    <x-slot name="breadcrumbTitle">Selfhost</x-slot>
-    <x-slot name="description">Technical documentation for selfhosting Event Schedule. Learn how to install, configure SaaS mode, set up Stripe payments, and enable Google Calendar sync.</x-slot>
+    <x-slot name="title">SaaS Documentation - Event Schedule</x-slot>
+    <x-slot name="breadcrumbTitle">SaaS</x-slot>
+    <x-slot name="description">Documentation for running Event Schedule as a SaaS platform. Learn how to configure multi-tenant deployment and set up event boosting with Meta ads.</x-slot>
     <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "TechArticle",
-        "headline": "Selfhost Documentation - Event Schedule",
-        "description": "Technical documentation for selfhosting Event Schedule. Learn how to install, configure SaaS mode, set up Stripe payments, and enable Google Calendar sync.",
+        "headline": "SaaS Documentation - Event Schedule",
+        "description": "Documentation for running Event Schedule as a SaaS platform. Learn how to configure multi-tenant deployment and set up event boosting with Meta ads.",
         "author": {
             "@type": "Organization",
             "name": "Event Schedule"
@@ -55,7 +55,7 @@
     <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
         <!-- Animated background -->
         <div class="absolute inset-0">
-            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-sky-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
             <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
         </div>
 
@@ -69,23 +69,23 @@
                 <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                <span class="text-gray-900 dark:text-white">Selfhost</span>
+                <span class="text-gray-900 dark:text-white">SaaS</span>
             </nav>
 
             <div class="text-center">
                 <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
-                    <svg aria-hidden="true" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                    <svg aria-hidden="true" class="w-4 h-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
                     </svg>
-                    <span class="text-sm text-gray-600 dark:text-gray-300">Selfhost Documentation</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-300">SaaS Documentation</span>
                 </div>
 
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
-                    Selfhost <span class="text-gradient">Installation</span>
+                    SaaS <span class="text-gradient">Platform</span>
                 </h1>
 
                 <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-                    Deploy Event Schedule on your own server. Full control, complete customization, no vendor lock-in.
+                    Run Event Schedule as a multi-tenant SaaS platform. Configure hosting, subscriptions, and event promotion tools.
                 </p>
             </div>
         </div>
@@ -94,56 +94,37 @@
     <!-- Documentation Cards -->
     <section class="bg-white dark:bg-[#0a0a0f] py-16">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-3 gap-6">
-                <!-- Installation Guide -->
-                <a href="{{ route('marketing.docs.selfhost.installation') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-cyan-100 dark:bg-cyan-500/20">
-                            <svg aria-hidden="true" class="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Installation Guide</h2>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Set up Event Schedule on your own server with this step-by-step guide.</p>
-                        <div class="inline-flex items-center text-sm font-medium text-cyan-600 dark:text-cyan-400">
-                            Read Guide
-                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Stripe Integration -->
-                <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-sky-100 dark:bg-sky-500/20">
-                            <svg aria-hidden="true" class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Stripe Integration</h2>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Set up Stripe Connect for ticket sales and Laravel Cashier for subscription billing.</p>
-                        <div class="inline-flex items-center text-sm font-medium text-sky-600 dark:text-sky-400">
-                            Read Guide
-                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Google Calendar -->
-                <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900">
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- SaaS Setup -->
+                <a href="{{ route('marketing.docs.saas.setup') }}" class="doc-card block">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900 dark:to-cyan-900">
                         <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-blue-100 dark:bg-blue-500/20">
                             <svg aria-hidden="true" class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
                             </svg>
                         </div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Google Calendar</h2>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Enable bidirectional sync between Event Schedule and Google Calendar.</p>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">SaaS Setup</h2>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Configure Event Schedule for SaaS deployment with subdomain-based multi-tenant routing, branding, and subscriptions.</p>
                         <div class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400">
+                            Read Guide
+                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Boost Setup -->
+                <a href="{{ route('marketing.docs.saas.boost') }}" class="doc-card block">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-sky-100 dark:bg-sky-500/20">
+                            <svg aria-hidden="true" class="w-6 h-6 text-sky-600 dark:text-sky-400" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Boost Setup</h2>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Configure Meta/Facebook ads integration to let users promote events through paid social media campaigns.</p>
+                        <div class="inline-flex items-center text-sm font-medium text-sky-600 dark:text-sky-400">
                             Read Guide
                             <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

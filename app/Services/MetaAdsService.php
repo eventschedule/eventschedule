@@ -826,6 +826,245 @@ class MetaAdsService
     }
 
     /**
+     * Proxy: Create a full campaign from raw array data
+     */
+    public function proxyCreateCampaign(array $data): array
+    {
+        // 1. Create Campaign
+        $campaignResponse = $this->apiPost("act_{$this->adAccountId}/campaigns", [
+            'name' => $data['name'],
+            'objective' => $data['objective'],
+            'status' => 'PAUSED',
+            'special_ad_categories' => [],
+        ]);
+
+        $metaCampaignId = $campaignResponse['id'];
+
+        // 2. Create Ad Set
+        $adSetData = [
+            'name' => $data['name'].' - Ad Set',
+            'campaign_id' => $metaCampaignId,
+            'billing_event' => 'IMPRESSIONS',
+            'optimization_goal' => $this->getOptimizationGoal($data['objective']),
+            'targeting' => json_encode($data['targeting'] ?? $this->getDefaultTargeting()),
+            'status' => 'PAUSED',
+        ];
+
+        if (($data['budget_type'] ?? 'daily') === 'daily') {
+            $adSetData['daily_budget'] = (int) round(($data['daily_budget'] ?? 0) * 100);
+        } else {
+            $adSetData['lifetime_budget'] = (int) round(($data['lifetime_budget'] ?? 0) * 100);
+        }
+
+        if (! empty($data['scheduled_start'])) {
+            $adSetData['start_time'] = $data['scheduled_start'];
+        }
+        if (! empty($data['scheduled_end'])) {
+            $adSetData['end_time'] = $data['scheduled_end'];
+        }
+
+        if (! empty($data['placements'])) {
+            $existing = json_decode($adSetData['targeting'], true);
+            $existing['publisher_platforms'] = $data['placements'];
+            $adSetData['targeting'] = json_encode($existing);
+        }
+
+        $adSetResponse = $this->apiPost("act_{$this->adAccountId}/adsets", $adSetData);
+        $metaAdSetId = $adSetResponse['id'];
+
+        // 3. Create Ad(s)
+        $adIds = [];
+        foreach ($data['ads'] ?? [] as $ad) {
+            $adId = $this->proxyCreateAd($ad, $metaAdSetId);
+            $adIds[] = $adId;
+        }
+
+        // 4. Activate campaign and ad set
+        $this->apiPost($metaCampaignId, ['status' => 'ACTIVE']);
+        $this->apiPost($metaAdSetId, ['status' => 'ACTIVE']);
+
+        return [
+            'meta_campaign_id' => $metaCampaignId,
+            'meta_adset_id' => $metaAdSetId,
+            'ad_ids' => $adIds,
+        ];
+    }
+
+    /**
+     * Proxy: Create a single ad from raw array data
+     */
+    protected function proxyCreateAd(array $ad, string $adSetId): string
+    {
+        // Upload image if needed
+        $imageHash = $ad['image_hash'] ?? null;
+        if (! $imageHash && ! empty($ad['image_url'])) {
+            $imageHash = $this->uploadImage($ad['image_url']);
+            if (! $imageHash) {
+                throw new \Exception('Failed to upload ad image');
+            }
+        }
+
+        if (! $imageHash) {
+            throw new \Exception('Ad has no image: neither image_hash nor image_url is set');
+        }
+
+        // Create creative
+        $creativeData = [
+            'name' => ($ad['headline'] ?? 'Ad').' - Creative',
+            'object_story_spec' => json_encode([
+                'page_id' => config('services.meta.page_id'),
+                'link_data' => [
+                    'message' => $ad['primary_text'] ?? '',
+                    'link' => $ad['destination_url'] ?? '',
+                    'name' => $ad['headline'] ?? '',
+                    'description' => $ad['description'] ?? '',
+                    'call_to_action' => [
+                        'type' => $ad['call_to_action'] ?? 'LEARN_MORE',
+                    ],
+                    'image_hash' => $imageHash,
+                ],
+            ]),
+        ];
+
+        $creativeResponse = $this->apiPost("act_{$this->adAccountId}/adcreatives", $creativeData);
+        $metaCreativeId = $creativeResponse['id'];
+
+        // Create ad
+        $adResponse = $this->apiPost("act_{$this->adAccountId}/ads", [
+            'name' => $ad['headline'] ?? 'Ad',
+            'adset_id' => $adSetId,
+            'creative' => json_encode(['creative_id' => $metaCreativeId]),
+            'status' => 'ACTIVE',
+        ]);
+
+        return $adResponse['id'];
+    }
+
+    /**
+     * Proxy: Upload an image from URL
+     */
+    public function proxyUploadImage(array $data): array
+    {
+        if (empty($data['image_url'])) {
+            throw new \Exception('image_url is required');
+        }
+        $imageHash = $this->uploadImage($data['image_url']);
+
+        return ['image_hash' => $imageHash];
+    }
+
+    /**
+     * Proxy: Pause a campaign by Meta campaign ID
+     */
+    public function proxyPauseCampaign(array $data): array
+    {
+        $this->apiPost($data['meta_campaign_id'], ['status' => 'PAUSED']);
+
+        return ['success' => true];
+    }
+
+    /**
+     * Proxy: Resume a campaign by Meta campaign ID
+     */
+    public function proxyResumeCampaign(array $data): array
+    {
+        $this->apiPost($data['meta_campaign_id'], ['status' => 'ACTIVE']);
+
+        return ['success' => true];
+    }
+
+    /**
+     * Proxy: Delete a campaign by Meta campaign ID
+     */
+    public function proxyDeleteCampaign(array $data): array
+    {
+        $this->apiDelete($data['meta_campaign_id']);
+
+        return ['success' => true];
+    }
+
+    /**
+     * Proxy: Get campaign-level insights
+     */
+    public function proxyGetInsights(array $data): ?array
+    {
+        $response = $this->apiGet("{$data['meta_campaign_id']}/insights", [
+            'fields' => 'impressions,reach,clicks,ctr,cpc,cpm,spend,actions',
+            'date_preset' => 'maximum',
+        ]);
+
+        return $response['data'][0] ?? null;
+    }
+
+    /**
+     * Proxy: Get ad-level insights
+     */
+    public function proxyGetAdInsights(array $data): ?array
+    {
+        $response = $this->apiGet("{$data['meta_ad_id']}/insights", [
+            'fields' => 'impressions,reach,clicks,ctr,spend',
+        ]);
+
+        return $response['data'][0] ?? null;
+    }
+
+    /**
+     * Proxy: Check campaign and ad statuses
+     */
+    public function proxyCheckStatus(array $data): array
+    {
+        $metaCampaignId = $data['meta_campaign_id'];
+
+        $response = $this->apiGet($metaCampaignId, [
+            'fields' => 'status,effective_status',
+        ]);
+
+        // Fetch ads from Meta API (no local DB records for proxy)
+        $adsResponse = $this->apiGet("{$metaCampaignId}/ads", [
+            'fields' => 'status,effective_status,ad_review_feedback',
+        ]);
+
+        $statuses = [];
+        foreach ($adsResponse['data'] ?? [] as $ad) {
+            $statuses[] = [
+                'id' => $ad['id'],
+                'status' => $ad['effective_status'] ?? $ad['status'] ?? null,
+                'rejection_reason' => $ad['ad_review_feedback']['global']['review_feedback'] ?? null,
+            ];
+        }
+
+        return [
+            'campaign_status' => $response['effective_status'] ?? $response['status'] ?? null,
+            'ad_statuses' => $statuses,
+        ];
+    }
+
+    /**
+     * Proxy: Search Meta interests
+     */
+    public function proxySearchInterests(array $data): array
+    {
+        $response = $this->apiGet('search', [
+            'type' => 'adinterest',
+            'q' => $data['query'] ?? '',
+        ]);
+
+        return $response['data'] ?? [];
+    }
+
+    /**
+     * Proxy: Estimate reach for targeting
+     */
+    public function proxyEstimateReach(array $data): ?array
+    {
+        $response = $this->apiGet("act_{$this->adAccountId}/reachestimate", [
+            'targeting_spec' => json_encode($data['targeting'] ?? []),
+        ]);
+
+        return $response['data'] ?? null;
+    }
+
+    /**
      * Route request through selfhosted cloud proxy
      */
     protected function proxyRequest(string $action, array $data): array

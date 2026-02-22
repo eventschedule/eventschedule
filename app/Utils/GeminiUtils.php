@@ -545,6 +545,14 @@ class GeminiUtils
         foreach ($data as $key => $item) {
             // Check if the registration url is a redirect
             if (! empty($item['registration_url'])) {
+                // Extract destination from Google redirect URLs
+                if (preg_match('#^https?://(www\.)?google\.[a-z.]+/url\?#i', $item['registration_url'])) {
+                    $parsed = parse_url($item['registration_url']);
+                    parse_str($parsed['query'] ?? '', $queryParams);
+                    if (! empty($queryParams['q'])) {
+                        $item['registration_url'] = $queryParams['q'];
+                    }
+                }
                 $links = UrlUtils::getUrlMetadata($item['registration_url']);
                 $data[$key]['registration_url'] = $links['redirect_url'];
                 $data[$key]['social_image'] = $links['image_path'];

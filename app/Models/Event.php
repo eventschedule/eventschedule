@@ -57,19 +57,6 @@ class Event extends Model
         'ticket_price' => 'decimal:2',
     ];
 
-    /**
-     * Strip query parameters from registration_url before saving
-     */
-    public function setRegistrationUrlAttribute($value)
-    {
-        if ($value && is_string($value)) {
-            // Remove everything after the first '?' (query parameters)
-            $this->attributes['registration_url'] = explode('?', $value)[0];
-        } else {
-            $this->attributes['registration_url'] = $value;
-        }
-    }
-
     protected static function boot()
     {
         parent::boot();
