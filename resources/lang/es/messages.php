@@ -51,6 +51,7 @@ return [
     'log_out' => 'Cerrar Sesión',
     'cancel' => 'Cancelar',
     'delete' => 'Eliminar',
+    'delete_event' => 'Eliminar Evento',
     'venue' => 'Lugar',
     'type' => 'Tipo',
     'details' => 'Detalles',

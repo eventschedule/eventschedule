@@ -55,6 +55,7 @@ return [
     'log_out' => 'Log Out',
     'cancel' => 'Cancel',
     'delete' => 'Delete',
+    'delete_event' => 'Delete Event',
     'venue' => 'Venue',
     'matched_venue' => 'Matched venue',
     'type' => 'Type',

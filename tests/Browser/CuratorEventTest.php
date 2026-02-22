@@ -72,13 +72,8 @@ class CuratorEventTest extends DuskTestCase
             $this->logoutUser($browser, $user3Name);
 
             // Step 4: First user logs back in and tries to edit the event
-            $browser->visit('/login')
-                ->type('email', $user1Email)
-                ->type('password', $user1Password)
-                ->press('LOG IN')
-                ->waitForLocation('/events', 5)
-                ->assertPathIs('/events')
-                ->assertSee($user1Name);
+            $this->loginUser($browser, $user1Email, $user1Password);
+            $browser->assertSee($user1Name);
 
             // Approve the event
             $browser->visit('/curator1/requests')

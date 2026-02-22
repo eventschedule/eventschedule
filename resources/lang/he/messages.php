@@ -54,6 +54,7 @@ return [
     'log_out' => 'התנתק',
     'cancel' => 'בטל',
     'delete' => 'מחק',
+    'delete_event' => 'מחק אירוע',
     'deleted' => 'נמחק',
     'venue' => 'מקום',
     'type' => 'סוג',

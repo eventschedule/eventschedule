@@ -29,14 +29,8 @@ class GeneralTest extends DuskTestCase
             $this->logoutUser($browser, $name);
 
             // Log back in
-            $browser->visit('/login')
-                ->waitFor('#email', 5)
-                ->type('email', $email)
-                ->type('password', $password)
-                ->press('LOG IN')
-                ->waitForLocation('/events', 15)
-                ->assertPathIs('/events')
-                ->assertSee($name);
+            $this->loginUser($browser, $email, $password);
+            $browser->assertSee($name);
 
             // Create/edit venue using the trait
             $this->createTestVenue($browser);

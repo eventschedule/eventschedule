@@ -53,6 +53,7 @@ return [
     'log_out' => 'Uitloggen',
     'cancel' => 'Annuleren',
     'delete' => 'Verwijderen',
+    'delete_event' => 'Evenement Verwijderen',
     'deleted' => 'Verwijderd',
     'venue' => 'Locatie',
     'type' => 'Type',
