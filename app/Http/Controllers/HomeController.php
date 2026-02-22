@@ -52,7 +52,6 @@ class HomeController extends Controller
         $month = $request->month;
         $year = $request->year;
         $startOfMonth = '';
-        $endOfMonth = '';
 
         if (! $month) {
             $month = now()->month;
@@ -66,11 +65,9 @@ class HomeController extends Controller
 
         // Calculate month boundaries in user's timezone, then convert to UTC for database query
         $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-        $endOfMonth = $startOfMonth->copy()->addMonths(6)->endOfMonth()->endOfDay();
 
         // Convert to UTC for database query
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
-        $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
 
         $roleIds = $user->roles()->pluck('roles.id');
 
@@ -87,8 +84,8 @@ class HomeController extends Controller
                     $query->where('user_id', $user->id);
                 });
             })
-            ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
-                $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+            ->where(function ($query) use ($startOfMonthUtc) {
+                $query->where('starts_at', '>=', $startOfMonthUtc)
                     ->orWhereNotNull('days_of_week');
             })
             ->orderBy('starts_at')
@@ -104,7 +101,6 @@ class HomeController extends Controller
             'month',
             'year',
             'startOfMonth',
-            'endOfMonth',
         ));
     }
 
@@ -117,10 +113,8 @@ class HomeController extends Controller
         $timezone = $user->timezone ?? 'UTC';
 
         $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-        $endOfMonth = $startOfMonth->copy()->addMonths(6)->endOfMonth()->endOfDay();
 
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
-        $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
 
         $roleIds = $user->roles()->pluck('roles.id');
 
@@ -137,8 +131,8 @@ class HomeController extends Controller
                     $query->where('user_id', $user->id);
                 });
             })
-            ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
-                $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+            ->where(function ($query) use ($startOfMonthUtc) {
+                $query->where('starts_at', '>=', $startOfMonthUtc)
                     ->orWhereNotNull('days_of_week');
             })
             ->orderBy('starts_at')

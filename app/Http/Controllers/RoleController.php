@@ -440,18 +440,16 @@ class RoleController extends Controller
 
         // Calculate month boundaries in user's/role's timezone, then convert to UTC for database query
         $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-        $endOfMonth = $startOfMonth->copy()->addMonths(6)->endOfMonth()->endOfDay();
 
         // Convert to UTC for database query
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
-        $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
 
         if ($event && ! request()->graphic) {
             // For event detail view (non-graphic), only check if calendar has events
             // The calendar partial loads data via Ajax, so we just need existence
             if ($role->isCurator()) {
-                $hasCalendarEvents = Event::where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
-                    $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+                $hasCalendarEvents = Event::where(function ($query) use ($startOfMonthUtc) {
+                    $query->where('starts_at', '>=', $startOfMonthUtc)
                         ->orWhereNotNull('days_of_week');
                 })
                     ->whereIn('id', function ($query) use ($role) {
@@ -462,8 +460,8 @@ class RoleController extends Controller
                     })
                     ->exists();
             } else {
-                $hasCalendarEvents = Event::where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
-                    $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+                $hasCalendarEvents = Event::where(function ($query) use ($startOfMonthUtc) {
+                    $query->where('starts_at', '>=', $startOfMonthUtc)
                         ->orWhereNotNull('days_of_week');
                 })
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
@@ -472,8 +470,8 @@ class RoleController extends Controller
             $events = $hasCalendarEvents ? collect([true]) : collect();
         } elseif ($role->isCurator()) {
             $events = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
-                ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
-                    $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+                ->where(function ($query) use ($startOfMonthUtc) {
+                    $query->where('starts_at', '>=', $startOfMonthUtc)
                         ->orWhereNotNull('days_of_week');
                 })
                 ->whereIn('id', function ($query) use ($role) {
@@ -486,8 +484,8 @@ class RoleController extends Controller
                 ->get();
         } else {
             $events = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
-                ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
-                    $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+                ->where(function ($query) use ($startOfMonthUtc) {
+                    $query->where('starts_at', '>=', $startOfMonthUtc)
                         ->orWhereNotNull('days_of_week');
                 })
                 ->where(function ($query) use ($role) {
@@ -737,15 +735,13 @@ class RoleController extends Controller
         $timezone = ($user ? $user->timezone : null) ?? $role->timezone ?? 'UTC';
 
         $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-        $endOfMonth = $startOfMonth->copy()->addMonths(6)->endOfMonth()->endOfDay();
 
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
-        $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
 
         if ($role->isCurator()) {
             $events = Event::with('roles', 'parts', 'tickets', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
-                ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
-                    $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+                ->where(function ($query) use ($startOfMonthUtc) {
+                    $query->where('starts_at', '>=', $startOfMonthUtc)
                         ->orWhereNotNull('days_of_week');
                 })
                 ->whereIn('id', function ($query) use ($role) {
@@ -758,8 +754,8 @@ class RoleController extends Controller
                 ->get();
         } else {
             $events = Event::with('roles', 'parts', 'tickets', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
-                ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
-                    $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+                ->where(function ($query) use ($startOfMonthUtc) {
+                    $query->where('starts_at', '>=', $startOfMonthUtc)
                         ->orWhereNotNull('days_of_week');
                 })
                 ->where(function ($query) use ($role) {
@@ -818,15 +814,13 @@ class RoleController extends Controller
         $timezone = $user->timezone ?? $role->timezone ?? 'UTC';
 
         $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-        $endOfMonth = $startOfMonth->copy()->addMonths(6)->endOfMonth()->endOfDay();
 
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
-        $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
 
         if ($role->isCurator()) {
             $events = Event::with('roles', 'parts', 'tickets')
-                ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
-                    $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+                ->where(function ($query) use ($startOfMonthUtc) {
+                    $query->where('starts_at', '>=', $startOfMonthUtc)
                         ->orWhereNotNull('days_of_week');
                 })
                 ->whereIn('id', function ($query) use ($role) {
@@ -845,8 +839,8 @@ class RoleController extends Controller
                             ->where('is_accepted', true);
                     });
                 })
-                ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
-                    $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+                ->where(function ($query) use ($startOfMonthUtc) {
+                    $query->where('starts_at', '>=', $startOfMonthUtc)
                         ->orWhereNotNull('days_of_week');
                 })
                 ->orderBy('starts_at')
@@ -873,7 +867,6 @@ class RoleController extends Controller
         $month = $request->month;
         $year = $request->year;
         $startOfMonth = '';
-        $endOfMonth = '';
         $datesUnavailable = [];
 
         $requests = Event::with('roles')
@@ -908,18 +901,15 @@ class RoleController extends Controller
 
             // Calculate month boundaries in user's/role's timezone, then convert to UTC for database query
             $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-            // Load events for 6 months to support mobile view showing all upcoming events
-            $endOfMonth = $startOfMonth->copy()->addMonths(6)->endOfMonth()->endOfDay();
 
             // Convert to UTC for database query
             $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
-            $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
 
             if ($tab == 'schedule') {
                 if ($role->isCurator()) {
                     $events = Event::with('roles')
-                        ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
-                            $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+                        ->where(function ($query) use ($startOfMonthUtc) {
+                            $query->where('starts_at', '>=', $startOfMonthUtc)
                                 ->orWhereNotNull('days_of_week');
                         })
                         ->whereIn('id', function ($query) use ($role) {
@@ -938,8 +928,8 @@ class RoleController extends Controller
                                     ->where('is_accepted', true);
                             });
                         })
-                        ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
-                            $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
+                        ->where(function ($query) use ($startOfMonthUtc) {
+                            $query->where('starts_at', '>=', $startOfMonthUtc)
                                 ->orWhereNotNull('days_of_week');
                         })
                         ->orderBy('starts_at')
