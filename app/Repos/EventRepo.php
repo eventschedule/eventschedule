@@ -341,6 +341,16 @@ class EventRepo
             $customFieldValues = array_filter($customFieldValues, function ($value) {
                 return $value !== null && $value !== '';
             });
+            // Validate dropdown custom field values against allowed options
+            $eventCustomFields = $currentRole->getEventCustomFields();
+            foreach ($eventCustomFields as $fieldKey => $fieldConfig) {
+                if (($fieldConfig['type'] ?? '') === 'dropdown' && isset($customFieldValues[$fieldKey])) {
+                    $allowedOptions = array_map('trim', explode(',', $fieldConfig['options'] ?? ''));
+                    if (! in_array($customFieldValues[$fieldKey], $allowedOptions, true)) {
+                        unset($customFieldValues[$fieldKey]);
+                    }
+                }
+            }
             $request->merge([
                 'custom_field_values' => ! empty($customFieldValues) ? $customFieldValues : null,
             ]);

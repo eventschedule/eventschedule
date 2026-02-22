@@ -154,7 +154,7 @@ class BoostController extends Controller
             'targeting' => 'nullable|json',
             'placements' => 'nullable|json',
             'scheduled_start' => 'nullable|date',
-            'scheduled_end' => 'nullable|date|after:scheduled_start',
+            'scheduled_end' => 'nullable|date|after:scheduled_start|after:now',
         ]);
 
         $eventId = UrlUtils::decodeId($request->event_id);
@@ -523,6 +523,7 @@ class BoostController extends Controller
         $request->validate([
             'event_id' => 'required|string',
             'budget' => 'required|numeric|min:'.config('services.meta.min_budget').'|max:'.config('services.meta.max_budget'),
+            'previous_payment_intent_id' => 'nullable|string',
         ]);
 
         $eventId = UrlUtils::decodeId($request->event_id);
@@ -539,6 +540,22 @@ class BoostController extends Controller
 
         try {
             $stripe = new \Stripe\StripeClient(config('services.stripe_platform.secret'));
+
+            // Cancel previous payment intent if provided
+            if ($request->previous_payment_intent_id) {
+                try {
+                    $previous = $stripe->paymentIntents->retrieve($request->previous_payment_intent_id);
+                    if (in_array($previous->status, ['requires_payment_method', 'requires_confirmation', 'requires_action'])) {
+                        $stripe->paymentIntents->cancel($request->previous_payment_intent_id);
+                    }
+                } catch (\Exception $e) {
+                    // Non-critical - previous intent may already be cancelled or expired
+                    Log::info('Could not cancel previous payment intent', [
+                        'previous_id' => $request->previous_payment_intent_id,
+                        'reason' => $e->getMessage(),
+                    ]);
+                }
+            }
 
             $paymentIntent = $stripe->paymentIntents->create([
                 'amount' => $amountInCents,

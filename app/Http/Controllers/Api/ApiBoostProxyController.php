@@ -78,7 +78,7 @@ class ApiBoostProxyController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['error' => 'An internal error occurred'], 500);
         }
     }
 }
