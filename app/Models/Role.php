@@ -182,20 +182,22 @@ class Role extends Model implements MustVerifyEmail
 
             foreach ($activeCampaigns as $campaign) {
                 try {
-                    if ($campaign->meta_campaign_id) {
+                    if ($campaign->meta_campaign_id && \App\Services\MetaAdsService::isBoostConfigured()) {
                         $metaService = app()->make(\App\Services\MetaAdsService::class);
                         $metaService->deleteCampaign($campaign);
                     }
 
                     $campaign->update(['status' => 'cancelled', 'meta_status' => $campaign->meta_campaign_id ? 'DELETED' : null]);
 
-                    $billingService = new \App\Services\BoostBillingService;
-                    if ($campaign->billing_status === 'charged') {
-                        $campaign->actual_spend && $campaign->actual_spend > 0
-                            ? $billingService->refundUnspent($campaign)
-                            : $billingService->refundFull($campaign);
-                    } elseif ($campaign->billing_status === 'pending' && $campaign->stripe_payment_intent_id) {
-                        $billingService->cancelPaymentIntent($campaign);
+                    if (config('app.hosted') && ! config('app.is_testing')) {
+                        $billingService = new \App\Services\BoostBillingService;
+                        if ($campaign->billing_status === 'charged') {
+                            $campaign->actual_spend && $campaign->actual_spend > 0
+                                ? $billingService->refundUnspent($campaign)
+                                : $billingService->refundFull($campaign);
+                        } elseif ($campaign->billing_status === 'pending' && $campaign->stripe_payment_intent_id) {
+                            $billingService->cancelPaymentIntent($campaign);
+                        }
                     }
                 } catch (\Exception $e) {
                     \Log::error('Failed to cancel boost campaign during role deletion', [
