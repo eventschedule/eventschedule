@@ -174,6 +174,39 @@ class Role extends Model implements MustVerifyEmail
             }
         });
 
+        static::deleting(function ($model) {
+            // Cancel active boost campaigns on Meta and issue refunds
+            $activeCampaigns = $model->boostCampaigns()
+                ->whereIn('status', ['active', 'paused', 'pending_payment'])
+                ->get();
+
+            foreach ($activeCampaigns as $campaign) {
+                try {
+                    if ($campaign->meta_campaign_id) {
+                        $metaService = app()->make(\App\Services\MetaAdsService::class);
+                        $metaService->deleteCampaign($campaign);
+                    }
+
+                    $campaign->update(['status' => 'cancelled', 'meta_status' => $campaign->meta_campaign_id ? 'DELETED' : null]);
+
+                    $billingService = new \App\Services\BoostBillingService;
+                    if ($campaign->billing_status === 'charged') {
+                        $campaign->actual_spend && $campaign->actual_spend > 0
+                            ? $billingService->refundUnspent($campaign)
+                            : $billingService->refundFull($campaign);
+                    } elseif ($campaign->billing_status === 'pending' && $campaign->stripe_payment_intent_id) {
+                        $billingService->cancelPaymentIntent($campaign);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Failed to cancel boost campaign during role deletion', [
+                        'campaign_id' => $campaign->id,
+                        'role_id' => $model->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        });
+
         static::updating(function ($model) {
             if ($model->isDirty('email') && config('app.hosted')) {
                 $model->email_verified_at = null;

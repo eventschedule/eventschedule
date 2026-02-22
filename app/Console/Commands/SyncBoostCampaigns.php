@@ -48,6 +48,7 @@ class SyncBoostCampaigns extends Command
         }
 
         $this->checkCompletedCampaigns();
+        $this->recoverStalePendingPayments();
 
         $this->info('Sync complete.');
     }
@@ -185,5 +186,56 @@ class SyncBoostCampaigns extends Command
                     ReconcileBoostCampaign::dispatch($campaign);
                 }
             });
+    }
+
+    private function recoverStalePendingPayments(): void
+    {
+        $staleCampaigns = BoostCampaign::where('status', 'pending_payment')
+            ->where('created_at', '<=', now()->subMinutes(30))
+            ->get();
+
+        if ($staleCampaigns->isEmpty()) {
+            return;
+        }
+
+        $this->info("Recovering {$staleCampaigns->count()} stale pending_payment campaigns...");
+
+        $billingService = app()->make(BoostBillingService::class);
+
+        foreach ($staleCampaigns as $campaign) {
+            try {
+                // Check if the Stripe payment actually succeeded
+                if ($campaign->stripe_payment_intent_id) {
+                    $stripe = new \Stripe\StripeClient(config('services.stripe_platform.secret'));
+                    $paymentIntent = $stripe->paymentIntents->retrieve($campaign->stripe_payment_intent_id);
+
+                    if ($paymentIntent->status === 'succeeded') {
+                        // Payment was charged - confirm and activate the campaign
+                        $confirmed = $billingService->confirmPayment($campaign, $campaign->stripe_payment_intent_id);
+                        if ($confirmed) {
+                            $campaign->update(['status' => 'active']);
+                            \App\Jobs\CreateBoostCampaign::dispatch($campaign);
+                            Log::info('Recovered stale pending_payment campaign - activated', ['campaign_id' => $campaign->id]);
+
+                            continue;
+                        }
+                    }
+                }
+
+                // Payment was not successful - cancel the campaign
+                $campaign->update(['status' => 'failed']);
+
+                if ($campaign->stripe_payment_intent_id) {
+                    $billingService->cancelPaymentIntent($campaign);
+                }
+
+                Log::info('Recovered stale pending_payment campaign - cancelled', ['campaign_id' => $campaign->id]);
+            } catch (\Exception $e) {
+                Log::error('Failed to recover stale pending_payment campaign', [
+                    'campaign_id' => $campaign->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
     }
 }

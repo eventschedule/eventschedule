@@ -137,6 +137,37 @@ class Event extends Model
         });
 
         static::deleting(function ($event) {
+            // Cancel active boost campaigns on Meta and issue refunds
+            $activeCampaigns = $event->boostCampaigns()
+                ->whereIn('status', ['active', 'paused', 'pending_payment'])
+                ->get();
+
+            foreach ($activeCampaigns as $campaign) {
+                try {
+                    if ($campaign->meta_campaign_id) {
+                        $metaService = app()->make(\App\Services\MetaAdsService::class);
+                        $metaService->deleteCampaign($campaign);
+                    }
+
+                    $campaign->update(['status' => 'cancelled', 'meta_status' => $campaign->meta_campaign_id ? 'DELETED' : null]);
+
+                    $billingService = new \App\Services\BoostBillingService;
+                    if ($campaign->billing_status === 'charged') {
+                        $campaign->actual_spend && $campaign->actual_spend > 0
+                            ? $billingService->refundUnspent($campaign)
+                            : $billingService->refundFull($campaign);
+                    } elseif ($campaign->billing_status === 'pending' && $campaign->stripe_payment_intent_id) {
+                        $billingService->cancelPaymentIntent($campaign);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Failed to cancel boost campaign during event deletion', [
+                        'campaign_id' => $campaign->id,
+                        'event_id' => $event->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+
             // Eager load roles with events count and user relationship
             $event->load(['roles' => function ($query) {
                 $query->withCount('events')->with('user');

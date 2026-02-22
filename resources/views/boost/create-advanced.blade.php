@@ -289,6 +289,7 @@
         // Initialize Stripe Payment Element
         async function initPayment() {
             const budget = parseFloat(budgetInput.value);
+            const previousPaymentIntentId = document.getElementById('payment_intent_id').value || null;
             const response = await fetch('{{ route("boost.payment_intent") }}', {
                 method: 'POST',
                 headers: {
@@ -299,6 +300,7 @@
                     event_id: '{{ $event->hashedId() }}',
                     role_id: '{{ \App\Utils\UrlUtils::encodeId($role->id) }}',
                     budget: budget,
+                    previous_payment_intent_id: previousPaymentIntentId,
                 }),
             });
 
