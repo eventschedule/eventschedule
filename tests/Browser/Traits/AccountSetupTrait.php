@@ -37,6 +37,7 @@ trait AccountSetupTrait
             ->type('name', $name)
             ->pause(1000)
             ->click('a[data-section="section-address"]')
+            ->pause(500)
             ->waitFor('#address1', 15)
             ->type('address1', $address)
             ->click('button[type="submit"]')
