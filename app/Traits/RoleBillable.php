@@ -115,12 +115,12 @@ trait RoleBillable
             return 'trial';
         }
 
-        if ($subscription->canceled()) {
-            return 'cancelled';
-        }
-
         if ($subscription->onGracePeriod()) {
             return 'grace_period';
+        }
+
+        if ($subscription->canceled()) {
+            return 'cancelled';
         }
 
         if ($subscription->pastDue()) {
@@ -144,12 +144,13 @@ trait RoleBillable
         $subscription = $this->subscription('default');
 
         if (! $subscription) {
-            return $this->plan_term;
+            return $this->plan_term === 'year' ? 'yearly' : 'monthly';
         }
 
         $yearlyPriceId = config('services.stripe_platform.price_yearly');
+        $enterpriseYearlyPriceId = config('services.stripe_platform.enterprise_price_yearly');
 
-        if ($subscription->hasPrice($yearlyPriceId)) {
+        if ($subscription->hasPrice($yearlyPriceId) || ($enterpriseYearlyPriceId && $subscription->hasPrice($enterpriseYearlyPriceId))) {
             return 'yearly';
         }
 

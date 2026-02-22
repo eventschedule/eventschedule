@@ -30,14 +30,14 @@ Route::get('/robots.txt', [AppController::class, 'robots']);
 
 if (config('app.hosted') && ! config('app.is_testing')) {
     if (config('app.env') != 'local') {
-        Route::domain('blog.eventschedule.com')->group(function () {
+        Route::domain('blog.' . _base_domain())->group(function () {
             Route::get('/', [BlogController::class, 'index'])->name('blog.index');
             Route::get('/feed', [BlogController::class, 'feed'])->name('blog.feed');
             Route::get('/{slug}', [BlogController::class, 'show'])->name('blog.show');
         });
     }
 
-    Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
+    Route::domain('{subdomain}.' . _base_domain())->where(['subdomain' => '^(?!www|app).*'])->group(function () {
         Route::get('/api/past-events', [RoleController::class, 'listPastEvents'])->name('role.list_past_events');
         Route::get('/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
         Route::get('/request', [RoleController::class, 'request'])->name('role.request');
@@ -814,7 +814,7 @@ Route::get('/blog/delete-signed/{blogPost}', [BlogController::class, 'destroySig
     ->middleware('signed');
 
 if (config('app.hosted') && ! config('app.is_testing')) {
-    Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
+    Route::domain('{subdomain}.' . _base_domain())->where(['subdomain' => '^(?!www|app).*'])->group(function () {
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
     });
 } else {

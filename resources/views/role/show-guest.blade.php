@@ -176,7 +176,7 @@
                   @endif
                   @if (auth()->user() && auth()->user()->isMember($role->subdomain))
                   <a
-                    href="{{ config('app.url') . route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false) }}"
+                    href="{{ app_url(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false)) }}"
                     class="inline-flex items-center justify-center"
                   >
                     <button
@@ -320,7 +320,7 @@
                   @endif
                   @if (auth()->user() && auth()->user()->isMember($role->subdomain))
                   <a
-                    href="{{ config('app.url') . route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false) }}"
+                    href="{{ app_url(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false)) }}"
                     class="inline-flex items-center justify-center flex-shrink-0"
                   >
                     <button

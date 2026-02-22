@@ -656,7 +656,7 @@
     }
 
     function onValidateClick() {
-        $('#address_response').text("{{ __('messages.searching') }}...").show();
+        $('#address_response').text(@json(__('messages.searching')) + '...').show();
         $('#accept_button').hide();
         var country = $('#venue_country').countrySelect('getSelectedCountryData');
         
@@ -677,11 +677,11 @@
                     $('#accept_button').show();
                     $('#address_response').data('validated_address', response['data']);
                 } else {
-                    $('#address_response').text("{{ __('messages.address_not_found') }}");    
+                    $('#address_response').text(@json(__('messages.address_not_found')));
                 }
             },
             error: function(xhr, status, error) {
-                $('#address_response').text("{{ __('messages.an_error_occurred') }}" + ': ' + error);
+                $('#address_response').text(@json(__('messages.an_error_occurred')) + ': ' + error);
             }
         });
     }
@@ -699,7 +699,7 @@
             var url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
             window.open(url, '_blank');
         } else {
-            alert("{{ __('messages.please_enter_address') }}");
+            alert(@json(__('messages.please_enter_address')));
         }
     }
 
@@ -752,7 +752,7 @@
             // Check file size
             var fileSize = input.files[0].size / 1024 / 1024; // in MB
             if (fileSize > 2.5) {
-                warningElement.textContent = "{{ __('messages.image_size_warning') }}";
+                warningElement.textContent = @json(__('messages.image_size_warning'));
                 warningElement.style.display = 'block';
             } else {
                 warningElement.textContent = '';
@@ -2849,7 +2849,7 @@
         activeTicketTab: 'tickets',
         formSubmitAttempted: false,
         isDirty: false,
-        soldLabel: "{{ __('messages.sold_reserved') }}",
+        soldLabel: @json(__('messages.sold_reserved')),
         isRecurring: @json($event->days_of_week ? true : false),
         sendEmailToVenue: false,
         sendEmailToMembers: {},
@@ -3286,7 +3286,7 @@
           this.parsingParts = false;
           event.target.value = '';
           if (data.error) {
-            alert('{{ __('messages.error') }}: ' + data.error);
+            alert(@json(__('messages.error')) + ': ' + data.error);
           } else if (Array.isArray(data) && data.length > 0) {
             this.parsedPartsPreview = data;
             this.showPartsPreview = true;
@@ -3295,7 +3295,7 @@
         .catch(() => {
           this.parsingParts = false;
           event.target.value = '';
-          alert('{{ __('messages.error') }}');
+          alert(@json(__('messages.error')));
         });
       },
       parsePartsFromText() {
@@ -3318,7 +3318,7 @@
         .then(data => {
           this.parsingParts = false;
           if (data.error) {
-            alert('{{ __('messages.error') }}: ' + data.error);
+            alert(@json(__('messages.error')) + ': ' + data.error);
           } else if (Array.isArray(data) && data.length > 0) {
             this.parsedPartsPreview = data;
             this.showPartsPreview = true;
@@ -3326,7 +3326,7 @@
         })
         .catch(() => {
           this.parsingParts = false;
-          alert('{{ __('messages.error') }}');
+          alert(@json(__('messages.error')));
         });
       },
       acceptParsedParts() {
@@ -3398,13 +3398,13 @@
         var startVal = document.getElementById('start_time').value;
         if (!dateVal || !startVal) {
           event.preventDefault();
-          alert("{{ __('messages.date_and_time_required') }}");
+          alert(@json(__('messages.date_and_time_required')));
           return;
         }
 
         if (! this.isFormValid) {
           event.preventDefault();
-          alert("{{ __('messages.please_select_venue_or_participant') }}");
+          alert(@json(__('messages.please_select_venue_or_participant')));
           return;
         }
 
@@ -3418,13 +3418,13 @@
 
           if (hasInvalidEventFields || hasInvalidTicketFields) {
             event.preventDefault();
-            alert("{{ __('messages.please_fill_in_custom_field_names') }}");
+            alert(@json(__('messages.please_fill_in_custom_field_names')));
             return;
           }
 
           if (hasInvalidTicketTypes) {
             event.preventDefault();
-            alert("{{ __('messages.please_fill_in_ticket_types') }}");
+            alert(@json(__('messages.please_fill_in_ticket_types')));
             return;
           }
         }
@@ -3773,7 +3773,7 @@
           var href = link.getAttribute('href');
           if (!href || href === '#' || href.startsWith('#') || href.startsWith('javascript:')) return;
           if (link.closest('form[enctype]')) return;
-          if (!confirm('{{ __("messages.unsaved_changes") }}')) {
+          if (!confirm(@json(__("messages.unsaved_changes")))) {
               e.preventDefault();
           } else {
               this.isDirty = false;
@@ -3792,7 +3792,7 @@
   var deleteForm = document.getElementById('event-delete-form');
   if (deleteForm) {
     deleteForm.addEventListener('submit', function(e) {
-      if (!confirm('{{ __('messages.are_you_sure') }}')) {
+      if (!confirm(@json(__('messages.are_you_sure')))) {
         e.preventDefault();
       }
     });
@@ -3935,25 +3935,25 @@
     .then(data => {
       statusDiv.classList.add('hidden');
       if (data.error) {
-        alert('{{ __('messages.error') }}: ' + data.error);
+        alert(@json(__('messages.error')) + ': ' + data.error);
       } else {
         location.reload(); // Refresh to show updated sync status
       }
     })
     .catch(error => {
       statusDiv.classList.add('hidden');
-      alert('{{ __('messages.error') }}: ' + error.message);
+      alert(@json(__('messages.error')) + ': ' + error.message);
     });
   }
 
   function unsyncEvent(subdomain, eventId) {
-    if (!confirm('{{ __('messages.confirm_remove_google_calendar') }}')) {
+    if (!confirm(@json(__('messages.confirm_remove_google_calendar')))) {
       return;
     }
-    
+
     const statusDiv = document.getElementById(`sync-status-${eventId}`);
     statusDiv.classList.remove('hidden');
-    
+
     fetch(`{{ url('/google-calendar/unsync-event') }}/${subdomain}/${eventId}`, {
       method: 'DELETE',
       headers: {
@@ -3970,14 +3970,14 @@
     .then(data => {
       statusDiv.classList.add('hidden');
       if (data.error) {
-        alert('{{ __('messages.error') }}: ' + data.error);
+        alert(@json(__('messages.error')) + ': ' + data.error);
       } else {
         location.reload(); // Refresh to show updated sync status
       }
     })
     .catch(error => {
       statusDiv.classList.add('hidden');
-      alert('{{ __('messages.error') }}: ' + error.message);
+      alert(@json(__('messages.error')) + ': ' + error.message);
     });
   }
 
@@ -4284,7 +4284,7 @@ window.addEventListener('load', function() {
 });
 
 function deleteFlyer(url, hash, token, element) {
-    if (!confirm('{{ __('messages.are_you_sure') }}')) {
+    if (!confirm(@json(__('messages.are_you_sure')))) {
         return;
     }
 

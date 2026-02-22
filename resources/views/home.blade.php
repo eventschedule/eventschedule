@@ -193,7 +193,7 @@
                         
                         if (data.success) {
                             Toastify({
-                                text: data.message || '{{ __("messages.feedback_submitted") }}',
+                                text: data.message || @json(__("messages.feedback_submitted")),
                                 duration: 3000,
                                 position: 'center',
                                 stopOnFocus: true,
@@ -206,7 +206,7 @@
                             toggleSubmitButton();
                         } else {
                             Toastify({
-                                text: data.message || '{{ __("messages.feedback_failed") }}',
+                                text: data.message || @json(__("messages.feedback_failed")),
                                 duration: 5000,
                                 position: 'center',
                                 stopOnFocus: true,
@@ -217,7 +217,7 @@
                         }
                     } catch (error) {
                         Toastify({
-                            text: '{{ __("messages.feedback_failed") }}',
+                            text: @json(__("messages.feedback_failed")),
                             duration: 5000,
                             position: 'center',
                             stopOnFocus: true,

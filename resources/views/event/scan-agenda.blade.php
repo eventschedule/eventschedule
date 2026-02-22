@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const selectedCameraId = ref('');
             const cameraStarted = ref(false);
             const showCameraModal = ref(false);
-            const selectCameraLabel = '{{ __("messages.select_camera") }}';
+            const selectCameraLabel = @json(__("messages.select_camera"));
             let stream = null;
 
             const selectedCameraLabel = computed(() => {
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     .then(devices => {
                         cameras.value = devices.filter(d => d.kind === 'videoinput');
                         if (cameras.value.length === 0) {
-                            cameraError.value = '{{ __("messages.camera_error") }}';
+                            cameraError.value = @json(__("messages.camera_error"));
                             return;
                         }
                         const savedCameraId = localStorage.getItem('scanAgendaSelectedCamera');
@@ -154,16 +154,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 const errorName = err.name || '';
                 if (errorName === 'NotAllowedError' || errorName === 'PermissionDeniedError') {
                     cameraErrorType.value = 'permission';
-                    cameraError.value = '{{ __("messages.camera_need_access") }}';
+                    cameraError.value = @json(__("messages.camera_need_access"));
                 } else if (errorName === 'NotFoundError' || errorName === 'DevicesNotFoundError') {
                     cameraErrorType.value = 'not_found';
-                    cameraError.value = '{{ __("messages.camera_not_found") }}';
+                    cameraError.value = @json(__("messages.camera_not_found"));
                 } else if (errorName === 'NotReadableError' || errorName === 'TrackStartError') {
                     cameraErrorType.value = 'in_use';
-                    cameraError.value = '{{ __("messages.camera_in_use") }}';
+                    cameraError.value = @json(__("messages.camera_in_use"));
                 } else {
                     cameraErrorType.value = 'unknown';
-                    cameraError.value = '{{ __("messages.camera_something_wrong") }}';
+                    cameraError.value = @json(__("messages.camera_something_wrong"));
                 }
             }
 
@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             end_time: p.end_time || '',
                         }));
                         if (parts.value.length === 0) {
-                            errorMessage.value = '{{ __("messages.no_events_found") }}';
+                            errorMessage.value = @json(__("messages.no_events_found"));
                             state.value = 'camera';
                             cameraStarted.value = false;
                             return;
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                     .catch(err => {
                         console.error('Parse error:', err);
-                        errorMessage.value = '{{ __("messages.event_parsing_failed") }}';
+                        errorMessage.value = @json(__("messages.event_parsing_failed"));
                         state.value = 'camera';
                         cameraStarted.value = false;
                     });
@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .catch(err => {
                     console.error('Save error:', err);
-                    errorMessage.value = '{{ __("messages.an_error_occurred") }}';
+                    errorMessage.value = @json(__("messages.an_error_occurred"));
                     state.value = 'editing';
                 });
             }

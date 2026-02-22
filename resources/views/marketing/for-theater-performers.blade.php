@@ -58,7 +58,7 @@
                 Share your productions, sell tickets, and let audiences know when the curtain rises.
             </p>
 
-            <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-amber-600 to-amber-500 rounded-full hover:scale-105 transition-all shadow-lg shadow-amber-900/30 hover:shadow-amber-700/40 border border-amber-400/30">
+            <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-amber-600 to-amber-500 rounded-full hover:scale-105 transition-all shadow-lg shadow-amber-900/30 hover:shadow-amber-700/40 border border-amber-400/30">
                 Create your schedule
                 <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -853,7 +853,7 @@
                 Join theater companies and performers who've simplified sharing their schedule.
             </p>
 
-            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-amber-600 to-amber-500 rounded-full hover:scale-105 transition-all shadow-lg shadow-amber-900/30 hover:shadow-amber-700/40 border border-amber-400/30">
+            <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-amber-600 to-amber-500 rounded-full hover:scale-105 transition-all shadow-lg shadow-amber-900/30 hover:shadow-amber-700/40 border border-amber-400/30">
                 Take the Stage
                 <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

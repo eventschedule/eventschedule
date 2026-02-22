@@ -9,7 +9,7 @@
                 const topic = document.getElementById('ai_topic').value;
 
                 if (!topic.trim()) {
-                    alert('{{ __('messages.please_enter_topic') }}');
+                    alert(@json(__('messages.please_enter_topic')));
                     return;
                 }
 
@@ -32,7 +32,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
-                        alert('{{ __('messages.error') }}: ' + data.error);
+                        alert(@json(__('messages.error')) + ': ' + data.error);
                     } else {
                         // Fill in the form fields
                         document.getElementById('title').value = data.title || '';
@@ -55,7 +55,7 @@
 
                         // Show success message
                         Toastify({
-                            text: "{{ __('messages.content_generated') }}",
+                            text: @json(__('messages.content_generated')),
                             duration: 3000,
                             position: 'center',
                             style: {
@@ -66,7 +66,7 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('{{ __('messages.failed_to_generate_content') }}');
+                    alert(@json(__('messages.failed_to_generate_content')));
                 })
                 .finally(() => {
                     // Reset button state

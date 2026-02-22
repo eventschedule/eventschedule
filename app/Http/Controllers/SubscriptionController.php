@@ -73,7 +73,7 @@ class SubscriptionController extends Controller
 
             // Update the role's plan info
             $role->plan_type = 'pro';
-            $role->plan_term = $request->plan;
+            $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
             $role->save();
 
             UsageTrackingService::track(UsageTrackingService::STRIPE_SUBSCRIPTION, $role->id);
@@ -173,7 +173,7 @@ class SubscriptionController extends Controller
             $subscription->swap($priceId);
 
             // Update the role's plan term
-            $role->plan_term = $request->plan;
+            $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
             $role->save();
         }
 

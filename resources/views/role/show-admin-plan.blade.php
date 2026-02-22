@@ -233,7 +233,7 @@
             @if (!$subscription && $role->plan_type == 'pro' && $role->isPro() && !is_demo_mode())
             <div>
                 <form method="POST" action="{{ route('role.change_plan', ['subdomain' => $role->subdomain, 'plan_type' => 'free']) }}"
-                    onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                    onsubmit='return confirm(@json(__("messages.are_you_sure")))'>
                     @csrf
                     <button type="submit"
                         class="text-sm text-red-600 dark:text-red-400 hover:text-red-500 font-medium">

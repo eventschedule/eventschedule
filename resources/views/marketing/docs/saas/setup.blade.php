@@ -144,8 +144,8 @@
 <span class="code-comment"># Your application name (shown in emails and alt text)</span>
 <span class="code-variable">APP_NAME</span>=<span class="code-string">Your Platform Name</span>
 
-<span class="code-comment"># Main application URL</span>
-<span class="code-variable">APP_URL</span>=<span class="code-string">https://yourdomain.com</span>
+<span class="code-comment"># Main application URL (use app subdomain)</span>
+<span class="code-variable">APP_URL</span>=<span class="code-string">https://app.yourdomain.com</span>
 
 <span class="code-comment"># Marketing site URL (can be same as APP_URL)</span>
 <span class="code-variable">APP_MARKETING_URL</span>=<span class="code-string">https://yourdomain.com</span></code></pre>
@@ -174,7 +174,7 @@
                                         <tr>
                                             <td><code class="doc-inline-code">APP_URL</code></td>
                                             <td>-</td>
-                                            <td>Primary application URL</td>
+                                            <td>Application URL. Set to the <code class="doc-inline-code">app</code> subdomain (e.g., <code class="doc-inline-code">https://app.yourdomain.com</code>). Other subdomains like <code class="doc-inline-code">blog</code> and <code class="doc-inline-code">demo</code> are derived automatically from this domain.</td>
                                         </tr>
                                         <tr>
                                             <td><code class="doc-inline-code">APP_MARKETING_URL</code></td>
@@ -444,7 +444,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
 <span class="code-variable">APP_NAME</span>=<span class="code-string">My Events Platform</span>
 <span class="code-variable">APP_ENV</span>=<span class="code-string">production</span>
 <span class="code-variable">APP_DEBUG</span>=<span class="code-value">false</span>
-<span class="code-variable">APP_URL</span>=<span class="code-string">https://myevents.com</span>
+<span class="code-variable">APP_URL</span>=<span class="code-string">https://app.myevents.com</span>
 <span class="code-variable">APP_MARKETING_URL</span>=<span class="code-string">https://myevents.com</span>
 
 <span class="code-comment"># SaaS Mode</span>

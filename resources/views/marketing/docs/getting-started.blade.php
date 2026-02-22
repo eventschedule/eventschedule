@@ -85,7 +85,7 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Event Schedule is free forever - no trials, no credit card, no catch. Create an account using your email or sign in with Google.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Visit <a href="{{ route('sign_up') }}" class="text-cyan-400 hover:text-cyan-300">the registration page</a></li>
+                                <li>Visit <a href="{{ app_url('/sign_up') }}" class="text-cyan-400 hover:text-cyan-300">the registration page</a></li>
                                 <li>Enter your name, email, and create a password (or use Google)</li>
                                 <li>Verify your email address by clicking the link we send you</li>
                                 <li>You're ready to create your first schedule</li>

@@ -861,6 +861,10 @@ class Role extends Model implements MustVerifyEmail
 
     public function isWhiteLabeled()
     {
+        if (! config('app.hosted')) {
+            return true;
+        }
+
         if (config('app.is_testing')) {
             return true;
         }

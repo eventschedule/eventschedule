@@ -99,12 +99,12 @@
                 validateForm(e) {
                     if (!this.hasSelectedTickets) {
                         e.preventDefault();
-                        alert('{{ __('messages.please_select_ticket') }}');
+                        alert(@json(__('messages.please_select_ticket')));
                         return;
                     }
                     if (this.turnstileEnabled && !this.turnstileToken) {
                         e.preventDefault();
-                        alert('{{ __('messages.turnstile_verification_failed') }}');
+                        alert(@json(__('messages.turnstile_verification_failed')));
                         return;
                     }
                 },

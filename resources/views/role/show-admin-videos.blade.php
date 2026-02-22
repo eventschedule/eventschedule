@@ -203,10 +203,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             role.selectedVideos = [data.videos[0]];
                         }
                     } else {
-                        role.error = data.message || '{{ __("messages.no_videos_found") }}';
+                        role.error = data.message || @json(__("messages.no_videos_found"));
                     }
                 } catch (error) {
-                    role.error = '{{ __("messages.error_searching_videos") }}';
+                    role.error = @json(__("messages.error_searching_videos"));
                     console.error('Error searching videos:', error);
                 } finally {
                     role.searching = false;
@@ -257,14 +257,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Remove the role from the list since it now has videos
                         this.talentRoles = this.talentRoles.filter(r => r.id !== role.id);
                     } else {
-                        alert(data.message || '{{ __("messages.error_saving_videos") }}');
+                        alert(data.message || @json(__("messages.error_saving_videos")));
                     }
                 } catch (error) {
                     console.error('Error saving videos:', error);
-                    alert('{{ __("messages.error_saving_videos") }}');
+                    alert(@json(__("messages.error_saving_videos")));
                 }
             },
-            
+
             async skipRole(role) {
                 try {
                     const response = await fetch(`{{ url('/' . $role->subdomain . '/save-videos') }}`, {
@@ -285,11 +285,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Remove the role from the list since it has been skipped
                         this.talentRoles = this.talentRoles.filter(r => r.id !== role.id);
                     } else {
-                        alert(data.message || '{{ __("messages.error_saving_videos") }}');
+                        alert(data.message || @json(__("messages.error_saving_videos")));
                     }
                 } catch (error) {
                     console.error('Error skipping role:', error);
-                    alert('{{ __("messages.error_saving_videos") }}');
+                    alert(@json(__("messages.error_saving_videos")));
                 }
             }
         }

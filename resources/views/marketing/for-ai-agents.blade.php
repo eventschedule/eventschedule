@@ -723,7 +723,7 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Get your API key</h3>
                     <p class="text-gray-500 dark:text-gray-400 text-sm flex-1">
-                        <a href="{{ route('sign_up') }}" class="text-cyan-600 dark:text-cyan-400 hover:underline font-medium">Sign up for free</a> and generate an API key from your account settings.
+                        <a href="{{ app_url('/sign_up') }}" class="text-cyan-600 dark:text-cyan-400 hover:underline font-medium">Sign up for free</a> and generate an API key from your account settings.
                     </p>
                     <div class="mt-4 bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3 text-left">
                         <div class="text-xs font-mono text-gray-500 dark:text-gray-400 leading-relaxed truncate">Authorization: Bearer YOUR_API_KEY</div>
@@ -900,7 +900,7 @@
                 Full REST API. OpenAPI spec. Zero platform fees.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ route('sign_up') }}" class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-cyan-600 to-emerald-600 rounded-2xl overflow-hidden hover:scale-105 transition-transform duration-150 will-change-transform shadow-xl shadow-cyan-500/20">
+                <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-cyan-600 to-emerald-600 rounded-2xl overflow-hidden hover:scale-105 transition-transform duration-150 will-change-transform shadow-xl shadow-cyan-500/20">
                     <span class="absolute inset-0 animate-shimmer"></span>
                     <span class="relative z-10 flex items-center gap-2">
                         Get Started Free

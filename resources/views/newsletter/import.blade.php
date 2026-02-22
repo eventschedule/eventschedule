@@ -273,7 +273,7 @@
                     if (!file) return;
 
                     if (file.size > 10 * 1024 * 1024) {
-                        alert('{{ __('messages.file_too_large') }}');
+                        alert(@json(__('messages.file_too_large')));
                         event.target.value = '';
                         return;
                     }
@@ -375,14 +375,14 @@
 
                         const rowNum = i + 1;
                         if (!name) {
-                            this.formErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', rowNum).replace(':error', '{{ __('messages.name_required') }}'));
+                            this.formErrors.push(@json(__('messages.row_error', ['row' => ''])).replace(':row', rowNum).replace(':error', @json(__('messages.name_required'))));
                         }
                         if (!email) {
-                            this.formErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', rowNum).replace(':error', '{{ __('messages.email_required') }}'));
+                            this.formErrors.push(@json(__('messages.row_error', ['row' => ''])).replace(':row', rowNum).replace(':error', @json(__('messages.email_required'))));
                         } else if (!this.isValidEmail(email)) {
-                            this.formErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', rowNum).replace(':error', '{{ __('messages.invalid_email') }}'));
+                            this.formErrors.push(@json(__('messages.row_error', ['row' => ''])).replace(':row', rowNum).replace(':error', @json(__('messages.invalid_email'))));
                         } else if (seen[email]) {
-                            this.formErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', rowNum).replace(':error', '{{ __('messages.duplicate_email') }}'));
+                            this.formErrors.push(@json(__('messages.row_error', ['row' => ''])).replace(':row', rowNum).replace(':error', @json(__('messages.duplicate_email'))));
                         }
 
                         if (name && email && this.isValidEmail(email) && !seen[email]) {
@@ -393,7 +393,7 @@
 
                     if (this.formErrors.length > 0) return;
                     if (entries.length === 0) {
-                        alert('{{ __('messages.no_valid_emails') }}');
+                        alert(@json(__('messages.no_valid_emails')));
                         return;
                     }
 
@@ -446,7 +446,7 @@
                     }
 
                     if (entries.length === 0) {
-                        alert('{{ __('messages.no_valid_emails') }}');
+                        alert(@json(__('messages.no_valid_emails')));
                         return;
                     }
 
@@ -460,12 +460,12 @@
                     this.csvErrors = [];
 
                     if (!this.hasEmailColumn()) {
-                        this.csvErrors.push('{{ __('messages.email_required') }}');
+                        this.csvErrors.push(@json(__('messages.email_required')));
                         return;
                     }
 
                     if (!this.hasNameColumn()) {
-                        this.csvErrors.push('{{ __('messages.name_required') }}');
+                        this.csvErrors.push(@json(__('messages.name_required')));
                         return;
                     }
 
@@ -486,14 +486,14 @@
                         if (!email && !name) return; // Skip empty rows
 
                         if (!name) {
-                            this.csvErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', rowNum).replace(':error', '{{ __('messages.name_required') }}'));
+                            this.csvErrors.push(@json(__('messages.row_error', ['row' => ''])).replace(':row', rowNum).replace(':error', @json(__('messages.name_required'))));
                         }
                         if (!email) {
-                            this.csvErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', rowNum).replace(':error', '{{ __('messages.email_required') }}'));
+                            this.csvErrors.push(@json(__('messages.row_error', ['row' => ''])).replace(':row', rowNum).replace(':error', @json(__('messages.email_required'))));
                         } else if (!this.isValidEmail(email)) {
-                            this.csvErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', rowNum).replace(':error', '{{ __('messages.invalid_email') }}'));
+                            this.csvErrors.push(@json(__('messages.row_error', ['row' => ''])).replace(':row', rowNum).replace(':error', @json(__('messages.invalid_email'))));
                         } else if (seen[email]) {
-                            this.csvErrors.push(`{{ __('messages.row_error', ['row' => '']) }}`.replace(':row', rowNum).replace(':error', '{{ __('messages.duplicate_email') }}'));
+                            this.csvErrors.push(@json(__('messages.row_error', ['row' => ''])).replace(':row', rowNum).replace(':error', @json(__('messages.duplicate_email'))));
                         }
 
                         if (email && name && this.isValidEmail(email) && !seen[email]) {
@@ -504,7 +504,7 @@
 
                     if (this.csvErrors.length > 0) return;
                     if (!entries.length) {
-                        alert('{{ __('messages.no_valid_emails') }}');
+                        alert(@json(__('messages.no_valid_emails')));
                         return;
                     }
                     await this.doSubmit(entries);
@@ -552,11 +552,11 @@
 
                 validateSegment() {
                     if (this.segmentTarget === 'new' && !this.segmentName.trim()) {
-                        alert('{{ __('messages.name') }}');
+                        alert(@json(__('messages.name')));
                         return false;
                     }
                     if (this.segmentTarget === 'existing' && !this.segmentId) {
-                        alert('{{ __('messages.select_segment') }}');
+                        alert(@json(__('messages.select_segment')));
                         return false;
                     }
                     return true;

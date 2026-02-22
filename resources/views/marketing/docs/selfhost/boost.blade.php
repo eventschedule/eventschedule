@@ -304,10 +304,7 @@
 <span class="code-variable">META_MAX_BUDGET</span>=<span class="code-value">5000.00</span>        <span class="code-comment"># Maximum boost budget (default)</span>
 <span class="code-variable">META_DEFAULT_CURRENCY</span>=<span class="code-string">USD</span>      <span class="code-comment"># Default currency (default)</span>
 <span class="code-variable">META_MAX_CONCURRENT_BOOSTS</span>=<span class="code-value">3</span>   <span class="code-comment"># Max active boosts per schedule (default)</span>
-
-<span class="code-comment"># Optional - Proxy for selfhosted instances (not needed for hosted)</span>
-<span class="code-variable">META_PROXY_URL</span>=
-<span class="code-variable">META_PROXY_API_KEY</span>=</code></pre>
+</code></pre>
                             </div>
 
                             <div class="overflow-x-auto mt-6">

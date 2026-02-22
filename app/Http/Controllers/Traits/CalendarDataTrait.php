@@ -51,7 +51,7 @@ trait CalendarDataTrait
             'flyer_url' => $event->flyer_image_url ?: null,
             'can_edit' => $canEdit,
             'edit_url' => $canEdit
-                ? ($role ? config('app.url').route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)], false) : config('app.url').route('event.edit_admin', ['hash' => UrlUtils::encodeId($event->id)], false))
+                ? ($role ? app_url(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)], false)) : app_url(route('event.edit_admin', ['hash' => UrlUtils::encodeId($event->id)], false)))
                 : null,
             'recurring_end_type' => $event->recurring_end_type ?? 'never',
             'recurring_end_value' => $event->recurring_end_value,

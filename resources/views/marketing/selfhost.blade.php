@@ -660,7 +660,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                 </a>
-                <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-900 border-2 border-gray-300 dark:text-white dark:border-white/30 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all">
+                <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-900 border-2 border-gray-300 dark:text-white dark:border-white/30 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all">
                     Or try the hosted version
                 </a>
             </div>

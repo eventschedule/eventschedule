@@ -2480,7 +2480,7 @@
                 var href = link.getAttribute('href');
                 if (!href || href === '#' || href.startsWith('#') || href.startsWith('javascript:')) return;
                 if (link.closest('form[enctype]')) return;
-                if (!confirm('{{ __("messages.unsaved_changes") }}')) {
+                if (!confirm(@json(__("messages.unsaved_changes")))) {
                     e.preventDefault();
                 } else {
                     isDirty = false;
@@ -2578,7 +2578,7 @@ function addGroupField() {
                 name: "groups[new_" + idx + "][color]",
                 initialColor: "",
                 colors: ["#EF4444","#F97316","#EAB308","#84CC16","#22C55E","#14B8A6","#06B6D4","#0EA5E9","#3B82F6","#6366F1","#A855F7","#EC4899","#F43F5E","#6B7280"],
-                clearLabel: "{{ __('messages.clear') }}",
+                clearLabel: @json(__('messages.clear')),
             })}'></div>
         </div>
         <div class="flex gap-4 items-center justify-end">
@@ -2707,7 +2707,7 @@ function testImport() {
         }
     })
     .catch(error => {
-        showImportOutput('', '{{ __("messages.import_test_error") }}: ' + error.message, false);
+        showImportOutput('', @json(__("messages.import_test_error")) + ': ' + error.message, false);
     })
     .finally(() => {
         button.textContent = originalText;
@@ -3819,7 +3819,7 @@ function deleteRoleImage(url, token, element) {
                 location.reload();
             }
         } else {
-            alert('{{ __('messages.failed_to_delete_image') }}');
+            alert(@json(__('messages.failed_to_delete_image')));
         }
     });
 }

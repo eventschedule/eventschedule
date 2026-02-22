@@ -158,6 +158,7 @@
                         <span>{{ __('messages.ad_budget') }}</span>
                         <span id="review-budget">{{ $currencySymbol }}{{ number_format($defaults['budget'], 2) }}</span>
                     </div>
+                    @if ($isHosted)
                     <div class="flex justify-between text-gray-600 dark:text-gray-300 mt-1">
                         <span>{{ __('messages.service_fee') }} ({{ intval($markupRate * 100) }}%)</span>
                         <span id="review-fee">{{ $currencySymbol }}{{ number_format($defaults['budget'] * $markupRate, 2) }}</span>
@@ -166,9 +167,12 @@
                         <span>{{ __('messages.total') }}</span>
                         <span id="review-total">{{ $currencySymbol }}{{ number_format($defaults['budget'] * (1 + $markupRate), 2) }}</span>
                     </div>
+                    @endif
                 </div>
 
+                @if ($isHosted)
                 <div id="payment-element" class="mb-4"></div>
+                @endif
                 <div id="payment-errors" class="text-sm text-red-600 dark:text-red-400 hidden"></div>
             </div>
 
@@ -187,25 +191,33 @@
         </form>
     </div>
 
+    @if ($isHosted)
     <script src="https://js.stripe.com/v3/" {!! nonce_attr() !!}></script>
+    @endif
     <script {!! nonce_attr() !!}>
-        const stripe = Stripe('{{ $stripeKey }}');
         const markupRate = {{ $markupRate }};
         const currencySymbol = '{{ $currencySymbol }}';
+        const submitBtn = document.getElementById('submit-btn');
+        const budgetInput = document.getElementById('budget-input');
+
+        @if ($isHosted)
+        const stripe = Stripe('{{ $stripeKey }}');
         let elements, paymentElement;
         let clientSecret = null;
         let intentBudget = null;
-        const submitBtn = document.getElementById('submit-btn');
+        @endif
 
         // Update review costs when budget changes
-        const budgetInput = document.getElementById('budget-input');
         budgetInput.addEventListener('input', function() {
             const budget = parseFloat(this.value) || 0;
             document.getElementById('review-budget').textContent = currencySymbol + budget.toFixed(2);
+            @if ($isHosted)
             document.getElementById('review-fee').textContent = currencySymbol + (budget * markupRate).toFixed(2);
             document.getElementById('review-total').textContent = currencySymbol + (budget * (1 + markupRate)).toFixed(2);
+            @endif
         });
 
+        @if ($isHosted)
         // Re-create payment intent when budget changes (debounced)
         let debounceTimer;
         budgetInput.addEventListener('change', function() {
@@ -215,12 +227,13 @@
                 try {
                     await initPayment();
                 } catch (err) {
-                    document.getElementById('payment-errors').textContent = '{{ __("messages.payment_error") }}';
+                    document.getElementById('payment-errors').textContent = @json(__("messages.payment_error"));
                     document.getElementById('payment-errors').classList.remove('hidden');
                 }
                 submitBtn.disabled = false;
             }, 500);
         });
+        @endif
 
         // Interest search
         let searchTimer;
@@ -286,6 +299,7 @@
 
         renderSelectedInterests();
 
+        @if ($isHosted)
         // Initialize Stripe Payment Element
         async function initPayment() {
             const budget = parseFloat(budgetInput.value);
@@ -324,18 +338,10 @@
             paymentElement = elements.create('payment');
             paymentElement.mount('#payment-element');
         }
+        @endif
 
-        // Form submission
-        document.getElementById('boost-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const submitSpinner = document.getElementById('submit-spinner');
-            const paymentErrors = document.getElementById('payment-errors');
-            submitBtn.disabled = true;
-            submitSpinner.classList.remove('hidden');
-            paymentErrors.classList.add('hidden');
-
-            // Build targeting JSON
+        // Helper to build targeting and placements JSON
+        function buildFormData() {
             const targeting = {
                 age_min: parseInt(document.getElementById('age-min').value),
                 age_max: parseInt(document.getElementById('age-max').value),
@@ -348,19 +354,32 @@
             @endif
             document.getElementById('targeting-json').value = JSON.stringify(targeting);
 
-            // Build placements
             const placements = [];
             if (document.querySelector('[name="placement_facebook_feed"]').checked) placements.push('facebook');
             if (document.querySelector('[name="placement_instagram"]').checked) placements.push('instagram');
             document.getElementById('placements-json').value = JSON.stringify(placements);
+        }
 
+        // Form submission
+        document.getElementById('boost-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const submitSpinner = document.getElementById('submit-spinner');
+            const paymentErrors = document.getElementById('payment-errors');
+            submitBtn.disabled = true;
+            submitSpinner.classList.remove('hidden');
+            paymentErrors.classList.add('hidden');
+
+            buildFormData();
+
+            @if ($isHosted)
             // Ensure payment intent matches current budget
             const currentBudget = parseFloat(budgetInput.value);
             if (!clientSecret || intentBudget !== currentBudget) {
                 try {
                     await initPayment();
                 } catch (err) {
-                    paymentErrors.textContent = '{{ __("messages.payment_error") }}';
+                    paymentErrors.textContent = @json(__("messages.payment_error"));
                     paymentErrors.classList.remove('hidden');
                     submitBtn.disabled = false;
                     submitSpinner.classList.add('hidden');
@@ -411,17 +430,49 @@
                         window.location.href = '{{ route("boost.index") }}';
                     }
                 } catch (err) {
-                    paymentErrors.textContent = '{{ __("messages.boost_store_error") }}' + ' (ref: ' + paymentIntent.id + ')';
+                    paymentErrors.textContent = @json(__("messages.boost_store_error")) + ' (ref: ' + paymentIntent.id + ')';
                     paymentErrors.classList.remove('hidden');
                     submitBtn.disabled = false;
                     submitSpinner.classList.add('hidden');
                 }
             }
+            @else
+            // Selfhosted: submit directly without Stripe
+            const formData = new FormData(document.getElementById('boost-form'));
+
+            try {
+                const response = await fetch('{{ route("boost.store") }}', {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                } else if (data.error) {
+                    paymentErrors.textContent = data.error;
+                    paymentErrors.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitSpinner.classList.add('hidden');
+                } else {
+                    window.location.href = '{{ route("boost.index") }}';
+                }
+            } catch (err) {
+                paymentErrors.textContent = @json(__("messages.boost_store_error"));
+                paymentErrors.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitSpinner.classList.add('hidden');
+            }
+            @endif
         });
 
+        @if ($isHosted)
         initPayment().catch(function() {
-            document.getElementById('payment-errors').textContent = '{{ __("messages.payment_error") }}';
+            document.getElementById('payment-errors').textContent = @json(__("messages.payment_error"));
             document.getElementById('payment-errors').classList.remove('hidden');
         });
+        @endif
     </script>
 </x-app-admin-layout>

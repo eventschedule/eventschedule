@@ -240,7 +240,7 @@ function hideAdd() {
 }
 
 function removeLink(link_type, link) {
-    var confirmed = confirm("{{ __('messages.are_you_sure') }}");
+    var confirmed = confirm(@json(__('messages.are_you_sure')));
 
     if (confirmed) {
         $('#remove_link').val(link);

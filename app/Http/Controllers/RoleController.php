@@ -199,20 +199,18 @@ class RoleController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        $mainDomain = config('app.url');
-
         if (! auth()->user()) {
             session(['pending_follow' => $subdomain]);
             $lang = session()->has('translate') ? 'en' : $role->language_code;
 
-            return redirect($mainDomain.route('sign_up', ['lang' => $lang], false));
+            return redirect(app_url(route('sign_up', ['lang' => $lang], false)));
         }
 
         $user = $request->user();
 
         // Prevent demo account from following other roles
         if (DemoService::isDemoUser($user)) {
-            return redirect($mainDomain.route('following', [], false))
+            return redirect(app_url(route('following', [], false)))
                 ->with('error', __('messages.demo_mode_restriction'));
         }
 
@@ -224,20 +222,15 @@ class RoleController extends Controller
 
         if ($subdomain = session('pending_request')) {
             if ($user->talents()->count() == 0) {
-                $redirectUrl = $mainDomain.route('new', ['type' => 'talent'], false);
-
-                return redirect($redirectUrl);
+                return redirect(app_url(route('new', ['type' => 'talent'], false)));
             }
 
             $role = $user->talents()->first();
-            $redirectUrl = $mainDomain.route('event.create', ['subdomain' => $role->subdomain], false);
 
-            return redirect($redirectUrl);
+            return redirect(app_url(route('event.create', ['subdomain' => $role->subdomain], false)));
 
         } else {
-            $redirectUrl = $mainDomain.route('following', [], false);
-
-            return redirect($redirectUrl)
+            return redirect(app_url(route('following', [], false)))
                 ->with('message', str_replace(':name', $role->name, __('messages.followed_role')));
         }
     }
@@ -293,7 +286,7 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->with('groups')->first();
 
         if (! $role || ! $role->isClaimed()) {
-            return redirect(config('app.url'));
+            return redirect(app_url());
         }
 
         if ($request->lang) {
@@ -693,7 +686,7 @@ class RoleController extends Controller
             'image_url' => $event->getImageUrl(),
             'can_edit' => auth()->user() && auth()->user()->canEditEvent($event),
             'edit_url' => auth()->user() && auth()->user()->canEditEvent($event)
-                ? ($role ? config('app.url').route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)], false) : config('app.url').route('event.edit_admin', ['hash' => UrlUtils::encodeId($event->id)], false))
+                ? ($role ? app_url(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)], false)) : app_url(route('event.edit_admin', ['hash' => UrlUtils::encodeId($event->id)], false)))
                 : null,
             'recurring_end_type' => $event->recurring_end_type ?? 'never',
             'recurring_end_value' => $event->recurring_end_value,
@@ -2059,13 +2052,10 @@ class RoleController extends Controller
         session(['pending_request' => $subdomain]);
         session(['pending_request_allow_guest' => ! $role->require_account]);
 
-        $mainDomain = config('app.url');
-
         if (! auth()->user()) {
             $lang = session()->has('translate') ? 'en' : $role->language_code;
-            $redirectUrl = $mainDomain.route('sign_up', ['lang' => $lang], false);
 
-            return redirect($redirectUrl);
+            return redirect(app_url(route('sign_up', ['lang' => $lang], false)));
         }
 
         $user = auth()->user();
@@ -2076,15 +2066,12 @@ class RoleController extends Controller
         }
 
         if ($user->talents()->count() == 0) {
-            $redirectUrl = $mainDomain.route('new', ['type' => 'talent'], false);
-
-            return redirect($redirectUrl);
+            return redirect(app_url(route('new', ['type' => 'talent'], false)));
         }
 
         $role = $user->talents()->first();
-        $redirectUrl = $mainDomain.route('event.create', ['subdomain' => $role->subdomain], false);
 
-        return redirect($redirectUrl);
+        return redirect(app_url(route('event.create', ['subdomain' => $role->subdomain], false)));
     }
 
     public function validateAddress(Request $request)

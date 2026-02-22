@@ -83,7 +83,7 @@
                 'flyer_url' => $event->flyer_image_url ?: null,
                 'can_edit' => auth()->user() && auth()->user()->canEditEvent($event),
                 'edit_url' => auth()->user() && auth()->user()->canEditEvent($event)
-                    ? (isset($role) ? config('app.url') . route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false) : config('app.url') . route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($event->id)], false))
+                    ? (isset($role) ? app_url(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false)) : app_url(route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($event->id)], false)))
                     : null,
                 'recurring_end_type' => $event->recurring_end_type ?? 'never',
                 'recurring_end_value' => $event->recurring_end_value,
@@ -2581,7 +2581,7 @@ const calendarApp = createApp({
             if (priceEl && priceTextEl) {
                 if (popupData.registration_url && popupData.ticket_price != null) {
                     priceTextEl.textContent = popupData.ticket_price == 0
-                        ? '{{ __('messages.free_entry') }}'
+                        ? @json(__('messages.free_entry'))
                         : this.formatPrice(popupData.ticket_price, popupData.ticket_currency_code);
                     priceEl.style.display = 'flex';
                 } else {

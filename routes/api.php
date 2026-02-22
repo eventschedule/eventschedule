@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Api\ApiAuthController;
-use App\Http\Controllers\Api\ApiBoostProxyController;
 use App\Http\Controllers\Api\ApiEventController;
 use App\Http\Controllers\Api\ApiGroupController;
 use App\Http\Controllers\Api\ApiSaleController;
@@ -13,9 +12,6 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register/send-code', [ApiAuthController::class, 'sendCode']);
 Route::post('/register', [ApiAuthController::class, 'register']);
 Route::post('/login', [ApiAuthController::class, 'login']);
-
-// Boost proxy (selfhosted installs proxy through hosted server)
-Route::post('/boost/proxy', [ApiBoostProxyController::class, 'handle']);
 
 // Authenticated routes
 Route::middleware([ApiAuthentication::class])->group(function () {
