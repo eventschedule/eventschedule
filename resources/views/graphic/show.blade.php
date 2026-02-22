@@ -1223,7 +1223,7 @@
         @if (is_rtl())
             <div class="flex items-center gap-3">
                 <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) }}"
-                   class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                   class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                     {{ __('messages.back') }}
                 </a>
             </div>
@@ -1252,7 +1252,7 @@
 
             <div class="flex items-center gap-3">
                 <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) }}"
-                   class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                   class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                     {{ __('messages.back') }}
                 </a>
             </div>
@@ -1446,8 +1446,8 @@
                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
                         </div>
 
-                        <!-- AI Prompt (Pro Feature) -->
-                        @if ($isPro)
+                        <!-- AI Prompt (Enterprise Feature) -->
+                        @if ($isEnterprise)
                         <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                             <div class="flex items-center justify-between mb-3">
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
@@ -1456,6 +1456,18 @@
                                 <textarea id="ai_prompt_mobile" rows="5" dir="auto" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
                             </div>
+                        </div>
+                        @elseif ($isPro)
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
+                            </div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ __('messages.enterprise_feature_ai_prompt') }}
+                                @if (config('app.hosted'))
+                                <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain, 'tier' => 'enterprise']) }}" class="text-amber-600 dark:text-amber-400 hover:underline">{{ __('messages.upgrade_to_enterprise') }}</a>
+                                @endif
+                            </p>
                         </div>
                         @endif
 
@@ -1568,10 +1580,9 @@
                         </div>
                         @else
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            @if ($hasRecurringEvents)
-                                {{ __('messages.enterprise_feature_email_scheduling') }}
-                            @else
-                                {{ __('messages.enterprise_feature_email_scheduling') }}
+                            {{ __('messages.enterprise_feature_email_scheduling') }}
+                            @if (config('app.hosted'))
+                            <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain, 'tier' => 'enterprise']) }}" class="text-amber-600 dark:text-amber-400 hover:underline">{{ __('messages.upgrade_to_enterprise') }}</a>
                             @endif
                         </p>
                         @endif
@@ -1749,8 +1760,8 @@
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
                             </div>
 
-                            <!-- AI Prompt (Pro Feature) -->
-                            @if ($isPro)
+                            <!-- AI Prompt (Enterprise Feature) -->
+                            @if ($isEnterprise)
                             <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                                 <div class="flex items-center justify-between mb-3">
                                     <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
@@ -1759,6 +1770,18 @@
                                     <textarea id="ai_prompt" rows="5" dir="auto" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
                                     <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
                                 </div>
+                            </div>
+                            @elseif ($isPro)
+                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
+                                </div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                    {{ __('messages.enterprise_feature_ai_prompt') }}
+                                    @if (config('app.hosted'))
+                                    <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain, 'tier' => 'enterprise']) }}" class="text-amber-600 dark:text-amber-400 hover:underline">{{ __('messages.upgrade_to_enterprise') }}</a>
+                                    @endif
+                                </p>
                             </div>
                             @endif
 
@@ -1871,10 +1894,9 @@
                             </div>
                             @else
                             <p class="text-sm text-gray-500 dark:text-gray-400">
-                                @if ($hasRecurringEvents)
-                                    {{ __('messages.enterprise_feature_email_scheduling') }}
-                                @else
-                                    {{ __('messages.enterprise_feature_email_scheduling') }}
+                                {{ __('messages.enterprise_feature_email_scheduling') }}
+                                @if (config('app.hosted'))
+                                <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain, 'tier' => 'enterprise']) }}" class="text-amber-600 dark:text-amber-400 hover:underline">{{ __('messages.upgrade_to_enterprise') }}</a>
                                 @endif
                             </p>
                             @endif

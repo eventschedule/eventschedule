@@ -148,7 +148,7 @@
                             $sections = [
                                 'Pricing & Fees' => [
                                     ['Free plan', 'Yes (forever)', 'Free to publish events', 'Yes (forever)', 'Free events only', 'Yes (forever)'],
-                                    ['Paid plan price', '$5/mo (first year free)', 'Free (fees on tickets)', '$59/mo', 'From $0.28/ticket', 'Free'],
+                                    ['Paid plan price', 'From $5/mo (first year free)', 'Free (fees on tickets)', '$59/mo', 'From $0.28/ticket', 'Free'],
                                     ['Platform fees', '0%', '3.7% + $1.79/ticket', '5% (free plan), 0% (Plus)', '$0.28-$0.60/ticket', 'N/A (no ticketing)'],
                                     ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in (included above)', 'Built-in', 'Stripe/PayPal/Square', 'No'],
                                 ],
@@ -173,7 +173,7 @@
                                     ['Event graphics gen', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
                                     ['Sub-schedules', 'Yes (Free)', 'No', 'No', 'No', 'Multiple calendars'],
                                     ['Fan videos & comments', 'Yes (Free)', 'No', 'No', 'No', 'No'],
-                                    ['Team collaboration', 'Yes (Free)', 'Yes', '3 admins (free), 5 (Plus)', 'Yes', 'Yes'],
+                                    ['Team collaboration', 'Yes (Enterprise)', 'Yes', '3 admins (free), 5 (Plus)', 'Yes', 'Yes'],
                                 ],
                                 'Platform' => [
                                     ['REST API', 'Yes (Pro)', 'Yes', 'Yes (Plus)', 'Yes', 'Yes'],
@@ -258,7 +258,7 @@
                 <a href="{{ route('marketing.compare_luma') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
                     <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Luma</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">$5/mo vs $59/mo for comparable features. Zero platform fees and fully open source.</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">From $5/mo vs $59/mo for comparable features. Zero platform fees and fully open source.</p>
                     <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
                         Compare
                         <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -270,7 +270,7 @@
                 <a href="{{ route('marketing.compare_ticket_tailor') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
                     <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Ticket Tailor</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Flat $5/mo vs per-ticket fees. Plus calendar sync, newsletters, and selfhosting.</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">From $5/mo vs per-ticket fees. Plus calendar sync, newsletters, and selfhosting.</p>
                     <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
                         Compare
                         <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">

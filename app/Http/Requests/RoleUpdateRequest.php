@@ -28,6 +28,7 @@ class RoleUpdateRequest extends FormRequest
                 is_demo_mode() ? [] : ['required'],
                 ['string', 'max:50']
             ),
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/'],
             'custom_domain' => ['nullable', 'string', 'url', 'max:255'],
             'profile_image' => ['image', 'max:2500', new SquareImage],
             'background_image_url' => ['image', 'max:2500'],

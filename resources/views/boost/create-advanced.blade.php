@@ -1,16 +1,40 @@
 <x-app-admin-layout>
     <div class="max-w-3xl mx-auto">
-        <div class="mb-6">
-            <a href="{{ route('boost.create', ['event_id' => $event->hashedId(), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-               class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">&larr; {{ __('messages.back_to_quick_boost') }}</a>
+        <div class="flex justify-between items-center gap-6 mb-6">
+            @if (is_rtl())
+                <a href="{{ route('event.edit_admin', $event->hashedId()) }}"
+                   class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    {{ __('messages.cancel') }}
+                </a>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ __('messages.advanced_boost') }}</h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $event->translatedName() }}</p>
+                </div>
+            @else
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ __('messages.advanced_boost') }}</h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $event->translatedName() }}</p>
+                </div>
+                <a href="{{ route('event.edit_admin', $event->hashedId()) }}"
+                   class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    {{ __('messages.cancel') }}
+                </a>
+            @endif
         </div>
-
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ __('messages.advanced_boost') }}</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ $event->translatedName() }}</p>
 
         @if (session('error'))
         <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300">
             {{ session('error') }}
+        </div>
+        @endif
+
+        {{-- Spending limit info --}}
+        @if ($isHosted)
+        <div class="mb-0 p-4 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+                {{ __('messages.boost_limit_info', ['limit' => $currencySymbol . number_format($maxBudget, 0)]) }}
+                {{ __('messages.boost_limit_grows') }}
+            </p>
         </div>
         @endif
 
@@ -334,8 +358,14 @@
                 paymentElement = null;
             }
 
-            elements = stripe.elements({ clientSecret });
-            paymentElement = elements.create('payment');
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const appearance = {
+                theme: isDarkMode ? 'night' : 'stripe',
+            };
+            elements = stripe.elements({ clientSecret, appearance });
+            paymentElement = elements.create('payment', {
+                paymentMethodOrder: ['card'],
+            });
             paymentElement.mount('#payment-element');
         }
         @endif

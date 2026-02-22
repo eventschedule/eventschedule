@@ -55,6 +55,46 @@
         </div>
 
         <div>
+            <x-input-label for="phone" :value="__('messages.phone_number')" />
+            <x-phone-input name="phone" :value="old('phone', $user->phone)" :disabled="is_demo_mode()" />
+            <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+
+            @if (!is_demo_mode() && config('app.hosted'))
+                @if ($user->phone && !$user->hasVerifiedPhone())
+                <div id="phone-verify-section">
+                    <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
+                        {{ __('messages.your_phone_is_unverified') }}
+                    </p>
+
+                    @if (\App\Services\SmsService::isConfigured())
+                    <div id="phone-verify-ui" class="mt-2">
+                        <button type="button" id="phone-send-code-btn"
+                            class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800">
+                            {{ __('messages.click_here_to_verify_phone') }}
+                        </button>
+
+                        <div id="phone-code-input" style="display: none;" class="mt-2 flex items-center gap-2">
+                            <input type="text" id="phone-verification-code" maxlength="6" placeholder="000000"
+                                class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm text-center tracking-widest" />
+                            <button type="button" id="phone-verify-code-btn"
+                                class="inline-flex items-center px-3 py-2 bg-[#4E81FA] text-white text-sm font-medium rounded-md hover:bg-[#3d6de8] transition-colors">
+                                {{ __('messages.verify') }}
+                            </button>
+                        </div>
+
+                        <p id="phone-verify-message" class="mt-2 text-sm" style="display: none;"></p>
+                    </div>
+                    @endif
+                </div>
+                @elseif ($user->phone && $user->hasVerifiedPhone())
+                <p class="text-sm mt-2 text-green-600 dark:text-green-400">
+                    {{ __('messages.phone_verified') }}
+                </p>
+                @endif
+            @endif
+        </div>
+
+        <div>
             <x-input-label for="timezone" :value="__('messages.timezone')" />
             <select name="timezone" id="timezone" required {{ is_demo_mode() ? 'disabled' : '' }}
                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
@@ -296,6 +336,80 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
     });
+
+    // Phone verification
+    var sendCodeBtn = document.getElementById('phone-send-code-btn');
+    var verifyCodeBtn = document.getElementById('phone-verify-code-btn');
+
+    if (sendCodeBtn) {
+        sendCodeBtn.addEventListener('click', function() {
+            sendCodeBtn.disabled = true;
+            sendCodeBtn.textContent = '...';
+
+            fetch('{{ route("phone.send_code") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ phone: document.getElementById('phone_hidden').value })
+            }).then(function(r) { return r.json(); }).then(function(data) {
+                var msgEl = document.getElementById('phone-verify-message');
+                if (data.success) {
+                    document.getElementById('phone-code-input').style.display = '';
+                    sendCodeBtn.style.display = 'none';
+                    msgEl.textContent = data.message;
+                    msgEl.className = 'mt-2 text-sm text-green-600 dark:text-green-400';
+                    msgEl.style.display = '';
+                } else {
+                    msgEl.textContent = data.message;
+                    msgEl.className = 'mt-2 text-sm text-red-600 dark:text-red-400';
+                    msgEl.style.display = '';
+                    sendCodeBtn.disabled = false;
+                    sendCodeBtn.textContent = @json(__('messages.click_here_to_verify_phone'), JSON_UNESCAPED_UNICODE);
+                }
+            }).catch(function() {
+                sendCodeBtn.disabled = false;
+                sendCodeBtn.textContent = @json(__('messages.click_here_to_verify_phone'), JSON_UNESCAPED_UNICODE);
+            });
+        });
+    }
+
+    if (verifyCodeBtn) {
+        verifyCodeBtn.addEventListener('click', function() {
+            var code = document.getElementById('phone-verification-code').value;
+            verifyCodeBtn.disabled = true;
+
+            fetch('{{ route("phone.verify_code") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ code: code })
+            }).then(function(r) { return r.json(); }).then(function(data) {
+                var msgEl = document.getElementById('phone-verify-message');
+                if (data.success) {
+                    msgEl.textContent = data.message;
+                    msgEl.className = 'mt-2 text-sm text-green-600 dark:text-green-400';
+                    msgEl.style.display = '';
+                    document.getElementById('phone-code-input').style.display = 'none';
+                    document.getElementById('phone-verify-ui').style.display = 'none';
+                    var section = document.getElementById('phone-verify-section');
+                    if (section) section.innerHTML = '<p class="text-sm mt-2 text-green-600 dark:text-green-400">' + data.message + '</p>';
+                } else {
+                    msgEl.textContent = data.message;
+                    msgEl.className = 'mt-2 text-sm text-red-600 dark:text-red-400';
+                    msgEl.style.display = '';
+                    verifyCodeBtn.disabled = false;
+                }
+            }).catch(function() {
+                verifyCodeBtn.disabled = false;
+            });
+        });
+    }
 
     // File input change handler (delegated)
     document.addEventListener('change', function(e) {

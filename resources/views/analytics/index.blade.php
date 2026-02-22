@@ -231,6 +231,131 @@
         </div>
         @endif
 
+        {{-- Boost Performance --}}
+        @if ($boostStats['has_data'])
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.boost_funnel') }}</h3>
+
+            {{-- Funnel visualization --}}
+            <div class="flex flex-col md:flex-row items-stretch gap-0 mb-6">
+                {{-- Impressions --}}
+                <div class="flex-1 bg-gray-50 dark:bg-gray-700/50 rounded-lg md:rounded-r-none p-4 text-center">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('messages.impressions') }}</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ number_format($boostStats['total_impressions']) }}</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">${{ number_format($boostStats['total_spend'], 2) }} {{ __('messages.total_spend') }}</p>
+                </div>
+                {{-- Arrow --}}
+                <div class="hidden md:flex items-center text-gray-300 dark:text-gray-600 px-1">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                </div>
+                {{-- Clicks --}}
+                <div class="flex-1 bg-gray-50 dark:bg-gray-700/50 rounded-lg md:rounded-none p-4 text-center">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('messages.clicks') }}</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ number_format($boostStats['total_clicks']) }}</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                        {{ number_format($boostStats['avg_ctr'], 1) }}% CTR
+                        @if ($boostStats['avg_cpc'] > 0)
+                            &middot; ${{ number_format($boostStats['avg_cpc'], 2) }}/{{ __('messages.click') }}
+                        @endif
+                    </p>
+                </div>
+                {{-- Arrow --}}
+                <div class="hidden md:flex items-center text-gray-300 dark:text-gray-600 px-1">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                </div>
+                {{-- Page Views --}}
+                <div class="flex-1 bg-gray-50 dark:bg-gray-700/50 rounded-lg md:rounded-none p-4 text-center">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('messages.page_views') }}</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ number_format($boostStats['boost_views']) }}</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                        @if ($boostStats['total_clicks'] > 0)
+                            {{ number_format(($boostStats['boost_views'] / $boostStats['total_clicks']) * 100, 0) }}% {{ __('messages.landed') }}
+                        @endif
+                        @if ($boostStats['cost_per_view'] > 0)
+                            &middot; ${{ number_format($boostStats['cost_per_view'], 2) }}/{{ __('messages.view') }}
+                        @endif
+                    </p>
+                </div>
+                {{-- Arrow --}}
+                <div class="hidden md:flex items-center text-gray-300 dark:text-gray-600 px-1">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                </div>
+                {{-- Sales --}}
+                <div class="flex-1 bg-gray-50 dark:bg-gray-700/50 rounded-lg md:rounded-l-none p-4 text-center">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('messages.sales') }}</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ number_format($boostStats['boost_sales']) }}</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                        @if ($boostStats['boost_views'] > 0 && $boostStats['boost_sales'] > 0)
+                            {{ number_format(($boostStats['boost_sales'] / $boostStats['boost_views']) * 100, 1) }}% {{ __('messages.converted') }}
+                        @endif
+                        @if ($boostStats['cost_per_sale'] > 0)
+                            &middot; ${{ number_format($boostStats['cost_per_sale'], 2) }}/{{ __('messages.sale') }}
+                        @endif
+                    </p>
+                </div>
+            </div>
+
+            {{-- ROAS highlight --}}
+            @if ($boostStats['boost_revenue'] > 0)
+            <div class="flex items-center gap-4 mb-6 p-3 rounded-lg {{ $boostStats['roas'] >= 1 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-amber-50 dark:bg-amber-900/20' }}">
+                <div>
+                    <p class="text-sm font-medium {{ $boostStats['roas'] >= 1 ? 'text-green-800 dark:text-green-300' : 'text-amber-800 dark:text-amber-300' }}">
+                        {{ __('messages.roas') }}: {{ number_format($boostStats['roas'], 1) }}x
+                    </p>
+                    <p class="text-xs {{ $boostStats['roas'] >= 1 ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400' }}">
+                        ${{ number_format($boostStats['boost_revenue'], 2) }} {{ __('messages.revenue') }} / ${{ number_format($boostStats['total_spend'], 2) }} {{ __('messages.spend') }}
+                    </p>
+                </div>
+            </div>
+            @endif
+
+            {{-- Campaigns table --}}
+            @if (count($boostStats['campaigns']) > 0)
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.boost_campaigns_in_period') }}</h4>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                            <th class="pb-2 font-medium">{{ __('messages.event') }}</th>
+                            <th class="pb-2 font-medium">{{ __('messages.status') }}</th>
+                            <th class="pb-2 font-medium text-end">{{ __('messages.spend') }}</th>
+                            <th class="pb-2 font-medium text-end">{{ __('messages.impressions') }}</th>
+                            <th class="pb-2 font-medium text-end">{{ __('messages.clicks') }}</th>
+                            <th class="pb-2 font-medium"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                        @foreach ($boostStats['campaigns'] as $campaign)
+                        <tr>
+                            <td class="py-2 text-gray-900 dark:text-white max-w-[200px] truncate">{{ $campaign['event_name'] }}</td>
+                            <td class="py-2">
+                                @php
+                                $badgeColors = match($campaign['status']) {
+                                    'active' => 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
+                                    'paused' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
+                                    'completed' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+                                    default => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+                                };
+                                @endphp
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $badgeColors }}">
+                                    {{ ucfirst($campaign['status']) }}
+                                </span>
+                            </td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">${{ number_format($campaign['spend'], 2) }}</td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ number_format($campaign['impressions']) }}</td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ number_format($campaign['clicks']) }}</td>
+                            <td class="py-2">
+                                <a href="{{ route('boost.show', ['hash' => $campaign['hash']]) }}" class="text-blue-600 dark:text-blue-400 hover:underline text-xs">{{ __('messages.view_details') }}</a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @endif
+        </div>
+        @endif
+
         @if ($totalViews > 0 || $appearanceViews > 0)
             {{-- Charts Row --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -287,6 +412,10 @@
                         <div class="flex items-start gap-1">
                             <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: #EF4444;"></span>
                             <span><strong>{{ __('messages.email_source') }}:</strong> {{ __('messages.email_description') }}</span>
+                        </div>
+                        <div class="flex items-start gap-1">
+                            <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: #F97316;"></span>
+                            <span><strong>{{ __('messages.boost') }}:</strong> {{ __('messages.boost_traffic_desc') }}</span>
                         </div>
                         <div class="flex items-start gap-1">
                             <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: #6B7280;"></span>
@@ -398,25 +527,48 @@
 
             // Views Over Time Chart
             const viewsCtx = document.getElementById('viewsChart').getContext('2d');
+            const viewsLabels = @json($viewsByPeriod->pluck('period')->toArray());
+            const viewsDatasets = [{
+                label: @json(__('messages.views')),
+                data: @json($viewsByPeriod->pluck('view_count')->toArray()),
+                borderColor: '#4E81FA',
+                backgroundColor: 'rgba(78, 129, 250, 0.1)',
+                fill: true,
+                tension: 0.3
+            }];
+
+            @if ($boostViewsByPeriod->isNotEmpty())
+            // Build boost views data aligned to the same labels
+            const boostViewsMap = @json($boostViewsByPeriod->pluck('view_count', 'period')->toArray());
+            const boostViewsData = viewsLabels.map(label => boostViewsMap[label] || 0);
+            if (boostViewsData.some(v => v > 0)) {
+                viewsDatasets.push({
+                    label: @json(__('messages.boost') . ' ' . __('messages.views')),
+                    data: boostViewsData,
+                    borderColor: '#F97316',
+                    backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    borderDash: [5, 5]
+                });
+            }
+            @endif
+
             new Chart(viewsCtx, {
             type: 'line',
             data: {
-                labels: @json($viewsByPeriod->pluck('period')->toArray()),
-                datasets: [{
-                    label: @json(__('messages.views')),
-                    data: @json($viewsByPeriod->pluck('view_count')->toArray()),
-                    borderColor: '#4E81FA',
-                    backgroundColor: 'rgba(78, 129, 250, 0.1)',
-                    fill: true,
-                    tension: 0.3
-                }]
+                labels: viewsLabels,
+                datasets: viewsDatasets
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        display: false
+                        display: viewsDatasets.length > 1,
+                        labels: {
+                            color: textColor
+                        }
                     }
                 },
                 scales: {
@@ -665,7 +817,16 @@
             'search': @json(__('messages.search')),
             'social': @json(__('messages.social')),
             'email': @json(__('messages.email')),
+            'boost': @json(__('messages.boost')),
             'other': @json(__('messages.other'))
+        };
+        const sourceColors = {
+            'direct': '#4E81FA',
+            'search': '#10B981',
+            'social': '#F59E0B',
+            'email': '#EF4444',
+            'boost': '#F97316',
+            'other': '#6B7280'
         };
         const trafficData = @json($trafficSources->toArray());
         new Chart(trafficSourcesCtx, {
@@ -674,7 +835,7 @@
                 labels: trafficData.map(item => sourceLabels[item.source] || item.source),
                 datasets: [{
                     data: trafficData.map(item => item.view_count),
-                    backgroundColor: ['#4E81FA', '#10B981', '#F59E0B', '#EF4444', '#6B7280']
+                    backgroundColor: trafficData.map(item => sourceColors[item.source] || '#6B7280')
                 }]
             },
             options: {

@@ -1018,14 +1018,50 @@
                             <x-input-error class="mt-2" :messages="$errors->get('show_email')" />
                         </div>
 
-                        <!--
                         <div class="mb-6">
-                            <x-input-label for="phone" :value="__('messages.phone')" />
-                            <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full"
-                                :value="old('phone', $role->phone)" />
+                            <x-input-label for="phone" :value="__('messages.phone_number')" />
+                            <x-phone-input name="phone" id="role_phone" :value="old('phone', $role->phone)" />
                             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+
+                            @if (config('app.hosted') && $role->exists && $role->phone && !$role->phone_verified_at)
+                            <div id="role-phone-verify-section">
+                                <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
+                                    {{ __('messages.your_phone_is_unverified') }}
+                                </p>
+
+                                @if (\App\Services\SmsService::isConfigured())
+                                <div id="role-phone-verify-ui" class="mt-2">
+                                    <button type="button" id="role-phone-send-code-btn"
+                                        class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800">
+                                        {{ __('messages.click_here_to_verify_phone') }}
+                                    </button>
+
+                                    <div id="role-phone-code-input" style="display: none;" class="mt-2 flex items-center gap-2">
+                                        <input type="text" id="role-phone-verification-code" maxlength="6" placeholder="000000"
+                                            class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm text-center tracking-widest" />
+                                        <button type="button" id="role-phone-verify-code-btn"
+                                            class="inline-flex items-center px-3 py-2 bg-[#4E81FA] text-white text-sm font-medium rounded-md hover:bg-[#3d6de8] transition-colors">
+                                            {{ __('messages.verify') }}
+                                        </button>
+                                    </div>
+
+                                    <p id="role-phone-verify-message" class="mt-2 text-sm" style="display: none;"></p>
+                                </div>
+                                @endif
+                            </div>
+                            @elseif (config('app.hosted') && $role->exists && $role->phone && $role->phone_verified_at)
+                            <p class="text-sm mt-2 text-green-600 dark:text-green-400">
+                                {{ __('messages.phone_verified') }}
+                            </p>
+                            @endif
                         </div>
-                        -->
+
+                        <div class="mb-6">
+                            <x-checkbox name="show_phone" label="{{ __('messages.show_phone_number') }}"
+                                checked="{{ old('show_phone', $role->show_phone) }}"
+                                data-custom-attribute="value" />
+                            <x-input-error class="mt-2" :messages="$errors->get('show_phone')" />
+                        </div>
 
                         <div class="mb-6">
                             <x-input-label for="website" :value="__('messages.website')" />
@@ -1491,11 +1527,28 @@
 
                             <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
                                 <x-input-label for="custom_css" :value="__('messages.custom_css')" />
+                                @if ($role->isEnterprise())
                                 <textarea id="custom_css" name="custom_css" {{ is_demo_mode() ? 'disabled' : '' }}
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm font-mono text-sm"
                                     rows="6">{{ old('custom_css', $role->custom_css) }}</textarea>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.custom_css_help') }}</p>
                                 <x-input-error class="mt-2" :messages="$errors->get('custom_css')" />
+                                @elseif ($role->custom_css)
+                                <textarea disabled
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm font-mono text-sm opacity-60"
+                                    rows="6">{{ $role->custom_css }}</textarea>
+                                <p class="mt-1 text-sm text-amber-600 dark:text-amber-400">{{ __('messages.custom_css_grandfathered') }}</p>
+                                @else
+                                <textarea disabled
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm font-mono text-sm opacity-60"
+                                    rows="3" placeholder="/* CSS */"></textarea>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ __('messages.custom_css_enterprise_only') }}
+                                    @if (config('app.hosted'))
+                                    - <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain, 'tier' => 'enterprise']) }}" class="text-amber-600 dark:text-amber-400 hover:underline">{{ __('messages.upgrade_to_enterprise') }}</a>
+                                    @endif
+                                </p>
+                                @endif
                                 @if (is_demo_mode())
                                 <p class="mt-1 text-sm text-yellow-600 dark:text-yellow-400">{{ __('messages.demo_mode_settings_disabled') }}</p>
                                 @endif
@@ -4064,6 +4117,78 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    // Role phone verification
+    var roleSendCodeBtn = document.getElementById('role-phone-send-code-btn');
+    var roleVerifyCodeBtn = document.getElementById('role-phone-verify-code-btn');
+
+    if (roleSendCodeBtn) {
+        roleSendCodeBtn.addEventListener('click', function() {
+            roleSendCodeBtn.disabled = true;
+            roleSendCodeBtn.textContent = '...';
+
+            fetch('{{ $role->exists ? route("role.phone.send_code", ["subdomain" => $role->subdomain]) : "" }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                }
+            }).then(function(r) { return r.json(); }).then(function(data) {
+                var msgEl = document.getElementById('role-phone-verify-message');
+                if (data.success) {
+                    document.getElementById('role-phone-code-input').style.display = '';
+                    roleSendCodeBtn.style.display = 'none';
+                    msgEl.textContent = data.message;
+                    msgEl.className = 'mt-2 text-sm text-green-600 dark:text-green-400';
+                    msgEl.style.display = '';
+                } else {
+                    msgEl.textContent = data.message;
+                    msgEl.className = 'mt-2 text-sm text-red-600 dark:text-red-400';
+                    msgEl.style.display = '';
+                    roleSendCodeBtn.disabled = false;
+                    roleSendCodeBtn.textContent = @json(__('messages.click_here_to_verify_phone'), JSON_UNESCAPED_UNICODE);
+                }
+            }).catch(function() {
+                roleSendCodeBtn.disabled = false;
+                roleSendCodeBtn.textContent = @json(__('messages.click_here_to_verify_phone'), JSON_UNESCAPED_UNICODE);
+            });
+        });
+    }
+
+    if (roleVerifyCodeBtn) {
+        roleVerifyCodeBtn.addEventListener('click', function() {
+            var code = document.getElementById('role-phone-verification-code').value;
+            roleVerifyCodeBtn.disabled = true;
+
+            fetch('{{ $role->exists ? route("role.phone.verify_code", ["subdomain" => $role->subdomain]) : "" }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ code: code })
+            }).then(function(r) { return r.json(); }).then(function(data) {
+                var msgEl = document.getElementById('role-phone-verify-message');
+                if (data.success) {
+                    msgEl.textContent = data.message;
+                    msgEl.className = 'mt-2 text-sm text-green-600 dark:text-green-400';
+                    msgEl.style.display = '';
+                    document.getElementById('role-phone-code-input').style.display = 'none';
+                    var section = document.getElementById('role-phone-verify-section');
+                    if (section) section.innerHTML = '<p class="text-sm mt-2 text-green-600 dark:text-green-400">' + data.message + '</p>';
+                } else {
+                    msgEl.textContent = data.message;
+                    msgEl.className = 'mt-2 text-sm text-red-600 dark:text-red-400';
+                    msgEl.style.display = '';
+                    roleVerifyCodeBtn.disabled = false;
+                }
+            }).catch(function() {
+                roleVerifyCodeBtn.disabled = false;
+            });
+        });
+    }
 
 });
 

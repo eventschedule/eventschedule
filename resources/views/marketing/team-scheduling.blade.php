@@ -58,7 +58,7 @@
                 "name": "Is there a limit on team members?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "The free plan includes team collaboration. The Pro plan supports multiple team members per account, so your whole team can manage the schedule together."
+                    "text": "The free plan includes team collaboration. The Enterprise plan supports multiple team members per account, so your whole team can manage the schedule together."
                 }
             }
         ]
@@ -596,7 +596,7 @@
                         </svg>
                     </button>
                     <div x-show="open === 3" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">The free plan includes team collaboration. The Pro plan supports multiple team members per account, so your whole team can manage the schedule together.</p>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">The free plan includes team collaboration. The Enterprise plan supports multiple team members per account, so your whole team can manage the schedule together.</p>
                     </div>
                 </div>
             </div>

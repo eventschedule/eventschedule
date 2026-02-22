@@ -81,6 +81,10 @@ class AuditService
 
     const ADMIN_SESSION_CHANGED = 'admin.session_changed';
 
+    const ADMIN_BOOST_CREDIT = 'admin.boost_credit';
+
+    const ADMIN_BOOST_LIMIT = 'admin.boost_limit';
+
     // Payment actions
     const STRIPE_LINK = 'stripe.link';
 

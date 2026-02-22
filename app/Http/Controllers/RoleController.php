@@ -27,6 +27,7 @@ use App\Services\BoostBillingService;
 use App\Services\DemoService;
 use App\Services\EmailService;
 use App\Services\MetaAdsService;
+use App\Services\SmsService;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\UrlUtils;
@@ -933,7 +934,7 @@ class RoleController extends Controller
 
         if ($tab == 'requests' && ! count($requests)) {
             return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
-        } elseif ($tab == 'availability' && $role->isCurator()) {
+        } elseif ($tab == 'availability' && ($role->isCurator() || !$role->isEnterprise())) {
             return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
         } elseif ($tab == 'videos' && ! $role->isCurator()) {
             return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
@@ -1068,9 +1069,9 @@ class RoleController extends Controller
 
         $this->authorize('manageMembers', $role);
 
-        if (! $role->isPro()) {
-            return redirect()->back()->with('error', __('messages.upgrade_to_pro'));
-        } elseif (! $role->email_verified_at) {
+        if (! $role->isEnterprise()) {
+            return redirect()->back()->with('error', __('messages.upgrade_to_enterprise'));
+        } elseif (! $role->isClaimed()) {
             return redirect()->back()->with('error', __('messages.email_not_verified'));
         }
 
@@ -1306,8 +1307,15 @@ class RoleController extends Controller
 
         if (! config('app.hosted')) {
             $role->email_verified_at = now();
+            if ($role->phone) {
+                $role->phone_verified_at = now();
+            }
         } elseif ($role->email == $user->email) {
             $role->email_verified_at = $user->email_verified_at;
+        }
+
+        if (config('app.hosted') && $role->phone && $user->phone === $role->phone && $user->hasVerifiedPhone()) {
+            $role->phone_verified_at = now();
         }
 
         if (! $request->background_colors) {
@@ -1569,6 +1577,11 @@ class RoleController extends Controller
             $request->files->remove('header_image');
         }
 
+        // Guard custom_css behind Enterprise plan
+        if (! $role->isEnterprise()) {
+            $request->merge(['custom_css' => $role->custom_css]);
+        }
+
         $existingSettings = $role->getEmailSettings();
 
         // Handle sync_direction and calendar changes and webhook management
@@ -1752,6 +1765,15 @@ class RoleController extends Controller
             }
 
             $role->event_custom_fields = ! empty($eventCustomFields) ? $eventCustomFields : null;
+        }
+
+        // Auto-verify phone for selfhost, or if it matches the user's verified phone
+        if (! config('app.hosted') && $role->phone && $role->isDirty('phone')) {
+            $role->phone_verified_at = now();
+        }
+        $user = auth()->user();
+        if (config('app.hosted') && $role->phone && $user->phone === $role->phone && $user->hasVerifiedPhone()) {
+            $role->phone_verified_at = now();
         }
 
         // Handle email settings
@@ -2210,6 +2232,11 @@ class RoleController extends Controller
     public function availability(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $role->isEnterprise()) {
+            return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
+        }
+
         $user = $request->user();
 
         $roleUser = RoleUser::where('user_id', $user->id)
@@ -2972,5 +2999,74 @@ class RoleController extends Controller
 
             return response()->json(['error' => __('messages.failed_to_send_test_email')], 500);
         }
+    }
+
+    /**
+     * Send a phone verification code for a role.
+     */
+    public function phoneSendCode(Request $request, $subdomain): JsonResponse
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! auth()->user()->isMember($subdomain)) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
+
+        $phone = $role->phone;
+        if (! $phone) {
+            return response()->json(['success' => false, 'message' => __('messages.phone_number').' is required'], 422);
+        }
+
+        // Rate limiting: max 5 codes per hour per phone
+        $attemptsKey = 'phone_verify_attempts_'.$phone;
+        $attempts = \Illuminate\Support\Facades\Cache::get($attemptsKey, 0);
+
+        if ($attempts >= 5) {
+            return response()->json(['success' => false, 'message' => __('messages.code_rate_limit')], 429);
+        }
+
+        $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        \Illuminate\Support\Facades\Cache::put('role_phone_verify_code_'.$code, [
+            'phone' => $phone,
+            'role_id' => $role->id,
+        ], now()->addMinutes(10));
+
+        \Illuminate\Support\Facades\Cache::put($attemptsKey, $attempts + 1, now()->addHour());
+
+        $sent = SmsService::sendSms($phone, __('messages.your_verification_code_is', ['code' => $code]));
+
+        if (! $sent) {
+            return response()->json(['success' => false, 'message' => __('messages.failed_to_send_sms')], 500);
+        }
+
+        return response()->json(['success' => true, 'message' => __('messages.verification_code_sent_to_phone')]);
+    }
+
+    /**
+     * Verify a phone code for a role.
+     */
+    public function phoneVerifyCode(Request $request, $subdomain): JsonResponse
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! auth()->user()->isMember($subdomain)) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'code' => ['required', 'string', 'size:6'],
+        ]);
+
+        $data = \Illuminate\Support\Facades\Cache::pull('role_phone_verify_code_'.$request->code);
+
+        if (! $data || $data['phone'] !== $role->phone || $data['role_id'] !== $role->id) {
+            return response()->json(['success' => false, 'message' => __('messages.phone_verification_code_invalid')], 422);
+        }
+
+        $role->phone_verified_at = now();
+        $role->save();
+
+        return response()->json(['success' => true, 'message' => __('messages.phone_verified')]);
     }
 }

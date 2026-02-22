@@ -31,9 +31,14 @@ class AnalyticsReferrersDaily extends Model
     /**
      * Increment view count for a role/date/source/domain combination using upsert
      */
-    public static function incrementView(int $roleId, ?string $referrer, ?string $customDomain = null): void
+    public static function incrementView(int $roleId, ?string $referrer, ?string $customDomain = null, ?string $sourceOverride = null): void
     {
-        [$source, $domain] = self::categorizeReferrer($referrer, $customDomain);
+        if ($sourceOverride) {
+            $source = $sourceOverride;
+            $domain = null;
+        } else {
+            [$source, $domain] = self::categorizeReferrer($referrer, $customDomain);
+        }
         $date = now()->toDateString();
 
         // Use empty string for null domain to make unique constraint work

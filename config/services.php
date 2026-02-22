@@ -61,6 +61,8 @@ return [
         'price_yearly_amount' => env('STRIPE_PRICE_YEARLY_AMOUNT', '50'),
         'enterprise_price_monthly' => env('STRIPE_ENTERPRISE_PRICE_MONTHLY'),
         'enterprise_price_yearly' => env('STRIPE_ENTERPRISE_PRICE_YEARLY'),
+        'enterprise_price_monthly_amount' => env('STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT', '15'),
+        'enterprise_price_yearly_amount' => env('STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT', '150'),
     ],
 
     'invoiceninja' => [
@@ -72,6 +74,12 @@ return [
         'secret_key' => env('TURNSTILE_SECRET_KEY'),
     ],
 
+    'twilio' => [
+        'sid' => env('TWILIO_SID'),
+        'token' => env('TWILIO_AUTH_TOKEN'),
+        'from' => env('TWILIO_FROM_NUMBER'),
+    ],
+
     'meta' => [
         'app_id' => env('META_APP_ID'),
         'app_secret' => env('META_APP_SECRET'),
@@ -80,7 +88,8 @@ return [
         'pixel_id' => env('META_PIXEL_ID'),
         'markup_rate' => env('META_MARKUP_RATE', 0.20),
         'min_budget' => env('META_MIN_BUDGET', 10.00),
-        'max_budget' => env('META_MAX_BUDGET', 5000.00),
+        'max_budget' => env('META_MAX_BUDGET', 1000.00),
+        'boost_default_limit' => env('META_BOOST_DEFAULT_LIMIT', 10.00),
         'default_currency' => env('META_DEFAULT_CURRENCY', 'USD'),
         'api_version' => env('META_API_VERSION', 'v21.0'),
         'webhook_verify_token' => env('META_WEBHOOK_VERIFY_TOKEN'),

@@ -7,6 +7,8 @@ use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\AnalyticsReferrersDaily;
 use App\Models\AuditLog;
+use App\Models\BoostBillingRecord;
+use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\EventPart;
 use App\Models\EventRole;
@@ -1506,5 +1508,283 @@ class AdminController extends Controller
         $categories = ['auth', 'profile', 'api', 'schedule', 'event', 'sale', 'admin', 'stripe'];
 
         return view('admin.audit-log', compact('logs', 'categories'));
+    }
+
+    /**
+     * Display the admin boost dashboard.
+     */
+    public function boost(Request $request)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $range = $request->input('range', 'last_30_days');
+        $dates = $this->getDateRange($range);
+        $startDate = $dates['start'];
+        $endDate = $dates['end'];
+
+        // Summary metrics
+        $totalCampaignsAllTime = BoostCampaign::count();
+        $totalCampaignsInPeriod = BoostCampaign::whereBetween('created_at', [$startDate, $endDate])->count();
+        $activeCampaigns = BoostCampaign::where('status', 'active')->count();
+
+        $markupRevenue = BoostBillingRecord::where('type', 'charge')
+            ->where('status', 'completed')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum('markup_amount');
+
+        $totalAdSpend = BoostCampaign::whereBetween('created_at', [$startDate, $endDate])
+            ->sum('actual_spend');
+
+        $totalRefunds = BoostBillingRecord::where('type', 'refund')
+            ->where('status', 'completed')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum('amount');
+
+        // Average performance (from campaigns with meaningful statuses)
+        $performanceCampaigns = BoostCampaign::whereIn('status', ['active', 'paused', 'completed'])
+            ->whereBetween('created_at', [$startDate, $endDate]);
+
+        $avgCtr = (clone $performanceCampaigns)->where('impressions', '>', 0)->avg(DB::raw('clicks / impressions * 100')) ?? 0;
+        $avgCpc = (clone $performanceCampaigns)->where('clicks', '>', 0)->avg(DB::raw('actual_spend / clicks')) ?? 0;
+        $avgCpm = (clone $performanceCampaigns)->where('impressions', '>', 0)->avg(DB::raw('actual_spend / impressions * 1000')) ?? 0;
+
+        $totalWithStatus = (clone $performanceCampaigns)->count() + BoostCampaign::where('status', 'rejected')->whereBetween('created_at', [$startDate, $endDate])->count();
+        $rejectedCount = BoostCampaign::where('status', 'rejected')->whereBetween('created_at', [$startDate, $endDate])->count();
+        $rejectionRate = $totalWithStatus > 0 ? ($rejectedCount / $totalWithStatus * 100) : 0;
+
+        // Alerts (not date-filtered)
+        $stuckPending = BoostCampaign::with(['event:id,name', 'user:id,name,email', 'role:id,subdomain,name'])
+            ->where('status', 'pending_payment')
+            ->where('created_at', '<', now()->subMinutes(30))
+            ->get();
+
+        $failedCampaigns = BoostCampaign::with(['event:id,name', 'user:id,name,email'])
+            ->where('status', 'failed')
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get();
+
+        $disapprovedCampaigns = BoostCampaign::with(['event:id,name', 'user:id,name,email'])
+            ->whereHas('ads', function ($q) {
+                $q->where('status', 'DISAPPROVED');
+            })
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get();
+
+        // Status distribution
+        $statusDistribution = BoostCampaign::selectRaw('status, count(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->toArray();
+
+        // Performance trend data
+        $daysDiff = $startDate->diffInDays($endDate);
+        if ($daysDiff <= 31) {
+            $formatKey = 'daily';
+            $labelFormat = 'M d';
+        } elseif ($daysDiff <= 90) {
+            $formatKey = 'weekly';
+            $labelFormat = 'W';
+        } else {
+            $formatKey = 'monthly';
+            $labelFormat = 'M Y';
+        }
+
+        $dateFormatExpr = match ($formatKey) {
+            'daily' => DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as period"),
+            'weekly' => DB::raw("DATE_FORMAT(created_at, '%Y-%u') as period"),
+            'monthly' => DB::raw("DATE_FORMAT(created_at, '%Y-%m') as period"),
+        };
+
+        $adSpendTrend = BoostBillingRecord::select(
+            $dateFormatExpr,
+            DB::raw('SUM(meta_spend) as total')
+        )
+            ->where('type', 'charge')
+            ->where('status', 'completed')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get();
+
+        $markupTrend = BoostBillingRecord::select(
+            match ($formatKey) {
+                'daily' => DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as period"),
+                'weekly' => DB::raw("DATE_FORMAT(created_at, '%Y-%u') as period"),
+                'monthly' => DB::raw("DATE_FORMAT(created_at, '%Y-%m') as period"),
+            },
+            DB::raw('SUM(markup_amount) as total')
+        )
+            ->where('type', 'charge')
+            ->where('status', 'completed')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get();
+
+        $allPeriods = collect()
+            ->merge($adSpendTrend->pluck('period'))
+            ->merge($markupTrend->pluck('period'))
+            ->unique()
+            ->sort()
+            ->values();
+
+        $trendLabels = $allPeriods->map(function ($period) use ($labelFormat) {
+            if (str_contains($labelFormat, 'W')) {
+                $parts = explode('-', $period);
+                if (count($parts) === 2) {
+                    return 'Week '.ltrim($parts[1], '0');
+                }
+            }
+            try {
+                return Carbon::parse($period)->format($labelFormat);
+            } catch (\Exception $e) {
+                return $period;
+            }
+        })->toArray();
+
+        $adSpendData = $allPeriods->map(fn ($period) => (float) ($adSpendTrend->firstWhere('period', $period)?->total ?? 0))->toArray();
+        $markupData = $allPeriods->map(fn ($period) => (float) ($markupTrend->firstWhere('period', $period)?->total ?? 0))->toArray();
+
+        // Top boosters
+        $topBoosters = BoostCampaign::select(
+            'role_id',
+            DB::raw('COUNT(*) as campaign_count'),
+            DB::raw('SUM(user_budget) as total_budget'),
+            DB::raw('SUM(actual_spend) as total_spend'),
+            DB::raw('SUM(impressions) as total_impressions'),
+            DB::raw('SUM(clicks) as total_clicks')
+        )
+            ->groupBy('role_id')
+            ->orderByDesc('total_budget')
+            ->limit(10)
+            ->get();
+
+        $topBoosterRoleIds = $topBoosters->pluck('role_id')->toArray();
+        $topBoosterRoles = Role::whereIn('id', $topBoosterRoleIds)->pluck('subdomain', 'id');
+
+        // Grant credit section
+        $rolesWithCredit = Role::where('boost_credit', '>', 0)
+            ->select('subdomain', 'boost_credit')
+            ->orderByDesc('boost_credit')
+            ->get();
+
+        // Spending limit section
+        $rolesWithLimit = Role::whereNotNull('boost_max_budget')
+            ->select('subdomain', 'boost_max_budget')
+            ->orderByDesc('boost_max_budget')
+            ->get();
+
+        // Campaigns table (paginated, filterable)
+        $statusFilter = $request->input('status');
+        $campaignsQuery = BoostCampaign::with(['event:id,name', 'user:id,name,email', 'role:id,subdomain,name'])
+            ->orderByDesc('created_at');
+
+        if ($statusFilter) {
+            $campaignsQuery->where('status', $statusFilter);
+        }
+
+        $campaigns = $campaignsQuery->paginate(20)->withQueryString();
+
+        // Recent billing records
+        $recentBilling = BoostBillingRecord::with(['campaign:id,name,currency_code'])
+            ->orderByDesc('created_at')
+            ->limit(30)
+            ->get();
+
+        return view('admin.boost', compact(
+            'range',
+            'totalCampaignsAllTime',
+            'totalCampaignsInPeriod',
+            'activeCampaigns',
+            'markupRevenue',
+            'totalAdSpend',
+            'totalRefunds',
+            'avgCtr',
+            'avgCpc',
+            'avgCpm',
+            'rejectionRate',
+            'stuckPending',
+            'failedCampaigns',
+            'disapprovedCampaigns',
+            'statusDistribution',
+            'trendLabels',
+            'adSpendData',
+            'markupData',
+            'topBoosters',
+            'topBoosterRoles',
+            'rolesWithCredit',
+            'rolesWithLimit',
+            'campaigns',
+            'statusFilter',
+            'recentBilling',
+        ));
+    }
+
+    /**
+     * Grant boost credit to a schedule.
+     */
+    public function boostGrantCredit(Request $request): RedirectResponse
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $request->validate([
+            'subdomain' => 'required|exists:roles,subdomain',
+            'amount' => 'required|numeric|min:1|max:5000',
+        ]);
+
+        $role = Role::where('subdomain', $request->subdomain)->firstOrFail();
+        $oldCredit = $role->boost_credit;
+        $amount = (float) $request->amount;
+        $role->increment('boost_credit', $amount);
+
+        AuditService::log(
+            AuditService::ADMIN_BOOST_CREDIT,
+            auth()->id(),
+            'App\\Models\\Role',
+            $role->id,
+            ['boost_credit' => $oldCredit],
+            ['boost_credit' => $oldCredit + $amount],
+            "Granted \${$amount} boost credit to {$role->subdomain}",
+        );
+
+        return redirect()->back()->with('success', "Granted \${$request->amount} boost credit to {$role->subdomain}");
+    }
+
+    /**
+     * Set boost spending limit for a schedule.
+     */
+    public function boostSetLimit(Request $request): RedirectResponse
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $request->validate([
+            'subdomain' => 'required|exists:roles,subdomain',
+            'amount' => 'required|numeric|min:1|max:'.config('services.meta.max_budget', 1000),
+        ]);
+
+        $role = Role::where('subdomain', $request->subdomain)->firstOrFail();
+        $oldLimit = $role->boost_max_budget;
+        $amount = (float) $request->amount;
+        $role->update(['boost_max_budget' => $amount]);
+
+        AuditService::log(
+            AuditService::ADMIN_BOOST_LIMIT,
+            auth()->id(),
+            'App\\Models\\Role',
+            $role->id,
+            ['boost_max_budget' => $oldLimit],
+            ['boost_max_budget' => $amount],
+            "Set boost spending limit to \${$amount} for {$role->subdomain}",
+        );
+
+        return redirect()->back()->with('success', "Set boost spending limit to \${$request->amount} for {$role->subdomain}");
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminNewsletterController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\Api\ApiSettingsController;
 use App\Http\Controllers\AppController;
@@ -15,7 +16,6 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvoiceNinjaController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\MetaAdsWebhookController;
-use App\Http\Controllers\AdminNewsletterController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\NewsletterTrackingController;
 use App\Http\Controllers\ProfileController;
@@ -30,14 +30,14 @@ Route::get('/robots.txt', [AppController::class, 'robots']);
 
 if (config('app.hosted') && ! config('app.is_testing')) {
     if (config('app.env') != 'local') {
-        Route::domain('blog.' . _base_domain())->group(function () {
+        Route::domain('blog.'._base_domain())->group(function () {
             Route::get('/', [BlogController::class, 'index'])->name('blog.index');
             Route::get('/feed', [BlogController::class, 'feed'])->name('blog.feed');
             Route::get('/{slug}', [BlogController::class, 'show'])->name('blog.show');
         });
     }
 
-    Route::domain('{subdomain}.' . _base_domain())->where(['subdomain' => '^(?!www|app).*'])->group(function () {
+    Route::domain('{subdomain}.'._base_domain())->where(['subdomain' => '^(?!www|app).*'])->group(function () {
         Route::get('/api/past-events', [RoleController::class, 'listPastEvents'])->name('role.list_past_events');
         Route::get('/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
         Route::get('/request', [RoleController::class, 'request'])->name('role.request');
@@ -216,6 +216,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{subdomain}/add-event', [EventController::class, 'create'])->name('event.create');
     Route::get('/{subdomain}/verify/{hash}', [RoleController::class, 'verify'])->name('role.verification.verify');
     Route::get('/{subdomain}/resend', [RoleController::class, 'resendVerify'])->name('role.verification.resend');
+    Route::post('/{subdomain}/phone/send-code', [RoleController::class, 'phoneSendCode'])->name('role.phone.send_code')->middleware('throttle:5,1');
+    Route::post('/{subdomain}/phone/verify-code', [RoleController::class, 'phoneVerifyCode'])->name('role.phone.verify_code')->middleware('throttle:10,1');
     Route::get('/{subdomain}/resend-invite/{hash}', [RoleController::class, 'resendInvite'])->name('role.resend_invite');
     Route::post('/{subdomain}/store-event', [EventController::class, 'store'])->name('event.store');
     Route::get('/{subdomain}/edit-event/{hash}', [EventController::class, 'edit'])->name('event.edit');
@@ -283,6 +285,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/revenue', [AdminController::class, 'revenue'])->name('admin.revenue');
         Route::get('/admin/analytics', [AdminController::class, 'analytics'])->name('admin.analytics');
         Route::get('/admin/usage', [AdminController::class, 'usage'])->name('admin.usage');
+        Route::get('/admin/boost', [AdminController::class, 'boost'])->name('admin.boost');
+        Route::post('/admin/boost/grant-credit', [AdminController::class, 'boostGrantCredit'])->name('admin.boost.grant_credit');
+        Route::post('/admin/boost/set-limit', [AdminController::class, 'boostSetLimit'])->name('admin.boost.set_limit');
         Route::post('/admin/translation/retry', [AdminController::class, 'retryTranslation'])->name('admin.translation.retry');
         Route::get('/admin/plans', [AdminController::class, 'plans'])->name('admin.plans');
         Route::get('/admin/plans/{role}/edit', [AdminController::class, 'editPlan'])->name('admin.plans.edit');
@@ -432,6 +437,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/analytics', [MarketingController::class, 'docsAnalytics'])->name('marketing.docs.analytics');
         Route::get('/docs/account-settings', [MarketingController::class, 'docsAccountSettings'])->name('marketing.docs.account_settings');
         Route::get('/docs/availability', [MarketingController::class, 'docsAvailability'])->name('marketing.docs.availability');
+        Route::get('/docs/boost', [MarketingController::class, 'docsBoost'])->name('marketing.docs.boost');
         // Selfhost section
         Route::get('/docs/selfhost', [MarketingController::class, 'docsSelfhostIndex'])->name('marketing.docs.selfhost');
         Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
@@ -554,6 +560,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/analytics', [MarketingController::class, 'docsAnalytics'])->name('marketing.docs.analytics');
             Route::get('/docs/account-settings', [MarketingController::class, 'docsAccountSettings'])->name('marketing.docs.account_settings');
             Route::get('/docs/availability', [MarketingController::class, 'docsAvailability'])->name('marketing.docs.availability');
+            Route::get('/docs/boost', [MarketingController::class, 'docsBoost'])->name('marketing.docs.boost');
             // Selfhost section
             Route::get('/docs/selfhost', [MarketingController::class, 'docsSelfhostIndex'])->name('marketing.docs.selfhost');
             Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
@@ -675,6 +682,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/analytics', fn () => redirect('https://eventschedule.com/docs/analytics', 301));
             Route::get('/docs/account-settings', fn () => redirect('https://eventschedule.com/docs/account-settings', 301));
             Route::get('/docs/availability', fn () => redirect('https://eventschedule.com/docs/availability', 301));
+            Route::get('/docs/boost', fn () => redirect('https://eventschedule.com/docs/boost', 301));
             // Selfhost section
             Route::get('/docs/selfhost', fn () => redirect('https://eventschedule.com/docs/selfhost', 301));
             Route::get('/docs/selfhost/installation', fn () => redirect('https://eventschedule.com/docs/selfhost/installation', 301));
@@ -785,6 +793,7 @@ if (config('app.is_nexus')) {
     Route::get('/docs/analytics', fn () => redirect()->route('home'));
     Route::get('/docs/account-settings', fn () => redirect()->route('home'));
     Route::get('/docs/availability', fn () => redirect()->route('home'));
+    Route::get('/docs/boost', fn () => redirect()->route('home'));
     // Selfhost section
     Route::get('/docs/selfhost', fn () => redirect()->route('home'));
     Route::get('/docs/selfhost/installation', fn () => redirect()->route('home'));
@@ -818,7 +827,7 @@ Route::get('/blog/delete-signed/{blogPost}', [BlogController::class, 'destroySig
     ->middleware('signed');
 
 if (config('app.hosted') && ! config('app.is_testing')) {
-    Route::domain('{subdomain}.' . _base_domain())->where(['subdomain' => '^(?!www|app).*'])->group(function () {
+    Route::domain('{subdomain}.'._base_domain())->where(['subdomain' => '^(?!www|app).*'])->group(function () {
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
     });
 } else {

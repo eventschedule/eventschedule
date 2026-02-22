@@ -22,6 +22,7 @@ class ProfileUpdateRequest extends FormRequest
                 ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id)],
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/', Rule::unique(User::class)->ignore($this->user()->id)],
             'timezone' => ['required', 'string', 'max:255'],
             'language_code' => ['required', 'string', 'in:'.implode(',', config('app.supported_languages', ['en']))],
             'profile_image' => ['image', 'max:2500'],

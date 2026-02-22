@@ -150,13 +150,18 @@
             <div class="w-full h-2.5 rounded-full {{ $barBgColor }}">
                 <div class="h-2.5 rounded-full {{ $barColor }} transition-all" style="width: {{ $newsletterPercent }}%"></div>
             </div>
+            @if (config('cashier.key') && $planTier === 'pro' && $newsletterLimit <= 100)
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                {{ __('messages.newsletter_upgrade_enterprise') }}
+            </p>
+            @endif
         </div>
         @endif
 
         {{-- Action Buttons --}}
         @if ($isOwner)
         <div class="pt-8 space-y-4">
-            {{-- Add Payment Method / Subscribe Button --}}
+            {{-- Subscribe Button (Free users or expired Pro/Enterprise) --}}
             @if (config('cashier.key') && !$role->hasActiveSubscription() && !$role->onGracePeriod() && ($role->onGenericTrial() || $role->plan_type == 'free' || ($role->plan_type == 'pro' && !$role->isPro())))
             <div>
                 <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain]) }}"
@@ -168,6 +173,23 @@
                     {{ __('messages.first_year_free') }}
                 </span>
                 @endif
+            </div>
+            @endif
+
+            {{-- Upgrade to Enterprise (for active Pro subscribers) --}}
+            @if (config('cashier.key') && $role->hasActiveSubscription() && !$role->hasActiveEnterpriseSubscription() && $subscription && $subscription->active() && !$subscription->onTrial() && !$subscription->onGracePeriod())
+            <div>
+                <form action="{{ route('subscription.swap', ['subdomain' => $role->subdomain]) }}" method="POST" class="inline form-confirm" data-confirm="{{ __('messages.are_you_sure') }}">
+                    @csrf
+                    <input type="hidden" name="plan" value="{{ $role->currentPlanTerm() == 'yearly' ? 'yearly' : 'monthly' }}">
+                    <input type="hidden" name="tier" value="enterprise">
+                    <button type="submit" class="inline-flex items-center rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-amber-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500">
+                        {{ __('messages.upgrade_to_enterprise') }}
+                    </button>
+                </form>
+                <span class="ms-3 text-sm text-gray-500 dark:text-gray-400">
+                    ${{ $role->currentPlanTerm() == 'yearly' ? config('services.stripe_platform.enterprise_price_yearly_amount') . '/' . __('messages.year') : config('services.stripe_platform.enterprise_price_monthly_amount') . '/' . __('messages.month') }}
+                </span>
             </div>
             @endif
 
@@ -183,22 +205,29 @@
 
             {{-- Swap Plan (Monthly/Yearly) --}}
             @if ($subscription && $subscription->active() && !$subscription->onTrial() && !$subscription->onGracePeriod())
+            @php
+                $isEnterpriseTier = $planTier === 'enterprise';
+                $swapMonthlyAmount = $isEnterpriseTier ? config('services.stripe_platform.enterprise_price_monthly_amount') : config('services.stripe_platform.price_monthly_amount');
+                $swapYearlyAmount = $isEnterpriseTier ? config('services.stripe_platform.enterprise_price_yearly_amount') : config('services.stripe_platform.price_yearly_amount');
+            @endphp
             <div class="flex items-center gap-4">
                 <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.switch_plan') }}:</span>
                 @if ($role->currentPlanTerm() == 'monthly')
                 <form action="{{ route('subscription.swap', ['subdomain' => $role->subdomain]) }}" method="POST" class="inline">
                     @csrf
                     <input type="hidden" name="plan" value="yearly">
+                    <input type="hidden" name="tier" value="{{ $planTier }}">
                     <button type="submit" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 font-medium">
-                        {{ __('messages.switch_to_yearly') }} (${{ config('services.stripe_platform.price_yearly_amount') }}/{{ __('messages.year') }})
+                        {{ __('messages.switch_to_yearly') }} (${{ $swapYearlyAmount }}/{{ __('messages.year') }})
                     </button>
                 </form>
                 @else
                 <form action="{{ route('subscription.swap', ['subdomain' => $role->subdomain]) }}" method="POST" class="inline">
                     @csrf
                     <input type="hidden" name="plan" value="monthly">
+                    <input type="hidden" name="tier" value="{{ $planTier }}">
                     <button type="submit" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 font-medium">
-                        {{ __('messages.switch_to_monthly') }} (${{ config('services.stripe_platform.price_monthly_amount') }}/{{ __('messages.month') }})
+                        {{ __('messages.switch_to_monthly') }} (${{ $swapMonthlyAmount }}/{{ __('messages.month') }})
                     </button>
                 </form>
                 @endif

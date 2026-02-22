@@ -179,6 +179,18 @@ class TicketController extends Controller
                 $sale->secret = strtolower(Str::random(32));
                 $sale->payment_method = $event->payment_method;
 
+                // Capture UTM attribution
+                $utmParams = $request->session()->get('utm_params', []);
+                if (empty($utmParams) && $request->cookie('utm_params')) {
+                    $utmParams = json_decode($request->cookie('utm_params'), true) ?? [];
+                }
+                $sale->utm_source = $utmParams['utm_source'] ?? null;
+                $sale->utm_medium = $utmParams['utm_medium'] ?? null;
+                $sale->utm_campaign = $utmParams['utm_campaign'] ?? null;
+                if (($utmParams['utm_source'] ?? null) === 'boost' && ($utmParams['utm_campaign'] ?? null)) {
+                    $sale->boost_campaign_id = UrlUtils::decodeId($utmParams['utm_campaign']);
+                }
+
                 if (! $sale->event_date) {
                     $sale->event_date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
                 }

@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Jobs\CreateBoostCampaign;
 use App\Models\BoostAd;
+use App\Models\BoostBillingRecord;
 use App\Models\BoostCampaign;
 use App\Models\Event;
+use App\Models\Role;
 use App\Services\BoostBillingService;
 use App\Services\MetaAdsService;
 use App\Utils\UrlUtils;
@@ -95,12 +97,23 @@ class BoostController extends Controller
             abort(404);
         }
 
-        // Check concurrent boost limit
+        // Require verified phone for boost (hosted mode only)
+        if (config('app.hosted') && ! auth()->user()->hasVerifiedPhone()) {
+            return redirect()->back()->with('error', __('messages.phone_required_for_boost'));
+        }
+
+        // Check concurrent boost limit (trust-based)
+        $completedCampaigns = BoostCampaign::where('role_id', $role->id)
+            ->where('status', 'completed')
+            ->count();
+
         $activeCampaigns = BoostCampaign::where('role_id', $role->id)
             ->whereIn('status', ['active', 'pending_payment'])
             ->count();
 
-        $maxConcurrent = config('services.meta.max_concurrent_boosts', 3);
+        $maxConcurrent = config('app.hosted')
+            ? Role::calculateBoostMaxConcurrentForCompletedCount($completedCampaigns)
+            : (int) config('services.meta.max_concurrent_boosts', 3);
 
         // Generate defaults
         $metaService = $this->getMetaService();
@@ -108,6 +121,10 @@ class BoostController extends Controller
 
         $isAdvanced = $request->boolean('advanced');
         $isFirstTime = ! BoostCampaign::where('user_id', auth()->id())->exists();
+
+        // Cap default budget to role's max
+        $maxBudget = $role->getBoostMaxBudget();
+        $defaults['budget'] = min($defaults['budget'], $maxBudget);
 
         $view = $isAdvanced ? 'boost.create-advanced' : 'boost.create';
 
@@ -128,10 +145,11 @@ class BoostController extends Controller
             'stripeKey' => config('services.stripe_platform.key'),
             'markupRate' => config('app.hosted') ? config('services.meta.markup_rate', 0.20) : 0,
             'minBudget' => config('services.meta.min_budget', 10),
-            'maxBudget' => config('services.meta.max_budget', 5000),
+            'maxBudget' => $maxBudget,
             'currencySymbol' => $currencySymbol,
             'isTesting' => config('app.is_testing'),
             'isHosted' => config('app.hosted'),
+            'boostCredit' => $role->boost_credit,
         ]);
     }
 
@@ -146,7 +164,7 @@ class BoostController extends Controller
             'event_id' => 'required|string',
             'role_id' => 'required|string',
             'budget' => 'required|numeric|min:'.config('services.meta.min_budget').'|max:'.config('services.meta.max_budget'),
-            'payment_intent_id' => (config('app.hosted') && ! config('app.is_testing')) ? 'required|string' : 'nullable|string',
+            'payment_intent_id' => 'nullable|string',
             'headline' => 'nullable|string|max:40',
             'primary_text' => 'nullable|string|max:125',
             'description' => 'nullable|string|max:30',
@@ -171,6 +189,25 @@ class BoostController extends Controller
         $role = $event->roles->firstWhere('id', $roleId);
         if (! $role) {
             abort(403);
+        }
+
+        // Check budget against trust-based limit
+        $boostMaxBudget = $role->getBoostMaxBudget();
+        if ((float) $request->budget > $boostMaxBudget) {
+            if ($isAjax) {
+                return response()->json(['error' => __('messages.boost_exceeds_limit', ['limit' => number_format($boostMaxBudget, 0)])], 422);
+            }
+
+            return back()->with('error', __('messages.boost_exceeds_limit', ['limit' => number_format($boostMaxBudget, 0)]));
+        }
+
+        // Require verified phone for boost (hosted mode only)
+        if (config('app.hosted') && ! auth()->user()->hasVerifiedPhone()) {
+            if ($isAjax) {
+                return response()->json(['error' => __('messages.phone_required_for_boost')], 403);
+            }
+
+            return redirect()->back()->with('error', __('messages.phone_required_for_boost'));
         }
 
         // Prevent duplicate campaigns from the same payment
@@ -211,7 +248,15 @@ class BoostController extends Controller
                 ->whereIn('status', ['active', 'pending_payment'])
                 ->count();
 
-            if ($activeCampaigns >= config('services.meta.max_concurrent_boosts', 3)) {
+            $completedCampaigns = BoostCampaign::where('role_id', $roleId)
+                ->where('status', 'completed')
+                ->count();
+
+            $maxConcurrent = config('app.hosted')
+                ? Role::calculateBoostMaxConcurrentForCompletedCount($completedCampaigns)
+                : (int) config('services.meta.max_concurrent_boosts', 3);
+
+            if ($activeCampaigns >= $maxConcurrent) {
                 DB::rollBack();
                 if ($isAjax) {
                     return response()->json(['error' => __('messages.boost_max_concurrent')], 422);
@@ -264,6 +309,12 @@ class BoostController extends Controller
 
         // Create ad
         $destinationUrl = $event->getGuestUrl(false, null, true);
+        $utmSeparator = str_contains($destinationUrl, '?') ? '&' : '?';
+        $destinationUrl .= $utmSeparator.http_build_query([
+            'utm_source' => 'boost',
+            'utm_medium' => 'paid_social',
+            'utm_campaign' => $campaign->hashedId(),
+        ]);
         try {
             BoostAd::create([
                 'boost_campaign_id' => $campaign->id,
@@ -294,15 +345,72 @@ class BoostController extends Controller
             return back()->with('error', __('messages.boost_payment_failed'));
         }
 
-        // Confirm Stripe payment
+        // Confirm payment (credit, testing/selfhosted, or Stripe)
         $billingService = new BoostBillingService;
-        if (! config('app.hosted') || config('app.is_testing')) {
+        $totalCost = $campaign->getTotalCost();
+        $role = Role::find($roleId);
+
+        if ($role && $role->boost_credit >= $totalCost) {
+            // Pay with boost credit (lock role to prevent race condition)
+            $creditPaid = DB::transaction(function () use ($roleId, $campaign, $totalCost) {
+                $role = Role::lockForUpdate()->find($roleId);
+                if (! $role || $role->boost_credit < $totalCost) {
+                    return false;
+                }
+                $role->decrement('boost_credit', $totalCost);
+                $campaign->update([
+                    'total_charged' => $totalCost,
+                    'billing_status' => 'charged',
+                    'stripe_payment_intent_id' => null,
+                ]);
+                BoostBillingRecord::create([
+                    'boost_campaign_id' => $campaign->id,
+                    'type' => 'charge',
+                    'amount' => $totalCost,
+                    'meta_spend' => $campaign->user_budget,
+                    'markup_amount' => $campaign->getMarkupAmount(),
+                    'status' => 'completed',
+                    'notes' => 'Paid with boost credit',
+                ]);
+
+                return true;
+            });
+            if ($creditPaid) {
+                $paymentConfirmed = true;
+            } elseif (! config('app.hosted') || config('app.is_testing')) {
+                $campaign->update([
+                    'total_charged' => config('app.hosted') ? $totalCost : 0,
+                    'billing_status' => 'charged',
+                ]);
+                $paymentConfirmed = true;
+            } else {
+                if (! $request->payment_intent_id) {
+                    $campaign->update(['status' => 'failed']);
+
+                    if ($isAjax) {
+                        return response()->json(['error' => __('messages.boost_payment_failed')], 422);
+                    }
+
+                    return back()->with('error', __('messages.boost_payment_failed'));
+                }
+                $paymentConfirmed = $billingService->confirmPayment($campaign, $request->payment_intent_id);
+            }
+        } elseif (! config('app.hosted') || config('app.is_testing')) {
             $campaign->update([
-                'total_charged' => config('app.hosted') ? $campaign->getTotalCost() : 0,
+                'total_charged' => config('app.hosted') ? $totalCost : 0,
                 'billing_status' => 'charged',
             ]);
             $paymentConfirmed = true;
         } else {
+            if (! $request->payment_intent_id) {
+                $campaign->update(['status' => 'failed']);
+
+                if ($isAjax) {
+                    return response()->json(['error' => __('messages.boost_payment_failed')], 422);
+                }
+
+                return back()->with('error', __('messages.boost_payment_failed'));
+            }
             $paymentConfirmed = $billingService->confirmPayment($campaign, $request->payment_intent_id);
         }
 
@@ -451,9 +559,27 @@ class BoostController extends Controller
         }
 
         // Attempt refund outside the transaction (billing methods handle their own locking)
-        if (config('app.hosted') && ! config('app.is_testing')) {
-            $campaign->refresh();
-            if (! in_array($campaign->billing_status, ['refunded', 'partially_refunded'])) {
+        $campaign->refresh();
+        if (! in_array($campaign->billing_status, ['refunded', 'partially_refunded'])) {
+            if (! $campaign->stripe_payment_intent_id && $campaign->billing_status === 'charged') {
+                // Credit-paid campaign - return credit to role
+                DB::transaction(function () use ($campaign) {
+                    $role = Role::lockForUpdate()->find($campaign->role_id);
+                    if (! $role) {
+                        return;
+                    }
+                    $refundAmount = $campaign->total_charged;
+                    $role->increment('boost_credit', $refundAmount);
+                    BoostBillingRecord::create([
+                        'boost_campaign_id' => $campaign->id,
+                        'type' => 'refund',
+                        'amount' => $refundAmount,
+                        'status' => 'completed',
+                        'notes' => 'Credit returned - campaign cancelled',
+                    ]);
+                    $campaign->update(['billing_status' => 'refunded']);
+                });
+            } elseif (config('app.hosted') && ! config('app.is_testing')) {
                 $billingService = new BoostBillingService;
 
                 if ($campaign->billing_status === 'pending') {
@@ -553,6 +679,28 @@ class BoostController extends Controller
         $markupRate = config('app.hosted') ? config('services.meta.markup_rate', 0.20) : 0;
         $totalAmount = round($budget * (1 + $markupRate), 2);
 
+        // Check if role has enough boost credit to cover the total
+        $event->loadMissing('roles');
+        $role = $request->role_id
+            ? $event->roles->firstWhere('id', UrlUtils::decodeId($request->role_id))
+            : $event->getViewableRole();
+
+        // Check budget against trust-based limit
+        if ($role) {
+            $boostMaxBudget = $role->getBoostMaxBudget();
+            if ($budget > $boostMaxBudget) {
+                return response()->json(['error' => __('messages.boost_exceeds_limit', ['limit' => number_format($boostMaxBudget, 0)])], 422);
+            }
+        }
+
+        if ($role && $role->boost_credit >= $totalAmount) {
+            return response()->json([
+                'use_credit' => true,
+                'credit_balance' => $role->boost_credit,
+                'total_amount' => $totalAmount,
+            ]);
+        }
+
         if (config('app.is_testing')) {
             $fakeId = 'test_pi_'.\Illuminate\Support\Str::random(24);
 
@@ -587,6 +735,7 @@ class BoostController extends Controller
             $paymentIntent = $stripe->paymentIntents->create([
                 'amount' => $amountInCents,
                 'currency' => strtolower(config('services.meta.default_currency', 'USD')),
+                'payment_method_types' => ['card'],
                 'metadata' => [
                     'type' => 'boost',
                     'event_id' => $eventId,

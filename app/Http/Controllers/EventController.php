@@ -197,7 +197,7 @@ class EventController extends Controller
         $schedule = $role->isTalent() ? $role : null;
         $curator = $role->isCurator() ? $role : null;
 
-        if (! $role->email_verified_at) {
+        if (! $role->isClaimed()) {
             return redirect()->back()->with('error', __('messages.email_not_verified'));
         }
 
@@ -383,7 +383,7 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! $role->email_verified_at) {
+        if (! $role->isClaimed()) {
             return redirect()->back()->with('error', __('messages.email_not_verified'));
         }
 
@@ -494,7 +494,7 @@ class EventController extends Controller
             }
         }
 
-        if (! $role->email_verified_at) {
+        if (! $role->isClaimed()) {
             return redirect()->back()->with('error', __('messages.email_not_verified'));
         }
 

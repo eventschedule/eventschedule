@@ -61,6 +61,7 @@ class Role extends Model implements MustVerifyEmail
         'geo_lat',
         'geo_lon',
         'show_email',
+        'show_phone',
         'require_approval',
         'import_config',
         'custom_domain',
@@ -89,6 +90,8 @@ class Role extends Model implements MustVerifyEmail
         'last_translated_at',
         'direct_registration',
         'first_day_of_week',
+        'boost_credit',
+        'boost_max_budget',
     ];
 
     /**
@@ -103,6 +106,8 @@ class Role extends Model implements MustVerifyEmail
         'event_custom_fields' => 'array',
         'last_translated_at' => 'datetime',
         'direct_registration' => 'boolean',
+        'boost_credit' => 'decimal:2',
+        'boost_max_budget' => 'decimal:2',
     ];
 
     /**
@@ -213,6 +218,12 @@ class Role extends Model implements MustVerifyEmail
             if ($model->isDirty('email') && config('app.hosted')) {
                 $model->email_verified_at = null;
                 $model->sendEmailVerificationNotification();
+            }
+
+            if ($model->isDirty('phone')) {
+                if (config('app.hosted') || ! $model->phone) {
+                    $model->phone_verified_at = null;
+                }
             }
 
             if ($model->isDirty(['name', 'short_description', 'description', 'address1', 'address2', 'city', 'state', 'request_terms'])) {
@@ -740,6 +751,7 @@ class Role extends Model implements MustVerifyEmail
         $data->name = $this->name;
         $data->email = $this->email;
         $data->phone = $this->phone;
+        $data->show_phone = $this->show_phone;
         $data->website = $this->website;
         $data->description = $this->description;
         $data->short_description = $this->short_description;
@@ -1495,6 +1507,52 @@ class Role extends Model implements MustVerifyEmail
             'from' => 'From CalDAV',
             'both' => 'Bidirectional Sync',
             default => 'No Sync'
+        };
+    }
+
+    /**
+     * Get the maximum budget allowed per boost campaign for this role.
+     * Selfhosted: returns global max_budget (no graduated restriction).
+     * Hosted: returns role-specific override or config default.
+     */
+    public function getBoostMaxBudget(): float
+    {
+        if (! config('app.hosted')) {
+            return (float) config('services.meta.max_budget', 1000);
+        }
+
+        if ($this->boost_max_budget !== null) {
+            return (float) $this->boost_max_budget;
+        }
+
+        return (float) config('services.meta.boost_default_limit', 10);
+    }
+
+    /**
+     * Calculate the budget limit tier for a given number of completed campaigns.
+     */
+    public static function calculateBoostLimitForCompletedCount(int $count): float
+    {
+        return match (true) {
+            $count >= 50 => 1000,
+            $count >= 20 => 500,
+            $count >= 10 => 250,
+            $count >= 5 => 100,
+            $count >= 3 => 50,
+            $count >= 1 => 25,
+            default => (float) config('services.meta.boost_default_limit', 10),
+        };
+    }
+
+    /**
+     * Calculate the max concurrent campaigns for a given number of completed campaigns.
+     */
+    public static function calculateBoostMaxConcurrentForCompletedCount(int $count): int
+    {
+        return match (true) {
+            $count >= 10 => 3,
+            $count >= 3 => 2,
+            default => 1,
         };
     }
 }
