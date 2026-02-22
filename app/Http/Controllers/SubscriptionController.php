@@ -43,6 +43,12 @@ class SubscriptionController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        if ($role->hasActiveSubscription()) {
+            return redirect()
+                ->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])
+                ->with('message', __('messages.subscription_already_active'));
+        }
+
         $priceId = $request->plan === 'yearly'
             ? config('services.stripe_platform.price_yearly')
             : config('services.stripe_platform.price_monthly');
@@ -121,8 +127,14 @@ class SubscriptionController extends Controller
 
         $subscription = $role->subscription('default');
 
-        if ($subscription) {
+        if (! $subscription) {
+            return redirect()->back()->with('error', __('messages.no_active_subscription'));
+        }
+
+        try {
             $subscription->cancel();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
         }
 
         return redirect()
@@ -143,8 +155,14 @@ class SubscriptionController extends Controller
 
         $subscription = $role->subscription('default');
 
-        if ($subscription && $subscription->onGracePeriod()) {
+        if (! $subscription || ! $subscription->onGracePeriod()) {
+            return redirect()->back()->with('error', __('messages.subscription_not_resumable'));
+        }
+
+        try {
             $subscription->resume();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
         }
 
         return redirect()
@@ -169,12 +187,18 @@ class SubscriptionController extends Controller
 
         $subscription = $role->subscription('default');
 
-        if ($subscription) {
+        if (! $subscription) {
+            return redirect()->back()->with('error', __('messages.no_active_subscription'));
+        }
+
+        try {
             $subscription->swap($priceId);
 
             // Update the role's plan term
             $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
             $role->save();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
         }
 
         return redirect()
