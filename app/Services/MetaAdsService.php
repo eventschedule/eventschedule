@@ -41,6 +41,8 @@ class MetaAdsService
      */
     public function createCampaign(BoostCampaign $campaign): array
     {
+        $metaCampaignId = null;
+
         try {
             // 1. Create Campaign
             $campaignResponse = $this->apiPost("act_{$this->adAccountId}/campaigns", [
@@ -107,6 +109,19 @@ class MetaAdsService
                 'ad_ids' => $adIds,
             ];
         } catch (\Exception $e) {
+            // Clean up the orphaned Meta campaign (cascades to adsets/ads)
+            if ($metaCampaignId) {
+                try {
+                    $this->apiDelete($metaCampaignId);
+                } catch (\Exception $cleanupError) {
+                    Log::warning('Meta Ads: Failed to clean up orphaned campaign', [
+                        'campaign_id' => $campaign->id,
+                        'meta_campaign_id' => $metaCampaignId,
+                        'error' => $cleanupError->getMessage(),
+                    ]);
+                }
+            }
+
             Log::error('Meta Ads: Failed to create campaign', [
                 'campaign_id' => $campaign->id,
                 'error' => $e->getMessage(),

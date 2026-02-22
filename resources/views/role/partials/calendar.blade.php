@@ -518,7 +518,7 @@
                 <div id="mobileEventsList" class="space-y-6">
                     <template v-for="(group, groupIndex) in eventsGroupedByDate" :key="'date-' + group.date">
                         {{-- Date Header --}}
-                        <div class="sticky top-0 z-10 {{ $stickyBleedClass }} bg-white {{ (isset($force_mobile) && $force_mobile) ? 'dark:bg-gray-800' : 'dark:bg-gray-900' }}"
+                        <div class="sticky top-0 z-10 {{ $stickyBleedClass }} bg-white/95 backdrop-blur-sm dark:bg-gray-900/95"
                             :class="isPastEvent(group.date) ? 'past-event hidden' : ''">
                             <div class="pb-5 pt-3 px-4 flex items-center gap-4">
                                 <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>

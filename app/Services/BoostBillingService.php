@@ -111,6 +111,8 @@ class BoostBillingService
                         'boost_campaign_id' => $campaign->id,
                         'reason' => 'full_refund',
                     ],
+                ], [
+                    'idempotency_key' => "boost_refund_full_{$campaign->id}",
                 ]);
 
                 $refundAmount = $campaign->total_charged ?? $campaign->getTotalCost();
@@ -215,6 +217,8 @@ class BoostBillingService
                         'reason' => 'unspent_budget',
                         'actual_spend' => $actualSpend,
                     ],
+                ], [
+                    'idempotency_key' => "boost_refund_unspent_{$campaign->id}",
                 ]);
 
                 BoostBillingRecord::create([

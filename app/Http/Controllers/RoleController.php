@@ -13,6 +13,7 @@ use App\Http\Requests\RoleVideosSaveRequest;
 use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsReferrersDaily;
+use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\RoleUser;
@@ -22,8 +23,10 @@ use App\Notifications\DeletedRoleNotification;
 use App\Repos\EventRepo;
 use App\Services\AnalyticsService;
 use App\Services\AuditService;
+use App\Services\BoostBillingService;
 use App\Services\DemoService;
 use App\Services\EmailService;
+use App\Services\MetaAdsService;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\UrlUtils;
@@ -179,6 +182,56 @@ class RoleController extends Controller
         AnalyticsAppearancesDaily::where('role_id', $role->id)->delete();
 
         AuditService::log(AuditService::SCHEDULE_DELETE, $user->id, 'Role', $role->id, null, null, $role->name);
+
+        // Cancel active boost campaigns before deletion (prevents orphaned Meta campaigns)
+        $activeCampaigns = BoostCampaign::where('role_id', $role->id)
+            ->whereIn('status', ['active', 'paused', 'pending_payment'])
+            ->get();
+
+        foreach ($activeCampaigns as $campaign) {
+            try {
+                $cancelled = \DB::transaction(function () use ($campaign) {
+                    $campaign = BoostCampaign::lockForUpdate()->find($campaign->id);
+                    if (! $campaign || ! $campaign->canBeCancelled()) {
+                        return false;
+                    }
+                    $campaign->update([
+                        'status' => 'cancelled',
+                        'meta_status' => $campaign->meta_campaign_id ? 'DELETED' : null,
+                    ]);
+
+                    return true;
+                });
+
+                if ($cancelled) {
+                    if ($campaign->meta_campaign_id) {
+                        (new MetaAdsService)->deleteCampaign($campaign);
+                    }
+
+                    if (config('app.hosted') && ! config('app.is_testing')) {
+                        $campaign->refresh();
+                        if (! in_array($campaign->billing_status, ['refunded', 'partially_refunded'])) {
+                            $billingService = new BoostBillingService;
+                            if ($campaign->billing_status === 'pending') {
+                                if ($campaign->stripe_payment_intent_id) {
+                                    $billingService->cancelPaymentIntent($campaign);
+                                }
+                            } else {
+                                $campaign->actual_spend && $campaign->actual_spend > 0
+                                    ? $billingService->refundUnspent($campaign)
+                                    : $billingService->refundFull($campaign);
+                            }
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Failed to cancel boost campaign during schedule deletion', [
+                    'campaign_id' => $campaign->id,
+                    'role_id' => $role->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
 
         $role->delete();
 
