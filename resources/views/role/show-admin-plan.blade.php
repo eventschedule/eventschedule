@@ -157,7 +157,7 @@
         @if ($isOwner)
         <div class="pt-8 space-y-4">
             {{-- Add Payment Method / Subscribe Button --}}
-            @if (config('cashier.key') && !$subscription && ($role->onGenericTrial() || $role->plan_type == 'free' || ($role->plan_type == 'pro' && !$role->isPro())))
+            @if (config('cashier.key') && !$role->hasActiveSubscription() && !$role->onGracePeriod() && ($role->onGenericTrial() || $role->plan_type == 'free' || ($role->plan_type == 'pro' && !$role->isPro())))
             <div>
                 <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain]) }}"
                     class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
@@ -182,7 +182,7 @@
             @endif
 
             {{-- Swap Plan (Monthly/Yearly) --}}
-            @if ($subscription && $subscription->active() && !$subscription->onTrial())
+            @if ($subscription && $subscription->active() && !$subscription->onTrial() && !$subscription->onGracePeriod())
             <div class="flex items-center gap-4">
                 <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.switch_plan') }}:</span>
                 @if ($role->currentPlanTerm() == 'monthly')
@@ -190,7 +190,7 @@
                     @csrf
                     <input type="hidden" name="plan" value="yearly">
                     <button type="submit" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 font-medium">
-                        {{ __('messages.switch_to_yearly') }} ($50/{{ __('messages.year') }})
+                        {{ __('messages.switch_to_yearly') }} (${{ config('services.stripe_platform.price_yearly_amount') }}/{{ __('messages.year') }})
                     </button>
                 </form>
                 @else
@@ -198,7 +198,7 @@
                     @csrf
                     <input type="hidden" name="plan" value="monthly">
                     <button type="submit" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 font-medium">
-                        {{ __('messages.switch_to_monthly') }} ($5/{{ __('messages.month') }})
+                        {{ __('messages.switch_to_monthly') }} (${{ config('services.stripe_platform.price_monthly_amount') }}/{{ __('messages.month') }})
                     </button>
                 </form>
                 @endif

@@ -141,6 +141,7 @@ class ApiScheduleController extends Controller
             $role->plan_expires = now()->addDays(config('app.trial_days'))->format('Y-m-d');
             $role->plan_type = 'pro';
             $role->plan_term = 'year';
+            $role->trial_ends_at = now()->addDays(config('app.trial_days'));
         }
 
         // Handle email verification

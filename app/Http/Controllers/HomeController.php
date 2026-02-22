@@ -66,7 +66,7 @@ class HomeController extends Controller
 
         // Calculate month boundaries in user's timezone, then convert to UTC for database query
         $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-        $endOfMonth = $startOfMonth->copy()->endOfMonth()->endOfDay();
+        $endOfMonth = $startOfMonth->copy()->addMonths(6)->endOfMonth()->endOfDay();
 
         // Convert to UTC for database query
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
@@ -117,7 +117,7 @@ class HomeController extends Controller
         $timezone = $user->timezone ?? 'UTC';
 
         $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-        $endOfMonth = $startOfMonth->copy()->endOfMonth()->endOfDay();
+        $endOfMonth = $startOfMonth->copy()->addMonths(6)->endOfMonth()->endOfDay();
 
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
         $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');

@@ -45,7 +45,7 @@
                             <span class="flex flex-col">
                                 <span class="block text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.monthly') }}</span>
                                 <span class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">{{ __('messages.billed_monthly') }}</span>
-                                <span class="mt-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">$5<span class="text-sm font-normal text-gray-500 dark:text-gray-400">/{{ __('messages.month') }}</span></span>
+                                <span class="mt-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">${{ config('services.stripe_platform.price_monthly_amount') }}<span class="text-sm font-normal text-gray-500 dark:text-gray-400">/{{ __('messages.month') }}</span></span>
                             </span>
                         </span>
                         <svg class="h-5 w-5 text-indigo-600 plan-check hidden" viewBox="0 0 20 20" fill="currentColor">
@@ -65,7 +65,7 @@
                                     </span>
                                 </span>
                                 <span class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">{{ __('messages.billed_yearly') }}</span>
-                                <span class="mt-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">$50<span class="text-sm font-normal text-gray-500 dark:text-gray-400">/{{ __('messages.year') }}</span></span>
+                                <span class="mt-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">${{ config('services.stripe_platform.price_yearly_amount') }}<span class="text-sm font-normal text-gray-500 dark:text-gray-400">/{{ __('messages.year') }}</span></span>
                             </span>
                         </span>
                         <svg class="h-5 w-5 text-indigo-600 plan-check hidden" viewBox="0 0 20 20" fill="currentColor">
