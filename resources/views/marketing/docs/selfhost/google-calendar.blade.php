@@ -141,13 +141,13 @@
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">User Features</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li><strong class="text-white">Connect Google Calendar:</strong> Users can connect their Google Calendar account from their profile page</li>
-                                <li><strong class="text-white">Sync All Events:</strong> Users can sync all their events to Google Calendar at once</li>
-                                <li><strong class="text-white">Individual Event Sync:</strong> Users can sync individual events from the event edit page</li>
-                                <li><strong class="text-white">Automatic Sync:</strong> Events are automatically synced when created, updated, or deleted (if user has Google Calendar connected)</li>
-                                <li><strong class="text-white">Bidirectional Sync:</strong> Events added in either Google Calendar or Event Schedule will appear in both places</li>
-                                <li><strong class="text-white">Calendar Selection:</strong> Choose which Google Calendar to sync with for each role/schedule</li>
-                                <li><strong class="text-white">Real-time Updates:</strong> Changes in Google Calendar are automatically synced to Event Schedule via webhooks</li>
+                                <li><strong class="text-gray-900 dark:text-white">Connect Google Calendar:</strong> Users can connect their Google Calendar account from their profile page</li>
+                                <li><strong class="text-gray-900 dark:text-white">Sync All Events:</strong> Users can sync all their events to Google Calendar at once</li>
+                                <li><strong class="text-gray-900 dark:text-white">Individual Event Sync:</strong> Users can sync individual events from the event edit page</li>
+                                <li><strong class="text-gray-900 dark:text-white">Automatic Sync:</strong> Events are automatically synced when created, updated, or deleted (if user has Google Calendar connected)</li>
+                                <li><strong class="text-gray-900 dark:text-white">Bidirectional Sync:</strong> Events added in either Google Calendar or Event Schedule will appear in both places</li>
+                                <li><strong class="text-gray-900 dark:text-white">Calendar Selection:</strong> Choose which Google Calendar to sync with for each role/schedule</li>
+                                <li><strong class="text-gray-900 dark:text-white">Real-time Updates:</strong> Changes in Google Calendar are automatically synced to Event Schedule via webhooks</li>
                             </ol>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Event Information Synced</h3>
@@ -244,8 +244,8 @@
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-5 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-3">5. Manual Sync Options</h4>
                                     <ul class="doc-list text-sm">
-                                        <li><strong class="text-white">Sync to Google Calendar:</strong> Push all events from Event Schedule to Google Calendar</li>
-                                        <li><strong class="text-white">Sync from Google Calendar:</strong> Pull all events from Google Calendar to Event Schedule</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Sync to Google Calendar:</strong> Push all events from Event Schedule to Google Calendar</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Sync from Google Calendar:</strong> Pull all events from Google Calendar to Event Schedule</li>
                                     </ul>
                                 </div>
                             </div>
