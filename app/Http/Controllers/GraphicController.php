@@ -34,16 +34,6 @@ class GraphicController extends Controller
         $graphicSettings = $role->graphic_settings;
         $hasRecurringEvents = $role->events()->whereNotNull('days_of_week')->exists();
 
-        // Get the count of available events for the event count selector
-        // Only count events that have their own flyer image (not relying on role image)
-        $maxEvents = Event::whereHas('roles', function ($query) use ($role) {
-            $query->where('role_id', $role->id)->where('is_accepted', true);
-        })
-            ->where('starts_at', '>=', now())
-            ->whereNotNull('flyer_image_url')
-            ->where('flyer_image_url', '!=', '')
-            ->count();
-
         $headerImagePreviewUrl = null;
         if (! empty($graphicSettings['header_image_url'])) {
             if (config('filesystems.default') == 'local') {
@@ -53,7 +43,7 @@ class GraphicController extends Controller
             }
         }
 
-        return view('graphic.show', compact('role', 'layout', 'isPro', 'isEnterprise', 'graphicSettings', 'hasRecurringEvents', 'maxEvents', 'headerImagePreviewUrl'));
+        return view('graphic.show', compact('role', 'layout', 'isPro', 'isEnterprise', 'graphicSettings', 'hasRecurringEvents', 'headerImagePreviewUrl'));
     }
 
     public function getSettings($subdomain)
