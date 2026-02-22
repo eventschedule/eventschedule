@@ -16,7 +16,7 @@
                     const button = document.getElementById(buttonId);
                     const originalText = button.innerHTML;
                     button.style.minWidth = button.offsetWidth + 'px';
-                    button.innerHTML = `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>{{ __("messages.copied") }}`;
+                    button.innerHTML = `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>${@json(__("messages.copied"))}`;
                     button.classList.add('bg-green-500', 'hover:bg-green-600');
                     button.classList.remove('bg-[#4E81FA]', 'hover:bg-[#3D6FE8]');
 
@@ -28,7 +28,7 @@
                     }, 2000);
                 }).catch(function(err) {
                     console.error('Could not copy text: ', err);
-                    alert('{{ __("messages.copy_failed") }}');
+                    alert(@json(__("messages.copy_failed")));
                 });
             }
 
@@ -78,7 +78,7 @@
                     const button = document.getElementById('copyImageBtn');
                     const originalText = button.innerHTML;
                     button.style.minWidth = button.offsetWidth + 'px';
-                    button.innerHTML = `<svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>{{ __("messages.copied") }}`;
+                    button.innerHTML = `<svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>${@json(__("messages.copied"))}`;
                     button.classList.add('bg-green-500', 'hover:bg-green-600');
                     button.classList.remove('bg-[#4E81FA]', 'hover:bg-[#3D6FE8]');
 
@@ -90,7 +90,7 @@
                     }, 2000);
                 }).catch(function(err) {
                     console.error('Could not copy image: ', err);
-                    alert('{{ __("messages.copy_failed") }}');
+                    alert(@json(__("messages.copy_failed")));
                 });
             }
 
@@ -112,7 +112,7 @@
                     navigator.share({ files: [file], text: text }).then(function() {
                         const button = document.getElementById('shareBtn');
                         const originalText = button.innerHTML;
-                        button.innerHTML = `<svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>{{ __("messages.shared") }}`;
+                        button.innerHTML = `<svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>${@json(__("messages.shared"))}`;
 
                         setTimeout(function() {
                             button.innerHTML = originalText;
@@ -120,7 +120,7 @@
                     }).catch(function(err) {
                         if (err.name === 'AbortError') return;
                         console.error('Could not share: ', err);
-                        alert('{{ __("messages.share_failed") }}');
+                        alert(@json(__("messages.share_failed")));
                     });
                 }, 'image/png');
             }
@@ -344,7 +344,7 @@
 
                         const errorTextDiv = document.getElementById('errorMessageText');
                         if (errorTextDiv) {
-                            errorTextDiv.textContent = error.message || '{{ __("messages.error_loading_graphic") }}';
+                            errorTextDiv.textContent = error.message || @json(__("messages.error_loading_graphic"));
                         }
                         errorDiv.classList.remove('hidden');
                     });
@@ -679,7 +679,7 @@
                         currentSettings = data.settings;
                         return data;
                     } else {
-                        throw new Error(data.message || '{{ __("messages.error") }}');
+                        throw new Error(data.message || @json(__("messages.error")));
                     }
                 });
             }
@@ -693,11 +693,11 @@
 
                 if (saveBtn) {
                     saveBtn.disabled = true;
-                    saveBtn.innerHTML = '{{ __("messages.saving") }}';
+                    saveBtn.innerHTML = @json(__("messages.saving"));
                 }
                 if (saveBtnMobile) {
                     saveBtnMobile.disabled = true;
-                    saveBtnMobile.innerHTML = '{{ __("messages.saving") }}';
+                    saveBtnMobile.innerHTML = @json(__("messages.saving"));
                 }
 
                 const settings = gatherSettings();
@@ -707,7 +707,7 @@
 
                 // Validate recipient emails is required when email scheduling is enabled
                 if (emailEnabled && emailEnabled.checked && recipientEmails && !recipientEmails.value.trim()) {
-                    showNotification('{{ __("messages.recipient_emails_required") }}', 'error');
+                    showNotification(@json(__("messages.recipient_emails_required")), 'error');
                     if (saveBtn) {
                         saveBtn.disabled = false;
                         saveBtn.innerHTML = originalText;
@@ -722,11 +722,11 @@
 
                 saveSettingsToServer(settings)
                 .then(() => {
-                    showNotification('{{ __("messages.settings_saved") }}', 'success');
+                    showNotification(@json(__("messages.settings_saved")), 'success');
                 })
                 .catch(error => {
                     console.error('Error saving settings:', error);
-                    showNotification(error.message || '{{ __("messages.error") }}', 'error');
+                    showNotification(error.message || @json(__("messages.error")), 'error');
                 })
                 .finally(() => {
                     if (saveBtn) {
@@ -749,17 +749,17 @@
 
                 if (testBtn) {
                     testBtn.disabled = true;
-                    testBtn.innerHTML = '{{ __("messages.sending") }}...';
+                    testBtn.innerHTML = @json(__("messages.sending")) + '...';
                 }
                 if (testBtnMobile) {
                     testBtnMobile.disabled = true;
-                    testBtnMobile.innerHTML = '{{ __("messages.sending") }}...';
+                    testBtnMobile.innerHTML = @json(__("messages.sending")) + '...';
                 }
 
                 const settings = gatherSettings();
 
                 if (!settings.recipient_emails.trim()) {
-                    showNotification('{{ __("messages.recipient_emails_required") }}', 'error');
+                    showNotification(@json(__("messages.recipient_emails_required")), 'error');
                     if (testBtn) {
                         testBtn.disabled = false;
                         testBtn.innerHTML = originalText;
@@ -788,14 +788,14 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        showNotification('{{ __("messages.test_email_sent") }}', 'success');
+                        showNotification(@json(__("messages.test_email_sent")), 'success');
                     } else {
-                        showNotification(data.message || '{{ __("messages.error") }}', 'error');
+                        showNotification(data.message || @json(__("messages.error")), 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error sending test email:', error);
-                    showNotification(error.message || '{{ __("messages.error") }}', 'error');
+                    showNotification(error.message || @json(__("messages.error")), 'error');
                 })
                 .finally(() => {
                     if (testBtn) {
@@ -871,7 +871,7 @@
                 ['header_image_preview', 'header_image_preview_mobile'].forEach(id => {
                     const container = document.getElementById(id);
                     if (container) {
-                        container.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400">{{ __("messages.uploading") }}...</div>';
+                        container.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400">' + @json(__("messages.uploading")) + '...</div>';
                         container.classList.remove('hidden');
                     }
                 });
@@ -902,11 +902,11 @@
                             }
                         });
                         currentSettings.header_image_url = data.filename;
-                        showNotification('{{ __("messages.saved") }}', 'success');
+                        showNotification(@json(__("messages.saved")), 'success');
                         // Reload the graphic preview
                         loadGraphic();
                     } else {
-                        showNotification(data.error || '{{ __("messages.error") }}', 'error');
+                        showNotification(data.error || @json(__("messages.error")), 'error');
                         ['header_image_preview', 'header_image_preview_mobile'].forEach(id => {
                             const container = document.getElementById(id);
                             if (container && !currentSettings.header_image_url) {
@@ -917,7 +917,7 @@
                 })
                 .catch(error => {
                     console.error('Error uploading header image:', error);
-                    showNotification('{{ __("messages.error") }}', 'error');
+                    showNotification(@json(__("messages.error")), 'error');
                     ['header_image_preview', 'header_image_preview_mobile'].forEach(id => {
                         const container = document.getElementById(id);
                         if (container && !currentSettings.header_image_url) {
@@ -928,7 +928,7 @@
             }
 
             function deleteGraphicHeaderImage() {
-                if (!confirm('{{ __("messages.are_you_sure") }}')) {
+                if (!confirm(@json(__("messages.are_you_sure")))) {
                     return;
                 }
 
@@ -956,16 +956,16 @@
                             if (input) input.value = '';
                         });
                         currentSettings.header_image_url = null;
-                        showNotification('{{ __("messages.deleted") }}', 'success');
+                        showNotification(@json(__("messages.deleted")), 'success');
                         // Reload the graphic preview
                         loadGraphic();
                     } else {
-                        showNotification(data.error || '{{ __("messages.error") }}', 'error');
+                        showNotification(data.error || @json(__("messages.error")), 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error deleting header image:', error);
-                    showNotification('{{ __("messages.error") }}', 'error');
+                    showNotification(@json(__("messages.error")), 'error');
                 });
             }
 

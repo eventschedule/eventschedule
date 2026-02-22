@@ -146,11 +146,26 @@ if (! function_exists('marketing_domain')) {
     }
 }
 
+if (! function_exists('_base_domain')) {
+    /**
+     * Extract the base domain from APP_URL by stripping known subdomain prefixes.
+     * e.g. "https://app.eventschedule.com" -> "eventschedule.com"
+     * e.g. "https://eventschedule.com" -> "eventschedule.com"
+     */
+    function _base_domain(): string
+    {
+        $host = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
+
+        // Strip known subdomain prefixes
+        return preg_replace('/^(app|www|blog|demo)\./', '', $host);
+    }
+}
+
 if (! function_exists('blog_url')) {
     /**
      * Generate a URL for blog pages
      * Returns /blog path for testing and selfhosted instances
-     * Returns blog.eventschedule.com for hosted production
+     * Returns blog.{domain} for hosted production
      */
     function blog_url(string $path = ''): string
     {
@@ -158,7 +173,7 @@ if (! function_exists('blog_url')) {
             return url('/blog'.$path);
         }
 
-        return 'https://blog.eventschedule.com'.$path;
+        return 'https://blog.'._base_domain().$path;
     }
 }
 
@@ -173,7 +188,23 @@ if (! function_exists('demo_url')) {
             return url('/demo');
         }
 
-        return 'https://demo.eventschedule.com';
+        return 'https://demo.'._base_domain();
+    }
+}
+
+if (! function_exists('app_url')) {
+    /**
+     * Generate a URL for app pages (login, sign up, etc.)
+     * Returns app.{domain} for hosted production
+     * Returns local URL for testing and selfhosted instances
+     */
+    function app_url(string $path = '/'): string
+    {
+        if (config('app.is_testing') || config('app.env') === 'local' || ! config('app.hosted')) {
+            return url($path);
+        }
+
+        return 'https://app.'._base_domain().$path;
     }
 }
 

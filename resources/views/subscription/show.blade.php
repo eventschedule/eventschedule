@@ -222,7 +222,7 @@
             event.preventDefault();
 
             submitButton.disabled = true;
-            buttonText.textContent = '{{ __('messages.processing') }}';
+            buttonText.textContent = @json(__('messages.processing'));
             buttonSpinner.classList.remove('hidden');
 
             const { setupIntent, error } = await stripe.confirmCardSetup(
@@ -241,7 +241,7 @@
                 const displayError = document.getElementById('card-errors');
                 displayError.textContent = error.message;
                 submitButton.disabled = false;
-                buttonText.textContent = '{{ __('messages.subscribe') }}';
+                buttonText.textContent = @json(__('messages.subscribe'));
                 buttonSpinner.classList.add('hidden');
             } else {
                 document.getElementById('payment-method').value = setupIntent.payment_method;

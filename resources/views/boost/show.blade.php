@@ -102,10 +102,12 @@
             <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
                 <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.campaign_details') }}</h3>
                 <div class="space-y-2 text-sm">
+                    @if (config('app.hosted'))
                     <div class="flex justify-between">
                         <span class="text-gray-500 dark:text-gray-400">{{ __('messages.total_charged') }}</span>
                         <span class="text-gray-900 dark:text-white">{{ $campaign->getCurrencySymbol() }}{{ number_format($campaign->total_charged ?? $campaign->getTotalCost(), 2) }}</span>
                     </div>
+                    @endif
                     @if ($campaign->scheduled_start)
                     <div class="flex justify-between">
                         <span class="text-gray-500 dark:text-gray-400">{{ __('messages.start_date') }}</span>
@@ -210,7 +212,7 @@
                 labels: labels,
                 datasets: [
                     {
-                        label: '{{ __("messages.impressions") }}',
+                        label: @json(__("messages.impressions")),
                         data: impressions,
                         borderColor: '#3b82f6',
                         backgroundColor: 'rgba(59,130,246,0.1)',
@@ -219,7 +221,7 @@
                         yAxisID: 'y',
                     },
                     {
-                        label: '{{ __("messages.clicks") }}',
+                        label: @json(__("messages.clicks")),
                         data: clicks,
                         borderColor: '#10b981',
                         backgroundColor: 'rgba(16,185,129,0.1)',

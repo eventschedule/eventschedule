@@ -33,7 +33,7 @@
         @endforeach
     </ul>
 
-    <a href="{{ route('sign_up') }}" class="block w-full text-center px-6 py-3 {{ $plan['highlighted'] ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white' }} font-medium rounded-xl transition-colors">
+    <a href="{{ app_url('/sign_up') }}" class="block w-full text-center px-6 py-3 {{ $plan['highlighted'] ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white' }} font-medium rounded-xl transition-colors">
         {{ $plan['cta'] }}
     </a>
 </div>

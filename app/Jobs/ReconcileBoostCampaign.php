@@ -63,13 +63,15 @@ class ReconcileBoostCampaign implements ShouldBeUnique, ShouldQueue
         }
 
         // Refund unspent budget (billing service handles its own transaction/locking)
-        $campaign->refresh();
-        if (! in_array($campaign->billing_status, ['refunded', 'partially_refunded'])) {
-            $billingService = new BoostBillingService;
-            if (! $billingService->refundUnspent($campaign)) {
-                Log::warning('Boost reconciliation refund failed', [
-                    'campaign_id' => $campaign->id,
-                ]);
+        if (config('app.hosted') && ! config('app.is_testing')) {
+            $campaign->refresh();
+            if (! in_array($campaign->billing_status, ['refunded', 'partially_refunded'])) {
+                $billingService = new BoostBillingService;
+                if (! $billingService->refundUnspent($campaign)) {
+                    Log::warning('Boost reconciliation refund failed', [
+                        'campaign_id' => $campaign->id,
+                    ]);
+                }
             }
         }
 

@@ -147,7 +147,7 @@
             <script {!! nonce_attr() !!}>
             document.getElementById('2fa-disable-btn').addEventListener('click', function(e) {
                 e.preventDefault();
-                var pw = prompt('{{ __("messages.two_factor_enter_password_to_disable") }}');
+                var pw = prompt(@json(__("messages.two_factor_enter_password_to_disable")));
                 if (pw !== null) {
                     document.getElementById('2fa_disable_password_value').value = pw;
                     this.closest('form').submit();

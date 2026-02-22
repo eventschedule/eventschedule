@@ -126,11 +126,12 @@ class BoostController extends Controller
             'maxConcurrent' => $maxConcurrent,
             'isFirstTime' => $isFirstTime,
             'stripeKey' => config('services.stripe_platform.key'),
-            'markupRate' => config('services.meta.markup_rate', 0.20),
+            'markupRate' => config('app.hosted') ? config('services.meta.markup_rate', 0.20) : 0,
             'minBudget' => config('services.meta.min_budget', 10),
             'maxBudget' => config('services.meta.max_budget', 5000),
             'currencySymbol' => $currencySymbol,
             'isTesting' => config('app.is_testing'),
+            'isHosted' => config('app.hosted'),
         ]);
     }
 
@@ -145,7 +146,7 @@ class BoostController extends Controller
             'event_id' => 'required|string',
             'role_id' => 'required|string',
             'budget' => 'required|numeric|min:'.config('services.meta.min_budget').'|max:'.config('services.meta.max_budget'),
-            'payment_intent_id' => config('app.is_testing') ? 'nullable|string' : 'required|string',
+            'payment_intent_id' => (config('app.hosted') && ! config('app.is_testing')) ? 'required|string' : 'nullable|string',
             'headline' => 'nullable|string|max:40',
             'primary_text' => 'nullable|string|max:125',
             'description' => 'nullable|string|max:30',
@@ -186,22 +187,24 @@ class BoostController extends Controller
         }
 
         // Prevent duplicate campaigns from the same payment
-        $existingCampaign = BoostCampaign::where('stripe_payment_intent_id', $request->payment_intent_id)->first();
-        if ($existingCampaign) {
-            if ($existingCampaign->user_id === auth()->id()) {
-                $url = route('boost.show', ['hash' => $existingCampaign->hashedId()]);
-                if ($isAjax) {
-                    return response()->json(['redirect' => $url]);
+        if ($request->payment_intent_id) {
+            $existingCampaign = BoostCampaign::where('stripe_payment_intent_id', $request->payment_intent_id)->first();
+            if ($existingCampaign) {
+                if ($existingCampaign->user_id === auth()->id()) {
+                    $url = route('boost.show', ['hash' => $existingCampaign->hashedId()]);
+                    if ($isAjax) {
+                        return response()->json(['redirect' => $url]);
+                    }
+
+                    return redirect($url)->with('success', __('messages.boost_created'));
                 }
 
-                return redirect($url)->with('success', __('messages.boost_created'));
-            }
+                if ($isAjax) {
+                    return response()->json(['error' => __('messages.boost_payment_failed')], 422);
+                }
 
-            if ($isAjax) {
-                return response()->json(['error' => __('messages.boost_payment_failed')], 422);
+                return back()->with('error', __('messages.boost_payment_failed'));
             }
-
-            return back()->with('error', __('messages.boost_payment_failed'));
         }
 
         // Generate defaults for fields not provided
@@ -210,7 +213,7 @@ class BoostController extends Controller
 
         $budget = (float) $request->budget;
         $budgetType = $request->budget_type ?? 'lifetime';
-        $markupRate = config('services.meta.markup_rate', 0.20);
+        $markupRate = config('app.hosted') ? config('services.meta.markup_rate', 0.20) : 0;
 
         // Create campaign record
         try {
@@ -231,7 +234,7 @@ class BoostController extends Controller
                 'placements' => $request->placements ? json_decode($request->placements, true) : null,
                 'user_budget' => $budget,
                 'markup_rate' => $markupRate,
-                'billing_status' => 'pending',
+                'billing_status' => config('app.hosted') ? 'pending' : 'charged',
                 'stripe_payment_intent_id' => $request->payment_intent_id ?? (config('app.is_testing') ? 'test_pi_'.\Illuminate\Support\Str::random(24) : null),
             ]);
         } catch (QueryException $e) {
@@ -273,7 +276,7 @@ class BoostController extends Controller
                 'error' => $e->getMessage(),
             ]);
             $campaign->update(['status' => 'failed']);
-            if (! config('app.is_testing')) {
+            if (config('app.hosted') && ! config('app.is_testing')) {
                 $billingService = new BoostBillingService;
                 $billingService->cancelPaymentIntent($campaign->fresh());
             }
@@ -286,9 +289,9 @@ class BoostController extends Controller
         }
 
         // Confirm Stripe payment
-        if (config('app.is_testing')) {
+        if (! config('app.hosted') || config('app.is_testing')) {
             $campaign->update([
-                'total_charged' => $campaign->getTotalCost(),
+                'total_charged' => config('app.hosted') ? $campaign->getTotalCost() : 0,
                 'billing_status' => 'charged',
             ]);
             $paymentConfirmed = true;
@@ -448,7 +451,7 @@ class BoostController extends Controller
         }
 
         // Attempt refund outside the transaction (billing methods handle their own locking)
-        if (! config('app.is_testing')) {
+        if (config('app.hosted') && ! config('app.is_testing')) {
             $campaign->refresh();
             if (! in_array($campaign->billing_status, ['refunded', 'partially_refunded'])) {
                 $billingService = new BoostBillingService;

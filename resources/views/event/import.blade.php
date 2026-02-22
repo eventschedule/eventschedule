@@ -80,7 +80,7 @@
                         @if (isset($isGuest) && $isGuest && ! auth()->check())
                         <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-md">
                             <p class="text-sm text-blue-800 dark:text-blue-200">
-                                {!! __('messages.create_account_link', ['link' => '<a href="' . route('sign_up') . '" class="font-medium underline hover:no-underline">' . __('messages.create_an_account') . '</a>']) !!}
+                                {!! __('messages.create_account_link', ['link' => '<a href="' . app_url('/sign_up') . '" class="font-medium underline hover:no-underline">' . __('messages.create_an_account') . '</a>']) !!}
                                 <span class="text-sm text-gray-400 dark:text-gray-500 mx-1">|</span> <a href="{{ marketing_url('/why-create-account') }}{{ request()->has('lang') ? '?lang=' . request()->get('lang') : '' }}" target="_blank" class="text-blue-600 dark:text-blue-300 underline hover:no-underline">{{ __('messages.why_create_account_learn_more') }} <svg class="inline-block w-3 h-3 ml-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg></a>
                             </p>
                         </div>
@@ -353,7 +353,7 @@
                                     v-model="preview.parsed[idx].event_date"
                                     v-bind:readonly="savedEvents[idx]"
                                     autocomplete="off"
-                                    :aria-label="'{{ __('messages.date') }}'" />
+                                    aria-label="{{ __('messages.date') }}" />
                                 <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                                     <div class="time-input-wrapper">
                                         <input type="text"
@@ -367,7 +367,7 @@
                                             @keydown="handleTimeKeydown($event, idx, 'start')"
                                             placeholder="{{ __('messages.start_time') }}"
                                             autocomplete="off"
-                                            :aria-label="'{{ __('messages.start_time') }}'" />
+                                            aria-label="{{ __('messages.start_time') }}" />
                                         <div :class="['time-dropdown-import', { 'open': activeTimeDropdown === idx + '-start' }]"
                                             :ref="'time_dropdown_' + idx + '_start'">
                                             <div v-for="time in timeOptions" :key="time"
@@ -392,7 +392,7 @@
                                             @keydown="handleTimeKeydown($event, idx, 'end')"
                                             placeholder="{{ __('messages.end_time') }}"
                                             autocomplete="off"
-                                            :aria-label="'{{ __('messages.end_time') }}'" />
+                                            aria-label="{{ __('messages.end_time') }}" />
                                         <div :class="['time-dropdown-import', { 'open': activeTimeDropdown === idx + '-end' }]"
                                             :ref="'time_dropdown_' + idx + '_end'">
                                             <div v-for="time in timeOptions" :key="time"
@@ -1854,7 +1854,7 @@
                     } else {
                         // Show success message for non-guest users
                         Toastify({
-                            text: '{{ __("messages.event_created") }}',
+                            text: @json(__("messages.event_created")),
                             duration: 3000,
                             position: 'center',
                             stopOnFocus: true,
@@ -1991,14 +1991,14 @@
 
             async uploadImage(file, idx) {
                 if (!file.type.startsWith('image/')) {
-                    this.errorMessage = '{{ __("messages.invalid_image_type") }}'
+                    this.errorMessage = @json(__("messages.invalid_image_type"))
                     return
                 }
 
                 // Check file size (2.5 MB = 2.5 * 1024 * 1024 bytes)
                 const maxSize = 2.5 * 1024 * 1024;
                 if (file.size > maxSize) {
-                    this.errorMessage = '{{ __("messages.image_size_warning") }}';
+                    this.errorMessage = @json(__("messages.image_size_warning"));
                     return;
                 }
 
@@ -2024,11 +2024,11 @@
                         // Update the social_image property for the specific event
                         this.preview.parsed[idx].social_image = data.filename;
                     } else {
-                        throw new Error(data.message || '{{ __("messages.error_uploading_image") }}');
+                        throw new Error(data.message || @json(__("messages.error_uploading_image")));
                     }
                 } catch (error) {
                     console.error('Error uploading image:', error);
-                    this.errorMessage = error.message || '{{ __("messages.error_uploading_image") }}';
+                    this.errorMessage = error.message || @json(__("messages.error_uploading_image"));
                 } finally {
                     this.isUploadingImage = null;
                 }
@@ -2057,7 +2057,7 @@
                     return;
                 }
 
-                if (confirm('{{ __("messages.confirm_remove_event") }}')) {
+                if (confirm(@json(__("messages.confirm_remove_event")))) {
                     // Destroy description editor for this event
                     if (this.descriptionEditors[idx]) {
                         this.descriptionEditors[idx].toTextArea();
@@ -2095,7 +2095,7 @@
                     
                     // Show success message
                     Toastify({
-                        text: '{{ __("messages.event_removed") }}',
+                        text: @json(__("messages.event_removed")),
                         duration: 3000,
                         position: 'center',
                         stopOnFocus: true,
@@ -2150,7 +2150,7 @@
                         } else {
                             // For non-guest users, show toast and redirect after delay
                             Toastify({
-                                text: '{{ __("messages.event_added_to_schedule") }}',
+                                text: @json(__("messages.event_added_to_schedule")),
                                 duration: 3000,
                                 position: 'center',
                                 stopOnFocus: true,
@@ -2160,13 +2160,13 @@
                             }).showToast();
                         }
                     } else {
-                        throw new Error(data.message || '{{ __("messages.error_adding_event") }}');
+                        throw new Error(data.message || @json(__("messages.error_adding_event")));
                     }
                 } catch (error) {
                     console.error('Error selecting event:', error);
-                    this.errorMessage = error.message || '{{ __("messages.error_adding_event") }}';
+                    this.errorMessage = error.message || @json(__("messages.error_adding_event"));
                     // Set error state for this event
-                    this.saveErrors[idx] = error.message || '{{ __("messages.error_adding_event") }}';
+                    this.saveErrors[idx] = error.message || @json(__("messages.error_adding_event"));
                 } finally {
                     // Clear saving state for this event
                     this.savingEvents[idx] = false;
@@ -2210,7 +2210,7 @@
                         };
                         
                         Toastify({
-                            text: '{{ __("messages.curate_event") }}',
+                            text: @json(__("messages.curate_event")),
                             duration: 3000,
                             position: 'center',
                             stopOnFocus: true,
@@ -2219,13 +2219,13 @@
                             }
                         }).showToast();
                     } else {
-                        throw new Error(data.message || '{{ __("messages.error_curating_event") }}');
+                        throw new Error(data.message || @json(__("messages.error_curating_event")));
                     }
                 } catch (error) {
                     console.error('Error curating event:', error);
-                    this.errorMessage = error.message || '{{ __("messages.error_curating_event") }}';
+                    this.errorMessage = error.message || @json(__("messages.error_curating_event"));
                     // Set error state for this event
-                    this.saveErrors[idx] = error.message || '{{ __("messages.error_curating_event") }}';
+                    this.saveErrors[idx] = error.message || @json(__("messages.error_curating_event"));
                 } finally {
                     // Clear saving state for this event
                     this.savingEvents[idx] = false;
@@ -2305,11 +2305,11 @@
                 // Show appropriate message after all events are processed
                 let message = '';
                 if (errorCount === 0 && skippedCount === 0) {
-                    message = '{{ __("messages.all_events_processed") }}';
+                    message = @json(__("messages.all_events_processed"));
                 } else {
-                    message = `{{ __("messages.events_processed_with_errors") }}`.replace('{success}', successCount).replace('{errors}', errorCount);
+                    message = @json(__("messages.events_processed_with_errors")).replace('{success}', successCount).replace('{errors}', errorCount);
                     if (skippedCount > 0) {
-                        message += ` ({{ __("messages.events_skipped") }}`.replace('{skipped}', skippedCount) + ')';
+                        message += ' (' + @json(__("messages.events_skipped")).replace('{skipped}', skippedCount) + ')';
                     }
                 }
 
@@ -2461,14 +2461,14 @@
 
             async uploadDetailsImage(file) {
                 if (!file.type.startsWith('image/')) {
-                    this.errorMessage = '{{ __("messages.invalid_image_type") }}';
+                    this.errorMessage = @json(__("messages.invalid_image_type"));
                     return;
                 }
 
                 // Check file size (2.5 MB = 2.5 * 1024 * 1024 bytes)
                 const maxSize = 2.5 * 1024 * 1024;
                 if (file.size > maxSize) {
-                    this.errorMessage = '{{ __("messages.image_size_warning") }}';
+                    this.errorMessage = @json(__("messages.image_size_warning"));
                     return;
                 }
 
@@ -2490,7 +2490,7 @@
                     // Don't auto-submit - user must click the submit button
                 } catch (error) {
                     console.error('Error uploading details image:', error);
-                    this.errorMessage = error.message || '{{ __("messages.error_uploading_image") }}';
+                    this.errorMessage = error.message || @json(__("messages.error_uploading_image"));
                     // Reset the image state on error
                     this.detailsImage = null;
                     this.detailsImageUrl = null;
@@ -2567,10 +2567,10 @@
                         // Don't auto-select videos - let user choose
                         performer.selectedVideos = []; // Reset to empty array
                     } else {
-                        performer.error = data.message || '{{ __("messages.no_videos_found") }}';
+                        performer.error = data.message || @json(__("messages.no_videos_found"));
                     }
                 } catch (error) {
-                    performer.error = '{{ __("messages.error_searching_videos") }}';
+                    performer.error = @json(__("messages.error_searching_videos"));
                     console.error('Error searching videos:', error);
                 } finally {
                     performer.searching = false;

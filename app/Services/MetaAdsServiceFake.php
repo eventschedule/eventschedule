@@ -13,11 +13,6 @@ class MetaAdsServiceFake extends MetaAdsService
         return true;
     }
 
-    public function useProxy(): bool
-    {
-        return false;
-    }
-
     public function createCampaign(BoostCampaign $campaign): array
     {
         $adIds = [];

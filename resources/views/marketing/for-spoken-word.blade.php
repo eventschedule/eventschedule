@@ -68,7 +68,7 @@
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="{{ route('sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-medium text-stone-900 bg-gradient-to-r from-amber-200 to-amber-100 rounded-xl hover:scale-105 transition-all shadow-lg shadow-amber-500/20">
+                <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-medium text-stone-900 bg-gradient-to-r from-amber-200 to-amber-100 rounded-xl hover:scale-105 transition-all shadow-lg shadow-amber-500/20">
                     Create your reading schedule
                     <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -649,7 +649,7 @@
                 Your words already found their audience once. Help them find you again.
             </p>
 
-            <a href="{{ route('sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-stone-900 bg-amber-200 rounded-xl hover:bg-amber-100 hover:scale-105 transition-all">
+            <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-stone-900 bg-amber-200 rounded-xl hover:bg-amber-100 hover:scale-105 transition-all">
                 Create your schedule
                 <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

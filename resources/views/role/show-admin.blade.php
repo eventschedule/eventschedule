@@ -442,12 +442,12 @@ function handleEventsGraphicClick() {
 function syncEventsFromDropdown() {
     // Check if user has Google token and role has calendar ID
     @if (!auth()->user()->google_token || !$role->google_calendar_id)
-        alert('{{ __("messages.google_calendar_not_connected") }}');
+        alert(@json(__("messages.google_calendar_not_connected")));
         return false;
     @endif
 
     // Show confirmation dialog
-    if (!confirm('{{ __("messages.are_you_sure") }}')) {
+    if (!confirm(@json(__("messages.are_you_sure")))) {
         return false;
     }
 
@@ -468,13 +468,13 @@ function syncEventsFromDropdown() {
     .then(response => response.json())
     .then(data => {
         if (data.error) {
-            alert('{{ __("messages.sync_error") }}: ' + data.error);
+            alert(@json(__("messages.sync_error")) + ': ' + data.error);
         } else {
             alert(data.message);
         }
     })
     .catch(error => {
-        alert('{{ __("messages.sync_error") }}: ' + error.message);
+        alert(@json(__("messages.sync_error")) + ': ' + error.message);
     })
     .finally(() => {
         event.target.innerHTML = originalText;

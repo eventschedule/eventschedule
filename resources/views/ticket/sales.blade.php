@@ -68,7 +68,7 @@ function updateResults(value) {
 }
 
 function handleAction(saleId, action) {
-    if (!confirm('{{ __("messages.are_you_sure") }}')) {
+    if (!confirm(@json(__("messages.are_you_sure")))) {
         return;
     }
 
@@ -91,13 +91,13 @@ function handleAction(saleId, action) {
 
             var message = '';
             if (action === 'mark_paid') {
-                message = '{{ __("messages.mark_paid_success") }}';
+                message = @json(__("messages.mark_paid_success"));
             } else if (action === 'refund') {
-                message = '{{ __("messages.refund_success") }}';
+                message = @json(__("messages.refund_success"));
             } else if (action === 'cancel') {
-                message = '{{ __("messages.cancel_success") }}';
+                message = @json(__("messages.cancel_success"));
             } else if (action === 'delete') {
-                message = '{{ __("messages.delete_success") }}';
+                message = @json(__("messages.delete_success"));
             }
 
             if (message) {
@@ -115,7 +115,7 @@ function handleAction(saleId, action) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('{{ __("messages.an_error_occurred") }}');
+        alert(@json(__("messages.an_error_occurred")));
     });
 }
 
@@ -142,7 +142,7 @@ function resendEmail(saleId) {
             }).showToast();
         } else {
             Toastify({
-                text: data.message || '{{ __("messages.email_sent_successfully") }}',
+                text: data.message || @json(__("messages.email_sent_successfully")),
                 duration: 3000,
                 position: 'center',
                 stopOnFocus: true,
@@ -155,7 +155,7 @@ function resendEmail(saleId) {
     .catch(error => {
         console.error('Error:', error);
         Toastify({
-            text: '{{ __("messages.failed_to_send_email") }}',
+            text: @json(__("messages.failed_to_send_email")),
             duration: 3000,
             position: 'center',
             stopOnFocus: true,

@@ -67,14 +67,14 @@
                 var emailInput = document.getElementById('email');
 
                 if (!email) {
-                    codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + '{{ __('messages.please_enter_email_address') }}' + '</span>';
+                    codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + @json(__('messages.please_enter_email_address')) + '</span>';
                     return;
                 }
 
                 // Validate email format
                 var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(email)) {
-                    codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + '{{ __('messages.invalid_email_address') }}' + '</span>';
+                    codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + @json(__('messages.invalid_email_address')) + '</span>';
                     return;
                 }
 
@@ -94,7 +94,7 @@
 
                 // Disable button and show loading
                 sendCodeBtn.disabled = true;
-                sendCodeBtn.innerHTML = '{{ __('messages.sending') }}...';
+                sendCodeBtn.innerHTML = @json(__('messages.sending')) + '...';
                 codeMessage.innerHTML = '';
 
                 fetch('{{ route('sign_up.send_code') }}', {
@@ -113,8 +113,8 @@
                 .then(response => {
                     // Always re-enable button and restore text
                     sendCodeBtn.disabled = false;
-                    sendCodeBtn.innerHTML = '{{ __('messages.send_code') }}';
-                    
+                    sendCodeBtn.innerHTML = @json(__('messages.send_code'));
+
                     return response.json().then(data => {
                         // Check if response is successful
                         if (response.ok && data.success) {
@@ -154,7 +154,7 @@
                             }
                         } else {
                             // Handle validation errors or other errors
-                            var errorMessage = data.message || '{{ __('messages.error_sending_code') }}';
+                            var errorMessage = data.message || @json(__('messages.error_sending_code'));
 
                             // Check for Laravel validation errors (422 status)
                             if (data.errors && data.errors.email) {
@@ -180,7 +180,7 @@
                         // If JSON parsing fails, show generic error
                         var errorSpan = document.createElement('span');
                         errorSpan.className = 'text-red-600 dark:text-red-400';
-                        errorSpan.textContent = '{{ __('messages.error_sending_code') }}';
+                        errorSpan.textContent = @json(__('messages.error_sending_code'));
                         codeMessage.innerHTML = '';
                         codeMessage.appendChild(errorSpan);
                         // Reset Turnstile widget on failure
@@ -190,9 +190,9 @@
                     });
                 })
                 .catch(error => {
-                    codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + '{{ __('messages.error_sending_code') }}' + '</span>';
+                    codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + @json(__('messages.error_sending_code')) + '</span>';
                     sendCodeBtn.disabled = false;
-                    sendCodeBtn.innerHTML = '{{ __('messages.send_code') }}';
+                    sendCodeBtn.innerHTML = @json(__('messages.send_code'));
                     // Reset Turnstile widget on failure
                     if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
                         turnstile.reset(turnstileWidgetId);

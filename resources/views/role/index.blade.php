@@ -42,9 +42,9 @@ const bulkActionBtn = document.getElementById('bulk-action-btn');
 const bulkSubdomainsInput = document.getElementById('bulk-subdomains');
 const bulkActionForm = document.getElementById('bulk-action-form');
 
-const unfollowLabel = '{{ __('messages.unfollow') }}';
-const deleteLabel = '{{ __('messages.delete') }}';
-const confirmMessage = '{{ __('messages.are_you_sure') }}';
+const unfollowLabel = @json(__('messages.unfollow'));
+const deleteLabel = @json(__('messages.delete'));
+const confirmMessage = @json(__('messages.are_you_sure'));
 
 // Show clear button if filter has initial value
 if (filterInput.value) {

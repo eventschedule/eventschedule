@@ -136,13 +136,16 @@ class CreateBoostCampaign implements ShouldBeUnique, ShouldQueue
         ]);
 
         // Issue full refund
-        $billingService = new BoostBillingService;
-        $refunded = $billingService->refundFull($campaign);
+        $refunded = false;
+        if (config('app.hosted') && ! config('app.is_testing')) {
+            $billingService = new BoostBillingService;
+            $refunded = $billingService->refundFull($campaign);
 
-        if (! $refunded) {
-            Log::error('Boost campaign failed but refund also failed', [
-                'campaign_id' => $campaign->id,
-            ]);
+            if (! $refunded) {
+                Log::error('Boost campaign failed but refund also failed', [
+                    'campaign_id' => $campaign->id,
+                ]);
+            }
         }
 
         // Send rejection email

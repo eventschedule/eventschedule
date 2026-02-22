@@ -76,7 +76,6 @@ return [
         'access_token' => env('META_ACCESS_TOKEN'),
         'ad_account_id' => env('META_AD_ACCOUNT_ID'),
         'pixel_id' => env('META_PIXEL_ID'),
-        'proxy_url' => env('META_PROXY_URL'),
         'markup_rate' => env('META_MARKUP_RATE', 0.20),
         'min_budget' => env('META_MIN_BUDGET', 10.00),
         'max_budget' => env('META_MAX_BUDGET', 5000.00),
@@ -84,7 +83,6 @@ return [
         'api_version' => env('META_API_VERSION', 'v21.0'),
         'webhook_verify_token' => env('META_WEBHOOK_VERIFY_TOKEN'),
         'max_concurrent_boosts' => env('META_MAX_CONCURRENT_BOOSTS', 3),
-        'proxy_api_key' => env('META_PROXY_API_KEY', ''),
         'page_id' => env('META_PAGE_ID'),
     ],
 

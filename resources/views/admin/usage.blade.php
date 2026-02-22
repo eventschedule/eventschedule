@@ -293,7 +293,7 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            button.textContent = '{{ __("messages.done") }}';
+                            button.textContent = @json(__("messages.done"));
                             button.classList.remove('text-[#4E81FA]');
                             button.classList.add('text-green-600', 'dark:text-green-400');
                             // Optionally remove the row after a short delay

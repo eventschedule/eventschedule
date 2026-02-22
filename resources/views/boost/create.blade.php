@@ -88,6 +88,7 @@
                         <span>{{ __('messages.ad_budget') }}</span>
                         <span id="cost-budget">{{ $currencySymbol }}{{ number_format($defaults['budget'], 2) }}</span>
                     </div>
+                    @if ($isHosted)
                     <div class="flex justify-between text-gray-600 dark:text-gray-300 mt-1">
                         <span>{{ __('messages.service_fee') }} ({{ intval($markupRate * 100) }}%)</span>
                         <span id="cost-fee">{{ $currencySymbol }}{{ number_format($defaults['budget'] * $markupRate, 2) }}</span>
@@ -96,6 +97,7 @@
                         <span>{{ __('messages.total') }}</span>
                         <span id="cost-total">{{ $currencySymbol }}{{ number_format($defaults['budget'] * (1 + $markupRate), 2) }}</span>
                     </div>
+                    @endif
                 </div>
             </div>
 
@@ -111,10 +113,12 @@
             </div>
 
             {{-- Payment --}}
-            @if (!empty($isTesting))
+            @if (!empty($isTesting) || empty($isHosted))
             <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
                 <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.payment') }}</h3>
+                @if (!empty($isTesting))
                 <p class="text-sm text-yellow-600 dark:text-yellow-400">Testing mode: payment will be skipped.</p>
+                @endif
                 <div id="payment-errors" class="text-sm text-red-600 dark:text-red-400 hidden"></div>
             </div>
             @else
@@ -133,7 +137,7 @@
                 </a>
                 <button type="submit" id="submit-btn"
                     class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                    <span id="submit-text">{{ __('messages.boost_for') }} {{ $currencySymbol }}<span id="submit-amount">{{ number_format($defaults['budget'] * (1 + $markupRate), 2) }}</span></span>
+                    <span id="submit-text">{{ __('messages.boost_for') }} {{ $currencySymbol }}<span id="submit-amount">{{ $isHosted ? number_format($defaults['budget'] * (1 + $markupRate), 2) : number_format($defaults['budget'], 2) }}</span></span>
                     <span id="submit-spinner" class="hidden ml-2">
                         <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
@@ -168,17 +172,21 @@
             budgetDisplay.textContent = currencySymbol + budget.toFixed(0);
             budgetInput.value = budget;
             costBudget.textContent = currencySymbol + budget.toFixed(2);
+            @if ($isHosted)
             costFee.textContent = currencySymbol + fee.toFixed(2);
             costTotal.textContent = currencySymbol + total.toFixed(2);
             submitAmount.textContent = total.toFixed(2);
+            @else
+            submitAmount.textContent = budget.toFixed(2);
+            @endif
         }
 
         slider.addEventListener('input', updateCosts);
     </script>
 
-    @if (!empty($isTesting))
+    @if (!empty($isTesting) || empty($isHosted))
     <script {!! nonce_attr() !!}>
-        // Testing mode: submit directly without Stripe
+        // Direct submission without Stripe (selfhosted or testing mode)
         document.getElementById('boost-form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -211,7 +219,7 @@
                     window.location.href = '{{ route("boost.index") }}';
                 }
             } catch (err) {
-                paymentErrors.textContent = '{{ __("messages.boost_store_error") }}';
+                paymentErrors.textContent = @json(__("messages.boost_store_error"));
                 paymentErrors.classList.remove('hidden');
                 submitBtn.disabled = false;
                 submitSpinner.classList.add('hidden');
@@ -276,7 +284,7 @@
                 try {
                     await initPayment();
                 } catch (err) {
-                    document.getElementById('payment-errors').textContent = '{{ __("messages.payment_error") }}';
+                    document.getElementById('payment-errors').textContent = @json(__("messages.payment_error"));
                     document.getElementById('payment-errors').classList.remove('hidden');
                 }
                 pendingPayment = false;
@@ -302,7 +310,7 @@
                 try {
                     await initPayment();
                 } catch (err) {
-                    paymentErrors.textContent = '{{ __("messages.payment_error") }}';
+                    paymentErrors.textContent = @json(__("messages.payment_error"));
                     paymentErrors.classList.remove('hidden');
                     submitBtn.disabled = false;
                     submitSpinner.classList.add('hidden');
@@ -356,7 +364,7 @@
                         window.location.href = '{{ route("boost.index") }}';
                     }
                 } catch (err) {
-                    paymentErrors.textContent = '{{ __("messages.boost_store_error") }}' + ' (ref: ' + paymentIntent.id + ')';
+                    paymentErrors.textContent = @json(__("messages.boost_store_error")) + ' (ref: ' + paymentIntent.id + ')';
                     paymentErrors.classList.remove('hidden');
                     submitBtn.disabled = false;
                     submitSpinner.classList.add('hidden');
@@ -366,7 +374,7 @@
 
         // Init on load
         initPayment().catch(function() {
-            document.getElementById('payment-errors').textContent = '{{ __("messages.payment_error") }}';
+            document.getElementById('payment-errors').textContent = @json(__("messages.payment_error"));
             document.getElementById('payment-errors').classList.remove('hidden');
         });
     </script>
