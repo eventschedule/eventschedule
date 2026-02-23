@@ -402,7 +402,7 @@ class RoleController extends Controller
 
             if ($event) {
                 // Block direct URL access to private events for non-members
-                if ($event->is_private && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
+                if ($event->is_private && ! $event->isPasswordProtected() && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
                     $event = null;
                 }
             }
@@ -506,6 +506,7 @@ class RoleController extends Controller
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
 
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+        $unlockedEventIds = ! $isMemberOrAdmin ? $this->getUnlockedEventIds() : [];
 
         if ($event && ! request()->graphic) {
             // For event detail view (non-graphic), only check if calendar has events
@@ -522,7 +523,12 @@ class RoleController extends Controller
                             ->where('is_accepted', true);
                     });
                 if (! $isMemberOrAdmin) {
-                    $query->where('is_private', false);
+                    $query->where(function ($q) use ($unlockedEventIds) {
+                        $q->where('is_private', false);
+                        if ($unlockedEventIds) {
+                            $q->orWhereIn('id', $unlockedEventIds);
+                        }
+                    });
                 }
                 $hasCalendarEvents = $query->exists();
             } else {
@@ -532,7 +538,12 @@ class RoleController extends Controller
                 })
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true));
                 if (! $isMemberOrAdmin) {
-                    $query->where('is_private', false);
+                    $query->where(function ($q) use ($unlockedEventIds) {
+                        $q->where('is_private', false);
+                        if ($unlockedEventIds) {
+                            $q->orWhereIn('id', $unlockedEventIds);
+                        }
+                    });
                 }
                 $hasCalendarEvents = $query->exists();
             }
@@ -600,9 +611,9 @@ class RoleController extends Controller
         }
 
         // Filter private events from calendar listings for non-members
-        if (! $isMemberOrAdmin) {
-            $events = $events->filter(fn ($e) => ! $e->is_private);
-            $pastEvents = $pastEvents->filter(fn ($e) => ! $e->is_private);
+        if (! $isMemberOrAdmin && $events->first() instanceof Event) {
+            $events = $events->filter(fn ($e) => ! $e->is_private || in_array($e->id, $unlockedEventIds));
+            $pastEvents = $pastEvents->filter(fn ($e) => ! $e->is_private || in_array($e->id, $unlockedEventIds));
         }
 
         // Track view for analytics (non-member visits only, skip embeds)
@@ -753,6 +764,7 @@ class RoleController extends Controller
 
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+        $unlockedEventIds = ! $isMemberOrAdmin ? $this->getUnlockedEventIds() : [];
 
         if ($role->isCurator()) {
             $pastEvents = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
@@ -764,7 +776,14 @@ class RoleController extends Controller
                         ->where('role_id', $role->id)
                         ->where('is_accepted', true);
                 })
-                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_private', false))
+                ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                    $q->where(function ($q) use ($unlockedEventIds) {
+                        $q->where('is_private', false);
+                        if ($unlockedEventIds) {
+                            $q->orWhereIn('id', $unlockedEventIds);
+                        }
+                    });
+                })
                 ->orderByDesc('starts_at')
                 ->limit(51)
                 ->get();
@@ -773,7 +792,14 @@ class RoleController extends Controller
                 ->where('starts_at', '<', $beforeDate)
                 ->whereNull('days_of_week')
                 ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
-                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_private', false))
+                ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                    $q->where(function ($q) use ($unlockedEventIds) {
+                        $q->where('is_private', false);
+                        if ($unlockedEventIds) {
+                            $q->orWhereIn('id', $unlockedEventIds);
+                        }
+                    });
+                })
                 ->orderByDesc('starts_at')
                 ->limit(51)
                 ->get();
@@ -883,6 +909,7 @@ class RoleController extends Controller
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
 
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+        $unlockedEventIds = ! $isMemberOrAdmin ? $this->getUnlockedEventIds() : [];
 
         if ($role->isCurator()) {
             $events = Event::with('roles', 'parts', 'tickets', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
@@ -896,7 +923,14 @@ class RoleController extends Controller
                         ->where('role_id', $role->id)
                         ->where('is_accepted', true);
                 })
-                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_private', false))
+                ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                    $q->where(function ($q) use ($unlockedEventIds) {
+                        $q->where('is_private', false);
+                        if ($unlockedEventIds) {
+                            $q->orWhereIn('id', $unlockedEventIds);
+                        }
+                    });
+                })
                 ->orderBy('starts_at')
                 ->get();
         } else {
@@ -911,7 +945,14 @@ class RoleController extends Controller
                             ->where('is_accepted', true);
                     });
                 })
-                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_private', false))
+                ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                    $q->where(function ($q) use ($unlockedEventIds) {
+                        $q->where('is_private', false);
+                        if ($unlockedEventIds) {
+                            $q->orWhereIn('id', $unlockedEventIds);
+                        }
+                    });
+                })
                 ->orderBy('starts_at')
                 ->get();
         }
@@ -926,7 +967,14 @@ class RoleController extends Controller
                         ->where('role_id', $role->id)
                         ->where('is_accepted', true);
                 })
-                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_private', false))
+                ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                    $q->where(function ($q) use ($unlockedEventIds) {
+                        $q->where('is_private', false);
+                        if ($unlockedEventIds) {
+                            $q->orWhereIn('id', $unlockedEventIds);
+                        }
+                    });
+                })
                 ->orderByDesc('starts_at')
                 ->limit(51)
                 ->get();
@@ -935,7 +983,14 @@ class RoleController extends Controller
                 ->where('starts_at', '<', Carbon::now('UTC'))
                 ->whereNull('days_of_week')
                 ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
-                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_private', false))
+                ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                    $q->where(function ($q) use ($unlockedEventIds) {
+                        $q->where('is_private', false);
+                        if ($unlockedEventIds) {
+                            $q->orWhereIn('id', $unlockedEventIds);
+                        }
+                    });
+                })
                 ->orderByDesc('starts_at')
                 ->limit(51)
                 ->get();
@@ -2611,7 +2666,8 @@ class RoleController extends Controller
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
         if (! $isMemberOrAdmin) {
-            $events = $events->filter(fn ($e) => ! $e->is_private);
+            $unlockedEventIds = $this->getUnlockedEventIds();
+            $events = $events->filter(fn ($e) => ! $e->is_private || in_array($e->id, $unlockedEventIds));
         }
 
         // Format events for frontend
@@ -3234,5 +3290,14 @@ class RoleController extends Controller
         $role->save();
 
         return response()->json(['success' => true, 'message' => __('messages.phone_verified')]);
+    }
+
+    private function getUnlockedEventIds(): array
+    {
+        return collect(session()->all())
+            ->filter(fn ($value, $key) => str_starts_with($key, 'event_password_') && $value === true)
+            ->keys()
+            ->map(fn ($key) => (int) str_replace('event_password_', '', $key))
+            ->toArray();
     }
 }

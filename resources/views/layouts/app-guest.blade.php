@@ -53,7 +53,7 @@
             <meta name="twitter:site" content="@ScheduleEvent">
         @elseif ($event && $event->exists)
             @if ($role->language_code != 'en')
-                <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}?{{ 'lang=' . (request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code)) }}">
+                <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}?{{ 'lang=' . (is_valid_language_code(request()->lang) ? request()->lang : (session()->has('translate') ? 'en' : $role->language_code)) }}">
             @else
                 <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}">
             @endif
@@ -78,7 +78,7 @@
             <meta name="twitter:site" content="@ScheduleEvent">
         @elseif ($role->exists)
             @if ($role->language_code != 'en')
-                <link rel="canonical" href="{{ $role->getGuestUrl() }}?{{ 'lang=' . (request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code)) }}">
+                <link rel="canonical" href="{{ $role->getGuestUrl() }}?{{ 'lang=' . (is_valid_language_code(request()->lang) ? request()->lang : (session()->has('translate') ? 'en' : $role->language_code)) }}">
             @else
                 <link rel="canonical" href="{{ $role->getGuestUrl() }}">
             @endif

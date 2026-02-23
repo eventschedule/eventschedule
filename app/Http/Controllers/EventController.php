@@ -826,15 +826,20 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
 
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
         if ($event->is_private) {
             $user = auth()->user();
             $isEventMember = $event->roles->contains(fn ($r) => $user && $user->isMember($r->subdomain));
             if (! $isEventMember && ! $user?->isAdmin()) {
                 abort(404);
             }
-        }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
+            // Don't allow curating private events to other schedules
+            if (! $event->roles->contains('id', $role->id)) {
+                abort(404);
+            }
+        }
 
         // Check if the user is authorized to curate events for this role
         if ((! auth()->user() || ! auth()->user()->isMember($subdomain)) && ! $role->acceptEventRequests()) {
@@ -929,6 +934,15 @@ class EventController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        // Store guest language for auth flow
+        if (session()->has('translate')) {
+            session()->put('guest_language', 'en');
+        } elseif ($request->lang && is_valid_language_code($request->lang)) {
+            session()->put('guest_language', $request->lang);
+        } elseif (is_valid_language_code($role->language_code)) {
+            session()->put('guest_language', $role->language_code);
+        }
 
         if (! auth()->check() && $role->require_account) {
             session(['pending_request' => $subdomain]);
@@ -1188,7 +1202,9 @@ class EventController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'timezone' => 'America/New_York', // Default timezone
-            'language_code' => 'en', // Default language
+            'language_code' => (session()->has('guest_language') && is_valid_language_code(session('guest_language')))
+                ? session('guest_language')
+                : 'en',
             'utm_source' => $utmParams['utm_source'] ?? null,
             'utm_medium' => $utmParams['utm_medium'] ?? null,
             'utm_campaign' => $utmParams['utm_campaign'] ?? null,
@@ -1198,7 +1214,7 @@ class EventController extends Controller
             'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page'),
         ]);
 
-        session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page']);
+        session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language']);
 
         // Mark email as verified for guest users (they're already using the system)
         $user->email_verified_at = now();

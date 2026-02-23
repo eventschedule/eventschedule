@@ -34,7 +34,7 @@ class RegisteredUserController extends Controller
             return redirect()->route('login');
         }
 
-        if (request()->has('lang')) {
+        if (request()->has('lang') && is_valid_language_code(request('lang'))) {
             \App::setLocale(request('lang'));
         }
 
@@ -315,7 +315,7 @@ class RegisteredUserController extends Controller
             ]);
         }
 
-        session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page']);
+        session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language']);
 
         // In selfhost mode, make the first user an admin
         if (!config('app.hosted') && User::count() === 1) {

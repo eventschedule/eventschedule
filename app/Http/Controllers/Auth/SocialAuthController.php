@@ -92,6 +92,8 @@ class SocialAuthController extends Controller
 
         if ($googleLocale && is_valid_language_code(substr($googleLocale, 0, 2))) {
             $languageCode = substr($googleLocale, 0, 2);
+        } elseif (session()->has('guest_language') && is_valid_language_code(session('guest_language'))) {
+            $languageCode = session('guest_language');
         } elseif ($browserLanguage && is_valid_language_code($browserLanguage)) {
             $languageCode = $browserLanguage;
         }
@@ -119,7 +121,7 @@ class SocialAuthController extends Controller
         $user->profile_image_url = $googleUser->getAvatar();
         $user->save();
 
-        session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page']);
+        session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language']);
 
         Auth::login($user, true);
         AuditService::log(AuditService::AUTH_GOOGLE_LOGIN, $user->id, 'User', $user->id, null, null, 'new_account');

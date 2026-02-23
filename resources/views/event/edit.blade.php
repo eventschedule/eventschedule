@@ -2343,12 +2343,12 @@
                                             @if($role->language_code !== 'en')
                                             <div class="mt-2">
                                                 <x-input-label :value="__('messages.english_name')" class="text-xs" />
-                                                <x-text-input type="text" v-model="field.name_en" class="mt-1 block w-full text-sm" :placeholder="__('messages.auto_translated_placeholder')" />
+                                                <x-text-input type="text" v-model="field.name_en" class="mt-1 block w-full text-sm" placeholder="{{ __('messages.auto_translated_placeholder') }}" />
                                             </div>
                                             @endif
                                             <div class="mt-2" v-if="field.type === 'dropdown'">
                                                 <x-input-label :value="__('messages.field_options')" class="text-xs" />
-                                                <x-text-input type="text" v-model="field.options" class="mt-1 block w-full text-sm" :placeholder="__('messages.options_placeholder')" />
+                                                <x-text-input type="text" v-model="field.options" class="mt-1 block w-full text-sm" placeholder="{{ __('messages.options_placeholder') }}" />
                                             </div>
                                             <div class="mt-2 flex items-center justify-between">
                                                 <div class="flex items-center">
@@ -2430,12 +2430,12 @@
                                                 @if($role->language_code !== 'en')
                                                 <div class="mt-2">
                                                     <x-input-label :value="__('messages.english_name')" class="text-xs" />
-                                                    <x-text-input type="text" v-model="field.name_en" class="mt-1 block w-full text-sm" :placeholder="__('messages.auto_translated_placeholder')" />
+                                                    <x-text-input type="text" v-model="field.name_en" class="mt-1 block w-full text-sm" placeholder="{{ __('messages.auto_translated_placeholder') }}" />
                                                 </div>
                                                 @endif
                                                 <div class="mt-2" v-if="field.type === 'dropdown'">
                                                     <x-input-label :value="__('messages.field_options')" class="text-xs" />
-                                                    <x-text-input type="text" v-model="field.options" class="mt-1 block w-full text-sm" :placeholder="__('messages.options_placeholder')" />
+                                                    <x-text-input type="text" v-model="field.options" class="mt-1 block w-full text-sm" placeholder="{{ __('messages.options_placeholder') }}" />
                                                 </div>
                                                 <div class="mt-2 flex items-center justify-between">
                                                     <div class="flex items-center">
@@ -2581,11 +2581,11 @@
                                 <p class="mt-1 ms-7 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.private_event_help') }}</p>
                             </div>
 
-                            <div class="mb-6">
+                            <div class="mb-6" v-show="event.is_private">
                                 <x-input-label for="event_password" :value="__('messages.event_password')" />
                                 <x-text-input id="event_password" name="event_password" type="text" class="mt-1 block w-full"
                                     v-model="event.event_password" maxlength="255"
-                                    {{ ! $role->isPro() ? 'disabled' : '' }} />
+                                    :disabled="! $role->isPro()" />
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.event_password_help') }}</p>
                                 @if (! $role->isPro() && config('app.hosted'))
                                 <div class="text-xs pt-1">

@@ -16,6 +16,35 @@
   <div class="pt-8"></div>
   @endif
 
+  <script {!! nonce_attr() !!}>
+  (function() {
+      var serverDefault = '{{ $role->event_layout ?? "calendar" }}';
+      try {
+          var saved = localStorage.getItem('es_view_{{ $role->subdomain }}');
+          if (saved && saved !== serverDefault && (saved === 'calendar' || saved === 'list')) {
+              document.documentElement.dataset.esView = saved;
+          }
+      } catch (e) {}
+  })();
+  </script>
+  <style {!! nonce_attr() !!}>
+  html[data-es-view] [data-view-width] { transition: none !important; }
+  html[data-es-view="calendar"] [data-view-width] { max-width: 200rem !important; }
+  html[data-es-view="list"] [data-view-width] { max-width: 56rem !important; }
+  html[data-es-view="list"] #toggle-list-btn { background-color: {{ $accentColor }} !important; color: {{ $contrastColor }} !important; }
+  html[data-es-view="list"] #toggle-calendar-btn { background-color: transparent !important; color: inherit !important; }
+  html[data-es-view="calendar"] #toggle-calendar-btn { background-color: {{ $accentColor }} !important; color: {{ $contrastColor }} !important; }
+  html[data-es-view="calendar"] #toggle-list-btn { background-color: transparent !important; color: inherit !important; }
+  html[data-es-view="list"] #calendar-panel-wrapper {
+      background: transparent !important;
+      backdrop-filter: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      border: none !important;
+      padding: 0 !important;
+  }
+  </style>
+
   <main>
     <div>
       <div class="container mx-auto pt-3 md:pt-4 pb-3 md:pb-10 px-5 md:mt-0 relative z-10"

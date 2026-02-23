@@ -1503,7 +1503,10 @@ const calendarApp = createApp({
             isLoadingEvents: {{ request()->graphic ? 'false' : 'true' }},
             uniqueCategoryIds: @json($uniqueCategoryIds ?? []),
             dropdownCustomFields: @json($dropdownCustomFields ?? []),
-            selectedCustomFields: @json(collect($dropdownCustomFields ?? [])->pluck('key')->mapWithKeys(fn($k) => [$k => '']))
+            selectedCustomFields: @json(collect($dropdownCustomFields ?? [])->pluck('key')->mapWithKeys(fn($k) => [$k => ''])),
+            pageMonth: {{ $month }},
+            pageYear: {{ $year }},
+            listDataLoaded: false
         }
     },
     computed: {
@@ -2140,6 +2143,20 @@ const calendarApp = createApp({
                     // localStorage not available
                 }
             }
+
+            const now = new Date();
+            const currentMonth = now.getMonth() + 1;
+            const currentYear = now.getFullYear();
+            const isNavigatedAway = this.pageMonth !== currentMonth || this.pageYear !== currentYear;
+
+            if (view === 'list' && isNavigatedAway && !this.listDataLoaded) {
+                this.isLoadingEvents = true;
+                this.fetchCalendarEvents({ skipMonthFilter: true });
+            } else if (view === 'calendar' && this.listDataLoaded) {
+                this.listDataLoaded = false;
+                this.isLoadingEvents = true;
+                this.fetchCalendarEvents();
+            }
         },
         updatePanelWrapper(view) {
             const wrapper = document.getElementById('calendar-panel-wrapper');
@@ -2718,13 +2735,15 @@ const calendarApp = createApp({
                 }
             });
         },
-        async fetchCalendarEvents() {
+        async fetchCalendarEvents(options = {}) {
             if (this.tab === 'availability') {
                 this.isLoadingEvents = false;
                 return;
             }
 
-            const cacheKey = `es_cal_${this.route}_${this.subdomain}_{{ $month }}_{{ $year }}`;
+            const skipMonthFilter = options.skipMonthFilter || false;
+            const cacheKeySuffix = skipMonthFilter ? 'list' : '{{ $month }}_{{ $year }}';
+            const cacheKey = `es_cal_${this.route}_${this.subdomain}_${cacheKeySuffix}`;
 
             // Show cached data immediately if available
             try {
@@ -2755,7 +2774,12 @@ const calendarApp = createApp({
                     url = '{{ isset($subdomain) ? route("role.calendar_events", ["subdomain" => $subdomain]) : "" }}';
                 }
                 const separator = url.includes('?') ? '&' : '?';
-                url += separator + 'month={{ $month }}&year={{ $year }}';
+                if (skipMonthFilter) {
+                    // Omit month/year so backend defaults to current month
+                    url += separator + '_=1';
+                } else {
+                    url += separator + 'month={{ $month }}&year={{ $year }}';
+                }
 
                 const response = await fetch(url);
                 const data = await response.json();
@@ -2765,6 +2789,10 @@ const calendarApp = createApp({
                 this.pastEvents = data.pastEvents || [];
                 this.hasMorePastEvents = data.hasMorePastEvents || false;
                 this.uniqueCategoryIds = data.filterMeta.uniqueCategoryIds;
+
+                if (skipMonthFilter) {
+                    this.listDataLoaded = true;
+                }
 
                 // Cache for stale-while-revalidate on next visit
                 try {
@@ -2827,6 +2855,9 @@ const calendarApp = createApp({
 
         // Update panel wrapper for initial view
         this.updatePanelWrapper(this.currentView);
+
+        // Clean up early-load CSS override; Vue/inline styles now have correct values
+        document.documentElement.removeAttribute('data-es-view');
 
         if (this.isLoadingEvents) {
             // Ajax mode: fetch events, then init popups after data loads

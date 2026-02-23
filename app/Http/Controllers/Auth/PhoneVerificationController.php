@@ -43,8 +43,8 @@ class PhoneVerificationController extends Controller
         // Generate 6-digit code
         $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
-        // Store reverse mapping (code -> phone) for validation
-        Cache::put('phone_verify_code_'.$code, $phone, now()->addMinutes(10));
+        // Store mapping (phone -> code) for validation
+        Cache::put('phone_verify_code_'.$phone, $code, now()->addMinutes(10));
 
         // Increment attempts counter
         Cache::put($attemptsKey, $attempts + 1, now()->addHour());
@@ -74,9 +74,9 @@ class PhoneVerificationController extends Controller
             'code' => ['required', 'string', 'size:6'],
         ]);
 
-        $phone = Cache::pull('phone_verify_code_'.$request->code);
+        $storedCode = Cache::pull('phone_verify_code_'.$request->user()->phone);
 
-        if (! $phone || $phone !== $request->user()->phone) {
+        if (! $storedCode || ! hash_equals($storedCode, $request->code)) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.phone_verification_code_invalid'),
