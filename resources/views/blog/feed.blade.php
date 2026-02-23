@@ -1,6 +1,6 @@
 <?php echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
     <channel>
         <title>Event Schedule Blog</title>
         <link>{{ route('blog.index') }}</link>
@@ -32,6 +32,7 @@
             <category>{{ htmlspecialchars($tag, ENT_XML1, 'UTF-8') }}</category>
             @endforeach
             @endif
+            <content:encoded><![CDATA[{!! $post->content !!}]]></content:encoded>
         </item>
         @endforeach
     </channel>
