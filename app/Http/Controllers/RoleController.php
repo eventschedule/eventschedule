@@ -1544,6 +1544,13 @@ class RoleController extends Controller
         $fonts = file_get_contents(base_path('storage/fonts.json'));
         $fonts = json_decode($fonts);
 
+        $approvedSubdomainNames = [];
+        if ($role->approved_subdomains) {
+            $approvedSubdomainNames = Role::whereIn('subdomain', $role->approved_subdomains)
+                ->pluck('name', 'subdomain')
+                ->toArray();
+        }
+
         $data = [
             'user' => auth()->user(),
             'role' => $role,
@@ -1552,6 +1559,7 @@ class RoleController extends Controller
             'backgrounds' => $backgroundOptions,
             'headers' => $headerOptions,
             'fonts' => $fonts,
+            'approvedSubdomainNames' => $approvedSubdomainNames,
         ];
 
         return view('role/edit', $data);
@@ -2414,7 +2422,7 @@ class RoleController extends Controller
     public function searchSubdomains(Request $request): JsonResponse
     {
         $q = trim($request->get('q', ''));
-        $exclude = $request->get('exclude', '');
+        $exclude = array_filter((array) $request->get('exclude', []));
 
         if (strlen($q) < 2) {
             return response()->json([]);
@@ -2424,7 +2432,7 @@ class RoleController extends Controller
             $query->where('subdomain', 'like', "{$q}%")
                 ->orWhere('name', 'like', "%{$q}%");
         })
-            ->when($exclude, fn ($query) => $query->where('subdomain', '!=', $exclude))
+            ->when(!empty($exclude), fn ($query) => $query->whereNotIn('subdomain', $exclude))
             ->limit(10)
             ->get(['subdomain', 'name', 'city']);
 
