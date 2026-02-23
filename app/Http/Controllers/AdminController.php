@@ -1227,10 +1227,30 @@ class AdminController extends Controller
 
         $validated = $request->validated();
 
+        $oldValues = [
+            'plan_type' => $role->plan_type,
+            'plan_term' => $role->plan_term,
+            'plan_expires' => $role->plan_expires,
+        ];
+
         $role->plan_type = $validated['plan_type'];
         $role->plan_term = $validated['plan_term'] ?? 'year';
         $role->plan_expires = $validated['plan_expires'];
         $role->save();
+
+        AuditService::log(
+            AuditService::ADMIN_PLAN_UPDATE,
+            auth()->id(),
+            'App\\Models\\Role',
+            $role->id,
+            $oldValues,
+            [
+                'plan_type' => $role->plan_type,
+                'plan_term' => $role->plan_term,
+                'plan_expires' => $role->plan_expires,
+            ],
+            "Plan updated for {$role->subdomain}",
+        );
 
         return redirect()->route('admin.plans')->with('success', 'Plan updated successfully for '.$role->name.'.');
     }

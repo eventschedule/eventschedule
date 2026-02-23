@@ -292,6 +292,15 @@ class ImportCuratorEvents extends Command
             return 0;
         }
 
+        // Validate URL against SSRF before fetching
+        if (! UrlUtils::isUrlSafe($url)) {
+            if ($debug) {
+                $this->warn("URL blocked by SSRF check: {$url}");
+            }
+
+            return 0;
+        }
+
         // Fetch the webpage content
         $response = Http::timeout(30)
             ->withHeaders(['User-Agent' => 'Event Schedule Bot/1.0 (+https://www.eventschedule.com)'])
@@ -484,7 +493,7 @@ class ImportCuratorEvents extends Command
         $imageFormat = null;
         $imageUrl = null;
 
-        if ($ogImage) {
+        if ($ogImage && UrlUtils::isUrlSafe($ogImage)) {
             try {
                 $imageData = file_get_contents($ogImage);
                 $imageUrl = $ogImage;

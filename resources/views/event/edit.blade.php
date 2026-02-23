@@ -4385,11 +4385,11 @@ function deleteFlyer(url, hash, token, element) {
 }
 </script>
 
-<x-upgrade-modal name="upgrade-boost" tier="pro" :subdomain="$subdomain">
+<x-upgrade-modal name="upgrade-boost" tier="pro" :subdomain="$subdomain" docsUrl="{{ route('marketing.docs.boost') }}">
     {{ __('messages.upgrade_feature_description_boost') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-tickets" tier="pro" :subdomain="$subdomain">
+<x-upgrade-modal name="upgrade-tickets" tier="pro" :subdomain="$subdomain" docsUrl="{{ route('marketing.docs.tickets') }}">
     {{ __('messages.upgrade_feature_description_tickets') }}
 </x-upgrade-modal>
 

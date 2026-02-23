@@ -51,7 +51,9 @@
     <link rel="canonical" href="{{ $canonicalPath }}">
     <!-- Hreflang tags -->
     <link rel="alternate" hreflang="x-default" href="{{ $basePath }}">
-    <link rel="alternate" hreflang="en" href="{{ $basePath }}">
+    @foreach (['en', 'es', 'de', 'fr', 'it', 'pt', 'he', 'nl', 'ar', 'et', 'ru'] as $lang)
+    <link rel="alternate" hreflang="{{ $lang }}" href="{{ $basePath }}?lang={{ $lang }}">
+    @endforeach
     <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">
     <meta name="robots" content="{{ $robots ?? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' }}">
     <meta name="author" content="Event Schedule">

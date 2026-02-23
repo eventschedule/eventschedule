@@ -259,7 +259,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/{subdomain}/approve-comment/{hash}', [EventController::class, 'approveComment'])->name('event.approve_comment');
     Route::delete('/{subdomain}/reject-comment/{hash}', [EventController::class, 'rejectComment'])->name('event.reject_comment');
 
-    Route::get('/{subdomain}/scan-agenda', [EventController::class, 'scanAgenda'])->name('event.scan_agenda');
+    Route::get('/{subdomain}/scan-agenda', [EventController::class, 'scanAgenda'])->name('event.scan_agenda')->where('subdomain', '(?!docs(?=/|$))[^/]+');
     Route::post('/{subdomain}/save-event-parts', [EventController::class, 'saveEventParts'])->name('event.save_parts');
 
     Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|profile|followers|team|plan|videos')->where('subdomain', '(?!docs(?=/|$))[^/]+');
@@ -438,6 +438,8 @@ if (config('app.is_nexus')) {
         Route::get('/docs/account-settings', [MarketingController::class, 'docsAccountSettings'])->name('marketing.docs.account_settings');
         Route::get('/docs/availability', [MarketingController::class, 'docsAvailability'])->name('marketing.docs.availability');
         Route::get('/docs/boost', [MarketingController::class, 'docsBoost'])->name('marketing.docs.boost');
+        Route::get('/docs/scan-agenda', [MarketingController::class, 'docsScanAgenda'])->name('marketing.docs.scan_agenda');
+        Route::get('/docs/fan-content', [MarketingController::class, 'docsFanContent'])->name('marketing.docs.fan_content');
         // Selfhost section
         Route::get('/docs/selfhost', [MarketingController::class, 'docsSelfhostIndex'])->name('marketing.docs.selfhost');
         Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
@@ -561,6 +563,8 @@ if (config('app.is_nexus')) {
             Route::get('/docs/account-settings', [MarketingController::class, 'docsAccountSettings'])->name('marketing.docs.account_settings');
             Route::get('/docs/availability', [MarketingController::class, 'docsAvailability'])->name('marketing.docs.availability');
             Route::get('/docs/boost', [MarketingController::class, 'docsBoost'])->name('marketing.docs.boost');
+            Route::get('/docs/scan-agenda', [MarketingController::class, 'docsScanAgenda'])->name('marketing.docs.scan_agenda');
+            Route::get('/docs/fan-content', [MarketingController::class, 'docsFanContent'])->name('marketing.docs.fan_content');
             // Selfhost section
             Route::get('/docs/selfhost', [MarketingController::class, 'docsSelfhostIndex'])->name('marketing.docs.selfhost');
             Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
@@ -683,6 +687,8 @@ if (config('app.is_nexus')) {
             Route::get('/docs/account-settings', fn () => redirect('https://eventschedule.com/docs/account-settings', 301));
             Route::get('/docs/availability', fn () => redirect('https://eventschedule.com/docs/availability', 301));
             Route::get('/docs/boost', fn () => redirect('https://eventschedule.com/docs/boost', 301));
+            Route::get('/docs/scan-agenda', fn () => redirect('https://eventschedule.com/docs/scan-agenda', 301));
+            Route::get('/docs/fan-content', fn () => redirect('https://eventschedule.com/docs/fan-content', 301));
             // Selfhost section
             Route::get('/docs/selfhost', fn () => redirect('https://eventschedule.com/docs/selfhost', 301));
             Route::get('/docs/selfhost/installation', fn () => redirect('https://eventschedule.com/docs/selfhost/installation', 301));
@@ -794,6 +800,8 @@ if (config('app.is_nexus')) {
     Route::get('/docs/account-settings', fn () => redirect()->route('home'));
     Route::get('/docs/availability', fn () => redirect()->route('home'));
     Route::get('/docs/boost', fn () => redirect()->route('home'));
+    Route::get('/docs/scan-agenda', fn () => redirect()->route('home'));
+    Route::get('/docs/fan-content', fn () => redirect()->route('home'));
     // Selfhost section
     Route::get('/docs/selfhost', fn () => redirect()->route('home'));
     Route::get('/docs/selfhost/installation', fn () => redirect()->route('home'));

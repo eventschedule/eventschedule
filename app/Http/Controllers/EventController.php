@@ -883,6 +883,10 @@ class EventController extends Controller
 
     public function showImport(Request $request, $subdomain)
     {
+        if (! auth()->user()->isMember($subdomain)) {
+            abort(403, __('messages.not_authorized'));
+        }
+
         $role = Role::subdomain($subdomain)->firstOrFail();
         $venues = [];
 
@@ -954,6 +958,10 @@ class EventController extends Controller
 
     public function parse(EventParseRequest $request, $subdomain)
     {
+        if (! auth()->user()->isMember($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
         $details = request()->input('event_details');
         $file = null;
 
@@ -1110,6 +1118,10 @@ class EventController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $role->acceptEventRequests()) {
+            abort(403, __('messages.not_authorized'));
+        }
 
         $event = $this->eventRepo->saveEvent($role, $request, null, false);
 

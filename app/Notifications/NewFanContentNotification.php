@@ -44,7 +44,8 @@ class NewFanContentNotification extends Notification
     {
         $subject = __('messages.new_fan_content_notification_subject', ['name' => $this->event->name, 'count' => $this->fanContentCount]);
         $actionUrl = route('event.edit', ['subdomain' => $this->subdomain, 'hash' => UrlUtils::encodeId($this->event->id)]).'#section-fan-content';
-        $unsubscribeUrl = route('user.unsubscribe', ['email' => base64_encode($notifiable->email)]);
+        $encodedEmail = base64_encode($notifiable->email);
+        $unsubscribeUrl = route('user.unsubscribe', ['email' => $encodedEmail, 'sig' => \App\Utils\UrlUtils::signEmail($encodedEmail)]);
 
         return (new MailMessage)
             ->subject($subject)

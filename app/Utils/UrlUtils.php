@@ -79,6 +79,22 @@ class UrlUtils
         return $decoded;
     }
 
+    /**
+     * Generate an HMAC signature for an unsubscribe email token
+     */
+    public static function signEmail(string $email): string
+    {
+        return hash_hmac('sha256', $email, config('app.key'));
+    }
+
+    /**
+     * Verify an HMAC signature for an unsubscribe email token
+     */
+    public static function verifyEmailSignature(string $email, string $signature): bool
+    {
+        return hash_equals(self::signEmail($email), $signature);
+    }
+
     public static function clean($url)
     {
         $pattern = '/^(https?:\/\/)?(www\.)?/';
@@ -278,7 +294,7 @@ class UrlUtils
     /**
      * Validate if URL is safe to make requests to
      */
-    private static function isUrlSafe($url)
+    public static function isUrlSafe($url)
     {
         // Parse URL
         $parsedUrl = parse_url($url);

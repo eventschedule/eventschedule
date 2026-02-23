@@ -20,6 +20,7 @@ class TicketCheckoutRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255'],
             'tickets' => ['required', 'array'],
+            'tickets.*' => ['integer', 'min:1'],
             'cf-turnstile-response' => [new ValidTurnstile],
         ];
 

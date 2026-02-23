@@ -31,11 +31,12 @@ class BoostBillingService
                         'actual_cents' => $paymentIntent->amount,
                     ]);
 
-                    // Record the charge for audit trail even on mismatch
+                    // Record the mismatch for audit trail - do NOT mark as 'charged'
+                    // so the refund path in cancelPaymentIntent() handles cleanup
                     DB::transaction(function () use ($campaign, $paymentIntentId, $paymentIntent, $expectedCents) {
                         $campaign->update([
                             'total_charged' => $paymentIntent->amount / 100,
-                            'billing_status' => 'charged',
+                            'billing_status' => 'amount_mismatch',
                         ]);
 
                         BoostBillingRecord::create([
@@ -45,8 +46,8 @@ class BoostBillingService
                             'meta_spend' => 0,
                             'markup_amount' => 0,
                             'stripe_payment_intent_id' => $paymentIntentId,
-                            'status' => 'completed',
-                            'notes' => 'Amount mismatch - expected: '.($expectedCents / 100),
+                            'status' => 'failed',
+                            'notes' => 'Amount mismatch - expected: '.($expectedCents / 100).', actual: '.($paymentIntent->amount / 100),
                         ]);
                     });
 

@@ -144,15 +144,21 @@ class StripeController extends Controller
                         $expectedAmount = $sale->payment_amount;
                         $amountDifference = abs($webhookAmount - $expectedAmount);
 
-                        // Allow small tolerance for floating point differences (e.g., 0.01)
+                        // Allow small tolerance for floating point/rounding differences
                         if ($amountDifference > 0.01) {
-                            \Log::warning('Payment amount mismatch in Stripe webhook', [
+                            \Log::error('Payment amount mismatch in Stripe webhook - sale NOT marked as paid', [
                                 'sale_id' => $sale->id,
                                 'expected_amount' => $expectedAmount,
                                 'webhook_amount' => $webhookAmount,
                                 'difference' => $amountDifference,
                                 'payment_intent_id' => $paymentIntent->id,
                             ]);
+
+                            $sale->status = 'amount_mismatch';
+                            $sale->transaction_reference = $paymentIntent->id;
+                            $sale->save();
+
+                            return;
                         }
 
                         $sale->payment_amount = $webhookAmount;
@@ -189,15 +195,21 @@ class StripeController extends Controller
                             $expectedAmount = $sale->payment_amount;
                             $amountDifference = abs($webhookAmount - $expectedAmount);
 
-                            // Allow small tolerance for floating point differences (e.g., 0.01)
+                            // Allow small tolerance for floating point/rounding differences
                             if ($amountDifference > 0.01) {
-                                \Log::warning('Payment amount mismatch in Stripe checkout webhook', [
+                                \Log::error('Payment amount mismatch in Stripe checkout webhook - sale NOT marked as paid', [
                                     'sale_id' => $sale->id,
                                     'expected_amount' => $expectedAmount,
                                     'webhook_amount' => $webhookAmount,
                                     'difference' => $amountDifference,
                                     'session_id' => $session->id,
                                 ]);
+
+                                $sale->status = 'amount_mismatch';
+                                $sale->transaction_reference = $session->payment_intent;
+                                $sale->save();
+
+                                return;
                             }
 
                             $sale->payment_amount = $webhookAmount;

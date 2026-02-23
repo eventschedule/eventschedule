@@ -248,15 +248,40 @@
                     </div>
                 </a>
 
-                <a href="{{ route('marketing.docs.boost') }}" class="doc-card block lg:col-span-3">
-                    <div class="rounded-xl border border-orange-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900 dark:to-amber-900 hover:border-orange-500/30 transition-colors">
+                <a href="{{ route('marketing.docs.scan_agenda') }}" class="doc-card block">
+                    <div class="rounded-xl border border-cyan-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900 dark:to-teal-900 hover:border-cyan-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
-                            <svg aria-hidden="true" class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Scan Agenda</h3>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Use AI to scan a photo of a printed agenda and automatically create event parts.</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('marketing.docs.boost') }}" class="doc-card block">
+                    <div class="rounded-xl border border-cyan-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900 dark:to-teal-900 hover:border-cyan-500/30 transition-colors">
+                        <div class="flex items-center gap-3 mb-3">
+                            <svg aria-hidden="true" class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                             </svg>
                             <h3 class="font-semibold text-gray-900 dark:text-white">Boost</h3>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Promote your events with automated Facebook and Instagram ad campaigns. Set a budget, target your audience, and track results in real time.</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Promote events with automated Facebook and Instagram ads.</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('marketing.docs.fan_content') }}" class="doc-card block">
+                    <div class="rounded-xl border border-cyan-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900 dark:to-teal-900 hover:border-cyan-500/30 transition-colors">
+                        <div class="flex items-center gap-3 mb-3">
+                            <svg aria-hidden="true" class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Fan Content</h3>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Let fans submit videos and comments on your events.</p>
                     </div>
                 </a>
             </div>

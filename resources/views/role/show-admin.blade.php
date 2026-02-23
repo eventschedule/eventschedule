@@ -59,10 +59,14 @@
                 $saveButton.prop('disabled', false);
             });
 
-            $saveButton.on('click', function () {                
-                $('#unavailable_days').val(JSON.stringify(Array.from(unavailableDays)));
-                $('#available_days').val(JSON.stringify(Array.from(availableDays)));
-                $('#availability_form').submit();
+            $saveButton.on('click', function () {
+                @if (!$role->isEnterprise() && config('app.hosted'))
+                    window.dispatchEvent(new CustomEvent('open-modal', { detail: 'upgrade-availability' }));
+                @else
+                    $('#unavailable_days').val(JSON.stringify(Array.from(unavailableDays)));
+                    $('#available_days').val(JSON.stringify(Array.from(availableDays)));
+                    $('#availability_form').submit();
+                @endif
             });
         });
         </script>
@@ -380,10 +384,8 @@
                 <option value="videos" {{ $tab == 'videos' ? 'selected' : '' }}>
                     {{ __('messages.videos') }}</option>
                 @endif
-                @if ($role->isTalent() && $role->isEnterprise())
+                @if ($role->isTalent())
                 <option value="availability" {{ $tab == 'availability' ? 'selected' : '' }}>{{ __('messages.availability') }}</option>
-                @elseif ($role->isTalent() && config('app.hosted'))
-                <option value="availability" data-upgrade="upgrade-availability">{{ __('messages.availability') }}</option>
                 @endif
                 @if (count($requests))
                 <option value="requests" {{ $tab == 'requests' ? 'selected' : '' }}>
@@ -412,15 +414,9 @@
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'videos']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'videos' ? 'border-[#4E81FA] px-3 pb-5 text-base font-medium text-[#4E81FA]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.videos') }}</a>
                 @endif
-                @if ($role->isTalent() && $role->isEnterprise())
+                @if ($role->isTalent())
                 <a href=" {{ route('role.view_admin', ((now()->year == $year && now()->month == $month) || $tab == 'availability') ? ['subdomain' => $role->subdomain, 'tab' => 'availability'] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'tab' => 'availability', 'month' => $month] : ['subdomain' => $role->subdomain, 'tab' => 'availability', 'year' => $year, 'month' => $month])) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'availability' ? 'border-[#4E81FA] px-3 pb-5 text-base font-medium text-[#4E81FA]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.availability') }}</a>
-                @elseif ($role->isTalent() && config('app.hosted'))
-                <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-availability')"
-                    class="whitespace-nowrap border-b-2 border-transparent px-3 pb-5 text-base font-medium text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 cursor-pointer">
-                    {{ __('messages.availability') }}
-                    <svg class="inline w-3.5 h-3.5 ms-1" viewBox="0 0 24 24" fill="currentColor"><path d="M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V10A2,2 0 0,1 6,8H15V6A3,3 0 0,0 12,3A3,3 0 0,0 9,6H7A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,17A2,2 0 0,0 14,15A2,2 0 0,0 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17Z" /></svg>
-                </button>
                 @endif
                 @if (count($requests))
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']) }}"
@@ -558,11 +554,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 @include('components.embed-modal')
 
-<x-upgrade-modal name="upgrade-scan-agenda" tier="enterprise" :subdomain="$role->subdomain">
+<x-upgrade-modal name="upgrade-scan-agenda" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.scan_agenda') }}">
     {{ __('messages.upgrade_feature_description_scan_agenda') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-availability" tier="enterprise" :subdomain="$role->subdomain">
+<x-upgrade-modal name="upgrade-availability" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.availability') }}">
     {{ __('messages.upgrade_feature_description_availability') }}
 </x-upgrade-modal>
 

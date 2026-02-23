@@ -934,7 +934,7 @@ class RoleController extends Controller
 
         if ($tab == 'requests' && ! count($requests)) {
             return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
-        } elseif ($tab == 'availability' && ($role->isCurator() || !$role->isEnterprise())) {
+        } elseif ($tab == 'availability' && $role->isCurator()) {
             return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
         } elseif ($tab == 'videos' && ! $role->isCurator()) {
             return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
@@ -1325,7 +1325,13 @@ class RoleController extends Controller
 
         if ($request->has('import_urls') || $request->has('import_cities')) {
             $importConfig = $role->import_config;
-            $importConfig['urls'] = array_map('strtolower', array_filter(array_map('trim', $request->input('import_urls', []))));
+            $importUrls = array_map('strtolower', array_filter(array_map('trim', $request->input('import_urls', []))));
+            foreach ($importUrls as $importUrl) {
+                if (! UrlUtils::isUrlSafe($importUrl)) {
+                    return redirect()->back()->withErrors(['import_urls' => __('messages.invalid_url')]);
+                }
+            }
+            $importConfig['urls'] = $importUrls;
             $importConfig['cities'] = array_map('strtolower', array_filter(array_map('trim', $request->input('import_cities', []))));
             $role->import_config = $importConfig;
         }
@@ -1613,7 +1619,13 @@ class RoleController extends Controller
 
         if ($request->has('import_urls') || $request->has('import_cities')) {
             $importConfig = $role->import_config;
-            $importConfig['urls'] = array_map('strtolower', array_filter(array_map('trim', $request->input('import_urls', []))));
+            $importUrls = array_map('strtolower', array_filter(array_map('trim', $request->input('import_urls', []))));
+            foreach ($importUrls as $importUrl) {
+                if (! UrlUtils::isUrlSafe($importUrl)) {
+                    return redirect()->back()->withErrors(['import_urls' => __('messages.invalid_url')]);
+                }
+            }
+            $importConfig['urls'] = $importUrls;
             $importConfig['cities'] = array_map('strtolower', array_filter(array_map('trim', $request->input('import_cities', []))));
             $role->import_config = $importConfig;
         }
@@ -2283,27 +2295,40 @@ class RoleController extends Controller
 
     public function unsubscribe(Request $request)
     {
-        $roles = Role::where('email', base64_decode($request->email))->get();
+        if ($request->has('sig')) {
+            // Link-based unsubscription (from email) - verify HMAC
+            if (! UrlUtils::verifyEmailSignature($request->email, $request->sig)) {
+                return redirect()->route('role.show_unsubscribe')->with('error', 'Invalid unsubscribe link.');
+            }
+            $email = base64_decode($request->email);
+        } else {
+            // Form-based unsubscription (manual entry, CSRF-protected)
+            $request->validate(['email' => 'required|email']);
+            $email = $request->email;
+        }
+
+        $roles = Role::where('email', $email)->get();
 
         foreach ($roles as $role) {
             $role->is_subscribed = false;
             $role->save();
         }
 
-        return redirect()->route('role.show_unsubscribe', ['email' => $request->email]);
+        return redirect()->route('role.show_unsubscribe', ['email' => base64_encode($email)]);
     }
 
     public function unsubscribeUser(Request $request)
     {
-        $email = null;
-
-        if ($request->has('email')) {
-            $email = base64_decode($request->email);
-        }
-
-        if (! $email) {
+        if (! $request->has('email')) {
             return redirect()->route('role.show_unsubscribe')->with('error', 'Invalid unsubscribe link.');
         }
+
+        // Verify HMAC signature to prevent unauthorized unsubscription
+        if (! $request->has('sig') || ! UrlUtils::verifyEmailSignature($request->email, $request->sig)) {
+            return redirect()->route('role.show_unsubscribe')->with('error', 'Invalid unsubscribe link.');
+        }
+
+        $email = base64_decode($request->email);
 
         $users = User::where('email', $email)->get();
 
@@ -2524,6 +2549,16 @@ class RoleController extends Controller
             $urls = array_filter(array_map('trim', $urls));
             $cities = array_filter(array_map('trim', $cities));
 
+            // Validate URLs against SSRF
+            foreach ($urls as $url) {
+                if (! \App\Utils\UrlUtils::isUrlSafe($url)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('messages.invalid_url'),
+                    ]);
+                }
+            }
+
             if (empty($urls) && empty($cities)) {
                 return response()->json([
                     'success' => false,
@@ -2531,46 +2566,28 @@ class RoleController extends Controller
                 ]);
             }
 
-            // Use shell_exec as a fallback if Artisan call fails
-            try {
-                // Capture output using BufferedOutput
-                $output = new \Symfony\Component\Console\Output\BufferedOutput;
+            // Capture output using BufferedOutput
+            $output = new \Symfony\Component\Console\Output\BufferedOutput;
 
-                $artisanParams = [
-                    '--role_id' => (string) $roleId,
-                    '--test' => null,
-                ];
+            $artisanParams = [
+                '--role_id' => (string) $roleId,
+                '--test' => null,
+            ];
 
-                // Add URLs and cities as command line arguments
-                foreach ($urls as $url) {
-                    $artisanParams['--urls'][] = $url;
-                }
-                foreach ($cities as $city) {
-                    $artisanParams['--cities'][] = $city;
-                }
-
-                $exitCode = \Artisan::call('app:import-curator-events', $artisanParams, $output);
-
-                $outputText = $output->fetch();
-            } catch (\Exception $e) {
-                // Fallback to shell_exec if Artisan call fails
-                // Use escapeshellarg() to prevent command injection
-                $urlArgs = '';
-                $cityArgs = '';
-
-                if (! empty($urls)) {
-                    $urlArgs = ' --urls='.implode(' --urls=', array_map('escapeshellarg', $urls));
-                }
-                if (! empty($cities)) {
-                    $cityArgs = ' --cities='.implode(' --cities=', array_map('escapeshellarg', $cities));
-                }
-
-                // Escape roleId to prevent command injection
-                $escapedRoleId = escapeshellarg((string) $roleId);
-                $command = "php artisan app:import-curator-events --role_id={$escapedRoleId} --test{$urlArgs}{$cityArgs} 2>&1";
-                $outputText = shell_exec($command);
-                $exitCode = 0; // Assume success for shell_exec
+            // Add URLs and cities as command line arguments
+            foreach ($urls as $url) {
+                $artisanParams['--urls'][] = $url;
             }
+            foreach ($cities as $city) {
+                $artisanParams['--cities'][] = $city;
+            }
+
+            $exitCode = \Artisan::call('app:import-curator-events', $artisanParams, $output);
+
+            $outputText = $output->fetch();
+
+            // Strip file paths from output to avoid leaking server internals
+            $outputText = preg_replace('#(/[a-zA-Z0-9._-]+){3,}#', '[path]', $outputText);
 
             // Check if the command was successful - look for completion message or successful processing
             $isSuccessful = strpos($outputText, 'Import completed') !== false ||
@@ -2595,7 +2612,7 @@ class RoleController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => __('messages.import_test_error').': '.$e->getMessage(),
+                'message' => __('messages.import_test_error'),
             ]);
         }
     }

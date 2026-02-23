@@ -55,8 +55,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'referrer_url',
         'landing_page',
         'use_24_hour_time',
-        'two_factor_secret',
-        'two_factor_recovery_codes',
         'two_factor_confirmed_at',
         'admin_newsletter_unsubscribed_at',
     ];
@@ -68,6 +66,8 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $guarded = [
         'is_admin', // Prevent privilege escalation via mass assignment
+        'two_factor_secret', // Set explicitly in TwoFactorController only
+        'two_factor_recovery_codes', // Set explicitly in TwoFactorController only
     ];
 
     /**

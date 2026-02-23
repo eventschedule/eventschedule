@@ -576,7 +576,12 @@ class ApiEventController extends Controller
         }
 
         $file = $request->file('flyer_image');
-        $filename = strtolower('flyer_'.Str::random(32).'.'.($file->guessExtension() ?? 'jpg'));
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (! in_array($extension, $allowedExtensions)) {
+            return response()->json(['error' => 'Invalid file type'], 422);
+        }
+        $filename = strtolower('flyer_'.Str::random(32).'.'.$extension);
         $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
         $event->flyer_image_url = $filename;

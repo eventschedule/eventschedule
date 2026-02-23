@@ -225,12 +225,25 @@ class ApiSaleController extends Controller
             return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
         }
 
-        $sale->is_deleted = true;
-        $sale->save();
+        $previousStatus = $sale->status;
+
+        DB::transaction(function () use ($sale) {
+            // If the sale was paid, cancel first to release ticket inventory
+            // (triggers Sale::booted hook) and decrement analytics
+            if ($sale->status === 'paid') {
+                $sale->status = 'cancelled';
+                $sale->save();
+
+                AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+            }
+
+            $sale->is_deleted = true;
+            $sale->save();
+        });
 
         AuditService::log(AuditService::SALE_CHECKIN, auth()->id(), 'Sale', $sale->id,
-            null,
-            ['is_deleted' => true],
+            ['status' => $previousStatus],
+            ['status' => $sale->status, 'is_deleted' => true],
             'delete:event_id:'.$sale->event_id
         );
 
