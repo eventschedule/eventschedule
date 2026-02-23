@@ -15,9 +15,6 @@
             animation: none !important;
             transition: none !important;
         }
-        .flex.flex-col.items-center.justify-center {
-            padding-top: 60px !important;
-        }
         h1 {
             font-size: 5rem !important;
             line-height: 1.1 !important;

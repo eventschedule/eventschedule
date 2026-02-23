@@ -90,6 +90,14 @@ Test files: `tests/Browser/GeneralTest.php`, `TicketTest.php`, `CuratorEventTest
 composer audit
 ```
 
+## Feature Tiers (Free / Pro / Enterprise)
+
+See `FEATURES.md` for the complete reference of which features belong to each plan tier. **Always consult `FEATURES.md`** when:
+- Updating the pricing page, comparison/alternative pages, or feature marketing pages
+- Updating the user guide or documentation
+- Adding or modifying gate checks (`$role->isPro()`, `$role->isEnterprise()`) in the AP
+- Writing feature descriptions that mention plan availability
+
 ## Architecture
 
 ### Multi-Tenant Routing

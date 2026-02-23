@@ -202,7 +202,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
                 @foreach ($key_advantages as $advantage)
-                    <div class="bg-gradient-to-br {{ $advantage['gradient'] }} rounded-2xl p-8 border {{ $advantage['border'] }}">
+                    <div class="bg-gradient-to-br {{ $advantage['gradient'] }} rounded-2xl p-8 border border-gray-200 dark:border-gray-700">
                         <div class="w-12 h-12 rounded-xl {{ $advantage['icon_bg'] }} flex items-center justify-center mb-5">
                             @if ($advantage['icon'] === 'dollar')
                                 <svg aria-hidden="true" class="w-6 h-6 {{ $advantage['icon_color'] }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
