@@ -1181,6 +1181,7 @@ return [
     'expires' => 'Срок действия истекает',
     'no_schedules_found' => 'Расписания не найдены',
     'search_schedules' => 'Поиск по имени, субдомену или адресу электронной почты...',
+    'search_schedules_autocomplete' => 'Поиск по имени или субдомену...',
     'edit_plan' => 'Редактировать план',
     'back_to_plans' => 'Вернуться к планам',
     'current_subscription_status' => 'Текущий статус подписки',
@@ -1878,5 +1879,10 @@ return [
     'upgrade_feature_description_ai_prompt' => 'Use AI to automatically transform and enhance the text in your event graphics.',
     'upgrade_feature_description_email_scheduling' => 'Automatically send event graphic emails to your audience on a recurring schedule.',
     'upgrade_feature_description_custom_css' => 'Add custom CSS to fully personalize the look of your public schedule page.',
+    'want_to_see_your_event_here' => 'Хотите увидеть своё событие здесь? Добавьте его на',
+    'approved_schedules' => 'Одобренные расписания',
+    'approved_schedules_help' => 'Мероприятия, отправленные из этих расписаний, будут автоматически одобрены',
+    'add_schedule' => 'Добавить расписание',
+    'schedule_subdomain' => 'поддомен расписания',
 
 ];

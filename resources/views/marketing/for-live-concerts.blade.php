@@ -1,7 +1,7 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Schedule for Live Concerts | Stream, Schedule & Sell Virtual Tickets</x-slot>
+    <x-slot name="title">Event Schedule for Live Concerts | Ticketing Software</x-slot>
     <x-slot name="description">Stream live concerts to fans worldwide. Sell virtual tickets alongside venue tickets, email fans directly, and manage your streaming schedule. Zero platform fees.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="socialImage">social/for-online.png</x-slot>
     <x-slot name="breadcrumbTitle">For Live Concerts</x-slot>
 
     <x-slot name="structuredData">
@@ -21,6 +21,46 @@
             "@type": "Audience",
             "audienceType": "Live Concert Streamers"
         }
+    }
+    </script>
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Do I need special equipment to stream a live concert?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. Event Schedule works with any streaming platform. Stream from your phone with Instagram Live, use OBS with YouTube Live or Twitch, or set up a multi-camera production. Just add your streaming link to the event."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I sell virtual tickets and venue tickets for the same show?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Create multiple ticket types for each event. Fans choose between attending in person or watching the livestream. You keep 100% of the revenue (minus standard Stripe processing fees)."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What streaming platforms does Event Schedule work with?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Any platform that gives you a streaming URL. YouTube Live, Twitch, Instagram Live, Facebook Live, Vimeo, custom RTMP servers, and more. Event Schedule is platform-agnostic."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is Event Schedule really free for streaming concerts?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. The free plan includes unlimited events, fan email notifications, and follower features. There are zero platform fees on ticket sales at any plan level. Stripe charges its standard processing fee (2.9% + $0.30)."
+                }
+            }
+        ]
     }
     </script>
     </x-slot>
@@ -586,36 +626,80 @@
     </section>
 
     <!-- FAQ Section -->
-    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
+    <section class="bg-gray-100 dark:bg-black/30 py-24">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center mb-12">
-                Frequently asked questions about streaming live concerts
-            </h2>
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Frequently asked questions
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400">
+                    Everything artists and promoters ask about Event Schedule.
+                </p>
+            </div>
 
-            <div class="space-y-6">
-                <div class="bg-white dark:bg-[#0a0a0f] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Do I need special equipment to stream a live concert?</h3>
-                    <p class="text-gray-500 dark:text-gray-400">No. Event Schedule works with any streaming platform. Stream from your phone with Instagram Live, use OBS with YouTube Live or Twitch, or set up a multi-camera production. Just add your streaming link to the event.</p>
+            <div class="space-y-4" x-data="{ open: null }">
+                <div class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Do I need special equipment to stream a live concert?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 1" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            No. Event Schedule works with any streaming platform. Stream from your phone with Instagram Live, use OBS with YouTube Live or Twitch, or set up a multi-camera production. Just add your streaming link to the event.
+                        </p>
+                    </div>
                 </div>
 
-                <div class="bg-white dark:bg-[#0a0a0f] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Can I sell virtual tickets and venue tickets for the same show?</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Yes. Create multiple ticket types for each event. Fans choose between attending in person or watching the livestream. You keep 100% of the revenue (minus standard Stripe processing fees).</p>
+                <div class="bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900 dark:to-emerald-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I sell virtual tickets and venue tickets for the same show?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 2" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Create multiple ticket types for each event. Fans choose between attending in person or watching the livestream. You keep 100% of the revenue (minus standard Stripe processing fees).
+                        </p>
+                    </div>
                 </div>
 
-                <div class="bg-white dark:bg-[#0a0a0f] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">What streaming platforms does Event Schedule work with?</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Any platform that gives you a streaming URL. YouTube Live, Twitch, Instagram Live, Facebook Live, Vimeo, custom RTMP servers, and more. Event Schedule is platform-agnostic.</p>
+                <div class="bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            What streaming platforms does Event Schedule work with?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 3" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Any platform that gives you a streaming URL. YouTube Live, Twitch, Instagram Live, Facebook Live, Vimeo, custom RTMP servers, and more. Event Schedule is platform-agnostic.
+                        </p>
+                    </div>
                 </div>
 
-                <div class="bg-white dark:bg-[#0a0a0f] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">How do fans get the streaming link?</h3>
-                    <p class="text-gray-500 dark:text-gray-400">When fans register or purchase a virtual ticket, the streaming link appears on their ticket and event page. You can also email all registered fans directly from your dashboard before going live.</p>
-                </div>
-
-                <div class="bg-white dark:bg-[#0a0a0f] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Is Event Schedule really free for streaming concerts?</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Yes. The free plan includes unlimited events, fan email notifications, and follower features. There are zero platform fees on ticket sales at any plan level. Stripe charges its standard processing fee (2.9% + $0.30).</p>
+                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Is Event Schedule really free for streaming concerts?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 4" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. The free plan includes unlimited events, fan email notifications, and follower features. There are zero platform fees on ticket sales at any plan level. Stripe charges its standard processing fee (2.9% + $0.30).
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -764,61 +848,11 @@
         ],
         "url": "{{ url()->current() }}",
         "keywords": "live concert streaming, virtual concert tickets, livestream concerts",
-        "screenshot": "{{ asset('social/features.png') }}",
+        "screenshot": "{{ asset('social/for-online.png') }}",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"
         }
-    }
-    </script>
-
-    <!-- FAQ Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Do I need special equipment to stream a live concert?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "No. Event Schedule works with any streaming platform. Stream from your phone with Instagram Live, use OBS with YouTube Live or Twitch, or set up a multi-camera production. Just add your streaming link to the event."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I sell virtual tickets and venue tickets for the same show?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Create multiple ticket types for each event. Fans choose between attending in person or watching the livestream. You keep 100% of the revenue (minus standard Stripe processing fees)."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What streaming platforms does Event Schedule work with?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Any platform that gives you a streaming URL. YouTube Live, Twitch, Instagram Live, Facebook Live, Vimeo, custom RTMP servers, and more. Event Schedule is platform-agnostic."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do fans get the streaming link?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "When fans register or purchase a virtual ticket, the streaming link appears on their ticket and event page. You can also email all registered fans directly from your dashboard before going live."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule really free for streaming concerts?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. The free plan includes unlimited events, fan email notifications, and follower features. There are zero platform fees on ticket sales at any plan level. Stripe charges its standard processing fee (2.9% + $0.30)."
-                }
-            }
-        ]
     }
     </script>
 

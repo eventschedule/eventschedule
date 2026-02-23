@@ -1,7 +1,7 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Schedule for Webinars | Host, Schedule & Manage Webinars</x-slot>
+    <x-slot name="title">Event Schedule for Webinars | Webinar Scheduling Software</x-slot>
     <x-slot name="description">Host webinars with built-in registration, ticketing, email notifications, and streaming link integration. Works with Zoom, Google Meet, and any platform. Zero platform fees.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="socialImage">social/for-online.png</x-slot>
     <x-slot name="breadcrumbTitle">For Webinars</x-slot>
 
     <x-slot name="structuredData">
@@ -21,6 +21,46 @@
             "@type": "Audience",
             "audienceType": "Webinar Hosts"
         }
+    }
+    </script>
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What video platforms does Event Schedule work with?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Any platform that gives you a meeting or streaming link. Zoom, Google Meet, Microsoft Teams, Webex, YouTube Live, and custom solutions. Event Schedule is platform-agnostic - just paste your link and attendees join from your schedule."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I charge for webinars?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Set up paid registration with Stripe. You keep 100% of the ticket revenue - Event Schedule charges zero platform fees. Stripe charges its standard processing fee (2.9% + $0.30)."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I schedule a recurring webinar series?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Set up weekly, biweekly, or monthly webinar series with a single recurring event. Attendees can follow your schedule and get notified when new sessions are added."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is Event Schedule free for hosting webinars?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. The free plan includes unlimited events, attendee email notifications, and registration features. There are zero platform fees on ticket sales at any plan level. You only pay Stripe's standard processing fee if you sell tickets."
+                }
+            }
+        ]
     }
     </script>
     </x-slot>
@@ -580,36 +620,80 @@
     </section>
 
     <!-- FAQ Section -->
-    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
+    <section class="bg-gray-100 dark:bg-black/30 py-24">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center mb-12">
-                Frequently asked questions about hosting webinars
-            </h2>
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Frequently asked questions
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400">
+                    Everything webinar hosts ask about Event Schedule.
+                </p>
+            </div>
 
-            <div class="space-y-6">
-                <div class="bg-white dark:bg-[#0a0a0f] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">What video platforms does Event Schedule work with?</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Any platform that gives you a meeting or streaming link. Zoom, Google Meet, Microsoft Teams, Webex, YouTube Live, and custom solutions. Event Schedule is platform-agnostic - just paste your link and attendees join from your schedule.</p>
+            <div class="space-y-4" x-data="{ open: null }">
+                <div class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            What video platforms does Event Schedule work with?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 1" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Any platform that gives you a meeting or streaming link. Zoom, Google Meet, Microsoft Teams, Webex, YouTube Live, and custom solutions. Event Schedule is platform-agnostic - just paste your link and attendees join from your schedule.
+                        </p>
+                    </div>
                 </div>
 
-                <div class="bg-white dark:bg-[#0a0a0f] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Can I charge for webinars?</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Yes. Set up paid registration with Stripe. You keep 100% of the ticket revenue - Event Schedule charges zero platform fees. Stripe charges its standard processing fee (2.9% + $0.30).</p>
+                <div class="bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900 dark:to-emerald-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I charge for webinars?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 2" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Set up paid registration with Stripe. You keep 100% of the ticket revenue - Event Schedule charges zero platform fees. Stripe charges its standard processing fee (2.9% + $0.30).
+                        </p>
+                    </div>
                 </div>
 
-                <div class="bg-white dark:bg-[#0a0a0f] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">How do attendees get the webinar link?</h3>
-                    <p class="text-gray-500 dark:text-gray-400">When attendees register or purchase a ticket, the meeting link appears on their registration confirmation and event page. You can also email all registrants directly from your dashboard before the session starts.</p>
+                <div class="bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I schedule a recurring webinar series?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 3" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Set up weekly, biweekly, or monthly webinar series with a single recurring event. Attendees can follow your schedule and get notified when new sessions are added.
+                        </p>
+                    </div>
                 </div>
 
-                <div class="bg-white dark:bg-[#0a0a0f] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Can I schedule a recurring webinar series?</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Yes. Set up weekly, biweekly, or monthly webinar series with a single recurring event. Attendees can follow your schedule and get notified when new sessions are added.</p>
-                </div>
-
-                <div class="bg-white dark:bg-[#0a0a0f] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Is Event Schedule free for hosting webinars?</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Yes. The free plan includes unlimited events, attendee email notifications, and registration features. There are zero platform fees on ticket sales at any plan level. You only pay Stripe's standard processing fee if you sell tickets.</p>
+                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Is Event Schedule free for hosting webinars?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 4" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. The free plan includes unlimited events, attendee email notifications, and registration features. There are zero platform fees on ticket sales at any plan level. You only pay Stripe's standard processing fee if you sell tickets.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -759,61 +843,11 @@
         ],
         "url": "{{ url()->current() }}",
         "keywords": "webinar hosting, webinar scheduling, webinar registration, paid webinars",
-        "screenshot": "{{ asset('social/features.png') }}",
+        "screenshot": "{{ asset('social/for-online.png') }}",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"
         }
-    }
-    </script>
-
-    <!-- FAQ Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "What video platforms does Event Schedule work with?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Any platform that gives you a meeting or streaming link. Zoom, Google Meet, Microsoft Teams, Webex, YouTube Live, and custom solutions. Event Schedule is platform-agnostic - just paste your link and attendees join from your schedule."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I charge for webinars?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Set up paid registration with Stripe. You keep 100% of the ticket revenue - Event Schedule charges zero platform fees. Stripe charges its standard processing fee (2.9% + $0.30)."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do attendees get the webinar link?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "When attendees register or purchase a ticket, the meeting link appears on their registration confirmation and event page. You can also email all registrants directly from your dashboard before the session starts."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I schedule a recurring webinar series?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Set up weekly, biweekly, or monthly webinar series with a single recurring event. Attendees can follow your schedule and get notified when new sessions are added."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free for hosting webinars?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. The free plan includes unlimited events, attendee email notifications, and registration features. There are zero platform fees on ticket sales at any plan level. You only pay Stripe's standard processing fee if you sell tickets."
-                }
-            }
-        ]
     }
     </script>
 

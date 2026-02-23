@@ -21,6 +21,9 @@
                 <a href="{{ marketing_url('/pricing') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 pb-0.5 {{ request()->is('*/pricing') || request()->is('pricing') ? 'text-blue-600 dark:text-blue-400 font-medium !border-blue-600 dark:!border-blue-400 hover:!border-blue-600 dark:hover:!border-blue-400' : '' }}">
                     Pricing
                 </a>
+                <a href="{{ marketing_url('/use-cases') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 pb-0.5 {{ request()->is('*/use-cases') || request()->is('use-cases') || request()->is('*/for-*') || request()->is('for-*') ? 'text-blue-600 dark:text-blue-400 font-medium !border-blue-600 dark:!border-blue-400 hover:!border-blue-600 dark:hover:!border-blue-400' : '' }}">
+                    Use Cases
+                </a>
                 <a href="{{ marketing_url('/features/integrations') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 pb-0.5 {{ request()->is('*/integrations') || request()->is('integrations') ? 'text-blue-600 dark:text-blue-400 font-medium !border-blue-600 dark:!border-blue-400 hover:!border-blue-600 dark:hover:!border-blue-400' : '' }}">
                     Integrations
                 </a>
@@ -101,6 +104,9 @@
                 </a>
                 <a href="{{ marketing_url('/pricing') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
                     Pricing
+                </a>
+                <a href="{{ marketing_url('/use-cases') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
+                    Use Cases
                 </a>
                 <a href="{{ marketing_url('/features/integrations') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
                     Integrations

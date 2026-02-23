@@ -2,7 +2,7 @@
     <x-slot name="title">Installation Guide - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Installation</x-slot>
     <x-slot name="description">Set up Event Schedule on your own server with this step-by-step installation guide. Learn how to configure the database, environment, and cron jobs.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="socialImage">social/docs.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -27,7 +27,9 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "{{ url()->current() }}"
-        }
+        },
+        "datePublished": "2024-01-01",
+        "dateModified": "2026-02-01"
     }
     </script>
     </x-slot>

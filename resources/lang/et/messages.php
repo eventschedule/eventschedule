@@ -1179,6 +1179,7 @@ return [
     'expires' => 'Aegub',
     'no_schedules_found' => 'Ajakavasid ei leitud',
     'search_schedules' => 'Otsige nime, alamdomeeni või meili järgi...',
+    'search_schedules_autocomplete' => 'Otsige nime või alamdomeeni järgi...',
     'edit_plan' => 'Muuda plaani',
     'back_to_plans' => 'Tagasi plaanide juurde',
     'current_subscription_status' => 'Praegune abonemendi olek',
@@ -1875,5 +1876,10 @@ return [
     'upgrade_feature_description_ai_prompt' => 'Use AI to automatically transform and enhance the text in your event graphics.',
     'upgrade_feature_description_email_scheduling' => 'Automatically send event graphic emails to your audience on a recurring schedule.',
     'upgrade_feature_description_custom_css' => 'Add custom CSS to fully personalize the look of your public schedule page.',
+    'want_to_see_your_event_here' => 'Soovid oma sündmust siin näha? Lisa see aadressil',
+    'approved_schedules' => 'Kinnitatud kalendrid',
+    'approved_schedules_help' => 'Nendest kalendritest esitatud sündmused kinnitatakse automaatselt',
+    'add_schedule' => 'Lisa kalender',
+    'schedule_subdomain' => 'kalendri alamdomeen',
 
 ];

@@ -1153,6 +1153,7 @@ return [
     'expires' => 'Verloopt',
     'no_schedules_found' => 'Geen agenda\'s gevonden',
     'search_schedules' => 'Zoeken op naam, subdomein of e-mail...',
+    'search_schedules_autocomplete' => 'Zoeken op naam of subdomein...',
     'edit_plan' => 'Plan bewerken',
     'back_to_plans' => 'Terug naar plannen',
     'current_subscription_status' => 'Huidige abonnementsstatus',
@@ -1857,5 +1858,10 @@ return [
     'upgrade_feature_description_ai_prompt' => 'Use AI to automatically transform and enhance the text in your event graphics.',
     'upgrade_feature_description_email_scheduling' => 'Automatically send event graphic emails to your audience on a recurring schedule.',
     'upgrade_feature_description_custom_css' => 'Add custom CSS to fully personalize the look of your public schedule page.',
+    'want_to_see_your_event_here' => 'Wilt u uw evenement hier zien? Voeg het toe op',
+    'approved_schedules' => 'Goedgekeurde agenda\'s',
+    'approved_schedules_help' => 'Evenementen ingediend vanuit deze agenda\'s worden automatisch goedgekeurd',
+    'add_schedule' => 'Agenda toevoegen',
+    'schedule_subdomain' => 'agenda subdomein',
 
 ];

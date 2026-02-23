@@ -1148,6 +1148,7 @@ return [
     'expires' => 'פג תוקף',
     'no_schedules_found' => 'לא נמצאו לוחות',
     'search_schedules' => 'חיפוש לפי שם, תת-דומיין או אימייל...',
+    'search_schedules_autocomplete' => 'חיפוש לפי שם או תת-דומיין...',
     'edit_plan' => 'עריכת תוכנית',
     'back_to_plans' => 'חזרה לתוכניות',
     'current_subscription_status' => 'סטטוס מנוי נוכחי',
@@ -1852,5 +1853,10 @@ return [
     'upgrade_feature_description_ai_prompt' => 'Use AI to automatically transform and enhance the text in your event graphics.',
     'upgrade_feature_description_email_scheduling' => 'Automatically send event graphic emails to your audience on a recurring schedule.',
     'upgrade_feature_description_custom_css' => 'Add custom CSS to fully personalize the look of your public schedule page.',
+    'want_to_see_your_event_here' => 'רוצה לראות את האירוע שלך כאן? הוסף אותו ב',
+    'approved_schedules' => 'לוחות זמנים מאושרים',
+    'approved_schedules_help' => 'אירועים שיוגשו מלוחות זמנים אלה יאושרו אוטומטית',
+    'add_schedule' => 'הוסף לוח זמנים',
+    'schedule_subdomain' => 'תת-דומיין של לוח זמנים',
 
 ];

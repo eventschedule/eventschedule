@@ -2,7 +2,7 @@
     <x-slot name="title">Documentation - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Documentation</x-slot>
     <x-slot name="description">Complete documentation for Event Schedule. User guides, selfhost installation, and developer resources.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="socialImage">social/docs.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -27,7 +27,9 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "{{ url()->current() }}"
-        }
+        },
+        "datePublished": "2024-01-01",
+        "dateModified": "2026-02-01"
     }
     </script>
     </x-slot>
@@ -506,6 +508,63 @@
             </div>
         </div>
     </section>
+
+    <!-- DefinedTermSet Schema for Glossary -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "DefinedTermSet",
+        "name": "Event Schedule Glossary",
+        "description": "Key terms used throughout Event Schedule",
+        "hasDefinedTerm": [
+            {
+                "@type": "DefinedTerm",
+                "name": "Schedule",
+                "description": "Your event calendar with its own unique URL and branding. Each schedule can contain unlimited events."
+            },
+            {
+                "@type": "DefinedTerm",
+                "name": "Event",
+                "description": "A single occurrence with a date, time, location, and details. Events belong to a schedule."
+            },
+            {
+                "@type": "DefinedTerm",
+                "name": "Sub-schedule",
+                "description": "A category to organize events within your schedule (e.g., Live Music, Comedy, Workshops)."
+            },
+            {
+                "@type": "DefinedTerm",
+                "name": "Ticket",
+                "description": "A purchasable item for event attendance. Events can have multiple ticket types (e.g., General, VIP)."
+            },
+            {
+                "@type": "DefinedTerm",
+                "name": "Follower",
+                "description": "Someone who follows your schedule to receive updates about new events."
+            },
+            {
+                "@type": "DefinedTerm",
+                "name": "Newsletter",
+                "description": "An email campaign sent to your followers or ticket buyers to announce events, share updates, or promote your schedule."
+            },
+            {
+                "@type": "DefinedTerm",
+                "name": "Segment",
+                "description": "A defined audience group for sending newsletters (e.g., all followers, ticket buyers, or a custom list)."
+            },
+            {
+                "@type": "DefinedTerm",
+                "name": "Embed",
+                "description": "A widget that displays your schedule on an external website using an iframe or JavaScript snippet."
+            },
+            {
+                "@type": "DefinedTerm",
+                "name": "Admin Panel",
+                "description": "The management interface where you configure your schedule, add events, and view analytics."
+            }
+        ]
+    }
+    </script>
 
     <!-- Open Source Section -->
     <section class="bg-white dark:bg-[#0a0a0f] py-20 border-t border-gray-200 dark:border-white/5">

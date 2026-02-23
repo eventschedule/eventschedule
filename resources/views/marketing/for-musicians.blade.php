@@ -1,7 +1,7 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Musicians & Bands | Share Your Tour Dates</x-slot>
-    <x-slot name="description">Share your tour dates, sell tickets, and reach fans directly with newsletters. No algorithm blocking your content. Zero platform fees. Built for musicians, bands, and solo artists.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="description">Share your tour dates, sell tickets, and reach fans directly with newsletters. No algorithm blocking your content. Zero platform fees. Free forever.</x-slot>
+    <x-slot name="socialImage">social/for-talent.png</x-slot>
     <x-slot name="breadcrumbTitle">For Musicians</x-slot>
 
     <x-slot name="structuredData">

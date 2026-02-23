@@ -2,7 +2,7 @@
     <x-slot name="title">Account Settings Documentation - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Account Settings</x-slot>
     <x-slot name="description">Learn how to manage your profile, payment methods, API access, and Google integrations in Event Schedule.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="socialImage">social/docs.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -27,7 +27,9 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "{{ url()->current() }}"
-        }
+        },
+        "datePublished": "2024-01-01",
+        "dateModified": "2026-02-01"
     }
     </script>
     </x-slot>

@@ -41,6 +41,13 @@ abstract class AbstractEventDesign
 
     protected $headerImageResource = null;
 
+    // Footer configuration
+    protected const FOOTER_HEIGHT = 50;
+
+    protected const FOOTER_FONT_SIZE = 13;
+
+    protected int $footerHeight = 0;
+
     // Language and layout
     protected string $lang;
 
@@ -93,6 +100,9 @@ abstract class AbstractEventDesign
         // Prepare header image (uses totalWidth, adds to totalHeight)
         $this->prepareHeaderImage();
 
+        // Prepare footer (adds to totalHeight if schedule accepts requests)
+        $this->prepareFooter();
+
         // Create image
         $this->im = imagecreatetruecolor($this->totalWidth, $this->totalHeight);
         if (! $this->im) {
@@ -125,6 +135,9 @@ abstract class AbstractEventDesign
 
         // Generate event layout based on design type
         $this->generateEventLayout();
+
+        // Render footer after event layout
+        $this->renderFooter();
 
         // Output the image
         ob_start();
@@ -242,6 +255,51 @@ abstract class AbstractEventDesign
 
         imagedestroy($this->headerImageResource);
         $this->headerImageResource = null;
+    }
+
+    /**
+     * Prepare footer - adds height if schedule accepts event requests
+     */
+    protected function prepareFooter(): void
+    {
+        if ($this->role->acceptEventRequests()) {
+            $this->footerHeight = self::FOOTER_HEIGHT;
+            $this->totalHeight += $this->footerHeight;
+        }
+    }
+
+    /**
+     * Render footer with "Want to see your event here?" message
+     */
+    protected function renderFooter(): void
+    {
+        if ($this->footerHeight === 0) {
+            return;
+        }
+
+        $lang = strtolower($this->role->language_code);
+        $message = trans('messages.want_to_see_your_event_here', [], $lang);
+        $url = $this->getFooterRequestUrl();
+
+        $centerX = (int) ($this->totalWidth / 2);
+        $y = $this->totalHeight - $this->footerHeight + 8;
+
+        $this->addCenteredText($message, $centerX, $y, self::FOOTER_FONT_SIZE, $this->c['gray']);
+        $this->addCenteredText($url, $centerX, $y + 20, self::FOOTER_FONT_SIZE, $this->c['gray']);
+    }
+
+    /**
+     * Get the URL for the event request page
+     */
+    protected function getFooterRequestUrl(): string
+    {
+        if ($this->role->custom_domain) {
+            $url = $this->role->custom_domain.'/request';
+        } else {
+            $url = route('role.request', ['subdomain' => $this->role->subdomain]);
+        }
+
+        return preg_replace('#^https?://#', '', $url);
     }
 
     /**

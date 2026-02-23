@@ -2,7 +2,7 @@
     <x-slot name="title">Event Graphics Documentation - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Event Graphics</x-slot>
     <x-slot name="description">Learn how to use the Event Graphics feature to generate shareable images and text for your upcoming events.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="socialImage">social/docs.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -27,7 +27,9 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "{{ url()->current() }}"
-        }
+        },
+        "datePublished": "2024-01-01",
+        "dateModified": "2026-02-01"
     }
     </script>
     </x-slot>

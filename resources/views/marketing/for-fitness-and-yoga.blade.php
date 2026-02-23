@@ -1,7 +1,7 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Schedule for Fitness & Yoga Instructors | Share Your Class Schedule</x-slot>
-    <x-slot name="description">Share your class schedule, sell drop-in passes, and reach students directly with newsletters. No algorithm blocking your content. Zero platform fees. Built for yoga teachers, personal trainers, and fitness instructors.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="title">Event Schedule for Fitness & Yoga | Class Scheduling</x-slot>
+    <x-slot name="description">Share your class schedule, sell drop-in passes, and reach students directly with newsletters. No algorithm. Zero platform fees. Free forever.</x-slot>
+    <x-slot name="socialImage">social/for-talent.png</x-slot>
     <x-slot name="breadcrumbTitle">For Fitness & Yoga</x-slot>
 
     <x-slot name="structuredData">
@@ -21,6 +21,46 @@
             "@type": "Audience",
             "audienceType": "Fitness & Yoga Instructors"
         }
+    }
+    </script>
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Is Event Schedule free for fitness and yoga instructors?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Event Schedule is free forever for sharing your class schedule, building a student following, and syncing with Google Calendar. Paid class registration and newsletters are available on the Pro plan, with zero platform fees."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I schedule recurring weekly classes?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Set up daily, weekly, or monthly recurring classes. Create your schedule once and it repeats automatically. Students can follow your schedule and get notified when new sessions are added or times change."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do students find and follow my classes?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Students can follow your schedule and receive email notifications for new classes. Share your schedule link on social media, embed it on your website, or include it in your studio's listing. You can also send newsletters to followers."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I charge for classes and manage registrations?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Connect your Stripe account to sell class spots directly from your schedule. Set per-class pricing, manage registrations, and check in students with QR codes. Event Schedule charges zero platform fees - you only pay Stripe's processing fees."
+                }
+            }
+        ]
     }
     </script>
     </x-slot>
@@ -725,6 +765,86 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="bg-gray-100 dark:bg-black/30 py-24">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Frequently asked questions
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400">
+                    Everything fitness and yoga instructors ask about Event Schedule.
+                </p>
+            </div>
+
+            <div class="space-y-4" x-data="{ open: null }">
+                <div class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Is Event Schedule free for fitness and yoga instructors?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 1" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Event Schedule is free forever for sharing your class schedule, building a student following, and syncing with Google Calendar. Paid class registration and newsletters are available on the Pro plan, with zero platform fees.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900 dark:to-emerald-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I schedule recurring weekly classes?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 2" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Set up daily, weekly, or monthly recurring classes. Create your schedule once and it repeats automatically. Students can follow your schedule and get notified when new sessions are added or times change.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            How do students find and follow my classes?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 3" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Students can follow your schedule and receive email notifications for new classes. Share your schedule link on social media, embed it on your website, or include it in your studio's listing. You can also send newsletters to followers.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I charge for classes and manage registrations?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 4" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Connect your Stripe account to sell class spots directly from your schedule. Set per-class pricing, manage registrations, and check in students with QR codes. Event Schedule charges zero platform fees - you only pay Stripe's processing fees.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

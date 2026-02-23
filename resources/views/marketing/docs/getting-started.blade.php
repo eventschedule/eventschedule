@@ -2,7 +2,7 @@
     <x-slot name="title">Getting Started - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Getting Started</x-slot>
     <x-slot name="description">Get started with Event Schedule. Learn how to create your account, set up your first schedule, and start sharing events.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="socialImage">social/docs.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -27,7 +27,9 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "{{ url()->current() }}"
-        }
+        },
+        "datePublished": "2024-01-01",
+        "dateModified": "2026-02-01"
     }
     </script>
     </x-slot>
@@ -239,6 +241,56 @@
     </section>
 
     @include('marketing.docs.partials.scripts')
+
+    <!-- FAQPage Schema -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Can I have multiple schedules?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, you can create unlimited schedules under one account. This is useful if you manage multiple venues, bands, or organizations."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I change my schedule URL?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Go to Admin Panel, Profile, Edit and update the URL/subdomain field. Note that changing your URL may break existing links."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What's the difference between schedule types?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Talent schedules show where you'll be performing. Venue schedules show what's happening at your location (with full address support). Curator schedules aggregate events from multiple sources. Vendor schedules are for mobile businesses like food trucks. You can change your type anytime."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I import events from my existing calendar?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes! Event Schedule supports Google Calendar and CalDAV sync. Connect your calendar in Admin Panel, Profile, Edit under Calendar Sync. You can also import events using AI from text or images."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is Event Schedule free?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, free forever! The free plan includes unlimited events, unlimited schedules, a custom subdomain, and all core features. No credit card required. Pro features like custom domains, branding removal, and ticketing are available starting at just $5/month with a 7-day free trial."
+                }
+            }
+        ]
+    }
+    </script>
 
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>

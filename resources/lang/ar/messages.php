@@ -1147,6 +1147,7 @@ return [
     'expires' => 'ينتهي',
     'no_schedules_found' => 'لم يتم العثور على جداول',
     'search_schedules' => 'البحث بالاسم أو النطاق الفرعي أو البريد...',
+    'search_schedules_autocomplete' => 'البحث بالاسم أو النطاق الفرعي...',
     'edit_plan' => 'تعديل الخطة',
     'back_to_plans' => 'العودة للخطط',
     'current_subscription_status' => 'حالة الاشتراك الحالية',
@@ -1860,5 +1861,10 @@ return [
     'upgrade_feature_description_ai_prompt' => 'Use AI to automatically transform and enhance the text in your event graphics.',
     'upgrade_feature_description_email_scheduling' => 'Automatically send event graphic emails to your audience on a recurring schedule.',
     'upgrade_feature_description_custom_css' => 'Add custom CSS to fully personalize the look of your public schedule page.',
+    'want_to_see_your_event_here' => 'هل تريد رؤية فعاليتك هنا؟ أضفها على',
+    'approved_schedules' => 'الجداول المعتمدة',
+    'approved_schedules_help' => 'سيتم الموافقة تلقائيًا على الأحداث المقدمة من هذه الجداول',
+    'add_schedule' => 'إضافة جدول',
+    'schedule_subdomain' => 'النطاق الفرعي للجدول',
 
 ];

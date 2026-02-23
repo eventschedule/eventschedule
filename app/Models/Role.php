@@ -64,7 +64,7 @@ class Role extends Model implements MustVerifyEmail
         'show_phone',
         'require_approval',
         'import_config',
-        'custom_domain',
+        'custom_domain', // Stored as full URL with protocol (e.g. https://example.com)
         'event_layout',
         'google_calendar_id',
         'sync_direction',
@@ -83,6 +83,7 @@ class Role extends Model implements MustVerifyEmail
         'slug_pattern',
         'direct_registration',
         'first_day_of_week',
+        'approved_subdomains',
     ];
 
     /**
@@ -95,6 +96,7 @@ class Role extends Model implements MustVerifyEmail
         'trial_ends_at' => 'datetime',
         'caldav_last_sync_at' => 'datetime',
         'event_custom_fields' => 'array',
+        'approved_subdomains' => 'array',
         'last_translated_at' => 'datetime',
         'direct_registration' => 'boolean',
         'boost_credit' => 'decimal:2',
@@ -1185,6 +1187,14 @@ class Role extends Model implements MustVerifyEmail
         $config['required_fields'] = array_merge($defaults['required_fields'], $config['required_fields'] ?? []);
 
         return $config;
+    }
+
+    /**
+     * Normalize the custom_domain to strip trailing slashes on all save paths.
+     */
+    public function setCustomDomainAttribute($value)
+    {
+        $this->attributes['custom_domain'] = $value ? rtrim($value, '/') : $value;
     }
 
     /**

@@ -1780,6 +1780,9 @@ class RoleController extends Controller
             $role->event_custom_fields = ! empty($eventCustomFields) ? $eventCustomFields : null;
         }
 
+        $approvedSubdomains = array_filter(array_map('trim', $request->input('approved_subdomains', [])));
+        $role->approved_subdomains = ! empty($approvedSubdomains) ? array_values($approvedSubdomains) : null;
+
         // Auto-verify phone for selfhost, or if it matches the user's verified phone
         if (! config('app.hosted') && $role->phone && $role->isDirty('phone')) {
             $role->phone_verified_at = now();
@@ -2073,7 +2076,7 @@ class RoleController extends Controller
     public function qrCode($subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
-        $url = $role->custom_domain ? 'https://'.$role->custom_domain : $role->getGuestUrl();
+        $url = $role->custom_domain ?: $role->getGuestUrl();
 
         $qrCode = QrCode::create($url)
             ->setSize(300)
@@ -2406,6 +2409,30 @@ class RoleController extends Controller
         $roles = array_values($roles->toArray());
 
         return response()->json($roles);
+    }
+
+    public function searchSubdomains(Request $request): JsonResponse
+    {
+        $q = trim($request->get('q', ''));
+        $exclude = $request->get('exclude', '');
+
+        if (strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $roles = Role::where(function ($query) use ($q) {
+            $query->where('subdomain', 'like', "{$q}%")
+                ->orWhere('name', 'like', "%{$q}%");
+        })
+            ->when($exclude, fn ($query) => $query->where('subdomain', '!=', $exclude))
+            ->limit(10)
+            ->get(['subdomain', 'name', 'city']);
+
+        return response()->json($roles->map(fn ($role) => [
+            'subdomain' => $role->subdomain,
+            'name' => $role->name,
+            'city' => $role->city,
+        ]));
     }
 
     public function searchEvents(Request $request, $subdomain)

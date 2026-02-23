@@ -2,7 +2,7 @@
     <x-slot name="title">Selling Tickets - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Selling Tickets</x-slot>
     <x-slot name="description">Learn how to set up and sell tickets for your events. Configure payment methods, create ticket types, and manage sales.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="socialImage">social/docs.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -27,7 +27,9 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "{{ url()->current() }}"
-        }
+        },
+        "datePublished": "2024-01-01",
+        "dateModified": "2026-02-01"
     }
     </script>
     </x-slot>

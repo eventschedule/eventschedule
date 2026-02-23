@@ -162,6 +162,30 @@
                 });
             }
 
+            const requireApprovalCheckbox = document.querySelector('input[name="require_approval"][type="checkbox"]');
+            const approvedSubdomainsSection = document.getElementById('approved_subdomains_section');
+
+            if (acceptRequestsCheckbox && requireApprovalCheckbox && approvedSubdomainsSection) {
+                function toggleApprovedSubdomains() {
+                    approvedSubdomainsSection.style.display = (acceptRequestsCheckbox.checked && requireApprovalCheckbox.checked) ? 'block' : 'none';
+                }
+                toggleApprovedSubdomains();
+                acceptRequestsCheckbox.addEventListener('change', toggleApprovedSubdomains);
+                requireApprovalCheckbox.addEventListener('change', toggleApprovedSubdomains);
+            }
+
+            document.querySelectorAll('[data-subdomain-search]').forEach(function(el) {
+                setupSubdomainAutocomplete(el);
+            });
+
+            document.addEventListener('click', function(e) {
+                document.querySelectorAll('[data-subdomain-dropdown]').forEach(function(dropdown) {
+                    if (!dropdown.parentElement.contains(e.target)) {
+                        dropdown.classList.add('hidden');
+                        dropdown.innerHTML = '';
+                    }
+                });
+            });
 
             $('#profile_image').on('change', function() {
                 previewImage(this, 'profile_image_preview');
@@ -1894,6 +1918,33 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.require_approval_help') }}</p>
                             <x-input-error class="mt-2" :messages="$errors->get('require_approval')" />
                         </div>
+                        <div class="mb-6" id="approved_subdomains_section">
+                            <x-input-label :value="__('messages.approved_schedules')" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.approved_schedules_help') }}</p>
+                            <div id="approved-subdomains-items">
+                                @foreach(old('approved_subdomains', $role->approved_subdomains ?? []) as $i => $subdomain)
+                                    <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                        <div class="mb-4 relative">
+                                            <div class="flex items-center">
+                                                <input type="text" data-subdomain-search value="{{ $subdomain }}" placeholder="{{ __('messages.search_schedules_autocomplete') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" autocomplete="off" />
+                                                <button type="button" data-subdomain-clear class="hidden ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
+                                            </div>
+                                            <input type="hidden" name="approved_subdomains[]" value="{{ $subdomain }}" />
+                                            <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50"></div>
+                                        </div>
+                                        <div class="flex gap-4 items-center">
+                                            <button type="button" data-action="remove-parent-item"
+                                                class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                {{ __('messages.remove') }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <button type="button" data-action="add-approved-subdomain" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                + {{ __('messages.add_schedule') }}
+                            </button>
+                        </div>
                         <div class="mb-6" id="request_terms_section">
                             <x-input-label for="request_terms" :value="__('messages.request_terms')" />
                             <textarea id="request_terms" name="request_terms"
@@ -2839,6 +2890,111 @@ function addImportUrlField() {
         </div>
     `;
     container.appendChild(div);
+}
+
+function addApprovedSubdomainField() {
+    const container = document.getElementById('approved-subdomains-items');
+    const div = document.createElement('div');
+    div.className = 'mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg';
+    div.innerHTML = `
+        <div class="mb-4 relative">
+            <div class="flex items-center">
+                <input type="text" data-subdomain-search placeholder="{{ __('messages.search_schedules_autocomplete') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" autocomplete="off" />
+                <button type="button" data-subdomain-clear class="hidden ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
+            </div>
+            <input type="hidden" name="approved_subdomains[]" value="" />
+            <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50"></div>
+        </div>
+        <div class="flex gap-4 items-center">
+            <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm" data-action="remove-parent-item">
+                {{ __('messages.remove') }}
+            </button>
+        </div>
+    `;
+    container.appendChild(div);
+    setupSubdomainAutocomplete(div.querySelector('[data-subdomain-search]'));
+}
+
+function setupSubdomainAutocomplete(inputEl) {
+    if (!inputEl) return;
+    const wrapper = inputEl.closest('.relative');
+    const hiddenInput = wrapper.querySelector('input[name="approved_subdomains[]"]');
+    const dropdown = wrapper.querySelector('[data-subdomain-dropdown]');
+    const clearBtn = wrapper.querySelector('[data-subdomain-clear]');
+    let debounceTimer = null;
+    const currentSubdomain = '{{ $role->subdomain ?? '' }}';
+
+    if (hiddenInput.value) {
+        clearBtn.classList.remove('hidden');
+    }
+
+    inputEl.addEventListener('input', function() {
+        const q = this.value.trim();
+        clearTimeout(debounceTimer);
+
+        if (q.length < 2) {
+            dropdown.classList.add('hidden');
+            dropdown.innerHTML = '';
+            if (!hiddenInput.value) {
+                clearBtn.classList.add('hidden');
+            }
+            return;
+        }
+
+        debounceTimer = setTimeout(function() {
+            const url = '{{ route("role.search-subdomains") }}' + '?q=' + encodeURIComponent(q) + '&exclude=' + encodeURIComponent(currentSubdomain);
+            fetch(url, {
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(results) {
+                dropdown.innerHTML = '';
+                if (results.length === 0) {
+                    dropdown.classList.add('hidden');
+                    return;
+                }
+                results.forEach(function(item) {
+                    const row = document.createElement('div');
+                    row.className = 'px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700';
+                    const nameText = item.name || item.subdomain;
+                    const cityText = item.city ? ' <span class="text-xs text-gray-400">' + escapeHtml(item.city) + '</span>' : '';
+                    row.innerHTML = '<div class="font-medium text-sm text-gray-900 dark:text-gray-100">' + escapeHtml(nameText) + cityText + '</div>'
+                        + '<div class="text-xs text-gray-500 dark:text-gray-400">' + escapeHtml(item.subdomain) + '.eventschedule.com</div>';
+                    row.addEventListener('click', function() {
+                        hiddenInput.value = item.subdomain;
+                        inputEl.value = nameText + ' (' + item.subdomain + ')';
+                        inputEl.readOnly = true;
+                        inputEl.classList.add('bg-gray-50', 'dark:bg-gray-800');
+                        dropdown.classList.add('hidden');
+                        dropdown.innerHTML = '';
+                        clearBtn.classList.remove('hidden');
+                    });
+                    dropdown.appendChild(row);
+                });
+                dropdown.classList.remove('hidden');
+            });
+        }, 300);
+    });
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            hiddenInput.value = '';
+            inputEl.value = '';
+            inputEl.readOnly = false;
+            inputEl.classList.remove('bg-gray-50', 'dark:bg-gray-800');
+            clearBtn.classList.add('hidden');
+            dropdown.classList.add('hidden');
+            dropdown.innerHTML = '';
+            inputEl.focus();
+        });
+    }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
 }
 
 function addImportCityField() {
@@ -3961,6 +4117,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'add-import-url':
                 addImportUrlField();
+                break;
+            case 'add-approved-subdomain':
+                addApprovedSubdomainField();
                 break;
             case 'add-import-city':
                 addImportCityField();

@@ -1,6 +1,6 @@
-@props(['name', 'tier' => 'pro', 'subdomain', 'docsUrl' => null])
+@props(['name', 'tier' => 'pro', 'subdomain' => '', 'docsUrl' => null])
 
-@if (config('app.hosted'))
+@if (config('app.hosted') && $subdomain)
 <x-modal :name="$name" maxWidth="sm">
     <div class="p-6 text-center">
         <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4">

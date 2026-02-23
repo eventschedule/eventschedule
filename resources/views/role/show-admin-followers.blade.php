@@ -25,8 +25,8 @@
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.share_your_event_schedule_link') }}</p>
     <div class="mt-3">
         @if ($role->custom_domain)
-        <x-link href="https://{{ $role->custom_domain }}" target="_blank">
-            {{ $role->custom_domain }}
+        <x-link href="{{ $role->custom_domain }}" target="_blank">
+            {{ \App\Utils\UrlUtils::clean($role->custom_domain) }}
         </x-link>
         @else
         <x-link href="{{ $role->getGuestUrl() }}" target="_blank">

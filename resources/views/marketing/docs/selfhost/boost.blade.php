@@ -2,7 +2,7 @@
     <x-slot name="title">Boost Setup Documentation - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Boost Setup</x-slot>
     <x-slot name="description">Learn how to configure Meta/Facebook ads integration for Event Schedule's boost feature, enabling users to promote events through paid social media campaigns.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="socialImage">social/docs.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -27,7 +27,9 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "{{ url()->current() }}"
-        }
+        },
+        "datePublished": "2024-01-01",
+        "dateModified": "2026-02-01"
     }
     </script>
     </x-slot>

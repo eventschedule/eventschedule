@@ -1,7 +1,7 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Schedule for Watch Parties | Host, Schedule & Manage Virtual Watch Parties</x-slot>
+    <x-slot name="title">Event Schedule for Watch Parties | Hosting Software</x-slot>
     <x-slot name="description">Free, open-source watch party scheduling software with registration, ticketing, and email notifications. Works with any streaming platform. Zero platform fees.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="socialImage">social/for-online.png</x-slot>
     <x-slot name="breadcrumbTitle">For Watch Parties</x-slot>
 
     <x-slot name="structuredData">
@@ -21,6 +21,46 @@
             "@type": "Audience",
             "audienceType": "Watch Party Hosts"
         }
+    }
+    </script>
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What streaming platforms work with watch parties?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Any platform that gives you a streaming or meeting link. YouTube, Twitch, Discord, Zoom, and custom streaming solutions all work. Event Schedule is platform-agnostic - just paste your link and viewers join from your schedule."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I charge for watch party access?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Set up paid registration with Stripe for premium screenings, exclusive premieres, or VIP watch parties. You keep 100% of the ticket revenue - Event Schedule charges zero platform fees. Stripe charges its standard processing fee (2.9% + $0.30)."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I schedule recurring watch parties?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Set up weekly movie nights, monthly documentary screenings, or any recurring schedule. Viewers can follow your schedule and get notified whenever you add new screenings. Your full watch party calendar lives on one shareable page. Screenings also sync with Google Calendar."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is Event Schedule free for hosting watch parties?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Event Schedule is free, open-source watch party hosting software. The free plan includes unlimited events, viewer email notifications, follower features, and Google Calendar sync. There are zero platform fees on ticket sales at any plan level. You only pay Stripe's standard processing fee if you sell tickets. You can also selfhost Event Schedule on your own server."
+                }
+            }
+        ]
     }
     </script>
     </x-slot>
@@ -583,36 +623,80 @@
     </section>
 
     <!-- FAQ Section -->
-    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
+    <section class="bg-gray-100 dark:bg-black/30 py-24">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center mb-12">
-                Frequently asked questions about hosting watch parties
-            </h2>
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Frequently asked questions
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400">
+                    Everything watch party hosts ask about Event Schedule.
+                </p>
+            </div>
 
-            <div class="space-y-6">
-                <div class="bg-white dark:bg-[#0a0a0f] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">What streaming platforms work with watch parties?</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Any platform that gives you a streaming or meeting link. YouTube, Twitch, Discord, Zoom, and custom streaming solutions all work. Event Schedule is platform-agnostic - just paste your link and viewers join from your schedule. Learn more about <a href="{{ route('marketing.online_events') }}" class="text-indigo-600 dark:text-indigo-400 underline hover:no-underline">online event features</a>.</p>
+            <div class="space-y-4" x-data="{ open: null }">
+                <div class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            What streaming platforms work with watch parties?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 1" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Any platform that gives you a streaming or meeting link. YouTube, Twitch, Discord, Zoom, and custom streaming solutions all work. Event Schedule is platform-agnostic - just paste your link and viewers join from your schedule. Learn more about <a href="{{ route('marketing.online_events') }}" class="text-indigo-600 dark:text-indigo-400 underline hover:no-underline">online event features</a>.
+                        </p>
+                    </div>
                 </div>
 
-                <div class="bg-white dark:bg-[#0a0a0f] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Can I charge for watch party access?</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Yes. Set up paid registration with Stripe for premium screenings, exclusive premieres, or VIP watch parties. You keep 100% of the ticket revenue - Event Schedule charges zero platform fees. Stripe charges its standard processing fee (2.9% + $0.30). See all <a href="{{ route('marketing.ticketing') }}" class="text-indigo-600 dark:text-indigo-400 underline hover:no-underline">ticketing features</a>.</p>
+                <div class="bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900 dark:to-emerald-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I charge for watch party access?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 2" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Set up paid registration with Stripe for premium screenings, exclusive premieres, or VIP watch parties. You keep 100% of the ticket revenue - Event Schedule charges zero platform fees. Stripe charges its standard processing fee (2.9% + $0.30). See all <a href="{{ route('marketing.ticketing') }}" class="text-indigo-600 dark:text-indigo-400 underline hover:no-underline">ticketing features</a>.
+                        </p>
+                    </div>
                 </div>
 
-                <div class="bg-white dark:bg-[#0a0a0f] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Can I schedule recurring watch parties?</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Yes. Set up weekly movie nights, monthly documentary screenings, or any recurring schedule. Viewers can follow your schedule and get notified whenever you add new screenings. Your full watch party calendar lives on one shareable page. Screenings also sync with <a href="{{ route('marketing.calendar_sync') }}" class="text-indigo-600 dark:text-indigo-400 underline hover:no-underline">Google Calendar</a>.</p>
+                <div class="bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I schedule recurring watch parties?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 3" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Set up weekly movie nights, monthly documentary screenings, or any recurring schedule. Viewers can follow your schedule and get notified whenever you add new screenings. Your full watch party calendar lives on one shareable page. Screenings also sync with <a href="{{ route('marketing.calendar_sync') }}" class="text-indigo-600 dark:text-indigo-400 underline hover:no-underline">Google Calendar</a>.
+                        </p>
+                    </div>
                 </div>
 
-                <div class="bg-white dark:bg-[#0a0a0f] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">How do viewers get the streaming link?</h3>
-                    <p class="text-gray-500 dark:text-gray-400">When viewers register or purchase a ticket, the streaming link appears on their registration confirmation and event page. You can also email all registrants directly from your dashboard before the screening starts.</p>
-                </div>
-
-                <div class="bg-white dark:bg-[#0a0a0f] rounded-2xl border border-gray-200 dark:border-white/10 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Is Event Schedule free for hosting watch parties?</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Yes. Event Schedule is free, open-source watch party hosting software. The free plan includes unlimited events, viewer email notifications, follower features, and Google Calendar sync. There are zero platform fees on ticket sales at any plan level. You only pay Stripe's standard processing fee if you sell tickets. You can also <a href="https://github.com/eventschedule/eventschedule" class="text-indigo-600 dark:text-indigo-400 underline hover:no-underline">selfhost Event Schedule</a> on your own server.</p>
+                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Is Event Schedule free for hosting watch parties?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 4" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Event Schedule is free, open-source watch party hosting software. The free plan includes unlimited events, viewer email notifications, follower features, and Google Calendar sync. There are zero platform fees on ticket sales at any plan level. You only pay Stripe's standard processing fee if you sell tickets. You can also <a href="https://github.com/eventschedule/eventschedule" class="text-indigo-600 dark:text-indigo-400 underline hover:no-underline">selfhost Event Schedule</a> on your own server.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -763,61 +847,11 @@
         ],
         "url": "{{ url()->current() }}",
         "keywords": "watch party platform, schedule watch parties, virtual watch party, online watch party hosting, group streaming events, watch party ticketing, movie night scheduling, free watch party app",
-        "screenshot": "{{ asset('social/features.png') }}",
+        "screenshot": "{{ asset('social/for-online.png') }}",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"
         }
-    }
-    </script>
-
-    <!-- FAQ Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "What streaming platforms work with watch parties?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Any platform that gives you a streaming or meeting link. YouTube, Twitch, Discord, Zoom, and custom streaming solutions all work. Event Schedule is platform-agnostic - just paste your link and viewers join from your schedule. Learn more about online event features."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I charge for watch party access?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Set up paid registration with Stripe for premium screenings, exclusive premieres, or VIP watch parties. You keep 100% of the ticket revenue - Event Schedule charges zero platform fees. Stripe charges its standard processing fee (2.9% + $0.30). See all ticketing features."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I schedule recurring watch parties?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Set up weekly movie nights, monthly documentary screenings, or any recurring schedule. Viewers can follow your schedule and get notified whenever you add new screenings. Your full watch party calendar lives on one shareable page. Screenings also sync with Google Calendar."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do viewers get the streaming link?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "When viewers register or purchase a ticket, the streaming link appears on their registration confirmation and event page. You can also email all registrants directly from your dashboard before the screening starts."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free for hosting watch parties?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is free, open-source watch party hosting software. The free plan includes unlimited events, viewer email notifications, follower features, and Google Calendar sync. There are zero platform fees on ticket sales at any plan level. You only pay Stripe's standard processing fee if you sell tickets. You can also selfhost Event Schedule on your own server."
-                }
-            }
-        ]
     }
     </script>
 

@@ -1,7 +1,7 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Visual Artists | Share Your Exhibitions</x-slot>
-    <x-slot name="description">Share your exhibitions, open studios, and art fairs. Sell tickets directly, build your collector base with newsletters. Built for painters, sculptors, photographers, and visual artists. Zero platform fees.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="description">Share your exhibitions, open studios, and art fairs. Sell tickets directly and build your collector base with newsletters. Zero platform fees. Free forever.</x-slot>
+    <x-slot name="socialImage">social/for-talent.png</x-slot>
     <x-slot name="breadcrumbTitle">For Visual Artists</x-slot>
 
     <x-slot name="structuredData">
@@ -21,6 +21,46 @@
             "@type": "Audience",
             "audienceType": "Visual Artists"
         }
+    }
+    </script>
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Is Event Schedule free for visual artists?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Event Schedule is free forever for sharing your exhibition and event schedule, building a collector following, and syncing with Google Calendar. Newsletters and advanced features are available on the Pro plan."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I list exhibitions, open studios, and art fairs together?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Use sub-schedules to organize by event type - solo exhibitions, group shows, open studios, art fairs, and workshops. Each event can include descriptions, images, venue details, and ticketing options."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do collectors and art lovers discover my events?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Followers can receive email notifications when you add new exhibitions or events. Share your schedule link in your artist bio, on social media, or embed it on your portfolio website."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I sell tickets to openings and workshops?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Connect your Stripe account and sell tickets directly from your schedule. Perfect for ticketed opening receptions, art workshops, or studio tours. Zero platform fees - you only pay Stripe's processing fees."
+                }
+            }
+        ]
     }
     </script>
     </x-slot>
@@ -660,6 +700,86 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="bg-gray-100 dark:bg-black/30 py-24">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Frequently asked questions
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400">
+                    Everything visual artists ask about Event Schedule.
+                </p>
+            </div>
+
+            <div class="space-y-4" x-data="{ open: null }">
+                <div class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Is Event Schedule free for visual artists?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 1" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Event Schedule is free forever for sharing your exhibition and event schedule, building a collector following, and syncing with Google Calendar. Newsletters and advanced features are available on the Pro plan.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900 dark:to-emerald-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I list exhibitions, open studios, and art fairs together?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 2" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Use sub-schedules to organize by event type - solo exhibitions, group shows, open studios, art fairs, and workshops. Each event can include descriptions, images, venue details, and ticketing options.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            How do collectors and art lovers discover my events?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 3" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Followers can receive email notifications when you add new exhibitions or events. Share your schedule link in your artist bio, on social media, or embed it on your portfolio website.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I sell tickets to openings and workshops?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 4" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Connect your Stripe account and sell tickets directly from your schedule. Perfect for ticketed opening receptions, art workshops, or studio tours. Zero platform fees - you only pay Stripe's processing fees.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

@@ -1146,6 +1146,7 @@ return [
     'expires' => 'Expire',
     'no_schedules_found' => 'Aucun planning trouvé',
     'search_schedules' => 'Rechercher par nom, sous-domaine ou e-mail...',
+    'search_schedules_autocomplete' => 'Rechercher par nom ou sous-domaine...',
     'edit_plan' => 'Modifier le plan',
     'back_to_plans' => 'Retour aux plans',
     'current_subscription_status' => 'Statut d\'abonnement actuel',
@@ -1859,5 +1860,10 @@ return [
     'upgrade_feature_description_ai_prompt' => 'Use AI to automatically transform and enhance the text in your event graphics.',
     'upgrade_feature_description_email_scheduling' => 'Automatically send event graphic emails to your audience on a recurring schedule.',
     'upgrade_feature_description_custom_css' => 'Add custom CSS to fully personalize the look of your public schedule page.',
+    'want_to_see_your_event_here' => 'Vous voulez voir votre événement ici ? Ajoutez-le sur',
+    'approved_schedules' => 'Calendriers approuvés',
+    'approved_schedules_help' => 'Les événements soumis depuis ces calendriers seront automatiquement approuvés',
+    'add_schedule' => 'Ajouter un calendrier',
+    'schedule_subdomain' => 'sous-domaine du calendrier',
 
 ];

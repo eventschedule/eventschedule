@@ -2,7 +2,7 @@
     <x-slot name="title">API Reference - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">API Reference</x-slot>
     <x-slot name="description">Programmatically manage schedules and events with the Event Schedule REST API. Learn about authentication, endpoints, and response formats.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
+    <x-slot name="socialImage">social/docs.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -27,7 +27,9 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "{{ url()->current() }}"
-        }
+        },
+        "datePublished": "2024-01-01",
+        "dateModified": "2026-02-01"
     }
     </script>
     </x-slot>
