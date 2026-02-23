@@ -34,7 +34,8 @@
         "image": "{{ $post->featured_image_url ?: config('app.url') . '/images/social/home.png' }}",
         "author": {
             "@type": "Person",
-            "name": "{{ $post->author_name }}"
+            "name": "{{ $post->author_name }}",
+            "url": "{{ config('app.url') }}/about"
         },
         "publisher": {
             "@type": "Organization",
@@ -56,6 +57,7 @@
             "@type": "SpeakableSpecification",
             "cssSelector": ["[itemprop='headline']", "[itemprop='description']"]
         }
+        ,"wordCount": {{ str_word_count(strip_tags($post->content)) }}
         @if($post->tags)
         ,"keywords": "{{ implode(', ', $post->tags) }}"
         @endif

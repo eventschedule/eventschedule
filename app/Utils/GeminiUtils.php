@@ -719,11 +719,12 @@ class GeminiUtils
             $eventUrl = null;
             $event = Event::where('registration_url', $item['registration_url'])
                 ->where('starts_at', '>=', now())
+                ->whereHas('roles', fn($q) => $q->where('roles.id', $role->id))
                 ->first();
             if ($event) {
                 $data[$key]['event_url'] = $event->getGuestUrl();
                 $data[$key]['event_id'] = UrlUtils::encodeId($event->id);
-                $data[$key]['is_curated'] = $role->isCurator() && $event->roles->contains($role->id);
+                $data[$key]['is_curated'] = $role->isCurator();
             }
 
             // Check for similar events at the same time
@@ -731,7 +732,8 @@ class GeminiUtils
                 $timezone = $role->user->timezone;
                 $eventDate = Carbon::parse($item['event_date_time'], $timezone)->setTimezone('UTC');
                 $query = Event::where('starts_at', $eventDate)
-                    ->where('starts_at', '>=', now());
+                    ->where('starts_at', '>=', now())
+                    ->whereHas('roles', fn($q) => $q->where('roles.id', $role->id));
 
                 // Check for same venue address
                 if (! empty($item['event_address'])) {

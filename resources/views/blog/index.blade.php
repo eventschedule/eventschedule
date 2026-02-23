@@ -11,7 +11,7 @@
     @endif
     <x-slot name="breadcrumbTitle">Blog</x-slot>
 
-    @if($posts->currentPage() > 1 || $monthLabel)
+    @if($posts->currentPage() > 1 || $monthLabel || request('tag'))
         <x-slot name="robots">noindex, follow</x-slot>
     @endif
 

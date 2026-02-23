@@ -581,7 +581,7 @@
     @foreach($blogPosts as $post)
         <url>
             <loc>{{ route('blog.show', $post->slug) }}</loc>
-            <lastmod>{{ $post->published_at->toIso8601String() }}</lastmod>
+            <lastmod>{{ $post->updated_at->gt($post->published_at) ? $post->updated_at->toIso8601String() : $post->published_at->toIso8601String() }}</lastmod>
             <changefreq>monthly</changefreq>
             <priority>0.7</priority>
         </url>
