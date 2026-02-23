@@ -84,9 +84,17 @@
 
         <script {!! nonce_attr() !!}>
             function onTabChange() {
+                var select = document.getElementById('current-tab');
+                var selected = select.options[select.selectedIndex];
+                var upgrade = selected.getAttribute('data-upgrade');
+                if (upgrade) {
+                    select.value = '{{ $tab }}';
+                    window.dispatchEvent(new CustomEvent('open-modal', { detail: upgrade }));
+                    return;
+                }
                 var tab = $('#current-tab').find(':selected').val();
                 location.href = "{{ url('/') }}" + '/{{ $subdomain }}/' + tab;
-            }             
+            }
         </script>
     </x-slot>
 
@@ -271,7 +279,8 @@
                                     {{ __('messages.import_events') }}
                                 </div>
                             </a>
-                            @if (config('services.google.gemini_key') && (auth()->user()->isAdmin() || $role->isEnterprise()))
+                            @if (config('services.google.gemini_key'))
+                            @if (auth()->user()->isAdmin() || $role->isEnterprise())
                             <a href="{{ route('event.scan_agenda', ['subdomain' => $role->subdomain]) }}" class="lg:hidden group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                 <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
@@ -280,6 +289,16 @@
                                     {{ __('messages.scan_agenda') }}
                                 </div>
                             </a>
+                            @elseif (config('app.hosted'))
+                            <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-scan-agenda')" class="lg:hidden w-full group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                                <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
+                                </svg>
+                                <div>
+                                    {{ __('messages.scan_agenda') }}
+                                </div>
+                            </button>
+                            @endif
                             @endif
                             @if (auth()->user()->google_token && $role->google_calendar_id)
                             <a href="#" id="sync-events-link" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
@@ -363,6 +382,8 @@
                 @endif
                 @if ($role->isTalent() && $role->isEnterprise())
                 <option value="availability" {{ $tab == 'availability' ? 'selected' : '' }}>{{ __('messages.availability') }}</option>
+                @elseif ($role->isTalent() && config('app.hosted'))
+                <option value="availability" data-upgrade="upgrade-availability">{{ __('messages.availability') }}</option>
                 @endif
                 @if (count($requests))
                 <option value="requests" {{ $tab == 'requests' ? 'selected' : '' }}>
@@ -394,6 +415,12 @@
                 @if ($role->isTalent() && $role->isEnterprise())
                 <a href=" {{ route('role.view_admin', ((now()->year == $year && now()->month == $month) || $tab == 'availability') ? ['subdomain' => $role->subdomain, 'tab' => 'availability'] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'tab' => 'availability', 'month' => $month] : ['subdomain' => $role->subdomain, 'tab' => 'availability', 'year' => $year, 'month' => $month])) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'availability' ? 'border-[#4E81FA] px-3 pb-5 text-base font-medium text-[#4E81FA]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.availability') }}</a>
+                @elseif ($role->isTalent() && config('app.hosted'))
+                <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-availability')"
+                    class="whitespace-nowrap border-b-2 border-transparent px-3 pb-5 text-base font-medium text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 cursor-pointer">
+                    {{ __('messages.availability') }}
+                    <svg class="inline w-3.5 h-3.5 ms-1" viewBox="0 0 24 24" fill="currentColor"><path d="M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V10A2,2 0 0,1 6,8H15V6A3,3 0 0,0 12,3A3,3 0 0,0 9,6H7A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,17A2,2 0 0,0 14,15A2,2 0 0,0 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17Z" /></svg>
+                </button>
                 @endif
                 @if (count($requests))
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']) }}"
@@ -530,5 +557,13 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 @include('components.embed-modal')
+
+<x-upgrade-modal name="upgrade-scan-agenda" tier="enterprise" :subdomain="$role->subdomain">
+    {{ __('messages.upgrade_feature_description_scan_agenda') }}
+</x-upgrade-modal>
+
+<x-upgrade-modal name="upgrade-availability" tier="enterprise" :subdomain="$role->subdomain">
+    {{ __('messages.upgrade_feature_description_availability') }}
+</x-upgrade-modal>
 
 </x-app-admin-layout>

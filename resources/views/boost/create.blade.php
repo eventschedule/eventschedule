@@ -169,6 +169,11 @@
             @else
             <div id="stripe-payment-section" class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
                 <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.payment') }}</h3>
+                @if (!empty($pmLastFour))
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                    {{ __('messages.saved_card_on_file', ['brand' => ucfirst($pmType ?? 'card'), 'last4' => $pmLastFour]) }}
+                </p>
+                @endif
                 <div id="payment-element" class="mb-4"></div>
                 <div id="payment-errors" class="text-sm text-red-600 dark:text-red-400 hidden"></div>
             </div>
@@ -382,7 +387,11 @@
             const appearance = {
                 theme: isDarkMode ? 'night' : 'stripe',
             };
-            elements = stripe.elements({ clientSecret, appearance });
+            const elementsOptions = { clientSecret, appearance };
+            if (data.customer_session_client_secret) {
+                elementsOptions.customerSessionClientSecret = data.customer_session_client_secret;
+            }
+            elements = stripe.elements(elementsOptions);
             paymentElement = elements.create('payment', {
                 paymentMethodOrder: ['card'],
             });

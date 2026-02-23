@@ -83,12 +83,12 @@ trait RoleBillable
     }
 
     /**
-     * Check if the role is eligible for first year free.
+     * Check if the role is eligible for a free trial.
      * Eligible if they haven't had a subscription before.
      *
      * @return bool
      */
-    public function isEligibleForFreeYear()
+    public function isEligibleForTrial()
     {
         if ($this->plan_expires || $this->trial_ends_at) {
             return false;

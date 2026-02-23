@@ -53,6 +53,7 @@ return [
     'thanks' => 'Thanks',
     'resend_verification_email' => 'Resend Verification Email',
     'log_out' => 'Log Out',
+    'upgrade' => 'Upgrade',
     'cancel' => 'Cancel',
     'delete' => 'Delete',
     'delete_event' => 'Delete Event',
@@ -484,6 +485,7 @@ return [
     'change_to_free_plan' => 'Change to Free Plan',
     'plan_changed' => 'Plan changed successfully!',
     'first_year_free' => 'First year free',
+    'free_trial_badge' => '7-day free trial',
     'copy_url' => 'Copy URL',
     'note_all_schedules_are_publicly_listed' => 'Your schedule will be publicly visible',
     'note_all_events_are_publicly_listed' => 'Your event will be publicly visible',
@@ -946,6 +948,7 @@ return [
     'feature_custom_domain' => 'Use your own custom domain',
     'feature_team_members' => 'Add team members to manage your schedule',
     'feature_api_access' => 'API access for integrations',
+    'feature_boost' => 'Boost events with ads',
     'upgrade_to_pro_plan' => 'Upgrade to Pro',
 
     // Email scheduling for graphics
@@ -1864,4 +1867,17 @@ return [
     'converted' => 'converted',
     'click' => 'click',
     'sale' => 'sale',
+    'saved_card_on_file' => 'Your :brand card ending in :last4 is on file.',
+
+    // Upgrade modals
+    'upgrade_feature_title_pro' => 'Pro Feature',
+    'upgrade_feature_title_enterprise' => 'Enterprise Feature',
+    'upgrade_feature_description_members' => 'Add team members to help manage your schedule.',
+    'upgrade_feature_description_scan_agenda' => 'Use AI to scan event agendas and automatically create event details.',
+    'upgrade_feature_description_boost' => 'Promote your event to reach a larger audience.',
+    'upgrade_feature_description_tickets' => 'Sell tickets for your events and manage sales directly from your schedule.',
+    'upgrade_feature_description_availability' => 'Mark your available and unavailable dates so organizers know when to book you.',
+    'upgrade_feature_description_ai_prompt' => 'Use AI to automatically transform and enhance the text in your event graphics.',
+    'upgrade_feature_description_email_scheduling' => 'Automatically send event graphic emails to your audience on a recurring schedule.',
+    'upgrade_feature_description_custom_css' => 'Add custom CSS to fully personalize the look of your public schedule page.',
 ];

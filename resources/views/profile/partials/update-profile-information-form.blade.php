@@ -86,10 +86,6 @@
                     </div>
                     @endif
                 </div>
-                @elseif ($user->phone && $user->hasVerifiedPhone())
-                <p class="text-sm mt-2 text-green-600 dark:text-green-400">
-                    {{ __('messages.phone_verified') }}
-                </p>
                 @endif
             @endif
         </div>

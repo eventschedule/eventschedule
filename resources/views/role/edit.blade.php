@@ -1049,10 +1049,6 @@
                                 </div>
                                 @endif
                             </div>
-                            @elseif (config('app.hosted') && $role->exists && $role->phone && $role->phone_verified_at)
-                            <p class="text-sm mt-2 text-green-600 dark:text-green-400">
-                                {{ __('messages.phone_verified') }}
-                            </p>
                             @endif
                         </div>
 
@@ -1545,7 +1541,8 @@
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                     {{ __('messages.custom_css_enterprise_only') }}
                                     @if (config('app.hosted'))
-                                    - <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain, 'tier' => 'enterprise']) }}" class="text-amber-600 dark:text-amber-400 hover:underline">{{ __('messages.upgrade_to_enterprise') }}</a>
+                                    - <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-css')"
+                                        class="text-[#4E81FA] hover:underline font-medium">{{ __('messages.upgrade_to_enterprise') }}</button>
                                     @endif
                                 </p>
                                 @endif
@@ -4193,3 +4190,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
+
+<x-upgrade-modal name="upgrade-custom-css" tier="enterprise" :subdomain="$role->subdomain">
+    {{ __('messages.upgrade_feature_description_custom_css') }}
+</x-upgrade-modal>

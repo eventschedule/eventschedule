@@ -7,6 +7,7 @@
         -->
     </div>
     <div class="mt-6 sm:ms-16 sm:mt-0 sm:flex-none">
+        @if ($role->isEnterprise())
         <x-brand-link href="{{ route('role.create_member', ['subdomain' => $role->subdomain]) }}" class="w-full md:w-auto">
             <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path
@@ -14,6 +15,19 @@
             </svg>
             {{ __('messages.add_member') }}
         </x-brand-link>
+        @elseif (config('app.hosted'))
+        <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-members')"
+                class="w-full md:w-auto inline-flex items-center justify-center px-4 py-3 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-base text-white shadow-sm transition-all duration-200 hover:bg-[#3D6FE8] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+            <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path
+                    d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+            </svg>
+            {{ __('messages.add_member') }}
+        </button>
+        <x-upgrade-modal name="upgrade-members" tier="enterprise" :subdomain="$role->subdomain">
+            {{ __('messages.upgrade_feature_description_members') }}
+        </x-upgrade-modal>
+        @endif
     </div>
 </div>
 <div class="mt-8 flow-root">

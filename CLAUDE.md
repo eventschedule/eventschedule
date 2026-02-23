@@ -38,6 +38,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - Shared `.text-gradient` class is defined in `resources/css/marketing.css`
 - Never use purple/violet/indigo/fuchsia/pink as WP brand colors
 - Icon accent colors (on sub-audience-cards) are decorative and exempt
+- **Dark mode grays** (custom palette, not standard Tailwind): background `#1e1e1e`, borders/hover `#2d2d30`, text `#d1d5db`, muted text `#9ca3af`. Use these for third-party component dark mode overrides.
 
 ## Build & Development Commands
 

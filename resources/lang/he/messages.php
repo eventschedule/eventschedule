@@ -52,6 +52,7 @@ return [
     'thanks' => 'תודה',
     'resend_verification_email' => 'שלח שוב אימייל אימות',
     'log_out' => 'התנתק',
+    'upgrade' => 'שדרוג',
     'cancel' => 'בטל',
     'delete' => 'מחק',
     'delete_event' => 'מחק אירוע',
@@ -245,6 +246,7 @@ return [
     'change_to_free_plan' => 'שנה למסלול בסיסי',
     'plan_changed' => 'המסלול שונתה בהצלחה!',
     'first_year_free' => 'השנה הראשונה חינם',
+    'free_trial_badge' => 'תקופת ניסיון חינם ל-7 ימים',
     'copy_url' => 'העתק כתובת URL',
     'note_all_schedules_are_publicly_listed' => 'לוח הזמנים שלך יהיה גלוי לציבור',
     'note_all_events_are_publicly_listed' => 'האירוע שלך יהיה גלוי לציבור',
@@ -926,6 +928,7 @@ return [
     'feature_custom_domain' => 'שימוש בדומיין מותאם אישית משלך',
     'feature_team_members' => 'הוספת חברי צוות לניהול לוח הזמנים שלך',
     'feature_api_access' => 'גישת API לאינטגרציות',
+    'feature_boost' => 'Boost events with ads',
     'upgrade_to_pro_plan' => 'שדרג ל-Pro',
 
     // CalDAV Calendar Integration
@@ -1005,8 +1008,21 @@ return [
 
     // Enterprise features
     'upgrade_to_enterprise' => 'שדרג ל-Enterprise',
+    'enterprise_plan' => 'תוכנית Enterprise',
+    'enterprise_features' => 'תכונות Enterprise',
     'enterprise_feature_ai_prompt' => 'המרת טקסט באמצעות AI היא תכונת Enterprise.',
     'enterprise_feature_email_scheduling' => 'תזמון דוא"ל הוא תכונת Enterprise.',
+    'enterprise_feature_agenda_scanning' => 'סריקת סדר יום היא תכונת Enterprise.',
+    'feature_ai_text' => 'המרת טקסט באמצעות AI',
+    'feature_email_scheduling' => 'תזמון דוא"ל',
+    'feature_agenda_scanning' => 'סריקת סדר יום',
+    'feature_custom_css_enterprise' => 'עיצוב CSS מותאם אישית',
+    'feature_priority_support' => 'תמיכה בעדיפות',
+    'select_tier' => 'בחר תוכנית',
+    'custom_css_enterprise_only' => 'CSS מותאם אישית הוא תכונת Enterprise',
+    'custom_css_grandfathered' => 'עריכת CSS מותאם אישית היא תכונת Enterprise. הסגנונות הקיימים שלך ימשיכו לעבוד.',
+    'newsletter_upgrade_enterprise' => 'צריך יותר? שדרג ל-Enterprise עבור 1,000/חודש',
+    'everything_in_pro' => 'הכל ב-Pro',
 
     'sync_direction_updated' => 'כיוון הסנכרון עודכן.',
 
@@ -1764,6 +1780,9 @@ return [
     'boost_headline_in_person' => ':name ב-:location',
     'boost_text_in_person' => 'אל תפספסו את :name בהופעה חיה ב-:venue',
     'boost_desc_live_event' => 'אירוע חי',
+    'you_have' => 'יש לך',
+    'in_boost_credit' => 'בקרדיט חיזוק',
+    'will_be_paid_with_boost_credit' => 'זה ישולם מקרדיט החיזוק שלך',
 
     // Admin newsletters
     'admin_newsletters' => 'ניוזלטרים',
@@ -1820,4 +1839,18 @@ return [
     'converted' => 'המירו',
     'click' => 'קליק',
     'sale' => 'מכירה',
+    'saved_card_on_file' => 'כרטיס ה-:brand שלך המסתיים ב-:last4 שמור בקובץ.',
+
+    // Upgrade modals
+    'upgrade_feature_title_pro' => 'Pro Feature',
+    'upgrade_feature_title_enterprise' => 'Enterprise Feature',
+    'upgrade_feature_description_members' => 'Add team members to help manage your schedule.',
+    'upgrade_feature_description_scan_agenda' => 'Use AI to scan event agendas and automatically create event details.',
+    'upgrade_feature_description_boost' => 'Promote your event to reach a larger audience.',
+    'upgrade_feature_description_tickets' => 'Sell tickets for your events and manage sales directly from your schedule.',
+    'upgrade_feature_description_availability' => 'Mark your available and unavailable dates so organizers know when to book you.',
+    'upgrade_feature_description_ai_prompt' => 'Use AI to automatically transform and enhance the text in your event graphics.',
+    'upgrade_feature_description_email_scheduling' => 'Automatically send event graphic emails to your audience on a recurring schedule.',
+    'upgrade_feature_description_custom_css' => 'Add custom CSS to fully personalize the look of your public schedule page.',
+
 ];
