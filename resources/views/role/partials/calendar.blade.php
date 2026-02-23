@@ -620,8 +620,8 @@
                                         <div class="flex items-start gap-2">
                                             <span v-if="getEventGroupColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
                                             <h3 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto">
-                                                <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-6 h-6 text-gray-400 me-1 align-text-bottom"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                                                 <span v-text="event.name"></span>
+                                                <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-6 h-6 text-gray-400 ms-2 align-middle"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                                             </h3>
                                         </div>
                                         <p v-if="event.short_description && !event.is_password_protected" class="text-gray-600 dark:text-gray-400 mt-2" dir="auto" v-text="event.short_description"></p>
@@ -853,8 +853,8 @@
                                     <div class="flex items-start gap-2">
                                         <span v-if="getEventGroupColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
                                         <h3 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto">
-                                            <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-6 h-6 text-gray-400 me-1 align-text-bottom"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                                             <span v-text="event.name"></span>
+                                            <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-6 h-6 text-gray-400 ms-2 align-middle"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                                         </h3>
                                     </div>
                                     <p v-if="event.short_description && !event.is_password_protected" class="text-gray-600 dark:text-gray-400 mt-2" dir="auto" v-text="event.short_description"></p>
@@ -1432,7 +1432,10 @@
     <div class="event-popup-content">
         <img id="event-popup-image" class="event-popup-image" style="display: none;" />
         <div class="event-popup-body">
-            <h3 id="event-popup-title" class="event-popup-title"></h3>
+            <h3 id="event-popup-title" class="event-popup-title">
+                <svg id="event-popup-lock" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="display: none; width: 16px; height: 16px; vertical-align: middle; margin-inline-end: 6px; color: #9ca3af; flex-shrink: 0;" class="inline-block"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                <span id="event-popup-title-text"></span>
+            </h3>
             <div class="event-popup-details">
                 <div id="event-popup-venue" class="event-popup-detail" style="display: none;">
                     <svg class="event-popup-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -2395,7 +2398,8 @@ const calendarApp = createApp({
                 ticket_price: event.ticket_price,
                 ticket_currency_code: event.ticket_currency_code || '',
                 registration_url: event.registration_url || '',
-                coupon_code: event.coupon_code || ''
+                coupon_code: event.coupon_code || '',
+                is_password_protected: event.is_password_protected || false
             };
         },
         getEventDisplayName(event) {
@@ -2568,7 +2572,10 @@ const calendarApp = createApp({
             const timeTextEl = document.getElementById('event-popup-time-text');
             const descriptionEl = document.getElementById('event-popup-description');
 
-            if (titleEl) titleEl.textContent = popupData.name || '';
+            const lockEl = document.getElementById('event-popup-lock');
+            const titleTextEl = document.getElementById('event-popup-title-text');
+            if (lockEl) lockEl.style.display = popupData.is_password_protected ? 'inline-block' : 'none';
+            if (titleTextEl) titleTextEl.textContent = popupData.name || '';
 
             if (imageEl) {
                 if (popupData.image_url) {

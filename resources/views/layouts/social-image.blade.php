@@ -16,7 +16,7 @@
             transition: none !important;
         }
         .flex.flex-col.items-center.justify-center {
-            bottom: 40px !important;
+            padding-top: 60px !important;
         }
         h1 {
             font-size: 5rem !important;
@@ -35,5 +35,6 @@
     <div style="position: relative; z-index: 1;">
         {{ $slot }}
     </div>
+    <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 250px; background: radial-gradient(ellipse at center bottom, rgba(78, 129, 250, 0.13) 0%, transparent 70%); z-index: 2; pointer-events: none;"></div>
 </body>
 </html>
