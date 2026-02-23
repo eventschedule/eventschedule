@@ -107,7 +107,7 @@ class VerifyEmail extends BaseVerifyEmail
 
         if ($this->type == 'user' && $this->notifiable) {
             return [
-                'List-Unsubscribe' => '<'.route('user.unsubscribe', ['email' => base64_encode($this->notifiable->email)]).'>',
+                'List-Unsubscribe' => '<'.route('user.unsubscribe', ['email' => base64_encode($this->notifiable->email), 'sig' => \App\Utils\UrlUtils::signEmail(base64_encode($this->notifiable->email))]).'>',
                 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
             ];
         }

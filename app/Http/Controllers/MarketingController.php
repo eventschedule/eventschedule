@@ -742,6 +742,22 @@ class MarketingController extends Controller
         return view('marketing.docs.boost', $this->getDocNavigation('marketing.docs.boost'));
     }
 
+    /**
+     * Scan Agenda documentation page
+     */
+    public function docsScanAgenda()
+    {
+        return view('marketing.docs.scan-agenda', $this->getDocNavigation('marketing.docs.scan_agenda'));
+    }
+
+    /**
+     * Fan Content documentation page
+     */
+    public function docsFanContent()
+    {
+        return view('marketing.docs.fan-content', $this->getDocNavigation('marketing.docs.fan_content'));
+    }
+
     // ==========================================
     // Selfhost Section
     // ==========================================
@@ -1450,6 +1466,8 @@ class MarketingController extends Controller
             ['route' => 'marketing.docs.account_settings', 'title' => 'Account Settings'],
             ['route' => 'marketing.docs.availability', 'title' => 'Availability Calendar'],
             ['route' => 'marketing.docs.boost', 'title' => 'Boost'],
+            ['route' => 'marketing.docs.scan_agenda', 'title' => 'Scan Agenda'],
+            ['route' => 'marketing.docs.fan_content', 'title' => 'Fan Content'],
         ];
 
         $currentIndex = null;
@@ -1634,5 +1652,4 @@ class MarketingController extends Controller
             ],
         ];
     }
-
 }

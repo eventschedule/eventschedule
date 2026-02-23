@@ -168,7 +168,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount ($)</label>
-                    <input type="number" name="amount" required min="1" max="5000" step="0.01"
+                    <input type="number" name="amount" required min="1" max="1000" step="0.01"
                         class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 w-32"
                         placeholder="100">
                 </div>

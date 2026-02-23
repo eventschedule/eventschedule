@@ -1462,7 +1462,7 @@
                             <div class="flex items-center justify-between mb-3">
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
                             </div>
-                            <button type="button" x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-prompt')"
+                            <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-prompt')"
                                 class="w-full text-start p-3 rounded-md border border-dashed border-gray-300 dark:border-gray-600 hover:border-[#4E81FA] dark:hover:border-[#4E81FA] transition-colors">
                                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_ai_prompt') }}</p>
                                 <p class="text-sm text-[#4E81FA] mt-1 font-medium">{{ __('messages.upgrade_to_enterprise') }} &rarr;</p>
@@ -1585,7 +1585,7 @@
                             </div>
                         </div>
                         @elseif (config('app.hosted'))
-                        <button type="button" x-on:click.prevent="$dispatch('open-modal', 'upgrade-email-scheduling')"
+                        <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-email-scheduling')"
                             class="w-full text-start p-3 rounded-md border border-dashed border-gray-300 dark:border-gray-600 hover:border-[#4E81FA] dark:hover:border-[#4E81FA] transition-colors">
                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_email_scheduling') }}</p>
                             <p class="text-sm text-[#4E81FA] mt-1 font-medium">{{ __('messages.upgrade_to_enterprise') }} &rarr;</p>
@@ -1783,7 +1783,7 @@
                                 <div class="flex items-center justify-between mb-3">
                                     <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
                                 </div>
-                                <button type="button" x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-prompt')"
+                                <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-prompt')"
                                     class="w-full text-start p-3 rounded-md border border-dashed border-gray-300 dark:border-gray-600 hover:border-[#4E81FA] dark:hover:border-[#4E81FA] transition-colors">
                                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_ai_prompt') }}</p>
                                     <p class="text-sm text-[#4E81FA] mt-1 font-medium">{{ __('messages.upgrade_to_enterprise') }} &rarr;</p>
@@ -1906,7 +1906,7 @@
                                 </div>
                             </div>
                             @elseif (config('app.hosted'))
-                            <button type="button" x-on:click.prevent="$dispatch('open-modal', 'upgrade-email-scheduling')"
+                            <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-email-scheduling')"
                                 class="w-full text-start p-3 rounded-md border border-dashed border-gray-300 dark:border-gray-600 hover:border-[#4E81FA] dark:hover:border-[#4E81FA] transition-colors">
                                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_email_scheduling') }}</p>
                                 <p class="text-sm text-[#4E81FA] mt-1 font-medium">{{ __('messages.upgrade_to_enterprise') }} &rarr;</p>
@@ -2013,11 +2013,11 @@
             </div>
         </div>
     </div>
-<x-upgrade-modal name="upgrade-ai-prompt" tier="enterprise" :subdomain="$role->subdomain">
+<x-upgrade-modal name="upgrade-ai-prompt" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.event_graphics') }}#ai-prompt">
     {{ __('messages.upgrade_feature_description_ai_prompt') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-email-scheduling" tier="enterprise" :subdomain="$role->subdomain">
+<x-upgrade-modal name="upgrade-email-scheduling" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.creating_schedules') }}#email-scheduling">
     {{ __('messages.upgrade_feature_description_email_scheduling') }}
 </x-upgrade-modal>
 

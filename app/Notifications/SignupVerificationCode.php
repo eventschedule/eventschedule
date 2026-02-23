@@ -89,7 +89,7 @@ class SignupVerificationCode extends Notification
                 if ($this->email) {
                     return new \Illuminate\Mail\Mailables\Headers(
                         text: [
-                            'List-Unsubscribe' => '<'.route('user.unsubscribe', ['email' => base64_encode($this->email)]).'>',
+                            'List-Unsubscribe' => '<'.route('user.unsubscribe', ['email' => base64_encode($this->email), 'sig' => \App\Utils\UrlUtils::signEmail(base64_encode($this->email))]).'>',
                             'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
                         ],
                     );

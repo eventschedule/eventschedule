@@ -84,15 +84,12 @@ class TicketController extends Controller
             abort(403);
         }
 
-        $user = auth()->user();
-
-        // Check if trying to buy tickets for a past recurring event occurrence
-        if ($event->days_of_week && $request->event_date) {
-            $startDateTime = $event->getStartDateTime($request->event_date, true);
-            if ($startDateTime->isPast()) {
-                return back()->with('error', __('messages.cannot_buy_tickets_past_event'));
-            }
+        // Verify event can sell tickets (checks past dates, tickets_enabled, and Pro plan)
+        if (! $event->canSellTickets($request->event_date)) {
+            return back()->with('error', __('messages.tickets_not_available'));
         }
+
+        $user = auth()->user();
 
         if (! $user && $request->create_account && config('app.hosted')) {
 
@@ -709,8 +706,19 @@ class TicketController extends Controller
                 break;
 
             case 'delete':
-                $sale->is_deleted = true;
-                $sale->save();
+                DB::transaction(function () use ($sale) {
+                    // If the sale was paid, cancel first to release ticket inventory
+                    // (triggers Sale::booted hook) and decrement analytics
+                    if ($sale->status === 'paid') {
+                        $sale->status = 'cancelled';
+                        $sale->save();
+
+                        AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+                    }
+
+                    $sale->is_deleted = true;
+                    $sale->save();
+                });
                 $actionPerformed = true;
                 break;
         }

@@ -94,7 +94,6 @@ class InvoiceNinjaController extends Controller
             $webhookAmount = $payload['paymentables'][0]['amount'];
 
             // Validate that the webhook amount matches the expected sale amount
-            // Log discrepancies for investigation but still process the payment
             $expectedAmount = $sale->payment_amount;
             $amountDifference = abs($webhookAmount - $expectedAmount);
 
@@ -107,6 +106,12 @@ class InvoiceNinjaController extends Controller
                     'difference' => $amountDifference,
                     'invoice_id' => $invoiceId,
                 ]);
+
+                $sale->status = 'amount_mismatch';
+                $sale->transaction_reference = $invoiceId;
+                $sale->save();
+
+                return;
             }
 
             $sale->payment_amount = $webhookAmount;

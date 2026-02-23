@@ -301,7 +301,7 @@
 <span class="code-comment"># Optional - Business settings</span>
 <span class="code-variable">META_MARKUP_RATE</span>=<span class="code-value">0.20</span>          <span class="code-comment"># 20% markup on ad spend (default)</span>
 <span class="code-variable">META_MIN_BUDGET</span>=<span class="code-value">10.00</span>          <span class="code-comment"># Minimum boost budget (default)</span>
-<span class="code-variable">META_MAX_BUDGET</span>=<span class="code-value">5000.00</span>        <span class="code-comment"># Maximum boost budget (default)</span>
+<span class="code-variable">META_MAX_BUDGET</span>=<span class="code-value">1000.00</span>        <span class="code-comment"># Maximum boost budget (default)</span>
 <span class="code-variable">META_DEFAULT_CURRENCY</span>=<span class="code-string">USD</span>      <span class="code-comment"># Default currency (default)</span>
 <span class="code-variable">META_MAX_CONCURRENT_BOOSTS</span>=<span class="code-value">3</span>   <span class="code-comment"># Max active boosts per schedule (default)</span>
 </code></pre>
@@ -365,7 +365,7 @@
                                         <tr>
                                             <td><code class="doc-inline-code">META_MAX_BUDGET</code></td>
                                             <td>No</td>
-                                            <td>Maximum boost budget in currency units (default: 5000.00)</td>
+                                            <td>Maximum boost budget in currency units (default: 1000.00)</td>
                                         </tr>
                                         <tr>
                                             <td><code class="doc-inline-code">META_API_VERSION</code></td>

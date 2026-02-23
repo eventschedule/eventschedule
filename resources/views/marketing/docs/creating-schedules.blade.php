@@ -72,6 +72,8 @@
                         <a href="#auto-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Auto Import</a>
                         <a href="#calendar-integrations" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Calendar Integrations</a>
                         <a href="#email-settings" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Email Settings</a>
+                        <a href="#email-scheduling" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Email Scheduling</a>
+                        <a href="#team-members" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Team Members</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
                 </aside>
@@ -220,6 +222,61 @@
                                 <li>Enter your SMTP server details (host, port, username, password)</li>
                                 <li>Set your custom sender name and email address</li>
                                 <li>Send a test email to verify the configuration</li>
+                            </ol>
+                        </section>
+
+                        <!-- Email Scheduling -->
+                        <section id="email-scheduling" class="doc-section">
+                            <h2 class="doc-heading">Email Scheduling</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Schedule automatic email delivery of your event graphics to keep your audience informed about upcoming events.</p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Automated Delivery</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Set a recurring schedule to automatically email your event graphic to subscribers. Choose daily, weekly, or custom intervals.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Graphic Preview</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Recipients receive a visual snapshot of your upcoming events as an <a href="{{ route('marketing.docs.event_graphics') }}" class="text-cyan-400 hover:text-cyan-300">event graphic</a>, making it easy to see what's coming up at a glance.</p>
+                                </div>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Setting Up Email Scheduling</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Graphic</strong></li>
+                                <li>Click the <strong class="text-gray-900 dark:text-white">Email Scheduling</strong> button</li>
+                                <li>Configure the delivery frequency and recipient list</li>
+                                <li>Your event graphic will be emailed automatically on the chosen schedule</li>
+                            </ol>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>Combine email scheduling with <a href="#email-settings" class="text-cyan-400 hover:text-cyan-300">custom email settings</a> to send from your own domain for a more professional look.</p>
+                            </div>
+                        </section>
+
+                        <!-- Team Members -->
+                        <section id="team-members" class="doc-section">
+                            <h2 class="doc-heading">Team Members</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Add team members to your schedule so multiple people can collaborate on managing events.</p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Collaborative Management</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Invite team members by email to help manage your schedule. Each member gets their own login and can create, edit, and manage events.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Access Control</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Schedule owners maintain full control, including the ability to add or remove team members at any time.</p>
+                                </div>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Adding Team Members</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Team</strong></li>
+                                <li>Click <strong class="text-gray-900 dark:text-white">Add Member</strong></li>
+                                <li>Enter the team member's email address</li>
+                                <li>They'll receive an invitation and can start managing the schedule once they accept</li>
                             </ol>
                         </section>
 

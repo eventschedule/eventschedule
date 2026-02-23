@@ -67,9 +67,6 @@ class Role extends Model implements MustVerifyEmail
         'custom_domain',
         'event_layout',
         'google_calendar_id',
-        'google_webhook_id',
-        'google_webhook_resource_id',
-        'google_webhook_expires_at',
         'sync_direction',
         'request_terms',
         'request_terms_en',
@@ -80,18 +77,12 @@ class Role extends Model implements MustVerifyEmail
         'graphic_settings',
         'caldav_settings',
         'caldav_sync_direction',
-        'caldav_sync_token',
-        'caldav_last_sync_at',
         'agenda_ai_prompt',
         'agenda_show_times',
         'agenda_show_description',
         'slug_pattern',
-        'translation_attempts',
-        'last_translated_at',
         'direct_registration',
         'first_day_of_week',
-        'boost_credit',
-        'boost_max_budget',
     ];
 
     /**
@@ -151,7 +142,7 @@ class Role extends Model implements MustVerifyEmail
 
             $address = $model->fullAddressRaw();
 
-            if (!$address && $model->geo_address) {
+            if (! $address && $model->geo_address) {
                 $model->geo_address = null;
                 $model->geo_lat = null;
                 $model->geo_lon = null;

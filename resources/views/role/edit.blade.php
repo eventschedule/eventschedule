@@ -4191,6 +4191,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </script>
 
-<x-upgrade-modal name="upgrade-custom-css" tier="enterprise" :subdomain="$role->subdomain">
+<x-upgrade-modal name="upgrade-custom-css" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.schedule_styling') }}#custom-css">
     {{ __('messages.upgrade_feature_description_custom_css') }}
 </x-upgrade-modal>

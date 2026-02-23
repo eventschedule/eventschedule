@@ -37,7 +37,7 @@
                 "name": "How much does Boost cost?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "You set your own ad budget from $10 to $5,000. Event Schedule charges a transparent service fee on top of your ad spend. There are no hidden costs, and you can see the full breakdown before you launch."
+                    "text": "You set your own ad budget from $10 to $1,000. Event Schedule charges a transparent service fee on top of your ad spend. There are no hidden costs, and you can see the full breakdown before you launch."
                 }
             },
             {
@@ -167,7 +167,7 @@
                         <span class="text-xl font-bold text-amber-600 dark:text-amber-400">2</span>
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Set your budget</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Slide from $10 to $5,000. See estimated reach before you commit. Pay with the card on file.</p>
+                    <p class="text-gray-600 dark:text-gray-400">Slide from $10 to $1,000. See estimated reach before you commit. Pay with the card on file.</p>
                 </div>
 
                 <!-- Step 3 -->
@@ -269,7 +269,7 @@
                         Flexible
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Budget control</h3>
-                    <p class="text-gray-600 dark:text-white/80 mb-6">Slide from $10 to $5,000. See estimated reach before you pay. No surprises, no overruns.</p>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">Slide from $10 to $1,000. See estimated reach before you pay. No surprises, no overruns.</p>
 
                     <!-- Budget slider mockup -->
                     <div class="space-y-3">
@@ -282,7 +282,7 @@
                         </div>
                         <div class="flex justify-between text-xs text-gray-400">
                             <span>$10</span>
-                            <span>$5,000</span>
+                            <span>$1,000</span>
                         </div>
                         <div class="text-center text-sm text-orange-600 dark:text-orange-400 font-medium">Est. 3,200 to 8,500 reach</div>
                     </div>
@@ -531,7 +531,7 @@
                     </button>
                     <div x-show="open === 2" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            You set your own ad budget from $10 to $5,000. Event Schedule charges a transparent service fee on top of your ad spend. The full breakdown is shown before you launch. No hidden costs, no minimum commitments.
+                            You set your own ad budget from $10 to $1,000. Event Schedule charges a transparent service fee on top of your ad spend. The full breakdown is shown before you launch. No hidden costs, no minimum commitments.
                         </p>
                     </div>
                 </div>
@@ -658,7 +658,7 @@
         "featureList": [
             "Automated Facebook and Instagram ads",
             "Smart audience targeting",
-            "Budget control from $10 to $5,000",
+            "Budget control from $10 to $1,000",
             "Real-time campaign analytics",
             "Transparent pricing",
             "Advanced targeting mode"

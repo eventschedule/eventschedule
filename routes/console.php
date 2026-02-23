@@ -53,3 +53,7 @@ Schedule::call(function () {
         Artisan::call('boost:sync');
     }
 })->everyFifteenMinutes()->name('boost-sync')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
+    Artisan::call('boost:expire-pending');
+})->everyFifteenMinutes()->appendOutputTo(storage_path('logs/scheduler.log'));
