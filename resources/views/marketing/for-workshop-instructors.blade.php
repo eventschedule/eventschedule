@@ -63,6 +63,39 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Workshop Instructors",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Workshop Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Teach what you love. Fill every seat. From pottery to photography, cooking to coding. One link for all your workshops. Reach students directly with zero platform fees.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Workshop series with progressive curriculum",
+            "Zero-fee ticketing with Stripe integration",
+            "Capacity management with real-time availability",
+            "Custom fields for skill levels and materials",
+            "One-click newsletter to students",
+            "Google Calendar two-way sync",
+            "Analytics and booking insights",
+            "One link for all workshops"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section - Mesh Gradient Background -->
@@ -825,39 +858,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Workshop Instructors",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Workshop Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Teach what you love. Fill every seat. From pottery to photography, cooking to coding. One link for all your workshops. Reach students directly with zero platform fees.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Workshop series with progressive curriculum",
-            "Zero-fee ticketing with Stripe integration",
-            "Capacity management with real-time availability",
-            "Custom fields for skill levels and materials",
-            "One-click newsletter to students",
-            "Google Calendar two-way sync",
-            "Analytics and booking insights",
-            "One link for all workshops"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .text-gradient-workshop {

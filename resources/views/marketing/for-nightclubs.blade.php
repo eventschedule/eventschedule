@@ -63,6 +63,38 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Nightclubs",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Nightclub Event Management Software",
+        "operatingSystem": "Web",
+        "description": "Fill your club's calendar with DJ lineups and themed nights. Email your crowd directly - no paying for ads. Sell tickets with QR check-in, accept booking requests from DJs.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Weekly lineup blast newsletter",
+            "Guest list signups and management",
+            "VIP table and bottle service requests",
+            "DJ booking inbox with SoundCloud links",
+            "Auto-generate lineup graphics for social",
+            "Ticketed events with QR check-in",
+            "Themed night scheduling"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section -->
@@ -958,38 +990,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Nightclubs",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Nightclub Event Management Software",
-        "operatingSystem": "Web",
-        "description": "Fill your club's calendar with DJ lineups and themed nights. Email your crowd directly - no paying for ads. Sell tickets with QR check-in, accept booking requests from DJs.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Weekly lineup blast newsletter",
-            "Guest list signups and management",
-            "VIP table and bottle service requests",
-            "DJ booking inbox with SoundCloud links",
-            "Auto-generate lineup graphics for social",
-            "Ticketed events with QR check-in",
-            "Themed night scheduling"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .text-gradient-nightclub {

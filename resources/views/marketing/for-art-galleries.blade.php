@@ -63,6 +63,38 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Art Galleries & Studios",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Art Gallery and Studio Event Management Software",
+        "operatingSystem": "Web",
+        "description": "Fill your gallery with collectors. Announce exhibitions, sell tickets to opening nights, and email your collectors directly. Reach your audience directly. No algorithm. Free forever.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Exhibition announcement newsletters",
+            "Opening night ticketing",
+            "Art classes and workshop scheduling",
+            "Artist submission inbox",
+            "Multiple gallery space calendars",
+            "Virtual gallery tours",
+            "Auto-generated social media graphics"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section -->
@@ -873,38 +905,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Art Galleries & Studios",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Art Gallery and Studio Event Management Software",
-        "operatingSystem": "Web",
-        "description": "Fill your gallery with collectors. Announce exhibitions, sell tickets to opening nights, and email your collectors directly. Reach your audience directly. No algorithm. Free forever.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Exhibition announcement newsletters",
-            "Opening night ticketing",
-            "Art classes and workshop scheduling",
-            "Artist submission inbox",
-            "Multiple gallery space calendars",
-            "Virtual gallery tours",
-            "Auto-generated social media graphics"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .text-gradient-gallery {

@@ -330,10 +330,10 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 <a href="{{ marketing_url('/features/fan-videos') }}" class="group block">
-                    <div class="h-full bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900 dark:to-amber-900 rounded-3xl border border-orange-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                    <div class="h-full bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900 dark:to-amber-900 rounded-3xl border border-orange-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300 flex flex-col">
                         <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-orange-600 dark:group-hover:text-orange-300 transition-colors">Fan Videos & Comments</h3>
                         <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Fans add YouTube videos and comments to your events. All submissions need your approval.</p>
-                        <span class="inline-flex items-center text-orange-500 dark:text-orange-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                        <span class="inline-flex items-center text-orange-500 dark:text-orange-400 font-medium group-hover:gap-3 gap-2 transition-all mt-auto">
                             Learn more
                             <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

@@ -63,6 +63,41 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Live Concerts",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Live Concert Streaming & Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Stream live concerts to fans worldwide. Sell virtual tickets alongside venue tickets, email fans directly, and manage your streaming schedule.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Email fans before and after livestreams",
+            "Virtual and in-person dual ticketing",
+            "One link for all shows",
+            "Works with YouTube Live, Twitch, Instagram Live",
+            "Recurring show series scheduling",
+            "Google Calendar two-way sync",
+            "Fan follower notifications",
+            "Zero platform fees on ticket sales"
+        ],
+        "url": "{{ url()->current() }}",
+        "keywords": "live concert streaming, virtual concert tickets, livestream concerts",
+        "screenshot": "{{ asset('images/social/for-online.png') }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section - Mesh Gradient -->
@@ -820,41 +855,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Live Concerts",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Live Concert Streaming & Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Stream live concerts to fans worldwide. Sell virtual tickets alongside venue tickets, email fans directly, and manage your streaming schedule.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Email fans before and after livestreams",
-            "Virtual and in-person dual ticketing",
-            "One link for all shows",
-            "Works with YouTube Live, Twitch, Instagram Live",
-            "Recurring show series scheduling",
-            "Google Calendar two-way sync",
-            "Fan follower notifications",
-            "Zero platform fees on ticket sales"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "live concert streaming, virtual concert tickets, livestream concerts",
-        "screenshot": "{{ asset('social/for-online.png') }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .concert-glow-text {

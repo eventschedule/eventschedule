@@ -539,6 +539,11 @@ class CalDAVService
             ],
         ]);
 
+        // Mark private events
+        if ($event->is_private) {
+            $vcalendar->VEVENT->add('CLASS', 'PRIVATE');
+        }
+
         // Add location if venue exists
         if ($event->venue && $event->venue->bestAddress()) {
             $vcalendar->VEVENT->add('LOCATION', $event->venue->bestAddress());

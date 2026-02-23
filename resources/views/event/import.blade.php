@@ -1991,8 +1991,8 @@
 
             async uploadImage(file, idx) {
                 if (!file.type.startsWith('image/')) {
-                    this.errorMessage = @json(__("messages.invalid_image_type"))
-                    return
+                    this.errorMessage = @json(__("messages.invalid_image_type"));
+                    return;
                 }
 
                 // Check file size (2.5 MB = 2.5 * 1024 * 1024 bytes)

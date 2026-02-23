@@ -63,6 +63,42 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Online Classes",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Online Class Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Schedule and sell online classes with built-in registration, recurring sessions, student email notifications, and payment processing. Works with Zoom, Google Meet, and any platform.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Email notifications to registered students",
+            "One link for your full class schedule",
+            "Zero-fee payments for paid classes",
+            "Google Calendar two-way sync",
+            "Works with Zoom, Google Meet, YouTube Live",
+            "Recurring class scheduling",
+            "Student registration management",
+            "Follower notifications for new classes",
+            "Multi-level class organization"
+        ],
+        "url": "{{ url()->current() }}",
+        "keywords": "online class scheduling, virtual class platform, sell online classes, online teaching",
+        "screenshot": "{{ asset('images/social/for-online.png') }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section - Mesh Gradient -->
@@ -820,42 +856,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Online Classes",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Online Class Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Schedule and sell online classes with built-in registration, recurring sessions, student email notifications, and payment processing. Works with Zoom, Google Meet, and any platform.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Email notifications to registered students",
-            "One link for your full class schedule",
-            "Zero-fee payments for paid classes",
-            "Google Calendar two-way sync",
-            "Works with Zoom, Google Meet, YouTube Live",
-            "Recurring class scheduling",
-            "Student registration management",
-            "Follower notifications for new classes",
-            "Multi-level class organization"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "online class scheduling, virtual class platform, sell online classes, online teaching",
-        "screenshot": "{{ asset('social/for-online.png') }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .classes-glow-text {

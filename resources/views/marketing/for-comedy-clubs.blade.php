@@ -63,6 +63,39 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Comedy Clubs",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Comedy Club Management Software",
+        "operatingSystem": "Web",
+        "description": "Be the stage where comedy careers are made. From open mic to headliner - manage lineups, sell tickets with zero fees, and build your audience. Built for stand-up clubs, improv theaters, and open mic venues.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Lineup builder with performer profiles",
+            "Open mic sign-up management",
+            "Accept booking requests from comedians with video clips",
+            "Recurring show scheduling",
+            "Multiple room/stage support",
+            "QR code ticketing with zero fees",
+            "Direct newsletter to comedy fans",
+            "Event analytics"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section - Comedy Club with Neon & Stage Curtains -->
@@ -918,39 +951,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Comedy Clubs",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Comedy Club Management Software",
-        "operatingSystem": "Web",
-        "description": "Be the stage where comedy careers are made. From open mic to headliner - manage lineups, sell tickets with zero fees, and build your audience. Built for stand-up clubs, improv theaters, and open mic venues.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Lineup builder with performer profiles",
-            "Open mic sign-up management",
-            "Accept booking requests from comedians with video clips",
-            "Recurring show scheduling",
-            "Multiple room/stage support",
-            "QR code ticketing with zero fees",
-            "Direct newsletter to comedy fans",
-            "Event analytics"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .text-gradient-comedy {

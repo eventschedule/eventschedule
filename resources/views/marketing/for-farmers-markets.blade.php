@@ -63,6 +63,38 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Farmers Markets",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Farmers Market Management Software",
+        "operatingSystem": "Web",
+        "description": "Grow your farmers market community. Email shoppers directly - no algorithm. Share vendor lineups, seasonal schedules, and special events. Free forever.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Direct newsletter to shoppers - no algorithm middleman",
+            "Vendor lineup management",
+            "Recurring weekly market schedules",
+            "Seasonal calendar planning",
+            "Special event announcements",
+            "Google Calendar sync for shoppers",
+            "Event analytics and tracking"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section -->
@@ -849,38 +881,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Farmers Markets",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Farmers Market Management Software",
-        "operatingSystem": "Web",
-        "description": "Grow your farmers market community. Email shoppers directly - no algorithm. Share vendor lineups, seasonal schedules, and special events. Free forever.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Direct newsletter to shoppers - no algorithm middleman",
-            "Vendor lineup management",
-            "Recurring weekly market schedules",
-            "Seasonal calendar planning",
-            "Special event announcements",
-            "Google Calendar sync for shoppers",
-            "Event analytics and tracking"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .text-gradient-lime {

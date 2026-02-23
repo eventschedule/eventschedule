@@ -116,7 +116,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Google Calendar Card -->
                 <a href="{{ marketing_url('/google-calendar') }}" class="group block">
-                    <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 h-full">
+                    <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 h-full flex flex-col">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="w-12 h-12 bg-white dark:bg-gray-800 rounded-xl flex items-center justify-center">
                                 <svg aria-hidden="true" class="w-7 h-7" viewBox="0 0 24 24">
@@ -140,7 +140,7 @@
                             <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm">Instant sync</span>
                         </div>
 
-                        <div class="flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                        <div class="flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all mt-auto">
                             Learn more
                             <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -151,7 +151,7 @@
 
                 <!-- CalDAV Card -->
                 <a href="{{ marketing_url('/caldav') }}" class="group block">
-                    <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 h-full">
+                    <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 h-full flex flex-col">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center">
                                 <svg aria-hidden="true" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -172,7 +172,7 @@
                             <span class="inline-flex items-center px-3 py-1 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-sm">Any server</span>
                         </div>
 
-                        <div class="flex items-center text-teal-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                        <div class="flex items-center text-teal-400 font-medium group-hover:gap-3 gap-2 transition-all mt-auto">
                             Learn more
                             <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -519,13 +519,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 <a href="{{ route('marketing.analytics') }}" class="group block">
-                    <div class="h-full bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
-                        <div class="flex flex-col lg:flex-row gap-8 items-center">
+                    <div class="h-full bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300 flex flex-col">
+                        <div class="flex flex-col lg:flex-row gap-8 items-center flex-1">
                             <!-- Text content -->
-                            <div class="flex-1 text-center lg:text-left">
+                            <div class="flex-1 flex flex-col text-center lg:text-left">
                                 <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-emerald-300 transition-colors">Built-in Analytics</h3>
                                 <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Track page views, device breakdown, and traffic sources. Privacy-first with no external services.</p>
-                                <span class="inline-flex items-center text-emerald-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                <span class="inline-flex items-center text-emerald-400 font-medium group-hover:gap-3 gap-2 transition-all mt-auto">
                                     Learn more
                                     <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

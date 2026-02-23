@@ -474,13 +474,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 <a href="{{ marketing_url('/features/online-events') }}" class="group block">
-                    <div class="h-full bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-3xl border border-sky-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
-                        <div class="flex flex-col lg:flex-row gap-8 items-center">
+                    <div class="h-full bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-3xl border border-sky-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300 flex flex-col">
+                        <div class="flex flex-col lg:flex-row gap-8 items-center flex-1">
                             <!-- Text content -->
-                            <div class="flex-1 text-center lg:text-left">
+                            <div class="flex-1 flex flex-col text-center lg:text-left">
                                 <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Online Events</h3>
                                 <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Host virtual events with any streaming platform. Easy toggle between in-person and online, with the link on every ticket.</p>
-                                <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all mt-auto">
                                     Learn more
                                     <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

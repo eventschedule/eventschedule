@@ -826,6 +826,14 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
 
+        if ($event->is_private) {
+            $user = auth()->user();
+            $isEventMember = $event->roles->contains(fn ($r) => $user && $user->isMember($r->subdomain));
+            if (! $isEventMember && ! $user?->isAdmin()) {
+                abort(404);
+            }
+        }
+
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         // Check if the user is authorized to curate events for this role
@@ -1337,6 +1345,12 @@ class EventController extends Controller
             abort(404);
         }
 
+        $user = auth()->user();
+        $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+        if ($event->is_private && ! $isMemberOrAdmin) {
+            abort(404);
+        }
+
         $youtubeUrl = trim($request->input('youtube_url'));
         $embedUrl = UrlUtils::getYouTubeEmbed($youtubeUrl);
 
@@ -1430,6 +1444,12 @@ class EventController extends Controller
         $event = Event::with('parts')->findOrFail($event_id);
 
         if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
+            abort(404);
+        }
+
+        $user = auth()->user();
+        $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+        if ($event->is_private && ! $isMemberOrAdmin) {
             abort(404);
         }
 

@@ -63,6 +63,40 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Musicians",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Musician Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Share your tour dates, sell tickets, and reach fans directly with newsletters. Built for musicians, bands, and solo artists.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Tour announcements to fans",
+            "Custom schedule URL for Spotify, Bandcamp, EPK",
+            "Zero-fee ticket sales with door check-in",
+            "Google Calendar sync for gigs, rehearsals, sessions",
+            "Venue auto-linking for clubs, theaters, festivals",
+            "Band and manager collaboration",
+            "Fan notifications for nearby shows",
+            "Fan videos and comments on events",
+            "Setlist image parsing"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section - Mesh Gradient -->
@@ -826,40 +860,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Musicians",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Musician Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Share your tour dates, sell tickets, and reach fans directly with newsletters. Built for musicians, bands, and solo artists.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Tour announcements to fans",
-            "Custom schedule URL for Spotify, Bandcamp, EPK",
-            "Zero-fee ticket sales with door check-in",
-            "Google Calendar sync for gigs, rehearsals, sessions",
-            "Venue auto-linking for clubs, theaters, festivals",
-            "Band and manager collaboration",
-            "Fan notifications for nearby shows",
-            "Fan videos and comments on events",
-            "Setlist image parsing"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .stage-glow-text {

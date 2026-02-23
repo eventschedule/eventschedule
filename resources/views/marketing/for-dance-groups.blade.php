@@ -63,6 +63,39 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Dance Groups",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Dance Performance Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Share your dance performances with fans worldwide. Email your audience directly - no algorithm. Sell tickets to recitals, workshops, and showcases with zero platform fees.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Season planning for dance companies",
+            "Class and workshop scheduling",
+            "Zero-fee ticket sales for performances",
+            "Direct newsletter communication with audiences",
+            "Virtual performance and livestream support",
+            "Two-way Google Calendar sync",
+            "Team collaboration for ensembles",
+            "Auto-generated promotional graphics"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section - Movement/Flow Theme -->
@@ -841,37 +874,4 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Dance Groups",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Dance Performance Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Share your dance performances with fans worldwide. Email your audience directly - no algorithm. Sell tickets to recitals, workshops, and showcases with zero platform fees.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Season planning for dance companies",
-            "Class and workshop scheduling",
-            "Zero-fee ticket sales for performances",
-            "Direct newsletter communication with audiences",
-            "Virtual performance and livestream support",
-            "Two-way Google Calendar sync",
-            "Team collaboration for ensembles",
-            "Auto-generated promotional graphics"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 </x-marketing-layout>

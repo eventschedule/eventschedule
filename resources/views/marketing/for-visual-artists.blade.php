@@ -63,6 +63,39 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Visual Artists",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Visual Artist Exhibition Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Share your exhibitions, open studios, and art fairs. Sell tickets directly, build your collector base with newsletters. Built for painters, sculptors, photographers, and visual artists.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Exhibition announcements to collectors via email",
+            "Zero-fee ticket sales for openings and events",
+            "One link for all exhibitions and shows",
+            "Gallery venue auto-sync",
+            "Auto-generated promotional graphics",
+            "Two-way Google Calendar sync",
+            "Collector follower notifications",
+            "Exhibition analytics and insights"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section - Mesh Gradient -->
@@ -810,39 +843,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Visual Artists",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Visual Artist Exhibition Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Share your exhibitions, open studios, and art fairs. Sell tickets directly, build your collector base with newsletters. Built for painters, sculptors, photographers, and visual artists.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Exhibition announcements to collectors via email",
-            "Zero-fee ticket sales for openings and events",
-            "One link for all exhibitions and shows",
-            "Gallery venue auto-sync",
-            "Auto-generated promotional graphics",
-            "Two-way Google Calendar sync",
-            "Collector follower notifications",
-            "Exhibition analytics and insights"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .artist-glow-text {

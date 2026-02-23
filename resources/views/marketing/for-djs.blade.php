@@ -63,6 +63,37 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for DJs",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "DJ Event Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Share your DJ sets, residencies, and guest spots. Built for club DJs, festival DJs, and electronic producers.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Residency tracking",
+            "Late-night event support",
+            "Club calendar sync",
+            "Promo graphic generator",
+            "Zero-fee ticketing",
+            "Direct fan newsletters"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section -->
@@ -769,37 +800,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for DJs",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "DJ Event Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Share your DJ sets, residencies, and guest spots. Built for club DJs, festival DJs, and electronic producers.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Residency tracking",
-            "Late-night event support",
-            "Club calendar sync",
-            "Promo graphic generator",
-            "Zero-fee ticketing",
-            "Direct fan newsletters"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .text-gradient-neon {

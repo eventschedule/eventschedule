@@ -63,6 +63,44 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Virtual Conferences",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Virtual Conference Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Schedule and sell virtual conferences with multi-day agendas, tiered ticketing, attendee email notifications, and payment processing. Works with Zoom, Teams, YouTube Live, and any platform.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Multi-day conference scheduling",
+            "Tiered ticket types with zero platform fees",
+            "One shareable link for full conference agenda",
+            "Works with Zoom, Teams, YouTube Live, any platform",
+            "Email notifications to all attendees",
+            "Google Calendar two-way sync",
+            "Follower notifications for future conferences",
+            "QR code tickets for hybrid events",
+            "Attendee management dashboard",
+            "Open source virtual conference platform",
+            "Selfhosted conference scheduling option"
+        ],
+        "url": "{{ url()->current() }}",
+        "keywords": "virtual conference platform, online conference scheduling, virtual summit, conference ticketing",
+        "screenshot": "{{ asset('images/social/for-online.png') }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section - Mesh Gradient -->
@@ -867,44 +905,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Virtual Conferences",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Virtual Conference Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Schedule and sell virtual conferences with multi-day agendas, tiered ticketing, attendee email notifications, and payment processing. Works with Zoom, Teams, YouTube Live, and any platform.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Multi-day conference scheduling",
-            "Tiered ticket types with zero platform fees",
-            "One shareable link for full conference agenda",
-            "Works with Zoom, Teams, YouTube Live, any platform",
-            "Email notifications to all attendees",
-            "Google Calendar two-way sync",
-            "Follower notifications for future conferences",
-            "QR code tickets for hybrid events",
-            "Attendee management dashboard",
-            "Open source virtual conference platform",
-            "Selfhosted conference scheduling option"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "virtual conference platform, online conference scheduling, virtual summit, conference ticketing",
-        "screenshot": "{{ asset('social/for-online.png') }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>

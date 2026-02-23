@@ -63,6 +63,39 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Community Centers",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Community Center Management Software",
+        "operatingSystem": "Web",
+        "description": "Reach your members directly without algorithms. Manage program registration, room booking, and community events. Email your community directly and fill your classes. Free forever.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Program announcement newsletters",
+            "Class and workshop registration",
+            "Multi-room scheduling",
+            "Facility rental request management",
+            "Community event calendar",
+            "QR code check-in",
+            "Virtual event support",
+            "Auto-generated social media graphics"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section -->
@@ -899,39 +932,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Community Centers",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Community Center Management Software",
-        "operatingSystem": "Web",
-        "description": "Reach your members directly without algorithms. Manage program registration, room booking, and community events. Email your community directly and fill your classes. Free forever.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Program announcement newsletters",
-            "Class and workshop registration",
-            "Multi-room scheduling",
-            "Facility rental request management",
-            "Community event calendar",
-            "QR code check-in",
-            "Virtual event support",
-            "Auto-generated social media graphics"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .text-gradient-teal {

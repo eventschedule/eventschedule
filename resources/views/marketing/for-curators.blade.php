@@ -63,6 +63,37 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Curators",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Event Curation Software",
+        "operatingSystem": "Web",
+        "description": "Build the ultimate local guide. Use AI-powered import, aggregate events from multiple sources, and grow your following.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "AI-powered event import",
+            "City search discovery",
+            "Approval workflow",
+            "Event aggregation",
+            "Schedule graphics",
+            "Follower notifications"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section -->
@@ -809,37 +840,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Curators",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Event Curation Software",
-        "operatingSystem": "Web",
-        "description": "Build the ultimate local guide. Use AI-powered import, aggregate events from multiple sources, and grow your following.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "AI-powered event import",
-            "City search discovery",
-            "Approval workflow",
-            "Event aggregation",
-            "Schedule graphics",
-            "Follower notifications"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         @media (prefers-reduced-motion: reduce) {

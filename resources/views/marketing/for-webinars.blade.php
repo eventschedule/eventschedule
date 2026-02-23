@@ -63,6 +63,42 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Webinars",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Webinar Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Host webinars with built-in registration, ticketing, email notifications, and streaming link integration. Works with Zoom, Google Meet, and any platform.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Email notifications to registered attendees",
+            "One registration link for all webinars",
+            "Zero-fee ticket sales for paid webinars",
+            "Google Calendar two-way sync",
+            "Works with Zoom, Google Meet, Microsoft Teams",
+            "Recurring webinar series scheduling",
+            "Attendee registration management",
+            "Team collaboration for multiple hosts",
+            "Multi-track webinar programs"
+        ],
+        "url": "{{ url()->current() }}",
+        "keywords": "webinar hosting, webinar scheduling, webinar registration, paid webinars",
+        "screenshot": "{{ asset('images/social/for-online.png') }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section - Mesh Gradient -->
@@ -814,42 +850,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Webinars",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Webinar Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Host webinars with built-in registration, ticketing, email notifications, and streaming link integration. Works with Zoom, Google Meet, and any platform.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Email notifications to registered attendees",
-            "One registration link for all webinars",
-            "Zero-fee ticket sales for paid webinars",
-            "Google Calendar two-way sync",
-            "Works with Zoom, Google Meet, Microsoft Teams",
-            "Recurring webinar series scheduling",
-            "Attendee registration management",
-            "Team collaboration for multiple hosts",
-            "Multi-track webinar programs"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "webinar hosting, webinar scheduling, webinar registration, paid webinars",
-        "screenshot": "{{ asset('social/for-online.png') }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .webinar-glow-text {

@@ -431,10 +431,10 @@
 
                 <!-- Newsletters -->
                 <a href="{{ marketing_url('/features/newsletters') }}" class="group block">
-                    <div class="h-full bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900 dark:to-cyan-900 rounded-3xl border border-sky-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                    <div class="h-full bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900 dark:to-cyan-900 rounded-3xl border border-sky-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300 flex flex-col">
                         <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Newsletters</h3>
                         <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Send branded emails to your followers and ticket buyers with a drag-and-drop editor.</p>
-                        <span class="inline-flex items-center text-sky-500 dark:text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                        <span class="inline-flex items-center text-sky-500 dark:text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all mt-auto">
                             Learn more
                             <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -445,10 +445,10 @@
 
                 <!-- Analytics -->
                 <a href="{{ marketing_url('/features/analytics') }}" class="group block">
-                    <div class="h-full bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-3xl border border-emerald-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                    <div class="h-full bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-3xl border border-emerald-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300 flex flex-col">
                         <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">Analytics</h3>
                         <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Track views, followers, and engagement across all your events and schedules.</p>
-                        <span class="inline-flex items-center text-emerald-500 dark:text-emerald-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                        <span class="inline-flex items-center text-emerald-500 dark:text-emerald-400 font-medium group-hover:gap-3 gap-2 transition-all mt-auto">
                             Learn more
                             <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

@@ -44,7 +44,9 @@ class GraphicEmailService
                 })
                 ->where('starts_at', '>=', now())
                 ->whereNotNull('flyer_image_url')
-                ->where('flyer_image_url', '!=', '');
+                ->where('flyer_image_url', '!=', '')
+                ->where('is_private', false)
+                ->whereNull('event_password');
 
             // Only exclude recurring events if setting is true
             if ($excludeRecurring) {

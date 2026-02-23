@@ -63,6 +63,40 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Theater Performers",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Theater Production Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Share your theater productions with audiences everywhere. Email your fans directly - no algorithm. Sell tickets to your shows with zero platform fees.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Show run scheduling for multi-night productions",
+            "Zero-fee ticket sales for performances",
+            "Direct newsletter communication with audiences",
+            "Virtual performance and livestream support",
+            "Two-way Google Calendar sync",
+            "Cast and crew coordination",
+            "Auto-generated promotional graphics",
+            "Multiple ticket types per performance",
+            "Season announcement support"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section - The Marquee -->
@@ -982,40 +1016,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Theater Performers",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Theater Production Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Share your theater productions with audiences everywhere. Email your fans directly - no algorithm. Sell tickets to your shows with zero platform fees.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Show run scheduling for multi-night productions",
-            "Zero-fee ticket sales for performances",
-            "Direct newsletter communication with audiences",
-            "Virtual performance and livestream support",
-            "Two-way Google Calendar sync",
-            "Cast and crew coordination",
-            "Auto-generated promotional graphics",
-            "Multiple ticket types per performance",
-            "Season announcement support"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         @keyframes marquee-bulb {

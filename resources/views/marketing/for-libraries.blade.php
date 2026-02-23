@@ -63,6 +63,39 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Libraries",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Library Program Management Software",
+        "operatingSystem": "Web",
+        "description": "From story time to author readings. One calendar for all your library programs. Keep patrons engaged and informed. Email your community directly and fill your programs. Free forever.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Program update newsletters",
+            "Recurring program scheduling",
+            "Author event management",
+            "Community program categories",
+            "Zero fee ticketing and registration",
+            "Google Calendar sync",
+            "Team management for library staff",
+            "Program attendance analytics"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section -->
@@ -896,39 +929,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Libraries",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Library Program Management Software",
-        "operatingSystem": "Web",
-        "description": "From story time to author readings. One calendar for all your library programs. Keep patrons engaged and informed. Email your community directly and fill your programs. Free forever.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Program update newsletters",
-            "Recurring program scheduling",
-            "Author event management",
-            "Community program categories",
-            "Zero fee ticketing and registration",
-            "Google Calendar sync",
-            "Team management for library staff",
-            "Program attendance analytics"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .text-gradient-sky {

@@ -84,12 +84,16 @@ class TicketController extends Controller
             abort(403);
         }
 
+        $user = auth()->user();
+        $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+        if ($event->is_private && ! $isMemberOrAdmin) {
+            abort(404);
+        }
+
         // Verify event can sell tickets (checks past dates, tickets_enabled, and Pro plan)
         if (! $event->canSellTickets($request->event_date)) {
             return back()->with('error', __('messages.tickets_not_available'));
         }
-
-        $user = auth()->user();
 
         if (! $user && $request->create_account && config('app.hosted')) {
 

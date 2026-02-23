@@ -63,6 +63,39 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Comedians",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Comedy Show Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Track your open mics, guest spots, and headlining gigs. Email fans directly - no algorithm burying your posts. Zero fees on ticket sales. Built for stand-up comics.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Open mic tracking",
+            "Guest spot management",
+            "Direct fan newsletters",
+            "Zero-fee ticketing",
+            "Late night show support",
+            "Comedy club integration",
+            "Tour date management",
+            "Promo graphic generator"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section - Comedy Club Stage Vibe -->
@@ -800,39 +833,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Comedians",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Comedy Show Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Track your open mics, guest spots, and headlining gigs. Email fans directly - no algorithm burying your posts. Zero fees on ticket sales. Built for stand-up comics.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Open mic tracking",
-            "Guest spot management",
-            "Direct fan newsletters",
-            "Zero-fee ticketing",
-            "Late night show support",
-            "Comedy club integration",
-            "Tour date management",
-            "Promo graphic generator"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .neon-text {

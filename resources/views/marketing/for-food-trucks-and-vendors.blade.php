@@ -63,6 +63,37 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Food Trucks & Vendors",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Food Truck Location Management Software",
+        "operatingSystem": "Web",
+        "description": "Tell customers where to find your food truck today. Share your weekly rotation, email your regulars directly, and take catering bookings with zero platform fees.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Daily and weekly location schedule with route visualization",
+            "Direct newsletter to regulars - no algorithm middleman",
+            "QR code for truck window - customers scan to follow",
+            "Instant notifications when you post new locations",
+            "Share-ready promotional graphics for social media",
+            "Zero-fee catering and private event bookings"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section -->
@@ -814,37 +845,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Food Trucks & Vendors",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Food Truck Location Management Software",
-        "operatingSystem": "Web",
-        "description": "Tell customers where to find your food truck today. Share your weekly rotation, email your regulars directly, and take catering bookings with zero platform fees.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Daily and weekly location schedule with route visualization",
-            "Direct newsletter to regulars - no algorithm middleman",
-            "QR code for truck window - customers scan to follow",
-            "Instant notifications when you post new locations",
-            "Share-ready promotional graphics for social media",
-            "Zero-fee catering and private event bookings"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .text-gradient-food {

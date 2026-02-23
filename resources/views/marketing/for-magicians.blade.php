@@ -63,6 +63,38 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Magicians",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Magician Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Share your magic shows, sell tickets directly, and reach your audience with newsletters. Built for magicians, mentalists, illusionists, and variety performers.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Private event booking management for corporate and wedding bookings",
+            "Zero-fee ticket sales with QR check-in",
+            "Direct newsletter communication with fans",
+            "Virtual show streaming support",
+            "Two-way Google Calendar sync",
+            "Team coordination for assistants and agents",
+            "Auto-generated promotional graphics for social media"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section -->
@@ -840,38 +872,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Magicians",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Magician Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Share your magic shows, sell tickets directly, and reach your audience with newsletters. Built for magicians, mentalists, illusionists, and variety performers.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Private event booking management for corporate and wedding bookings",
-            "Zero-fee ticket sales with QR check-in",
-            "Direct newsletter communication with fans",
-            "Virtual show streaming support",
-            "Two-way Google Calendar sync",
-            "Team coordination for assistants and agents",
-            "Auto-generated promotional graphics for social media"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .text-gradient-blue {

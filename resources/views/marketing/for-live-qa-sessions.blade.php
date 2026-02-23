@@ -63,6 +63,43 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Live Q&A Sessions",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Live Q&A Session Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Schedule live Q&A sessions with built-in registration, audience interaction, ticketing, and streaming link integration. Works with Zoom, YouTube Live, and any platform.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Email notifications to registered attendees",
+            "One registration link for all Q&A sessions",
+            "Zero-fee ticket sales for paid sessions",
+            "Google Calendar two-way sync",
+            "Works with Zoom, YouTube Live, Microsoft Teams",
+            "Recurring Q&A series scheduling",
+            "Attendee registration management",
+            "Follower notifications for new sessions",
+            "Open source Q&A session platform",
+            "Selfhosted Q&A scheduling option"
+        ],
+        "url": "{{ url()->current() }}",
+        "keywords": "live Q&A platform, Q&A session scheduling, interactive Q&A events, paid Q&A sessions",
+        "screenshot": "{{ asset('images/social/for-online.png') }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section - Mesh Gradient -->
@@ -814,43 +851,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Live Q&A Sessions",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Live Q&A Session Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Schedule live Q&A sessions with built-in registration, audience interaction, ticketing, and streaming link integration. Works with Zoom, YouTube Live, and any platform.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Email notifications to registered attendees",
-            "One registration link for all Q&A sessions",
-            "Zero-fee ticket sales for paid sessions",
-            "Google Calendar two-way sync",
-            "Works with Zoom, YouTube Live, Microsoft Teams",
-            "Recurring Q&A series scheduling",
-            "Attendee registration management",
-            "Follower notifications for new sessions",
-            "Open source Q&A session platform",
-            "Selfhosted Q&A scheduling option"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "live Q&A platform, Q&A session scheduling, interactive Q&A events, paid Q&A sessions",
-        "screenshot": "{{ asset('social/for-online.png') }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>

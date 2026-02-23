@@ -63,6 +63,39 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Breweries & Wineries",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Brewery and Winery Event Management Software",
+        "operatingSystem": "Web",
+        "description": "Fill your tasting room with fans. Announce new releases, host tastings, and sell tickets to brewery events. Email your fans directly. No algorithm. Free forever.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Limited release announcements with email newsletters",
+            "Club member first access and allocation management",
+            "Ticketed tastings and barrel room tours",
+            "Private event and tour booking inbox",
+            "Multiple space calendars (taproom, patio, barrel room)",
+            "Live tap list with QR code scanning",
+            "Virtual tasting support",
+            "Auto-generated social media graphics"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section with Floating Release Card -->
@@ -911,39 +944,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Breweries & Wineries",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Brewery and Winery Event Management Software",
-        "operatingSystem": "Web",
-        "description": "Fill your tasting room with fans. Announce new releases, host tastings, and sell tickets to brewery events. Email your fans directly. No algorithm. Free forever.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Limited release announcements with email newsletters",
-            "Club member first access and allocation management",
-            "Ticketed tastings and barrel room tours",
-            "Private event and tour booking inbox",
-            "Multiple space calendars (taproom, patio, barrel room)",
-            "Live tap list with QR code scanning",
-            "Virtual tasting support",
-            "Auto-generated social media graphics"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .text-gradient-copper {

@@ -63,6 +63,37 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Venues",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Venue Management Software",
+        "operatingSystem": "Web",
+        "description": "Fill your calendar with great events. Accept booking requests, sell tickets with QR check-in, and manage multiple rooms or stages.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Public event calendar",
+            "Booking request inbox",
+            "QR code ticketing",
+            "Multiple rooms/stages",
+            "Team management",
+            "Google Calendar sync"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section -->
@@ -954,35 +985,4 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Venues",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Venue Management Software",
-        "operatingSystem": "Web",
-        "description": "Fill your calendar with great events. Accept booking requests, sell tickets with QR check-in, and manage multiple rooms or stages.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Public event calendar",
-            "Booking request inbox",
-            "QR code ticketing",
-            "Multiple rooms/stages",
-            "Team management",
-            "Google Calendar sync"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 </x-marketing-layout>

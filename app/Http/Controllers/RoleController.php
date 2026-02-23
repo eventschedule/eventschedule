@@ -751,6 +751,9 @@ class RoleController extends Controller
             return response()->json(['events' => [], 'has_more' => false]);
         }
 
+        $user = auth()->user();
+        $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+
         if ($role->isCurator()) {
             $pastEvents = Event::with('roles', 'parts', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
                 ->where('starts_at', '<', $beforeDate)
@@ -761,6 +764,7 @@ class RoleController extends Controller
                         ->where('role_id', $role->id)
                         ->where('is_accepted', true);
                 })
+                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_private', false))
                 ->orderByDesc('starts_at')
                 ->limit(51)
                 ->get();
@@ -769,15 +773,10 @@ class RoleController extends Controller
                 ->where('starts_at', '<', $beforeDate)
                 ->whereNull('days_of_week')
                 ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
+                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_private', false))
                 ->orderByDesc('starts_at')
                 ->limit(51)
                 ->get();
-        }
-
-        // Filter private events for non-members
-        $user = auth()->user();
-        if (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin())) {
-            $pastEvents = $pastEvents->filter(fn ($e) => ! $e->is_private);
         }
 
         $hasMore = $pastEvents->count() > 50;
@@ -883,6 +882,8 @@ class RoleController extends Controller
 
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
 
+        $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+
         if ($role->isCurator()) {
             $events = Event::with('roles', 'parts', 'tickets', 'approvedVideos', 'approvedComments.user')->withCount(['approvedVideos', 'approvedComments'])
                 ->where(function ($query) use ($startOfMonthUtc) {
@@ -895,6 +896,7 @@ class RoleController extends Controller
                         ->where('role_id', $role->id)
                         ->where('is_accepted', true);
                 })
+                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_private', false))
                 ->orderBy('starts_at')
                 ->get();
         } else {
@@ -909,6 +911,7 @@ class RoleController extends Controller
                             ->where('is_accepted', true);
                     });
                 })
+                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_private', false))
                 ->orderBy('starts_at')
                 ->get();
         }
@@ -923,6 +926,7 @@ class RoleController extends Controller
                         ->where('role_id', $role->id)
                         ->where('is_accepted', true);
                 })
+                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_private', false))
                 ->orderByDesc('starts_at')
                 ->limit(51)
                 ->get();
@@ -931,15 +935,10 @@ class RoleController extends Controller
                 ->where('starts_at', '<', Carbon::now('UTC'))
                 ->whereNull('days_of_week')
                 ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
+                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_private', false))
                 ->orderByDesc('starts_at')
                 ->limit(51)
                 ->get();
-        }
-
-        // Filter private events for non-members
-        if (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin())) {
-            $events = $events->filter(fn ($e) => ! $e->is_private);
-            $pastEvents = $pastEvents->filter(fn ($e) => ! $e->is_private);
         }
 
         $hasMorePastEvents = $pastEvents->count() > 50;
@@ -2530,7 +2529,7 @@ class RoleController extends Controller
             $query->where('subdomain', 'like', "{$q}%")
                 ->orWhere('name', 'like', "%{$q}%");
         })
-            ->when(!empty($exclude), fn ($query) => $query->whereNotIn('subdomain', $exclude))
+            ->when(! empty($exclude), fn ($query) => $query->whereNotIn('subdomain', $exclude))
             ->limit(10)
             ->get(['subdomain', 'name', 'city']);
 
@@ -2608,11 +2607,18 @@ class RoleController extends Controller
                 ->get();
         }
 
+        // Filter private events for non-members
+        $user = auth()->user();
+        $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+        if (! $isMemberOrAdmin) {
+            $events = $events->filter(fn ($e) => ! $e->is_private);
+        }
+
         // Format events for frontend
         $eventsData = $events->map(function ($event) use ($subdomain, $role) {
             $groupId = $event->getGroupIdForSubdomain($role->subdomain);
 
-            return [
+            $data = [
                 'id' => $event->id,
                 'name' => $event->translatedName(),
                 'description' => $event->translatedDescription(),
@@ -2623,6 +2629,15 @@ class RoleController extends Controller
                 'group_id' => $groupId ? \App\Utils\UrlUtils::encodeId($groupId) : null,
                 'category_id' => $event->category_id,
             ];
+
+            // Strip sensitive fields from password-protected events
+            if ($event->isPasswordProtected()) {
+                $data['description'] = null;
+                $data['venue_name'] = null;
+                $data['image_url'] = null;
+            }
+
+            return $data;
         });
 
         return response()->json($eventsData);

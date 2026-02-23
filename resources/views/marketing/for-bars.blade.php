@@ -63,6 +63,38 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Bars & Pubs",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Bar Event Management Software",
+        "operatingSystem": "Web",
+        "description": "Fill your bar's calendar with great events. Email your regulars directly - no paying for Facebook ads. Sell tickets with QR check-in, accept booking requests from performers.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Direct newsletter to regulars - no algorithm middleman",
+            "Accept booking requests from performers",
+            "Recurring weekly events",
+            "Watch parties and sports events",
+            "Tap takeovers and specials announcements",
+            "QR code ticketing with zero platform fees",
+            "Event analytics and tracking"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section -->
@@ -815,38 +847,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Bars & Pubs",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Bar Event Management Software",
-        "operatingSystem": "Web",
-        "description": "Fill your bar's calendar with great events. Email your regulars directly - no paying for Facebook ads. Sell tickets with QR check-in, accept booking requests from performers.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Direct newsletter to regulars - no algorithm middleman",
-            "Accept booking requests from performers",
-            "Recurring weekly events",
-            "Watch parties and sports events",
-            "Tap takeovers and specials announcements",
-            "QR code ticketing with zero platform fees",
-            "Event analytics and tracking"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .text-gradient-amber {

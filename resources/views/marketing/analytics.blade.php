@@ -343,10 +343,10 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 <a href="{{ marketing_url('/features/recurring-events') }}" class="group block">
-                    <div class="h-full bg-gradient-to-br from-lime-100 to-green-100 dark:from-lime-900 dark:to-green-900 rounded-3xl border border-lime-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                    <div class="h-full bg-gradient-to-br from-lime-100 to-green-100 dark:from-lime-900 dark:to-green-900 rounded-3xl border border-lime-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300 flex flex-col">
                         <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-lime-600 dark:group-hover:text-lime-300 transition-colors">Recurring Events</h3>
                         <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Set events to repeat weekly on chosen days with flexible end conditions and per-occurrence tickets.</p>
-                        <span class="inline-flex items-center text-lime-500 dark:text-lime-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                        <span class="inline-flex items-center text-lime-500 dark:text-lime-400 font-medium group-hover:gap-3 gap-2 transition-all mt-auto">
                             Learn more
                             <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

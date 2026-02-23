@@ -321,7 +321,7 @@
                 </p>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-                    <a href="{{ marketing_url('/stripe') }}" class="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10 hover:border-blue-500/30 transition-all group">
+                    <a href="{{ marketing_url('/stripe') }}" class="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10 hover:border-blue-500/30 transition-all group flex flex-col">
                         <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mx-auto mb-4">
                             <svg aria-hidden="true" class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -329,7 +329,7 @@
                         </div>
                         <h3 class="text-gray-900 dark:text-white font-semibold mb-2 group-hover:text-blue-300 transition-colors">Stripe</h3>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mb-3">Credit cards, Apple Pay, Google Pay</p>
-                        <span class="inline-flex items-center text-blue-400 text-xs font-medium">
+                        <span class="inline-flex items-center text-blue-400 text-xs font-medium mt-auto">
                             Learn more
                             <svg aria-hidden="true" class="ml-1 w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -337,7 +337,7 @@
                         </span>
                     </a>
 
-                    <a href="{{ marketing_url('/invoiceninja') }}" class="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10 hover:border-emerald-500/30 transition-all group">
+                    <a href="{{ marketing_url('/invoiceninja') }}" class="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10 hover:border-emerald-500/30 transition-all group flex flex-col">
                         <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
                             <svg aria-hidden="true" class="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -345,7 +345,7 @@
                         </div>
                         <h3 class="text-gray-900 dark:text-white font-semibold mb-2 group-hover:text-emerald-300 transition-colors">Invoice Ninja</h3>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mb-3">Professional invoicing for B2B</p>
-                        <span class="inline-flex items-center text-emerald-400 text-xs font-medium">
+                        <span class="inline-flex items-center text-emerald-400 text-xs font-medium mt-auto">
                             Learn more
                             <svg aria-hidden="true" class="ml-1 w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -379,7 +379,7 @@
 
                 <!-- Read the guide -->
                 <a href="{{ route('marketing.docs.tickets') }}" class="group block">
-                    <div class="h-full bg-white dark:bg-white/5 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                    <div class="h-full bg-white dark:bg-white/5 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300 flex flex-col">
                         <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/20 mb-6">
                             <svg aria-hidden="true" class="w-6 h-6 text-sky-500 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -387,7 +387,7 @@
                         </div>
                         <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">Read the guide</h3>
                         <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Learn how to get the most out of ticketing.</p>
-                        <span class="inline-flex items-center text-sky-500 dark:text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                        <span class="inline-flex items-center text-sky-500 dark:text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all mt-auto">
                             Read guide
                             <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -398,10 +398,10 @@
 
                 <!-- Next feature -->
                 <a href="{{ marketing_url('/features/ai') }}" class="group block">
-                    <div class="h-full bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-3xl border border-blue-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
+                    <div class="h-full bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-3xl border border-blue-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300 flex flex-col">
                         <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">AI-Powered Import</h3>
                         <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Paste text or drop an image. AI extracts event details automatically.</p>
-                        <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                        <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all mt-auto">
                             Learn more
                             <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

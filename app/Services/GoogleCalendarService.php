@@ -212,7 +212,7 @@ class GoogleCalendarService
             }
 
             // Set visibility
-            $googleEvent->setVisibility('public');
+            $googleEvent->setVisibility($event->is_private ? 'private' : 'public');
 
             // Create the event
             $createdEvent = $this->calendarService->events->insert($calendarId, $googleEvent);
@@ -278,6 +278,9 @@ class GoogleCalendarService
             if ($event->venue && $event->venue->bestAddress()) {
                 $googleEvent->setLocation($event->venue->bestAddress());
             }
+
+            // Set visibility
+            $googleEvent->setVisibility($event->is_private ? 'private' : 'public');
 
             // Update the event
             $updatedEvent = $this->calendarService->events->update($calendarId, $googleEventId, $googleEvent);

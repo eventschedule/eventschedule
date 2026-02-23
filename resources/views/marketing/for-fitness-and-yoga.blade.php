@@ -63,6 +63,38 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Fitness & Yoga Instructors",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Fitness Class Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Share your class schedule, sell drop-in passes, and reach students directly with newsletters. Built for yoga teachers, personal trainers, and fitness instructors.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Weekly class schedule newsletters to students",
+            "Custom schedule URL for Instagram, website, flyers",
+            "Zero-fee drop-in ticketing and class passes",
+            "Google Calendar two-way sync",
+            "Recurring class schedule management",
+            "Multi-instructor team collaboration",
+            "Student follower notifications"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section - Mesh Gradient -->
@@ -874,38 +906,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Fitness & Yoga Instructors",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Fitness Class Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Share your class schedule, sell drop-in passes, and reach students directly with newsletters. Built for yoga teachers, personal trainers, and fitness instructors.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Weekly class schedule newsletters to students",
-            "Custom schedule URL for Instagram, website, flyers",
-            "Zero-fee drop-in ticketing and class passes",
-            "Google Calendar two-way sync",
-            "Recurring class schedule management",
-            "Multi-instructor team collaboration",
-            "Student follower notifications"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .fitness-glow-text {

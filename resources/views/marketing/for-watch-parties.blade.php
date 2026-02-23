@@ -63,6 +63,43 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Watch Parties",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Watch Party Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Schedule watch parties with built-in registration, viewer notifications, ticketing, and streaming link integration. Works with YouTube, Twitch, Discord, and any platform.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Email notifications to registered viewers",
+            "One registration link for all watch parties",
+            "Zero-fee ticket sales for paid screenings",
+            "Google Calendar two-way sync",
+            "Works with YouTube, Twitch, Discord, any platform",
+            "Recurring watch party series scheduling",
+            "Viewer registration management",
+            "Follower notifications for new screenings",
+            "Open source watch party platform",
+            "Selfhosted watch party scheduling option"
+        ],
+        "url": "{{ url()->current() }}",
+        "keywords": "watch party platform, schedule watch parties, virtual watch party, online watch party hosting, group streaming events, watch party ticketing, movie night scheduling, free watch party app",
+        "screenshot": "{{ asset('images/social/for-online.png') }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section - Mesh Gradient -->
@@ -817,43 +854,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Watch Parties",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Watch Party Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Schedule watch parties with built-in registration, viewer notifications, ticketing, and streaming link integration. Works with YouTube, Twitch, Discord, and any platform.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Email notifications to registered viewers",
-            "One registration link for all watch parties",
-            "Zero-fee ticket sales for paid screenings",
-            "Google Calendar two-way sync",
-            "Works with YouTube, Twitch, Discord, any platform",
-            "Recurring watch party series scheduling",
-            "Viewer registration management",
-            "Follower notifications for new screenings",
-            "Open source watch party platform",
-            "Selfhosted watch party scheduling option"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "watch party platform, schedule watch parties, virtual watch party, online watch party hosting, group streaming events, watch party ticketing, movie night scheduling, free watch party app",
-        "screenshot": "{{ asset('social/for-online.png') }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>

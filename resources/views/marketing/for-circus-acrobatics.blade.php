@@ -63,6 +63,39 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Circus & Acrobatics",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Circus Performer Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Share your circus performances, sell tickets directly, and reach your audience with newsletters. Built for aerialists, acrobats, and circus performers.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Festival circuit tracking for summer tours",
+            "Technical rigging specs for venue bookers",
+            "Workshop scheduling for teaching",
+            "Troupe and ensemble collaboration",
+            "Zero-fee ticket sales with door check-in",
+            "Event planner booking kit",
+            "Direct newsletter announcements to fans",
+            "Online event streaming and virtual tickets"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section - The Big Top -->
@@ -945,39 +978,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Circus & Acrobatics",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Circus Performer Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Share your circus performances, sell tickets directly, and reach your audience with newsletters. Built for aerialists, acrobats, and circus performers.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Festival circuit tracking for summer tours",
-            "Technical rigging specs for venue bookers",
-            "Workshop scheduling for teaching",
-            "Troupe and ensemble collaboration",
-            "Zero-fee ticket sales with door check-in",
-            "Event planner booking kit",
-            "Direct newsletter announcements to fans",
-            "Online event streaming and virtual tickets"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         /* Circus Color Palette - Light Mode */

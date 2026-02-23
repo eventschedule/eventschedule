@@ -63,6 +63,38 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Poets & Spoken Word",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Poetry Reading Scheduling Software",
+        "operatingSystem": "Web",
+        "description": "Share your poetry readings, open mics, and workshops. Sell tickets directly, reach fans with newsletters. Built for spoken word artists, slam poets, and writers.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Open mic and reading tracking across multiple venues",
+            "Zero-fee ticket sales with chapbook bundling",
+            "Direct newsletter communication with readers",
+            "Virtual reading and workshop support",
+            "Two-way Google Calendar sync",
+            "Workshop scheduling and registration",
+            "Auto-generated promotional graphics for social media"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section - Typewriter/Literary Theme -->
@@ -778,36 +810,4 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Poets & Spoken Word",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Poetry Reading Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Share your poetry readings, open mics, and workshops. Sell tickets directly, reach fans with newsletters. Built for spoken word artists, slam poets, and writers.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Open mic and reading tracking across multiple venues",
-            "Zero-fee ticket sales with chapbook bundling",
-            "Direct newsletter communication with readers",
-            "Virtual reading and workshop support",
-            "Two-way Google Calendar sync",
-            "Workshop scheduling and registration",
-            "Auto-generated promotional graphics for social media"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 </x-marketing-layout>

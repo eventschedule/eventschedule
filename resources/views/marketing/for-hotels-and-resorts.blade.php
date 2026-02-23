@@ -63,6 +63,39 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Hotels & Resorts",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Hotel Activity Management Software",
+        "operatingSystem": "Web",
+        "description": "Elevate the guest experience with one calendar for every activity. Pool parties, wine tastings, live entertainment, conferences, and more. Keep guests engaged and delighted. Free forever.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Guest activity newsletter",
+            "Multi-space management",
+            "Ticketed events and experiences",
+            "Weekly activity planner",
+            "Concierge sharing link",
+            "Google Calendar sync",
+            "Team management with roles",
+            "Activity analytics and insights"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section -->
@@ -914,39 +947,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Hotels & Resorts",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Hotel Activity Management Software",
-        "operatingSystem": "Web",
-        "description": "Elevate the guest experience with one calendar for every activity. Pool parties, wine tastings, live entertainment, conferences, and more. Keep guests engaged and delighted. Free forever.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Guest activity newsletter",
-            "Multi-space management",
-            "Ticketed events and experiences",
-            "Weekly activity planner",
-            "Concierge sharing link",
-            "Google Calendar sync",
-            "Team management with roles",
-            "Activity analytics and insights"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .text-gradient-slate-gold {

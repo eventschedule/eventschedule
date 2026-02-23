@@ -12,7 +12,7 @@
         "name": "Event Schedule Use Cases",
         "description": "Discover how Event Schedule works for musicians, venues, comedians, restaurants, art galleries, and more.",
         "url": "{{ url()->current() }}",
-        "numberOfItems": 3,
+        "numberOfItems": 10,
         "itemListElement": [
             {
                 "@type": "ListItem",
@@ -24,16 +24,65 @@
             {
                 "@type": "ListItem",
                 "position": 2,
+                "name": "For Musicians",
+                "description": "Share your gigs, sync calendars, and let fans follow your shows.",
+                "url": "{{ config('app.url') }}/for-musicians"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "For Comedians",
+                "description": "List your shows, sell tickets, and build your comedy brand.",
+                "url": "{{ config('app.url') }}/for-comedians"
+            },
+            {
+                "@type": "ListItem",
+                "position": 4,
                 "name": "For Venues",
                 "description": "Bars, clubs, theaters, and event spaces that want to fill their calendar with great events.",
                 "url": "{{ config('app.url') }}/for-venues"
             },
             {
                 "@type": "ListItem",
-                "position": 3,
+                "position": 5,
+                "name": "For Restaurants",
+                "description": "Promote dinner events, wine tastings, and live entertainment to your diners.",
+                "url": "{{ config('app.url') }}/for-restaurants"
+            },
+            {
+                "@type": "ListItem",
+                "position": 6,
+                "name": "For Bars & Pubs",
+                "description": "Keep your entertainment calendar fresh and bring in crowds.",
+                "url": "{{ config('app.url') }}/for-bars"
+            },
+            {
+                "@type": "ListItem",
+                "position": 7,
                 "name": "For Curators",
                 "description": "Event curators and promoters who organize and promote events across multiple venues.",
                 "url": "{{ config('app.url') }}/for-curators"
+            },
+            {
+                "@type": "ListItem",
+                "position": 8,
+                "name": "For Webinars",
+                "description": "Host webinars with built-in registration, ticketing, and streaming link integration.",
+                "url": "{{ config('app.url') }}/for-webinars"
+            },
+            {
+                "@type": "ListItem",
+                "position": 9,
+                "name": "For Virtual Conferences",
+                "description": "Schedule and manage virtual conferences with multi-track programs and ticketing.",
+                "url": "{{ config('app.url') }}/for-virtual-conferences"
+            },
+            {
+                "@type": "ListItem",
+                "position": 10,
+                "name": "For Online Classes",
+                "description": "Schedule and sell online classes with built-in registration and video platform integration.",
+                "url": "{{ config('app.url') }}/for-online-classes"
             }
         ]
     }

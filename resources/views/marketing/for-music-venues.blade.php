@@ -63,6 +63,38 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Music Venues",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Music Venue Management Software",
+        "operatingSystem": "Web",
+        "description": "Your venue's concert calendar without the Ticketmaster fees. Let bands apply to play, sell tickets directly to fans, and manage load-in to encore.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Zero platform fee ticketing",
+            "Artist booking applications",
+            "Multi-stage venue support",
+            "Show day timeline management",
+            "QR code door check-in",
+            "Venue analytics",
+            "Direct fan newsletters"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section -->
@@ -924,36 +956,4 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Music Venues",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Music Venue Management Software",
-        "operatingSystem": "Web",
-        "description": "Your venue's concert calendar without the Ticketmaster fees. Let bands apply to play, sell tickets directly to fans, and manage load-in to encore.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Zero platform fee ticketing",
-            "Artist booking applications",
-            "Multi-stage venue support",
-            "Show day timeline management",
-            "QR code door check-in",
-            "Venue analytics",
-            "Direct fan newsletters"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 </x-marketing-layout>

@@ -63,6 +63,37 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Theaters",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Theater Management Software",
+        "operatingSystem": "Web",
+        "description": "Sell out every performance. Manage show runs from opening night to closing curtain, sell tickets with zero platform fees, and email your patrons directly.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Show run management",
+            "Multiple ticket types",
+            "Zero-fee ticketing",
+            "QR code box office",
+            "Direct patron newsletter",
+            "Multi-venue scheduling"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section with Theater Marquee Effect -->
@@ -752,35 +783,4 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Theaters",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Theater Management Software",
-        "operatingSystem": "Web",
-        "description": "Sell out every performance. Manage show runs from opening night to closing curtain, sell tickets with zero platform fees, and email your patrons directly.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Show run management",
-            "Multiple ticket types",
-            "Zero-fee ticketing",
-            "QR code box office",
-            "Direct patron newsletter",
-            "Multi-venue scheduling"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 </x-marketing-layout>

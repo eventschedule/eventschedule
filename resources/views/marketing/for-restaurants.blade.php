@@ -63,6 +63,39 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Restaurants",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Restaurant Event Management Software",
+        "operatingSystem": "Web",
+        "description": "Email your regulars directly and fill every seat. Announce seasonal menus, sell tickets to wine dinners and prix fixe events, and reach your regulars directly. No algorithm. Free forever.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Seasonal menu announcement newsletters",
+            "Prix fixe and wine dinner ticketing",
+            "Annual dining calendar with holiday events",
+            "Private dining inquiry management",
+            "Multiple dining space calendars",
+            "QR codes for menus and check-in",
+            "Virtual cooking class support",
+            "Auto-generated social media graphics"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section -->
@@ -961,39 +994,6 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Restaurants",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Restaurant Event Management Software",
-        "operatingSystem": "Web",
-        "description": "Email your regulars directly and fill every seat. Announce seasonal menus, sell tickets to wine dinners and prix fixe events, and reach your regulars directly. No algorithm. Free forever.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Seasonal menu announcement newsletters",
-            "Prix fixe and wine dinner ticketing",
-            "Annual dining calendar with holiday events",
-            "Private dining inquiry management",
-            "Multiple dining space calendars",
-            "QR codes for menus and check-in",
-            "Virtual cooking class support",
-            "Auto-generated social media graphics"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 
     <style {!! nonce_attr() !!}>
         .text-gradient-burgundy {

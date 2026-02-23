@@ -63,6 +63,38 @@
         ]
     }
     </script>
+    <!-- Product Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Event Schedule for Musicians & Performers",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Event Management Software",
+        "operatingSystem": "Web",
+        "description": "Share your upcoming shows with fans. Sync with Google Calendar, sell tickets direct, and let venues add you to their schedule.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever"
+        },
+        "featureList": [
+            "Custom schedule URL",
+            "Google Calendar sync",
+            "Direct ticket sales",
+            "Venue linking",
+            "Availability tracking",
+            "Team collaboration",
+            "Fan videos and comments on events"
+        ],
+        "url": "{{ url()->current() }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Event Schedule"
+        }
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section -->
@@ -879,36 +911,4 @@
         </div>
     </section>
 
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Musicians & Performers",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Event Management Software",
-        "operatingSystem": "Web",
-        "description": "Share your upcoming shows with fans. Sync with Google Calendar, sell tickets direct, and let venues add you to their schedule.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Custom schedule URL",
-            "Google Calendar sync",
-            "Direct ticket sales",
-            "Venue linking",
-            "Availability tracking",
-            "Team collaboration",
-            "Fan videos and comments on events"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
 </x-marketing-layout>
