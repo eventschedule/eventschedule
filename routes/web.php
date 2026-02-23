@@ -785,35 +785,35 @@ if (config('app.is_nexus')) {
     Route::get('/contact', fn () => redirect()->route('home'));
     Route::get('/selfhost', fn () => redirect()->route('home'));
     Route::get('/saas', fn () => redirect()->route('home'));
-    Route::get('/docs', fn () => redirect()->route('home'));
+    Route::get('/docs', fn () => redirect()->route('home'))->name('marketing.docs');
     // User Guide
-    Route::get('/docs/getting-started', fn () => redirect()->route('home'));
-    Route::get('/docs/creating-schedules', fn () => redirect()->route('home'));
-    Route::get('/docs/schedule-basics', fn () => redirect()->route('home'));
-    Route::get('/docs/schedule-styling', fn () => redirect()->route('home'));
-    Route::get('/docs/creating-events', fn () => redirect()->route('home'));
-    Route::get('/docs/sharing', fn () => redirect()->route('home'));
-    Route::get('/docs/tickets', fn () => redirect()->route('home'));
-    Route::get('/docs/event-graphics', fn () => redirect()->route('home'));
-    Route::get('/docs/newsletters', fn () => redirect()->route('home'));
-    Route::get('/docs/analytics', fn () => redirect()->route('home'));
-    Route::get('/docs/account-settings', fn () => redirect()->route('home'));
-    Route::get('/docs/availability', fn () => redirect()->route('home'));
-    Route::get('/docs/boost', fn () => redirect()->route('home'));
-    Route::get('/docs/scan-agenda', fn () => redirect()->route('home'));
-    Route::get('/docs/fan-content', fn () => redirect()->route('home'));
+    Route::get('/docs/getting-started', fn () => redirect()->route('home'))->name('marketing.docs.getting_started');
+    Route::get('/docs/creating-schedules', fn () => redirect()->route('home'))->name('marketing.docs.creating_schedules');
+    Route::get('/docs/schedule-basics', fn () => redirect()->route('home'))->name('marketing.docs.schedule_basics');
+    Route::get('/docs/schedule-styling', fn () => redirect()->route('home'))->name('marketing.docs.schedule_styling');
+    Route::get('/docs/creating-events', fn () => redirect()->route('home'))->name('marketing.docs.creating_events');
+    Route::get('/docs/sharing', fn () => redirect()->route('home'))->name('marketing.docs.sharing');
+    Route::get('/docs/tickets', fn () => redirect()->route('home'))->name('marketing.docs.tickets');
+    Route::get('/docs/event-graphics', fn () => redirect()->route('home'))->name('marketing.docs.event_graphics');
+    Route::get('/docs/newsletters', fn () => redirect()->route('home'))->name('marketing.docs.newsletters');
+    Route::get('/docs/analytics', fn () => redirect()->route('home'))->name('marketing.docs.analytics');
+    Route::get('/docs/account-settings', fn () => redirect()->route('home'))->name('marketing.docs.account_settings');
+    Route::get('/docs/availability', fn () => redirect()->route('home'))->name('marketing.docs.availability');
+    Route::get('/docs/boost', fn () => redirect()->route('home'))->name('marketing.docs.boost');
+    Route::get('/docs/scan-agenda', fn () => redirect()->route('home'))->name('marketing.docs.scan_agenda');
+    Route::get('/docs/fan-content', fn () => redirect()->route('home'))->name('marketing.docs.fan_content');
     // Selfhost section
-    Route::get('/docs/selfhost', fn () => redirect()->route('home'));
-    Route::get('/docs/selfhost/installation', fn () => redirect()->route('home'));
+    Route::get('/docs/selfhost', fn () => redirect()->route('home'))->name('marketing.docs.selfhost');
+    Route::get('/docs/selfhost/installation', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.installation');
     Route::get('/docs/selfhost/saas', fn () => redirect()->route('home'));
-    Route::get('/docs/selfhost/stripe', fn () => redirect()->route('home'));
-    Route::get('/docs/selfhost/google-calendar', fn () => redirect()->route('home'));
-    Route::get('/docs/selfhost/boost', fn () => redirect()->route('home'));
+    Route::get('/docs/selfhost/stripe', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.stripe');
+    Route::get('/docs/selfhost/google-calendar', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.google_calendar');
+    Route::get('/docs/selfhost/boost', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.boost');
     // SaaS section
-    Route::get('/docs/saas', fn () => redirect()->route('home'));
+    Route::get('/docs/saas', fn () => redirect()->route('home'))->name('marketing.docs.saas.setup');
     // Developer section
     Route::get('/docs/developer', fn () => redirect()->route('home'));
-    Route::get('/docs/developer/api', fn () => redirect()->route('home'));
+    Route::get('/docs/developer/api', fn () => redirect()->route('home'))->name('marketing.docs.developer.api');
     // Old URLs (still redirect to home)
     Route::get('/docs/stripe', fn () => redirect()->route('home'));
     Route::get('/docs/google-calendar', fn () => redirect()->route('home'));

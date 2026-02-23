@@ -51,11 +51,9 @@
                         <a href="{{ route('admin.analytics') }}" class="{{ $active === 'analytics' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.analytics')
                         </a>
-                        @if (config('app.hosted'))
                         <a href="{{ route('admin.usage') }}" class="{{ $active === 'usage' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.usage')
                         </a>
-                        @endif
                     </div>
                 </div>
             </div>
@@ -80,24 +78,18 @@
                     style="display: none;"
                     @click="openDropdown = null">
                     <div class="rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-gray-700">
-                        @if (config('app.hosted'))
                         <a href="{{ route('admin.boost') }}" class="{{ $active === 'boost' ? $dropdownItemActive : $dropdownItem }}">
                             Boost
                         </a>
-                        @endif
-                        @if (config('app.hosted') || config('app.is_nexus'))
                         <a href="{{ route('admin.plans') }}" class="{{ $active === 'plans' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.plans')
                         </a>
                         <a href="{{ route('admin.newsletters.index') }}" class="{{ $active === 'newsletters' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.newsletters')
                         </a>
-                        @endif
-                        @if (!config('app.hosted') || config('app.is_nexus'))
                         <a href="{{ route('blog.admin.index') }}" class="{{ $active === 'blog' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.blog')
                         </a>
-                        @endif
                     </div>
                 </div>
             </div>
