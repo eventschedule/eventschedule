@@ -1048,6 +1048,7 @@ Create a new event under a schedule.
 | short_description | string | No | Brief description (max 500 chars) |
 | event_url | string | No | External URL for the event (max 255 chars) |
 | event_password | string | No | Password to protect the event page (max 255 chars) |
+| is_private | boolean | No | Make event private (hidden from calendar, only accessible via direct link) |
 | registration_url | string | No | External registration URL (max 255 chars) |
 | category_id | integer | No | Category ID from GET /categories |
 | category | string | No | Category name (alternative to category_id, max 255 chars) |
@@ -1469,6 +1470,8 @@ curl -X POST https://eventschedule.com/api/sales \
 | registration_url | string | Yes | External registration URL |
 | venue_id | string | Yes | Encoded ID of associated venue schedule |
 | flyer_image_url | string | Yes | URL of the flyer image |
+| is_private | boolean | No | Whether the event is private (hidden from calendar, only accessible via direct link) |
+| is_password_protected | boolean | No | Whether the event page is protected by a password |
 | schedule_type | string | No | "single" or "recurring" |
 | recurring_frequency | string | Yes | Recurrence frequency. Only present for recurring events |
 | recurring_interval | integer | Yes | Interval for every_n_weeks. Only present for recurring events |

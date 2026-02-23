@@ -201,7 +201,7 @@
                     </div>
                 </a>
 
-                <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-card block">
+                <a href="{{ marketing_url('/features/event-graphics') }}" class="doc-card block">
                     <div class="rounded-xl border border-teal-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900 dark:to-cyan-900 hover:border-teal-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
                             <svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

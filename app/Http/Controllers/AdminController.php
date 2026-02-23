@@ -799,24 +799,40 @@ class AdminController extends Controller
 
         $stuckRoles = Role::where('translation_attempts', '>=', $stuckThreshold)
             ->where(function ($q) {
-                $q->whereNull('name_en')
-                    ->orWhereNull('description_en')
-                    ->orWhereNull('address1_en')
-                    ->orWhereNull('city_en')
-                    ->orWhereNull('state_en')
-                    ->orWhereNull('request_terms_en');
+                $q->where(function ($sub) {
+                    $sub->whereNotNull('name')->where('name', '!=', '')->whereNull('name_en');
+                })
+                    ->orWhere(function ($sub) {
+                        $sub->whereNotNull('description')->where('description', '!=', '')->whereNull('description_en');
+                    })
+                    ->orWhere(function ($sub) {
+                        $sub->whereNotNull('address1')->where('address1', '!=', '')->whereNull('address1_en');
+                    })
+                    ->orWhere(function ($sub) {
+                        $sub->whereNotNull('city')->where('city', '!=', '')->whereNull('city_en');
+                    })
+                    ->orWhere(function ($sub) {
+                        $sub->whereNotNull('state')->where('state', '!=', '')->whereNull('state_en');
+                    })
+                    ->orWhere(function ($sub) {
+                        $sub->whereNotNull('request_terms')->where('request_terms', '!=', '')->whereNull('request_terms_en');
+                    });
             })
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
             ->where('subdomain', 'not like', 'demo-%')
             ->orderByDesc('translation_attempts')
             ->limit(20)
-            ->get(['id', 'name', 'subdomain', 'translation_attempts', 'last_translated_at', 'language_code', 'description', 'name_en', 'description_en', 'address1_en', 'city_en', 'state_en', 'request_terms_en']);
+            ->get(['id', 'name', 'subdomain', 'translation_attempts', 'last_translated_at', 'language_code', 'description', 'name_en', 'description_en', 'address1', 'address1_en', 'city', 'city_en', 'state', 'state_en', 'request_terms', 'request_terms_en']);
 
         $stuckEvents = Event::with('venue:id,language_code')
             ->where('translation_attempts', '>=', $stuckThreshold)
             ->where(function ($q) {
-                $q->whereNull('name_en')
-                    ->orWhereNull('description_en');
+                $q->where(function ($sub) {
+                    $sub->whereNotNull('name')->where('name', '!=', '')->whereNull('name_en');
+                })
+                    ->orWhere(function ($sub) {
+                        $sub->whereNotNull('description')->where('description', '!=', '')->whereNull('description_en');
+                    });
             })
             ->whereDoesntHave('roles', fn ($q) => $q->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)->orWhere('subdomain', 'like', 'demo-%'))
             ->orderByDesc('translation_attempts')
@@ -826,19 +842,29 @@ class AdminController extends Controller
         $stuckEventParts = EventPart::with('event.venue:id,language_code')
             ->where('translation_attempts', '>=', $stuckThreshold)
             ->where(function ($q) {
-                $q->whereNull('name_en')
-                    ->orWhereNull('description_en');
+                $q->where(function ($sub) {
+                    $sub->whereNotNull('name')->where('name', '!=', '')->whereNull('name_en');
+                })
+                    ->orWhere(function ($sub) {
+                        $sub->whereNotNull('description')->where('description', '!=', '')->whereNull('description_en');
+                    });
             })
             ->whereHas('event', fn ($q) => $q->whereDoesntHave('roles', fn ($r) => $r->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)->orWhere('subdomain', 'like', 'demo-%')))
             ->orderByDesc('translation_attempts')
             ->limit(20)
             ->get(['id', 'name', 'description', 'event_id', 'translation_attempts', 'last_translated_at', 'name_en', 'description_en']);
 
-        $stuckEventRoles = EventRole::with(['event:id,name', 'role:id,subdomain,language_code'])
+        $stuckEventRoles = EventRole::with(['event:id,name,description', 'role:id,subdomain,language_code'])
             ->where('translation_attempts', '>=', $stuckThreshold)
             ->where(function ($q) {
-                $q->whereNull('name_translated')
-                    ->orWhereNull('description_translated');
+                $q->where(function ($sub) {
+                    $sub->whereNull('name_translated')
+                        ->whereHas('event', fn ($e) => $e->whereNotNull('name')->where('name', '!=', ''));
+                })
+                    ->orWhere(function ($sub) {
+                        $sub->whereNull('description_translated')
+                            ->whereHas('event', fn ($e) => $e->whereNotNull('description')->where('description', '!=', ''));
+                    });
             })
             ->whereHas('role', fn ($q) => $q->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)->where('subdomain', 'not like', 'demo-%'))
             ->orderByDesc('translation_attempts')

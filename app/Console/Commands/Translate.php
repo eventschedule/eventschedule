@@ -182,8 +182,11 @@ class Translate extends Command
             }
             */
 
+            $translationAttempted = false;
+
             if ($role->name && ! $role->name_en) {
                 $role->name_en = GeminiUtils::translate($role->name, $role->language_code, 'en');
+                $translationAttempted = true;
                 if ($debug) {
                     $this->info("Translated name from {$role->language_code} to en: '{$role->name}' → '{$role->name_en}'");
                 }
@@ -196,6 +199,7 @@ class Translate extends Command
 
             if ($role->description && ! $role->description_en) {
                 $role->description_en = GeminiUtils::translate($role->description, $role->language_code, 'en', $glossary);
+                $translationAttempted = true;
                 if ($debug) {
                     $this->info("Translated description from {$role->language_code} to en: '{$role->description}' → '{$role->description_en}'");
                 }
@@ -203,6 +207,7 @@ class Translate extends Command
 
             if ($role->short_description && ! $role->short_description_en) {
                 $role->short_description_en = GeminiUtils::translate($role->short_description, $role->language_code, 'en', $glossary);
+                $translationAttempted = true;
                 if ($debug) {
                     $this->info("Translated short_description from {$role->language_code} to en: '{$role->short_description}' → '{$role->short_description_en}'");
                 }
@@ -210,6 +215,7 @@ class Translate extends Command
 
             if ($role->address1 && ! $role->address1_en) {
                 $role->address1_en = GeminiUtils::translate($role->address1, $role->language_code, 'en');
+                $translationAttempted = true;
                 if ($debug) {
                     $this->info("Translated address1 from {$role->language_code} to en: '{$role->address1}' → '{$role->address1_en}'");
                 }
@@ -217,6 +223,7 @@ class Translate extends Command
 
             if ($role->address2 && ! $role->address2_en) {
                 $role->address2_en = GeminiUtils::translate($role->address2, $role->language_code, 'en');
+                $translationAttempted = true;
                 if ($debug) {
                     $this->info("Translated address2 from {$role->language_code} to en: '{$role->address2}' → '{$role->address2_en}'");
                 }
@@ -224,6 +231,7 @@ class Translate extends Command
 
             if ($role->city && ! $role->city_en) {
                 $role->city_en = GeminiUtils::translate($role->city, $role->language_code, 'en');
+                $translationAttempted = true;
                 if ($debug) {
                     $this->info("Translated city from {$role->language_code} to en: '{$role->city}' → '{$role->city_en}'");
                 }
@@ -231,6 +239,7 @@ class Translate extends Command
 
             if ($role->state && ! $role->state_en) {
                 $role->state_en = GeminiUtils::translate($role->state, $role->language_code, 'en');
+                $translationAttempted = true;
                 if ($debug) {
                     $this->info("Translated state from {$role->language_code} to en: '{$role->state}' → '{$role->state_en}'");
                 }
@@ -238,14 +247,11 @@ class Translate extends Command
 
             if ($role->request_terms && ! $role->request_terms_en) {
                 $role->request_terms_en = GeminiUtils::translate($role->request_terms, $role->language_code, 'en', $glossary);
+                $translationAttempted = true;
                 if ($debug) {
                     $this->info("Translated request terms from {$role->language_code} to en: '{$role->request_terms}' → '{$role->request_terms_en}'");
                 }
             }
-
-            $role->translation_attempts++;
-            $role->last_translated_at = now();
-            UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE, $role->id);
 
             // Translate event custom field names
             if ($role->event_custom_fields) {
@@ -272,6 +278,7 @@ class Translate extends Command
                         foreach ($fieldsNeedingTranslation as $fieldKey => $fieldName) {
                             if (isset($translations[$fieldName])) {
                                 $customFields[$fieldKey]['name_en'] = $translations[$fieldName];
+                                $translationAttempted = true;
                                 if ($debug) {
                                     $this->info("Translated custom field '{$fieldName}' → '{$translations[$fieldName]}'");
                                 }
@@ -315,6 +322,7 @@ class Translate extends Command
                                 $translatedOptions[] = $optionTranslations[$opt] ?? $opt;
                             }
                             $customFields[$fieldKey]['options_en'] = implode(', ', $translatedOptions);
+                            $translationAttempted = true;
                             if ($debug) {
                                 $this->info("Translated options for field '{$customFields[$fieldKey]['name']}': {$customFields[$fieldKey]['options_en']}");
                             }
@@ -325,6 +333,12 @@ class Translate extends Command
                         $this->error('Failed to translate custom field options: '.$e->getMessage());
                     }
                 }
+            }
+
+            if ($translationAttempted) {
+                $role->translation_attempts++;
+                $role->last_translated_at = now();
+                UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE, $role->id);
             }
 
             $role->save();
@@ -463,9 +477,18 @@ class Translate extends Command
                 $query->where('type', 'curator');
             })
             ->where(function ($query) {
-                $query->whereNull('name_translated')
-                    ->orWhereNull('description_translated')
-                    ->orWhereNull('short_description_translated');
+                $query->where(function ($q) {
+                    $q->whereNull('name_translated')
+                        ->whereHas('event', fn ($e) => $e->whereNotNull('name')->where('name', '!=', ''));
+                })
+                    ->orWhere(function ($q) {
+                        $q->whereNull('description_translated')
+                            ->whereHas('event', fn ($e) => $e->whereNotNull('description')->where('description', '!=', ''));
+                    })
+                    ->orWhere(function ($q) {
+                        $q->whereNull('short_description_translated')
+                            ->whereHas('event', fn ($e) => $e->whereNotNull('short_description')->where('short_description', '!=', ''));
+                    });
             });
 
         if ($eventId) {
@@ -519,10 +542,13 @@ class Translate extends Command
                 continue;
             }
 
-            if (! $eventRole->name_translated) {
+            $translationAttempted = false;
+
+            if (! $eventRole->name_translated && $eventRole->event->name) {
                 $fromLang = $eventRole->event->getLanguageCode();
                 $toLang = $eventRole->role->language_code;
                 $eventRole->name_translated = GeminiUtils::translate($eventRole->event->name, $fromLang, $toLang);
+                $translationAttempted = true;
                 if ($debug) {
                     $this->info("Translated event name from {$fromLang} to {$toLang}: '{$eventRole->event->name}' → '{$eventRole->name_translated}'");
                 }
@@ -532,6 +558,7 @@ class Translate extends Command
                 $fromLang = $eventRole->event->getLanguageCode();
                 $toLang = $eventRole->role->language_code;
                 $eventRole->description_translated = GeminiUtils::translate($eventRole->event->description, $fromLang, $toLang);
+                $translationAttempted = true;
                 if ($eventRole->description_translated) {
                     $eventRole->description_html_translated = \App\Utils\MarkdownUtils::convertToHtml($eventRole->description_translated);
                 }
@@ -544,14 +571,17 @@ class Translate extends Command
                 $fromLang = $eventRole->event->getLanguageCode();
                 $toLang = $eventRole->role->language_code;
                 $eventRole->short_description_translated = GeminiUtils::translate($eventRole->event->short_description, $fromLang, $toLang);
+                $translationAttempted = true;
                 if ($debug) {
                     $this->info("Translated event short_description from {$fromLang} to {$toLang}: '{$eventRole->event->short_description}' → '{$eventRole->short_description_translated}'");
                 }
             }
 
-            $eventRole->translation_attempts++;
-            $eventRole->last_translated_at = now();
-            UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE, $eventRole->role_id);
+            if ($translationAttempted) {
+                $eventRole->translation_attempts++;
+                $eventRole->last_translated_at = now();
+                UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE, $eventRole->role_id);
+            }
 
             $eventRole->save();
             $bar->advance();

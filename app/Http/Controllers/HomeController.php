@@ -159,6 +159,8 @@ class HomeController extends Controller
 
         $events = Event::with(['roles'])
             ->whereNotNull('starts_at')
+            ->where('is_private', false)
+            ->whereNull('event_password')
             ->orderBy(request()->has('events') ? 'id' : 'starts_at', 'desc')
             ->get();
 

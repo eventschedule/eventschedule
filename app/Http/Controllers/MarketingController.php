@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
+use App\Models\Role;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class MarketingController extends Controller
@@ -161,6 +164,22 @@ class MarketingController extends Controller
     public function boost()
     {
         return view('marketing.boost');
+    }
+
+    /**
+     * Private Events page
+     */
+    public function privateEvents()
+    {
+        return view('marketing.private-events');
+    }
+
+    /**
+     * Event Graphics page
+     */
+    public function eventGraphics()
+    {
+        return view('marketing.event-graphics');
     }
 
     /**
@@ -1461,7 +1480,6 @@ class MarketingController extends Controller
             ['route' => 'marketing.docs.sharing', 'title' => 'Sharing Your Schedule'],
             ['route' => 'marketing.docs.newsletters', 'title' => 'Newsletters'],
             ['route' => 'marketing.docs.tickets', 'title' => 'Selling Tickets'],
-            ['route' => 'marketing.docs.event_graphics', 'title' => 'Event Graphics'],
             ['route' => 'marketing.docs.analytics', 'title' => 'Analytics'],
             ['route' => 'marketing.docs.account_settings', 'title' => 'Account Settings'],
             ['route' => 'marketing.docs.availability', 'title' => 'Availability Calendar'],
@@ -1651,5 +1669,67 @@ class MarketingController extends Controller
                 'description' => 'Buyers receive confirmation emails with their tickets automatically.',
             ],
         ];
+    }
+
+    /**
+     * Search page
+     */
+    public function search(Request $request)
+    {
+        $query = trim($request->input('q', ''));
+        $schedules = collect();
+        $events = collect();
+
+        if (strlen($query) >= 2) {
+            $escapedQuery = str_replace(['%', '_'], ['\\%', '\\_'], $query);
+
+            $publicScheduleFilter = function ($q) {
+                $q->where(function ($query) {
+                    $query->where(function ($q) {
+                        $q->whereNotNull('email')
+                            ->whereNotNull('email_verified_at');
+                    })->orWhere(function ($q) {
+                        $q->whereNotNull('phone')
+                            ->whereNotNull('phone_verified_at');
+                    });
+                })
+                ->where('is_deleted', false)
+                ->where('is_unlisted', false)
+                ->whereNotNull('user_id');
+            };
+
+            $schedules = Role::where(function ($q) use ($escapedQuery) {
+                    $q->where('subdomain', 'like', $escapedQuery . '%')
+                        ->orWhere('name', 'like', '%' . $escapedQuery . '%')
+                        ->orWhere('city', 'like', '%' . $escapedQuery . '%')
+                        ->orWhere('short_description', 'like', '%' . $escapedQuery . '%');
+                })
+                ->where($publicScheduleFilter)
+                ->orderBy('name')
+                ->limit(12)
+                ->get();
+
+            $events = Event::with(['roles'])
+                ->where(function ($q) use ($escapedQuery) {
+                    $q->where('name', 'like', '%' . $escapedQuery . '%')
+                        ->orWhere('short_description', 'like', '%' . $escapedQuery . '%');
+                })
+                ->where(function ($q) {
+                    $q->where('starts_at', '>=', Carbon::today())
+                        ->orWhereNotNull('days_of_week');
+                })
+                ->where('is_private', false)
+                ->whereHas('roles', $publicScheduleFilter)
+                ->orderByRaw('starts_at IS NULL, starts_at ASC')
+                ->limit(12)
+                ->get();
+        }
+
+        return view('marketing.search', [
+            'query' => $query,
+            'searched' => strlen($query) >= 2,
+            'schedules' => $schedules,
+            'events' => $events,
+        ]);
     }
 }

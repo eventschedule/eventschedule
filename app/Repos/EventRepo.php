@@ -358,6 +358,11 @@ class EventRepo
 
         $event->fill($request->all());
 
+        if ($currentRole && ! $currentRole->isPro()) {
+            $event->is_private = false;
+            $event->event_password = null;
+        }
+
         // Handle slug update for existing events
         if (! $isNewEvent) {
             if ($request->filled('slug')) {

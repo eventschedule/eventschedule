@@ -15,7 +15,7 @@
     @endphp
 
     <x-slot name="meta">
-        @if (request()->embed)
+        @if (request()->embed || (isset($event) && $event->exists && $event->is_private))
             <meta name="robots" content="noindex, nofollow">
         @else
             <meta name="robots" content="index, follow">
@@ -36,7 +36,22 @@
         @endphp
         <meta property="og:locale" content="{{ $ogLocale }}">
 
-        @if ($event && $event->exists)
+        @if ($event && $event->exists && ($passwordGate ?? false))
+            <meta name="description" content="{{ __('messages.event_password_required') }}">
+            <meta property="og:type" content="event">
+            <meta property="og:title" content="{{ __('messages.event_password_required') }}">
+            <meta property="og:description" content="{{ __('messages.event_password_required') }}">
+            <meta property="og:image" content="{{ config('app.url') . '/images/social/home.png' }}">
+            <meta property="og:image:width" content="1200">
+            <meta property="og:image:height" content="630">
+            <meta property="og:url" content="{{ $event->getGuestUrl(false, $date) }}">
+            <meta property="og:site_name" content="Event Schedule">
+            <meta name="twitter:title" content="{{ __('messages.event_password_required') }}">
+            <meta name="twitter:description" content="{{ __('messages.event_password_required') }}">
+            <meta name="twitter:image" content="{{ config('app.url') . '/images/social/home.png' }}">
+            <meta name="twitter:card" content="summary_large_image">
+            <meta name="twitter:site" content="@ScheduleEvent">
+        @elseif ($event && $event->exists)
             @if ($role->language_code != 'en')
                 <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}?{{ 'lang=' . (request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code)) }}">
             @else
@@ -214,7 +229,7 @@
 
         </style>
 
-        @if ($event && $event->exists && $event->starts_at)
+        @if ($event && $event->exists && $event->starts_at && !($passwordGate ?? false))
             @php
                 // Use translation if available, otherwise fall back to event methods
                 $eventName = (isset($translation) && $translation && $translation->name_translated) ? $translation->name_translated : $event->translatedName();
@@ -338,7 +353,7 @@
             </script>
         @endif
 
-        @if ($event && $event->exists && $event->starts_at)
+        @if ($event && $event->exists && $event->starts_at && !($passwordGate ?? false))
             <script type="application/ld+json" {!! nonce_attr() !!}>
             {
                 "@context": "https://schema.org",

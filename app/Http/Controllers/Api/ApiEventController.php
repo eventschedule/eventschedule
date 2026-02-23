@@ -201,6 +201,7 @@ class ApiEventController extends Controller
                 'short_description' => 'nullable|string|max:500',
                 'event_url' => 'nullable|url|max:255',
                 'event_password' => 'nullable|string|max:255',
+                'is_private' => 'nullable|boolean',
                 'registration_url' => 'nullable|url|max:255',
                 'category_id' => 'nullable|integer|in:'.implode(',', array_keys(config('app.event_categories', []))),
                 'category' => 'nullable|string|max:255',
@@ -240,7 +241,7 @@ class ApiEventController extends Controller
         // Strip request to only allowed fields to prevent mass assignment
         $request->replace($request->only([
             'name', 'starts_at', 'duration', 'description', 'short_description',
-            'event_url', 'event_password', 'registration_url',
+            'event_url', 'event_password', 'is_private', 'registration_url',
             'category_id', 'category', 'tickets_enabled', 'ticket_currency_code',
             'payment_method', 'payment_instructions',
             'schedule_type', 'recurring_frequency', 'recurring_interval',
@@ -302,6 +303,7 @@ class ApiEventController extends Controller
                 'short_description' => 'nullable|string|max:500',
                 'event_url' => 'nullable|url|max:255',
                 'event_password' => 'nullable|string|max:255',
+                'is_private' => 'nullable|boolean',
                 'registration_url' => 'nullable|url|max:255',
                 'category_id' => 'nullable|integer|in:'.implode(',', array_keys(config('app.event_categories', []))),
                 'category' => 'nullable|string|max:255',
@@ -341,7 +343,7 @@ class ApiEventController extends Controller
         // Strip request to only allowed fields to prevent mass assignment
         $request->replace($request->only([
             'name', 'starts_at', 'duration', 'description', 'short_description',
-            'event_url', 'event_password', 'registration_url',
+            'event_url', 'event_password', 'is_private', 'registration_url',
             'category_id', 'category', 'tickets_enabled', 'ticket_currency_code',
             'payment_method', 'payment_instructions',
             'schedule_type', 'recurring_frequency', 'recurring_interval',

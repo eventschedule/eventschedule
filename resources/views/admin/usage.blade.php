@@ -143,12 +143,12 @@
                         @foreach ($stuckRoles as $record)
                         @php
                             $missingFields = [];
-                            if (is_null($record->name_en)) $missingFields[] = 'name_en';
-                            if (is_null($record->description_en)) $missingFields[] = 'description_en';
-                            if (is_null($record->address1_en)) $missingFields[] = 'address1_en';
-                            if (is_null($record->city_en)) $missingFields[] = 'city_en';
-                            if (is_null($record->state_en)) $missingFields[] = 'state_en';
-                            if (is_null($record->request_terms_en)) $missingFields[] = 'request_terms_en';
+                            if (!empty($record->name) && is_null($record->name_en)) $missingFields[] = 'name_en';
+                            if (!empty($record->description) && is_null($record->description_en)) $missingFields[] = 'description_en';
+                            if (!empty($record->address1) && is_null($record->address1_en)) $missingFields[] = 'address1_en';
+                            if (!empty($record->city) && is_null($record->city_en)) $missingFields[] = 'city_en';
+                            if (!empty($record->state) && is_null($record->state_en)) $missingFields[] = 'state_en';
+                            if (!empty($record->request_terms) && is_null($record->request_terms_en)) $missingFields[] = 'request_terms_en';
                         @endphp
                         <tr>
                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Schedule</td>
@@ -177,8 +177,8 @@
                         @foreach ($stuckEvents as $record)
                         @php
                             $missingFields = [];
-                            if (is_null($record->name_en)) $missingFields[] = 'name_en';
-                            if (is_null($record->description_en)) $missingFields[] = 'description_en';
+                            if (!empty($record->name) && is_null($record->name_en)) $missingFields[] = 'name_en';
+                            if (!empty($record->description) && is_null($record->description_en)) $missingFields[] = 'description_en';
                             $langCode = $record->venue?->language_code;
                         @endphp
                         <tr>
@@ -205,8 +205,8 @@
                         @foreach ($stuckEventParts as $record)
                         @php
                             $missingFields = [];
-                            if (is_null($record->name_en)) $missingFields[] = 'name_en';
-                            if (is_null($record->description_en)) $missingFields[] = 'description_en';
+                            if (!empty($record->name) && is_null($record->name_en)) $missingFields[] = 'name_en';
+                            if (!empty($record->description) && is_null($record->description_en)) $missingFields[] = 'description_en';
                             $langCode = $record->event?->venue?->language_code;
                         @endphp
                         <tr>
@@ -233,8 +233,8 @@
                         @foreach ($stuckEventRoles as $record)
                         @php
                             $missingFields = [];
-                            if (is_null($record->name_translated)) $missingFields[] = 'name_translated';
-                            if (is_null($record->description_translated)) $missingFields[] = 'description_translated';
+                            if ($record->event && !empty($record->event->name) && is_null($record->name_translated)) $missingFields[] = 'name_translated';
+                            if ($record->event && !empty($record->event->description) && is_null($record->description_translated)) $missingFields[] = 'description_translated';
                             $langCode = $record->role?->language_code;
                         @endphp
                         <tr>

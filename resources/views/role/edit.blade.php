@@ -1,8 +1,6 @@
 <x-app-admin-layout>
 
     @vite([
-    'resources/js/countrySelect.min.js',
-    'resources/css/countrySelect.min.css',
     'resources/js/color-picker.js',
     ])
 
@@ -16,10 +14,6 @@
     <x-slot name="head">
 
         <style {!! nonce_attr() !!}>
-        .country-select {
-            width: 100%;
-        }
-        
         /* Hide all sections except the first one by default */
         .section-content {
             display: none;
@@ -102,9 +96,6 @@
 
         <script {!! nonce_attr() !!}>
         document.addEventListener('DOMContentLoaded', () => {
-            $("#country").countrySelect({
-                defaultCountry: '{{ old('country_code', $role->country_code) }}',
-            });
             $('#background').val('{{ old('background', $role->background) }}');
             $('#background_colors').val('{{ old('background_colors', $role->background_colors) }}');
 
@@ -338,8 +329,11 @@
         }
 
         function onChangeCountry() {
-            var selected = $('#country').countrySelect('getSelectedCountryData');
-            $('#country_code').val(selected.iso2);
+            var ci = window.getCountryInput('country_code');
+            if (ci) {
+                var selected = ci.getSelectedCountryData();
+                $('#country_code').val(selected.iso2);
+            }
         }
 
         function onChangeBackground() {
@@ -488,7 +482,8 @@
         function onValidateClick() {
             $('#address_response').text(@json(__('messages.searching'), JSON_UNESCAPED_UNICODE) + '...').show();
             $('#accept_button').hide();
-            var country = $('#country').countrySelect('getSelectedCountryData');
+            var ci = window.getCountryInput('country_code');
+            var country = ci ? ci.getSelectedCountryData() : null;
             $.post({
                 url: '{{ route('validate_address') }}',
                 data: {
@@ -496,7 +491,7 @@
                     address1: $('#address1').val(),
                     city: $('#city').val(),
                     state: $('#state').val(),
-                    postal_code: $('#postal_code').val(),                    
+                    postal_code: $('#postal_code').val(),
                     country_code: country ? country.iso2 : '',
                 },
                 success: function(response) {
@@ -521,7 +516,7 @@
                 $('#city').val(),
                 $('#state').val(),
                 $('#postal_code').val(),
-                $('#country').countrySelect('getSelectedCountryData').name
+                (window.getCountryInput('country_code') ? window.getCountryInput('country_code').getSelectedCountryData().name : '')
             ].filter(Boolean).join(', ');
 
             if (address) {
@@ -984,11 +979,9 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="country" :value="__('messages.country')" />
-                            <x-text-input id="country" name="country" type="text" class="mt-1 block w-full"
-                                :value="old('country')" data-action="change-country" autocomplete="off" />
-                            <x-input-error class="mt-2" :messages="$errors->get('country')" />
-                            <input type="hidden" id="country_code" name="country_code" />
+                            <x-input-label for="country_code" :value="__('messages.country')" />
+                            <x-country-input id="country_code" name="country_code" :value="old('country_code', $role->country_code)" />
+                            <x-input-error class="mt-2" :messages="$errors->get('country_code')" />
                         </div>
 
                         <div class="mb-6">
@@ -1101,11 +1094,9 @@
 
                         @if ($role->isCurator() || $role->isTalent())
                         <div class="mb-6">
-                            <x-input-label for="country" :value="__('messages.country')" />
-                            <x-text-input id="country" name="country" type="text" class="mt-1 block w-full"
-                                :value="old('country')" data-action="change-country" autocomplete="off" />
-                            <x-input-error class="mt-2" :messages="$errors->get('country')" />
-                            <input type="hidden" id="country_code" name="country_code" />
+                            <x-input-label for="country_code" :value="__('messages.country')" />
+                            <x-country-input id="country_code" name="country_code" :value="old('country_code', $role->country_code)" />
+                            <x-input-error class="mt-2" :messages="$errors->get('country_code')" />
                         </div>
                         @endif
 
@@ -4156,9 +4147,6 @@ document.addEventListener('DOMContentLoaded', function() {
         var action = el.dataset.action;
 
         switch (action) {
-            case 'change-country':
-                onChangeCountry();
-                break;
             case 'background-type-change':
                 onChangeBackground();
                 updatePreview();

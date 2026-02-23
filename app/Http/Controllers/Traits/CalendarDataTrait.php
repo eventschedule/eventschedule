@@ -32,7 +32,7 @@ trait CalendarDataTrait
             $canEdit = $user->canEditEvent($event);
         }
 
-        return [
+        $data = [
             'id' => UrlUtils::encodeId($event->id),
             'group_id' => $groupId ? UrlUtils::encodeId($groupId) : null,
             'category_id' => $event->category_id,
@@ -96,7 +96,29 @@ trait CalendarDataTrait
             'submit_video_url' => isset($role) ? route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => UrlUtils::encodeId($event->id)]) : null,
             'submit_comment_url' => isset($role) ? route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => UrlUtils::encodeId($event->id)]) : null,
             'custom_field_values' => $event->custom_field_values ?? [],
+            'is_password_protected' => $event->isPasswordProtected(),
         ];
+
+        if ($event->isPasswordProtected()) {
+            $data['short_description'] = null;
+            $data['description_excerpt'] = null;
+            $data['venue_name'] = null;
+            $data['venue_guest_url'] = null;
+            $data['venue_profile_image'] = null;
+            $data['venue_header_image'] = null;
+            $data['ticket_price'] = null;
+            $data['registration_url'] = null;
+            $data['coupon_code'] = null;
+            $data['talent'] = [];
+            $data['videos'] = [];
+            $data['recent_comments'] = [];
+            $data['parts'] = [];
+            $data['image_url'] = null;
+            $data['flyer_url'] = null;
+            $data['custom_field_values'] = [];
+        }
+
+        return $data;
     }
 
     protected function buildEventsMap($events, Carbon $startOfMonth, Carbon $endOfMonth): array

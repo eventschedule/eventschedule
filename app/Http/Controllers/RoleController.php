@@ -401,6 +401,13 @@ class RoleController extends Controller
             }
 
             if ($event) {
+                // Block direct URL access to private events for non-members
+                if ($event->is_private && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
+                    $event = null;
+                }
+            }
+
+            if ($event) {
                 // Handle direct registration redirect when URL has trailing slash
                 if ($request->attributes->get('has_trailing_slash') && $role->direct_registration) {
                     if (! auth()->user()?->isAdmin()) {
@@ -498,11 +505,13 @@ class RoleController extends Controller
         // Convert to UTC for database query
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
 
+        $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+
         if ($event && ! request()->graphic) {
             // For event detail view (non-graphic), only check if calendar has events
             // The calendar partial loads data via Ajax, so we just need existence
             if ($role->isCurator()) {
-                $hasCalendarEvents = Event::where(function ($query) use ($startOfMonthUtc) {
+                $query = Event::where(function ($query) use ($startOfMonthUtc) {
                     $query->where('starts_at', '>=', $startOfMonthUtc)
                         ->orWhereNotNull('days_of_week');
                 })
@@ -511,15 +520,21 @@ class RoleController extends Controller
                             ->from('event_role')
                             ->where('role_id', $role->id)
                             ->where('is_accepted', true);
-                    })
-                    ->exists();
+                    });
+                if (! $isMemberOrAdmin) {
+                    $query->where('is_private', false);
+                }
+                $hasCalendarEvents = $query->exists();
             } else {
-                $hasCalendarEvents = Event::where(function ($query) use ($startOfMonthUtc) {
+                $query = Event::where(function ($query) use ($startOfMonthUtc) {
                     $query->where('starts_at', '>=', $startOfMonthUtc)
                         ->orWhereNotNull('days_of_week');
                 })
-                    ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
-                    ->exists();
+                    ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true));
+                if (! $isMemberOrAdmin) {
+                    $query->where('is_private', false);
+                }
+                $hasCalendarEvents = $query->exists();
             }
             $events = $hasCalendarEvents ? collect([true]) : collect();
         } elseif ($role->isCurator()) {
@@ -584,6 +599,12 @@ class RoleController extends Controller
             }
         }
 
+        // Filter private events from calendar listings for non-members
+        if (! $isMemberOrAdmin) {
+            $events = $events->filter(fn ($e) => ! $e->is_private);
+            $pastEvents = $pastEvents->filter(fn ($e) => ! $e->is_private);
+        }
+
         // Track view for analytics (non-member visits only, skip embeds)
         if (! request()->embed && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
             app(AnalyticsService::class)->recordView($role, $event, $request);
@@ -598,6 +619,29 @@ class RoleController extends Controller
         if ($embed) {
             $view = 'role/show-guest-embed';
         } elseif ($event) {
+            // Check if event requires a password and user hasn't provided it
+            $bypassPassword = ($user && ($user->isAdmin() || $user->isMember($subdomain)))
+                || session()->has('event_password_'.$event->id);
+
+            if ($event->isPasswordProtected() && ! $bypassPassword) {
+                $fonts = [];
+                if ($event->venue) {
+                    $fonts[] = $event->venue->font_family;
+                }
+                foreach ($event->roles as $each) {
+                    if ($each->isClaimed() && $each->isTalent()) {
+                        $fonts[] = $each->font_family;
+                    }
+                }
+                $fonts = array_unique($fonts);
+
+                $passwordGate = true;
+
+                return response()->view('event/password-prompt', compact(
+                    'role', 'event', 'date', 'fonts', 'passwordGate'
+                ));
+            }
+
             $view = 'event/show-guest';
             $event->loadMissing(['approvedVideos.user', 'approvedComments.user']);
 
@@ -661,6 +705,33 @@ class RoleController extends Controller
         return $response;
     }
 
+    public function checkEventPassword(Request $request, $subdomain)
+    {
+        $request->validate([
+            'event_id' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        $eventId = UrlUtils::decodeId($request->event_id);
+        $event = Event::whereHas('roles', fn ($q) => $q->where('subdomain', $subdomain))
+            ->find($eventId);
+
+        if (! $event) {
+            abort(404);
+        }
+
+        // Construct redirect URL server-side from event's guest URL
+        $redirectUrl = $event->getGuestUrl($subdomain);
+
+        if ($event->event_password && hash_equals($event->event_password, $request->password)) {
+            session()->put('event_password_'.$event->id, true);
+
+            return redirect($redirectUrl);
+        }
+
+        return redirect($redirectUrl)->with('password_error', true);
+    }
+
     public function listPastEvents(Request $request, $subdomain): JsonResponse
     {
         $role = Role::subdomain($subdomain)->with('groups')->first();
@@ -703,6 +774,12 @@ class RoleController extends Controller
                 ->get();
         }
 
+        // Filter private events for non-members
+        $user = auth()->user();
+        if (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin())) {
+            $pastEvents = $pastEvents->filter(fn ($e) => ! $e->is_private);
+        }
+
         $hasMore = $pastEvents->count() > 50;
         if ($hasMore) {
             $pastEvents = $pastEvents->take(50);
@@ -722,7 +799,7 @@ class RoleController extends Controller
     {
         $groupId = $role ? $event->getGroupIdForSubdomain($role->subdomain) : null;
 
-        return [
+        $data = [
             'id' => UrlUtils::encodeId($event->id),
             'group_id' => $groupId ? UrlUtils::encodeId($groupId) : null,
             'category_id' => $event->category_id,
@@ -770,7 +847,22 @@ class RoleController extends Controller
             ])->values()->toArray(),
             'occurrenceDate' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
             'uniqueKey' => UrlUtils::encodeId($event->id),
+            'is_password_protected' => $event->isPasswordProtected(),
         ];
+
+        if ($event->isPasswordProtected()) {
+            $data['description_excerpt'] = null;
+            $data['venue_name'] = null;
+            $data['venue_profile_image'] = null;
+            $data['venue_header_image'] = null;
+            $data['talent'] = [];
+            $data['videos'] = [];
+            $data['recent_comments'] = [];
+            $data['parts'] = [];
+            $data['image_url'] = null;
+        }
+
+        return $data;
     }
 
     public function calendarEvents(Request $request, $subdomain): JsonResponse
@@ -842,6 +934,12 @@ class RoleController extends Controller
                 ->orderByDesc('starts_at')
                 ->limit(51)
                 ->get();
+        }
+
+        // Filter private events for non-members
+        if (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin())) {
+            $events = $events->filter(fn ($e) => ! $e->is_private);
+            $pastEvents = $pastEvents->filter(fn ($e) => ! $e->is_private);
         }
 
         $hasMorePastEvents = $pastEvents->count() > 50;

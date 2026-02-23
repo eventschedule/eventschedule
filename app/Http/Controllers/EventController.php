@@ -1657,6 +1657,17 @@ class EventController extends Controller
             abort(404);
         }
 
+        $user = auth()->user();
+        $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+
+        if ($event->is_private && ! $isMemberOrAdmin) {
+            abort(404);
+        }
+
+        if ($event->isPasswordProtected() && ! $isMemberOrAdmin && ! session()->has('event_password_'.$event->id)) {
+            abort(403);
+        }
+
         $title = $event->getTitle();
         $description = $event->description_html ? strip_tags($event->description_html) : ($event->role() ? strip_tags($event->role()->description_html) : '');
         $location = $event->venue ? $event->venue->bestAddress() : '';

@@ -723,6 +723,11 @@
                                             <td>Password to protect the event page</td>
                                         </tr>
                                         <tr>
+                                            <td><code class="doc-inline-code">is_private</code></td>
+                                            <td>No</td>
+                                            <td>Make event private (hidden from calendar, only accessible via direct link)</td>
+                                        </tr>
+                                        <tr>
                                             <td><code class="doc-inline-code">category_id</code></td>
                                             <td>No</td>
                                             <td>Category ID (see <a href="#list-categories" class="text-cyan-400 hover:text-cyan-300">List Categories</a>)</td>

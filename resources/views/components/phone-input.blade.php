@@ -4,7 +4,8 @@
     $inputId = $id ?? $name;
 @endphp
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@24.8.2/build/css/intlTelInput.css">
+@once
+<link rel="stylesheet" href="{{ asset('vendor/intl-tel-input/css/intlTelInput.css') }}">
 <style {!! nonce_attr() !!}>
 .dark .iti {
     --iti-dropdown-bg: #1e1e1e;
@@ -17,6 +18,8 @@
 .dark .iti__selected-dial-code { color: #d1d5db; }
 .dark .iti__search-input { background: #1e1e1e; color: #d1d5db; border-color: #2d2d30; }
 </style>
+<script src="{{ asset('vendor/intl-tel-input/js/intlTelInput.min.js') }}" {!! nonce_attr() !!}></script>
+@endonce
 
 <input type="hidden" name="{{ $name }}" id="{{ $inputId }}_hidden" value="{{ $value }}">
 <input type="tel" id="{{ $inputId }}" value="{{ $value }}"
@@ -25,7 +28,6 @@
     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
     autocomplete="tel" />
 
-<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@24.8.2/build/js/intlTelInput.min.js" {!! nonce_attr() !!}></script>
 <script {!! nonce_attr() !!}>
 (function() {
     var input = document.getElementById('{{ $inputId }}');
@@ -33,7 +35,7 @@
     if (!input || !hidden) return;
 
     var iti = window.intlTelInput(input, {
-        utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@24.8.2/build/js/utils.js',
+        utilsScript: '{{ asset('vendor/intl-tel-input/js/utils.js') }}',
         initialCountry: 'auto',
         geoIpLookup: function(callback) {
             fetch('https://ipapi.co/json/')

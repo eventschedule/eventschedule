@@ -1012,7 +1012,159 @@
             </div>
         </section>
 
-        <!-- Banner 14: Open Source (Visual Left, Text Right) -->
+        <!-- Banner 14: Event Graphics (Text Left, Visual Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-orange-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
+                <div class="absolute bottom-10 right-1/3 w-[300px] h-[300px] bg-amber-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.1s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ marketing_url('/features/event-graphics') }}" class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                Event Graphics
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-orange-600 dark:group-hover:text-orange-300 transition-colors">Share your events everywhere</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Auto-generate shareable images and formatted text for upcoming events. Ready for Instagram, WhatsApp, email, and more.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Auto-generated</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Social-ready</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple formats</span>
+                            </div>
+                            <span class="inline-flex items-center text-orange-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float" style="animation-delay: 0.5s;">
+                                <div class="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900 dark:to-amber-900 rounded-xl border border-orange-200 dark:border-orange-500/30 p-4 w-56">
+                                    <!-- Event graphic card mockup -->
+                                    <div class="bg-gradient-to-br from-orange-400 to-amber-500 rounded-lg p-3 mb-3">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <div class="w-3 h-3 bg-white/30 rounded"></div>
+                                            <div class="h-2 bg-white/40 rounded w-16"></div>
+                                        </div>
+                                        <div class="text-white font-bold text-xs mb-1">Summer Jazz Night</div>
+                                        <div class="text-white/80 text-[10px]">Sat, Jul 12 at 8 PM</div>
+                                        <div class="text-white/60 text-[10px]">Blue Note Jazz Club</div>
+                                    </div>
+                                    <!-- Format options -->
+                                    <div class="space-y-1.5">
+                                        <div class="flex items-center gap-2 p-1.5 rounded-lg bg-orange-100 dark:bg-orange-500/20 border border-orange-200 dark:border-orange-400/30">
+                                            <svg aria-hidden="true" class="w-3.5 h-3.5 text-orange-600 dark:text-orange-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <span class="text-[10px] text-orange-700 dark:text-orange-300">Image graphic</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 p-1.5 rounded-lg bg-gray-50 dark:bg-white/5">
+                                            <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            <span class="text-[10px] text-gray-600 dark:text-gray-300">Formatted text</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Banner 15: Private Events (Visual Left, Text Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-20 right-1/4 w-[400px] h-[400px] bg-yellow-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
+                <div class="absolute bottom-20 left-1/3 w-[300px] h-[300px] bg-amber-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.3s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ route('marketing.private_events') }}" class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                Private Events
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-yellow-600 dark:group-hover:text-yellow-300 transition-colors">Control who sees what</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Password-protect events for VIP audiences or invite-only gatherings. Mix public and private events on the same schedule.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Password protection</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Per-event privacy</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Hidden from public</span>
+                            </div>
+                            <span class="inline-flex items-center text-yellow-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float" style="animation-delay: 0.6s;">
+                                <div class="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900 dark:to-amber-900 rounded-xl border border-yellow-200 dark:border-yellow-500/30 p-4 w-56">
+                                    <!-- Lock/shield mockup -->
+                                    <div class="flex items-center justify-center mb-3">
+                                        <div class="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-500/20 flex items-center justify-center">
+                                            <svg aria-hidden="true" class="w-6 h-6 text-yellow-600 dark:text-yellow-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <!-- Password field -->
+                                    <div class="mb-3">
+                                        <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">Event password</div>
+                                        <div class="bg-white dark:bg-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-sm border border-gray-200 dark:border-white/10 flex items-center gap-2">
+                                            <span class="tracking-widest">&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;</span>
+                                        </div>
+                                    </div>
+                                    <!-- Event cards -->
+                                    <div class="space-y-1.5">
+                                        <div class="flex items-center gap-2 p-1.5 rounded-lg bg-gray-50 dark:bg-white/5">
+                                            <div class="w-2 h-2 rounded-full bg-green-400"></div>
+                                            <span class="text-[10px] text-gray-600 dark:text-gray-300 flex-1">Summer Concert</span>
+                                            <span class="text-[10px] text-gray-400">Public</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 p-1.5 rounded-lg bg-yellow-100 dark:bg-yellow-500/20 border border-yellow-200 dark:border-yellow-400/30">
+                                            <svg aria-hidden="true" class="w-2.5 h-2.5 text-yellow-600 dark:text-yellow-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                            </svg>
+                                            <span class="text-[10px] text-yellow-700 dark:text-yellow-300 flex-1">VIP Meetup</span>
+                                            <span class="text-[10px] text-yellow-600 dark:text-yellow-400">Private</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 p-1.5 rounded-lg bg-gray-50 dark:bg-white/5">
+                                            <div class="w-2 h-2 rounded-full bg-green-400"></div>
+                                            <span class="text-[10px] text-gray-600 dark:text-gray-300 flex-1">Open Mic Night</span>
+                                            <span class="text-[10px] text-gray-400">Public</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Banner 16: Open Source (Visual Left, Text Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">

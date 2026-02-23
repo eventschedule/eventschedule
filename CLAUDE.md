@@ -22,6 +22,8 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Never use em-dashes** - Use hyphens, "to", or "or" instead of em-dashes (—) in all written content
 - **Use "schedule" not "role", "sub-schedule" not "group"** - In the code, `Role` = schedule and `Group` = sub-schedule. Always use "schedule" and "sub-schedule" in UI text and conversations, never "role" or "group"
 - **MySQL only** - Only MySQL is supported; do not add SQLite compatibility to migrations or tests
+- **Never use CDNs** - Always use local vendor files for JS/CSS libraries. Selfhosted users should not have the app calling external servers.
+- **Never add npm dependencies** - Do not use `npm install` to add new packages. Instead, download built files manually and place them in `public/vendor/`.
 
 ## Terminology
 
@@ -38,7 +40,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - Shared `.text-gradient` class is defined in `resources/css/marketing.css`
 - Never use purple/violet/indigo/fuchsia/pink as WP brand colors
 - Icon accent colors (on sub-audience-cards) are decorative and exempt
-- **Dark mode grays** (custom palette, not standard Tailwind): background `#1e1e1e`, borders/hover `#2d2d30`, text `#d1d5db`, muted text `#9ca3af`. Use these for third-party component dark mode overrides.
+- **Dark mode grays** (custom palette, not standard Tailwind): background `#1e1e1e`, borders/hover `#2d2d30`, text `#d1d5db`, muted text `#9ca3af`. Always use these custom values in hardcoded dark mode styles (inline CSS, `<style>` blocks, CSS overrides). Never use standard Tailwind gray hex values (e.g. `#374151`, `#111827`) - our `tailwind.config.js` overrides the entire gray scale.
 
 ## Build & Development Commands
 

@@ -50,6 +50,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::get('/curate-event/{hash}', [EventController::class, 'curate'])->name('event.curate');
         Route::post('/submit-video/{event_hash}', [EventController::class, 'submitVideo'])->name('event.submit_video')->middleware('throttle:10,60');
         Route::post('/submit-comment/{event_hash}', [EventController::class, 'submitComment'])->name('event.submit_comment')->middleware('throttle:20,60');
+        Route::post('/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
         Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
         Route::get('/checkout/success/{sale_id}/{date}', [TicketController::class, 'success'])->name('checkout.success');
         Route::get('/checkout/cancel/{sale_id}/{date}', [TicketController::class, 'cancel'])->name('checkout.cancel');
@@ -344,6 +345,7 @@ if (config('app.is_nexus')) {
         Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
         Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
         Route::get('/examples', [MarketingController::class, 'demos'])->name('marketing.demos');
+        Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
         Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
         Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
         Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
@@ -365,6 +367,8 @@ if (config('app.is_nexus')) {
         Route::get('/features/embed-calendar', [MarketingController::class, 'embedCalendar'])->name('marketing.embed_calendar');
         Route::get('/features/fan-videos', [MarketingController::class, 'fanVideos'])->name('marketing.fan_videos');
         Route::get('/features/boost', [MarketingController::class, 'boost'])->name('marketing.boost');
+        Route::get('/features/private-events', [MarketingController::class, 'privateEvents'])->name('marketing.private_events');
+        Route::get('/features/event-graphics', [MarketingController::class, 'eventGraphics'])->name('marketing.event_graphics');
         // Redirects from old feature URLs
         Route::get('/wp/analytics', fn () => redirect()->route('marketing.analytics', [], 301));
         Route::get('/wp/newsletters', fn () => redirect()->route('marketing.newsletters', [], 301));
@@ -433,7 +437,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/creating-events', [MarketingController::class, 'docsCreatingEvents'])->name('marketing.docs.creating_events');
         Route::get('/docs/sharing', [MarketingController::class, 'docsSharing'])->name('marketing.docs.sharing');
         Route::get('/docs/tickets', [MarketingController::class, 'docsTickets'])->name('marketing.docs.tickets');
-        Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
+        Route::get('/docs/event-graphics', fn () => redirect('/features/event-graphics', 301))->name('marketing.docs.event_graphics');
         Route::get('/docs/newsletters', [MarketingController::class, 'docsNewsletters'])->name('marketing.docs.newsletters');
         Route::get('/docs/analytics', [MarketingController::class, 'docsAnalytics'])->name('marketing.docs.analytics');
         Route::get('/docs/account-settings', [MarketingController::class, 'docsAccountSettings'])->name('marketing.docs.account_settings');
@@ -467,6 +471,7 @@ if (config('app.is_nexus')) {
             Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
             Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
             Route::get('/examples', [MarketingController::class, 'demos'])->name('marketing.demos');
+            Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
             Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
             Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
             Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
@@ -488,6 +493,8 @@ if (config('app.is_nexus')) {
             Route::get('/features/embed-calendar', [MarketingController::class, 'embedCalendar'])->name('marketing.embed_calendar');
             Route::get('/features/fan-videos', [MarketingController::class, 'fanVideos'])->name('marketing.fan_videos');
             Route::get('/features/boost', [MarketingController::class, 'boost'])->name('marketing.boost');
+            Route::get('/features/private-events', [MarketingController::class, 'privateEvents'])->name('marketing.private_events');
+            Route::get('/features/event-graphics', [MarketingController::class, 'eventGraphics'])->name('marketing.event_graphics');
             // Redirects from old feature URLs
             Route::get('/ticketing', fn () => redirect()->route('marketing.ticketing', [], 301));
             Route::get('/ai', fn () => redirect()->route('marketing.ai', [], 301));
@@ -558,7 +565,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/creating-events', [MarketingController::class, 'docsCreatingEvents'])->name('marketing.docs.creating_events');
             Route::get('/docs/sharing', [MarketingController::class, 'docsSharing'])->name('marketing.docs.sharing');
             Route::get('/docs/tickets', [MarketingController::class, 'docsTickets'])->name('marketing.docs.tickets');
-            Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
+            Route::get('/docs/event-graphics', fn () => redirect('/features/event-graphics', 301))->name('marketing.docs.event_graphics');
             Route::get('/docs/newsletters', [MarketingController::class, 'docsNewsletters'])->name('marketing.docs.newsletters');
             Route::get('/docs/analytics', [MarketingController::class, 'docsAnalytics'])->name('marketing.docs.analytics');
             Route::get('/docs/account-settings', [MarketingController::class, 'docsAccountSettings'])->name('marketing.docs.account_settings');
@@ -594,6 +601,7 @@ if (config('app.is_nexus')) {
             Route::get('/about', fn () => redirect('https://eventschedule.com/about', 301));
             Route::get('/demos', fn () => redirect('https://eventschedule.com/examples', 301));
             Route::get('/examples', fn () => redirect('https://eventschedule.com/examples', 301));
+            Route::get('/search', fn () => redirect('https://eventschedule.com/search', 301));
             Route::get('/faq', fn () => redirect('https://eventschedule.com/faq', 301));
             Route::get('/ticketing', fn () => redirect('https://eventschedule.com/features/ticketing', 301));
             Route::get('/ai', fn () => redirect('https://eventschedule.com/features/ai', 301));
@@ -626,6 +634,8 @@ if (config('app.is_nexus')) {
             Route::get('/features/embed-calendar', fn () => redirect('https://eventschedule.com/features/embed-calendar', 301));
             Route::get('/features/fan-videos', fn () => redirect('https://eventschedule.com/features/fan-videos', 301));
             Route::get('/features/boost', fn () => redirect('https://eventschedule.com/features/boost', 301));
+            Route::get('/features/private-events', fn () => redirect('https://eventschedule.com/features/private-events', 301));
+            Route::get('/features/event-graphics', fn () => redirect('https://eventschedule.com/features/event-graphics', 301));
             Route::get('/for-talent', fn () => redirect('https://eventschedule.com/for-talent', 301));
             Route::get('/for-venues', fn () => redirect('https://eventschedule.com/for-venues', 301));
             Route::get('/for-curators', fn () => redirect('https://eventschedule.com/for-curators', 301));
@@ -717,6 +727,7 @@ if (config('app.is_nexus')) {
     Route::get('/about', fn () => redirect()->route('home'));
     Route::get('/demos', fn () => redirect()->route('home'));
     Route::get('/examples', fn () => redirect()->route('home'));
+    Route::get('/search', fn () => redirect()->route('home'));
     Route::get('/faq', fn () => redirect()->route('home'));
     Route::get('/features/ticketing', fn () => redirect()->route('home'));
     Route::get('/features/ai', fn () => redirect()->route('home'));
@@ -735,6 +746,8 @@ if (config('app.is_nexus')) {
     Route::get('/features/embed-calendar', fn () => redirect()->route('home'));
     Route::get('/features/fan-videos', fn () => redirect()->route('home'));
     Route::get('/features/boost', fn () => redirect()->route('home'));
+    Route::get('/features/private-events', fn () => redirect()->route('home'));
+    Route::get('/features/event-graphics', fn () => redirect()->route('home'));
     Route::get('/features/analytics', fn () => redirect()->route('home'));
     // Old URLs still redirect to home
     Route::get('/ticketing', fn () => redirect()->route('home'));
@@ -852,6 +865,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     Route::get('/{subdomain}/curate-event/{hash}', [EventController::class, 'curate'])->name('event.curate');
     Route::post('/{subdomain}/submit-video/{event_hash}', [EventController::class, 'submitVideo'])->name('event.submit_video')->middleware('throttle:10,60');
     Route::post('/{subdomain}/submit-comment/{event_hash}', [EventController::class, 'submitComment'])->name('event.submit_comment')->middleware('throttle:20,60');
+    Route::post('/{subdomain}/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
     Route::post('/{subdomain}/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
     Route::get('/{subdomain}/checkout/success/{sale_id}', [TicketController::class, 'success'])->name('checkout.success');
     Route::get('/{subdomain}/checkout/cancel/{sale_id}', [TicketController::class, 'cancel'])->name('checkout.cancel');

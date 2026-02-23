@@ -1,10 +1,5 @@
 <x-app-admin-layout>
 
-@vite([
-    'resources/js/countrySelect.min.js',
-    'resources/css/countrySelect.min.css',
-])
-
 <!-- Step Indicator for Add Event Flow -->
 @if(session('pending_request'))
     <div class="my-6">
@@ -380,9 +375,6 @@
             }
         }
 
-        $("#venue_country").countrySelect({
-            defaultCountry: "{{ $selectedVenue && $selectedVenue->country ? $selectedVenue->country : ($role && $role->country_code ? $role->country_code : '') }}",
-        });
 
         // --- Time combobox logic for main event ---
 
@@ -621,9 +613,12 @@
     });
 
     function onChangeCountry() {
-        var selected = $('#venue_country').countrySelect('getSelectedCountryData');
-        $('#venue_country_code').val(selected.iso2);
-        app.venueCountryCode = selected.iso2;
+        var ci = window.getCountryInput('venue_country_code');
+        if (ci) {
+            var selected = ci.getSelectedCountryData();
+            $('#venue_country_code').val(selected.iso2);
+            app.venueCountryCode = selected.iso2;
+        }
     }
 
     function onChangeDateType() {
@@ -658,8 +653,8 @@
     function onValidateClick() {
         $('#address_response').text(@json(__('messages.searching')) + '...').show();
         $('#accept_button').hide();
-        var country = $('#venue_country').countrySelect('getSelectedCountryData');
-        
+        var ci = window.getCountryInput('venue_country_code');
+        var country = ci ? ci.getSelectedCountryData() : null;
         $.post({
             url: '{{ route('validate_address') }}',
             data: {
@@ -667,7 +662,7 @@
                 address1: $('#venue_address1').val(),
                 city: $('#venue_city').val(),
                 state: $('#venue_state').val(),
-                postal_code: $('#venue_postal_code').val(),                    
+                postal_code: $('#venue_postal_code').val(),
                 country_code: country ? country.iso2 : '',
             },
             success: function(response) {
@@ -692,7 +687,7 @@
             $('#venue_city').val(),
             $('#venue_state').val(),
             $('#venue_postal_code').val(),
-            $('#venue_country').countrySelect('getSelectedCountryData').name
+            (window.getCountryInput('venue_country_code') ? window.getCountryInput('venue_country_code').getSelectedCountryData().name : '')
         ].filter(Boolean).join(', ');
 
         if (address) {
@@ -1055,6 +1050,12 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
                                 </svg>
                                 {{ __('messages.tickets') }}
+                            </a>
+                            <a href="#section-privacy" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-privacy">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                </svg>
+                                {{ __('messages.privacy') }}
                             </a>
                             @endif
                             @if (count($role->getEventCustomFields()) > 0)
@@ -1444,12 +1445,9 @@
                                     </div>
 
                                     <div class="mb-6">
-                                        <x-input-label for="venue_country" :value="__('messages.country')" />
-                                        <x-text-input id="venue_country" name="venue_country" type="text" class="mt-1 block w-full"
-                                            autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('country')" />
-                                        <input type="hidden" id="venue_country_code" name="venue_country_code" 
-                                            v-model="venueCountryCode"/>
+                                        <x-input-label for="venue_country_code" :value="__('messages.country')" />
+                                        <x-country-input id="venue_country_code" name="venue_country_code" :value="$selectedVenue && $selectedVenue->country ? $selectedVenue->country : ($role && $role->country_code ? $role->country_code : '')" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('venue_country_code')" />
                                     </div>
 
                                     <div class="mb-6">
@@ -2539,6 +2537,71 @@
                     </div>
                 @endif
 
+                @if ($event->user_id == $user->id)
+                    <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-privacy">
+                        <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                            </svg>
+                            {{ __('messages.privacy') }}
+                        </span>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="section-privacy" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                        <div class="max-w-xl">
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                </svg>
+                                {{ __('messages.privacy') }}
+                            </h2>
+
+                            <div class="mb-6">
+                                <div class="flex items-center">
+                                    <input id="is_private" name="is_private" type="checkbox" v-model="event.is_private" :value="1"
+                                        class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
+                                        {{ ! $role->isPro() ? 'disabled' : '' }}>
+                                    <input type="hidden" name="is_private" :value="event.is_private ? 1 : 0">
+                                    <label for="is_private" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                        {{ __('messages.private_event') }}
+                                        @if (! $role->isPro() && config('app.hosted'))
+                                        <div class="text-xs pt-1">
+                                            <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-privacy')"
+                                                class="text-[#4E81FA] hover:underline font-medium">
+                                                {{ __('messages.requires_pro_plan') }}
+                                            </button>
+                                        </div>
+                                        @elseif (! $role->isPro())
+                                        <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_pro_plan') }}</div>
+                                        @endif
+                                    </label>
+                                </div>
+                                <p class="mt-1 ms-7 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.private_event_help') }}</p>
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="event_password" :value="__('messages.event_password')" />
+                                <x-text-input id="event_password" name="event_password" type="text" class="mt-1 block w-full"
+                                    v-model="event.event_password" maxlength="255"
+                                    {{ ! $role->isPro() ? 'disabled' : '' }} />
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.event_password_help') }}</p>
+                                @if (! $role->isPro() && config('app.hosted'))
+                                <div class="text-xs pt-1">
+                                    <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-privacy')"
+                                        class="text-[#4E81FA] hover:underline font-medium">
+                                        {{ __('messages.requires_pro_plan') }}
+                                    </button>
+                                </div>
+                                @elseif (! $role->isPro())
+                                <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_pro_plan') }}</div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 @if (count($role->getEventCustomFields()) > 0)
                 <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-custom-fields">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -2956,12 +3019,10 @@
       },
       editSelectedVenue() {
         this.showVenueAddressFields = true;
-        
 
         this.$nextTick(() => {
-            $("#venue_country").countrySelect({
-                defaultCountry: this.venueCountryCode,
-            });
+            var ci = window.getCountryInput('venue_country_code');
+            if (ci) ci.setCountry(this.venueCountryCode);
         });
       },
       updateSelectedVenue() {
@@ -3700,9 +3761,8 @@
         this.venueSearchResults = [];
 
         this.$nextTick(() => {
-            $("#venue_country").countrySelect({
-                defaultCountry: "{{ $role && $role->country_code ? $role->country_code : '' }}",
-            });
+            var ci = window.getCountryInput('venue_country_code');
+            if (ci) ci.setCountry("{{ $role && $role->country_code ? $role->country_code : '' }}");
         });
       },
       memberType() {
@@ -3925,8 +3985,8 @@
     });
   }
 
-  // Country select change (line 1317 originally)
-  var venueCountryInput = document.getElementById('venue_country');
+  // Country select change
+  var venueCountryInput = document.getElementById('venue_country_code');
   if (venueCountryInput) {
     venueCountryInput.addEventListener('change', function() {
       onChangeCountry();
@@ -4391,6 +4451,10 @@ function deleteFlyer(url, hash, token, element) {
 
 <x-upgrade-modal name="upgrade-tickets" tier="pro" :subdomain="$subdomain" docsUrl="{{ route('marketing.docs.tickets') }}">
     {{ __('messages.upgrade_feature_description_tickets') }}
+</x-upgrade-modal>
+
+<x-upgrade-modal name="upgrade-privacy" tier="pro" :subdomain="$subdomain">
+    {{ __('messages.upgrade_feature_description_privacy') }}
 </x-upgrade-modal>
 
 </x-app-admin-layout>

@@ -2438,6 +2438,14 @@
             "nullable": true,
             "description": "URL of the flyer image"
           },
+          "is_private": {
+            "type": "boolean",
+            "description": "Whether the event is private (hidden from calendar, only accessible via direct link)"
+          },
+          "is_password_protected": {
+            "type": "boolean",
+            "description": "Whether the event page is protected by a password"
+          },
           "schedule_type": {
             "type": "string",
             "enum": ["single", "recurring"],
@@ -2627,6 +2635,11 @@
             "type": "string",
             "maxLength": 255,
             "description": "Password to protect the event page"
+          },
+          "is_private": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Make event private (hidden from calendar, only accessible via direct link)"
           },
           "registration_url": {
             "type": "string",

@@ -21,6 +21,7 @@ class Event extends Model
         'short_description_en',
         'event_url',
         'event_password',
+        'is_private',
         'name',
         'name_en',
         'slug',
@@ -49,8 +50,11 @@ class Event extends Model
         'last_notified_fan_content_count',
     ];
 
+    protected $hidden = ['event_password'];
+
     protected $casts = [
         'duration' => 'float',
+        'is_private' => 'boolean',
         'custom_fields' => 'array',
         'custom_field_values' => 'array',
         'last_translated_at' => 'datetime',
@@ -365,6 +369,16 @@ class Event extends Model
         }
 
         return false;
+    }
+
+    public function isPrivate()
+    {
+        return (bool) $this->is_private;
+    }
+
+    public function isPasswordProtected()
+    {
+        return ! empty($this->event_password);
     }
 
     public function isAtVenue($subdomain)
@@ -1036,6 +1050,8 @@ class Event extends Model
         $data->duration = $this->duration;
         $data->category_id = $this->category_id;
         $data->category_name = $this->category_id ? (config('app.event_categories')[$this->category_id] ?? null) : null;
+        $data->is_private = (bool) $this->is_private;
+        $data->is_password_protected = $this->isPasswordProtected();
         $data->event_url = $this->event_url;
         $data->registration_url = $this->registration_url;
         $data->venue_id = $this->venue ? UrlUtils::encodeId($this->venue->id) : null;

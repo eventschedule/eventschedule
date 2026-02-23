@@ -619,9 +619,12 @@
                                         {{-- Event Title --}}
                                         <div class="flex items-start gap-2">
                                             <span v-if="getEventGroupColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
-                                            <h3 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto" v-text="event.name"></h3>
+                                            <h3 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto">
+                                                <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-6 h-6 text-gray-400 me-1 align-text-bottom"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                                                <span v-text="event.name"></span>
+                                            </h3>
                                         </div>
-                                        <p v-if="event.short_description" class="text-gray-600 dark:text-gray-400 mt-2" dir="auto" v-text="event.short_description"></p>
+                                        <p v-if="event.short_description && !event.is_password_protected" class="text-gray-600 dark:text-gray-400 mt-2" dir="auto" v-text="event.short_description"></p>
 
                                         {{-- Date Badge --}}
                                         <div v-if="event.occurrenceDate" class="flex items-center gap-4">
@@ -639,7 +642,7 @@
                                         </div>
 
                                         {{-- Venue Badge --}}
-                                        <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="flex items-center gap-4 min-w-0 hover:opacity-80 transition-opacity">
+                                        <a v-if="event.venue_name && event.venue_guest_url && !event.is_password_protected" :href="event.venue_guest_url" class="flex items-center gap-4 min-w-0 hover:opacity-80 transition-opacity">
                                             <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                                 <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
                                                 <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
@@ -651,7 +654,7 @@
                                                 <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                                             </svg>
                                         </a>
-                                        <div v-else-if="event.venue_name" class="flex items-center gap-4 min-w-0">
+                                        <div v-else-if="event.venue_name && !event.is_password_protected" class="flex items-center gap-4 min-w-0">
                                             <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                                 <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
                                                 <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
@@ -662,7 +665,7 @@
                                         </div>
 
                                         {{-- Ticket Price Badge --}}
-                                        <div v-if="event.registration_url && event.ticket_price != null" class="flex items-center gap-4">
+                                        <div v-if="event.registration_url && event.ticket_price != null && !event.is_password_protected" class="flex items-center gap-4">
                                             <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                                 <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
                                                     <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
@@ -680,7 +683,7 @@
                                         </div>
 
                                         {{-- Talent Avatars + Names --}}
-                                        <div v-if="event.talent && event.talent.length > 0" class="flex items-center gap-2">
+                                        <div v-if="event.talent && event.talent.length > 0 && !event.is_password_protected" class="flex items-center gap-2">
                                             <div class="flex items-center -space-x-2" :class="isRtl ? 'space-x-reverse' : ''">
                                                 <template v-for="(t, tIndex) in event.talent.slice(0, 5)" :key="'ta-' + tIndex">
                                                     <img v-if="t.profile_image" :src="t.profile_image" class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-gray-700" :alt="t.name" :title="t.name">
@@ -700,7 +703,7 @@
                                         </div>
 
                                         {{-- Video Thumbnails --}}
-                                        <div v-if="event.videos && event.videos.length > 0" class="mt-3 space-y-2">
+                                        <div v-if="event.videos && event.videos.length > 0 && !event.is_password_protected" class="mt-3 space-y-2">
                                             {{-- Playing video iframe (full width, above thumbnails) --}}
                                             <div v-if="event.videos.some((v, i) => playingVideo === event.uniqueKey + '-' + i)"
                                                  class="w-full aspect-video rounded-lg overflow-hidden shadow-sm" @click.stop>
@@ -736,7 +739,7 @@
                                         </div>
 
                                         {{-- Recent Comments --}}
-                                        <div v-if="event.recent_comments && event.recent_comments.length > 0" class="space-y-1.5" :dir="isRtl ? 'rtl' : 'ltr'">
+                                        <div v-if="event.recent_comments && event.recent_comments.length > 0 && !event.is_password_protected" class="space-y-1.5" :dir="isRtl ? 'rtl' : 'ltr'">
                                             <div v-for="(comment, cIdx) in event.recent_comments" :key="'c-' + cIdx"
                                                  class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
                                                 <svg class="h-4 w-4 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
@@ -747,7 +750,7 @@
                                         </div>
 
                                         {{-- Mini Timeline for Parts --}}
-                                        <div v-if="event.parts && event.parts.length > 0" :dir="isRtl ? 'rtl' : 'ltr'">
+                                        <div v-if="event.parts && event.parts.length > 0 && !event.is_password_protected" :dir="isRtl ? 'rtl' : 'ltr'">
                                             <div class="relative ps-2">
                                                 <div class="absolute top-1 bottom-1 w-0.5 start-0" :style="'background-color: {{ $accentColor }}30'"></div>
                                                 <div class="space-y-2">
@@ -766,7 +769,7 @@
                                         </div>
 
                                         {{-- Description excerpt --}}
-                                        <p v-if="event.description_excerpt" class="hidden md:block text-base text-gray-500 dark:text-gray-400 line-clamp-2" dir="auto" v-text="event.description_excerpt"></p>
+                                        <p v-if="event.description_excerpt && !event.is_password_protected" class="hidden md:block text-base text-gray-500 dark:text-gray-400 line-clamp-2" dir="auto" v-text="event.description_excerpt"></p>
 
                                         {{-- Action buttons row --}}
                                         <div class="flex flex-wrap items-center gap-2">
@@ -830,7 +833,7 @@
                                         </form>
                                     </div>
                                     {{-- Flyer Image Column --}}
-                                    <div class="md:w-[35%] md:flex-shrink-0">
+                                    <div v-if="!event.is_password_protected" class="md:w-[35%] md:flex-shrink-0">
                                         <img :src="event.flyer_url" :class="event._isPast ? 'grayscale' : ''" class="w-full" :alt="event.name">
                                     </div>
                                 </div>
@@ -839,7 +842,7 @@
                             {{-- Stacked layout when no flyer image --}}
                             <template v-else>
                                 {{-- Hero Banner (only when no flyer) --}}
-                                <div v-if="getHeaderImage(event)" class="h-40 relative overflow-hidden">
+                                <div v-if="getHeaderImage(event) && !event.is_password_protected" class="h-40 relative overflow-hidden">
                                     <img :src="getHeaderImage(event)" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name" v-on:error="$event?.target?.closest('.h-40') && ($event.target.closest('.h-40').style.display='none')">
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                                 </div>
@@ -849,9 +852,12 @@
                                     {{-- Event Title --}}
                                     <div class="flex items-start gap-2">
                                         <span v-if="getEventGroupColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
-                                        <h3 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto" v-text="event.name"></h3>
+                                        <h3 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto">
+                                            <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-6 h-6 text-gray-400 me-1 align-text-bottom"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                                            <span v-text="event.name"></span>
+                                        </h3>
                                     </div>
-                                    <p v-if="event.short_description" class="text-gray-600 dark:text-gray-400 mt-2" dir="auto" v-text="event.short_description"></p>
+                                    <p v-if="event.short_description && !event.is_password_protected" class="text-gray-600 dark:text-gray-400 mt-2" dir="auto" v-text="event.short_description"></p>
 
                                     {{-- Date Badge --}}
                                     <div v-if="event.occurrenceDate" class="flex items-center gap-4">
@@ -869,7 +875,7 @@
                                     </div>
 
                                     {{-- Venue Badge --}}
-                                    <a v-if="event.venue_name && event.venue_guest_url" :href="event.venue_guest_url" class="w-fit flex items-center gap-4 hover:opacity-80 transition-opacity">
+                                    <a v-if="event.venue_name && event.venue_guest_url && !event.is_password_protected" :href="event.venue_guest_url" class="w-fit flex items-center gap-4 hover:opacity-80 transition-opacity">
                                         <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                             <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
                                             <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
@@ -881,7 +887,7 @@
                                             <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                                         </svg>
                                     </a>
-                                    <div v-else-if="event.venue_name" class="flex items-center gap-4">
+                                    <div v-else-if="event.venue_name && !event.is_password_protected" class="flex items-center gap-4">
                                         <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                             <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
                                             <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
@@ -892,7 +898,7 @@
                                     </div>
 
                                     {{-- Ticket Price Badge --}}
-                                    <div v-if="event.registration_url && event.ticket_price != null" class="flex items-center gap-4">
+                                    <div v-if="event.registration_url && event.ticket_price != null && !event.is_password_protected" class="flex items-center gap-4">
                                         <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                             <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
                                                 <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
@@ -910,7 +916,7 @@
                                     </div>
 
                                     {{-- Talent Avatars + Names --}}
-                                    <div v-if="event.talent && event.talent.length > 0" class="flex items-center gap-2">
+                                    <div v-if="event.talent && event.talent.length > 0 && !event.is_password_protected" class="flex items-center gap-2">
                                         <div class="flex items-center -space-x-2" :class="isRtl ? 'space-x-reverse' : ''">
                                             <template v-for="(t, tIndex) in event.talent.slice(0, 5)" :key="'ta-' + tIndex">
                                                 <img v-if="t.profile_image" :src="t.profile_image" class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-gray-700" :alt="t.name" :title="t.name">
@@ -930,7 +936,7 @@
                                     </div>
 
                                     {{-- Video Thumbnails --}}
-                                    <div v-if="event.videos && event.videos.length > 0" class="mt-3 space-y-2">
+                                    <div v-if="event.videos && event.videos.length > 0 && !event.is_password_protected" class="mt-3 space-y-2">
                                         {{-- Playing video iframe (full width, above thumbnails) --}}
                                         <div v-if="event.videos.some((v, i) => playingVideo === event.uniqueKey + '-' + i)"
                                              class="w-full aspect-video rounded-lg overflow-hidden shadow-sm" @click.stop>
@@ -966,7 +972,7 @@
                                     </div>
 
                                     {{-- Recent Comments --}}
-                                    <div v-if="event.recent_comments && event.recent_comments.length > 0" class="space-y-1.5" :dir="isRtl ? 'rtl' : 'ltr'">
+                                    <div v-if="event.recent_comments && event.recent_comments.length > 0 && !event.is_password_protected" class="space-y-1.5" :dir="isRtl ? 'rtl' : 'ltr'">
                                         <div v-for="(comment, cIdx) in event.recent_comments" :key="'c-' + cIdx"
                                              class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
                                             <svg class="h-4 w-4 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
@@ -977,7 +983,7 @@
                                     </div>
 
                                     {{-- Mini Timeline for Parts --}}
-                                    <div v-if="event.parts && event.parts.length > 0" :dir="isRtl ? 'rtl' : 'ltr'">
+                                    <div v-if="event.parts && event.parts.length > 0 && !event.is_password_protected" :dir="isRtl ? 'rtl' : 'ltr'">
                                         <div class="relative ps-2">
                                             <div class="absolute top-1 bottom-1 w-0.5 start-0" :style="'background-color: {{ $accentColor }}30'"></div>
                                             <div class="space-y-2">
@@ -996,7 +1002,7 @@
                                     </div>
 
                                     {{-- Description excerpt --}}
-                                    <p v-if="event.description_excerpt" class="hidden md:block text-base text-gray-500 dark:text-gray-400 line-clamp-2" dir="auto" v-text="event.description_excerpt"></p>
+                                    <p v-if="event.description_excerpt && !event.is_password_protected" class="hidden md:block text-base text-gray-500 dark:text-gray-400 line-clamp-2" dir="auto" v-text="event.description_excerpt"></p>
 
                                     {{-- Action buttons row --}}
                                     <div class="flex flex-wrap items-center gap-2">

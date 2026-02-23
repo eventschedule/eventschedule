@@ -104,7 +104,15 @@
         "@type": "WebSite",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
-        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}"
+        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "{{ config('app.url') }}/search?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+        }
     }
     </script>
     <script type="application/ld+json" {!! nonce_attr() !!}>
@@ -139,11 +147,10 @@
     {
         "@context": "https://schema.org",
         "@type": "SiteNavigationElement",
-        "name": ["Features", "Pricing", "Integrations", "Selfhost", "Docs", "About"],
+        "name": ["Features", "Pricing", "Selfhost", "Docs", "About"],
         "url": [
             "{{ config('app.url') }}/features",
             "{{ config('app.url') }}/pricing",
-            "{{ config('app.url') }}/features/integrations",
             "{{ config('app.url') }}/selfhost",
             "{{ config('app.url') }}/docs",
             "{{ config('app.url') }}/about"
