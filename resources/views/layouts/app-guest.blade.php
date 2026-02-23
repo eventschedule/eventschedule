@@ -403,6 +403,32 @@
             </script>
         @endif
 
+        @if ($event && $event->exists && !($passwordGate ?? false))
+            @php
+                $allVideos = $event->approvedVideos;
+                $videoSchemaItems = [];
+                foreach ($allVideos as $video) {
+                    $videoId = \App\Utils\UrlUtils::extractYouTubeVideoId($video->youtube_url);
+                    if ($videoId) {
+                        $videoSchemaItems[] = [
+                            '@type' => 'VideoObject',
+                            'name' => $event->translatedName() . ($video->eventPart ? ' - ' . $video->eventPart->translatedName() : ''),
+                            'description' => trim(strip_tags($event->translatedDescription())) ?: $event->translatedName(),
+                            'thumbnailUrl' => 'https://img.youtube.com/vi/' . $videoId . '/hqdefault.jpg',
+                            'uploadDate' => $video->created_at->toIso8601String(),
+                            'contentUrl' => $video->youtube_url,
+                            'embedUrl' => 'https://www.youtube-nocookie.com/embed/' . $videoId,
+                        ];
+                    }
+                }
+            @endphp
+            @foreach ($videoSchemaItems as $videoSchema)
+            <script type="application/ld+json" {!! nonce_attr() !!}>
+            @json($videoSchema + ['@context' => 'https://schema.org'], $jsonLdFlags)
+            </script>
+            @endforeach
+        @endif
+
         {{-- Meta Pixel for boosted events --}}
         @if ($event && $event->exists && $event->activeBoostCampaign)
         @php $metaPixelId = config('services.meta.pixel_id'); @endphp

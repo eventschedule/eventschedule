@@ -37,7 +37,7 @@
 
             <!-- Right side buttons -->
             <div class="flex items-center space-x-4">
-                <!-- Search link -->
+                {{-- TODO: Re-enable search when there are more events worldwide
                 <a
                     href="{{ marketing_url('/search') }}"
                     class="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
@@ -47,6 +47,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </a>
+                --}}
 
                 <!-- Theme toggle button -->
                 <button

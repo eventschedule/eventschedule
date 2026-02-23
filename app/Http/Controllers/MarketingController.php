@@ -551,6 +551,38 @@ class MarketingController extends Controller
     }
 
     /**
+     * Compare vs Meetup page
+     */
+    public function compareMeetup()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('meetup'));
+    }
+
+    /**
+     * Compare vs Dice page
+     */
+    public function compareDice()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('dice'));
+    }
+
+    /**
+     * Compare vs Brown Paper Tickets page
+     */
+    public function compareBrownPaperTickets()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('brown-paper-tickets'));
+    }
+
+    /**
+     * Compare vs Splash page
+     */
+    public function compareSplash()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('splash'));
+    }
+
+    /**
      * Contact page
      */
     public function contact()
@@ -1124,7 +1156,7 @@ class MarketingController extends Controller
                 'cross_links' => [
                     ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
                     ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
-                    ['name' => 'Google Calendar', 'route' => 'marketing.compare_google_calendar'],
+                    ['name' => 'Meetup', 'route' => 'marketing.compare_meetup'],
                 ],
             ],
             'luma' => [
@@ -1459,6 +1491,452 @@ class MarketingController extends Controller
                     ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
                     ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
                     ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
+                ],
+            ],
+            'meetup' => [
+                'name' => 'Meetup',
+                'key' => 'meetup',
+                'slug' => 'meetup-alternative',
+                'tagline' => 'A free, open source alternative to Meetup with zero fees and full customization.',
+                'description' => 'Compare Event Schedule with Meetup. Get zero platform fees, custom domains, and open source flexibility without Meetup\'s subscription costs.',
+                'keywords' => 'meetup alternative, meetup alternative free, free event platform, meetup competitor, community events platform',
+                'about' => 'Meetup is a social platform for organizing and discovering local community events and groups. It connects people with shared interests through in-person and online gatherings.',
+                'competitor_strengths' => [
+                    'Large built-in community and event discovery marketplace',
+                    'Strong network effects with millions of active users',
+                    'Social features with member profiles, RSVPs, and group discussions',
+                ],
+                'sections' => [
+                    'Pricing & Fees' => [
+                        ['Free plan', 'Yes (forever)', 'Yes (limited)', true],
+                        ['Paid plan price', '$5/mo (7-day free trial)', 'From $14.99/mo (organizer)', true],
+                        ['Platform fees', '0%', '0% (but subscription required)', true],
+                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in (for paid events)', false],
+                    ],
+                    'Events & Ticketing' => [
+                        ['Ticketing', 'Yes (Pro)', 'Yes (paid events)', false],
+                        ['QR check-ins', 'Yes (Pro)', 'No', true],
+                        ['Online events', 'Yes (Free)', 'Yes', false],
+                        ['Recurring events', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Integrations' => [
+                        ['Google Calendar sync', 'Yes (Free)', 'Add to calendar only', true],
+                        ['CalDAV sync', 'Yes (Free)', 'No', true],
+                        ['Newsletters', 'Yes (Free)', 'Group messaging only', true],
+                    ],
+                    'Customization' => [
+                        ['Custom domains', 'Yes (Pro)', 'No', true],
+                        ['Remove branding', 'Yes (Pro)', 'No', true],
+                        ['Custom fields', 'Yes (Free)', 'No', true],
+                        ['Custom themes/styling', 'Yes (Free)', 'No', true],
+                    ],
+                    'Unique Features' => [
+                        ['AI event parsing', 'Yes (Pro)', 'No', true],
+                        ['Event graphics gen', 'Yes (Pro)', 'No', true],
+                        ['Embeddable calendar', 'Yes (Free)', 'No', true],
+                        ['Team collaboration', 'Yes (Free)', 'Co-organizers (paid)', true],
+                    ],
+                    'Platform' => [
+                        ['REST API', 'Yes (Pro)', 'Yes (limited)', true],
+                        ['Open source', 'Yes', 'No', true],
+                        ['Selfhosting', 'Yes', 'No', true],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => 'No Organizer Fee',
+                        'description' => 'Meetup charges organizers $14.99 to $29.99/mo just to create events. Event Schedule is free forever with optional $5/mo Pro upgrade.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => 'Custom Domain',
+                        'description' => 'Use your own domain for your event pages. Meetup locks you into meetup.com URLs with no custom domain option.',
+                        'icon' => 'globe',
+                        'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30',
+                        'border' => 'border-violet-200 dark:border-violet-500/20',
+                        'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20',
+                        'icon_color' => 'text-violet-600 dark:text-violet-400',
+                    ],
+                    [
+                        'title' => 'Full Customization',
+                        'description' => 'Custom themes, colors, backgrounds, and branding. Meetup groups all look the same with no customization options.',
+                        'icon' => 'image',
+                        'gradient' => 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30',
+                        'border' => 'border-fuchsia-200 dark:border-fuchsia-500/20',
+                        'icon_bg' => 'bg-fuchsia-100 dark:bg-fuchsia-500/20',
+                        'icon_color' => 'text-fuchsia-600 dark:text-fuchsia-400',
+                    ],
+                    [
+                        'title' => 'Open Source',
+                        'description' => 'Fully open source with selfhosting option. Own your data and your community, no vendor lock-in.',
+                        'icon' => 'code',
+                        'gradient' => 'from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30',
+                        'border' => 'border-indigo-200 dark:border-indigo-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                    [
+                        'title' => 'Embeddable Calendar',
+                        'description' => 'Embed your event calendar on any website. Meetup has no embeddable calendar widget.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                    [
+                        'title' => 'AI Event Parsing',
+                        'description' => 'Paste event details in any format and AI extracts all the details. Not available on Meetup.',
+                        'icon' => 'ai',
+                        'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30',
+                        'border' => 'border-rose-200 dark:border-rose-500/20',
+                        'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20',
+                        'icon_color' => 'text-rose-600 dark:text-rose-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
+                    ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
+                    ['name' => 'Google Calendar', 'route' => 'marketing.compare_google_calendar'],
+                ],
+            ],
+            'dice' => [
+                'name' => 'DICE',
+                'key' => 'dice',
+                'slug' => 'dice-alternative',
+                'tagline' => 'A transparent, fee-free alternative to DICE for event organizers.',
+                'description' => 'Compare Event Schedule with DICE. Get zero platform fees, open source flexibility, and full control over your event pages.',
+                'keywords' => 'dice alternative, dice fm alternative, dice ticketing alternative, dice competitor, event ticketing platform',
+                'about' => 'DICE is a mobile-first ticketing platform focused on live music, nightlife, and entertainment events. It handles ticket distribution, fan engagement, and event discovery through its app.',
+                'competitor_strengths' => [
+                    'Strong focus on live music and nightlife events',
+                    'Mobile-first app with curated event discovery',
+                    'Anti-scalping technology with mobile-only tickets',
+                ],
+                'sections' => [
+                    'Pricing & Fees' => [
+                        ['Free plan', 'Yes (forever)', 'Free for organizers', false],
+                        ['Paid plan price', '$5/mo (7-day free trial)', 'Free (fees on buyers)', true],
+                        ['Platform fees', '0%', 'Service fee on buyers', true],
+                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in', false],
+                    ],
+                    'Events & Ticketing' => [
+                        ['Ticketing', 'Yes (Pro)', 'Yes', false],
+                        ['QR check-ins', 'Yes (Pro)', 'Yes (app-based)', false],
+                        ['Online events', 'Yes (Free)', 'Yes (livestream)', false],
+                        ['Recurring events', 'Yes (Free)', 'Limited', true],
+                    ],
+                    'Integrations' => [
+                        ['Google Calendar sync', 'Yes (Free)', 'No', true],
+                        ['CalDAV sync', 'Yes (Free)', 'No', true],
+                        ['Newsletters', 'Yes (Free)', 'Push notifications', true],
+                    ],
+                    'Customization' => [
+                        ['Custom domains', 'Yes (Pro)', 'No', true],
+                        ['Remove branding', 'Yes (Pro)', 'No', true],
+                        ['Custom event pages', 'Yes (full control)', 'Template-based', true],
+                        ['Embeddable calendar', 'Yes (Free)', 'Widget only', true],
+                    ],
+                    'Unique Features' => [
+                        ['AI event parsing', 'Yes (Pro)', 'No', true],
+                        ['Event graphics gen', 'Yes (Pro)', 'No', true],
+                        ['Sub-schedules', 'Yes (Free)', 'No', true],
+                        ['Fan videos & comments', 'Yes (Free)', 'No', true],
+                    ],
+                    'Platform' => [
+                        ['REST API', 'Yes (Pro)', 'Limited', true],
+                        ['Open source', 'Yes', 'No', true],
+                        ['Selfhosting', 'Yes', 'No', true],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => '0% Platform Fees',
+                        'description' => 'DICE charges service fees to ticket buyers. With Event Schedule, there are zero platform fees at any tier.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => 'Full Page Control',
+                        'description' => 'Customize every aspect of your event pages with themes, colors, and custom domains. DICE locks you into their app template.',
+                        'icon' => 'globe',
+                        'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30',
+                        'border' => 'border-violet-200 dark:border-violet-500/20',
+                        'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20',
+                        'icon_color' => 'text-violet-600 dark:text-violet-400',
+                    ],
+                    [
+                        'title' => 'Calendar Sync',
+                        'description' => 'Two-way Google Calendar and CalDAV sync keeps your schedule always up to date. Not available on DICE.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30',
+                        'border' => 'border-fuchsia-200 dark:border-fuchsia-500/20',
+                        'icon_bg' => 'bg-fuchsia-100 dark:bg-fuchsia-500/20',
+                        'icon_color' => 'text-fuchsia-600 dark:text-fuchsia-400',
+                    ],
+                    [
+                        'title' => 'Open Source',
+                        'description' => 'Fully open source with selfhosting option. Own your data and avoid vendor lock-in.',
+                        'icon' => 'code',
+                        'gradient' => 'from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30',
+                        'border' => 'border-indigo-200 dark:border-indigo-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                    [
+                        'title' => 'AI Event Parsing',
+                        'description' => 'Paste event details in any format and AI handles the rest. Unique to Event Schedule.',
+                        'icon' => 'ai',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                    [
+                        'title' => 'Newsletters',
+                        'description' => 'Built-in newsletter system to keep your audience engaged. DICE only offers push notifications through their app.',
+                        'icon' => 'mail',
+                        'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30',
+                        'border' => 'border-rose-200 dark:border-rose-500/20',
+                        'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20',
+                        'icon_color' => 'text-rose-600 dark:text-rose-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
+                    ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
+                    ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
+                ],
+            ],
+            'brown-paper-tickets' => [
+                'name' => 'Brown Paper Tickets',
+                'key' => 'brown-paper-tickets',
+                'slug' => 'brown-paper-tickets-alternative',
+                'tagline' => 'A modern, actively developed alternative to Brown Paper Tickets.',
+                'description' => 'Compare Event Schedule with Brown Paper Tickets. Get zero platform fees, modern design, and reliable support.',
+                'keywords' => 'brown paper tickets alternative, brown paper tickets replacement, bpt alternative, event ticketing platform, brown paper tickets competitor',
+                'about' => 'Brown Paper Tickets is a ticketing platform that was known for its low fees and focus on independent events. The platform has faced service reliability issues in recent years, leading many organizers to seek alternatives.',
+                'competitor_strengths' => [
+                    'Historically low per-ticket fees for organizers',
+                    'Long track record in the independent event space',
+                    'Will-call and physical ticket options',
+                ],
+                'sections' => [
+                    'Pricing & Fees' => [
+                        ['Free plan', 'Yes (forever)', 'Free to list', false],
+                        ['Paid plan price', '$5/mo (7-day free trial)', 'Free (fees on tickets)', true],
+                        ['Platform fees', '0%', '$0.99 + 5% per ticket (buyer-paid)', true],
+                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in', false],
+                    ],
+                    'Events & Ticketing' => [
+                        ['Ticketing', 'Yes (Pro)', 'Yes', false],
+                        ['QR check-ins', 'Yes (Pro)', 'Limited', true],
+                        ['Online events', 'Yes (Free)', 'Limited', true],
+                        ['Recurring events', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Integrations' => [
+                        ['Google Calendar sync', 'Yes (Free)', 'No', true],
+                        ['CalDAV sync', 'Yes (Free)', 'No', true],
+                        ['Newsletters', 'Yes (Free)', 'Basic email', true],
+                    ],
+                    'Customization' => [
+                        ['Custom domains', 'Yes (Pro)', 'No', true],
+                        ['Remove branding', 'Yes (Pro)', 'No', true],
+                        ['Modern event pages', 'Yes (responsive, customizable)', 'Dated design', true],
+                        ['Embeddable calendar', 'Yes (Free)', 'Limited widget', true],
+                    ],
+                    'Unique Features' => [
+                        ['AI event parsing', 'Yes (Pro)', 'No', true],
+                        ['Event graphics gen', 'Yes (Pro)', 'No', true],
+                        ['Sub-schedules', 'Yes (Free)', 'No', true],
+                        ['Fan videos & comments', 'Yes (Free)', 'No', true],
+                    ],
+                    'Platform' => [
+                        ['REST API', 'Yes (Pro)', 'Limited', true],
+                        ['Open source', 'Yes', 'No', true],
+                        ['Selfhosting', 'Yes', 'No', true],
+                        ['Active development', 'Yes (regular updates)', 'Minimal updates', true],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => '0% Platform Fees',
+                        'description' => 'Brown Paper Tickets charges $0.99 + 5% per ticket. Event Schedule charges zero platform fees at any tier.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => 'Modern Design',
+                        'description' => 'Beautiful, responsive event pages with customizable themes, colors, and backgrounds. A modern experience for your audience.',
+                        'icon' => 'image',
+                        'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30',
+                        'border' => 'border-violet-200 dark:border-violet-500/20',
+                        'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20',
+                        'icon_color' => 'text-violet-600 dark:text-violet-400',
+                    ],
+                    [
+                        'title' => 'Reliable Platform',
+                        'description' => 'Actively developed and maintained with regular updates. Count on consistent uptime and responsive support.',
+                        'icon' => 'globe',
+                        'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30',
+                        'border' => 'border-sky-200 dark:border-sky-500/20',
+                        'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20',
+                        'icon_color' => 'text-sky-600 dark:text-sky-400',
+                    ],
+                    [
+                        'title' => 'Calendar Sync',
+                        'description' => 'Two-way Google Calendar and CalDAV sync keeps everything in sync. Not available on Brown Paper Tickets.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30',
+                        'border' => 'border-fuchsia-200 dark:border-fuchsia-500/20',
+                        'icon_bg' => 'bg-fuchsia-100 dark:bg-fuchsia-500/20',
+                        'icon_color' => 'text-fuchsia-600 dark:text-fuchsia-400',
+                    ],
+                    [
+                        'title' => 'AI Event Parsing',
+                        'description' => 'Paste event details in any format and AI handles the rest. Save time on event creation.',
+                        'icon' => 'ai',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                    [
+                        'title' => 'Open Source',
+                        'description' => 'Fully open source with selfhosting option. No vendor lock-in, complete transparency.',
+                        'icon' => 'code',
+                        'gradient' => 'from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30',
+                        'border' => 'border-indigo-200 dark:border-indigo-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
+                    ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
+                    ['name' => 'DICE', 'route' => 'marketing.compare_dice'],
+                ],
+            ],
+            'splash' => [
+                'name' => 'Splash',
+                'key' => 'splash',
+                'slug' => 'splash-alternative',
+                'tagline' => 'A simpler, more affordable alternative to Splash for event marketing.',
+                'description' => 'Compare Event Schedule with Splash. Get zero platform fees, open source flexibility, and powerful features without enterprise pricing.',
+                'keywords' => 'splash alternative, splash event marketing alternative, splash competitor, event management platform, splash replacement',
+                'about' => 'Splash is an enterprise event marketing platform focused on branded event experiences, registration, and attendee engagement. It targets mid-to-large organizations with custom event pages and marketing automation.',
+                'competitor_strengths' => [
+                    'Enterprise-grade event marketing and branding tools',
+                    'Advanced attendee engagement and analytics',
+                    'Custom event page designer with drag-and-drop builder',
+                ],
+                'sections' => [
+                    'Pricing & Fees' => [
+                        ['Free plan', 'Yes (forever)', 'No (custom pricing)', true],
+                        ['Paid plan price', '$5/mo (7-day free trial)', 'Enterprise pricing', true],
+                        ['Platform fees', '0%', 'Included in subscription', true],
+                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in', false],
+                    ],
+                    'Events & Ticketing' => [
+                        ['Ticketing', 'Yes (Pro)', 'Yes', false],
+                        ['QR check-ins', 'Yes (Pro)', 'Yes', false],
+                        ['Online events', 'Yes (Free)', 'Yes', false],
+                        ['Recurring events', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Integrations' => [
+                        ['Google Calendar sync', 'Yes (Free)', 'Limited', true],
+                        ['CalDAV sync', 'Yes (Free)', 'No', true],
+                        ['Newsletters', 'Yes (Free)', 'Yes (enterprise)', false],
+                    ],
+                    'Customization' => [
+                        ['Custom domains', 'Yes (Pro)', 'Yes (enterprise)', false],
+                        ['Remove branding', 'Yes (Pro)', 'Yes (enterprise)', false],
+                        ['Custom fields', 'Yes (Free)', 'Yes', false],
+                        ['Embeddable calendar', 'Yes (Free)', 'Registration widget', true],
+                    ],
+                    'Unique Features' => [
+                        ['AI event parsing', 'Yes (Pro)', 'No', true],
+                        ['Event graphics gen', 'Yes (Pro)', 'No', true],
+                        ['Sub-schedules', 'Yes (Free)', 'No', true],
+                        ['Fan videos & comments', 'Yes (Free)', 'No', true],
+                    ],
+                    'Platform' => [
+                        ['REST API', 'Yes (Pro)', 'Yes (enterprise)', false],
+                        ['Open source', 'Yes', 'No', true],
+                        ['Selfhosting', 'Yes', 'No', true],
+                        ['Setup time', 'Minutes', 'Weeks (implementation)', true],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => 'Accessible Pricing',
+                        'description' => 'Splash requires enterprise contracts. Event Schedule starts free and offers Pro at $5/mo, accessible to any size organizer.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => 'Instant Setup',
+                        'description' => 'Create your schedule and start adding events in minutes. No implementation timeline, no onboarding calls needed.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30',
+                        'border' => 'border-violet-200 dark:border-violet-500/20',
+                        'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20',
+                        'icon_color' => 'text-violet-600 dark:text-violet-400',
+                    ],
+                    [
+                        'title' => 'AI Event Parsing',
+                        'description' => 'Paste event details in any format and AI extracts everything automatically. Not available on Splash.',
+                        'icon' => 'ai',
+                        'gradient' => 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30',
+                        'border' => 'border-fuchsia-200 dark:border-fuchsia-500/20',
+                        'icon_bg' => 'bg-fuchsia-100 dark:bg-fuchsia-500/20',
+                        'icon_color' => 'text-fuchsia-600 dark:text-fuchsia-400',
+                    ],
+                    [
+                        'title' => 'Open Source',
+                        'description' => 'Fully open source with selfhosting option. Complete transparency and no vendor lock-in.',
+                        'icon' => 'code',
+                        'gradient' => 'from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30',
+                        'border' => 'border-indigo-200 dark:border-indigo-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                    [
+                        'title' => 'Calendar Sync',
+                        'description' => 'Two-way Google Calendar and CalDAV sync included free. Keep all your events in one place.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                    [
+                        'title' => 'Event Graphics',
+                        'description' => 'Generate shareable event graphics automatically. Professional social media promotion without a designer.',
+                        'icon' => 'image',
+                        'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30',
+                        'border' => 'border-rose-200 dark:border-rose-500/20',
+                        'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20',
+                        'icon_color' => 'text-rose-600 dark:text-rose-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
+                    ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
+                    ['name' => 'Meetup', 'route' => 'marketing.compare_meetup'],
                 ],
             ],
         ];

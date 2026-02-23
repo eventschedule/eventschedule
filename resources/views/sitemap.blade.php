@@ -31,12 +31,14 @@
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
+    {{-- TODO: Re-enable search when there are more events worldwide
     <url>
         <loc>{{ url('/search') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
+    --}}
     <url>
         <loc>{{ url('/compare') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
@@ -63,6 +65,30 @@
     </url>
     <url>
         <loc>{{ url('/google-calendar-alternative') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>{{ url('/meetup-alternative') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>{{ url('/dice-alternative') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>{{ url('/brown-paper-tickets-alternative') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>{{ url('/splash-alternative') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>

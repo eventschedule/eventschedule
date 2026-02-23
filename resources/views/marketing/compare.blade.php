@@ -242,7 +242,7 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 <a href="{{ route('marketing.compare_eventbrite') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
                     <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Eventbrite</h3>
@@ -283,6 +283,56 @@
                     <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Google Calendar</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Purpose-built event platform vs personal scheduling tool. Ticketing, public pages, and AI features.</p>
+                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
+                        Compare
+                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </span>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <a href="{{ route('marketing.compare_meetup') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Meetup</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Free forever vs $14.99+/mo organizer fees. Custom domains, full branding, and open source.</p>
+                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
+                        Compare
+                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </span>
+                </a>
+
+                <a href="{{ route('marketing.compare_dice') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">DICE</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Zero platform fees vs buyer service fees. Full page control, calendar sync, and open source.</p>
+                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
+                        Compare
+                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </span>
+                </a>
+
+                <a href="{{ route('marketing.compare_brown_paper_tickets') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Brown Paper Tickets</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Modern, reliable platform vs dated design. Zero fees, AI features, and active development.</p>
+                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
+                        Compare
+                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </span>
+                </a>
+
+                <a href="{{ route('marketing.compare_splash') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Splash</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">$5/mo vs enterprise pricing. Instant setup, AI features, and open source flexibility.</p>
                     <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
                         Compare
                         <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">

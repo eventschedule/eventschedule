@@ -27,26 +27,12 @@
             font-size: 1.875rem !important;
             line-height: 1.4 !important;
         }
-        body > div:first-child > div:first-child::after {
-            content: '';
-            position: absolute;
-            bottom: -50px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 900px;
-            height: 350px;
-            background: radial-gradient(ellipse, rgba(78, 129, 250, 0.22) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 1;
-        }
-        body > div:first-child > div:first-child > .flex.flex-col {
-            z-index: 2 !important;
-        }
     </style>
 
     {{ $headStyles ?? '' }}
 </head>
 <body style="margin: 0; padding: 0; width: 1200px; height: 630px; overflow: hidden; position: relative;">
     {{ $slot }}
+    <div style="position:fixed; bottom:-50px; left:50%; transform:translateX(-50%); width:900px; height:350px; background:radial-gradient(ellipse, rgba(78,129,250,0.22) 0%, transparent 70%); pointer-events:none; z-index:10;"></div>
 </body>
 </html>

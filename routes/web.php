@@ -357,7 +357,8 @@ if (config('app.is_nexus')) {
         Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
         Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
         Route::get('/examples', [MarketingController::class, 'demos'])->name('marketing.demos');
-        Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
+        // TODO: Re-enable search when there are more events worldwide
+        // Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
         Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
         Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
         Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
@@ -434,6 +435,10 @@ if (config('app.is_nexus')) {
         Route::get('/luma-alternative', [MarketingController::class, 'compareLuma'])->name('marketing.compare_luma');
         Route::get('/ticket-tailor-alternative', [MarketingController::class, 'compareTicketTailor'])->name('marketing.compare_ticket_tailor');
         Route::get('/google-calendar-alternative', [MarketingController::class, 'compareGoogleCalendar'])->name('marketing.compare_google_calendar');
+        Route::get('/meetup-alternative', [MarketingController::class, 'compareMeetup'])->name('marketing.compare_meetup');
+        Route::get('/dice-alternative', [MarketingController::class, 'compareDice'])->name('marketing.compare_dice');
+        Route::get('/brown-paper-tickets-alternative', [MarketingController::class, 'compareBrownPaperTickets'])->name('marketing.compare_brown_paper_tickets');
+        Route::get('/splash-alternative', [MarketingController::class, 'compareSplash'])->name('marketing.compare_splash');
         Route::get('/contact', [MarketingController::class, 'contact'])->name('marketing.contact');
         Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
         Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
@@ -483,7 +488,8 @@ if (config('app.is_nexus')) {
             Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
             Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
             Route::get('/examples', [MarketingController::class, 'demos'])->name('marketing.demos');
-            Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
+            // TODO: Re-enable search when there are more events worldwide
+            // Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
             Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
             Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
             Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
@@ -562,6 +568,10 @@ if (config('app.is_nexus')) {
             Route::get('/luma-alternative', [MarketingController::class, 'compareLuma'])->name('marketing.compare_luma');
             Route::get('/ticket-tailor-alternative', [MarketingController::class, 'compareTicketTailor'])->name('marketing.compare_ticket_tailor');
             Route::get('/google-calendar-alternative', [MarketingController::class, 'compareGoogleCalendar'])->name('marketing.compare_google_calendar');
+            Route::get('/meetup-alternative', [MarketingController::class, 'compareMeetup'])->name('marketing.compare_meetup');
+            Route::get('/dice-alternative', [MarketingController::class, 'compareDice'])->name('marketing.compare_dice');
+            Route::get('/brown-paper-tickets-alternative', [MarketingController::class, 'compareBrownPaperTickets'])->name('marketing.compare_brown_paper_tickets');
+            Route::get('/splash-alternative', [MarketingController::class, 'compareSplash'])->name('marketing.compare_splash');
             Route::get('/contact', [MarketingController::class, 'contact'])->name('marketing.contact');
             Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
             Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
@@ -688,6 +698,10 @@ if (config('app.is_nexus')) {
             Route::get('/luma-alternative', fn () => redirect('https://eventschedule.com/luma-alternative', 301));
             Route::get('/ticket-tailor-alternative', fn () => redirect('https://eventschedule.com/ticket-tailor-alternative', 301));
             Route::get('/google-calendar-alternative', fn () => redirect('https://eventschedule.com/google-calendar-alternative', 301));
+            Route::get('/meetup-alternative', fn () => redirect('https://eventschedule.com/meetup-alternative', 301));
+            Route::get('/dice-alternative', fn () => redirect('https://eventschedule.com/dice-alternative', 301));
+            Route::get('/brown-paper-tickets-alternative', fn () => redirect('https://eventschedule.com/brown-paper-tickets-alternative', 301));
+            Route::get('/splash-alternative', fn () => redirect('https://eventschedule.com/splash-alternative', 301));
             Route::get('/why-create-account', fn () => redirect('https://eventschedule.com/why-create-account', 301));
             Route::get('/contact', fn () => redirect('https://eventschedule.com/contact', 301));
             Route::get('/privacy', fn () => redirect('https://eventschedule.com/privacy', 301));

@@ -59,7 +59,8 @@
                                 <div class="flex">
                                     <textarea id="iframe-code" readonly rows="4"
                                               class="block w-full rounded-s-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] sm:text-sm font-mono text-xs"
-                                              style="resize: vertical;"><iframe src="{{ $embedUrl }}" width="100%" height="800" frameborder="0" style="border: none;"></iframe></textarea>
+                                              style="resize: vertical;"><iframe src="{{ $embedUrl }}" width="100%" height="800" frameborder="0" style="border: none;"></iframe>
+<p style="font-size: 12px; text-align: right; margin-top: 4px; opacity: 0.6;"><a href="https://eventschedule.com" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">Powered by Event Schedule</a></p></textarea>
                                     <button type="button" id="iframe-code-btn" class="js-copy-iframe-code"
                                             class="inline-flex items-center rounded-e-md border border-s-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 focus:border-[#4E81FA] focus:outline-none focus:ring-1 focus:ring-[#4E81FA]">
                                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

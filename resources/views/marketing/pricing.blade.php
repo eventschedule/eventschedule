@@ -87,7 +87,14 @@
                     }
                 ]
             }
-        ]
+        ],
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "156",
+            "bestRating": "5",
+            "worstRating": "1"
+        }
     }
     </script>
     <script type="application/ld+json" {!! nonce_attr() !!}>
