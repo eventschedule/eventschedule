@@ -195,6 +195,11 @@
                 </div>
 
                 @if ($isHosted)
+                @if (!empty($pmLastFour))
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                    {{ __('messages.saved_card_on_file', ['brand' => ucfirst($pmType ?? 'card'), 'last4' => $pmLastFour]) }}
+                </p>
+                @endif
                 <div id="payment-element" class="mb-4"></div>
                 @endif
                 <div id="payment-errors" class="text-sm text-red-600 dark:text-red-400 hidden"></div>
@@ -362,7 +367,11 @@
             const appearance = {
                 theme: isDarkMode ? 'night' : 'stripe',
             };
-            elements = stripe.elements({ clientSecret, appearance });
+            const elementsOptions = { clientSecret, appearance };
+            if (data.customer_session_client_secret) {
+                elementsOptions.customerSessionClientSecret = data.customer_session_client_secret;
+            }
+            elements = stripe.elements(elementsOptions);
             paymentElement = elements.create('payment', {
                 paymentMethodOrder: ['card'],
             });

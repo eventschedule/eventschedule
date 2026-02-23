@@ -139,14 +139,6 @@ class ApiScheduleController extends Controller
         $role->user_id = $user->id;
         $role->background_colors = ColorUtils::randomGradient();
 
-        // Set trial for hosted mode
-        if (config('app.hosted')) {
-            $role->plan_expires = now()->addDays(config('app.trial_days'))->format('Y-m-d');
-            $role->plan_type = 'pro';
-            $role->plan_term = 'year';
-            $role->trial_ends_at = now()->addDays(config('app.trial_days'));
-        }
-
         // Handle email verification
         if (! config('app.hosted')) {
             $role->email_verified_at = now();

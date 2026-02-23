@@ -49,6 +49,7 @@ return [
     'thanks' => 'Gracias',
     'resend_verification_email' => 'Reenviar Correo de Verificación',
     'log_out' => 'Cerrar Sesión',
+    'upgrade' => 'Mejorar',
     'cancel' => 'Cancelar',
     'delete' => 'Eliminar',
     'delete_event' => 'Eliminar Evento',
@@ -436,6 +437,7 @@ return [
     'change_to_free_plan' => 'Cambiar a Plan Gratuito',
     'plan_changed' => '¡Plan cambiado con éxito!',
     'first_year_free' => 'Primer año gratis',
+    'free_trial_badge' => 'Prueba gratuita de 7 dias',
     'copy_url' => 'Copiar URL',
     'note_all_schedules_are_publicly_listed' => 'Tu horario será visible públicamente',
     'note_all_events_are_publicly_listed' => 'Tu evento será visible públicamente',
@@ -931,6 +933,7 @@ return [
     'feature_custom_domain' => 'Usar tu propio dominio personalizado',
     'feature_team_members' => 'Agregar miembros de equipo para gestionar tu calendario',
     'feature_api_access' => 'Acceso a API para integraciones',
+    'feature_boost' => 'Boost events with ads',
     'upgrade_to_pro_plan' => 'Actualizar a Pro',
 
     // CalDAV Calendar Integration
@@ -1010,8 +1013,21 @@ return [
 
     // Enterprise features
     'upgrade_to_enterprise' => 'Actualizar a Enterprise',
+    'enterprise_plan' => 'Plan Enterprise',
+    'enterprise_features' => 'Funciones Enterprise',
     'enterprise_feature_ai_prompt' => 'La transformación de texto con IA es una función Enterprise.',
     'enterprise_feature_email_scheduling' => 'La programación de correos es una función Enterprise.',
+    'enterprise_feature_agenda_scanning' => 'El escaneo de agenda es una función Enterprise.',
+    'feature_ai_text' => 'Transformación de texto con IA',
+    'feature_email_scheduling' => 'Programación de correos',
+    'feature_agenda_scanning' => 'Escaneo de agenda',
+    'feature_custom_css_enterprise' => 'Estilo CSS personalizado',
+    'feature_priority_support' => 'Soporte prioritario',
+    'select_tier' => 'Seleccionar plan',
+    'custom_css_enterprise_only' => 'CSS personalizado es una función Enterprise',
+    'custom_css_grandfathered' => 'La edición de CSS personalizado es una función Enterprise. Sus estilos existentes seguirán funcionando.',
+    'newsletter_upgrade_enterprise' => '¿Necesita más? Actualice a Enterprise por 1.000/mes',
+    'everything_in_pro' => 'Todo en Pro',
 
     'sync_direction_updated' => 'Dirección de sincronización actualizada.',
 
@@ -1771,6 +1787,9 @@ return [
     'boost_headline_in_person' => ':name en :location',
     'boost_text_in_person' => 'No te pierdas :name en vivo en :venue',
     'boost_desc_live_event' => 'Evento en Vivo',
+    'you_have' => 'Tiene',
+    'in_boost_credit' => 'en crédito de impulso',
+    'will_be_paid_with_boost_credit' => 'Esto se pagará con su crédito de impulso',
 
     // Admin newsletters
     'admin_newsletters' => 'Boletines',
@@ -1827,4 +1846,18 @@ return [
     'converted' => 'convirtieron',
     'click' => 'clic',
     'sale' => 'venta',
+    'saved_card_on_file' => 'Su tarjeta :brand terminada en :last4 está registrada.',
+
+    // Upgrade modals
+    'upgrade_feature_title_pro' => 'Pro Feature',
+    'upgrade_feature_title_enterprise' => 'Enterprise Feature',
+    'upgrade_feature_description_members' => 'Add team members to help manage your schedule.',
+    'upgrade_feature_description_scan_agenda' => 'Use AI to scan event agendas and automatically create event details.',
+    'upgrade_feature_description_boost' => 'Promote your event to reach a larger audience.',
+    'upgrade_feature_description_tickets' => 'Sell tickets for your events and manage sales directly from your schedule.',
+    'upgrade_feature_description_availability' => 'Mark your available and unavailable dates so organizers know when to book you.',
+    'upgrade_feature_description_ai_prompt' => 'Use AI to automatically transform and enhance the text in your event graphics.',
+    'upgrade_feature_description_email_scheduling' => 'Automatically send event graphic emails to your audience on a recurring schedule.',
+    'upgrade_feature_description_custom_css' => 'Add custom CSS to fully personalize the look of your public schedule page.',
+
 ];

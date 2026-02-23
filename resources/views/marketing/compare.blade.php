@@ -148,7 +148,7 @@
                             $sections = [
                                 'Pricing & Fees' => [
                                     ['Free plan', 'Yes (forever)', 'Free to publish events', 'Yes (forever)', 'Free events only', 'Yes (forever)'],
-                                    ['Paid plan price', 'From $5/mo (first year free)', 'Free (fees on tickets)', '$59/mo', 'From $0.28/ticket', 'Free'],
+                                    ['Paid plan price', 'From $5/mo (7-day free trial)', 'Free (fees on tickets)', '$59/mo', 'From $0.28/ticket', 'Free'],
                                     ['Platform fees', '0%', '3.7% + $1.79/ticket', '5% (free plan), 0% (Plus)', '$0.28-$0.60/ticket', 'N/A (no ticketing)'],
                                     ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in (included above)', 'Built-in', 'Stripe/PayPal/Square', 'No'],
                                 ],

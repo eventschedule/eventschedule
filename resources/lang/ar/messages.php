@@ -49,6 +49,7 @@ return [
     'thanks' => 'شكرًا',
     'resend_verification_email' => 'إعادة إرسال البريد الإلكتروني للتحقق',
     'log_out' => 'تسجيل الخروج',
+    'upgrade' => 'ترقية',
     'cancel' => 'إلغاء',
     'delete' => 'حذف',
     'delete_event' => 'حذف الحدث',
@@ -421,6 +422,7 @@ return [
     'change_to_free_plan' => 'التغيير إلى الخطة المجانية',
     'plan_changed' => 'تم تغيير الخطة بنجاح!',
     'first_year_free' => 'السنة الأولى مجاناً',
+    'free_trial_badge' => 'تجربة مجانية لمدة 7 أيام',
     'copy_url' => 'نسخ الرابط',
     'note_all_schedules_are_publicly_listed' => 'سيكون جدولك الزمني مرئيًا للعامة',
     'note_all_events_are_publicly_listed' => 'سيكون حدثك مرئيًا للعامة',
@@ -932,6 +934,7 @@ return [
     'feature_custom_domain' => 'استخدام نطاقك المخصص',
     'feature_team_members' => 'إضافة أعضاء فريق لإدارة جدولك',
     'feature_api_access' => 'الوصول إلى API للتكاملات',
+    'feature_boost' => 'Boost events with ads',
     'upgrade_to_pro_plan' => 'الترقية إلى Pro',
 
     // CalDAV Calendar Integration
@@ -1011,8 +1014,21 @@ return [
 
     // Enterprise features
     'upgrade_to_enterprise' => 'الترقية إلى Enterprise',
+    'enterprise_plan' => 'خطة Enterprise',
+    'enterprise_features' => 'ميزات Enterprise',
     'enterprise_feature_ai_prompt' => 'تحويل النص بالذكاء الاصطناعي هو ميزة Enterprise.',
     'enterprise_feature_email_scheduling' => 'جدولة البريد الإلكتروني هي ميزة Enterprise.',
+    'enterprise_feature_agenda_scanning' => 'مسح جدول الأعمال هو ميزة Enterprise.',
+    'feature_ai_text' => 'تحويل النص بالذكاء الاصطناعي',
+    'feature_email_scheduling' => 'جدولة البريد الإلكتروني',
+    'feature_agenda_scanning' => 'مسح جدول الأعمال',
+    'feature_custom_css_enterprise' => 'تنسيق CSS مخصص',
+    'feature_priority_support' => 'دعم ذو أولوية',
+    'select_tier' => 'اختيار الخطة',
+    'custom_css_enterprise_only' => 'CSS المخصص هو ميزة Enterprise',
+    'custom_css_grandfathered' => 'تعديل CSS المخصص هو ميزة Enterprise. ستستمر أنماطك الحالية في العمل.',
+    'newsletter_upgrade_enterprise' => 'تحتاج المزيد؟ قم بالترقية إلى Enterprise مقابل 1,000/شهر',
+    'everything_in_pro' => 'كل شيء في Pro',
 
     'sync_direction_updated' => 'تم تحديث اتجاه المزامنة.',
 
@@ -1772,6 +1788,9 @@ return [
     'boost_headline_in_person' => ':name في :location',
     'boost_text_in_person' => 'لا تفوّت :name مباشرة في :venue',
     'boost_desc_live_event' => 'حدث مباشر',
+    'you_have' => 'لديك',
+    'in_boost_credit' => 'في رصيد التعزيز',
+    'will_be_paid_with_boost_credit' => 'سيتم الدفع من رصيد التعزيز الخاص بك',
 
     // Admin newsletters
     'admin_newsletters' => 'النشرات الإخبارية',
@@ -1828,4 +1847,18 @@ return [
     'converted' => 'تحولوا',
     'click' => 'نقرة',
     'sale' => 'بيع',
+    'saved_card_on_file' => 'بطاقة :brand المنتهية بـ :last4 مسجلة في الملف.',
+
+    // Upgrade modals
+    'upgrade_feature_title_pro' => 'Pro Feature',
+    'upgrade_feature_title_enterprise' => 'Enterprise Feature',
+    'upgrade_feature_description_members' => 'Add team members to help manage your schedule.',
+    'upgrade_feature_description_scan_agenda' => 'Use AI to scan event agendas and automatically create event details.',
+    'upgrade_feature_description_boost' => 'Promote your event to reach a larger audience.',
+    'upgrade_feature_description_tickets' => 'Sell tickets for your events and manage sales directly from your schedule.',
+    'upgrade_feature_description_availability' => 'Mark your available and unavailable dates so organizers know when to book you.',
+    'upgrade_feature_description_ai_prompt' => 'Use AI to automatically transform and enhance the text in your event graphics.',
+    'upgrade_feature_description_email_scheduling' => 'Automatically send event graphic emails to your audience on a recurring schedule.',
+    'upgrade_feature_description_custom_css' => 'Add custom CSS to fully personalize the look of your public schedule page.',
+
 ];

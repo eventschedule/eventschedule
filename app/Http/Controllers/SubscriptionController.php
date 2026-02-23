@@ -71,6 +71,7 @@ class SubscriptionController extends Controller
 
             try {
                 $subscription = $role->subscription('default');
+                $role->updateDefaultPaymentMethod($request->payment_method);
                 $subscription->swap($priceId);
 
                 $role->plan_type = 'enterprise';
@@ -80,6 +81,11 @@ class SubscriptionController extends Controller
                 return redirect()
                     ->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])
                     ->with('message', __('messages.subscription_updated'));
+            } catch (IncompletePayment $exception) {
+                return redirect()->route(
+                    'cashier.payment',
+                    [$exception->payment->id, 'redirect' => route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])]
+                );
             } catch (\Exception $e) {
                 \Log::error('Subscription upgrade failed', ['error' => $e->getMessage(), 'role' => $role->id]);
 
@@ -110,8 +116,8 @@ class SubscriptionController extends Controller
             // Calculate trial days
             $trialDays = 0;
 
-            // If eligible for first year free
-            if ($role->isEligibleForFreeYear()) {
+            // If eligible for free trial
+            if ($role->isEligibleForTrial()) {
                 $trialDays = config('app.trial_days');
             } elseif ($role->plan_expires) {
                 // If they have remaining days from legacy trial
@@ -239,6 +245,10 @@ class SubscriptionController extends Controller
 
         $tier = $request->input('tier', $role->plan_type ?: 'pro');
 
+        if ($role->plan_type === 'enterprise' && $tier !== 'enterprise') {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
         if ($tier === 'enterprise') {
             $priceId = $request->plan === 'yearly'
                 ? config('services.stripe_platform.enterprise_price_yearly')
@@ -251,7 +261,7 @@ class SubscriptionController extends Controller
 
         $subscription = $role->subscription('default');
 
-        if (! $subscription || ! $subscription->active() || $subscription->onTrial()) {
+        if (! $subscription || ! $subscription->active() || $subscription->onTrial() || $subscription->onGracePeriod()) {
             return redirect()->back()->with('error', __('messages.no_active_subscription'));
         }
 
@@ -262,6 +272,11 @@ class SubscriptionController extends Controller
             $role->plan_type = $tier;
             $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
             $role->save();
+        } catch (IncompletePayment $exception) {
+            return redirect()->route(
+                'cashier.payment',
+                [$exception->payment->id, 'redirect' => route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])]
+            );
         } catch (\Exception $e) {
             \Log::error('Subscription swap failed', ['error' => $e->getMessage(), 'role' => $role->id]);
 

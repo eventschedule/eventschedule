@@ -1055,6 +1055,11 @@ class RoleController extends Controller
 
         $this->authorize('manageMembers', $role);
 
+        if (! $role->isEnterprise()) {
+            return redirect()->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'team'])
+                ->with('error', __('messages.upgrade_to_enterprise'));
+        }
+
         $data = [
             'role' => $role,
             'title' => __('messages.add_member'),
@@ -1219,6 +1224,10 @@ class RoleController extends Controller
         $role->language_code = auth()->user()->language_code;
         $role->use_24_hour_time = auth()->user()->use_24_hour_time;
 
+        if (auth()->user()->phone && auth()->user()->hasVerifiedPhone()) {
+            $role->phone = auth()->user()->phone;
+        }
+
         if ($role->type == 'talent') {
             $role->name = auth()->user()->name;
         }
@@ -1296,14 +1305,6 @@ class RoleController extends Controller
         $role->fill($request->all());
         $role->subdomain = Role::generateSubdomain($request->name);
         $role->user_id = $user->id;
-
-        // TODO remove this
-        if (config('app.hosted')) {
-            $role->plan_expires = now()->addDays(config('app.trial_days'))->format('Y-m-d');
-            $role->plan_type = 'pro';
-            $role->plan_term = 'year';
-            $role->trial_ends_at = now()->addDays(config('app.trial_days'));
-        }
 
         if (! config('app.hosted')) {
             $role->email_verified_at = now();

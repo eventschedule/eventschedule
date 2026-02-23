@@ -102,10 +102,6 @@
                         </button>
                         -->
 
-                        <!-- Separator -->
-                        <div class="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-900/10 dark:lg:bg-gray-700" aria-hidden="true"></div>
-
-
                         <!-- Settings Dropdown -->
                         <div class="sm:flex sm:items-center sm:ms-6">
                             <x-dropdown align="right" width="48">
@@ -137,6 +133,14 @@
                                 </x-slot>
                             </x-dropdown>
                         </div>
+
+                        @if ($upgradeSubdomain)
+                        <a href="{{ route('role.subscribe', ['subdomain' => $upgradeSubdomain]) }}"
+                           class="group relative inline-flex items-center justify-center px-3 py-1 text-sm font-semibold text-white bg-green-600 hover:bg-gradient-to-r hover:from-green-600 hover:to-emerald-500 rounded-lg overflow-hidden transition-all hover:scale-105 hover:shadow-lg hover:shadow-green-500/25">
+                            <span class="relative z-10">{{ __('messages.upgrade') }}</span>
+                            <div class="absolute inset-0 animate-shimmer"></div>
+                        </a>
+                        @endif
 
                     </div>
                 </div>

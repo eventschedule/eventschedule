@@ -97,6 +97,11 @@ class BoostController extends Controller
             abort(404);
         }
 
+        // Require Pro plan for boost
+        if (! $role->isPro()) {
+            return redirect()->back()->with('error', __('messages.pro_feature_required'));
+        }
+
         // Require verified phone for boost (hosted mode only)
         if (config('app.hosted') && ! auth()->user()->hasVerifiedPhone()) {
             return redirect()->back()->with('error', __('messages.phone_required_for_boost'));
@@ -150,6 +155,8 @@ class BoostController extends Controller
             'isTesting' => config('app.is_testing'),
             'isHosted' => config('app.hosted'),
             'boostCredit' => $role->boost_credit,
+            'pmLastFour' => $role->pm_last_four,
+            'pmType' => $role->pm_type,
         ]);
     }
 
@@ -189,6 +196,15 @@ class BoostController extends Controller
         $role = $event->roles->firstWhere('id', $roleId);
         if (! $role) {
             abort(403);
+        }
+
+        // Require Pro plan for boost
+        if (! $role->isPro()) {
+            if ($isAjax) {
+                return response()->json(['error' => __('messages.pro_feature_required')], 403);
+            }
+
+            return redirect()->back()->with('error', __('messages.pro_feature_required'));
         }
 
         // Check budget against trust-based limit
@@ -732,7 +748,7 @@ class BoostController extends Controller
                 }
             }
 
-            $paymentIntent = $stripe->paymentIntents->create([
+            $params = [
                 'amount' => $amountInCents,
                 'currency' => strtolower(config('services.meta.default_currency', 'USD')),
                 'payment_method_types' => ['card'],
@@ -743,12 +759,44 @@ class BoostController extends Controller
                     'markup_rate' => $markupRate,
                 ],
                 'description' => "Boost: {$event->translatedName()}",
-            ]);
+            ];
+
+            // Attach Stripe customer so saved payment methods are available
+            $customerSessionClientSecret = null;
+            if ($role && $role->stripe_id) {
+                $params['customer'] = $role->stripe_id;
+
+                try {
+                    $customerSession = $stripe->customerSessions->create([
+                        'customer' => $role->stripe_id,
+                        'components' => [
+                            'payment_element' => [
+                                'enabled' => true,
+                                'features' => [
+                                    'payment_method_redisplay' => 'enabled',
+                                ],
+                            ],
+                        ],
+                    ]);
+                    $customerSessionClientSecret = $customerSession->client_secret;
+                } catch (\Exception $e) {
+                    // Non-critical - fall back to manual card entry
+                    Log::info('Could not create customer session for boost', [
+                        'role_id' => $role->id,
+                        'reason' => $e->getMessage(),
+                    ]);
+                }
+            }
+
+            $paymentIntent = $stripe->paymentIntents->create($params);
 
             return response()->json([
                 'client_secret' => $paymentIntent->client_secret,
                 'payment_intent_id' => $paymentIntent->id,
                 'total_amount' => $totalAmount,
+                'has_saved_card' => $role && ! empty($role->pm_last_four),
+                'pm_last_four' => $role?->pm_last_four,
+                'customer_session_client_secret' => $customerSessionClientSecret,
             ]);
         } catch (\Exception $e) {
             Log::error('Stripe payment intent creation failed', [

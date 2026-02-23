@@ -1457,17 +1457,23 @@
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
                             </div>
                         </div>
+                        @elseif ($isPro && config('app.hosted'))
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
+                            </div>
+                            <button type="button" x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-prompt')"
+                                class="w-full text-start p-3 rounded-md border border-dashed border-gray-300 dark:border-gray-600 hover:border-[#4E81FA] dark:hover:border-[#4E81FA] transition-colors">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_ai_prompt') }}</p>
+                                <p class="text-sm text-[#4E81FA] mt-1 font-medium">{{ __('messages.upgrade_to_enterprise') }} &rarr;</p>
+                            </button>
+                        </div>
                         @elseif ($isPro)
                         <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                             <div class="flex items-center justify-between mb-3">
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
                             </div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ __('messages.enterprise_feature_ai_prompt') }}
-                                @if (config('app.hosted'))
-                                <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain, 'tier' => 'enterprise']) }}" class="text-amber-600 dark:text-amber-400 hover:underline">{{ __('messages.upgrade_to_enterprise') }}</a>
-                                @endif
-                            </p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_ai_prompt') }}</p>
                         </div>
                         @endif
 
@@ -1578,13 +1584,14 @@
                                 </div>
                             </div>
                         </div>
+                        @elseif (config('app.hosted'))
+                        <button type="button" x-on:click.prevent="$dispatch('open-modal', 'upgrade-email-scheduling')"
+                            class="w-full text-start p-3 rounded-md border border-dashed border-gray-300 dark:border-gray-600 hover:border-[#4E81FA] dark:hover:border-[#4E81FA] transition-colors">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_email_scheduling') }}</p>
+                            <p class="text-sm text-[#4E81FA] mt-1 font-medium">{{ __('messages.upgrade_to_enterprise') }} &rarr;</p>
+                        </button>
                         @else
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            {{ __('messages.enterprise_feature_email_scheduling') }}
-                            @if (config('app.hosted'))
-                            <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain, 'tier' => 'enterprise']) }}" class="text-amber-600 dark:text-amber-400 hover:underline">{{ __('messages.upgrade_to_enterprise') }}</a>
-                            @endif
-                        </p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_email_scheduling') }}</p>
                         @endif
                     </div>
 
@@ -1771,17 +1778,23 @@
                                     <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
                                 </div>
                             </div>
+                            @elseif ($isPro && config('app.hosted'))
+                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
+                                </div>
+                                <button type="button" x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-prompt')"
+                                    class="w-full text-start p-3 rounded-md border border-dashed border-gray-300 dark:border-gray-600 hover:border-[#4E81FA] dark:hover:border-[#4E81FA] transition-colors">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_ai_prompt') }}</p>
+                                    <p class="text-sm text-[#4E81FA] mt-1 font-medium">{{ __('messages.upgrade_to_enterprise') }} &rarr;</p>
+                                </button>
+                            </div>
                             @elseif ($isPro)
                             <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                                 <div class="flex items-center justify-between mb-3">
                                     <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
                                 </div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ __('messages.enterprise_feature_ai_prompt') }}
-                                    @if (config('app.hosted'))
-                                    <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain, 'tier' => 'enterprise']) }}" class="text-amber-600 dark:text-amber-400 hover:underline">{{ __('messages.upgrade_to_enterprise') }}</a>
-                                    @endif
-                                </p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_ai_prompt') }}</p>
                             </div>
                             @endif
 
@@ -1892,13 +1905,14 @@
                                     </div>
                                 </div>
                             </div>
+                            @elseif (config('app.hosted'))
+                            <button type="button" x-on:click.prevent="$dispatch('open-modal', 'upgrade-email-scheduling')"
+                                class="w-full text-start p-3 rounded-md border border-dashed border-gray-300 dark:border-gray-600 hover:border-[#4E81FA] dark:hover:border-[#4E81FA] transition-colors">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_email_scheduling') }}</p>
+                                <p class="text-sm text-[#4E81FA] mt-1 font-medium">{{ __('messages.upgrade_to_enterprise') }} &rarr;</p>
+                            </button>
                             @else
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ __('messages.enterprise_feature_email_scheduling') }}
-                                @if (config('app.hosted'))
-                                <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain, 'tier' => 'enterprise']) }}" class="text-amber-600 dark:text-amber-400 hover:underline">{{ __('messages.upgrade_to_enterprise') }}</a>
-                                @endif
-                            </p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_email_scheduling') }}</p>
                             @endif
                         </div>
 
@@ -1999,4 +2013,12 @@
             </div>
         </div>
     </div>
+<x-upgrade-modal name="upgrade-ai-prompt" tier="enterprise" :subdomain="$role->subdomain">
+    {{ __('messages.upgrade_feature_description_ai_prompt') }}
+</x-upgrade-modal>
+
+<x-upgrade-modal name="upgrade-email-scheduling" tier="enterprise" :subdomain="$role->subdomain">
+    {{ __('messages.upgrade_feature_description_email_scheduling') }}
+</x-upgrade-modal>
+
 </x-app-admin-layout>

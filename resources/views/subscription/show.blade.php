@@ -15,15 +15,15 @@
         <h2 class="pb-4 text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight" x-text="selectedTier === 'enterprise' ? '{{ __('messages.enterprise_plan') }}' : '{{ __('messages.subscribe_to_pro') }}'">
         </h2>
 
-        {{-- First Year Free Badge --}}
-        @if ($role->isEligibleForFreeYear())
+        {{-- Free Trial Badge --}}
+        @if ($role->isEligibleForTrial())
         <div class="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
             <div class="flex items-center">
                 <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                 </svg>
                 <span class="text-green-800 dark:text-green-200 font-medium">
-                    {{ __('messages.first_year_free') }} - {{ __('messages.you_wont_be_charged_until', ['date' => now()->addYear()->format('F j, Y')]) }}
+                    {{ __('messages.free_trial_badge') }} - {{ __('messages.you_wont_be_charged_until', ['date' => now()->addDays(config('app.trial_days'))->format('F j, Y')]) }}
                 </span>
             </div>
         </div>
@@ -68,6 +68,10 @@
                     <li class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                         {{ __('messages.feature_api_access') }}
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        {{ __('messages.feature_boost') }}
                     </li>
                     <li class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>

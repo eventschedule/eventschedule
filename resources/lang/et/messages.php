@@ -53,6 +53,7 @@ return [
     'thanks' => 'Aitäh',
     'resend_verification_email' => 'Saatke kinnitusmeil uuesti',
     'log_out' => 'Logi välja',
+    'upgrade' => 'Uuenda',
     'cancel' => 'Tühista',
     'delete' => 'Kustuta',
     'delete_event' => 'Kustuta sündmus',
@@ -483,6 +484,7 @@ return [
     'change_to_free_plan' => 'Valige tasuta pakett',
     'plan_changed' => 'Plaani muutmine õnnestus!',
     'first_year_free' => 'Esimene aasta tasuta',
+    'free_trial_badge' => '7-päevane tasuta prooviperiood',
     'copy_url' => 'Kopeeri URL',
     'note_all_schedules_are_publicly_listed' => 'Teie ajakava on avalikult nähtav',
     'note_all_events_are_publicly_listed' => 'Teie sündmus on avalikult nähtav',
@@ -943,6 +945,7 @@ return [
     'feature_custom_domain' => 'Kasutage oma kohandatud domeeni',
     'feature_team_members' => 'Lisage oma ajakava haldamiseks meeskonnaliikmeid',
     'feature_api_access' => 'API juurdepääs integratsioonidele',
+    'feature_boost' => 'Boost events with ads',
     'upgrade_to_pro_plan' => 'Minge üle Pro versioonile',
 
     // Email scheduling for graphics
@@ -984,8 +987,21 @@ return [
 
     // Enterprise features
     'upgrade_to_enterprise' => 'Minge üle ettevõtte versioonile',
+    'enterprise_plan' => 'Enterprise plaan',
+    'enterprise_features' => 'Enterprise funktsioonid',
     'enterprise_feature_ai_prompt' => 'AI teksti teisendus on ettevõtte funktsioon.',
     'enterprise_feature_email_scheduling' => 'Meili ajastamine on ettevõtte funktsioon.',
+    'enterprise_feature_agenda_scanning' => 'Päevakorra skaneerimine on Enterprise funktsioon.',
+    'feature_ai_text' => 'AI teksti teisendamine',
+    'feature_email_scheduling' => 'Meili ajastamine',
+    'feature_agenda_scanning' => 'Päevakorra skaneerimine',
+    'feature_custom_css_enterprise' => 'Kohandatud CSS stiil',
+    'feature_priority_support' => 'Prioriteetne tugi',
+    'select_tier' => 'Vali plaan',
+    'custom_css_enterprise_only' => 'Kohandatud CSS on Enterprise funktsioon',
+    'custom_css_grandfathered' => 'Kohandatud CSS-i redigeerimine on Enterprise funktsioon. Teie olemasolevad stiilid jätkavad tööd.',
+    'newsletter_upgrade_enterprise' => 'Vajad rohkem? Uuenda Enterprise plaanile 1000/kuus',
+    'everything_in_pro' => 'Kõik Pro-s sisalduv',
 
     // Event graphic layout and options
     'layout_type' => 'Paigutuse tüüp',
@@ -1787,6 +1803,9 @@ return [
     'boost_headline_in_person' => ':name kohas :location',
     'boost_text_in_person' => 'Ärge jätke vahele :name kohapeal :venue',
     'boost_desc_live_event' => 'Otseüritus',
+    'you_have' => 'Teil on',
+    'in_boost_credit' => 'võimenduskrediiti',
+    'will_be_paid_with_boost_credit' => 'See makstakse teie võimenduskrediidist',
 
     // Admin newsletters
     'admin_newsletters' => 'Uudiskirjad',
@@ -1843,4 +1862,18 @@ return [
     'converted' => 'konverteerusid',
     'click' => 'klikk',
     'sale' => 'müük',
+    'saved_card_on_file' => 'Teie :brand kaart lõpuga :last4 on salvestatud.',
+
+    // Upgrade modals
+    'upgrade_feature_title_pro' => 'Pro Feature',
+    'upgrade_feature_title_enterprise' => 'Enterprise Feature',
+    'upgrade_feature_description_members' => 'Add team members to help manage your schedule.',
+    'upgrade_feature_description_scan_agenda' => 'Use AI to scan event agendas and automatically create event details.',
+    'upgrade_feature_description_boost' => 'Promote your event to reach a larger audience.',
+    'upgrade_feature_description_tickets' => 'Sell tickets for your events and manage sales directly from your schedule.',
+    'upgrade_feature_description_availability' => 'Mark your available and unavailable dates so organizers know when to book you.',
+    'upgrade_feature_description_ai_prompt' => 'Use AI to automatically transform and enhance the text in your event graphics.',
+    'upgrade_feature_description_email_scheduling' => 'Automatically send event graphic emails to your audience on a recurring schedule.',
+    'upgrade_feature_description_custom_css' => 'Add custom CSS to fully personalize the look of your public schedule page.',
+
 ];

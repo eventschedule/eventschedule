@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Calendar & Ticketing Pricing Plans - Event Schedule</x-slot>
-    <x-slot name="description">Start free with unlimited events. Upgrade to Pro for ticketing and white-label branding, or Enterprise for AI features, custom CSS, and priority support. No hidden fees.</x-slot>
+    <x-slot name="description">Start free with unlimited events. Upgrade to Pro for ticketing, event boosting, and white-label branding, or Enterprise for AI features, custom CSS, and priority support. No hidden fees.</x-slot>
     <x-slot name="socialImage">social/pricing.png</x-slot>
     <x-slot name="breadcrumbTitle">Pricing</x-slot>
 
@@ -27,7 +27,7 @@
                 "price": "5.00",
                 "priceCurrency": "USD",
                 "billingIncrement": "MON",
-                "description": "Everything in Free plus remove branding, ticketing with QR check-ins, Stripe payments, event graphics, and REST API access.",
+                "description": "Everything in Free plus remove branding, ticketing with QR check-ins, Stripe payments, event graphics, event boosting with ads, and REST API access.",
                 "availability": "https://schema.org/InStock",
                 "priceSpecification": [
                     {
@@ -105,10 +105,10 @@
             },
             {
                 "@type": "Question",
-                "name": "What does \"first year free\" mean?",
+                "name": "How does the free trial work?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "When you sign up for Pro or Enterprise, your first year is completely free. After that, Pro is $5/month or $50/year, and Enterprise is $15/month or $150/year. You can cancel anytime."
+                    "text": "When you sign up for Pro or Enterprise, you get a 7-day free trial. Enter your card to start, and you won't be charged until the trial ends. After that, Pro is $5/month or $50/year, and Enterprise is $15/month or $150/year. You can cancel anytime."
                 }
             },
             {
@@ -116,7 +116,7 @@
                 "name": "What is the difference between Pro and Enterprise?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Pro includes ticketing, white-label branding, event graphics, and REST API access. Enterprise adds multiple team members, AI text transformation, email scheduling, agenda scanning, custom CSS styling, 1,000 newsletters per month, and priority support."
+                    "text": "Pro includes ticketing, white-label branding, event graphics, event boosting with ads, and REST API access. Enterprise adds multiple team members, AI text transformation, email scheduling, agenda scanning, custom CSS styling, 1,000 newsletters per month, and priority support."
                 }
             },
             {
@@ -266,10 +266,10 @@
 
                 <!-- Pro Plan -->
                 <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border-2 border-blue-300 dark:border-blue-500/50 p-8 lg:p-10 flex flex-col">
-                    <!-- First Year Free Banner -->
+                    <!-- Free Trial Banner -->
                     <div class="bg-gradient-to-r from-blue-500 to-sky-500 text-white text-center py-3 px-4 -mx-8 lg:-mx-10 -mt-8 lg:-mt-10 mb-8">
-                        <div class="text-lg font-bold">First Year FREE</div>
-                        <div class="text-sm text-blue-100">No credit card required to start</div>
+                        <div class="text-lg font-bold">7-Day Free Trial</div>
+                        <div class="text-sm text-blue-100">Try all Pro features risk-free</div>
                     </div>
 
                     <div class="mb-8">
@@ -283,8 +283,8 @@
                                 <span class="text-gray-500 dark:text-gray-400">/month</span>
                             </div>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400" x-show="annual">Just $4.17/month, billed annually after your free year</p>
-                        <p class="text-gray-500 dark:text-gray-400" x-show="!annual" x-cloak>Billed monthly after your free year</p>
+                        <p class="text-gray-500 dark:text-gray-400" x-show="annual">Just $4.17/month, billed annually after your free trial</p>
+                        <p class="text-gray-500 dark:text-gray-400" x-show="!annual" x-cloak>Billed monthly after your free trial</p>
                     </div>
 
                     <ul class="space-y-4 mb-10">
@@ -342,6 +342,14 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
+                            <span class="text-gray-600 dark:text-gray-300">{{ __('messages.feature_boost') }}</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg aria-hidden="true" class="w-3 h-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
                             <span class="text-gray-600 dark:text-gray-300">100 {{ __('messages.newsletters_per_month') }}</span>
                         </li>
                     </ul>
@@ -353,10 +361,10 @@
 
                 <!-- Enterprise Plan -->
                 <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-900 dark:to-yellow-900 border-2 border-amber-300 dark:border-amber-500/50 p-8 lg:p-10 flex flex-col">
-                    <!-- First Year Free Banner -->
+                    <!-- Free Trial Banner -->
                     <div class="bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-center py-3 px-4 -mx-8 lg:-mx-10 -mt-8 lg:-mt-10 mb-8">
-                        <div class="text-lg font-bold">First Year FREE</div>
-                        <div class="text-sm text-amber-100">No credit card required to start</div>
+                        <div class="text-lg font-bold">7-Day Free Trial</div>
+                        <div class="text-sm text-amber-100">Try all Enterprise features risk-free</div>
                     </div>
 
                     <div class="mb-8">
@@ -370,8 +378,8 @@
                                 <span class="text-gray-500 dark:text-gray-400">/month</span>
                             </div>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400" x-show="annual">Just $12.50/month, billed annually after your free year</p>
-                        <p class="text-gray-500 dark:text-gray-400" x-show="!annual" x-cloak>Billed monthly after your free year</p>
+                        <p class="text-gray-500 dark:text-gray-400" x-show="annual">Just $12.50/month, billed annually after your free trial</p>
+                        <p class="text-gray-500 dark:text-gray-400" x-show="!annual" x-cloak>Billed monthly after your free trial</p>
                     </div>
 
                     <ul class="space-y-4 mb-10">
@@ -499,7 +507,7 @@
                 <div class="bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900 dark:to-cyan-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden">
                     <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            What does "first year free" mean?
+                            How does the free trial work?
                         </h3>
                         <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -507,7 +515,7 @@
                     </button>
                     <div x-show="open === 2" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            When you sign up for Pro or Enterprise, your first year is completely free. After that, Pro is $5/month or $50/year, and Enterprise is $15/month or $150/year. You can cancel anytime.
+                            When you sign up for Pro or Enterprise, you get a 7-day free trial. Enter your card to start, and you won't be charged until the trial ends. After that, Pro is $5/month or $50/year, and Enterprise is $15/month or $150/year. You can cancel anytime.
                         </p>
                     </div>
                 </div>
@@ -523,7 +531,7 @@
                     </button>
                     <div x-show="open === 3" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Pro includes ticketing, white-label branding, event graphics, and REST API access. Enterprise adds multiple team members, AI text transformation, email scheduling, agenda scanning, custom CSS styling, 1,000 newsletters per month, and priority support.
+                            Pro includes ticketing, white-label branding, event graphics, event boosting with ads, and REST API access. Enterprise adds multiple team members, AI text transformation, email scheduling, agenda scanning, custom CSS styling, 1,000 newsletters per month, and priority support.
                         </p>
                     </div>
                 </div>
@@ -572,7 +580,7 @@
                 Start sharing your events today
             </h2>
             <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-                Create your free schedule in seconds. No credit card required.
+                Create your free schedule in seconds. Start your free trial today.
             </p>
             <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                 Get Started Free

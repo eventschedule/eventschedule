@@ -100,8 +100,8 @@
                                 <li>Track impressions, reach, clicks, and conversions in real time</li>
                             </ul>
                             <div class="doc-callout doc-callout-info">
-                                <div class="doc-callout-title">Prerequisite</div>
-                                <p>To use Boost, you need a verified phone number on your account. Add and verify your phone in <a href="{{ route('marketing.docs.account_settings') }}#profile" class="text-cyan-400 hover:text-cyan-300">Account Settings</a>.</p>
+                                <div class="doc-callout-title">Pro Feature</div>
+                                <p>Boost requires a <a href="{{ marketing_url('/pricing') }}" class="text-cyan-400 hover:text-cyan-300">Pro plan</a> or higher. You also need a verified phone number on your account. Add and verify your phone in <a href="{{ route('marketing.docs.account_settings') }}#profile" class="text-cyan-400 hover:text-cyan-300">Account Settings</a>.</p>
                             </div>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Boost offers two modes: <strong>Quick Mode</strong> for a streamlined experience and <strong>Advanced Mode</strong> for full control over every parameter.

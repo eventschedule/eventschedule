@@ -10,7 +10,8 @@ $langFiles = [
     'resources/lang/he/messages.php',
     'resources/lang/it/messages.php',
     'resources/lang/nl/messages.php',
-    'resources/lang/pt/messages.php'
+    'resources/lang/pt/messages.php',
+    'resources/lang/ru/messages.php'
 ];
 
 // Load base (English) translations

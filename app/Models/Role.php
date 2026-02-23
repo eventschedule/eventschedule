@@ -149,7 +149,15 @@ class Role extends Model implements MustVerifyEmail
                 $model->accent_color = '#000000';
             }
 
-            $address = $model->fullAddress();
+            $address = $model->fullAddressRaw();
+
+            if (!$address && $model->geo_address) {
+                $model->geo_address = null;
+                $model->geo_lat = null;
+                $model->geo_lon = null;
+                $model->formatted_address = null;
+                $model->google_place_id = null;
+            }
 
             if (config('services.google.backend') && $address && $address != $model->geo_address) {
                 try {
@@ -410,6 +418,37 @@ class Role extends Model implements MustVerifyEmail
 
         if ($this->translatedState()) {
             $str .= $this->translatedState().', ';
+        }
+
+        if ($this->postal_code) {
+            $str .= $this->postal_code.', ';
+        }
+
+        if ($str && $this->country_code) {
+            $str .= $this->country_code;
+        }
+
+        return $str;
+    }
+
+    public function fullAddressRaw()
+    {
+        $str = '';
+
+        if ($this->address1) {
+            $str .= $this->address1.', ';
+        }
+
+        if ($this->address2) {
+            $str .= $this->address2.', ';
+        }
+
+        if ($this->city) {
+            $str .= $this->city.', ';
+        }
+
+        if ($this->state) {
+            $str .= $this->state.', ';
         }
 
         if ($this->postal_code) {
@@ -805,7 +844,7 @@ class Role extends Model implements MustVerifyEmail
             return true;
         }
 
-        // Check if user is on a generic trial (first year free)
+        // Check if user is on a generic trial
         if ($this->onGenericTrial()) {
             return true;
         }
@@ -888,7 +927,7 @@ class Role extends Model implements MustVerifyEmail
             return true;
         }
 
-        // Check if user is on a generic trial (first year free)
+        // Check if user is on a generic trial
         if ($this->onGenericTrial()) {
             return true;
         }

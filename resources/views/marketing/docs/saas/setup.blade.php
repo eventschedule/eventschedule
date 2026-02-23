@@ -269,7 +269,7 @@
                                     <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-comment"># Free trial length in days for new Pro subscribers</span>
-<span class="code-variable">TRIAL_DAYS</span>=<span class="code-value">365</span></code></pre>
+<span class="code-variable">TRIAL_DAYS</span>=<span class="code-value">7</span></code></pre>
                             </div>
 
                             <div class="overflow-x-auto mb-6">
@@ -284,8 +284,8 @@
                                     <tbody>
                                         <tr>
                                             <td><code class="doc-inline-code">TRIAL_DAYS</code></td>
-                                            <td><code class="doc-inline-code">365</code></td>
-                                            <td>Number of days for free trial when new schedules are created or users subscribe to Pro</td>
+                                            <td><code class="doc-inline-code">7</code></td>
+                                            <td>Number of days for free trial when users subscribe to Pro</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -456,7 +456,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
 <span class="code-variable">SUPPORT_EMAIL</span>=<span class="code-string">support@myevents.com</span>
 
 <span class="code-comment"># Trial Configuration</span>
-<span class="code-variable">TRIAL_DAYS</span>=<span class="code-value">365</span>
+<span class="code-variable">TRIAL_DAYS</span>=<span class="code-value">7</span>
 
 <span class="code-comment"># Database</span>
 <span class="code-variable">DB_CONNECTION</span>=<span class="code-string">mysql</span>

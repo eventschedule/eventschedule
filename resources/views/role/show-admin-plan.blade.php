@@ -168,9 +168,9 @@
                     class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
                     {{ __('messages.upgrade_to_pro_plan') }}
                 </a>
-                @if ($role->isEligibleForFreeYear())
+                @if ($role->isEligibleForTrial())
                 <span class="ms-3 text-sm text-green-600 dark:text-green-400 font-medium">
-                    {{ __('messages.first_year_free') }}
+                    {{ __('messages.free_trial_badge') }}
                 </span>
                 @endif
             </div>

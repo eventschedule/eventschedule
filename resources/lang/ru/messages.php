@@ -53,6 +53,7 @@ return [
     'thanks' => 'Спасибо',
     'resend_verification_email' => 'Повторно отправить письмо с подтверждением',
     'log_out' => 'Выйти',
+    'upgrade' => 'Улучшить',
     'cancel' => 'Отмена',
     'delete' => 'Удалить',
     'delete_event' => 'Удалить событие',
@@ -484,6 +485,7 @@ return [
     'change_to_free_plan' => 'Перейти на бесплатный план',
     'plan_changed' => 'План успешно изменен!',
     'first_year_free' => 'Первый год бесплатно',
+    'free_trial_badge' => '7-дневная бесплатная пробная версия',
     'copy_url' => 'Копировать URL',
     'note_all_schedules_are_publicly_listed' => 'Ваше расписание будет общедоступным',
     'note_all_events_are_publicly_listed' => 'Ваше мероприятие будет общедоступным',
@@ -944,6 +946,7 @@ return [
     'feature_custom_domain' => 'Используйте свой собственный домен',
     'feature_team_members' => 'Добавьте участников команды, чтобы управлять своим расписанием',
     'feature_api_access' => 'Доступ к API для интеграций',
+    'feature_boost' => 'Boost events with ads',
     'upgrade_to_pro_plan' => 'Обновите до Pro',
 
     // Email scheduling for graphics
@@ -985,8 +988,21 @@ return [
 
     // Enterprise features
     'upgrade_to_enterprise' => 'Обновление до предприятия',
+    'enterprise_plan' => 'План Enterprise',
+    'enterprise_features' => 'Функции Enterprise',
     'enterprise_feature_ai_prompt' => 'Преобразование текста с помощью ИИ — это функция Enterprise.',
     'enterprise_feature_email_scheduling' => 'Планирование электронной почты — это функция Enterprise.',
+    'enterprise_feature_agenda_scanning' => 'Сканирование повестки дня — это функция Enterprise.',
+    'feature_ai_text' => 'Преобразование текста с помощью ИИ',
+    'feature_email_scheduling' => 'Планирование электронной почты',
+    'feature_agenda_scanning' => 'Сканирование повестки дня',
+    'feature_custom_css_enterprise' => 'Пользовательские стили CSS',
+    'feature_priority_support' => 'Приоритетная поддержка',
+    'select_tier' => 'Выбрать план',
+    'custom_css_enterprise_only' => 'Пользовательский CSS — это функция Enterprise',
+    'custom_css_grandfathered' => 'Редактирование пользовательского CSS — это функция Enterprise. Ваши существующие стили продолжат работать.',
+    'newsletter_upgrade_enterprise' => 'Нужно больше? Обновитесь до Enterprise за 1 000/месяц',
+    'everything_in_pro' => 'Всё, что есть в Pro',
 
     // Event graphic layout and options
     'layout_type' => 'Тип макета',
@@ -1790,6 +1806,9 @@ return [
     'boost_headline_in_person' => ':name в :location',
     'boost_text_in_person' => 'Не пропустите :name в :venue',
     'boost_desc_live_event' => 'Мероприятие',
+    'you_have' => 'У вас есть',
+    'in_boost_credit' => 'кредита на продвижение',
+    'will_be_paid_with_boost_credit' => 'Это будет оплачено вашим кредитом на продвижение',
 
     // Admin newsletters
     'admin_newsletters' => 'Рассылки',
@@ -1846,4 +1865,18 @@ return [
     'converted' => 'конвертировались',
     'click' => 'клик',
     'sale' => 'продажа',
+    'saved_card_on_file' => 'Ваша карта :brand с окончанием :last4 сохранена.',
+
+    // Upgrade modals
+    'upgrade_feature_title_pro' => 'Pro Feature',
+    'upgrade_feature_title_enterprise' => 'Enterprise Feature',
+    'upgrade_feature_description_members' => 'Add team members to help manage your schedule.',
+    'upgrade_feature_description_scan_agenda' => 'Use AI to scan event agendas and automatically create event details.',
+    'upgrade_feature_description_boost' => 'Promote your event to reach a larger audience.',
+    'upgrade_feature_description_tickets' => 'Sell tickets for your events and manage sales directly from your schedule.',
+    'upgrade_feature_description_availability' => 'Mark your available and unavailable dates so organizers know when to book you.',
+    'upgrade_feature_description_ai_prompt' => 'Use AI to automatically transform and enhance the text in your event graphics.',
+    'upgrade_feature_description_email_scheduling' => 'Automatically send event graphic emails to your audience on a recurring schedule.',
+    'upgrade_feature_description_custom_css' => 'Add custom CSS to fully personalize the look of your public schedule page.',
+
 ];

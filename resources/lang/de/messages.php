@@ -49,6 +49,7 @@ return [
     'thanks' => 'Danke',
     'resend_verification_email' => 'Bestätigungs-E-Mail erneut senden',
     'log_out' => 'Abmelden',
+    'upgrade' => 'Upgraden',
     'cancel' => 'Abbrechen',
     'delete' => 'Löschen',
     'delete_event' => 'Veranstaltung löschen',
@@ -428,6 +429,7 @@ return [
     'change_to_free_plan' => 'Wechsel zum kostenlosen Plan',
     'plan_changed' => 'Plan erfolgreich geändert!',
     'first_year_free' => 'Erstes Jahr kostenlos',
+    'free_trial_badge' => '7 Tage kostenlos testen',
     'copy_url' => 'URL kopieren',
     'note_all_schedules_are_publicly_listed' => 'Ihr Zeitplan wird öffentlich sichtbar sein',
     'note_all_events_are_publicly_listed' => 'Ihre Veranstaltung wird öffentlich sichtbar sein',
@@ -935,6 +937,7 @@ return [
     'feature_custom_domain' => 'Eigene Domain verwenden',
     'feature_team_members' => 'Teammitglieder zur Verwaltung Ihres Zeitplans hinzufügen',
     'feature_api_access' => 'API-Zugang für Integrationen',
+    'feature_boost' => 'Boost events with ads',
     'upgrade_to_pro_plan' => 'Auf Pro upgraden',
 
     // CalDAV Calendar Integration
@@ -1014,8 +1017,21 @@ return [
 
     // Enterprise features
     'upgrade_to_enterprise' => 'Upgrade auf Enterprise',
+    'enterprise_plan' => 'Enterprise-Plan',
+    'enterprise_features' => 'Enterprise-Funktionen',
     'enterprise_feature_ai_prompt' => 'KI-Texttransformation ist eine Enterprise-Funktion.',
     'enterprise_feature_email_scheduling' => 'E-Mail-Planung ist eine Enterprise-Funktion.',
+    'enterprise_feature_agenda_scanning' => 'Agenda-Scannen ist eine Enterprise-Funktion.',
+    'feature_ai_text' => 'KI-Texttransformation',
+    'feature_email_scheduling' => 'E-Mail-Planung',
+    'feature_agenda_scanning' => 'Agenda-Scannen',
+    'feature_custom_css_enterprise' => 'Benutzerdefiniertes CSS-Styling',
+    'feature_priority_support' => 'Prioritäts-Support',
+    'select_tier' => 'Plan auswählen',
+    'custom_css_enterprise_only' => 'Benutzerdefiniertes CSS ist eine Enterprise-Funktion',
+    'custom_css_grandfathered' => 'Benutzerdefinierte CSS-Bearbeitung ist eine Enterprise-Funktion. Ihre bestehenden Stile werden weiterhin funktionieren.',
+    'newsletter_upgrade_enterprise' => 'Mehr benötigt? Upgraden Sie auf Enterprise für 1.000/Monat',
+    'everything_in_pro' => 'Alles in Pro',
 
     'sync_direction_updated' => 'Synchronisierungsrichtung aktualisiert.',
 
@@ -1775,6 +1791,9 @@ return [
     'boost_headline_in_person' => ':name bei :location',
     'boost_text_in_person' => 'Verpassen Sie nicht :name live bei :venue',
     'boost_desc_live_event' => 'Live-Veranstaltung',
+    'you_have' => 'Sie haben',
+    'in_boost_credit' => 'an Boost-Guthaben',
+    'will_be_paid_with_boost_credit' => 'Dies wird mit Ihrem Boost-Guthaben bezahlt',
 
     // Admin newsletters
     'admin_newsletters' => 'Newsletter',
@@ -1831,4 +1850,18 @@ return [
     'converted' => 'konvertiert',
     'click' => 'Klick',
     'sale' => 'Verkauf',
+    'saved_card_on_file' => 'Ihre :brand Karte mit Endung :last4 ist gespeichert.',
+
+    // Upgrade modals
+    'upgrade_feature_title_pro' => 'Pro Feature',
+    'upgrade_feature_title_enterprise' => 'Enterprise Feature',
+    'upgrade_feature_description_members' => 'Add team members to help manage your schedule.',
+    'upgrade_feature_description_scan_agenda' => 'Use AI to scan event agendas and automatically create event details.',
+    'upgrade_feature_description_boost' => 'Promote your event to reach a larger audience.',
+    'upgrade_feature_description_tickets' => 'Sell tickets for your events and manage sales directly from your schedule.',
+    'upgrade_feature_description_availability' => 'Mark your available and unavailable dates so organizers know when to book you.',
+    'upgrade_feature_description_ai_prompt' => 'Use AI to automatically transform and enhance the text in your event graphics.',
+    'upgrade_feature_description_email_scheduling' => 'Automatically send event graphic emails to your audience on a recurring schedule.',
+    'upgrade_feature_description_custom_css' => 'Add custom CSS to fully personalize the look of your public schedule page.',
+
 ];

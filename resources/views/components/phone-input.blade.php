@@ -6,10 +6,16 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@24.8.2/build/css/intlTelInput.css">
 <style {!! nonce_attr() !!}>
-.iti__dropdown-content { background: inherit; }
-.dark .iti__dropdown-content { background: rgb(17 24 39); color: rgb(209 213 219); }
-.dark .iti__search-input { background: rgb(17 24 39); color: rgb(209 213 219); border-color: rgb(55 65 81); }
-.dark .iti__highlight { background-color: rgb(55 65 81); }
+.dark .iti {
+    --iti-dropdown-bg: #1e1e1e;
+    --iti-hover-color: #2d2d30;
+    --iti-border-color: #2d2d30;
+    --iti-dialcode-color: #9ca3af;
+    --iti-arrow-color: #d1d5db;
+}
+.dark .iti__dropdown-content { color: #d1d5db; }
+.dark .iti__selected-dial-code { color: #d1d5db; }
+.dark .iti__search-input { background: #1e1e1e; color: #d1d5db; border-color: #2d2d30; }
 </style>
 
 <input type="hidden" name="{{ $name }}" id="{{ $inputId }}_hidden" value="{{ $value }}">
@@ -38,6 +44,7 @@
         separateDialCode: true,
         strictMode: true,
         nationalMode: false,
+        autoPlaceholder: 'off',
     });
 
     // If we have an initial value, set it

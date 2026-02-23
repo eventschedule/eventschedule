@@ -83,5 +83,13 @@ class AppServiceProvider extends ServiceProvider
             ]);
         });
 
+        View::composer('layouts.app-admin', function ($view) {
+            $allRoles = app('userRoles');
+            $upgradeRole = $allRoles
+                ->where('pivot.level', 'owner')
+                ->first(fn ($role) => $role->actualPlanTier() === 'free');
+            $view->with('upgradeSubdomain', $upgradeRole?->subdomain);
+        });
+
     }
 }

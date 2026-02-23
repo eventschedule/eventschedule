@@ -830,6 +830,7 @@
         @if ($event->exists)
         {{-- Boost button --}}
         @if (config('services.meta.app_id') && $event->name && $event->starts_at && \Carbon\Carbon::parse($event->starts_at)->isFuture())
+        @if ($role->isPro())
         @php
             $activeBoost = $event->boostCampaigns()->whereIn('status', ['active', 'paused'])->first();
         @endphp
@@ -849,6 +850,15 @@
             </svg>
             {{ __('messages.boost_event') }}
         </a>
+        @endif
+        @elseif (config('app.hosted'))
+        <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-boost')"
+           class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+            <svg class="me-2 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
+            </svg>
+            {{ __('messages.boost_event') }}
+        </button>
         @endif
         @endif
 
@@ -911,6 +921,7 @@
         <div id="mobile-header-event-actions-pop-up-menu" class="pop-up-menu hidden absolute {{ is_rtl() ? 'start-0' : 'end-0' }} z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="mobile-header-event-actions-menu-button" tabindex="-1">
             <div class="py-2" role="none" id="mobile-header-event-actions-pop-up-menu-items" data-popup-target="mobile-header-event-actions-pop-up-menu">
                 @if (config('services.meta.app_id') && $event->name && $event->starts_at && \Carbon\Carbon::parse($event->starts_at)->isFuture())
+                @if ($role->isPro())
                 @if ($activeBoost)
                 <a href="{{ route('boost.show', ['hash' => $activeBoost->hashedId()]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                     <svg class="me-3 h-5 w-5 text-green-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -925,6 +936,14 @@
                     </svg>
                     <div>{{ __('messages.boost_event') }}</div>
                 </a>
+                @endif
+                @elseif (config('app.hosted'))
+                <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-boost')" class="w-full group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                    <svg class="me-3 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
+                    </svg>
+                    <div>{{ __('messages.boost_event') }}</div>
+                </button>
                 @endif
                 <div class="py-2" role="none">
                     <div class="border-t border-gray-100 dark:border-gray-700"></div>
@@ -2160,12 +2179,15 @@
                                     <input type="hidden" name="tickets_enabled" :value="event.tickets_enabled ? 1 : 0" >
                                     <label for="tickets_enabled" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                         {{ __('messages.enable_tickets') }}
-                                        @if (! $role->isPro())
+                                        @if (! $role->isPro() && config('app.hosted'))
                                         <div class="text-xs pt-1">
-                                            <x-link href="{{ route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan']) }}" target="_blank">
+                                            <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-tickets')"
+                                                class="text-[#4E81FA] hover:underline font-medium">
                                                 {{ __('messages.requires_pro_plan') }}
-                                            </x-link>
+                                            </button>
                                         </div>
+                                        @elseif (! $role->isPro())
+                                        <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_pro_plan') }}</div>
                                         @endif
                                     </label>
                                 </div>
@@ -4362,5 +4384,13 @@ function deleteFlyer(url, hash, token, element) {
     });
 }
 </script>
+
+<x-upgrade-modal name="upgrade-boost" tier="pro" :subdomain="$subdomain">
+    {{ __('messages.upgrade_feature_description_boost') }}
+</x-upgrade-modal>
+
+<x-upgrade-modal name="upgrade-tickets" tier="pro" :subdomain="$subdomain">
+    {{ __('messages.upgrade_feature_description_tickets') }}
+</x-upgrade-modal>
 
 </x-app-admin-layout>

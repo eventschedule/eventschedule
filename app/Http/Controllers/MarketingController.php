@@ -960,7 +960,7 @@ class MarketingController extends Controller
                 'name' => 'Pro',
                 'price' => '$5',
                 'period' => '/month',
-                'description' => 'First year free, then $5/month',
+                'description' => '7-day free trial, then $5/month',
                 'features' => [
                     'Everything in Free, plus:',
                     'Custom domain',
@@ -998,7 +998,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free to publish events', true],
-                        ['Paid plan price', '$5/mo (first year free)', 'Free (fees on tickets)', true],
+                        ['Paid plan price', '$5/mo (7-day free trial)', 'Free (fees on tickets)', true],
                         ['Platform fees', '0%', '3.7% + $1.79/ticket', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in (included above)', false],
                     ],
@@ -1108,7 +1108,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Yes (forever)', false],
-                        ['Paid plan price', '$5/mo (first year free)', '$59/mo', true],
+                        ['Paid plan price', '$5/mo (7-day free trial)', '$59/mo', true],
                         ['Platform fees', '0%', '5% (free plan), 0% (Plus)', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in', false],
                     ],
@@ -1143,7 +1143,7 @@ class MarketingController extends Controller
                 'key_advantages' => [
                     [
                         'title' => '12x More Affordable',
-                        'description' => 'Event Schedule Pro costs $5/mo with the first year free. Luma Plus costs $59/mo for comparable features.',
+                        'description' => 'Event Schedule Pro costs $5/mo with a 7-day free trial. Luma Plus costs $59/mo for comparable features.',
                         'icon' => 'dollar',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
                         'border' => 'border-emerald-200 dark:border-emerald-500/20',
@@ -1218,7 +1218,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free events only', true],
-                        ['Paid plan price', '$5/mo (first year free)', 'From $0.28/ticket', true],
+                        ['Paid plan price', '$5/mo (7-day free trial)', 'From $0.28/ticket', true],
                         ['Platform fees', '0%', '$0.28 to $0.60/ticket', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal/Square', false],
                     ],

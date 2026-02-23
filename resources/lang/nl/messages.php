@@ -51,6 +51,7 @@ return [
     'thanks' => 'Bedankt',
     'resend_verification_email' => 'Verstuur Verificatie E-mail Opnieuw',
     'log_out' => 'Uitloggen',
+    'upgrade' => 'Upgraden',
     'cancel' => 'Annuleren',
     'delete' => 'Verwijderen',
     'delete_event' => 'Evenement Verwijderen',
@@ -275,6 +276,7 @@ return [
     'change_to_free_plan' => 'Overstappen naar Gratis Abonnement',
     'plan_changed' => 'Abonnement succesvol gewijzigd!',
     'first_year_free' => 'Eerste jaar gratis',
+    'free_trial_badge' => '7 dagen gratis proefperiode',
     'copy_url' => 'Kopieer URL',
     'note_all_schedules_are_publicly_listed' => 'Je schema zal publiekelijk zichtbaar zijn',
     'note_all_events_are_publicly_listed' => 'Je evenement zal publiekelijk zichtbaar zijn',
@@ -931,6 +933,7 @@ return [
     'feature_custom_domain' => 'Gebruik uw eigen aangepaste domein',
     'feature_team_members' => 'Voeg teamleden toe om uw agenda te beheren',
     'feature_api_access' => 'API-toegang voor integraties',
+    'feature_boost' => 'Boost events with ads',
     'upgrade_to_pro_plan' => 'Upgraden naar Pro',
 
     // CalDAV Calendar Integration
@@ -1010,8 +1013,21 @@ return [
 
     // Enterprise features
     'upgrade_to_enterprise' => 'Upgraden naar Enterprise',
+    'enterprise_plan' => 'Enterprise Plan',
+    'enterprise_features' => 'Enterprise Functies',
     'enterprise_feature_ai_prompt' => 'AI-teksttransformatie is een Enterprise-functie.',
     'enterprise_feature_email_scheduling' => 'E-mail planning is een Enterprise-functie.',
+    'enterprise_feature_agenda_scanning' => 'Agenda scannen is een Enterprise-functie.',
+    'feature_ai_text' => 'AI-teksttransformatie',
+    'feature_email_scheduling' => 'E-mail planning',
+    'feature_agenda_scanning' => 'Agenda scannen',
+    'feature_custom_css_enterprise' => 'Aangepaste CSS-stijl',
+    'feature_priority_support' => 'Prioriteitsondersteuning',
+    'select_tier' => 'Plan selecteren',
+    'custom_css_enterprise_only' => 'Aangepaste CSS is een Enterprise-functie',
+    'custom_css_grandfathered' => 'Aangepaste CSS-bewerking is een Enterprise-functie. Uw bestaande stijlen blijven werken.',
+    'newsletter_upgrade_enterprise' => 'Meer nodig? Upgrade naar Enterprise voor 1.000/maand',
+    'everything_in_pro' => 'Alles in Pro',
 
     'sync_direction_updated' => 'Synchronisatierichting bijgewerkt.',
 
@@ -1769,6 +1785,9 @@ return [
     'boost_headline_in_person' => ':name bij :location',
     'boost_text_in_person' => 'Mis :name niet live bij :venue',
     'boost_desc_live_event' => 'Live Evenement',
+    'you_have' => 'U heeft',
+    'in_boost_credit' => 'aan boost-tegoed',
+    'will_be_paid_with_boost_credit' => 'Dit wordt betaald met uw boost-tegoed',
 
     // Admin newsletters
     'admin_newsletters' => 'Nieuwsbrieven',
@@ -1825,4 +1844,18 @@ return [
     'converted' => 'geconverteerd',
     'click' => 'klik',
     'sale' => 'verkoop',
+    'saved_card_on_file' => 'Uw :brand kaart eindigend op :last4 is opgeslagen.',
+
+    // Upgrade modals
+    'upgrade_feature_title_pro' => 'Pro Feature',
+    'upgrade_feature_title_enterprise' => 'Enterprise Feature',
+    'upgrade_feature_description_members' => 'Add team members to help manage your schedule.',
+    'upgrade_feature_description_scan_agenda' => 'Use AI to scan event agendas and automatically create event details.',
+    'upgrade_feature_description_boost' => 'Promote your event to reach a larger audience.',
+    'upgrade_feature_description_tickets' => 'Sell tickets for your events and manage sales directly from your schedule.',
+    'upgrade_feature_description_availability' => 'Mark your available and unavailable dates so organizers know when to book you.',
+    'upgrade_feature_description_ai_prompt' => 'Use AI to automatically transform and enhance the text in your event graphics.',
+    'upgrade_feature_description_email_scheduling' => 'Automatically send event graphic emails to your audience on a recurring schedule.',
+    'upgrade_feature_description_custom_css' => 'Add custom CSS to fully personalize the look of your public schedule page.',
+
 ];

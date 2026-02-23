@@ -112,7 +112,7 @@
 
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Pro Feature</div>
-                                <p>Ticketing is available on Pro plans. The first year is free, then starting at just $5/month - still with zero platform fees on your ticket sales.</p>
+                                <p>Ticketing is available on Pro plans. Starting at just $5/month with a 7-day free trial - and zero platform fees on your ticket sales.</p>
                             </div>
                         </section>
 

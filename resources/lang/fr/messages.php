@@ -49,6 +49,7 @@ return [
     'thanks' => 'Merci',
     'resend_verification_email' => 'Renvoyer l\'E-mail de vérification',
     'log_out' => 'Se déconnecter',
+    'upgrade' => 'Mettre à niveau',
     'cancel' => 'Annuler',
     'delete' => 'Supprimer',
     'delete_event' => 'Supprimer l\'événement',
@@ -435,6 +436,7 @@ return [
     'change_to_free_plan' => 'Passer au plan gratuit',
     'plan_changed' => 'Plan changé avec succès !',
     'first_year_free' => 'Première année gratuite',
+    'free_trial_badge' => 'Essai gratuit de 7 jours',
     'copy_url' => 'Copier l\'URL',
     'note_all_schedules_are_publicly_listed' => 'Votre planning sera visible publiquement',
     'note_all_events_are_publicly_listed' => 'Votre événement sera visible publiquement',
@@ -931,6 +933,7 @@ return [
     'feature_custom_domain' => 'Utiliser votre propre domaine personnalisé',
     'feature_team_members' => 'Ajouter des membres d\'équipe pour gérer votre calendrier',
     'feature_api_access' => 'Accès API pour les intégrations',
+    'feature_boost' => 'Boost events with ads',
     'upgrade_to_pro_plan' => 'Passer au plan Pro',
 
     // CalDAV Calendar Integration
@@ -1010,8 +1013,21 @@ return [
 
     // Enterprise features
     'upgrade_to_enterprise' => 'Passer à Enterprise',
+    'enterprise_plan' => 'Plan Enterprise',
+    'enterprise_features' => 'Fonctionnalités Enterprise',
     'enterprise_feature_ai_prompt' => 'La transformation de texte par IA est une fonctionnalité Enterprise.',
     'enterprise_feature_email_scheduling' => 'La planification des e-mails est une fonctionnalité Enterprise.',
+    'enterprise_feature_agenda_scanning' => 'La numérisation d\'agenda est une fonctionnalité Enterprise.',
+    'feature_ai_text' => 'Transformation de texte par IA',
+    'feature_email_scheduling' => 'Planification des e-mails',
+    'feature_agenda_scanning' => 'Numérisation d\'agenda',
+    'feature_custom_css_enterprise' => 'Style CSS personnalisé',
+    'feature_priority_support' => 'Support prioritaire',
+    'select_tier' => 'Sélectionner un plan',
+    'custom_css_enterprise_only' => 'Le CSS personnalisé est une fonctionnalité Enterprise',
+    'custom_css_grandfathered' => 'L\'édition de CSS personnalisé est une fonctionnalité Enterprise. Vos styles existants continueront de fonctionner.',
+    'newsletter_upgrade_enterprise' => 'Besoin de plus ? Passez à Enterprise pour 1 000/mois',
+    'everything_in_pro' => 'Tout dans Pro',
 
     'sync_direction_updated' => 'Direction de synchronisation mise à jour.',
 
@@ -1771,6 +1787,9 @@ return [
     'boost_headline_in_person' => ':name a :location',
     'boost_text_in_person' => 'Ne manquez pas :name en direct a :venue',
     'boost_desc_live_event' => 'Evenement en direct',
+    'you_have' => 'Vous avez',
+    'in_boost_credit' => 'en crédit de boost',
+    'will_be_paid_with_boost_credit' => 'Ceci sera payé avec votre crédit de boost',
 
     // Admin newsletters
     'admin_newsletters' => 'Newsletters',
@@ -1827,4 +1846,18 @@ return [
     'converted' => 'converti',
     'click' => 'clic',
     'sale' => 'vente',
+    'saved_card_on_file' => 'Votre carte :brand se terminant par :last4 est enregistrée.',
+
+    // Upgrade modals
+    'upgrade_feature_title_pro' => 'Pro Feature',
+    'upgrade_feature_title_enterprise' => 'Enterprise Feature',
+    'upgrade_feature_description_members' => 'Add team members to help manage your schedule.',
+    'upgrade_feature_description_scan_agenda' => 'Use AI to scan event agendas and automatically create event details.',
+    'upgrade_feature_description_boost' => 'Promote your event to reach a larger audience.',
+    'upgrade_feature_description_tickets' => 'Sell tickets for your events and manage sales directly from your schedule.',
+    'upgrade_feature_description_availability' => 'Mark your available and unavailable dates so organizers know when to book you.',
+    'upgrade_feature_description_ai_prompt' => 'Use AI to automatically transform and enhance the text in your event graphics.',
+    'upgrade_feature_description_email_scheduling' => 'Automatically send event graphic emails to your audience on a recurring schedule.',
+    'upgrade_feature_description_custom_css' => 'Add custom CSS to fully personalize the look of your public schedule page.',
+
 ];
