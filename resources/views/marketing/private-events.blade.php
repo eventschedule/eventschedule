@@ -61,7 +61,7 @@
                 "name": "Which plan includes private events?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Private events are available on the Pro plan. Free plans include unlimited public events."
+                    "text": "Private events are available on the Enterprise plan. Free plans include unlimited public events."
                 }
             }
         ]
@@ -243,10 +243,10 @@
                                 <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                 </svg>
-                                Pro Feature
+                                Enterprise Feature
                             </div>
-                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Included with Pro</h2>
-                            <p class="text-gray-600 dark:text-white/80 text-lg">Private events are part of the Pro plan, alongside custom fields, team scheduling, sub-schedules, and more. Start free and upgrade when you need privacy controls.</p>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Included with Enterprise</h2>
+                            <p class="text-gray-600 dark:text-white/80 text-lg">Private events are part of the Enterprise plan, alongside custom domains, multiple team members, AI features, and more. Start free and upgrade when you need privacy controls.</p>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10 text-center">
@@ -413,7 +413,7 @@
                     </button>
                     <div x-show="open === 4" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Private events are available on the Pro plan. Free plans include unlimited public events. You can upgrade at any time from your account settings.
+                            Private events are available on the Enterprise plan. Free plans include unlimited public events. You can upgrade at any time from your account settings.
                         </p>
                     </div>
                 </div>

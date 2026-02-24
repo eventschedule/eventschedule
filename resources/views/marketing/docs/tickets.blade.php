@@ -91,6 +91,13 @@
                             <h2 class="doc-heading">Overview</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Event Schedule includes full ticketing functionality. Sell tickets directly from your event pages with secure payment processing, automatic confirmation emails, and QR code tickets. <strong class="text-gray-900 dark:text-white">Keep 100% of your ticket sales - we never charge platform fees.</strong></p>
 
+                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
+                                <picture>
+                                    <source srcset="{{ url('images/docs/tickets--sales.webp') }}" type="image/webp">
+                                    <img src="{{ url('images/docs/tickets--sales.png') }}" alt="Sales management page" class="w-full h-auto" loading="eager">
+                                </picture>
+                            </div>
+
                             <div class="doc-callout doc-callout-tip mb-6">
                                 <div class="doc-callout-title">Zero Platform Fees</div>
                                 <p>Unlike other ticketing platforms that take a cut of every sale, Event Schedule charges nothing. You only pay standard payment processor fees (like Stripe's 2.9% + $0.30).</p>

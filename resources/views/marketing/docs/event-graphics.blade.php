@@ -95,6 +95,14 @@
                                 <li>Email <a href="{{ route('marketing.docs.newsletters') }}" class="text-cyan-400 hover:text-cyan-300">newsletters</a></li>
                                 <li>Website embeds</li>
                             </ul>
+
+                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
+                                <picture>
+                                    <source srcset="{{ url('images/docs/event-graphics--graphic-page.webp') }}" type="image/webp">
+                                    <img src="{{ url('images/docs/event-graphics--graphic-page.png') }}" alt="Event graphics page with generated graphic" class="w-full h-auto" loading="eager">
+                                </picture>
+                            </div>
+
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 The generated graphic displays up to 10 upcoming events with their flyer images in a grid or list layout. The text output provides event details in a format optimized for copying and pasting.
                             </p>
@@ -106,6 +114,13 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 The text template defines how each event is formatted in the generated text output. You can customize this template using variables that are automatically replaced with event data.
                             </p>
+
+                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
+                                <picture>
+                                    <source srcset="{{ url('images/docs/event-graphics--settings.webp') }}" type="image/webp">
+                                    <img src="{{ url('images/docs/event-graphics--settings.png') }}" alt="Event graphics settings" class="w-full h-auto" loading="lazy">
+                                </picture>
+                            </div>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Default Template</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">If you leave the template blank, the following default format is used:</p>
@@ -455,7 +470,7 @@ https://example.com/event/summer-concert</code></pre>
                         <section id="ai-prompt" class="doc-section">
                             <h2 class="doc-heading">AI Text Prompt</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-rose-500/20 text-rose-300 mr-2">Pro Feature</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-rose-500/20 text-rose-300 mr-2">Enterprise Feature</span>
                                 Use AI to transform the generated text with custom instructions.
                             </p>
 

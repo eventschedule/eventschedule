@@ -624,7 +624,7 @@
                         </div>
 
                         <!-- Custom Fields Section -->
-                        @if (count($role->getEventCustomFields()) > 0)
+                        @if ($role->isPro() && count($role->getEventCustomFields()) > 0)
                         <div class="mt-6">
                             @php
                                 $eventCustomFields = $role->getEventCustomFields();

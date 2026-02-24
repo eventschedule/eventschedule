@@ -88,6 +88,13 @@
                             <h2 class="doc-heading">Your Schedule URL</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Every schedule gets a unique, shareable URL. This is the primary way people will find and view your events.</p>
 
+                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
+                                <picture>
+                                    <source srcset="{{ url('images/docs/sharing--guest-portal.webp') }}" type="image/webp">
+                                    <img src="{{ url('images/docs/sharing--guest-portal.png') }}" alt="Public schedule page" class="w-full h-auto" loading="eager">
+                                </picture>
+                            </div>
+
                             <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
                                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Your schedule URL format:</p>
                                 <code class="text-blue-400">{{ config('app.url') }}/your-schedule-name</code>
@@ -102,8 +109,8 @@
                             </ul>
 
                             <div class="doc-callout doc-callout-tip">
-                                <div class="doc-callout-title">Pro Feature: Custom Domain</div>
-                                <p>With a Pro plan, you can use your own domain (e.g., <code class="doc-inline-code">events.yourdomain.com</code>) for a more professional look. Configure this in <a href="{{ route('marketing.docs.schedule_basics') }}#settings" class="text-cyan-400 hover:text-cyan-300">Schedule Settings</a>.</p>
+                                <div class="doc-callout-title">Enterprise Feature: Custom Domain</div>
+                                <p>With an Enterprise plan, you can use your own domain (e.g., <code class="doc-inline-code">events.yourdomain.com</code>) for a more professional look. Configure this in <a href="{{ route('marketing.docs.schedule_basics') }}#settings" class="text-cyan-400 hover:text-cyan-300">Schedule Settings</a>.</p>
                             </div>
                         </section>
 

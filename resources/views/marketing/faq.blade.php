@@ -23,7 +23,7 @@
                 "name": "Is Event Schedule really free?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. The free plan includes unlimited events, mobile-optimized calendars, Google Calendar sync, team collaboration, venue location maps, and more. These features are free forever, not a trial. The Pro plan (which adds ticketing, event boosting, custom domains, and branding removal) comes with a 7-day free trial, then $5/month after that. Enterprise is also available at $15/month for advanced features."
+                    "text": "Yes. The free plan includes unlimited events, mobile-optimized calendars, Google Calendar sync, team collaboration, venue location maps, and more. These features are free forever, not a trial. The Pro plan (which adds ticketing, event boosting, and branding removal) comes with a 7-day free trial, then $5/month after that. Enterprise adds custom domains, private events, multiple team members, and AI features at $15/month."
             }
             },
             {
@@ -47,7 +47,7 @@
                 "name": "What's the difference between Free and Pro?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "The Free plan includes everything you need for a professional event calendar: unlimited events, Google Calendar sync, team collaboration, and mobile-optimized design. Pro adds ticketing with QR check-ins, the ability to remove Event Schedule branding, event graphics generation, event boosting with ads, custom domains, and REST API access. Enterprise adds multiple team members, AI text transformation, email scheduling, agenda scanning, custom CSS styling, and priority support."
+                    "text": "The Free plan includes everything you need for a professional event calendar: unlimited events, Google Calendar sync, team collaboration, and mobile-optimized design. Pro adds ticketing with QR check-ins, the ability to remove Event Schedule branding, event graphics generation, event boosting with ads, custom CSS styling, and REST API access. Enterprise adds custom domains, private and password-protected events, multiple team members, AI features, email scheduling, agenda scanning, and priority support."
                 }
             },
             {
@@ -63,7 +63,7 @@
                 "name": "What happens when my free trial ends?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "After your 7-day free trial, your card is automatically charged for Pro ($5/month or $50/year) or Enterprise ($15/month or $150/year). You can cancel anytime during or after the trial. If you cancel, your account reverts to the Free plan. You keep all your events and data; you just lose access to Pro features like ticketing and custom domains."
+                    "text": "After your 7-day free trial, your card is automatically charged for Pro ($5/month or $50/year) or Enterprise ($15/month or $150/year). You can cancel anytime during or after the trial. If you cancel, your account reverts to the Free plan. You keep all your events and data; you just lose access to paid features like ticketing and branding removal."
                 }
             },
             {
@@ -223,7 +223,7 @@
                 "name": "Can I customize my schedule's appearance?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. You can customize colors, fonts, backgrounds, header images, profile images, and choose between grid or list layouts. Enterprise users can also add custom CSS for complete brand control. Pro users and above can use a custom domain."
+                    "text": "Yes. You can customize colors, fonts, backgrounds, header images, profile images, and choose between grid or list layouts. Pro users and above can also add custom CSS for complete brand control. Enterprise users can use a custom domain."
                 }
             },
             {
@@ -340,7 +340,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. The free plan includes unlimited events, mobile-optimized calendars, Google Calendar sync, team collaboration, venue location maps, and more. These features are free forever, not a trial. The <a href="{{ marketing_url('/pricing') }}" class="text-blue-600 hover:text-blue-700 underline">Pro plan</a> (which adds ticketing, event boosting, custom domains, and branding removal) comes with a 7-day free trial, then $5/month after that. Enterprise is also available at $15/month for advanced features.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. The free plan includes unlimited events, mobile-optimized calendars, Google Calendar sync, team collaboration, venue location maps, and more. These features are free forever, not a trial. The <a href="{{ marketing_url('/pricing') }}" class="text-blue-600 hover:text-blue-700 underline">Pro plan</a> (which adds ticketing, event boosting, and branding removal) comes with a 7-day free trial, then $5/month after that. Enterprise adds custom domains, private events, multiple team members, and AI features at $15/month.</p>
                         </div>
                     </div>
 
@@ -390,7 +390,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">The Free plan includes everything you need for a professional event calendar: unlimited events, Google Calendar sync, team collaboration, and mobile-optimized design. Pro adds ticketing with QR check-ins, the ability to remove Event Schedule branding, event graphics generation, event boosting with ads, custom domains, and REST API access. Enterprise adds multiple team members, AI text transformation, email scheduling, agenda scanning, custom CSS styling, and priority support. <a href="{{ marketing_url('/pricing') }}" class="text-blue-600 hover:text-blue-700 underline">See our pricing page</a> for details.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">The Free plan includes everything you need for a professional event calendar: unlimited events, Google Calendar sync, team collaboration, and mobile-optimized design. Pro adds ticketing with QR check-ins, the ability to remove Event Schedule branding, event graphics generation, event boosting with ads, custom CSS styling, and REST API access. Enterprise adds custom domains, private and password-protected events, multiple team members, AI features, email scheduling, agenda scanning, and priority support. <a href="{{ marketing_url('/pricing') }}" class="text-blue-600 hover:text-blue-700 underline">See our pricing page</a> for details.</p>
                         </div>
                     </div>
 
@@ -414,7 +414,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">After your 7-day free trial, your card is automatically charged for Pro ($5/month or $50/year) or Enterprise ($15/month or $150/year). You can cancel anytime during or after the trial. If you cancel, your account reverts to the Free plan. You keep all your events and data; you just lose access to Pro features like ticketing and custom domains.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">After your 7-day free trial, your card is automatically charged for Pro ($5/month or $50/year) or Enterprise ($15/month or $150/year). You can cancel anytime during or after the trial. If you cancel, your account reverts to the Free plan. You keep all your events and data; you just lose access to paid features like ticketing and branding removal.</p>
                         </div>
                     </div>
 
@@ -626,7 +626,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. You can customize colors, fonts, backgrounds, header images, profile images, and choose between grid or list layouts. Enterprise users can also add custom CSS for complete brand control. Pro users and above can use a custom domain. See our <a href="{{ marketing_url('/docs/schedule-styling') }}" class="text-blue-600 hover:text-blue-700 underline">schedule styling guide</a> for details.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. You can customize colors, fonts, backgrounds, header images, profile images, and choose between grid or list layouts. Pro users and above can also add custom CSS for complete brand control. Enterprise users can use a custom domain. See our <a href="{{ marketing_url('/docs/schedule-styling') }}" class="text-blue-600 hover:text-blue-700 underline">schedule styling guide</a> for details.</p>
                         </div>
                     </div>
 

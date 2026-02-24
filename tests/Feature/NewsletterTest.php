@@ -122,7 +122,7 @@ class NewsletterTest extends TestCase
         $response->assertRedirect('/login');
     }
 
-    public function test_newsletter_index_requires_enterprise_role(): void
+    public function test_newsletter_index_accessible_to_non_enterprise_role(): void
     {
         config(['app.hosted' => true, 'app.is_testing' => false]);
 
@@ -142,7 +142,7 @@ class NewsletterTest extends TestCase
             ->actingAs($user)
             ->get('/newsletters?role_id=' . UrlUtils::encodeId($role->id));
 
-        $response->assertForbidden();
+        $response->assertOk();
     }
 
     // ── CRUD tests ──

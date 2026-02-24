@@ -1538,7 +1538,7 @@
 
                             <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
                                 <x-input-label for="custom_css" :value="__('messages.custom_css')" />
-                                @if ($role->isEnterprise())
+                                @if ($role->isPro())
                                 <textarea id="custom_css" name="custom_css" {{ is_demo_mode() ? 'disabled' : '' }}
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm font-mono text-sm"
                                     rows="6">{{ old('custom_css', $role->custom_css) }}</textarea>
@@ -1557,7 +1557,7 @@
                                     {{ __('messages.custom_css_enterprise_only') }}
                                     @if (config('app.hosted'))
                                     - <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-css')"
-                                        class="text-[#4E81FA] hover:underline font-medium">{{ __('messages.upgrade_to_enterprise') }}</button>
+                                        class="text-[#4E81FA] hover:underline font-medium">{{ __('messages.upgrade_to_pro_plan') }}</button>
                                     @endif
                                 </p>
                                 @endif
@@ -1760,9 +1760,24 @@
 
                             <div>
                                 <x-input-label for="custom_domain" :value="__('messages.custom_domain')" />
+                                @if ($role->isEnterprise())
                                 <x-text-input id="custom_domain" name="custom_domain" type="url" class="mt-1 block w-full"
                                     :value="old('custom_domain', $role->custom_domain)" />
                                 <x-input-error class="mt-2" :messages="$errors->get('custom_domain')" />
+                                @else
+                                <x-text-input id="custom_domain" name="custom_domain" type="url" class="mt-1 block w-full"
+                                    :value="old('custom_domain', $role->custom_domain)" disabled />
+                                @if (config('app.hosted'))
+                                <div class="text-xs pt-1">
+                                    <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-domain')"
+                                        class="text-[#4E81FA] hover:underline font-medium">
+                                        {{ __('messages.requires_enterprise_plan') }}
+                                    </button>
+                                </div>
+                                @else
+                                <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_enterprise_plan') }}</div>
+                                @endif
+                                @endif
                             </div>
 
                             <x-secondary-button type="button" data-action="toggle-subdomain-edit" class="mt-3 mb-6">
@@ -1790,6 +1805,7 @@
 
                         <!-- Tab Content: Custom Fields -->
                         <div id="settings-tab-custom-fields" class="settings-tab-content hidden">
+                        @if ($role->isPro())
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                             {{ __('messages.event_custom_fields_help') }}
                         </p>
@@ -1877,6 +1893,17 @@
                         <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
                             {{ __('messages.event_custom_fields_graphic_help') }}
                         </p>
+                        @else
+                        <div class="text-center py-8">
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                                {{ __('messages.custom_fields_pro_only') }}
+                            </p>
+                            @if (config('app.hosted'))
+                            <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-fields')"
+                                class="text-[#4E81FA] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
+                            @endif
+                        </div>
+                        @endif
                         </div>
                         <!-- End Tab Content: Custom Fields -->
 
@@ -4315,6 +4342,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </script>
 
-<x-upgrade-modal name="upgrade-custom-css" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.schedule_styling') }}#custom-css">
+<x-upgrade-modal name="upgrade-custom-css" tier="pro" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.schedule_styling') }}#custom-css">
     {{ __('messages.upgrade_feature_description_custom_css') }}
+</x-upgrade-modal>
+
+<x-upgrade-modal name="upgrade-custom-fields" tier="pro" :subdomain="$role->subdomain" docsUrl="{{ marketing_url('/features/custom-fields') }}">
+    {{ __('messages.upgrade_feature_description_custom_fields') }}
+</x-upgrade-modal>
+
+<x-upgrade-modal name="upgrade-custom-domain" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.sharing') }}#schedule-url">
+    {{ __('messages.upgrade_feature_description_custom_domain') }}
 </x-upgrade-modal>

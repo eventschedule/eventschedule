@@ -56,10 +56,12 @@ trait AccountSetupTrait
         $browser->visit('/new/talent')
             ->waitFor('#name', 15)
             ->pause(1000)
-            ->value('#name', $name)
-            ->scrollIntoView('button[type="submit"]')
-            ->click('button[type="submit"]')
-            ->waitForLocation('/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 15)
+            ->value('#name', $name);
+
+        // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
+        $browser->script("document.getElementById('edit-form').requestSubmit()");
+
+        $browser->waitForLocation('/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 25)
             ->assertPathIs('/'.strtolower(str_replace(' ', '-', $name)).'/schedule');
     }
 

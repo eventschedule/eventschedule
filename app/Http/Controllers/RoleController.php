@@ -709,7 +709,7 @@ class RoleController extends Controller
             ));
 
         // Allow embedding when embed parameter is present
-        if ($embed && $role->isPro()) {
+        if ($embed) {
             $response->header('X-Frame-Options', 'ALLOW-FROM *');
         }
 
@@ -1744,9 +1744,14 @@ class RoleController extends Controller
             $request->files->remove('header_image');
         }
 
-        // Guard custom_css behind Enterprise plan
-        if (! $role->isEnterprise()) {
+        // Guard custom_css behind Pro plan
+        if (! $role->isPro()) {
             $request->merge(['custom_css' => $role->custom_css]);
+        }
+
+        // Guard custom_domain behind Enterprise plan
+        if (! $role->isEnterprise()) {
+            $request->merge(['custom_domain' => $role->custom_domain]);
         }
 
         $existingSettings = $role->getEmailSettings();
@@ -1813,8 +1818,8 @@ class RoleController extends Controller
             $role->import_config = $importConfig;
         }
 
-        // Handle event custom fields
-        if ($request->has('event_custom_fields_submitted')) {
+        // Handle event custom fields (Pro feature)
+        if ($request->has('event_custom_fields_submitted') && $role->isPro()) {
             $submittedFields = $request->input('event_custom_fields', []);
             $existingCustomFields = $role->event_custom_fields ?? [];
             $eventCustomFields = [];

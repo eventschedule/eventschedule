@@ -142,6 +142,13 @@
                             <h2 class="doc-heading">Basic Information</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Configure your schedule's core identity in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>.</p>
 
+                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
+                                <picture>
+                                    <source srcset="{{ url('images/docs/schedule-basics--section-details.webp') }}" type="image/webp">
+                                    <img src="{{ url('images/docs/schedule-basics--section-details.png') }}" alt="Schedule basic information settings" class="w-full h-auto" loading="eager">
+                                </picture>
+                            </div>
+
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Schedule Name</h4>
@@ -166,6 +173,13 @@
                         <section id="location" class="doc-section">
                             <h2 class="doc-heading">Location & Address</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">For <strong class="text-gray-900 dark:text-white">Venue</strong> schedules, you can add a full physical address. This enables map integration and helps visitors find your location.</p>
+
+                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
+                                <picture>
+                                    <source srcset="{{ url('images/docs/schedule-basics--section-address.webp') }}" type="image/webp">
+                                    <img src="{{ url('images/docs/schedule-basics--section-address.png') }}" alt="Schedule location and address settings" class="w-full h-auto" loading="lazy">
+                                </picture>
+                            </div>
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -193,6 +207,13 @@
                             <h2 class="doc-heading">Contact Information</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Add contact details in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> so visitors can reach you. These appear on your public schedule page.</p>
 
+                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
+                                <picture>
+                                    <source srcset="{{ url('images/docs/schedule-basics--section-contact-info.webp') }}" type="image/webp">
+                                    <img src="{{ url('images/docs/schedule-basics--section-contact-info.png') }}" alt="Schedule contact information settings" class="w-full h-auto" loading="lazy">
+                                </picture>
+                            </div>
+
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Email Address</h4>
@@ -218,6 +239,13 @@
                             <h2 class="doc-heading">Schedule Settings</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Configure how your schedule works in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>.</p>
 
+                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
+                                <picture>
+                                    <source srcset="{{ url('images/docs/schedule-basics--section-settings.webp') }}" type="image/webp">
+                                    <img src="{{ url('images/docs/schedule-basics--section-settings.png') }}" alt="Schedule settings" class="w-full h-auto" loading="lazy">
+                                </picture>
+                            </div>
+
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Schedule URL / Subdomain</h4>
@@ -225,7 +253,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Custom Domain</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400"><span class="text-cyan-400 text-xs font-medium">PRO</span> Use your own domain (e.g., <code class="doc-inline-code">events.yourbrand.com</code>) instead of a subdomain. Requires DNS configuration. A custom domain gives your <a href="{{ route('marketing.docs.sharing') }}#schedule-url" class="text-cyan-400 hover:text-cyan-300">shared schedule URL</a> a more professional look.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><span class="text-cyan-400 text-xs font-medium">ENTERPRISE</span> Use your own domain (e.g., <code class="doc-inline-code">events.yourbrand.com</code>) instead of a subdomain. Requires DNS configuration. A custom domain gives your <a href="{{ route('marketing.docs.sharing') }}#schedule-url" class="text-cyan-400 hover:text-cyan-300">shared schedule URL</a> a more professional look.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Language</h4>

@@ -20,6 +20,21 @@
         </div>
         @endif
 
+        @if ($role->newsletterLimit() !== null)
+        @php
+            $newsletterLimit = $role->newsletterLimit();
+            $newsletterUsed = $role->newslettersSentThisMonth();
+        @endphp
+        <div class="mb-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+            <span>{{ __('messages.newsletters_used', ['used' => $newsletterUsed, 'limit' => $newsletterLimit]) }}</span>
+            @if (config('cashier.key') && $role->actualPlanTier() !== 'enterprise' && $newsletterLimit < 1000)
+            <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain]) }}" class="text-[#4E81FA] hover:underline text-xs font-medium">
+                {{ __('messages.newsletter_upgrade_plan') }}
+            </a>
+            @endif
+        </div>
+        @endif
+
         @if ($newsletter->status === 'scheduled')
         <div class="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-md">
             <div class="flex justify-between items-center">

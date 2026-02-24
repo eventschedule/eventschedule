@@ -26,26 +26,19 @@ class NewsletterController extends Controller
             return;
         }
 
-        // Allow owners/members of enterprise roles
-        $hasEnterpriseRole = auth()->user()->roles()
+        // Allow owners/members of any role
+        $hasRole = auth()->user()->roles()
             ->wherePivot('level', '!=', 'follower')
-            ->get()
-            ->contains(fn ($role) => $role->isEnterprise());
+            ->exists();
 
-        if (! $hasEnterpriseRole) {
+        if (! $hasRole) {
             abort(403, __('messages.not_authorized'));
         }
     }
 
     protected function getRoles()
     {
-        $roles = auth()->user()->roles()->wherePivot('level', '!=', 'follower')->get();
-
-        if (! auth()->user()->isAdmin()) {
-            $roles = $roles->filter(fn ($role) => $role->isEnterprise());
-        }
-
-        return $roles;
+        return auth()->user()->roles()->wherePivot('level', '!=', 'follower')->get();
     }
 
     protected function getRole(Request $request)
@@ -61,7 +54,7 @@ class NewsletterController extends Controller
         }
 
         if (! auth()->user()->isAdmin()) {
-            if ($role->pivot->level === 'follower' || ! $role->isEnterprise()) {
+            if ($role->pivot->level === 'follower') {
                 abort(403);
             }
         }

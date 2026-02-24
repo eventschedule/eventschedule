@@ -1058,7 +1058,7 @@
                                 {{ __('messages.privacy') }}
                             </a>
                             @endif
-                            @if (count($role->getEventCustomFields()) > 0)
+                            @if ($role->isPro() && count($role->getEventCustomFields()) > 0)
                             <a href="#section-custom-fields" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-custom-fields">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
@@ -2562,19 +2562,19 @@
                                 <div class="flex items-center">
                                     <input id="is_private" name="is_private" type="checkbox" v-model="event.is_private" :value="1"
                                         class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
-                                        {{ ! $role->isPro() ? 'disabled' : '' }}>
+                                        {{ ! $role->isEnterprise() ? 'disabled' : '' }}>
                                     <input type="hidden" name="is_private" :value="event.is_private ? 1 : 0">
                                     <label for="is_private" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                         {{ __('messages.private_event') }}
-                                        @if (! $role->isPro() && config('app.hosted'))
+                                        @if (! $role->isEnterprise() && config('app.hosted'))
                                         <div class="text-xs pt-1">
                                             <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-privacy')"
                                                 class="text-[#4E81FA] hover:underline font-medium">
-                                                {{ __('messages.requires_pro_plan') }}
+                                                {{ __('messages.requires_enterprise_plan') }}
                                             </button>
                                         </div>
-                                        @elseif (! $role->isPro())
-                                        <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_pro_plan') }}</div>
+                                        @elseif (! $role->isEnterprise())
+                                        <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_enterprise_plan') }}</div>
                                         @endif
                                     </label>
                                 </div>
@@ -2585,24 +2585,24 @@
                                 <x-input-label for="event_password" :value="__('messages.event_password')" />
                                 <x-text-input id="event_password" name="event_password" type="text" class="mt-1 block w-full"
                                     v-model="event.event_password" maxlength="255"
-                                    :disabled="! $role->isPro()" />
+                                    :disabled="! $role->isEnterprise()" />
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.event_password_help') }}</p>
-                                @if (! $role->isPro() && config('app.hosted'))
+                                @if (! $role->isEnterprise() && config('app.hosted'))
                                 <div class="text-xs pt-1">
                                     <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-privacy')"
                                         class="text-[#4E81FA] hover:underline font-medium">
-                                        {{ __('messages.requires_pro_plan') }}
+                                        {{ __('messages.requires_enterprise_plan') }}
                                     </button>
                                 </div>
-                                @elseif (! $role->isPro())
-                                <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_pro_plan') }}</div>
+                                @elseif (! $role->isEnterprise())
+                                <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_enterprise_plan') }}</div>
                                 @endif
                             </div>
                         </div>
                     </div>
                 @endif
 
-                @if (count($role->getEventCustomFields()) > 0)
+                @if ($role->isPro() && count($role->getEventCustomFields()) > 0)
                 <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-custom-fields">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -4459,7 +4459,7 @@ function deleteFlyer(url, hash, token, element) {
     {{ __('messages.upgrade_feature_description_tickets') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-privacy" tier="pro" :subdomain="$subdomain">
+<x-upgrade-modal name="upgrade-privacy" tier="enterprise" :subdomain="$subdomain" docsUrl="{{ route('marketing.private_events') }}">
     {{ __('messages.upgrade_feature_description_privacy') }}
 </x-upgrade-modal>
 

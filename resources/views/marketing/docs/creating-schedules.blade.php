@@ -105,6 +105,13 @@
                             <h2 class="doc-heading">Sub-schedules</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Organize your events into sub-schedules (categories). This helps visitors filter and find events that interest them.</p>
 
+                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
+                                <picture>
+                                    <source srcset="{{ url('images/docs/creating-schedules--section-subschedules.webp') }}" type="image/webp">
+                                    <img src="{{ url('images/docs/creating-schedules--section-subschedules.png') }}" alt="Sub-schedules settings" class="w-full h-auto" loading="eager">
+                                </picture>
+                            </div>
+
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Creating Sub-schedules</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">To create a sub-schedule, go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and scroll to the Sub-schedules section.</p>
 
@@ -131,6 +138,13 @@
                         <section id="auto-import" class="doc-section">
                             <h2 class="doc-heading">Auto Import</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Automatically import events from external sources to keep your schedule up-to-date without manual entry.</p>
+
+                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
+                                <picture>
+                                    <source srcset="{{ url('images/docs/creating-schedules--section-auto-import.webp') }}" type="image/webp">
+                                    <img src="{{ url('images/docs/creating-schedules--section-auto-import.png') }}" alt="Auto import settings" class="w-full h-auto" loading="lazy">
+                                </picture>
+                            </div>
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -162,6 +176,13 @@
                         <section id="calendar-integrations" class="doc-section">
                             <h2 class="doc-heading">Calendar Integrations</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Sync your schedule with external calendar systems for smooth event management.</p>
+
+                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
+                                <picture>
+                                    <source srcset="{{ url('images/docs/creating-schedules--section-integrations.webp') }}" type="image/webp">
+                                    <img src="{{ url('images/docs/creating-schedules--section-integrations.png') }}" alt="Calendar integration settings" class="w-full h-auto" loading="lazy">
+                                </picture>
+                            </div>
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">

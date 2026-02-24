@@ -90,6 +90,13 @@
                             <h2 class="doc-heading">Overview</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Make your schedule uniquely yours with extensive styling options. Access styling settings in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>, then scroll to the styling section.</p>
 
+                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
+                                <picture>
+                                    <source srcset="{{ url('images/docs/schedule-styling--section-style.webp') }}" type="image/webp">
+                                    <img src="{{ url('images/docs/schedule-styling--section-style.png') }}" alt="Schedule styling settings" class="w-full h-auto" loading="eager">
+                                </picture>
+                            </div>
+
                             <p class="text-gray-600 dark:text-gray-300 mb-6">All styling changes update in real-time, so you can experiment freely and see exactly how your schedule will look before saving.</p>
 
                             <div class="doc-callout doc-callout-info">
@@ -222,8 +229,8 @@
                         <section id="custom-css" class="doc-section">
                             <h2 class="doc-heading">Custom CSS</h2>
                             <div class="doc-callout doc-callout-info">
-                                <div class="doc-callout-title">Enterprise Feature</div>
-                                <p>Custom CSS is available on Enterprise plans and for <a href="{{ route('marketing.docs.selfhost') }}" class="text-cyan-400 hover:text-cyan-300">selfhosted</a> installations.</p>
+                                <div class="doc-callout-title">Pro Feature</div>
+                                <p>Custom CSS is available on Pro plans and for <a href="{{ route('marketing.docs.selfhost') }}" class="text-cyan-400 hover:text-cyan-300">selfhosted</a> installations.</p>
                             </div>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">For advanced customization, write your own CSS to modify any aspect of your schedule's appearance:</p>
                             <ul class="doc-list mb-6">

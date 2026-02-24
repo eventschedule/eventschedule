@@ -97,6 +97,13 @@
                                 <div class="doc-callout-title">Tip</div>
                                 <p>Using Google login is the fastest way to get started - no email verification required. Your data is yours - we never share or sell your information.</p>
                             </div>
+
+                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
+                                <picture>
+                                    <source srcset="{{ url('images/docs/getting-started--dashboard.webp') }}" type="image/webp">
+                                    <img src="{{ url('images/docs/getting-started--dashboard.png') }}" alt="Event Schedule dashboard with schedule list" class="w-full h-auto" loading="eager">
+                                </picture>
+                            </div>
                         </section>
 
                         <!-- Create Schedule -->
@@ -186,7 +193,7 @@
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Pro Feature</div>
-                                <p>Upgrade to Pro to remove Event Schedule branding, use a custom domain, and access advanced features like ticketing and event graphics.</p>
+                                <p>Upgrade to Pro to remove Event Schedule branding and access advanced features like ticketing and event graphics. Custom domains are available on the Enterprise plan.</p>
                             </div>
                         </section>
 
@@ -213,7 +220,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Is Event Schedule free?</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Yes - free forever! The free plan includes unlimited events, unlimited schedules, a custom subdomain, and all core features. No credit card required. Pro features like custom domains, branding removal, and ticketing are available starting at just $5/month with a 7-day free trial.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Yes - free forever! The free plan includes unlimited events, unlimited schedules, a custom subdomain, and all core features. No credit card required. Pro features like branding removal and ticketing are available starting at just $5/month with a 7-day free trial. Custom domains are available on the Enterprise plan.</p>
                                 </div>
                             </div>
                         </section>
@@ -285,7 +292,7 @@
                 "name": "Is Event Schedule free?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes, free forever! The free plan includes unlimited events, unlimited schedules, a custom subdomain, and all core features. No credit card required. Pro features like custom domains, branding removal, and ticketing are available starting at just $5/month with a 7-day free trial."
+                    "text": "Yes, free forever! The free plan includes unlimited events, unlimited schedules, a custom subdomain, and all core features. No credit card required. Pro features like branding removal and ticketing are available starting at just $5/month with a 7-day free trial. Custom domains are available on the Enterprise plan."
                 }
             }
         ]

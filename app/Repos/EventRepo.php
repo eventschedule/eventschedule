@@ -358,7 +358,7 @@ class EventRepo
 
         $event->fill($request->all());
 
-        if ($currentRole && ! $currentRole->isPro()) {
+        if ($currentRole && ! $currentRole->isEnterprise()) {
             $event->is_private = false;
             $event->event_password = null;
         }

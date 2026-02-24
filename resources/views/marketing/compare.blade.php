@@ -163,13 +163,13 @@
                                     ['Newsletters', 'Yes (Free)', 'Yes', 'Yes', 'No', 'No'],
                                 ],
                                 'Customization' => [
-                                    ['Custom domains', 'Yes (Pro)', 'No', 'Yes (Plus)', 'Yes (paid)', 'No'],
+                                    ['Custom domains', 'Yes (Enterprise)', 'No', 'Yes (Plus)', 'Yes (paid)', 'No'],
                                     ['Remove branding', 'Yes (Pro)', 'No', 'Yes (Plus)', 'Yes (paid)', 'No'],
-                                    ['Custom fields', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
+                                    ['Custom fields', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
                                     ['Built-in analytics', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
                                 ],
                                 'Unique Features' => [
-                                    ['AI event parsing (incl. agenda scanning)', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
+                                    ['AI event parsing (incl. agenda scanning)', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
                                     ['Event graphics gen', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
                                     ['Sub-schedules', 'Yes (Free)', 'No', 'No', 'No', 'Multiple calendars'],
                                     ['Fan videos & comments', 'Yes (Free)', 'No', 'No', 'No', 'No'],

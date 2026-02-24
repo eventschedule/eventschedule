@@ -678,12 +678,14 @@ class MarketingController extends Controller
             $roles = $user->member()->get();
 
             foreach ($roles as $role) {
-                $fields = $role->getEventCustomFields();
-                if (! empty($fields)) {
-                    $customFieldsData[] = [
-                        'role_name' => $role->name,
-                        'fields' => $fields,
-                    ];
+                if ($role->isPro()) {
+                    $fields = $role->getEventCustomFields();
+                    if (! empty($fields)) {
+                        $customFieldsData[] = [
+                            'role_name' => $role->name,
+                            'fields' => $fields,
+                        ];
+                    }
                 }
             }
         }
@@ -746,12 +748,14 @@ class MarketingController extends Controller
             $roles = $user->member()->get();
 
             foreach ($roles as $role) {
-                $fields = $role->getEventCustomFields();
-                if (! empty($fields)) {
-                    $customFieldsData[] = [
-                        'role_name' => $role->name,
-                        'fields' => $fields,
-                    ];
+                if ($role->isPro()) {
+                    $fields = $role->getEventCustomFields();
+                    if (! empty($fields)) {
+                        $customFieldsData[] = [
+                            'role_name' => $role->name,
+                            'fields' => $fields,
+                        ];
+                    }
                 }
             }
         }
@@ -1080,13 +1084,13 @@ class MarketingController extends Controller
                         ['Newsletters', 'Yes (Free)', 'Yes', false],
                     ],
                     'Customization' => [
-                        ['Custom domains', 'Yes (Pro)', 'No', true],
+                        ['Custom domains', 'Yes (Enterprise)', 'No', true],
                         ['Remove branding', 'Yes (Pro)', 'No', true],
                         ['Custom fields', 'Yes (Free)', 'Yes', false],
                         ['Built-in analytics', 'Yes (Free)', 'Yes', false],
                     ],
                     'Unique Features' => [
-                        ['AI event parsing', 'Yes (Pro)', 'No', true],
+                        ['AI event parsing', 'Yes (Enterprise)', 'No', true],
                         ['Event graphics gen', 'Yes (Pro)', 'No', true],
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
                         ['Team collaboration', 'Yes (Free)', 'Yes', false],
@@ -1190,13 +1194,13 @@ class MarketingController extends Controller
                         ['Newsletters', 'Yes (Free)', 'Yes', false],
                     ],
                     'Customization' => [
-                        ['Custom domains', 'Yes (Pro)', 'Yes (Plus)', true],
+                        ['Custom domains', 'Yes (Enterprise)', 'Yes (Plus)', true],
                         ['Remove branding', 'Yes (Pro)', 'Yes (Plus)', true],
                         ['Custom fields', 'Yes (Free)', 'Yes', false],
                         ['Built-in analytics', 'Yes (Free)', 'Yes', false],
                     ],
                     'Unique Features' => [
-                        ['AI event parsing', 'Yes (Pro)', 'No', true],
+                        ['AI event parsing', 'Yes (Enterprise)', 'No', true],
                         ['Event graphics gen', 'Yes (Pro)', 'No', true],
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
                         ['Team collaboration', 'Yes (Free)', '3 admins (free), 5 (Plus)', true],
@@ -1300,13 +1304,13 @@ class MarketingController extends Controller
                         ['Newsletters', 'Yes (Free)', 'No', true],
                     ],
                     'Customization' => [
-                        ['Custom domains', 'Yes (Pro)', 'Yes (paid)', true],
+                        ['Custom domains', 'Yes (Enterprise)', 'Yes (paid)', true],
                         ['Remove branding', 'Yes (Pro)', 'Yes (paid)', true],
                         ['Custom fields', 'Yes (Free)', 'Yes', false],
                         ['Built-in analytics', 'Yes (Free)', 'Yes', false],
                     ],
                     'Unique Features' => [
-                        ['AI event parsing', 'Yes (Pro)', 'No', true],
+                        ['AI event parsing', 'Yes (Enterprise)', 'No', true],
                         ['Event graphics gen', 'Yes (Pro)', 'No', true],
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
                         ['Team collaboration', 'Yes (Free)', 'Yes', false],
@@ -1406,7 +1410,7 @@ class MarketingController extends Controller
                         ['Platform fees', '0%', 'N/A', true],
                     ],
                     'Event Features' => [
-                        ['AI event parsing', 'Yes (Pro)', 'No', true],
+                        ['AI event parsing', 'Yes (Enterprise)', 'No', true],
                         ['Event graphics generation', 'Yes (Pro)', 'No', true],
                         ['Rich descriptions (Markdown)', 'Yes (Free)', 'Plain text only', true],
                         ['Custom fields', 'Yes (Free)', 'No', true],
@@ -1525,13 +1529,13 @@ class MarketingController extends Controller
                         ['Newsletters', 'Yes (Free)', 'Group messaging only', true],
                     ],
                     'Customization' => [
-                        ['Custom domains', 'Yes (Pro)', 'No', true],
+                        ['Custom domains', 'Yes (Enterprise)', 'No', true],
                         ['Remove branding', 'Yes (Pro)', 'No', true],
                         ['Custom fields', 'Yes (Free)', 'No', true],
                         ['Custom themes/styling', 'Yes (Free)', 'No', true],
                     ],
                     'Unique Features' => [
-                        ['AI event parsing', 'Yes (Pro)', 'No', true],
+                        ['AI event parsing', 'Yes (Enterprise)', 'No', true],
                         ['Event graphics gen', 'Yes (Pro)', 'No', true],
                         ['Embeddable calendar', 'Yes (Free)', 'No', true],
                         ['Team collaboration', 'Yes (Free)', 'Co-organizers (paid)', true],
@@ -1636,13 +1640,13 @@ class MarketingController extends Controller
                         ['Newsletters', 'Yes (Free)', 'Push notifications', true],
                     ],
                     'Customization' => [
-                        ['Custom domains', 'Yes (Pro)', 'No', true],
+                        ['Custom domains', 'Yes (Enterprise)', 'No', true],
                         ['Remove branding', 'Yes (Pro)', 'No', true],
                         ['Custom event pages', 'Yes (full control)', 'Template-based', true],
                         ['Embeddable calendar', 'Yes (Free)', 'Widget only', true],
                     ],
                     'Unique Features' => [
-                        ['AI event parsing', 'Yes (Pro)', 'No', true],
+                        ['AI event parsing', 'Yes (Enterprise)', 'No', true],
                         ['Event graphics gen', 'Yes (Pro)', 'No', true],
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
                         ['Fan videos & comments', 'Yes (Free)', 'No', true],
@@ -1747,13 +1751,13 @@ class MarketingController extends Controller
                         ['Newsletters', 'Yes (Free)', 'Basic email', true],
                     ],
                     'Customization' => [
-                        ['Custom domains', 'Yes (Pro)', 'No', true],
+                        ['Custom domains', 'Yes (Enterprise)', 'No', true],
                         ['Remove branding', 'Yes (Pro)', 'No', true],
                         ['Modern event pages', 'Yes (responsive, customizable)', 'Dated design', true],
                         ['Embeddable calendar', 'Yes (Free)', 'Limited widget', true],
                     ],
                     'Unique Features' => [
-                        ['AI event parsing', 'Yes (Pro)', 'No', true],
+                        ['AI event parsing', 'Yes (Enterprise)', 'No', true],
                         ['Event graphics gen', 'Yes (Pro)', 'No', true],
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
                         ['Fan videos & comments', 'Yes (Free)', 'No', true],
@@ -1859,13 +1863,13 @@ class MarketingController extends Controller
                         ['Newsletters', 'Yes (Free)', 'Yes (enterprise)', false],
                     ],
                     'Customization' => [
-                        ['Custom domains', 'Yes (Pro)', 'Yes (enterprise)', false],
+                        ['Custom domains', 'Yes (Enterprise)', 'Yes (enterprise)', false],
                         ['Remove branding', 'Yes (Pro)', 'Yes (enterprise)', false],
                         ['Custom fields', 'Yes (Free)', 'Yes', false],
                         ['Embeddable calendar', 'Yes (Free)', 'Registration widget', true],
                     ],
                     'Unique Features' => [
-                        ['AI event parsing', 'Yes (Pro)', 'No', true],
+                        ['AI event parsing', 'Yes (Enterprise)', 'No', true],
                         ['Event graphics gen', 'Yes (Pro)', 'No', true],
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
                         ['Fan videos & comments', 'Yes (Free)', 'No', true],

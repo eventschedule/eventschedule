@@ -1457,7 +1457,7 @@
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
                             </div>
                         </div>
-                        @elseif ($isPro && config('app.hosted'))
+                        @elseif (config('app.hosted'))
                         <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                             <div class="flex items-center justify-between mb-3">
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
@@ -1778,7 +1778,7 @@
                                     <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
                                 </div>
                             </div>
-                            @elseif ($isPro && config('app.hosted'))
+                            @elseif (config('app.hosted'))
                             <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                                 <div class="flex items-center justify-between mb-3">
                                     <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>

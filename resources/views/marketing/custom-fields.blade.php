@@ -113,7 +113,7 @@
 
             <div class="flex flex-wrap justify-center gap-4">
                 <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-amber-600 to-orange-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-amber-500/25">
-                    Start for free
+                    Start Free Trial
                     <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
@@ -683,10 +683,10 @@
                 Collect the data you need
             </h2>
             <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-                Set up custom fields for your events today. Free to use, no credit card required.
+                Set up custom fields for your events today. Available on Pro plans.
             </p>
             <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-amber-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
-                Get Started Free
+                Start Free Trial
                 <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>

@@ -150,9 +150,11 @@
             <div class="w-full h-2.5 rounded-full {{ $barBgColor }}">
                 <div class="h-2.5 rounded-full {{ $barColor }} transition-all" style="width: {{ $newsletterPercent }}%"></div>
             </div>
-            @if (config('cashier.key') && $planTier === 'pro' && $newsletterLimit <= 100)
+            @if (config('cashier.key') && $planTier !== 'enterprise' && $newsletterLimit < 1000)
             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                {{ __('messages.newsletter_upgrade_enterprise') }}
+                <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain]) }}" class="text-[#4E81FA] hover:underline font-medium">
+                    {{ __('messages.newsletter_upgrade_plan') }}
+                </a>
             </p>
             @endif
         </div>

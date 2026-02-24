@@ -31,11 +31,12 @@ All users get these features with no subscription required.
 | Google Calendar sync | Bidirectional sync |
 | CalDAV sync | Standard calendar protocol |
 | Fan videos & comments on events | User-generated content on events |
-| Custom fields | Custom data fields on events |
 | Built-in analytics | Schedule analytics dashboard |
 | Sub-schedules | Group events into sub-schedules |
 | Online events | Virtual event support |
 | Recurring events | Day-of-week recurring patterns |
+| Newsletter management | Full newsletter creation and management UI (sending limits vary by tier) |
+| Embed calendar on website | iframe embed with X-Frame-Options |
 | 10 newsletters per month | Basic newsletter sending limit |
 
 ## Pro Features
@@ -47,12 +48,11 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Remove Event Schedule branding | `$role->isWhiteLabeled()` / `$role->showBranding()` | White-label, removes "Powered by" |
 | Ticketing & QR code check-ins | `$event->isPro()` in views and controllers | Create ticket types, scan QR codes |
 | Sell online via Stripe | Tied to ticketing gate | Stripe Connect payments, no platform fees |
-| Private & password-protected events | `$role->isPro()` in `event/edit.blade.php` | Restrict event visibility |
 | Generate event graphics | `GraphicController`, `$role->isPro()` | Auto-generated shareable images |
-| AI text processing on graphics | `GraphicController:298`, `$role->isPro()` | AI prompt for graphic text via Gemini |
 | REST API access | All `Api/*Controller.php`, `$role->isPro()` | Full CRUD API for events, schedules, sales, sub-schedules |
 | Event boosting with ads | `BoostController:101,202`, `$role->isPro()` | Meta Ads integration |
-| Embed calendar on website | `RoleController:712`, `$role->isPro()` | iframe embed with X-Frame-Options |
+| Custom CSS styling | `RoleController:1748`, `$role->isPro()` | Custom CSS on schedule pages |
+| Custom fields | `RoleController:1822`, `$role->isPro()` | Custom data fields on events |
 | 100 newsletters per month | `$role->newsletterLimit()` | Increased sending limit |
 
 ## Enterprise Features
@@ -64,11 +64,12 @@ Gated by `$role->isEnterprise()`.
 | AI event parsing | `EventController:1019`, `$role->isEnterprise()` | Parse event details from text/images via Gemini |
 | Agenda scanning | `EventController:1594`, `$role->isEnterprise()` | Scan agendas to auto-create event parts |
 | Save parsed event parts | `EventController:1654`, `$role->isEnterprise()` | Save AI-parsed event data |
+| AI text processing on graphics | `GraphicController:298`, `$role->isEnterprise()` | AI prompt for graphic text via Gemini |
 | Email scheduling (graphic emails) | `GraphicController:142`, `$role->isEnterprise()` | Schedule automated graphic emails |
-| Custom CSS styling | `RoleController:1748`, `$role->isEnterprise()` | Custom CSS on schedule pages |
+| Custom domains | `RoleController`, `$role->isEnterprise()` | Use your own domain for schedule |
+| Private & password-protected events | `EventRepo`, `$role->isEnterprise()` | Restrict event visibility |
 | Multiple team members | `RoleController:1210,1229`, `$role->isEnterprise()` | Add/manage multiple team members |
-| Newsletter management | `NewsletterController:33,45,64`, `$role->isEnterprise()` | Full newsletter creation and management UI |
-| Availability management | `RoleController:2412`, `$role->isEnterprise()` | Team member availability tracking |
+| Availability management | `RoleController:2413`, `$role->isEnterprise()` | Team member availability tracking |
 | 1,000 newsletters per month | `$role->newsletterLimit()` | Highest sending limit |
 | Priority support | Not code-gated | Service-level commitment |
 

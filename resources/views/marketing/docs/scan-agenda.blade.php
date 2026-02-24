@@ -88,6 +88,14 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Scan Agenda is an Enterprise feature that uses AI (powered by Google Gemini) to read a photo of a printed agenda, flyer, or setlist and automatically create event parts from it. Instead of manually typing each item, simply take a photo and let the AI do the work.
                             </p>
+
+                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
+                                <picture>
+                                    <source srcset="{{ url('images/docs/scan-agenda--page.webp') }}" type="image/webp">
+                                    <img src="{{ url('images/docs/scan-agenda--page.png') }}" alt="Scan agenda page" class="w-full h-auto" loading="eager">
+                                </picture>
+                            </div>
+
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 This is especially useful for:
                             </p>

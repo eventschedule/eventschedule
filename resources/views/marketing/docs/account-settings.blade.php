@@ -91,6 +91,13 @@
                                 Access your account settings by clicking <strong>Settings</strong> in the main navigation. The Profile Information section lets you manage your personal details:
                             </p>
 
+                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
+                                <picture>
+                                    <source srcset="{{ url('images/docs/account-settings--settings.webp') }}" type="image/webp">
+                                    <img src="{{ url('images/docs/account-settings--settings.png') }}" alt="Account settings page" class="w-full h-auto" loading="eager">
+                                </picture>
+                            </div>
+
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
                                     <thead>
