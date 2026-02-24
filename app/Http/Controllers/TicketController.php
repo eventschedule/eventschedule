@@ -354,6 +354,11 @@ class TicketController extends Controller
                     'customer_name' => $sale->name,
                     'sale_id' => UrlUtils::encodeId($sale->id),
                 ],
+                'payment_intent_data' => [
+                    'metadata' => [
+                        'sale_id' => UrlUtils::encodeId($sale->id),
+                    ],
+                ],
                 'success_url' => route('checkout.success', $data).'?session_id={CHECKOUT_SESSION_ID}&direct=1',
                 'cancel_url' => route('checkout.cancel', $data).'?secret='.$sale->secret,
             ]);

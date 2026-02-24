@@ -39,6 +39,12 @@ class SubscriptionController extends Controller
                 ->with('message', __('messages.subscription_already_active'));
         }
 
+        // If requesting Enterprise, verify price IDs are configured
+        $enterpriseConfigured = config('services.stripe_platform.enterprise_price_monthly') && config('services.stripe_platform.enterprise_price_yearly');
+        if ($requestedTier === 'enterprise' && ! $enterpriseConfigured) {
+            $requestedTier = 'pro';
+        }
+
         $intent = $role->createSetupIntent();
 
         return view('subscription.show', [
@@ -47,6 +53,7 @@ class SubscriptionController extends Controller
             'monthlyPrice' => config('services.stripe_platform.price_monthly'),
             'yearlyPrice' => config('services.stripe_platform.price_yearly'),
             'selectedTier' => $requestedTier,
+            'enterpriseConfigured' => $enterpriseConfigured,
         ]);
     }
 
@@ -62,6 +69,11 @@ class SubscriptionController extends Controller
         }
 
         $tier = $request->input('tier', 'pro');
+
+        // Validate Enterprise price IDs are configured
+        if ($tier === 'enterprise' && (! config('services.stripe_platform.enterprise_price_monthly') || ! config('services.stripe_platform.enterprise_price_yearly'))) {
+            return redirect()->back()->with('error', __('messages.subscription_error'));
+        }
 
         // If upgrading from Pro to Enterprise with existing subscription, use swap
         if ($tier === 'enterprise' && $role->hasActiveSubscription() && ! $role->hasActiveEnterpriseSubscription()) {
@@ -247,6 +259,11 @@ class SubscriptionController extends Controller
 
         if ($role->plan_type === 'enterprise' && $tier !== 'enterprise') {
             return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // Validate Enterprise price IDs are configured
+        if ($tier === 'enterprise' && (! config('services.stripe_platform.enterprise_price_monthly') || ! config('services.stripe_platform.enterprise_price_yearly'))) {
+            return redirect()->back()->with('error', __('messages.subscription_error'));
         }
 
         if ($tier === 'enterprise') {

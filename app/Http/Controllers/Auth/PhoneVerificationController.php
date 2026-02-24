@@ -81,16 +81,29 @@ class PhoneVerificationController extends Controller
             'code' => ['required', 'string', 'size:6'],
         ]);
 
-        $storedCode = Cache::get('phone_verify_code_'.$request->user()->phone);
+        $phone = $request->user()->phone;
+        $cacheKey = 'phone_verify_code_'.$phone;
+        $failedKey = 'phone_verify_failed_'.$phone;
+
+        $storedCode = Cache::get($cacheKey);
 
         if (! $storedCode || ! hash_equals($storedCode, $request->code)) {
+            $failed = Cache::get($failedKey, 0) + 1;
+            Cache::put($failedKey, $failed, now()->addMinutes(10));
+
+            if ($failed >= 5) {
+                Cache::forget($cacheKey);
+                Cache::forget($failedKey);
+            }
+
             return response()->json([
                 'success' => false,
                 'message' => __('messages.phone_verification_code_invalid'),
             ], 422);
         }
 
-        Cache::forget('phone_verify_code_'.$request->user()->phone);
+        Cache::forget($cacheKey);
+        Cache::forget($failedKey);
 
         $user = $request->user();
         $user->phone_verified_at = now();

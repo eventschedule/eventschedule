@@ -3286,13 +3286,25 @@ class RoleController extends Controller
             'code' => ['required', 'string', 'size:6'],
         ]);
 
-        $storedCode = \Illuminate\Support\Facades\Cache::get('role_phone_verify_code_'.$role->id);
+        $cacheKey = 'role_phone_verify_code_'.$role->id;
+        $failedKey = 'role_phone_verify_failed_'.$role->id;
+
+        $storedCode = \Illuminate\Support\Facades\Cache::get($cacheKey);
 
         if (! $storedCode || ! hash_equals($storedCode, $request->code)) {
+            $failed = \Illuminate\Support\Facades\Cache::get($failedKey, 0) + 1;
+            \Illuminate\Support\Facades\Cache::put($failedKey, $failed, now()->addMinutes(10));
+
+            if ($failed >= 5) {
+                \Illuminate\Support\Facades\Cache::forget($cacheKey);
+                \Illuminate\Support\Facades\Cache::forget($failedKey);
+            }
+
             return response()->json(['success' => false, 'message' => __('messages.phone_verification_code_invalid')], 422);
         }
 
-        \Illuminate\Support\Facades\Cache::forget('role_phone_verify_code_'.$role->id);
+        \Illuminate\Support\Facades\Cache::forget($cacheKey);
+        \Illuminate\Support\Facades\Cache::forget($failedKey);
 
         $role->phone_verified_at = now();
         $role->save();

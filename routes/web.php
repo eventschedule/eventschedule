@@ -760,7 +760,7 @@ if (config('app.is_nexus')) {
     Route::get('/features/embed-calendar', fn () => redirect()->route('home'));
     Route::get('/features/fan-videos', fn () => redirect()->route('home'));
     Route::get('/features/boost', fn () => redirect()->route('home'));
-    Route::get('/features/private-events', fn () => redirect()->route('home'));
+    Route::get('/features/private-events', fn () => redirect()->route('home'))->name('marketing.private_events');
     Route::get('/features/event-graphics', fn () => redirect()->route('home'));
     Route::get('/features/analytics', fn () => redirect()->route('home'));
     // Old URLs still redirect to home

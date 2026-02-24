@@ -179,7 +179,7 @@
             @endif
 
             {{-- Upgrade to Enterprise (for active Pro subscribers) --}}
-            @if (config('cashier.key') && $role->hasActiveSubscription() && !$role->hasActiveEnterpriseSubscription() && $subscription && $subscription->active() && !$subscription->onTrial() && !$subscription->onGracePeriod())
+            @if (config('cashier.key') && config('services.stripe_platform.enterprise_price_monthly') && config('services.stripe_platform.enterprise_price_yearly') && $role->hasActiveSubscription() && !$role->hasActiveEnterpriseSubscription() && $subscription && $subscription->active() && !$subscription->onTrial() && !$subscription->onGracePeriod())
             <div>
                 <form action="{{ route('subscription.swap', ['subdomain' => $role->subdomain]) }}" method="POST" class="inline form-confirm" data-confirm="{{ __('messages.are_you_sure') }}">
                     @csrf

@@ -85,6 +85,7 @@
             </button>
 
             {{-- Enterprise Card --}}
+            @if ($enterpriseConfigured)
             <button type="button" @click="selectedTier = 'enterprise'" class="relative rounded-xl border-2 p-6 text-left transition-all cursor-pointer" :class="selectedTier === 'enterprise' ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20 ring-1 ring-amber-500' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ __('messages.enterprise_plan') }}</h3>
@@ -129,6 +130,7 @@
                     </li>
                 </ul>
             </button>
+            @endif
         </div>
 
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 border border-gray-100 dark:border-gray-700">
