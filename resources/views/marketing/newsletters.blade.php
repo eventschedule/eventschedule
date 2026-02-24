@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Newsletter Builder for Events | Drag-and-Drop Email Marketing - Event Schedule</x-slot>
     <x-slot name="description">Send branded newsletters to followers and ticket buyers. Drag-and-drop editor, five professional templates, audience segments, A/B testing, and real-time delivery analytics.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Newsletters</x-slot>
 
     <x-slot name="structuredData">

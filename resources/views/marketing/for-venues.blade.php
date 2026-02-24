@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Venues | Manage Your Event Calendar</x-slot>
     <x-slot name="description">Fill your calendar with great events. Accept booking requests, sell tickets with QR check-in, and manage multiple rooms or stages. Built for bars, clubs, and event spaces.</x-slot>
-    <x-slot name="socialImage">social/for-venues.png</x-slot>
     <x-slot name="breadcrumbTitle">For Venues</x-slot>
 
     <x-slot name="structuredData">

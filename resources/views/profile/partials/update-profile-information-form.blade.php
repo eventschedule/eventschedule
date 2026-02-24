@@ -394,7 +394,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('phone-code-input').style.display = 'none';
                     document.getElementById('phone-verify-ui').style.display = 'none';
                     var section = document.getElementById('phone-verify-section');
-                    if (section) section.innerHTML = '<p class="text-sm mt-2 text-green-600 dark:text-green-400">' + data.message + '</p>';
+                    if (section) {
+                        var p = document.createElement('p');
+                        p.className = 'text-sm mt-2 text-green-600 dark:text-green-400';
+                        p.textContent = data.message;
+                        section.innerHTML = '';
+                        section.appendChild(p);
+                    }
                 } else {
                     msgEl.textContent = data.message;
                     msgEl.className = 'mt-2 text-sm text-red-600 dark:text-red-400';

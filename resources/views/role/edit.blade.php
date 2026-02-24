@@ -1037,7 +1037,7 @@
 
                         <div class="mb-6">
                             <x-input-label for="phone" :value="__('messages.phone_number')" />
-                            <x-phone-input name="phone" id="role_phone" :value="old('phone', $role->phone)" />
+                            <x-phone-input name="phone" id="role_phone" :value="old('phone', $role->phone)" :country="$role->country_code ?? 'us'" />
                             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
 
                             @if (config('app.hosted') && $role->exists && $role->phone && !$role->phone_verified_at)
@@ -4325,7 +4325,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     msgEl.style.display = '';
                     document.getElementById('role-phone-code-input').style.display = 'none';
                     var section = document.getElementById('role-phone-verify-section');
-                    if (section) section.innerHTML = '<p class="text-sm mt-2 text-green-600 dark:text-green-400">' + data.message + '</p>';
+                    if (section) {
+                        var p = document.createElement('p');
+                        p.className = 'text-sm mt-2 text-green-600 dark:text-green-400';
+                        p.textContent = data.message;
+                        section.innerHTML = '';
+                        section.appendChild(p);
+                    }
                 } else {
                     msgEl.textContent = data.message;
                     msgEl.className = 'mt-2 text-sm text-red-600 dark:text-red-400';

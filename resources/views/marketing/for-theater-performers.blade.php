@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Theater Performers | Show Scheduling</x-slot>
     <x-slot name="description">Share your theater productions with audiences everywhere. Email your fans directly - no social media algorithms. Sell tickets to your shows with zero platform fees.</x-slot>
-    <x-slot name="socialImage">social/for-talent.png</x-slot>
     <x-slot name="breadcrumbTitle">For Theater Performers</x-slot>
 
     <x-slot name="structuredData">

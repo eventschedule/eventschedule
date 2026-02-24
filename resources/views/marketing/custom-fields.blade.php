@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Custom Fields | Event Metadata &amp; Attendee Forms - Event Schedule</x-slot>
     <x-slot name="description">Define custom event metadata fields and collect attendee information with flexible form fields including text, dropdown, date, and yes/no options.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Custom Fields</x-slot>
 
     <x-slot name="structuredData">

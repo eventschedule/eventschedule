@@ -1843,6 +1843,7 @@ return [
 
     // Phone verification
     'phone_number' => 'Phone Number',
+    'phone_number_required' => 'Phone number is required',
     'show_phone_number' => 'Show phone number',
     'your_phone_is_unverified' => 'Your phone number is unverified.',
     'click_here_to_verify_phone' => 'Click here to verify your phone',

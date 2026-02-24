@@ -2,7 +2,6 @@
     <x-slot name="title">Privacy Policy - Event Schedule</x-slot>
     <x-slot name="description">Privacy Policy for Event Schedule - how we collect, use, and protect your data.</x-slot>
     <x-slot name="breadcrumbTitle">Privacy Policy</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
 
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>

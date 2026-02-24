@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">FAQ | Event Schedule - Common Questions Answered</x-slot>
     <x-slot name="description">Find answers to frequently asked questions about Event Schedule. Learn about pricing, features, ticketing, Google Calendar sync, selfhosting, and more.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">FAQ</x-slot>
 
     <x-slot name="structuredData">

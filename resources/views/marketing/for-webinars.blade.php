@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Webinars | Webinar Scheduling Software</x-slot>
     <x-slot name="description">Host webinars with built-in registration, ticketing, email notifications, and streaming link integration. Works with Zoom, Google Meet, and any platform. Zero platform fees.</x-slot>
-    <x-slot name="socialImage">social/for-online.png</x-slot>
     <x-slot name="breadcrumbTitle">For Webinars</x-slot>
 
     <x-slot name="structuredData">
@@ -92,7 +91,7 @@
         ],
         "url": "{{ url()->current() }}",
         "keywords": "webinar hosting, webinar scheduling, webinar registration, paid webinars",
-        "screenshot": "{{ asset('images/social/for-online.png') }}",
+        "screenshot": "{{ asset('images/social/for-webinars.png') }}",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"

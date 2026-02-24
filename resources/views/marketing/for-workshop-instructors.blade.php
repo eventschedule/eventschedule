@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Workshop Instructors | Class Scheduling</x-slot>
     <x-slot name="description">Teach what you love. Fill every seat. From pottery to photography, cooking to coding. One link for all your workshops. Reach students directly. Free forever.</x-slot>
-    <x-slot name="socialImage">social/for-talent.png</x-slot>
     <x-slot name="breadcrumbTitle">For Workshop Instructors</x-slot>
 
     <x-slot name="structuredData">

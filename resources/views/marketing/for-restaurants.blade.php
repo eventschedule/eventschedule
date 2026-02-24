@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Restaurants | Turn First-Time Diners into Regulars</x-slot>
     <x-slot name="description">Fill every seat. Announce seasonal menus, sell tickets to wine dinners and prix fixe events, and email your regulars directly. Free forever.</x-slot>
-    <x-slot name="socialImage">social/for-venues.png</x-slot>
     <x-slot name="breadcrumbTitle">For Restaurants</x-slot>
 
     <x-slot name="structuredData">

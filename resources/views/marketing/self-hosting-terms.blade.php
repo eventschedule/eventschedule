@@ -2,7 +2,6 @@
     <x-slot name="title">Self-Hosting Terms - Event Schedule</x-slot>
     <x-slot name="description">Terms for self-hosting Event Schedule - the rules and guidelines for running your own instance.</x-slot>
     <x-slot name="breadcrumbTitle">Selfhosting Terms</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
 
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>

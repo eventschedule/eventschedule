@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Art Galleries | Exhibition Calendar</x-slot>
     <x-slot name="description">Fill your gallery with collectors. Announce exhibitions, sell tickets to opening nights, and email your collectors directly. Zero platform fees. Free forever.</x-slot>
-    <x-slot name="socialImage">social/for-venues.png</x-slot>
     <x-slot name="breadcrumbTitle">For Art Galleries</x-slot>
 
     <x-slot name="structuredData">

@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Private Events | Password-Protected Events - Event Schedule</x-slot>
     <x-slot name="description">Password-protect events for VIP audiences or invite-only gatherings. Control who sees what with per-event privacy settings.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Private Events</x-slot>
 
     <x-slot name="structuredData">

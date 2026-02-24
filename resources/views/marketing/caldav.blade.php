@@ -2,7 +2,6 @@
     <x-slot name="title">CalDAV Sync - Event Schedule</x-slot>
     <x-slot name="description">Sync with any CalDAV-compatible calendar server. Works with Nextcloud, Radicale, Fastmail, iCloud, and more. Open standard, selfhosted friendly.</x-slot>
     <x-slot name="breadcrumbTitle">CalDAV</x-slot>
-    <x-slot name="socialImage">social/integrations.png</x-slot>
 
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>

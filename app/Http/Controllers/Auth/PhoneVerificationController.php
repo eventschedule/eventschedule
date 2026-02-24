@@ -40,6 +40,13 @@ class PhoneVerificationController extends Controller
             ], 429);
         }
 
+        if (! SmsService::isConfigured()) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.failed_to_send_sms'),
+            ], 500);
+        }
+
         // Generate 6-digit code
         $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 

@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Virtual & Online Event Hosting | Streaming & Ticketing - Event Schedule</x-slot>
     <x-slot name="description">Host virtual events with ease. Toggle between in-person and online, add your streaming URL, and sell tickets to attendees worldwide.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Online Events</x-slot>
 
     <x-slot name="structuredData">

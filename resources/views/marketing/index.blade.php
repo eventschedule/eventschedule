@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule - Plan, Promote & Share Event Calendars</x-slot>
     <x-slot name="description">Create professional event calendars, sell tickets with no platform fees, and check in attendees with QR codes. Free for venues, performers, and communities.</x-slot>
-    <x-slot name="socialImage">social/home.png</x-slot>
     <x-slot name="breadcrumbTitle">Home</x-slot>
     <x-slot name="preload">
         <link rel="preload" as="image" type="image/webp" href="{{ url(webp_path('/images/screenshots/marketing_1_800w.jpg')) }}">

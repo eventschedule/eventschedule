@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">{{ $name }} Alternative | Event Schedule vs {{ $name }}</x-slot>
     <x-slot name="description">{{ $description }}</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">{{ $name }} Alternative</x-slot>
 
     <x-slot name="structuredData">

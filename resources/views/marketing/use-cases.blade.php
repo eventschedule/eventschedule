@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Use Cases | Event Schedule for Every Industry</x-slot>
     <x-slot name="description">Discover how Event Schedule works for musicians, venues, comedians, restaurants, art galleries, and more. Find your industry and see how to share events, sell tickets, and grow your audience.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Use Cases</x-slot>
 
     <x-slot name="structuredData">

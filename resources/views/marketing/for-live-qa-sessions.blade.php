@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Live Q&A Sessions | Scheduling Software</x-slot>
     <x-slot name="description">Free live Q&A scheduling software with registration, ticketing, and email notifications. Works with Zoom, YouTube Live, and any platform. Zero platform fees.</x-slot>
-    <x-slot name="socialImage">social/for-online.png</x-slot>
     <x-slot name="breadcrumbTitle">For Live Q&A Sessions</x-slot>
 
     <x-slot name="structuredData">
@@ -93,7 +92,7 @@
         ],
         "url": "{{ url()->current() }}",
         "keywords": "live Q&A platform, Q&A session scheduling, interactive Q&A events, paid Q&A sessions",
-        "screenshot": "{{ asset('images/social/for-online.png') }}",
+        "screenshot": "{{ asset('images/social/for-live-qa-sessions.png') }}",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"

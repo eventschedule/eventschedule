@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Breweries & Wineries | Tasting Events</x-slot>
     <x-slot name="description">Fill your tasting room with fans. Announce releases, host tastings, and sell tickets to brewery events. Email your fans directly. Free forever.</x-slot>
-    <x-slot name="socialImage">social/for-venues.png</x-slot>
     <x-slot name="breadcrumbTitle">For Breweries & Wineries</x-slot>
 
     <x-slot name="structuredData">

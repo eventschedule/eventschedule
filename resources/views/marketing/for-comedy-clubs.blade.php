@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Comedy Clubs | Lineup Calendar</x-slot>
     <x-slot name="description">Be the stage where comedy careers are made. Manage lineups, sell tickets with zero platform fees, and email your audience directly. Free forever.</x-slot>
-    <x-slot name="socialImage">social/for-venues.png</x-slot>
     <x-slot name="breadcrumbTitle">For Comedy Clubs</x-slot>
 
     <x-slot name="structuredData">

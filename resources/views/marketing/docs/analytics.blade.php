@@ -2,7 +2,6 @@
     <x-slot name="title">Analytics Documentation - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Analytics</x-slot>
     <x-slot name="description">Learn how to track views, devices, traffic sources, and conversions with Event Schedule's built-in analytics dashboard.</x-slot>
-    <x-slot name="socialImage">social/docs.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

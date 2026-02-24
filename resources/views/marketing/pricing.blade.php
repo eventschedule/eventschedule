@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Calendar & Ticketing Pricing Plans - Event Schedule</x-slot>
     <x-slot name="description">Start free with unlimited events. Upgrade to Pro for ticketing, event boosting, custom CSS styling, and white-label branding, or Enterprise for AI features and priority support. No hidden fees.</x-slot>
-    <x-slot name="socialImage">social/pricing.png</x-slot>
     <x-slot name="breadcrumbTitle">Pricing</x-slot>
 
     <x-slot name="structuredData">

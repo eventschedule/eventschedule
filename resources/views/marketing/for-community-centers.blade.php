@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Community Centers | Program Calendar</x-slot>
     <x-slot name="description">Manage program registration and community events in one place. Email your community directly with zero platform fees. Open-source and free forever.</x-slot>
-    <x-slot name="socialImage">social/for-venues.png</x-slot>
     <x-slot name="breadcrumbTitle">For Community Centers</x-slot>
 
     <x-slot name="structuredData">

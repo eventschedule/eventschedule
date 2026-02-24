@@ -2,7 +2,6 @@
     <x-slot name="title">Boost Documentation - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Boost</x-slot>
     <x-slot name="description">Learn how to promote your events with automated Facebook and Instagram ad campaigns using Event Schedule's Boost feature.</x-slot>
-    <x-slot name="socialImage">social/docs.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

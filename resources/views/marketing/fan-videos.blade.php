@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Fan Videos & Comments for Events | Community Engagement - Event Schedule</x-slot>
     <x-slot name="description">Let fans share YouTube videos and comments on your event pages for free. Organizer approval workflow, agenda integration, and recurring event support. No credit card required.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">Fan Videos & Comments</x-slot>
 
     <x-slot name="structuredData">

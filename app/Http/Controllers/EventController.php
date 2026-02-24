@@ -947,7 +947,7 @@ class EventController extends Controller
         if (! auth()->check() && $role->require_account) {
             session(['pending_request' => $subdomain]);
 
-            return redirect(route('sign_up'));
+            return redirect(app_url(route('sign_up', [], false)));
         }
 
         if ($request->lang) {
@@ -1385,7 +1385,7 @@ class EventController extends Controller
                 'return_url' => url()->previous(),
             ]);
 
-            return redirect()->route('sign_up');
+            return redirect(app_url(route('sign_up', [], false)));
         }
 
         $eventPartId = $request->input('event_part_id');
@@ -1482,7 +1482,7 @@ class EventController extends Controller
                 'return_url' => url()->previous(),
             ]);
 
-            return redirect()->route('sign_up');
+            return redirect(app_url(route('sign_up', [], false)));
         }
 
         $eventPartId = $request->input('event_part_id');

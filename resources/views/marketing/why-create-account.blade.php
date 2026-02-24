@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">{{ __('messages.why_create_account_title') }} | Event Schedule</x-slot>
     <x-slot name="description">{{ __('messages.why_create_account_description') }}</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">{{ __('messages.why_create_account_title') }}</x-slot>
 
     <x-slot name="structuredData">

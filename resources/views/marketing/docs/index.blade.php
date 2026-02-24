@@ -2,7 +2,6 @@
     <x-slot name="title">Documentation - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Documentation</x-slot>
     <x-slot name="description">Complete documentation for Event Schedule. User guides, selfhost installation, and developer resources.</x-slot>
-    <x-slot name="socialImage">social/docs.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

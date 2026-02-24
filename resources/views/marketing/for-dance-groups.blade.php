@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Dance Groups | Performance Scheduling</x-slot>
     <x-slot name="description">Share your dance performances with fans worldwide. Email your fans directly and sell tickets to recitals and workshops with zero fees. Free forever.</x-slot>
-    <x-slot name="socialImage">social/for-talent.png</x-slot>
     <x-slot name="breadcrumbTitle">For Dance Groups</x-slot>
 
     <x-slot name="structuredData">

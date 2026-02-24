@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Poets & Spoken Word | Share Your Readings</x-slot>
     <x-slot name="description">Share your poetry readings, open mics, and workshops. Sell tickets directly and reach fans with newsletters. Zero platform fees. Free forever.</x-slot>
-    <x-slot name="socialImage">social/for-talent.png</x-slot>
     <x-slot name="breadcrumbTitle">For Spoken Word</x-slot>
 
     <x-slot name="structuredData">

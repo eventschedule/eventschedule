@@ -2,7 +2,6 @@
     <x-slot name="title">Creating Events - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Creating Events</x-slot>
     <x-slot name="description">Learn how to add events to your schedule. Create events manually, import from text or images using AI, or sync from Google Calendar.</x-slot>
-    <x-slot name="socialImage">social/docs.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

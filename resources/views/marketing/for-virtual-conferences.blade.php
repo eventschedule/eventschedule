@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Virtual Conferences | Online Event Software</x-slot>
     <x-slot name="description">Schedule and sell virtual conferences with multi-day agendas, tiered ticketing, and attendee email notifications. Works with any platform. Free forever.</x-slot>
-    <x-slot name="socialImage">social/for-online.png</x-slot>
     <x-slot name="breadcrumbTitle">For Virtual Conferences</x-slot>
 
     <x-slot name="structuredData">
@@ -94,7 +93,7 @@
         ],
         "url": "{{ url()->current() }}",
         "keywords": "virtual conference platform, online conference scheduling, virtual summit, conference ticketing",
-        "screenshot": "{{ asset('images/social/for-online.png') }}",
+        "screenshot": "{{ asset('images/social/for-virtual-conferences.png') }}",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"

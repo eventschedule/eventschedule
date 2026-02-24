@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">AI-Powered Event Import | Text & Image to Calendar - Event Schedule</x-slot>
     <x-slot name="description">Smart event import with AI. Paste text or drop an image and AI extracts all the details automatically. Instant translation included.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">AI Import</x-slot>
 
     <x-slot name="structuredData">

@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for DJs | Share Your Sets & Pack the Dancefloor</x-slot>
     <x-slot name="description">Share your DJ sets, residencies, and guest spots. Reach fans directly with no promoter middleman. Sell tickets with zero platform fees. Free forever.</x-slot>
-    <x-slot name="socialImage">social/for-talent.png</x-slot>
     <x-slot name="breadcrumbTitle">For DJs</x-slot>
 
     <x-slot name="structuredData">

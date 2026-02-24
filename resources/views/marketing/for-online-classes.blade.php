@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Online Classes | Virtual Class Scheduling</x-slot>
     <x-slot name="description">Schedule and sell online classes with built-in registration, recurring sessions, and student email notifications. Works with any platform. Free forever.</x-slot>
-    <x-slot name="socialImage">social/for-online.png</x-slot>
     <x-slot name="breadcrumbTitle">For Online Classes</x-slot>
 
     <x-slot name="structuredData">
@@ -92,7 +91,7 @@
         ],
         "url": "{{ url()->current() }}",
         "keywords": "online class scheduling, virtual class platform, sell online classes, online teaching",
-        "screenshot": "{{ asset('images/social/for-online.png') }}",
+        "screenshot": "{{ asset('images/social/for-online-classes.png') }}",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"

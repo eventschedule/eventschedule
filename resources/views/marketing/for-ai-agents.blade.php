@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">API for AI Agents & Developers - Event Schedule</x-slot>
     <x-slot name="description">Full REST API with OpenAPI spec, llms.txt, and agents.json for AI agents and developers. Create events, manage tickets, and automate scheduling programmatically. Zero platform fees.</x-slot>
-    <x-slot name="socialImage">social/for-online.png</x-slot>
     <x-slot name="breadcrumbTitle">For AI Agents</x-slot>
 
     <style {!! nonce_attr() !!}>

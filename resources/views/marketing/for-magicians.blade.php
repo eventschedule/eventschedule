@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Magicians | Share Your Shows & Get Booked</x-slot>
     <x-slot name="description">Share your magic shows, sell tickets directly, and reach your audience with newsletters. No algorithm blocking your content. Zero platform fees. Free forever.</x-slot>
-    <x-slot name="socialImage">social/for-talent.png</x-slot>
     <x-slot name="breadcrumbTitle">For Magicians</x-slot>
 
     <x-slot name="structuredData">

@@ -1,4 +1,4 @@
-@props(['name' => 'phone', 'value' => '', 'id' => null, 'required' => false, 'disabled' => false])
+@props(['name' => 'phone', 'value' => '', 'id' => null, 'required' => false, 'disabled' => false, 'country' => 'us'])
 
 @php
     $inputId = $id ?? $name;
@@ -36,13 +36,7 @@
 
     var iti = window.intlTelInput(input, {
         utilsScript: '{{ asset('vendor/intl-tel-input/js/utils.js') }}',
-        initialCountry: 'auto',
-        geoIpLookup: function(callback) {
-            fetch('https://ipapi.co/json/')
-                .then(function(res) { return res.json(); })
-                .then(function(data) { callback(data.country_code); })
-                .catch(function() { callback('us'); });
-        },
+        initialCountry: '{{ strtolower($country) }}',
         separateDialCode: true,
         strictMode: true,
         nationalMode: false,

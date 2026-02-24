@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Theaters | Ticketing & Show Calendar Software</x-slot>
     <x-slot name="description">Sell out every performance. Manage show runs, sell tickets with zero platform fees, and email your patrons directly. Free forever.</x-slot>
-    <x-slot name="socialImage">social/for-venues.png</x-slot>
     <x-slot name="breadcrumbTitle">For Theaters</x-slot>
 
     <x-slot name="structuredData">

@@ -337,18 +337,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::get('/tmp/event-image/{filename?}', [AppController::class, 'tempEventImage'])->name('event.tmp_image');
 
-// Social image preview (local development only)
-if (config('app.env') === 'local') {
-    Route::get('/social-preview/{page}', function (string $page) {
-        $pages = ['home', 'features', 'pricing', 'about', 'selfhost', 'integrations', 'saas', 'for-talent', 'for-venues', 'for-online', 'docs', 'for-community'];
-        if (! in_array($page, $pages)) {
-            abort(404);
-        }
-
-        return view("social.{$page}");
-    })->name('social.preview');
-}
-
 // Marketing pages - only shown on the nexus (eventschedule.com)
 if (config('app.is_nexus')) {
     if (config('app.is_testing')) {

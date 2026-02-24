@@ -2,7 +2,6 @@
     {{-- SEO Slots --}}
     <x-slot name="title">Search Schedules & Events | Event Schedule</x-slot>
     <x-slot name="description">Search for schedules and upcoming events on Event Schedule. Find fitness classes, music venues, community groups, and more.</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
     <x-slot name="breadcrumbTitle">{{ __('messages.search') }}</x-slot>
 
     @if($query)

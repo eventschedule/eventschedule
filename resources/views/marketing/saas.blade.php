@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">White-Label SaaS Platform - Run Your Own Ticketing Business</x-slot>
     <x-slot name="description">Launch your own white-label ticketing SaaS platform at zero cost. Set your own prices, keep 100% of revenue through your branded platform.</x-slot>
-    <x-slot name="socialImage">social/saas.png</x-slot>
     <x-slot name="breadcrumbTitle">SaaS</x-slot>
 
     <x-slot name="structuredData">

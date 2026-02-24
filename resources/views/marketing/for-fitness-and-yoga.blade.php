@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Fitness & Yoga | Class Scheduling</x-slot>
     <x-slot name="description">Share your class schedule, sell drop-in passes, and reach students directly with newsletters. No algorithm. Zero platform fees. Free forever.</x-slot>
-    <x-slot name="socialImage">social/for-talent.png</x-slot>
     <x-slot name="breadcrumbTitle">For Fitness & Yoga</x-slot>
 
     <x-slot name="structuredData">

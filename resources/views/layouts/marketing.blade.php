@@ -64,9 +64,15 @@
     <meta property="og:title" content="{{ $title ?? 'Event Schedule' }}">
     <meta property="og:description" content="{{ $description ?? 'The simple and free way to share your event schedule' }}">
     @php
-        $ogImage = isset($socialImage)
-            ? (str_starts_with($socialImage, 'http') ? $socialImage : config('app.url') . '/images/' . $socialImage)
-            : config('app.url') . '/images/social/home.png';
+        if (isset($socialImage) && str_starts_with($socialImage, 'http')) {
+            $ogImage = $socialImage;
+        } else {
+            $pathSlug = trim(request()->path(), '/') ?: 'home';
+            $pathSlug = str_replace('/', '-', $pathSlug);
+            $ogImage = file_exists(public_path("images/social/{$pathSlug}.png"))
+                ? config('app.url') . "/images/social/{$pathSlug}.png"
+                : config('app.url') . '/images/social/home.png';
+        }
     @endphp
     <meta property="og:image" content="{{ $ogImage }}">
     <meta property="og:image:width" content="1200">
@@ -104,15 +110,7 @@
         "@type": "WebSite",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
-        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}",
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": {
-                "@type": "EntryPoint",
-                "urlTemplate": "{{ config('app.url') }}/search?q={search_term_string}"
-            },
-            "query-input": "required name=search_term_string"
-        }
+        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}"
     }
     </script>
     <script type="application/ld+json" {!! nonce_attr() !!}>

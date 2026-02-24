@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Musicians & Performers | Share Your Shows</x-slot>
     <x-slot name="description">Share your upcoming shows with fans. Sync with Google Calendar, sell tickets direct, and let venues add you to their schedule. Built for musicians, DJs, and performers.</x-slot>
-    <x-slot name="socialImage">social/for-talent.png</x-slot>
     <x-slot name="breadcrumbTitle">For Talent</x-slot>
 
     <x-slot name="structuredData">

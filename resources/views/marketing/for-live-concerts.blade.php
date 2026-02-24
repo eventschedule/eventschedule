@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Live Concerts | Ticketing Software</x-slot>
     <x-slot name="description">Stream live concerts to fans worldwide. Sell virtual tickets alongside venue tickets, email fans directly, and manage your streaming schedule. Zero platform fees.</x-slot>
-    <x-slot name="socialImage">social/for-online.png</x-slot>
     <x-slot name="breadcrumbTitle">For Live Concerts</x-slot>
 
     <x-slot name="structuredData">
@@ -91,7 +90,7 @@
         ],
         "url": "{{ url()->current() }}",
         "keywords": "live concert streaming, virtual concert tickets, livestream concerts",
-        "screenshot": "{{ asset('images/social/for-online.png') }}",
+        "screenshot": "{{ asset('images/social/for-live-concerts.png') }}",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"

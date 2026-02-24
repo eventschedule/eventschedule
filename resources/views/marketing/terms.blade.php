@@ -2,7 +2,6 @@
     <x-slot name="title">Terms of Service - Event Schedule</x-slot>
     <x-slot name="description">Terms of Service for Event Schedule - the rules and guidelines for using our platform.</x-slot>
     <x-slot name="breadcrumbTitle">Terms of Service</x-slot>
-    <x-slot name="socialImage">social/features.png</x-slot>
 
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>

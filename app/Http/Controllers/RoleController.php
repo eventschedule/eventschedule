@@ -3241,7 +3241,11 @@ class RoleController extends Controller
 
         $phone = $role->phone;
         if (! $phone) {
-            return response()->json(['success' => false, 'message' => __('messages.phone_number').' is required'], 422);
+            return response()->json(['success' => false, 'message' => __('messages.phone_number_required')], 422);
+        }
+
+        if (! SmsService::isConfigured()) {
+            return response()->json(['success' => false, 'message' => __('messages.failed_to_send_sms')], 500);
         }
 
         // Rate limiting: max 5 codes per hour per phone
@@ -3254,10 +3258,7 @@ class RoleController extends Controller
 
         $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
-        \Illuminate\Support\Facades\Cache::put('role_phone_verify_code_'.$code, [
-            'phone' => $phone,
-            'role_id' => $role->id,
-        ], now()->addMinutes(10));
+        \Illuminate\Support\Facades\Cache::put('role_phone_verify_code_'.$role->id, $code, now()->addMinutes(10));
 
         \Illuminate\Support\Facades\Cache::put($attemptsKey, $attempts + 1, now()->addHour());
 
@@ -3285,9 +3286,9 @@ class RoleController extends Controller
             'code' => ['required', 'string', 'size:6'],
         ]);
 
-        $data = \Illuminate\Support\Facades\Cache::pull('role_phone_verify_code_'.$request->code);
+        $storedCode = \Illuminate\Support\Facades\Cache::pull('role_phone_verify_code_'.$role->id);
 
-        if (! $data || $data['phone'] !== $role->phone || $data['role_id'] !== $role->id) {
+        if (! $storedCode || ! hash_equals($storedCode, $request->code)) {
             return response()->json(['success' => false, 'message' => __('messages.phone_verification_code_invalid')], 422);
         }
 

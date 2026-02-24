@@ -2,7 +2,6 @@
     <x-slot name="title">Fan Content Documentation - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Fan Content</x-slot>
     <x-slot name="description">Learn how to let fans submit videos and comments on your events in Event Schedule.</x-slot>
-    <x-slot name="socialImage">social/docs.png</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

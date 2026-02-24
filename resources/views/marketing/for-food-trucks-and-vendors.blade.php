@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Food Trucks | Location Sharing & Bookings</x-slot>
     <x-slot name="description">Tell customers where to find your food truck today. Share your weekly rotation, email your regulars directly, and take catering bookings with zero platform fees.</x-slot>
-    <x-slot name="socialImage">social/for-talent.png</x-slot>
     <x-slot name="breadcrumbTitle">For Food Trucks & Vendors</x-slot>
 
     <x-slot name="structuredData">

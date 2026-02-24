@@ -1,7 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule for Visual Artists | Share Your Exhibitions</x-slot>
     <x-slot name="description">Share your exhibitions, open studios, and art fairs. Sell tickets directly and build your collector base with newsletters. Zero platform fees. Free forever.</x-slot>
-    <x-slot name="socialImage">social/for-talent.png</x-slot>
     <x-slot name="breadcrumbTitle">For Visual Artists</x-slot>
 
     <x-slot name="structuredData">

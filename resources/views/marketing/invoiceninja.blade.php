@@ -2,7 +2,6 @@
     <x-slot name="title">Invoice Ninja Integration - Event Schedule</x-slot>
     <x-slot name="description">Generate professional invoices for ticket purchases. Automatic client management, QR code tickets, and automatic payment tracking with Invoice Ninja.</x-slot>
     <x-slot name="breadcrumbTitle">Invoice Ninja</x-slot>
-    <x-slot name="socialImage">social/integrations.png</x-slot>
 
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
