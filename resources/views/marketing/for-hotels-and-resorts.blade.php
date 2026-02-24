@@ -131,14 +131,14 @@
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass hotel-brass-badge mb-8">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass hotel-brass-badge mb-8 animate-reveal" style="opacity: 0;">
                 <svg aria-hidden="true" class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
                 <span class="text-sm text-gray-600 dark:text-gray-300 font-medium">For Hotels & Resorts</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-4 leading-tight animate-reveal delay-100" style="opacity: 0;">
                 Elevate the<br>
                 <span class="text-gradient-slate-gold">guest experience.</span>
             </h1>
@@ -148,11 +148,11 @@
                 <div class="hotel-shimmer-line w-48 h-px"></div>
             </div>
 
-            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12 animate-reveal delay-200" style="opacity: 0;">
                 From pool parties to wine tastings. One calendar for every guest activity. Keep guests engaged and delighted.
             </p>
 
-            <div class="flex flex-wrap justify-center gap-4">
+            <div class="flex flex-wrap justify-center gap-4 animate-reveal delay-300" style="opacity: 0;">
                 <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-slate-700 to-amber-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-amber-500/25">
                     Create your activity calendar
                     <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

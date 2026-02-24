@@ -118,16 +118,16 @@
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8 backdrop-blur-sm">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8 backdrop-blur-sm animate-reveal" style="opacity: 0;">
                 <span class="text-sm text-rose-600 dark:text-rose-200/80">For Dance Companies, Troupes & Studios</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-light text-gray-900 dark:text-white mb-6 leading-tight tracking-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-light text-gray-900 dark:text-white mb-6 leading-tight tracking-tight animate-reveal delay-100" style="opacity: 0;">
                 From studio<br>
                 <span class="font-normal bg-gradient-to-r from-rose-300 via-cyan-300 to-sky-300 bg-clip-text text-transparent">to stage</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-stone-500 dark:text-stone-400 max-w-2xl mx-auto mb-12 font-light">
+            <p class="text-xl md:text-2xl text-stone-500 dark:text-stone-400 max-w-2xl mx-auto mb-12 font-light animate-reveal delay-200" style="opacity: 0;">
                 One schedule for rehearsals, performances, and classes. One link for your audience to find you.
             </p>
 

@@ -138,23 +138,23 @@
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-lg wood-grain-badge border border-amber-300/50 dark:border-amber-600/30 mb-8 backdrop-blur-sm">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-lg wood-grain-badge border border-amber-300/50 dark:border-amber-600/30 mb-8 backdrop-blur-sm animate-reveal" style="opacity: 0;">
                 <svg aria-hidden="true" class="w-4 h-4 text-lime-600 dark:text-lime-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span class="text-sm text-gray-600 dark:text-gray-300 font-medium">For Farmers Markets & Outdoor Markets</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight animate-reveal delay-100" style="opacity: 0;">
                 Your market. Your community.<br>
                 <span class="text-gradient-lime">Fresh every week.</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12 animate-reveal delay-200" style="opacity: 0;">
                 Stop losing shoppers to outdated flyers. Email your community directly, share what's fresh, and grow your market.
             </p>
 
-            <div class="flex flex-wrap justify-center gap-4">
+            <div class="flex flex-wrap justify-center gap-4 animate-reveal delay-300" style="opacity: 0;">
                 <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-lime-600 to-green-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-lime-500/25">
                     Create your market's calendar
                     <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -118,16 +118,16 @@
         </div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 backdrop-blur-sm">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 backdrop-blur-sm animate-reveal" style="opacity: 0;">
                 <span class="text-sm text-gray-600 dark:text-gray-300">For Actors, Companies & Productions</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-light text-gray-900 dark:text-white mb-6 leading-tight tracking-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-light text-gray-900 dark:text-white mb-6 leading-tight tracking-tight animate-reveal delay-100" style="opacity: 0;">
                 Your name<br>
                 <span class="font-semibold bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent">in lights</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-500 dark:text-stone-400 max-w-2xl mx-auto mb-12 font-light">
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-stone-400 max-w-2xl mx-auto mb-12 font-light animate-reveal delay-200" style="opacity: 0;">
                 Share your productions, sell tickets, and let audiences know when the curtain rises.
             </p>
 

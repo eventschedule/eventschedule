@@ -120,7 +120,7 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <!-- Badge with picture frame border -->
-            <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-sm glass artist-frame-badge mb-8 backdrop-blur-sm">
+            <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-sm glass artist-frame-badge mb-8 backdrop-blur-sm animate-reveal" style="opacity: 0;">
                 <div class="relative">
                     <svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -129,19 +129,19 @@
                 <span class="text-sm text-gray-600 dark:text-gray-300 font-medium tracking-wide">For Visual Artists</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight animate-reveal delay-100" style="opacity: 0;">
                 Your art. Your audience.<br>
                 <span class="artist-glow-text">No gallery gate.</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-4">
+            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-4 animate-reveal delay-200" style="opacity: 0;">
                 From open studios to art fairs. One link for all your exhibitions.
             </p>
             <p class="text-lg text-gray-400 dark:text-gray-500 max-w-2xl mx-auto mb-12">
                 Build your collector base directly.
             </p>
 
-            <div class="flex flex-wrap justify-center gap-4">
+            <div class="flex flex-wrap justify-center gap-4 animate-reveal delay-300" style="opacity: 0;">
                 <a href="{{ app_url('/sign_up') }}" class="group inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-sky-600 to-cyan-600 rounded-2xl hover:scale-105 transition-transform duration-150 will-change-transform shadow-lg shadow-sky-500/25">
                     Create your schedule
                     <svg aria-hidden="true" class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">

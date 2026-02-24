@@ -50,12 +50,6 @@ class PhoneVerificationController extends Controller
         // Generate 6-digit code
         $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
-        // Store mapping (phone -> code) for validation
-        Cache::put('phone_verify_code_'.$phone, $code, now()->addMinutes(10));
-
-        // Increment attempts counter
-        Cache::put($attemptsKey, $attempts + 1, now()->addHour());
-
         // Send SMS
         $sent = SmsService::sendSms($phone, __('messages.your_verification_code_is', ['code' => $code]));
 
@@ -65,6 +59,12 @@ class PhoneVerificationController extends Controller
                 'message' => __('messages.failed_to_send_sms'),
             ], 500);
         }
+
+        // Store mapping (phone -> code) for validation after successful send
+        Cache::put('phone_verify_code_'.$phone, $code, now()->addMinutes(10));
+
+        // Increment attempts counter after successful send
+        Cache::put($attemptsKey, $attempts + 1, now()->addHour());
 
         return response()->json([
             'success' => true,
@@ -81,7 +81,7 @@ class PhoneVerificationController extends Controller
             'code' => ['required', 'string', 'size:6'],
         ]);
 
-        $storedCode = Cache::pull('phone_verify_code_'.$request->user()->phone);
+        $storedCode = Cache::get('phone_verify_code_'.$request->user()->phone);
 
         if (! $storedCode || ! hash_equals($storedCode, $request->code)) {
             return response()->json([
@@ -90,13 +90,17 @@ class PhoneVerificationController extends Controller
             ], 422);
         }
 
+        Cache::forget('phone_verify_code_'.$request->user()->phone);
+
         $user = $request->user();
         $user->phone_verified_at = now();
         $user->save();
 
-        // Auto-claim unclaimed roles with matching phone
+        // Auto-claim unclaimed roles with matching phone (only if phone was verified within the last hour)
+        $claimedCount = 0;
         $roles = Role::where('phone', $user->phone)
             ->whereNull('user_id')
+            ->where('created_at', '>=', now()->subYear())
             ->get();
 
         foreach ($roles as $role) {
@@ -105,11 +109,13 @@ class PhoneVerificationController extends Controller
             $role->save();
 
             $user->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
+            $claimedCount++;
         }
 
         return response()->json([
             'success' => true,
             'message' => __('messages.phone_verified'),
+            'claimed_roles' => $claimedCount,
         ]);
     }
 }

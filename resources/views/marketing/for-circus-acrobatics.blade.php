@@ -119,22 +119,22 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <!-- "Now Performing" marquee badge -->
-            <div class="inline-flex items-center gap-3 px-5 py-2 rounded-sm marquee-badge mb-8">
+            <div class="inline-flex items-center gap-3 px-5 py-2 rounded-sm marquee-badge mb-8 animate-reveal" style="opacity: 0;">
                 <div class="w-2 h-2 bg-gold rounded-full animate-pulse"></div>
                 <span class="text-sm text-ivory font-medium tracking-widest uppercase">Now Performing</span>
                 <div class="w-2 h-2 bg-gold rounded-full animate-pulse"></div>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-ivory mb-8 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-ivory mb-8 leading-tight animate-reveal delay-100" style="opacity: 0;">
                 <span class="text-gradient-circus">Defy gravity.</span><br>
                 Fill every seat.
             </h1>
 
-            <p class="text-xl md:text-2xl text-ivory/80 max-w-3xl mx-auto mb-12">
+            <p class="text-xl md:text-2xl text-ivory/80 max-w-3xl mx-auto mb-12 animate-reveal delay-200" style="opacity: 0;">
                 From the training studio to the big top. One link for all your shows. Venues book you, fans follow you, no algorithm decides who sees it.
             </p>
 
-            <div class="flex flex-wrap justify-center gap-4">
+            <div class="flex flex-wrap justify-center gap-4 animate-reveal delay-300" style="opacity: 0;">
                 <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-gray-900 rounded-sm hover:scale-105 transition-all shadow-lg shadow-gold/25 marquee-button" style="background: linear-gradient(to right, #FFD700, #fbbf24);">
                     Create your performance schedule
                     <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

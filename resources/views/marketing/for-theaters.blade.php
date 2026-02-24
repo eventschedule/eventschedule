@@ -116,24 +116,24 @@
         <div class="absolute inset-0 grid-pattern bg-[size:60px_60px]"></div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-500/10 border border-gray-200 dark:border-white/10 mb-6">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-500/10 border border-gray-200 dark:border-white/10 mb-6 animate-reveal" style="opacity: 0;">
                 <svg aria-hidden="true" class="w-4 h-4 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
                 </svg>
                 <span class="text-sm text-rose-700 dark:text-rose-300">For Theaters & Performing Arts Venues</span>
             </div>
 
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight animate-reveal delay-100" style="opacity: 0;">
                 Sell out every show.<br>
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-red-400 to-amber-400">Build your audience.</span>
             </h1>
 
-            <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-8">
+            <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-8 animate-reveal delay-200" style="opacity: 0;">
                 From opening night to closing curtain. Sell tickets directly, manage show runs, and email your patrons without paying for ads.
             </p>
 
             <!-- Genre tags -->
-            <div class="flex flex-wrap justify-center gap-2 mb-10">
+            <div class="flex flex-wrap justify-center gap-2 mb-10 animate-reveal delay-300" style="opacity: 0;">
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm">Drama</span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300 text-sm">Musical</span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm">Comedy</span>

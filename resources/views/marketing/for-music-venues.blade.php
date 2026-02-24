@@ -107,21 +107,21 @@
 
         <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-gray-200 dark:border-white/10 mb-6">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-gray-200 dark:border-white/10 mb-6 animate-reveal" style="opacity: 0;">
                     <div class="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse"></div>
                     <span class="text-sm text-gray-600 dark:text-gray-300">For Concert Halls & Live Music Venues</span>
                 </div>
 
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight animate-reveal delay-100" style="opacity: 0;">
                     The venue calendar that<br>
                     <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-400 to-blue-400">pays you, not Ticketmaster</span>
                 </h1>
 
-                <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-10">
+                <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-10 animate-reveal delay-200" style="opacity: 0;">
                     Bands apply to play. You sell tickets direct. Fans get email updates without you paying for reach. Zero platform fees.
                 </p>
 
-                <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
+                <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25 animate-reveal delay-300" style="opacity: 0;">
                     Create Your Venue Calendar
                     <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

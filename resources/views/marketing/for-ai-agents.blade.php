@@ -28,41 +28,6 @@
             pointer-events: none;
         }
 
-        @keyframes reveal-up {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-reveal { animation: reveal-up 0.8s ease-out forwards; }
-        .delay-100 { animation-delay: 0.1s; }
-        .delay-200 { animation-delay: 0.2s; }
-        .delay-300 { animation-delay: 0.3s; }
-
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        .animate-shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            background-size: 200% 100%;
-            animation: shimmer 2s infinite;
-        }
-        .dark .animate-shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-            background-size: 200% 100%;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .animate-reveal,
-            .animate-shimmer,
-            .animate-pulse-slow,
-            .animate-float {
-                animation: none !important;
-            }
-            .animate-reveal {
-                opacity: 1 !important;
-                transform: none !important;
-            }
-        }
     </style>
 
     <x-slot name="structuredData">

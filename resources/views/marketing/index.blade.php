@@ -26,15 +26,6 @@
             84%, 96% { transform: translateX(-600%); }
             100% { transform: translateX(-700%); }
         }
-        @keyframes reveal-up {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-
         .animate-gradient {
             background-size: 200% 200%;
             animation: gradient-shift 8s ease infinite;
@@ -44,22 +35,6 @@
         .screenshot-carousel:hover .animate-scroll-step {
             animation-play-state: paused;
         }
-        .animate-reveal { animation: reveal-up 0.8s ease-out forwards; }
-        .animate-shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            background-size: 200% 100%;
-            animation: shimmer 2s infinite;
-        }
-        .dark .animate-shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-            background-size: 200% 100%;
-        }
-
-        /* Delays */
-        .delay-100 { animation-delay: 0.1s; }
-        .delay-200 { animation-delay: 0.2s; }
-        .delay-300 { animation-delay: 0.3s; }
-
         /* Noise overlay */
         .noise::before {
             content: "";

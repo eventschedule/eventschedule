@@ -120,11 +120,11 @@
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <!-- Neon sign style badge -->
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-200 dark:bg-[#0f0f14] border border-gray-200 dark:border-white/10 mb-8 shadow-[0_0_15px_rgba(251,191,36,0.3)]">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-200 dark:bg-[#0f0f14] border border-gray-200 dark:border-white/10 mb-8 shadow-[0_0_15px_rgba(251,191,36,0.3)] animate-reveal" style="opacity: 0;">
                 <span class="text-sm text-gray-600 dark:text-gray-300 font-medium tracking-wide">For Comedy Clubs & Improv Theaters</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight animate-reveal delay-100" style="opacity: 0;">
                 <span class="text-gray-900 dark:text-white">Running a comedy club is hard.</span>
             </h1>
 
@@ -132,11 +132,11 @@
                 Your software shouldn't be the joke.
             </p>
 
-            <p class="text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-12">
+            <p class="text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-12 animate-reveal delay-200" style="opacity: 0;">
                 Two drink minimum. Zero booking hassle. From open mic to Netflix special.
             </p>
 
-            <div class="flex flex-wrap justify-center gap-4">
+            <div class="flex flex-wrap justify-center gap-4 animate-reveal delay-300" style="opacity: 0;">
                 <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-black bg-gradient-to-r from-amber-400 to-yellow-500 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-amber-500/25">
                     Create your club's calendar
                     <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
