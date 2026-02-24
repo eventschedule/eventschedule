@@ -88,12 +88,7 @@
                             <h2 class="doc-heading">Your Schedule URL</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Every schedule gets a unique, shareable URL. This is the primary way people will find and view your events.</p>
 
-                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
-                                <picture>
-                                    <source srcset="{{ url('images/docs/sharing--guest-portal.webp') }}" type="image/webp">
-                                    <img src="{{ url('images/docs/sharing--guest-portal.png') }}" alt="Public schedule page" class="w-full h-auto" loading="eager">
-                                </picture>
-                            </div>
+                            <x-doc-screenshot id="sharing--guest-portal" alt="Public schedule page" loading="eager" />
 
                             <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
                                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Your schedule URL format:</p>

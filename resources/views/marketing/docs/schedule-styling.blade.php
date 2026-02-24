@@ -90,12 +90,7 @@
                             <h2 class="doc-heading">Overview</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Make your schedule uniquely yours with extensive styling options. Access styling settings in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>, then scroll to the styling section.</p>
 
-                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
-                                <picture>
-                                    <source srcset="{{ url('images/docs/schedule-styling--section-style.webp') }}" type="image/webp">
-                                    <img src="{{ url('images/docs/schedule-styling--section-style.png') }}" alt="Schedule styling settings" class="w-full h-auto" loading="eager">
-                                </picture>
-                            </div>
+                            <x-doc-screenshot id="schedule-styling--section-style" alt="Schedule styling settings" loading="eager" />
 
                             <p class="text-gray-600 dark:text-gray-300 mb-6">All styling changes update in real-time, so you can experiment freely and see exactly how your schedule will look before saving.</p>
 

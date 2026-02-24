@@ -58,8 +58,10 @@ class GeneralTest extends DuskTestCase
 
             // Create/edit event
             $browser->visit('/talent/add-event?date='.date('Y-m-d'))
-                ->click('a[data-section="section-venue"]')
-                ->waitFor('#selected_venue', 5)
+                ->waitFor('#name', 10)
+                ->pause(500);
+            $browser->script("document.querySelector('a[data-section=\"section-venue\"]').click()");
+            $browser->waitFor('#selected_venue', 5)
                 ->select('#selected_venue')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')

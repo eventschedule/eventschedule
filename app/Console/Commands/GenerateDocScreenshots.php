@@ -23,6 +23,8 @@ class GenerateDocScreenshots extends Command
 
     private const TEMP_PASSWORD = 'doc-screenshots-temp-pw-2024';
 
+    private const TEMP_EMAIL = 'screenshots@temp.local';
+
     private const OUTPUT_DIR = 'public/images/docs';
 
     private array $serverPipes = [];
@@ -76,16 +78,23 @@ class GenerateDocScreenshots extends Command
             $this->line('Temporarily moved Vite hot file to use built assets.');
         }
 
-        // Save original password hash and set temp password
+        // Save original credentials and set temp ones (temp email avoids demo mode warnings)
         $originalPasswordHash = $user->password;
+        $originalEmail = $user->email;
         $user->password = Hash::make(self::TEMP_PASSWORD);
+        $user->email = self::TEMP_EMAIL;
         $user->save();
+
+        // Re-verify email (the User model clears email_verified_at on email change)
+        $user->email_verified_at = now();
+        $user->saveQuietly();
 
         try {
             return $this->generate($user, $pages, $force, $outputDir);
         } finally {
-            // Restore original password
+            // Restore original credentials
             $user->password = $originalPasswordHash;
+            $user->email = $originalEmail;
             $user->save();
 
             // Restore hot file
@@ -127,7 +136,7 @@ class GenerateDocScreenshots extends Command
             ],
             'event-graphics' => [
                 ['id' => 'event-graphics--graphic-page', 'route' => '/simpsons/events-graphic', 'pause' => 3000],
-                ['id' => 'event-graphics--settings', 'route' => '/simpsons/events-graphic/settings'],
+                ['id' => 'event-graphics--settings', 'route' => '/simpsons/events-graphic', 'pause' => 3000, 'script' => "document.querySelectorAll('nav[aria-label=\"Settings Tabs\"] button')[1].click()"],
             ],
             'newsletters' => [
                 ['id' => 'newsletters--list', 'route' => '/newsletters?role_id='.$encodedRoleId],
@@ -189,21 +198,21 @@ class GenerateDocScreenshots extends Command
 
         $this->info('Server ready.');
 
-        // Start ChromeDriver
-        $chromeProcess = (new ChromeProcess)->toProcess();
+        // Start ChromeDriver on a dynamic port
+        $chromePort = $this->findAvailablePort();
+        $chromeProcess = (new ChromeProcess)->toProcess(["--port={$chromePort}"]);
         $chromeProcess->start();
 
         // Wait for ChromeDriver to be ready
-        sleep(2);
-
-        if (! $chromeProcess->isRunning()) {
+        if (! $this->waitForServer($chromePort)) {
             $this->error('ChromeDriver failed to start. Run: php artisan dusk:chrome-driver');
+            $this->error($chromeProcess->getErrorOutput());
             $this->stopServer($serverProcess);
 
             return 1;
         }
 
-        $this->info('ChromeDriver ready.');
+        $this->info("ChromeDriver ready on port {$chromePort}.");
 
         $baseUrl = "http://127.0.0.1:{$port}";
 
@@ -218,7 +227,7 @@ class GenerateDocScreenshots extends Command
         ]);
 
         $driver = RemoteWebDriver::create(
-            'http://localhost:9515',
+            "http://localhost:{$chromePort}",
             DesiredCapabilities::chrome()->setCapability(ChromeOptions::CAPABILITY, $options)
         );
 
@@ -239,6 +248,10 @@ class GenerateDocScreenshots extends Command
             $browser->script("document.querySelector('form[method=\"POST\"]').requestSubmit()");
             $browser->waitForLocation('/events', 15);
             $this->info('Logged in.');
+
+            // Force light mode for consistent screenshots
+            $browser->script("document.documentElement.classList.remove('dark')");
+            $browser->pause(300);
 
             $generated = 0;
             $skipped = 0;
@@ -263,8 +276,10 @@ class GenerateDocScreenshots extends Command
 
                     $pngPath = "{$outputDir}/{$id}.png";
                     $webpPath = "{$outputDir}/{$id}.webp";
+                    $darkPngPath = "{$outputDir}/{$id}-dark.png";
+                    $darkWebpPath = "{$outputDir}/{$id}-dark.webp";
 
-                    if (! $force && file_exists($pngPath) && file_exists($webpPath)) {
+                    if (! $force && file_exists($pngPath) && file_exists($webpPath) && file_exists($darkPngPath) && file_exists($darkWebpPath)) {
                         $this->line("  Skipping {$id} (already exists, use --force to overwrite)");
                         $skipped++;
 
@@ -276,13 +291,20 @@ class GenerateDocScreenshots extends Command
                     $browser->visit($route);
                     $browser->pause($pause);
 
+                    // Execute custom script if needed (e.g. click a tab)
+                    $script = $screenshot['script'] ?? null;
+                    if ($script) {
+                        $browser->script($script);
+                        $browser->pause(800);
+                    }
+
                     // Click section nav if needed
                     if ($section) {
                         $browser->script("document.querySelector('a[data-section=\"{$section}\"]').click()");
                         $browser->pause(800);
                     }
 
-                    // Take screenshot (Browser stores as PNG in the storeScreenshotsAt dir)
+                    // Take light screenshot (Browser stores as PNG in the storeScreenshotsAt dir)
                     $browser->screenshot($id);
 
                     if (file_exists($pngPath)) {
@@ -292,6 +314,23 @@ class GenerateDocScreenshots extends Command
                     } else {
                         $this->warn("  Failed to generate {$id}");
                     }
+
+                    // Take dark screenshot
+                    $browser->script("document.documentElement.classList.add('dark')");
+                    $browser->pause(800);
+                    $browser->screenshot($id.'-dark');
+
+                    if (file_exists($darkPngPath)) {
+                        ImageUtils::generateWebP($darkPngPath, $darkWebpPath);
+                        $generated++;
+                        $this->line("  Generated {$id}-dark");
+                    } else {
+                        $this->warn("  Failed to generate {$id}-dark");
+                    }
+
+                    // Restore light mode for next screenshot
+                    $browser->script("document.documentElement.classList.remove('dark')");
+                    $browser->pause(300);
                 }
             }
 

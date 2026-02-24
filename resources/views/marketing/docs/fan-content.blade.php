@@ -88,12 +88,7 @@
                                 Fan Content lets your audience submit YouTube or Vimeo videos and text comments on event pages. This is available for Curator-type schedules and gives fans a way to share their experience while keeping you in control of what appears publicly.
                             </p>
 
-                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
-                                <picture>
-                                    <source srcset="{{ url('images/docs/fan-content--videos-tab.webp') }}" type="image/webp">
-                                    <img src="{{ url('images/docs/fan-content--videos-tab.png') }}" alt="Fan videos management tab" class="w-full h-auto" loading="eager">
-                                </picture>
-                            </div>
+                            <x-doc-screenshot id="fan-content--videos-tab" alt="Fan videos management tab" loading="eager" />
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 All fan submissions go through an approval workflow. Nothing appears on your public event page until you approve it.

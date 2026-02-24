@@ -88,12 +88,7 @@
                                 The Analytics dashboard gives you a comprehensive view of how your schedule is performing. Access it by clicking <strong>Analytics</strong> in the main navigation.
                             </p>
 
-                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
-                                <picture>
-                                    <source srcset="{{ url('images/docs/analytics--dashboard.webp') }}" type="image/webp">
-                                    <img src="{{ url('images/docs/analytics--dashboard.png') }}" alt="Analytics dashboard" class="w-full h-auto" loading="eager">
-                                </picture>
-                            </div>
+                            <x-doc-screenshot id="analytics--dashboard" alt="Analytics dashboard" loading="eager" />
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Analytics tracks:

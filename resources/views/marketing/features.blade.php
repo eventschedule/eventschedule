@@ -15,16 +15,20 @@
         "operatingSystem": ["Web", "Android", "iOS"],
         "featureList": [
             "Event Ticketing with QR Check-in",
-            "Google Calendar Sync",
             "AI Event Parsing",
-            "Analytics Dashboard",
             "Email Newsletters",
-            "Embeddable Calendar Widget",
-            "Custom Fields",
+            "Google Calendar Sync",
+            "Analytics Dashboard",
             "Recurring Events",
-            "Sub-schedules",
             "Team Scheduling",
-            "Event Boost Ad Campaigns"
+            "Private Events",
+            "Custom Fields",
+            "Event Graphics",
+            "Event Boost Ad Campaigns",
+            "Fan Videos & Comments",
+            "Online Events",
+            "Sub-schedules",
+            "Open Source & REST API"
         ],
         "offers": {
             "@type": "Offer",
@@ -331,7 +335,143 @@
             </div>
         </section>
 
-        <!-- Banner 4: Recurring Events (Visual Left, Text Right) -->
+        <!-- Banner 4: Calendar Sync (Visual Left, Text Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-10 left-1/3 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
+                <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 0.8s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ marketing_url('/features/calendar-sync') }}" class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                Calendar Sync
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Two-way sync</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Sync with Google Calendar automatically. Changes flow in both directions via real-time webhooks.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Two-way sync</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Real-time updates</span>
+                            </div>
+                            <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float" style="animation-delay: 1s;">
+                                <div class="flex items-center gap-4">
+                                    <!-- Event Schedule box -->
+                                    <div class="bg-blue-100 dark:bg-gradient-to-br dark:from-blue-500/20 dark:to-sky-500/20 rounded-xl border border-blue-200 dark:border-blue-400/30 p-4 w-28">
+                                        <div class="text-xs text-blue-600 dark:text-blue-300 mb-2 text-center">Event Schedule</div>
+                                        <div class="space-y-1.5">
+                                            <div class="h-2 bg-white/20 rounded"></div>
+                                            <div class="h-2 bg-white/20 rounded w-3/4"></div>
+                                            <div class="h-2 bg-white/20 rounded w-1/2"></div>
+                                        </div>
+                                    </div>
+                                    <!-- Sync arrows -->
+                                    <div class="flex flex-col items-center gap-1">
+                                        <svg aria-hidden="true" class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                        </svg>
+                                        <svg aria-hidden="true" class="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                        </svg>
+                                    </div>
+                                    <!-- Google Calendar box -->
+                                    <div class="bg-gray-200 dark:bg-white/10 rounded-xl border border-gray-300 dark:border-white/20 p-4 w-28">
+                                        <div class="text-xs text-gray-600 dark:text-gray-300 mb-2 text-center">Google Calendar</div>
+                                        <div class="space-y-1.5">
+                                            <div class="h-2 bg-blue-400/40 rounded"></div>
+                                            <div class="h-2 bg-green-400/40 rounded w-3/4"></div>
+                                            <div class="h-2 bg-yellow-400/40 rounded w-1/2"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Banner 5: Analytics (Text Left, Visual Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-20 right-1/3 w-[400px] h-[400px] bg-emerald-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
+                <div class="absolute bottom-20 left-1/4 w-[300px] h-[300px] bg-teal-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.5s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ route('marketing.analytics') }}" class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                                Analytics
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">Know your audience</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Track page views, device breakdown, and traffic sources. Privacy-first with no external services.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Privacy-first</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">No external services</span>
+                            </div>
+                            <span class="inline-flex items-center text-emerald-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float" style="animation-delay: 0.3s;">
+                                <div class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900 dark:to-teal-900 rounded-xl border border-emerald-200 dark:border-emerald-500/30 p-5 w-64">
+                                    <div class="text-xs text-gray-500 dark:text-white/70 mb-3">Views this week</div>
+                                    <div class="flex items-end justify-between h-24 gap-2">
+                                        <div class="w-6 bg-emerald-500/40 rounded-t" style="height: 40%"></div>
+                                        <div class="w-6 bg-emerald-500/50 rounded-t" style="height: 55%"></div>
+                                        <div class="w-6 bg-emerald-500/60 rounded-t" style="height: 45%"></div>
+                                        <div class="w-6 bg-emerald-500/70 rounded-t" style="height: 70%"></div>
+                                        <div class="w-6 bg-emerald-500/80 rounded-t" style="height: 60%"></div>
+                                        <div class="w-6 bg-emerald-500/90 rounded-t" style="height: 85%"></div>
+                                        <div class="w-6 bg-emerald-500 rounded-t" style="height: 100%"></div>
+                                    </div>
+                                    <div class="flex justify-between mt-2 text-xs text-gray-500 dark:text-white/70">
+                                        <span>M</span>
+                                        <span>T</span>
+                                        <span>W</span>
+                                        <span>T</span>
+                                        <span>F</span>
+                                        <span>S</span>
+                                        <span>S</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Banner 6: Recurring Events (Visual Left, Text Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
@@ -417,275 +557,7 @@
             </div>
         </section>
 
-        <!-- Banner 5: Calendar Sync (Text Left, Visual Right) -->
-        <section class="relative py-24 lg:py-32 overflow-hidden">
-            <!-- Parallax background blobs -->
-            <div class="absolute inset-0">
-                <div class="absolute top-10 left-1/3 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
-                <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 0.8s;"></div>
-            </div>
-
-            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/calendar-sync') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
-                        <!-- Text side -->
-                        <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                Calendar Sync
-                            </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Two-way sync</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Sync with Google Calendar automatically. Changes flow in both directions via real-time webhooks.</p>
-                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Two-way sync</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Real-time updates</span>
-                            </div>
-                            <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
-                                Learn more
-                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                        </div>
-
-                        <!-- Visual side -->
-                        <div class="flex-shrink-0">
-                            <div class="animate-float" style="animation-delay: 1s;">
-                                <div class="flex items-center gap-4">
-                                    <!-- Event Schedule box -->
-                                    <div class="bg-blue-100 dark:bg-gradient-to-br dark:from-blue-500/20 dark:to-sky-500/20 rounded-xl border border-blue-200 dark:border-blue-400/30 p-4 w-28">
-                                        <div class="text-xs text-blue-600 dark:text-blue-300 mb-2 text-center">Event Schedule</div>
-                                        <div class="space-y-1.5">
-                                            <div class="h-2 bg-white/20 rounded"></div>
-                                            <div class="h-2 bg-white/20 rounded w-3/4"></div>
-                                            <div class="h-2 bg-white/20 rounded w-1/2"></div>
-                                        </div>
-                                    </div>
-                                    <!-- Sync arrows -->
-                                    <div class="flex flex-col items-center gap-1">
-                                        <svg aria-hidden="true" class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                        </svg>
-                                        <svg aria-hidden="true" class="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                        </svg>
-                                    </div>
-                                    <!-- Google Calendar box -->
-                                    <div class="bg-gray-200 dark:bg-white/10 rounded-xl border border-gray-300 dark:border-white/20 p-4 w-28">
-                                        <div class="text-xs text-gray-600 dark:text-gray-300 mb-2 text-center">Google Calendar</div>
-                                        <div class="space-y-1.5">
-                                            <div class="h-2 bg-blue-400/40 rounded"></div>
-                                            <div class="h-2 bg-green-400/40 rounded w-3/4"></div>
-                                            <div class="h-2 bg-yellow-400/40 rounded w-1/2"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </section>
-
-        <!-- Banner 6: Analytics (Visual Left, Text Right) -->
-        <section class="relative py-24 lg:py-32 overflow-hidden">
-            <!-- Parallax background blobs -->
-            <div class="absolute inset-0">
-                <div class="absolute top-20 right-1/3 w-[400px] h-[400px] bg-emerald-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
-                <div class="absolute bottom-20 left-1/4 w-[300px] h-[300px] bg-teal-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.5s;"></div>
-            </div>
-
-            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ route('marketing.analytics') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
-                        <!-- Text side -->
-                        <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-sm font-medium mb-4">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                                Analytics
-                            </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">Know your audience</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Track page views, device breakdown, and traffic sources. Privacy-first with no external services.</p>
-                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Privacy-first</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">No external services</span>
-                            </div>
-                            <span class="inline-flex items-center text-emerald-400 font-medium group-hover:gap-3 gap-2 transition-all">
-                                Learn more
-                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                        </div>
-
-                        <!-- Visual side -->
-                        <div class="flex-shrink-0">
-                            <div class="animate-float" style="animation-delay: 0.3s;">
-                                <div class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900 dark:to-teal-900 rounded-xl border border-emerald-200 dark:border-emerald-500/30 p-5 w-64">
-                                    <div class="text-xs text-gray-500 dark:text-white/70 mb-3">Views this week</div>
-                                    <div class="flex items-end justify-between h-24 gap-2">
-                                        <div class="w-6 bg-emerald-500/40 rounded-t" style="height: 40%"></div>
-                                        <div class="w-6 bg-emerald-500/50 rounded-t" style="height: 55%"></div>
-                                        <div class="w-6 bg-emerald-500/60 rounded-t" style="height: 45%"></div>
-                                        <div class="w-6 bg-emerald-500/70 rounded-t" style="height: 70%"></div>
-                                        <div class="w-6 bg-emerald-500/80 rounded-t" style="height: 60%"></div>
-                                        <div class="w-6 bg-emerald-500/90 rounded-t" style="height: 85%"></div>
-                                        <div class="w-6 bg-emerald-500 rounded-t" style="height: 100%"></div>
-                                    </div>
-                                    <div class="flex justify-between mt-2 text-xs text-gray-500 dark:text-white/70">
-                                        <span>M</span>
-                                        <span>T</span>
-                                        <span>W</span>
-                                        <span>T</span>
-                                        <span>F</span>
-                                        <span>S</span>
-                                        <span>S</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </section>
-
-        <!-- Banner 7: Embed Calendar (Text Left, Visual Right) -->
-        <section class="relative py-24 lg:py-32 overflow-hidden">
-            <!-- Parallax background blobs -->
-            <div class="absolute inset-0">
-                <div class="absolute top-10 left-1/3 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
-                <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.1s;"></div>
-            </div>
-
-            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/embed-calendar') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
-                        <!-- Text side -->
-                        <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                                </svg>
-                                Embed Calendar
-                            </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Add to any website</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Embed your event calendar on any site with one line of code. Responsive iframe with dark mode and 11 language support.</p>
-                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">One-line embed</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Responsive</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">11 languages</span>
-                            </div>
-                            <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
-                                Learn more
-                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                        </div>
-
-                        <!-- Visual side -->
-                        <div class="flex-shrink-0">
-                            <div class="animate-float" style="animation-delay: 0.7s;">
-                                <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl border border-gray-300 dark:border-white/20 overflow-hidden w-60">
-                                    <!-- Browser header -->
-                                    <div class="flex items-center gap-1.5 px-3 py-2 bg-gray-100 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
-                                        <div class="w-2.5 h-2.5 rounded-full bg-red-500/70"></div>
-                                        <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/70"></div>
-                                        <div class="w-2.5 h-2.5 rounded-full bg-green-500/70"></div>
-                                    </div>
-                                    <!-- Calendar grid -->
-                                    <div class="p-3">
-                                        <div class="grid grid-cols-5 gap-1 mb-2">
-                                            <div class="h-4 bg-blue-200 dark:bg-blue-500/30 rounded text-[8px] text-blue-700 dark:text-blue-300 flex items-center justify-center">Mon</div>
-                                            <div class="h-4 bg-gray-100 dark:bg-white/5 rounded"></div>
-                                            <div class="h-4 bg-blue-200 dark:bg-blue-500/30 rounded text-[8px] text-blue-700 dark:text-blue-300 flex items-center justify-center">Wed</div>
-                                            <div class="h-4 bg-gray-100 dark:bg-white/5 rounded"></div>
-                                            <div class="h-4 bg-blue-200 dark:bg-blue-500/30 rounded text-[8px] text-blue-700 dark:text-blue-300 flex items-center justify-center">Fri</div>
-                                        </div>
-                                        <!-- Code snippet -->
-                                        <div class="bg-gray-100 dark:bg-white/5 rounded-lg p-2 mt-2">
-                                            <code class="text-[9px] text-blue-600 dark:text-blue-300 font-mono break-all">&lt;iframe src="..."&gt;</code>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </section>
-
-        <!-- Banner 8: Custom Fields (Visual Left, Text Right) -->
-        <section class="relative py-24 lg:py-32 overflow-hidden">
-            <!-- Parallax background blobs -->
-            <div class="absolute inset-0">
-                <div class="absolute top-20 right-1/3 w-[400px] h-[400px] bg-amber-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
-                <div class="absolute bottom-20 left-1/4 w-[300px] h-[300px] bg-orange-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.2s;"></div>
-            </div>
-
-            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/custom-fields') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
-                        <!-- Text side -->
-                        <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm font-medium mb-4">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                Custom Fields
-                            </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors">Collect buyer info</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Gather dietary preferences, t-shirt sizes, or any info you need from ticket buyers with flexible form fields.</p>
-                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple field types</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Required or optional</span>
-                            </div>
-                            <span class="inline-flex items-center text-amber-400 font-medium group-hover:gap-3 gap-2 transition-all">
-                                Learn more
-                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                        </div>
-
-                        <!-- Visual side -->
-                        <div class="flex-shrink-0">
-                            <div class="animate-float" style="animation-delay: 0.7s;">
-                                <div class="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900 dark:to-orange-900 rounded-xl border border-amber-200 dark:border-amber-500/30 p-5 w-56 space-y-3">
-                                    <!-- Text field -->
-                                    <div>
-                                        <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">Company Name</div>
-                                        <div class="bg-white dark:bg-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-sm border border-gray-200 dark:border-white/10">Acme Corp</div>
-                                    </div>
-                                    <!-- Dropdown field -->
-                                    <div>
-                                        <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">T-Shirt Size</div>
-                                        <div class="bg-white dark:bg-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-sm border border-gray-200 dark:border-white/10 flex items-center justify-between">
-                                            <span>Large</span>
-                                            <svg aria-hidden="true" class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                                        </div>
-                                    </div>
-                                    <!-- Yes/No field -->
-                                    <div>
-                                        <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">Vegetarian?</div>
-                                        <div class="bg-amber-100 dark:bg-amber-500/20 rounded-lg px-3 py-2 text-amber-700 dark:text-amber-300 text-sm border border-amber-200 dark:border-amber-400/30 flex items-center justify-between">
-                                            <span>Yes</span>
-                                            <svg aria-hidden="true" class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </section>
-
-        <!-- Banner 9: Team Scheduling (Text Left, Visual Right) -->
+        <!-- Banner 7: Team Scheduling (Text Left, Visual Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
@@ -754,336 +626,7 @@
             </div>
         </section>
 
-        <!-- Banner 10: Sub-schedules (Visual Left, Text Right) -->
-        <section class="relative py-24 lg:py-32 overflow-hidden">
-            <!-- Parallax background blobs -->
-            <div class="absolute inset-0">
-                <div class="absolute top-20 right-1/3 w-[400px] h-[400px] bg-rose-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
-                <div class="absolute bottom-20 left-1/4 w-[300px] h-[300px] bg-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.4s;"></div>
-            </div>
-
-            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/sub-schedules') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
-                        <!-- Text side -->
-                        <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                </svg>
-                                Sub-schedules
-                            </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-rose-600 dark:group-hover:text-rose-300 transition-colors">Organize your events</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Create sub-schedules to categorize events by room, stage, series, or any way you like.</p>
-                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple rooms</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Event categories</span>
-                            </div>
-                            <span class="inline-flex items-center text-rose-400 font-medium group-hover:gap-3 gap-2 transition-all">
-                                Learn more
-                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                        </div>
-
-                        <!-- Visual side -->
-                        <div class="flex-shrink-0">
-                            <div class="animate-float" style="animation-delay: 0.4s;">
-                                <div class="bg-gradient-to-br from-rose-50 to-cyan-50 dark:from-rose-900 dark:to-cyan-900 rounded-xl border border-rose-200 dark:border-rose-500/30 p-4 w-56">
-                                    <div class="text-xs text-gray-500 dark:text-white/70 mb-3">Sub-schedules</div>
-                                    <div class="space-y-2">
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-rose-100 dark:bg-rose-500/20 border border-rose-200 dark:border-rose-500/30">
-                                            <div class="w-2 h-2 rounded-full bg-rose-400"></div>
-                                            <span class="text-gray-900 dark:text-white text-sm">Main Stage</span>
-                                        </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
-                                            <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
-                                            <span class="text-gray-600 dark:text-gray-300 text-sm">Acoustic Room</span>
-                                        </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
-                                            <div class="w-2 h-2 rounded-full bg-sky-400"></div>
-                                            <span class="text-gray-600 dark:text-gray-300 text-sm">Outdoor Patio</span>
-                                        </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
-                                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
-                                            <span class="text-gray-600 dark:text-gray-300 text-sm">Jazz Lounge</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </section>
-
-        <!-- Banner 11: Online Events (Text Left, Visual Right) -->
-        <section class="relative py-24 lg:py-32 overflow-hidden">
-            <!-- Parallax background blobs -->
-            <div class="absolute inset-0">
-                <div class="absolute top-10 left-1/3 w-[400px] h-[400px] bg-sky-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
-                <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.1s;"></div>
-            </div>
-
-            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/online-events') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
-                        <!-- Text side -->
-                        <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
-                                Online Events
-                            </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Go live, anywhere</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Toggle any event to online and add your streaming URL. Works with Zoom, YouTube, or any platform.</p>
-                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Virtual events</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any streaming platform</span>
-                            </div>
-                            <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
-                                Learn more
-                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                        </div>
-
-                        <!-- Visual side -->
-                        <div class="flex-shrink-0">
-                            <div class="animate-float" style="animation-delay: 0.8s;">
-                                <div class="bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900 dark:to-blue-900 rounded-xl border border-sky-200 dark:border-sky-500/30 p-4 w-56">
-                                    <!-- Toggle switch -->
-                                    <div class="flex items-center justify-between mb-4">
-                                        <span class="text-gray-600 dark:text-gray-300 text-sm">Online Event</span>
-                                        <div class="w-10 h-5 bg-sky-500 rounded-full relative">
-                                            <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow"></div>
-                                        </div>
-                                    </div>
-                                    <!-- URL field -->
-                                    <div>
-                                        <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">Streaming URL</div>
-                                        <div class="bg-sky-100 dark:bg-sky-500/20 rounded-lg px-3 py-2 text-sky-600 dark:text-sky-300 text-sm border border-sky-200 dark:border-sky-400/30 flex items-center gap-2">
-                                            <svg aria-hidden="true" class="w-4 h-4 text-sky-500 dark:text-sky-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
-                                            </svg>
-                                            <span class="truncate">zoom.us/j/123...</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </section>
-
-        <!-- Banner 12: Fan Videos & Comments (Visual Left, Text Right) -->
-        <section class="relative py-24 lg:py-32 overflow-hidden">
-            <!-- Parallax background blobs -->
-            <div class="absolute inset-0">
-                <div class="absolute top-20 right-1/3 w-[400px] h-[400px] bg-rose-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
-                <div class="absolute bottom-20 left-1/4 w-[300px] h-[300px] bg-orange-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.3s;"></div>
-            </div>
-
-            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/fan-videos') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
-                        <!-- Text side -->
-                        <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                </svg>
-                                Fan Engagement
-                            </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">Build community around events</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Fans and attendees can add YouTube videos and comments to your events, including on individual agenda items. All submissions need your approval before they go live. Turn every show into a shared memory.</p>
-                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">YouTube videos</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Comments</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Community</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Organizer approval</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Per-segment feedback</span>
-                            </div>
-                        </div>
-
-                        <!-- Visual side -->
-                        <div class="flex-shrink-0">
-                            <div class="animate-float" style="animation-delay: 0.5s;">
-                                <div class="bg-gradient-to-br from-rose-50 to-orange-50 dark:from-rose-900 dark:to-orange-900 rounded-xl border border-rose-200 dark:border-rose-500/30 p-4 w-56">
-                                    <!-- Event card mini -->
-                                    <div class="text-xs text-gray-500 dark:text-white/70 mb-2">Jazz Night</div>
-                                    <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-3">Fri, Mar 15 at 8 PM</div>
-                                    <!-- YouTube video thumbnail -->
-                                    <div class="bg-gray-800 rounded-lg p-3 mb-3 flex items-center justify-center">
-                                        <div class="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-                                            <svg aria-hidden="true" class="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M8 5v14l11-7z" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <!-- Comments -->
-                                    <div class="space-y-2">
-                                        <div class="flex items-start gap-2">
-                                            <div class="w-5 h-5 rounded-full bg-rose-300 dark:bg-rose-500/40 flex-shrink-0"></div>
-                                            <div class="bg-white dark:bg-white/10 rounded-lg px-2 py-1 text-[10px] text-gray-600 dark:text-gray-300">Amazing show!</div>
-                                        </div>
-                                        <div class="flex items-start gap-2">
-                                            <div class="w-5 h-5 rounded-full bg-orange-300 dark:bg-orange-500/40 flex-shrink-0"></div>
-                                            <div class="bg-white dark:bg-white/10 rounded-lg px-2 py-1 text-[10px] text-gray-600 dark:text-gray-300">Best night ever</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </section>
-
-        <!-- Banner 13: Event Boost (Text Left, Visual Right) -->
-        <section class="relative py-24 lg:py-32 overflow-hidden">
-            <!-- Parallax background blobs -->
-            <div class="absolute inset-0">
-                <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-orange-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
-                <div class="absolute bottom-10 right-1/3 w-[300px] h-[300px] bg-amber-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1s;"></div>
-            </div>
-
-            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/boost') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
-                        <!-- Text side -->
-                        <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 text-sm font-medium mb-4">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                                </svg>
-                                Event Boost
-                            </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-orange-600 dark:group-hover:text-orange-300 transition-colors">Amplify your events</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Turn any event into a live Facebook and Instagram ad. Set your budget, pick your audience, and launch in minutes. No ad manager required.</p>
-                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Facebook & Instagram</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Smart targeting</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Real-time analytics</span>
-                            </div>
-                            <span class="inline-flex items-center text-orange-400 font-medium group-hover:gap-3 gap-2 transition-all">
-                                Learn more
-                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                        </div>
-
-                        <!-- Visual side -->
-                        <div class="flex-shrink-0">
-                            <div class="animate-float" style="animation-delay: 0.4s;">
-                                <div class="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900 dark:to-amber-900 rounded-xl border border-orange-200 dark:border-orange-500/30 p-4 w-56">
-                                    <!-- Ad preview card -->
-                                    <div class="flex items-center gap-2 mb-3">
-                                        <div class="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-amber-500"></div>
-                                        <div class="text-[10px] text-gray-500 dark:text-white/70">Sponsored</div>
-                                    </div>
-                                    <div class="bg-gradient-to-br from-orange-400 to-amber-500 rounded-lg p-3 mb-3 text-center">
-                                        <div class="text-white font-bold text-xs">Summer Music Fest</div>
-                                        <div class="text-white/80 text-[10px] mt-0.5">Sat, Jul 12 at 6 PM</div>
-                                    </div>
-                                    <!-- Budget -->
-                                    <div class="mb-3">
-                                        <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">Budget</div>
-                                        <div class="h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
-                                            <div class="h-full w-3/5 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full"></div>
-                                        </div>
-                                        <div class="text-[10px] text-orange-600 dark:text-orange-300 mt-1 font-medium">$50 / 7 days</div>
-                                    </div>
-                                    <!-- Reach -->
-                                    <div class="bg-white dark:bg-white/10 rounded-lg p-2 text-center">
-                                        <div class="text-[10px] text-gray-500 dark:text-white/70">Est. reach</div>
-                                        <div class="text-sm font-bold text-orange-600 dark:text-orange-300">2,400 - 6,800</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </section>
-
-        <!-- Banner 14: Event Graphics (Text Left, Visual Right) -->
-        <section class="relative py-24 lg:py-32 overflow-hidden">
-            <!-- Parallax background blobs -->
-            <div class="absolute inset-0">
-                <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-orange-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
-                <div class="absolute bottom-10 right-1/3 w-[300px] h-[300px] bg-amber-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.1s;"></div>
-            </div>
-
-            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/event-graphics') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
-                        <!-- Text side -->
-                        <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 text-sm font-medium mb-4">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                Event Graphics
-                            </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-orange-600 dark:group-hover:text-orange-300 transition-colors">Share your events everywhere</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Auto-generate shareable images and formatted text for upcoming events. Ready for Instagram, WhatsApp, email, and more.</p>
-                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Auto-generated</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Social-ready</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple formats</span>
-                            </div>
-                            <span class="inline-flex items-center text-orange-400 font-medium group-hover:gap-3 gap-2 transition-all">
-                                Learn more
-                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                        </div>
-
-                        <!-- Visual side -->
-                        <div class="flex-shrink-0">
-                            <div class="animate-float" style="animation-delay: 0.5s;">
-                                <div class="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900 dark:to-amber-900 rounded-xl border border-orange-200 dark:border-orange-500/30 p-4 w-56">
-                                    <!-- Event graphic card mockup -->
-                                    <div class="bg-gradient-to-br from-orange-400 to-amber-500 rounded-lg p-3 mb-3">
-                                        <div class="flex items-center gap-2 mb-2">
-                                            <div class="w-3 h-3 bg-white/30 rounded"></div>
-                                            <div class="h-2 bg-white/40 rounded w-16"></div>
-                                        </div>
-                                        <div class="text-white font-bold text-xs mb-1">Summer Jazz Night</div>
-                                        <div class="text-white/80 text-[10px]">Sat, Jul 12 at 8 PM</div>
-                                        <div class="text-white/60 text-[10px]">Blue Note Jazz Club</div>
-                                    </div>
-                                    <!-- Format options -->
-                                    <div class="space-y-1.5">
-                                        <div class="flex items-center gap-2 p-1.5 rounded-lg bg-orange-100 dark:bg-orange-500/20 border border-orange-200 dark:border-orange-400/30">
-                                            <svg aria-hidden="true" class="w-3.5 h-3.5 text-orange-600 dark:text-orange-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                            <span class="text-[10px] text-orange-700 dark:text-orange-300">Image graphic</span>
-                                        </div>
-                                        <div class="flex items-center gap-2 p-1.5 rounded-lg bg-gray-50 dark:bg-white/5">
-                                            <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                            </svg>
-                                            <span class="text-[10px] text-gray-600 dark:text-gray-300">Formatted text</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </section>
-
-        <!-- Banner 15: Private Events (Visual Left, Text Right) -->
+        <!-- Banner 8: Private Events (Visual Left, Text Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
@@ -1164,7 +707,402 @@
             </div>
         </section>
 
-        <!-- Banner 16: Open Source (Visual Left, Text Right) -->
+        <!-- Banner 9: Custom Fields (Text Left, Visual Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-20 right-1/3 w-[400px] h-[400px] bg-amber-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
+                <div class="absolute bottom-20 left-1/4 w-[300px] h-[300px] bg-orange-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.2s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ marketing_url('/features/custom-fields') }}" class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Custom Fields
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors">Collect buyer info</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Gather dietary preferences, t-shirt sizes, or any info you need from ticket buyers with flexible form fields.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple field types</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Required or optional</span>
+                            </div>
+                            <span class="inline-flex items-center text-amber-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float" style="animation-delay: 0.7s;">
+                                <div class="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900 dark:to-orange-900 rounded-xl border border-amber-200 dark:border-amber-500/30 p-5 w-56 space-y-3">
+                                    <!-- Text field -->
+                                    <div>
+                                        <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">Company Name</div>
+                                        <div class="bg-white dark:bg-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-sm border border-gray-200 dark:border-white/10">Acme Corp</div>
+                                    </div>
+                                    <!-- Dropdown field -->
+                                    <div>
+                                        <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">T-Shirt Size</div>
+                                        <div class="bg-white dark:bg-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-sm border border-gray-200 dark:border-white/10 flex items-center justify-between">
+                                            <span>Large</span>
+                                            <svg aria-hidden="true" class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                        </div>
+                                    </div>
+                                    <!-- Yes/No field -->
+                                    <div>
+                                        <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">Vegetarian?</div>
+                                        <div class="bg-amber-100 dark:bg-amber-500/20 rounded-lg px-3 py-2 text-amber-700 dark:text-amber-300 text-sm border border-amber-200 dark:border-amber-400/30 flex items-center justify-between">
+                                            <span>Yes</span>
+                                            <svg aria-hidden="true" class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Banner 10: Event Graphics (Visual Left, Text Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-orange-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
+                <div class="absolute bottom-10 right-1/3 w-[300px] h-[300px] bg-amber-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.1s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ marketing_url('/features/event-graphics') }}" class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                Event Graphics
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-orange-600 dark:group-hover:text-orange-300 transition-colors">Share your events everywhere</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Auto-generate shareable images and formatted text for upcoming events. Ready for Instagram, WhatsApp, email, and more.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Auto-generated</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Social-ready</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple formats</span>
+                            </div>
+                            <span class="inline-flex items-center text-orange-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float" style="animation-delay: 0.5s;">
+                                <div class="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900 dark:to-amber-900 rounded-xl border border-orange-200 dark:border-orange-500/30 p-4 w-56">
+                                    <!-- Event graphic card mockup -->
+                                    <div class="bg-gradient-to-br from-orange-400 to-amber-500 rounded-lg p-3 mb-3">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <div class="w-3 h-3 bg-white/30 rounded"></div>
+                                            <div class="h-2 bg-white/40 rounded w-16"></div>
+                                        </div>
+                                        <div class="text-white font-bold text-xs mb-1">Summer Jazz Night</div>
+                                        <div class="text-white/80 text-[10px]">Sat, Jul 12 at 8 PM</div>
+                                        <div class="text-white/60 text-[10px]">Blue Note Jazz Club</div>
+                                    </div>
+                                    <!-- Format options -->
+                                    <div class="space-y-1.5">
+                                        <div class="flex items-center gap-2 p-1.5 rounded-lg bg-orange-100 dark:bg-orange-500/20 border border-orange-200 dark:border-orange-400/30">
+                                            <svg aria-hidden="true" class="w-3.5 h-3.5 text-orange-600 dark:text-orange-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <span class="text-[10px] text-orange-700 dark:text-orange-300">Image graphic</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 p-1.5 rounded-lg bg-gray-50 dark:bg-white/5">
+                                            <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            <span class="text-[10px] text-gray-600 dark:text-gray-300">Formatted text</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Banner 11: Event Boost (Text Left, Visual Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-orange-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
+                <div class="absolute bottom-10 right-1/3 w-[300px] h-[300px] bg-amber-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ marketing_url('/features/boost') }}" class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                                </svg>
+                                Event Boost
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-orange-600 dark:group-hover:text-orange-300 transition-colors">Amplify your events</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Turn any event into a live Facebook and Instagram ad. Set your budget, pick your audience, and launch in minutes. No ad manager required.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Facebook & Instagram</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Smart targeting</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Real-time analytics</span>
+                            </div>
+                            <span class="inline-flex items-center text-orange-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float" style="animation-delay: 0.4s;">
+                                <div class="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900 dark:to-amber-900 rounded-xl border border-orange-200 dark:border-orange-500/30 p-4 w-56">
+                                    <!-- Ad preview card -->
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <div class="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-amber-500"></div>
+                                        <div class="text-[10px] text-gray-500 dark:text-white/70">Sponsored</div>
+                                    </div>
+                                    <div class="bg-gradient-to-br from-orange-400 to-amber-500 rounded-lg p-3 mb-3 text-center">
+                                        <div class="text-white font-bold text-xs">Summer Music Fest</div>
+                                        <div class="text-white/80 text-[10px] mt-0.5">Sat, Jul 12 at 6 PM</div>
+                                    </div>
+                                    <!-- Budget -->
+                                    <div class="mb-3">
+                                        <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">Budget</div>
+                                        <div class="h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+                                            <div class="h-full w-3/5 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full"></div>
+                                        </div>
+                                        <div class="text-[10px] text-orange-600 dark:text-orange-300 mt-1 font-medium">$50 / 7 days</div>
+                                    </div>
+                                    <!-- Reach -->
+                                    <div class="bg-white dark:bg-white/10 rounded-lg p-2 text-center">
+                                        <div class="text-[10px] text-gray-500 dark:text-white/70">Est. reach</div>
+                                        <div class="text-sm font-bold text-orange-600 dark:text-orange-300">2,400 - 6,800</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Banner 12: Fan Videos & Comments (Visual Left, Text Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-20 right-1/3 w-[400px] h-[400px] bg-rose-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
+                <div class="absolute bottom-20 left-1/4 w-[300px] h-[300px] bg-orange-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.3s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ marketing_url('/features/fan-videos') }}" class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                                Fan Engagement
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">Build community around events</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Fans and attendees can add YouTube videos and comments to your events, including on individual agenda items. All submissions need your approval before they go live. Turn every show into a shared memory.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">YouTube videos</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Comments</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Community</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Organizer approval</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Per-segment feedback</span>
+                            </div>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float" style="animation-delay: 0.5s;">
+                                <div class="bg-gradient-to-br from-rose-50 to-orange-50 dark:from-rose-900 dark:to-orange-900 rounded-xl border border-rose-200 dark:border-rose-500/30 p-4 w-56">
+                                    <!-- Event card mini -->
+                                    <div class="text-xs text-gray-500 dark:text-white/70 mb-2">Jazz Night</div>
+                                    <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-3">Fri, Mar 15 at 8 PM</div>
+                                    <!-- YouTube video thumbnail -->
+                                    <div class="bg-gray-800 rounded-lg p-3 mb-3 flex items-center justify-center">
+                                        <div class="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
+                                            <svg aria-hidden="true" class="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M8 5v14l11-7z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <!-- Comments -->
+                                    <div class="space-y-2">
+                                        <div class="flex items-start gap-2">
+                                            <div class="w-5 h-5 rounded-full bg-rose-300 dark:bg-rose-500/40 flex-shrink-0"></div>
+                                            <div class="bg-white dark:bg-white/10 rounded-lg px-2 py-1 text-[10px] text-gray-600 dark:text-gray-300">Amazing show!</div>
+                                        </div>
+                                        <div class="flex items-start gap-2">
+                                            <div class="w-5 h-5 rounded-full bg-orange-300 dark:bg-orange-500/40 flex-shrink-0"></div>
+                                            <div class="bg-white dark:bg-white/10 rounded-lg px-2 py-1 text-[10px] text-gray-600 dark:text-gray-300">Best night ever</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Banner 13: Online Events (Text Left, Visual Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-10 left-1/3 w-[400px] h-[400px] bg-sky-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
+                <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.1s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ marketing_url('/features/online-events') }}" class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                                Online Events
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Go live, anywhere</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Toggle any event to online and add your streaming URL. Works with Zoom, YouTube, or any platform.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Virtual events</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any streaming platform</span>
+                            </div>
+                            <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float" style="animation-delay: 0.8s;">
+                                <div class="bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900 dark:to-blue-900 rounded-xl border border-sky-200 dark:border-sky-500/30 p-4 w-56">
+                                    <!-- Toggle switch -->
+                                    <div class="flex items-center justify-between mb-4">
+                                        <span class="text-gray-600 dark:text-gray-300 text-sm">Online Event</span>
+                                        <div class="w-10 h-5 bg-sky-500 rounded-full relative">
+                                            <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow"></div>
+                                        </div>
+                                    </div>
+                                    <!-- URL field -->
+                                    <div>
+                                        <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">Streaming URL</div>
+                                        <div class="bg-sky-100 dark:bg-sky-500/20 rounded-lg px-3 py-2 text-sky-600 dark:text-sky-300 text-sm border border-sky-200 dark:border-sky-400/30 flex items-center gap-2">
+                                            <svg aria-hidden="true" class="w-4 h-4 text-sky-500 dark:text-sky-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
+                                            </svg>
+                                            <span class="truncate">zoom.us/j/123...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Banner 14: Sub-schedules (Visual Left, Text Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-20 right-1/3 w-[400px] h-[400px] bg-rose-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
+                <div class="absolute bottom-20 left-1/4 w-[300px] h-[300px] bg-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.4s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ marketing_url('/features/sub-schedules') }}" class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                                Sub-schedules
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-rose-600 dark:group-hover:text-rose-300 transition-colors">Organize your events</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Create sub-schedules to categorize events by room, stage, series, or any way you like.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple rooms</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Event categories</span>
+                            </div>
+                            <span class="inline-flex items-center text-rose-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float" style="animation-delay: 0.4s;">
+                                <div class="bg-gradient-to-br from-rose-50 to-cyan-50 dark:from-rose-900 dark:to-cyan-900 rounded-xl border border-rose-200 dark:border-rose-500/30 p-4 w-56">
+                                    <div class="text-xs text-gray-500 dark:text-white/70 mb-3">Sub-schedules</div>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-rose-100 dark:bg-rose-500/20 border border-rose-200 dark:border-rose-500/30">
+                                            <div class="w-2 h-2 rounded-full bg-rose-400"></div>
+                                            <span class="text-gray-900 dark:text-white text-sm">Main Stage</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
+                                            <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+                                            <span class="text-gray-600 dark:text-gray-300 text-sm">Acoustic Room</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
+                                            <div class="w-2 h-2 rounded-full bg-sky-400"></div>
+                                            <span class="text-gray-600 dark:text-gray-300 text-sm">Outdoor Patio</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
+                                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                                            <span class="text-gray-600 dark:text-gray-300 text-sm">Jazz Lounge</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Banner 15: Open Source (Text Left, Visual Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
@@ -1174,7 +1112,7 @@
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <a href="{{ marketing_url('/open-source') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
+                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-500/20 text-gray-600 dark:text-gray-300 text-sm font-medium mb-4">

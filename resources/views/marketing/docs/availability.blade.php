@@ -87,12 +87,7 @@
                                 The Availability Calendar lets you mark specific dates as unavailable on your schedule. This is useful for:
                             </p>
 
-                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
-                                <picture>
-                                    <source srcset="{{ url('images/docs/availability--calendar.webp') }}" type="image/webp">
-                                    <img src="{{ url('images/docs/availability--calendar.png') }}" alt="Availability calendar" class="w-full h-auto" loading="eager">
-                                </picture>
-                            </div>
+                            <x-doc-screenshot id="availability--calendar" alt="Availability calendar" loading="eager" />
 
                             <ul class="doc-list mb-6">
                                 <li><strong>Talent</strong> (musicians, DJs, performers) - Show venues and promoters which dates you are free for bookings</li>

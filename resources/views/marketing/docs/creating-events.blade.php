@@ -93,12 +93,7 @@
                             <h2 class="doc-heading">Creating Events Manually</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">The simplest way to add an event is to create it manually from your schedule's admin page.</p>
 
-                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
-                                <picture>
-                                    <source srcset="{{ url('images/docs/creating-events--schedule-tab.webp') }}" type="image/webp">
-                                    <img src="{{ url('images/docs/creating-events--schedule-tab.png') }}" alt="Schedule event list view" class="w-full h-auto" loading="eager">
-                                </picture>
-                            </div>
+                            <x-doc-screenshot id="creating-events--schedule-tab" alt="Schedule event list view" loading="eager" />
 
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule</strong></li>
@@ -116,12 +111,7 @@
                                 <li>Click <strong class="text-gray-900 dark:text-white">"Save"</strong> to publish the event</li>
                             </ol>
 
-                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
-                                <picture>
-                                    <source srcset="{{ url('images/docs/creating-events--add-event.webp') }}" type="image/webp">
-                                    <img src="{{ url('images/docs/creating-events--add-event.png') }}" alt="Add event form" class="w-full h-auto" loading="lazy">
-                                </picture>
-                            </div>
+                            <x-doc-screenshot id="creating-events--add-event" alt="Add event form" />
                         </section>
 
                         <!-- AI Import -->
@@ -129,12 +119,7 @@
                             <h2 class="doc-heading">Let AI Do the Heavy Lifting</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Save hours of manual data entry. Paste any event text - emails, social media posts, website listings, or even flyer descriptions - and watch it transform into a ready-to-publish event in seconds.</p>
 
-                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
-                                <picture>
-                                    <source srcset="{{ url('images/docs/creating-events--import.webp') }}" type="image/webp">
-                                    <img src="{{ url('images/docs/creating-events--import.png') }}" alt="Import events page" class="w-full h-auto" loading="lazy">
-                                </picture>
-                            </div>
+                            <x-doc-screenshot id="creating-events--import" alt="Import events page" />
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">AI-Powered</div>

@@ -1086,14 +1086,14 @@ class MarketingController extends Controller
                     'Customization' => [
                         ['Custom domains', 'Yes (Enterprise)', 'No', true],
                         ['Remove branding', 'Yes (Pro)', 'No', true],
-                        ['Custom fields', 'Yes (Free)', 'Yes', false],
+                        ['Custom fields', 'Yes (Pro)', 'Yes', false],
                         ['Built-in analytics', 'Yes (Free)', 'Yes', false],
                     ],
                     'Unique Features' => [
                         ['AI event parsing', 'Yes (Enterprise)', 'No', true],
                         ['Event graphics gen', 'Yes (Pro)', 'No', true],
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
-                        ['Team collaboration', 'Yes (Free)', 'Yes', false],
+                        ['Team collaboration', 'Yes (Enterprise)', 'Yes', false],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Yes', false],
@@ -1196,14 +1196,14 @@ class MarketingController extends Controller
                     'Customization' => [
                         ['Custom domains', 'Yes (Enterprise)', 'Yes (Plus)', true],
                         ['Remove branding', 'Yes (Pro)', 'Yes (Plus)', true],
-                        ['Custom fields', 'Yes (Free)', 'Yes', false],
+                        ['Custom fields', 'Yes (Pro)', 'Yes', false],
                         ['Built-in analytics', 'Yes (Free)', 'Yes', false],
                     ],
                     'Unique Features' => [
                         ['AI event parsing', 'Yes (Enterprise)', 'No', true],
                         ['Event graphics gen', 'Yes (Pro)', 'No', true],
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
-                        ['Team collaboration', 'Yes (Free)', '3 admins (free), 5 (Plus)', true],
+                        ['Team collaboration', 'Yes (Enterprise)', '3 admins (free), 5 (Plus)', true],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Yes (Plus)', true],
@@ -1306,14 +1306,14 @@ class MarketingController extends Controller
                     'Customization' => [
                         ['Custom domains', 'Yes (Enterprise)', 'Yes (paid)', true],
                         ['Remove branding', 'Yes (Pro)', 'Yes (paid)', true],
-                        ['Custom fields', 'Yes (Free)', 'Yes', false],
+                        ['Custom fields', 'Yes (Pro)', 'Yes', false],
                         ['Built-in analytics', 'Yes (Free)', 'Yes', false],
                     ],
                     'Unique Features' => [
                         ['AI event parsing', 'Yes (Enterprise)', 'No', true],
                         ['Event graphics gen', 'Yes (Pro)', 'No', true],
                         ['Sub-schedules', 'Yes (Free)', 'No', true],
-                        ['Team collaboration', 'Yes (Free)', 'Yes', false],
+                        ['Team collaboration', 'Yes (Enterprise)', 'Yes', false],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Yes', false],
@@ -1413,7 +1413,7 @@ class MarketingController extends Controller
                         ['AI event parsing', 'Yes (Enterprise)', 'No', true],
                         ['Event graphics generation', 'Yes (Pro)', 'No', true],
                         ['Rich descriptions (Markdown)', 'Yes (Free)', 'Plain text only', true],
-                        ['Custom fields', 'Yes (Free)', 'No', true],
+                        ['Custom fields', 'Yes (Pro)', 'No', true],
                         ['Fan videos & comments', 'Yes (Free)', 'No', true],
                         ['Recurring events', 'Yes (Free)', 'Yes', false],
                     ],
@@ -1425,11 +1425,11 @@ class MarketingController extends Controller
                     ],
                     'Organization' => [
                         ['Sub-schedules/categories', 'Yes (Free)', 'Multiple calendars', true],
-                        ['Team collaboration', 'Yes (Free)', 'Yes', false],
+                        ['Team collaboration', 'Yes (Enterprise)', 'Yes', false],
                         ['Built-in analytics', 'Yes (Free)', 'No', true],
                     ],
                     'Platform' => [
-                        ['Custom domain', 'Yes (Pro)', 'No', true],
+                        ['Custom domain', 'Yes (Enterprise)', 'No', true],
                         ['Open source', 'Yes', 'No', true],
                         ['Selfhosting', 'Yes', 'No', true],
                         ['Google Calendar sync', 'Yes (Free)', 'N/A', true],
@@ -1531,14 +1531,14 @@ class MarketingController extends Controller
                     'Customization' => [
                         ['Custom domains', 'Yes (Enterprise)', 'No', true],
                         ['Remove branding', 'Yes (Pro)', 'No', true],
-                        ['Custom fields', 'Yes (Free)', 'No', true],
-                        ['Custom themes/styling', 'Yes (Free)', 'No', true],
+                        ['Custom fields', 'Yes (Pro)', 'No', true],
+                        ['Custom themes/styling', 'Yes (Pro)', 'No', true],
                     ],
                     'Unique Features' => [
                         ['AI event parsing', 'Yes (Enterprise)', 'No', true],
                         ['Event graphics gen', 'Yes (Pro)', 'No', true],
                         ['Embeddable calendar', 'Yes (Free)', 'No', true],
-                        ['Team collaboration', 'Yes (Free)', 'Co-organizers (paid)', true],
+                        ['Team collaboration', 'Yes (Enterprise)', 'Co-organizers (paid)', true],
                     ],
                     'Platform' => [
                         ['REST API', 'Yes (Pro)', 'Yes (limited)', true],
@@ -1865,7 +1865,7 @@ class MarketingController extends Controller
                     'Customization' => [
                         ['Custom domains', 'Yes (Enterprise)', 'Yes (enterprise)', false],
                         ['Remove branding', 'Yes (Pro)', 'Yes (enterprise)', false],
-                        ['Custom fields', 'Yes (Free)', 'Yes', false],
+                        ['Custom fields', 'Yes (Pro)', 'Yes', false],
                         ['Embeddable calendar', 'Yes (Free)', 'Registration widget', true],
                     ],
                     'Unique Features' => [

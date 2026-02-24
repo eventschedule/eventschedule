@@ -142,12 +142,7 @@
                             <h2 class="doc-heading">Basic Information</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Configure your schedule's core identity in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>.</p>
 
-                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
-                                <picture>
-                                    <source srcset="{{ url('images/docs/schedule-basics--section-details.webp') }}" type="image/webp">
-                                    <img src="{{ url('images/docs/schedule-basics--section-details.png') }}" alt="Schedule basic information settings" class="w-full h-auto" loading="eager">
-                                </picture>
-                            </div>
+                            <x-doc-screenshot id="schedule-basics--section-details" alt="Schedule basic information settings" loading="eager" />
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -174,12 +169,7 @@
                             <h2 class="doc-heading">Location & Address</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">For <strong class="text-gray-900 dark:text-white">Venue</strong> schedules, you can add a full physical address. This enables map integration and helps visitors find your location.</p>
 
-                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
-                                <picture>
-                                    <source srcset="{{ url('images/docs/schedule-basics--section-address.webp') }}" type="image/webp">
-                                    <img src="{{ url('images/docs/schedule-basics--section-address.png') }}" alt="Schedule location and address settings" class="w-full h-auto" loading="lazy">
-                                </picture>
-                            </div>
+                            <x-doc-screenshot id="schedule-basics--section-address" alt="Schedule location and address settings" />
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -207,12 +197,7 @@
                             <h2 class="doc-heading">Contact Information</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Add contact details in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> so visitors can reach you. These appear on your public schedule page.</p>
 
-                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
-                                <picture>
-                                    <source srcset="{{ url('images/docs/schedule-basics--section-contact-info.webp') }}" type="image/webp">
-                                    <img src="{{ url('images/docs/schedule-basics--section-contact-info.png') }}" alt="Schedule contact information settings" class="w-full h-auto" loading="lazy">
-                                </picture>
-                            </div>
+                            <x-doc-screenshot id="schedule-basics--section-contact-info" alt="Schedule contact information settings" />
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -239,12 +224,7 @@
                             <h2 class="doc-heading">Schedule Settings</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Configure how your schedule works in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>.</p>
 
-                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
-                                <picture>
-                                    <source srcset="{{ url('images/docs/schedule-basics--section-settings.webp') }}" type="image/webp">
-                                    <img src="{{ url('images/docs/schedule-basics--section-settings.png') }}" alt="Schedule settings" class="w-full h-auto" loading="lazy">
-                                </picture>
-                            </div>
+                            <x-doc-screenshot id="schedule-basics--section-settings" alt="Schedule settings" />
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">

@@ -227,6 +227,80 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Fee Calculator -->
+            <div class="mt-16" x-data="{
+                price: 10,
+                tickets: 100,
+                get revenue() { return this.price * this.tickets },
+                get esTotal() { return 5 + (this.revenue * 0.029) + (this.tickets * 0.30) },
+                get ebTotal() { return (this.revenue * 0.037) + (this.tickets * 1.79) },
+                get lumaFree() { return (this.revenue * 0.05) + (this.revenue * 0.029) + (this.tickets * 0.30) },
+                get lumaPlus() { return 59 + (this.revenue * 0.029) + (this.tickets * 0.30) },
+                get lumaTotal() { return Math.min(this.lumaFree, this.lumaPlus) },
+                get lumaIsFree() { return this.lumaFree <= this.lumaPlus },
+                get ttTotal() { return (this.tickets * 0.41) + (this.revenue * 0.029) + (this.tickets * 0.30) },
+                fmt(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') }
+            }">
+                <div class="text-center mb-8">
+                    <h3 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">Fee Calculator</h3>
+                    <p class="text-gray-500 dark:text-gray-400">See how much you'd pay each month on each platform.</p>
+                </div>
+
+                <!-- Inputs -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-6 mb-10">
+                    <div class="flex items-center gap-3">
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Ticket price</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">$</span>
+                            <input type="number" x-model.number="price" min="1" max="10000" class="w-28 pl-7 pr-3 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Tickets per month</label>
+                        <input type="number" x-model.number="tickets" min="1" max="100000" class="w-28 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+
+                <!-- Results Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Event Schedule -->
+                    <div class="relative rounded-2xl border-2 border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-500/5 p-6">
+                        <span class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-blue-500 text-white text-xs font-semibold whitespace-nowrap">Best value</span>
+                        <div class="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-1">Event Schedule</div>
+                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2" x-text="fmt(esTotal)"></div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">$5/mo + Stripe fees</div>
+                    </div>
+
+                    <!-- Eventbrite -->
+                    <div class="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 p-6">
+                        <div class="text-sm font-semibold text-gray-900 dark:text-white mb-1">Eventbrite</div>
+                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2" x-text="fmt(ebTotal)"></div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">3.7% + $1.79/ticket</div>
+                    </div>
+
+                    <!-- Luma -->
+                    <div class="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 p-6">
+                        <div class="text-sm font-semibold text-gray-900 dark:text-white mb-1">Luma</div>
+                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2" x-text="fmt(lumaTotal)"></div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                            <span x-show="lumaIsFree">Free plan (5% + Stripe)</span>
+                            <span x-show="!lumaIsFree">Plus plan ($59/mo + Stripe)</span>
+                        </div>
+                    </div>
+
+                    <!-- Ticket Tailor -->
+                    <div class="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 p-6">
+                        <div class="text-sm font-semibold text-gray-900 dark:text-white mb-1">Ticket Tailor</div>
+                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2" x-text="fmt(ttTotal)"></div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">~$0.41/ticket + Stripe fees</div>
+                    </div>
+                </div>
+
+                <p class="text-xs text-gray-400 dark:text-gray-500 text-center mt-4">
+                    Stripe fees (2.9% + $0.30/ticket) apply to Event Schedule, Luma, and Ticket Tailor. Eventbrite includes payment processing in their fees.
+                </p>
+            </div>
         </div>
     </section>
 

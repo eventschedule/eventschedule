@@ -99,12 +99,7 @@
                                 <li>Share news and updates with your community</li>
                             </ul>
 
-                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
-                                <picture>
-                                    <source srcset="{{ url('images/docs/newsletters--list.webp') }}" type="image/webp">
-                                    <img src="{{ url('images/docs/newsletters--list.png') }}" alt="Newsletter list" class="w-full h-auto" loading="eager">
-                                </picture>
-                            </div>
+                            <x-doc-screenshot id="newsletters--list" alt="Newsletter list" loading="eager" />
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 The newsletter builder provides a drag-and-drop interface with live preview, pre-built templates, and audience segmentation so you can reach the right people with the right message.
@@ -118,12 +113,7 @@
                                 The builder is organized into three tabs:
                             </p>
 
-                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
-                                <picture>
-                                    <source srcset="{{ url('images/docs/newsletters--create.webp') }}" type="image/webp">
-                                    <img src="{{ url('images/docs/newsletters--create.png') }}" alt="Newsletter builder" class="w-full h-auto" loading="lazy">
-                                </picture>
-                            </div>
+                            <x-doc-screenshot id="newsletters--create" alt="Newsletter builder" />
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">

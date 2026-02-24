@@ -92,12 +92,7 @@
                                 Boost turns your event details into live Facebook and Instagram ads. It is designed for event organizers who want to reach a wider audience without needing ad manager experience.
                             </p>
 
-                            <div class="my-6 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
-                                <picture>
-                                    <source srcset="{{ url('images/docs/boost--page.webp') }}" type="image/webp">
-                                    <img src="{{ url('images/docs/boost--page.png') }}" alt="Boost campaigns page" class="w-full h-auto" loading="eager">
-                                </picture>
-                            </div>
+                            <x-doc-screenshot id="boost--page" alt="Boost campaigns page" loading="eager" />
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 With Boost you can:
