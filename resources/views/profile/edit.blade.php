@@ -339,6 +339,19 @@
 
         // Initialize on page load
         initializeSections();
+
+        // Highlight phone field if redirected from boost
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('highlight') === 'phone') {
+            const phoneField = document.getElementById('phone-field');
+            if (phoneField) {
+                phoneField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                phoneField.classList.add('ring-2', 'ring-[#4E81FA]', 'rounded-md', 'p-2', '-m-2');
+                setTimeout(() => {
+                    phoneField.classList.remove('ring-2', 'ring-[#4E81FA]', 'rounded-md', 'p-2', '-m-2');
+                }, 5000);
+            }
+        }
     });
     </script>
 

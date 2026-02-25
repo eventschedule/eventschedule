@@ -78,6 +78,7 @@
                         <a href="#recurring" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Recurring Events</a>
                         <a href="#frequency-options" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">Frequency Options</a>
                         <a href="#end-conditions" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">End Conditions</a>
+                        <a href="#date-exceptions" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">Date Exceptions</a>
                         <a href="#event-details" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Event Details</a>
                         <a href="#managing" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Managing Events</a>
                         <a href="#custom-fields" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Custom Fields</a>
@@ -345,6 +346,27 @@
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Pro Tip: Google Calendar Sync</div>
                                 <p>Recurring events sync to <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-integrations" class="text-cyan-400 hover:text-cyan-300">Google Calendar</a> as individual occurrences, so each date appears separately in both calendars.</p>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mt-8 mb-4" id="date-exceptions">Date Exceptions</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Real-world schedules need flexibility. Use include and exclude dates to handle exceptions to your recurring pattern.</p>
+
+                            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Include Dates</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Add specific dates when the event should occur, even if they don't match the recurring pattern.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Example:</strong> A weekly Tuesday class adds a bonus Thursday session for a holiday week.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Exclude Dates</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Remove specific dates when the event should not occur, even if they match the recurring pattern.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Example:</strong> A weekly trivia night skips New Year's Eve.</p>
+                                </div>
+                            </div>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Priority</div>
+                                <p>If a date appears in both lists, exclude takes priority and the event will not occur on that date.</p>
                             </div>
                         </section>
 

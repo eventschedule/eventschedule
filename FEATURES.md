@@ -34,7 +34,7 @@ All users get these features with no subscription required.
 | Built-in analytics | Schedule analytics dashboard |
 | Sub-schedules | Group events into sub-schedules |
 | Online events | Virtual event support |
-| Recurring events | Day-of-week recurring patterns |
+| Recurring events | Day-of-week recurring patterns with date exceptions (include/exclude specific dates) |
 | Newsletter management | Full newsletter creation and management UI (sending limits vary by tier) |
 | Embed calendar on website | iframe embed with X-Frame-Options |
 | 10 newsletters per month | Basic newsletter sending limit |
@@ -53,6 +53,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Event boosting with ads | `BoostController:101,202`, `$role->isPro()` | Meta Ads integration |
 | Custom CSS styling | `RoleController:1748`, `$role->isPro()` | Custom CSS on schedule pages |
 | Custom fields | `RoleController:1822`, `$role->isPro()` | Custom data fields on events |
+| Event polls | `EventController`, `$role->isPro()` | Create polls on events, guests vote |
 | 100 newsletters per month | `$role->newsletterLimit()` | Increased sending limit |
 
 ## Enterprise Features

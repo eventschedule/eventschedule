@@ -1090,6 +1090,14 @@
                                 @endif
                             </a>
                             @endif
+                            @if ($event->exists && $role->isPro())
+                            <a href="#section-polls" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-polls">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                                </svg>
+                                {{ __('messages.polls') }}
+                            </a>
+                            @endif
                         </nav>
                         <!-- Sidebar Save Button -->
                         <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
@@ -1842,6 +1850,42 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('recurring_end_value')" />
                                 </div>
                             </div>
+                        </div>
+
+                        <div v-if="isRecurring" class="mb-6">
+                            <x-input-label :value="__('messages.include_dates')" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.include_dates_help') }}</p>
+                            <div id="recurring-include-dates-items">
+                                <div v-for="(date, index) in recurringIncludeDates" :key="'inc-' + index" class="mb-2">
+                                    <div class="flex items-center">
+                                        <input type="text" :class="'datepicker-include-date'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
+                                        <input type="hidden" name="recurring_include_dates[]" :value="date" />
+                                        <button type="button" @click="removeIncludeDate(index)"
+                                            class="ms-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" @click="addIncludeDate()" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                + {{ __('messages.add_date') }}
+                            </button>
+                        </div>
+
+                        <div v-if="isRecurring" class="mb-6">
+                            <x-input-label :value="__('messages.exclude_dates')" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.exclude_dates_help') }}</p>
+                            <div id="recurring-exclude-dates-items">
+                                <div v-for="(date, index) in recurringExcludeDates" :key="'exc-' + index" class="mb-2">
+                                    <div class="flex items-center">
+                                        <input type="text" :class="'datepicker-exclude-date'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
+                                        <input type="hidden" name="recurring_exclude_dates[]" :value="date" />
+                                        <button type="button" @click="removeExcludeDate(index)"
+                                            class="ms-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" @click="addExcludeDate()" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                + {{ __('messages.add_date') }}
+                            </button>
                         </div>
 
                     </div>
@@ -2931,6 +2975,117 @@
             </div>
             @endif
 
+            @if ($event->exists && $role->isPro())
+            <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-polls">
+                <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                    </svg>
+                    {{ __('messages.polls') }}
+                </span>
+                <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+            <div id="section-polls" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div class="max-w-xl">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                        </svg>
+                        {{ __('messages.polls') }}
+                    </h2>
+
+                    {{-- Existing Polls --}}
+                    @if ($polls->count() > 0)
+                    <div class="space-y-4 mb-6">
+                        @foreach ($polls as $poll)
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                            <div class="flex items-start justify-between gap-3 mb-3">
+                                <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ $poll->question }}</h3>
+                                <span class="shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $poll->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400' }}">
+                                    {{ $poll->is_active ? __('messages.poll_active') : __('messages.poll_closed_status') }}
+                                </span>
+                            </div>
+
+                            @php
+                                $results = $poll->getResults();
+                                $totalVotes = $poll->votes_count ?? 0;
+                                $maxCount = $totalVotes > 0 ? max(array_values($results + [0])) : 0;
+                            @endphp
+
+                            @foreach ($poll->options as $idx => $option)
+                            @php
+                                $count = $results[$idx] ?? 0;
+                                $pct = $totalVotes > 0 ? round($count / $totalVotes * 100) : 0;
+                            @endphp
+                            <div class="mb-2">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-700 dark:text-gray-300">{{ $option }}</span>
+                                    <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums">{{ $count }} ({{ $pct }}%)</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                    <div class="h-2 rounded-full" style="width: {{ max($pct, $totalVotes > 0 ? 2 : 0) }}%; background-color: {{ $count === $maxCount && $totalVotes > 0 ? '#4E81FA' : '#9ca3af' }}"></div>
+                                </div>
+                            </div>
+                            @endforeach
+
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 mb-3">
+                                {{ $totalVotes }} {{ __('messages.votes') }}
+                            </p>
+
+                            @if ($poll->votes_count > 0)
+                            <p class="text-xs text-amber-600 dark:text-amber-400 mb-3">{{ __('messages.cannot_edit_poll_with_votes') }}</p>
+                            @endif
+
+                            <div class="flex items-center gap-2">
+                                <button type="submit" form="form-toggle-poll-{{ $poll->id }}" class="text-sm px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    {{ $poll->is_active ? __('messages.close_poll') : __('messages.reopen_poll') }}
+                                </button>
+                                <button type="submit" form="form-delete-poll-{{ $poll->id }}" class="text-sm px-3 py-1.5 rounded border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20" onclick="return confirm('{{ __('messages.delete_poll') }}?')">
+                                    {{ __('messages.delete') }}
+                                </button>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    @else
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.no_polls') }}</p>
+                    @endif
+
+                    {{-- Add Poll Form --}}
+                    @if ($polls->count() < 5)
+                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.add_poll') }}</h3>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_question') }}</label>
+                            <input type="text" v-model="newPollQuestion" maxlength="500" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.poll_question') }}'">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_options') }}</label>
+                            <div v-for="(option, index) in newPollOptions" :key="index" class="flex items-center gap-2 mb-2">
+                                <input type="text" v-model="newPollOptions[index]" maxlength="200" class="flex-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.option_placeholder') }} ' + (index + 1)">
+                                <button v-if="newPollOptions.length > 2" type="button" @click="newPollOptions.splice(index, 1)" class="p-1 text-gray-400 hover:text-red-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
+                            <button v-if="newPollOptions.length < 10" type="button" @click="newPollOptions.push('')" class="mt-1 text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                                {{ __('messages.add_option') }}
+                            </button>
+                        </div>
+
+                        <button type="button" @click="submitPoll" :disabled="!newPollQuestion.trim() || newPollOptions.filter(o => o.trim()).length < 2" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                            {{ __('messages.add_poll') }}
+                        </button>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endif
+
                 </div> <!-- End of main content area -->
             </div> <!-- End of grid container -->
 
@@ -2980,6 +3135,14 @@
         @endforeach
         @foreach ($approvedPhotos as $photo)
         <form id="form-reject-photo-{{ $photo->id }}" method="POST" action="{{ route('event.reject_photo', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($photo->id)]) }}" class="hidden">@csrf @method('DELETE')</form>
+        @endforeach
+    @endif
+
+    {{-- External forms for poll toggle/delete buttons (outside main form to avoid nesting) --}}
+    @if ($event->exists && $role->isPro())
+        @foreach ($polls as $poll)
+        <form id="form-toggle-poll-{{ $poll->id }}" method="POST" action="{{ route('event.toggle_poll', ['subdomain' => $subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id), 'poll_hash' => \App\Utils\UrlUtils::encodeId($poll->id)]) }}" class="hidden">@csrf</form>
+        <form id="form-delete-poll-{{ $poll->id }}" method="POST" action="{{ route('event.delete_poll', ['subdomain' => $subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id), 'poll_hash' => \App\Utils\UrlUtils::encodeId($poll->id)]) }}" class="hidden">@csrf @method('DELETE')</form>
         @endforeach
     @endif
 
@@ -3053,6 +3216,8 @@
         isDirty: false,
         soldLabel: @json(__('messages.sold_reserved')),
         isRecurring: @json($event->days_of_week ? true : false),
+        recurringIncludeDates: @json($event->recurring_include_dates ?? []),
+        recurringExcludeDates: @json($event->recurring_exclude_dates ?? []),
         sendEmailToVenue: false,
         sendEmailToMembers: {},
         sendEmailToNewMember: false,
@@ -3080,6 +3245,8 @@
         partDragIndex: null,
         partDropTargetIndex: null,
         partEditors: {},
+        newPollQuestion: '',
+        newPollOptions: ['', ''],
       }
     },
     methods: {
@@ -3680,6 +3847,39 @@
       removeTicket(index) {
         this.tickets.splice(index, 1);
       },
+      submitPoll() {
+        const question = this.newPollQuestion.trim();
+        const options = this.newPollOptions.filter(o => o.trim());
+        if (!question || options.length < 2) return;
+
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ $event->exists ? route("event.store_poll", ["subdomain" => $subdomain, "event_hash" => \App\Utils\UrlUtils::encodeId($event->id)]) : "" }}';
+        form.style.display = 'none';
+
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = '_token';
+        csrf.value = '{{ csrf_token() }}';
+        form.appendChild(csrf);
+
+        const q = document.createElement('input');
+        q.type = 'hidden';
+        q.name = 'question';
+        q.value = question;
+        form.appendChild(q);
+
+        options.forEach(opt => {
+          const o = document.createElement('input');
+          o.type = 'hidden';
+          o.name = 'options[]';
+          o.value = opt.trim();
+          form.appendChild(o);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+      },
       getNextAvailableEventFieldIndex() {
         const usedIndices = Object.values(this.eventCustomFields || {}).map(f => f.index).filter(i => i);
         for (let i = 1; i <= 8; i++) {
@@ -3766,6 +3966,92 @@
             const curatorId = checkbox.value;
             this.toggleCuratorGroupSelection(curatorId);
           }
+        });
+      },
+      addIncludeDate() {
+        this.recurringIncludeDates.push('');
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            const items = document.querySelectorAll('#recurring-include-dates-items .datepicker-include-date');
+            const lastInput = items[items.length - 1];
+            if (lastInput && !lastInput._flatpickr) {
+              this.initDatePickerOnInput(lastInput, 'include', this.recurringIncludeDates.length - 1);
+            }
+          });
+        });
+      },
+      removeIncludeDate(index) {
+        document.querySelectorAll('#recurring-include-dates-items .datepicker-include-date').forEach(input => {
+          if (input._flatpickr) input._flatpickr.destroy();
+        });
+        this.recurringIncludeDates.splice(index, 1);
+        if (this.recurringIncludeDates.length > 0) {
+          this.initAllRecurringDatePickers();
+        }
+      },
+      addExcludeDate() {
+        this.recurringExcludeDates.push('');
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            const items = document.querySelectorAll('#recurring-exclude-dates-items .datepicker-exclude-date');
+            const lastInput = items[items.length - 1];
+            if (lastInput && !lastInput._flatpickr) {
+              this.initDatePickerOnInput(lastInput, 'exclude', this.recurringExcludeDates.length - 1);
+            }
+          });
+        });
+      },
+      removeExcludeDate(index) {
+        document.querySelectorAll('#recurring-exclude-dates-items .datepicker-exclude-date').forEach(input => {
+          if (input._flatpickr) input._flatpickr.destroy();
+        });
+        this.recurringExcludeDates.splice(index, 1);
+        if (this.recurringExcludeDates.length > 0) {
+          this.initAllRecurringDatePickers();
+        }
+      },
+      initDatePickerOnInput(input, type, index) {
+        const arr = type === 'include' ? this.recurringIncludeDates : this.recurringExcludeDates;
+        const defaultDate = arr[index] || null;
+
+        if (defaultDate) {
+          input.removeAttribute('value');
+        }
+
+        var f = flatpickr(input, {
+          allowInput: true,
+          enableTime: false,
+          altInput: true,
+          altFormat: "M j, Y",
+          dateFormat: "Y-m-d",
+          defaultDate: defaultDate,
+          onChange: (selectedDates, dateStr) => {
+            arr[index] = dateStr;
+          }
+        });
+
+        if (f._input) {
+          f._input.onkeydown = () => false;
+        }
+
+        if (!defaultDate) {
+          f.open();
+        }
+      },
+      initAllRecurringDatePickers() {
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            document.querySelectorAll('#recurring-include-dates-items .datepicker-include-date').forEach((input, i) => {
+              if (!input._flatpickr) {
+                this.initDatePickerOnInput(input, 'include', i);
+              }
+            });
+            document.querySelectorAll('#recurring-exclude-dates-items .datepicker-exclude-date').forEach((input, i) => {
+              if (!input._flatpickr) {
+                this.initDatePickerOnInput(input, 'exclude', i);
+              }
+            });
+          });
         });
       },
       initializeRecurringEndDatePicker() {
@@ -3926,6 +4212,11 @@
       'event.recurring_frequency'() {
         updateRecurringFieldVisibility();
       },
+      isRecurring(newValue) {
+        if (newValue && (this.recurringIncludeDates.length > 0 || this.recurringExcludeDates.length > 0)) {
+          this.initAllRecurringDatePickers();
+        }
+      },
       'event.recurring_end_type'(newValue, oldValue) {
         // Clear the value when switching between types
         if (oldValue && newValue !== oldValue) {
@@ -3988,6 +4279,11 @@
       // Initialize recurring end date picker if needed
       if (this.event.recurring_end_type === 'on_date') {
         this.initializeRecurringEndDatePicker();
+      }
+
+      // Initialize recurring include/exclude date pickers
+      if (this.isRecurring && (this.recurringIncludeDates.length > 0 || this.recurringExcludeDates.length > 0)) {
+        this.initAllRecurringDatePickers();
       }
       
       // Initialize sendEmailToMembers for existing selectedMembers

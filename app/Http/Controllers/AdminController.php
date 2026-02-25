@@ -219,8 +219,9 @@ class AdminController extends Controller
             ->limit(20)
             ->get();
 
-        // Recent events (excluding demo events)
+        // Recent events (excluding demo and private events)
         $recentEvents = Event::with('roles')
+            ->where('is_private', false)
             ->whereDoesntHave('roles', function ($query) {
                 $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
                     ->orWhere('subdomain', 'like', 'demo-%');
@@ -231,6 +232,20 @@ class AdminController extends Controller
 
         // Trends data - users, schedules, events over time
         $trendData = $this->getTrendData($startDate, $endDate);
+
+        // Private event counts
+        $privateEvents = Event::where('is_private', true)
+            ->whereDoesntHave('roles', function ($query) {
+                $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
+                    ->orWhere('subdomain', 'like', 'demo-%');
+            })->count();
+        $passwordProtectedEvents = Event::where('is_private', true)
+            ->whereNotNull('event_password')
+            ->where('event_password', '!=', '')
+            ->whereDoesntHave('roles', function ($query) {
+                $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
+                    ->orWhere('subdomain', 'like', 'demo-%');
+            })->count();
 
         // Boost & Newsletter stats
         $activeBoostCampaigns = BoostCampaign::where('status', 'active')->count();
@@ -268,6 +283,8 @@ class AdminController extends Controller
             'eventsByCountry',
             'recentSchedules',
             'recentEvents',
+            'privateEvents',
+            'passwordProtectedEvents',
             'trendData',
             'range',
             'activeBoostCampaigns',
@@ -898,6 +915,7 @@ class AdminController extends Controller
 
         $stuckEvents = Event::with('venue:id,language_code')
             ->where('translation_attempts', '>=', $stuckThreshold)
+            ->where('is_private', false)
             ->where(function ($q) {
                 $q->where(function ($sub) {
                     $sub->whereNotNull('name')->where('name', '!=', '')->whereNull('name_en');
@@ -921,7 +939,7 @@ class AdminController extends Controller
                         $sub->whereNotNull('description')->where('description', '!=', '')->whereNull('description_en');
                     });
             })
-            ->whereHas('event', fn ($q) => $q->whereDoesntHave('roles', fn ($r) => $r->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)->orWhere('subdomain', 'like', 'demo-%')))
+            ->whereHas('event', fn ($q) => $q->where('is_private', false)->whereDoesntHave('roles', fn ($r) => $r->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)->orWhere('subdomain', 'like', 'demo-%')))
             ->orderByDesc('translation_attempts')
             ->limit(20)
             ->get(['id', 'name', 'description', 'event_id', 'translation_attempts', 'last_translated_at', 'name_en', 'description_en']);
@@ -931,11 +949,11 @@ class AdminController extends Controller
             ->where(function ($q) {
                 $q->where(function ($sub) {
                     $sub->whereNull('name_translated')
-                        ->whereHas('event', fn ($e) => $e->whereNotNull('name')->where('name', '!=', ''));
+                        ->whereHas('event', fn ($e) => $e->where('is_private', false)->whereNotNull('name')->where('name', '!=', ''));
                 })
                     ->orWhere(function ($sub) {
                         $sub->whereNull('description_translated')
-                            ->whereHas('event', fn ($e) => $e->whereNotNull('description')->where('description', '!=', ''));
+                            ->whereHas('event', fn ($e) => $e->where('is_private', false)->whereNotNull('description')->where('description', '!=', ''));
                     });
             })
             ->whereHas('role', fn ($q) => $q->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)->where('subdomain', 'not like', 'demo-%'))

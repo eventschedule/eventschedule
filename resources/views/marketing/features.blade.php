@@ -25,6 +25,7 @@
             "Event Graphics",
             "Event Boost Ad Campaigns",
             "Fan Videos & Comments",
+            "Event Polls",
             "Online Events",
             "Sub-schedules",
             "Open Source & REST API"

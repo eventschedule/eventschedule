@@ -59,6 +59,8 @@ class Event extends Model
         'custom_field_values' => 'array',
         'last_translated_at' => 'datetime',
         'ticket_price' => 'decimal:2',
+        'recurring_include_dates' => 'array',
+        'recurring_exclude_dates' => 'array',
     ];
 
     protected static function boot()
@@ -262,6 +264,16 @@ class Event extends Model
     public function pendingPhotos()
     {
         return $this->hasMany(EventPhoto::class)->where('is_approved', false);
+    }
+
+    public function polls()
+    {
+        return $this->hasMany(EventPoll::class)->orderBy('sort_order');
+    }
+
+    public function activePolls()
+    {
+        return $this->hasMany(EventPoll::class)->where('is_active', true)->orderBy('sort_order');
     }
 
     public function user()
@@ -491,6 +503,18 @@ class Event extends Model
                 return false;
             }
 
+            $dateStr = Carbon::parse($date)->format('Y-m-d');
+
+            // Exclude dates have highest priority
+            if (! empty($this->recurring_exclude_dates) && in_array($dateStr, $this->recurring_exclude_dates)) {
+                return false;
+            }
+
+            // Include dates bypass pattern and end checks (but still require on/after start date)
+            if (! empty($this->recurring_include_dates) && in_array($dateStr, $this->recurring_include_dates)) {
+                return true;
+            }
+
             // Check if date matches the frequency pattern
             $frequency = $this->recurring_frequency ?? 'weekly';
 
@@ -566,7 +590,8 @@ class Event extends Model
     {
         switch ($frequency) {
             case 'daily':
-                return $startDate->diffInDays($checkDate) + 1;
+                $count = $startDate->diffInDays($checkDate) + 1;
+                break;
 
             case 'monthly_date':
                 $count = 0;
@@ -575,8 +600,7 @@ class Event extends Model
                     $count++;
                     $current->addMonth();
                 }
-
-                return $count;
+                break;
 
             case 'monthly_weekday':
                 $count = 0;
@@ -603,8 +627,7 @@ class Event extends Model
                     // Move to next month
                     $current->addMonth()->startOfMonth();
                 }
-
-                return $count;
+                break;
 
             case 'yearly':
                 $count = 0;
@@ -613,8 +636,7 @@ class Event extends Model
                     $count++;
                     $current->addYear();
                 }
-
-                return $count;
+                break;
 
             case 'every_n_weeks':
                 $interval = $this->recurring_interval ?? 2;
@@ -628,8 +650,7 @@ class Event extends Model
                     }
                     $currentDate->addDay();
                 }
-
-                return $count;
+                break;
 
             case 'weekly':
             default:
@@ -641,9 +662,31 @@ class Event extends Model
                     }
                     $currentDate->addDay();
                 }
-
-                return $count;
+                break;
         }
+
+        // Adjust count for include/exclude dates
+        if (! empty($this->recurring_exclude_dates)) {
+            foreach ($this->recurring_exclude_dates as $excludeDateStr) {
+                $excludeDate = Carbon::createFromFormat('Y-m-d', $excludeDateStr)->startOfDay();
+                if ($excludeDate->gte($startDate) && $excludeDate->lte($checkDate)
+                    && $this->matchesFrequency($frequency, $excludeDate, $startDate)) {
+                    $count--;
+                }
+            }
+        }
+
+        if (! empty($this->recurring_include_dates)) {
+            foreach ($this->recurring_include_dates as $includeDateStr) {
+                $includeDate = Carbon::createFromFormat('Y-m-d', $includeDateStr)->startOfDay();
+                if ($includeDate->gte($startDate) && $includeDate->lte($checkDate)
+                    && ! $this->matchesFrequency($frequency, $includeDate, $startDate)) {
+                    $count++;
+                }
+            }
+        }
+
+        return max(0, $count);
     }
 
     public function canSellTickets($date = null)

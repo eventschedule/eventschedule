@@ -7,6 +7,8 @@ use App\Http\Requests\EventCreateRequest;
 use App\Http\Requests\EventParseRequest;
 use App\Http\Requests\EventPartsSaveRequest;
 use App\Http\Requests\EventPhotoSubmitRequest;
+use App\Http\Requests\EventPollStoreRequest;
+use App\Http\Requests\EventPollVoteRequest;
 use App\Http\Requests\EventUpdateRequest;
 use App\Http\Requests\EventVideoSubmitRequest;
 use App\Jobs\SendQueuedEmail;
@@ -17,6 +19,8 @@ use App\Models\Event;
 use App\Models\EventComment;
 use App\Models\EventPart;
 use App\Models\EventPhoto;
+use App\Models\EventPoll;
+use App\Models\EventPollVote;
 use App\Models\EventVideo;
 use App\Models\Role;
 use App\Models\Ticket;
@@ -545,6 +549,7 @@ class EventController extends Controller
         $approvedComments = $event->exists ? $event->approvedComments()->with(['eventPart', 'user'])->get() : collect();
         $pendingPhotos = $event->exists ? $event->pendingPhotos()->with(['eventPart', 'user'])->get() : collect();
         $approvedPhotos = $event->exists ? $event->approvedPhotos()->with(['eventPart', 'user'])->get() : collect();
+        $polls = $event->exists ? $event->polls()->withCount('votes')->get() : collect();
 
         return view('event/edit', [
             'role' => $role,
@@ -566,6 +571,7 @@ class EventController extends Controller
             'approvedComments' => $approvedComments,
             'pendingPhotos' => $pendingPhotos,
             'approvedPhotos' => $approvedPhotos,
+            'polls' => $polls,
         ]);
     }
 
@@ -1702,7 +1708,7 @@ class EventController extends Controller
         }
 
         if (! auth()->check()) {
-            $tempFilename = 'photo_' . Str::random(32) . '.' . $extension;
+            $tempFilename = 'photo_'.Str::random(32).'.'.$extension;
             $file->storeAs('temp', $tempFilename);
 
             session()->put('pending_fan_content', [
@@ -1730,7 +1736,7 @@ class EventController extends Controller
 
         $eventDate = $event->days_of_week ? $request->input('event_date') : null;
 
-        $filename = 'photo_' . Str::random(32) . '.' . $extension;
+        $filename = 'photo_'.Str::random(32).'.'.$extension;
         if (config('filesystems.default') == 'local') {
             $file->storeAs('public', $filename);
         } else {
@@ -1761,7 +1767,7 @@ class EventController extends Controller
         if ($isApproved) {
             $redirect = $redirect->with('scroll_to', 'event-media-section');
         } else {
-            $redirect = $redirect->with('scroll_to', 'pending-photo-' . $photo->id);
+            $redirect = $redirect->with('scroll_to', 'pending-photo-'.$photo->id);
         }
 
         return $redirect;
@@ -1937,6 +1943,172 @@ class EventController extends Controller
         return response($ical, 200, [
             'Content-Type' => 'text/calendar; charset=utf-8',
             'Content-Disposition' => 'inline; filename="event.ics"',
+        ]);
+    }
+
+    public function storePoll(EventPollStoreRequest $request, $subdomain, $eventHash)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        if (is_demo_role($role)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+        if (! $role->isPro()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $event = Event::with('roles')->findOrFail(UrlUtils::decodeId($eventHash));
+        if (! $request->user()->canEditEvent($event)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        if ($event->polls()->count() >= 5) {
+            return redirect()->to(url()->previous().'#section-polls')->with('error', __('messages.max_polls_reached'));
+        }
+
+        $maxSort = $event->polls()->max('sort_order') ?? 0;
+
+        EventPoll::create([
+            'event_id' => $event->id,
+            'question' => $request->input('question'),
+            'options' => $request->input('options'),
+            'sort_order' => $maxSort + 1,
+        ]);
+
+        return redirect()->to(url()->previous().'#section-polls')->with('message', __('messages.poll_created'));
+    }
+
+    public function updatePoll(EventPollStoreRequest $request, $subdomain, $eventHash, $pollHash)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        if (is_demo_role($role)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+        if (! $role->isPro()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $event = Event::with('roles')->findOrFail(UrlUtils::decodeId($eventHash));
+        if (! $request->user()->canEditEvent($event)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $poll = EventPoll::where('event_id', $event->id)->findOrFail(UrlUtils::decodeId($pollHash));
+
+        if ($poll->votes()->exists()) {
+            $poll->update(['question' => $request->input('question')]);
+        } else {
+            $poll->update([
+                'question' => $request->input('question'),
+                'options' => $request->input('options'),
+            ]);
+        }
+
+        return redirect()->to(url()->previous().'#section-polls')->with('message', __('messages.poll_updated'));
+    }
+
+    public function deletePoll(Request $request, $subdomain, $eventHash, $pollHash)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        if (is_demo_role($role)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+        if (! $role->isPro()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $event = Event::with('roles')->findOrFail(UrlUtils::decodeId($eventHash));
+        if (! $request->user()->canEditEvent($event)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $poll = EventPoll::where('event_id', $event->id)->findOrFail(UrlUtils::decodeId($pollHash));
+        $poll->delete();
+
+        return redirect()->to(url()->previous().'#section-polls')->with('message', __('messages.poll_deleted'));
+    }
+
+    public function togglePoll(Request $request, $subdomain, $eventHash, $pollHash)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        if (is_demo_role($role)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+        if (! $role->isPro()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $event = Event::with('roles')->findOrFail(UrlUtils::decodeId($eventHash));
+        if (! $request->user()->canEditEvent($event)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $poll = EventPoll::where('event_id', $event->id)->findOrFail(UrlUtils::decodeId($pollHash));
+        $poll->update(['is_active' => ! $poll->is_active]);
+
+        $message = $poll->is_active ? __('messages.poll_reopened') : __('messages.poll_closed');
+
+        return redirect()->to(url()->previous().'#section-polls')->with('message', $message);
+    }
+
+    public function votePoll(EventPollVoteRequest $request, $subdomain, $eventHash, $pollHash)
+    {
+        $role = Role::where('subdomain', $subdomain)->firstOrFail();
+        if (is_demo_role($role)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (! $role->isPro()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $event = Event::findOrFail(UrlUtils::decodeId($eventHash));
+
+        if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
+            return response()->json(['error' => 'Not found'], 404);
+        }
+
+        if ($event->is_private) {
+            $user = auth()->user();
+            $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+            if (! $isMemberOrAdmin) {
+                return response()->json(['error' => 'Not found'], 404);
+            }
+        }
+
+        if (! auth()->check()) {
+            return response()->json(['error' => __('messages.sign_in_to_vote')], 401);
+        }
+
+        $poll = EventPoll::where('event_id', $event->id)
+            ->where('is_active', true)
+            ->findOrFail(UrlUtils::decodeId($pollHash));
+
+        $optionIndex = $request->input('option_index');
+        if ($optionIndex >= count($poll->options)) {
+            return response()->json(['error' => 'Invalid option'], 422);
+        }
+
+        try {
+            EventPollVote::create([
+                'event_poll_id' => $poll->id,
+                'user_id' => auth()->id(),
+                'option_index' => $optionIndex,
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->errorInfo[1] !== 1062) {
+                throw $e;
+            }
+            // Duplicate vote - return current results
+        }
+
+        $results = $poll->getResults();
+        $totalVotes = $poll->votes()->count();
+
+        return response()->json([
+            'success' => true,
+            'options' => $poll->options,
+            'results' => $results,
+            'total_votes' => $totalVotes,
         ]);
     }
 }

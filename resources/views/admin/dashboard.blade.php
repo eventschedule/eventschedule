@@ -84,7 +84,7 @@
         </div>
 
         {{-- Activity Stats --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_users_7_days')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeUsers7Days) }}</p>
@@ -107,6 +107,18 @@
                     <p class="ms-2 text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.upcoming_online_events')</p>
                 </div>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($upcomingOnlineEvents) }}</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="w-5 h-5 text-amber-500 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                    <p class="ms-2 text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.private_events')</p>
+                </div>
+                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($privateEvents) }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ number_format($passwordProtectedEvents) }} @lang('messages.with_password')</p>
             </div>
         </div>
 

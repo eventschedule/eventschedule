@@ -129,6 +129,17 @@
                 'uniqueKey' => \App\Utils\UrlUtils::encodeId($event->id),
                 'submit_video_url' => isset($role) ? route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : null,
                 'submit_comment_url' => isset($role) ? route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : null,
+                'polls' => (isset($role) && $role->isPro() && $event->relationLoaded('activePolls')) ? $event->activePolls->map(fn($poll) => [
+                    'id' => \App\Utils\UrlUtils::encodeId($poll->id),
+                    'question' => $poll->question,
+                    'options' => $poll->options,
+                    'total_votes' => $poll->votes_count ?? $poll->votes()->count(),
+                    'results' => $poll->getResults(),
+                    'user_vote' => auth()->check() ? $poll->getUserVote(auth()->id()) : null,
+                    'is_active' => $poll->is_active,
+                ])->values()->toArray() : [],
+                'poll_count' => (isset($role) && $role->isPro()) ? ($event->active_polls_count ?? 0) : 0,
+                'vote_poll_url' => (isset($role) && $role->isPro()) ? route('event.vote_poll', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id), 'poll_hash' => 'POLL_HASH']) : null,
                 'custom_field_values' => $event->custom_field_values ?? [],
             ];
         };
@@ -763,6 +774,49 @@
                                             </div>
                                         </div>
 
+                                        {{-- Polls --}}
+                                        <div v-if="event.polls && event.polls.length > 0 && !event.is_password_protected" class="space-y-3" @click.stop>
+                                            <div v-for="poll in event.polls" :key="poll.id"
+                                                 class="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                                                <h4 class="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-3"
+                                                    v-text="poll.question"></h4>
+                                                <div v-if="poll.user_vote === null && poll.is_active">
+                                                    <button v-for="(option, idx) in poll.options" :key="idx"
+                                                            @click.stop="votePoll(event, poll, idx)"
+                                                            :disabled="votingPoll[poll.id]"
+                                                            class="w-full text-start px-3 py-2.5 mb-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 dark:text-gray-200 hover:border-gray-500 transition-colors">
+                                                        <span v-text="option"></span>
+                                                    </button>
+                                                    @guest
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                        <a href="{{ app_url('/login') }}" class="underline">{{ __('messages.sign_in_to_vote') }}</a>
+                                                    </p>
+                                                    @endguest
+                                                </div>
+                                                <div v-else>
+                                                    <div v-for="(option, idx) in poll.options" :key="idx" class="mb-2.5">
+                                                        <div class="flex justify-between text-sm mb-1">
+                                                            <span class="text-gray-800 dark:text-gray-200" :class="{ 'font-semibold': getVoteCount(poll, idx) === getMaxVoteCount(poll) && poll.total_votes > 0 }" v-text="option"></span>
+                                                            <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums">
+                                                                <span v-text="getVoteCount(poll, idx)"></span> (<span v-text="getVotePercent(poll, idx)"></span>%)
+                                                            </span>
+                                                        </div>
+                                                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                                            <div class="h-2.5 rounded-full transition-all duration-500"
+                                                                 :style="{
+                                                                     width: Math.max(getVotePercent(poll, idx), poll.total_votes > 0 ? 2 : 0) + '%',
+                                                                     backgroundColor: idx === poll.user_vote ? accentColor : (getVoteCount(poll, idx) === getMaxVoteCount(poll) && poll.total_votes > 0 ? accentColor + '80' : '#9ca3af')
+                                                                 }"></div>
+                                                        </div>
+                                                    </div>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                                                        <span v-text="poll.total_votes"></span> {{ __('messages.votes') }}
+                                                        <span v-if="!poll.is_active" class="ms-1">&middot; {{ __('messages.poll_closed_status') }}</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         {{-- Mini Timeline for Parts --}}
                                         <div v-if="event.parts && event.parts.length > 0 && !event.is_password_protected" :dir="isRtl ? 'rtl' : 'ltr'">
                                             <div class="relative ps-2">
@@ -1050,6 +1104,49 @@
                                                 <path fill-rule="evenodd" d="M3.43 2.524A41.29 41.29 0 0110 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.202 41.202 0 01-5.183.501.78.78 0 00-.528.224l-3.579 3.58A.75.75 0 016 17.25v-3.443a41.033 41.033 0 01-2.57-.33C2.993 13.244 2 11.986 2 10.574V5.426c0-1.413.993-2.67 2.43-2.902z" clip-rule="evenodd" />
                                             </svg>
                                             <span>"<span v-text="comment.text"></span>" - <span class="font-medium" v-text="comment.author"></span></span>
+                                        </div>
+                                    </div>
+
+                                    {{-- Polls --}}
+                                    <div v-if="event.polls && event.polls.length > 0 && !event.is_password_protected" class="space-y-3" @click.stop>
+                                        <div v-for="poll in event.polls" :key="poll.id"
+                                             class="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                                            <h4 class="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-3"
+                                                v-text="poll.question"></h4>
+                                            <div v-if="poll.user_vote === null && poll.is_active">
+                                                <button v-for="(option, idx) in poll.options" :key="idx"
+                                                        @click.stop="votePoll(event, poll, idx)"
+                                                        :disabled="votingPoll[poll.id]"
+                                                        class="w-full text-start px-3 py-2.5 mb-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 dark:text-gray-200 hover:border-gray-500 transition-colors">
+                                                    <span v-text="option"></span>
+                                                </button>
+                                                @guest
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                    <a href="{{ app_url('/login') }}" class="underline">{{ __('messages.sign_in_to_vote') }}</a>
+                                                </p>
+                                                @endguest
+                                            </div>
+                                            <div v-else>
+                                                <div v-for="(option, idx) in poll.options" :key="idx" class="mb-2.5">
+                                                    <div class="flex justify-between text-sm mb-1">
+                                                        <span class="text-gray-800 dark:text-gray-200" :class="{ 'font-semibold': getVoteCount(poll, idx) === getMaxVoteCount(poll) && poll.total_votes > 0 }" v-text="option"></span>
+                                                        <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums">
+                                                            <span v-text="getVoteCount(poll, idx)"></span> (<span v-text="getVotePercent(poll, idx)"></span>%)
+                                                        </span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                                        <div class="h-2.5 rounded-full transition-all duration-500"
+                                                             :style="{
+                                                                 width: Math.max(getVotePercent(poll, idx), poll.total_votes > 0 ? 2 : 0) + '%',
+                                                                 backgroundColor: idx === poll.user_vote ? accentColor : (getVoteCount(poll, idx) === getMaxVoteCount(poll) && poll.total_votes > 0 ? accentColor + '80' : '#9ca3af')
+                                                             }"></div>
+                                                    </div>
+                                                </div>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                                                    <span v-text="poll.total_votes"></span> {{ __('messages.votes') }}
+                                                    <span v-if="!poll.is_active" class="ms-1">&middot; {{ __('messages.poll_closed_status') }}</span>
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -1622,6 +1719,7 @@ const calendarApp = createApp({
             playingVideo: null,
             openCommentForm: {},
             openPhotoForm: {},
+            votingPoll: {},
             isLoadingEvents: {{ request()->graphic ? 'false' : 'true' }},
             uniqueCategoryIds: @json($uniqueCategoryIds ?? []),
             dropdownCustomFields: @json($dropdownCustomFields ?? []),
@@ -2496,6 +2594,45 @@ const calendarApp = createApp({
                     if (form) form.focus();
                 });
             }
+        },
+        async votePoll(event, poll, optionIndex) {
+            if (this.votingPoll[poll.id]) return;
+            this.votingPoll = { ...this.votingPoll, [poll.id]: true };
+            try {
+                const url = event.vote_poll_url.replace('POLL_HASH', poll.id);
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ option_index: optionIndex }),
+                });
+                if (response.status === 401) {
+                    window.location.href = '{{ app_url("/login") }}';
+                    return;
+                }
+                const data = await response.json();
+                if (data.success) {
+                    poll.user_vote = optionIndex;
+                    poll.results = data.results;
+                    poll.total_votes = data.total_votes;
+                }
+            } finally {
+                this.votingPoll = { ...this.votingPoll, [poll.id]: false };
+            }
+        },
+        getVoteCount(poll, idx) {
+            return (poll.results && poll.results[idx]) || 0;
+        },
+        getVotePercent(poll, idx) {
+            if (!poll.total_votes) return 0;
+            return Math.round((this.getVoteCount(poll, idx) / poll.total_votes) * 100);
+        },
+        getMaxVoteCount(poll) {
+            if (!poll.results) return 0;
+            return Math.max(...Object.values(poll.results), 0);
         },
         navigateToEvent(event, e) {
             // Don't navigate if clicking on the edit link or a form/button

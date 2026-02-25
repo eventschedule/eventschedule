@@ -51,6 +51,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::post('/submit-video/{event_hash}', [EventController::class, 'submitVideo'])->name('event.submit_video')->middleware('throttle:10,60');
         Route::post('/submit-comment/{event_hash}', [EventController::class, 'submitComment'])->name('event.submit_comment')->middleware('throttle:20,60');
         Route::post('/submit-photo/{event_hash}', [EventController::class, 'submitPhoto'])->name('event.submit_photo')->middleware('throttle:10,60');
+        Route::post('/vote-poll/{event_hash}/{poll_hash}', [EventController::class, 'votePoll'])->name('event.vote_poll')->middleware('throttle:30,60');
         Route::post('/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
         Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
         Route::get('/checkout/success/{sale_id}/{date}', [TicketController::class, 'success'])->name('checkout.success');
@@ -168,6 +169,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/boost/search-interests', [BoostController::class, 'searchInterests'])->name('boost.search_interests');
     Route::get('/boost/estimate-reach', [BoostController::class, 'estimateReach'])->name('boost.estimate_reach');
     Route::post('/boost/generate-content', [BoostController::class, 'generateContent'])->name('boost.generate_content');
+    Route::post('/boost/translate-defaults', [BoostController::class, 'translateDefaults'])->name('boost.translate_defaults');
     Route::get('/boost/{hash}', [BoostController::class, 'show'])->name('boost.show');
     Route::post('/boost/{hash}/toggle-pause', [BoostController::class, 'togglePause'])->name('boost.toggle_pause');
     Route::post('/boost/{hash}/cancel', [BoostController::class, 'cancel'])->name('boost.cancel');
@@ -267,6 +269,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/{subdomain}/reject-comment/{hash}', [EventController::class, 'rejectComment'])->name('event.reject_comment');
     Route::post('/{subdomain}/approve-photo/{hash}', [EventController::class, 'approvePhoto'])->name('event.approve_photo');
     Route::delete('/{subdomain}/reject-photo/{hash}', [EventController::class, 'rejectPhoto'])->name('event.reject_photo');
+
+    Route::post('/{subdomain}/polls/{event_hash}', [EventController::class, 'storePoll'])->name('event.store_poll');
+    Route::put('/{subdomain}/polls/{event_hash}/{poll_hash}', [EventController::class, 'updatePoll'])->name('event.update_poll');
+    Route::delete('/{subdomain}/polls/{event_hash}/{poll_hash}', [EventController::class, 'deletePoll'])->name('event.delete_poll');
+    Route::post('/{subdomain}/polls/{event_hash}/{poll_hash}/toggle', [EventController::class, 'togglePoll'])->name('event.toggle_poll');
 
     Route::get('/{subdomain}/scan-agenda', [EventController::class, 'scanAgenda'])->name('event.scan_agenda')->where('subdomain', '(?!docs(?=/|$))[^/]+');
     Route::post('/{subdomain}/save-event-parts', [EventController::class, 'saveEventParts'])->name('event.save_parts');
@@ -378,6 +385,7 @@ if (config('app.is_nexus')) {
         Route::get('/features/recurring-events', [MarketingController::class, 'recurringEvents'])->name('marketing.recurring_events');
         Route::get('/features/embed-calendar', [MarketingController::class, 'embedCalendar'])->name('marketing.embed_calendar');
         Route::get('/features/fan-videos', [MarketingController::class, 'fanVideos'])->name('marketing.fan_videos');
+        Route::get('/features/polls', [MarketingController::class, 'polls'])->name('marketing.polls');
         Route::get('/features/boost', [MarketingController::class, 'boost'])->name('marketing.boost');
         Route::get('/features/private-events', [MarketingController::class, 'privateEvents'])->name('marketing.private_events');
         Route::get('/features/event-graphics', [MarketingController::class, 'eventGraphics'])->name('marketing.event_graphics');
@@ -464,6 +472,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/boost', [MarketingController::class, 'docsBoost'])->name('marketing.docs.boost');
         Route::get('/docs/scan-agenda', [MarketingController::class, 'docsScanAgenda'])->name('marketing.docs.scan_agenda');
         Route::get('/docs/fan-content', [MarketingController::class, 'docsFanContent'])->name('marketing.docs.fan_content');
+        Route::get('/docs/polls', [MarketingController::class, 'docsPolls'])->name('marketing.docs.polls');
         // Selfhost section
         Route::get('/docs/selfhost', [MarketingController::class, 'docsSelfhostIndex'])->name('marketing.docs.selfhost');
         Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
@@ -512,6 +521,7 @@ if (config('app.is_nexus')) {
             Route::get('/features/recurring-events', [MarketingController::class, 'recurringEvents'])->name('marketing.recurring_events');
             Route::get('/features/embed-calendar', [MarketingController::class, 'embedCalendar'])->name('marketing.embed_calendar');
             Route::get('/features/fan-videos', [MarketingController::class, 'fanVideos'])->name('marketing.fan_videos');
+            Route::get('/features/polls', [MarketingController::class, 'polls'])->name('marketing.polls');
             Route::get('/features/boost', [MarketingController::class, 'boost'])->name('marketing.boost');
             Route::get('/features/private-events', [MarketingController::class, 'privateEvents'])->name('marketing.private_events');
             Route::get('/features/event-graphics', [MarketingController::class, 'eventGraphics'])->name('marketing.event_graphics');
@@ -600,6 +610,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/boost', [MarketingController::class, 'docsBoost'])->name('marketing.docs.boost');
             Route::get('/docs/scan-agenda', [MarketingController::class, 'docsScanAgenda'])->name('marketing.docs.scan_agenda');
             Route::get('/docs/fan-content', [MarketingController::class, 'docsFanContent'])->name('marketing.docs.fan_content');
+            Route::get('/docs/polls', [MarketingController::class, 'docsPolls'])->name('marketing.docs.polls');
             // Selfhost section
             Route::get('/docs/selfhost', [MarketingController::class, 'docsSelfhostIndex'])->name('marketing.docs.selfhost');
             Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
@@ -660,6 +671,7 @@ if (config('app.is_nexus')) {
             Route::get('/features/recurring-events', fn () => redirect('https://eventschedule.com/features/recurring-events', 301));
             Route::get('/features/embed-calendar', fn () => redirect('https://eventschedule.com/features/embed-calendar', 301));
             Route::get('/features/fan-videos', fn () => redirect('https://eventschedule.com/features/fan-videos', 301));
+            Route::get('/features/polls', fn () => redirect('https://eventschedule.com/features/polls', 301));
             Route::get('/features/boost', fn () => redirect('https://eventschedule.com/features/boost', 301));
             Route::get('/features/private-events', fn () => redirect('https://eventschedule.com/features/private-events', 301));
             Route::get('/features/event-graphics', fn () => redirect('https://eventschedule.com/features/event-graphics', 301));
@@ -734,6 +746,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/boost', fn () => redirect('https://eventschedule.com/docs/boost', 301));
             Route::get('/docs/scan-agenda', fn () => redirect('https://eventschedule.com/docs/scan-agenda', 301));
             Route::get('/docs/fan-content', fn () => redirect('https://eventschedule.com/docs/fan-content', 301));
+            Route::get('/docs/polls', fn () => redirect('https://eventschedule.com/docs/polls', 301));
             // Selfhost section
             Route::get('/docs/selfhost', fn () => redirect('https://eventschedule.com/docs/selfhost', 301));
             Route::get('/docs/selfhost/installation', fn () => redirect('https://eventschedule.com/docs/selfhost/installation', 301));
@@ -779,6 +792,7 @@ if (config('app.is_nexus')) {
     Route::get('/features/recurring-events', fn () => redirect()->route('home'));
     Route::get('/features/embed-calendar', fn () => redirect()->route('home'));
     Route::get('/features/fan-videos', fn () => redirect()->route('home'));
+    Route::get('/features/polls', fn () => redirect()->route('home'))->name('marketing.polls');
     Route::get('/features/boost', fn () => redirect()->route('home'));
     Route::get('/features/private-events', fn () => redirect()->route('home'))->name('marketing.private_events');
     Route::get('/features/event-graphics', fn () => redirect()->route('home'));
@@ -853,6 +867,7 @@ if (config('app.is_nexus')) {
     Route::get('/docs/boost', fn () => redirect()->route('home'))->name('marketing.docs.boost');
     Route::get('/docs/scan-agenda', fn () => redirect()->route('home'))->name('marketing.docs.scan_agenda');
     Route::get('/docs/fan-content', fn () => redirect()->route('home'))->name('marketing.docs.fan_content');
+    Route::get('/docs/polls', fn () => redirect()->route('home'))->name('marketing.docs.polls');
     // Selfhost section
     Route::get('/docs/selfhost', fn () => redirect()->route('home'))->name('marketing.docs.selfhost');
     Route::get('/docs/selfhost/installation', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.installation');
@@ -903,6 +918,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     Route::post('/{subdomain}/submit-video/{event_hash}', [EventController::class, 'submitVideo'])->name('event.submit_video')->middleware('throttle:10,60');
     Route::post('/{subdomain}/submit-comment/{event_hash}', [EventController::class, 'submitComment'])->name('event.submit_comment')->middleware('throttle:20,60');
     Route::post('/{subdomain}/submit-photo/{event_hash}', [EventController::class, 'submitPhoto'])->name('event.submit_photo')->middleware('throttle:10,60');
+    Route::post('/{subdomain}/vote-poll/{event_hash}/{poll_hash}', [EventController::class, 'votePoll'])->name('event.vote_poll')->middleware('throttle:30,60');
     Route::post('/{subdomain}/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
     Route::post('/{subdomain}/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
     Route::get('/{subdomain}/checkout/success/{sale_id}', [TicketController::class, 'success'])->name('checkout.success');

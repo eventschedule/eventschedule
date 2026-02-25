@@ -143,6 +143,17 @@
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">3. {{ __('messages.creative') }}</h2>
 
                 <div class="space-y-4">
+                    @if ($roleLanguage && $roleLanguage !== 'en')
+                    <div class="p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-md">
+                        <label class="inline-flex items-center gap-2">
+                            <input type="checkbox" name="translate_to_english" id="translate-to-english" value="1"
+                                class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.translate_ad_to_english') }}</span>
+                        </label>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.translate_ad_to_english_desc') }}</p>
+                    </div>
+                    @endif
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.headline') }} ({{ __('messages.max_chars', ['count' => 40]) }})</label>
                         <input type="text" name="headline" value="{{ $defaults['headline'] }}" maxlength="40"
@@ -228,6 +239,54 @@
         const currencySymbol = '{{ $currencySymbol }}';
         const submitBtn = document.getElementById('submit-btn');
         const budgetInput = document.getElementById('budget-input');
+
+        // Translate to English toggle
+        @if (isset($roleLanguage) && $roleLanguage && $roleLanguage !== 'en')
+        (function() {
+            const translateCheckbox = document.getElementById('translate-to-english');
+            if (!translateCheckbox) return;
+
+            let originalValues = null;
+
+            translateCheckbox.addEventListener('change', async function() {
+                const headlineInput = document.querySelector('input[name="headline"]');
+                const primaryTextInput = document.querySelector('textarea[name="primary_text"]');
+                const descriptionInput = document.querySelector('input[name="description"]');
+
+                if (this.checked) {
+                    // Cache original values
+                    originalValues = {
+                        headline: headlineInput.value,
+                        primary_text: primaryTextInput.value,
+                        description: descriptionInput.value,
+                    };
+
+                    // Fetch English defaults
+                    try {
+                        const res = await fetch('{{ route("boost.translate_defaults") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                            },
+                            body: JSON.stringify({ event_id: '{{ $event->hashedId() }}' }),
+                        });
+                        const data = await res.json();
+                        if (data.headline) headlineInput.value = data.headline;
+                        if (data.primary_text) primaryTextInput.value = data.primary_text;
+                        if (data.description) descriptionInput.value = data.description;
+                    } catch (err) {
+                        this.checked = false;
+                    }
+                } else if (originalValues) {
+                    // Restore original values
+                    headlineInput.value = originalValues.headline;
+                    primaryTextInput.value = originalValues.primary_text;
+                    descriptionInput.value = originalValues.description;
+                }
+            });
+        })();
+        @endif
 
         @if ($isHosted)
         const stripe = Stripe('{{ $stripeKey }}');

@@ -158,6 +158,11 @@ class MarketingController extends Controller
         return view('marketing.fan-videos');
     }
 
+    public function polls()
+    {
+        return view('marketing.polls');
+    }
+
     /**
      * Boost page
      */
@@ -837,6 +842,11 @@ class MarketingController extends Controller
         return view('marketing.docs.fan-content', $this->getDocNavigation('marketing.docs.fan_content'));
     }
 
+    public function docsPolls()
+    {
+        return view('marketing.docs.polls', $this->getDocNavigation('marketing.docs.polls'));
+    }
+
     // ==========================================
     // Selfhost Section
     // ==========================================
@@ -1063,6 +1073,7 @@ class MarketingController extends Controller
                     'Priority support',
                     'Advanced analytics',
                     'Custom CSS styling',
+                    'Event polls',
                     'API access',
                 ],
                 'cta' => 'Start Free Trial',
@@ -1992,6 +2003,7 @@ class MarketingController extends Controller
             ['route' => 'marketing.docs.boost', 'title' => 'Boost'],
             ['route' => 'marketing.docs.scan_agenda', 'title' => 'Scan Agenda'],
             ['route' => 'marketing.docs.fan_content', 'title' => 'Fan Content'],
+            ['route' => 'marketing.docs.polls', 'title' => 'Event Polls'],
         ];
 
         $currentIndex = null;
@@ -2199,17 +2211,17 @@ class MarketingController extends Controller
                             ->whereNotNull('phone_verified_at');
                     });
                 })
-                ->where('is_deleted', false)
-                ->where('is_unlisted', false)
-                ->whereNotNull('user_id');
+                    ->where('is_deleted', false)
+                    ->where('is_unlisted', false)
+                    ->whereNotNull('user_id');
             };
 
             $schedules = Role::where(function ($q) use ($escapedQuery) {
-                    $q->where('subdomain', 'like', $escapedQuery . '%')
-                        ->orWhere('name', 'like', '%' . $escapedQuery . '%')
-                        ->orWhere('city', 'like', '%' . $escapedQuery . '%')
-                        ->orWhere('short_description', 'like', '%' . $escapedQuery . '%');
-                })
+                $q->where('subdomain', 'like', $escapedQuery.'%')
+                    ->orWhere('name', 'like', '%'.$escapedQuery.'%')
+                    ->orWhere('city', 'like', '%'.$escapedQuery.'%')
+                    ->orWhere('short_description', 'like', '%'.$escapedQuery.'%');
+            })
                 ->where($publicScheduleFilter)
                 ->orderBy('name')
                 ->limit(12)
@@ -2217,8 +2229,8 @@ class MarketingController extends Controller
 
             $events = Event::with(['roles'])
                 ->where(function ($q) use ($escapedQuery) {
-                    $q->where('name', 'like', '%' . $escapedQuery . '%')
-                        ->orWhere('short_description', 'like', '%' . $escapedQuery . '%');
+                    $q->where('name', 'like', '%'.$escapedQuery.'%')
+                        ->orWhere('short_description', 'like', '%'.$escapedQuery.'%');
                 })
                 ->where(function ($q) {
                     $q->where('starts_at', '>=', Carbon::today())

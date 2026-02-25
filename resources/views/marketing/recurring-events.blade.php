@@ -41,6 +41,14 @@
             },
             {
                 "@type": "Question",
+                "name": "Can I add or skip specific dates in a recurring series?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Use Include Dates to add extra dates outside your recurring pattern, and Exclude Dates to skip dates that match the pattern. Exclude dates take priority if a date appears in both lists."
+                }
+            },
+            {
+                "@type": "Question",
                 "name": "How do recurring events sync with Google Calendar?",
                 "acceptedAnswer": {
                     "@type": "Answer",
@@ -276,47 +284,71 @@
                     </div>
                 </div>
 
-                <!-- Google Calendar Sync (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-100 to-lime-100 dark:from-green-900 dark:to-lime-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
-                    <div class="flex flex-col lg:flex-row gap-8 items-center">
-                        <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300 text-sm font-medium mb-4">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                </svg>
-                                Auto Sync
+                <!-- Google Calendar Sync -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-100 to-lime-100 dark:from-green-900 dark:to-lime-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300 text-sm font-medium mb-4">
+                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Auto Sync
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Syncs automatically</h2>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">Recurring events sync to Google Calendar as individual occurrences. Each date appears separately.</p>
+
+                    <div class="flex items-center justify-center gap-3">
+                        <div class="bg-lime-100 dark:bg-lime-500/20 rounded-xl border border-lime-200 dark:border-lime-400/30 p-3 flex-1">
+                            <div class="text-xs text-lime-600 dark:text-lime-300 mb-1.5 text-center">Event Schedule</div>
+                            <div class="space-y-1">
+                                <div class="h-1.5 bg-lime-400/40 rounded"></div>
+                                <div class="h-1.5 bg-lime-400/40 rounded w-3/4"></div>
                             </div>
-                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Syncs automatically</h2>
-                            <p class="text-gray-600 dark:text-white/80 text-lg">Recurring events sync to Google Calendar as individual occurrences. Each date appears separately so attendees see the full series.</p>
                         </div>
-                        <div class="flex-shrink-0 w-full lg:w-auto">
-                            <div class="animate-float" style="animation-delay: 0.3s;">
-                                <div class="flex items-center gap-4">
-                                    <div class="bg-lime-100 dark:bg-lime-500/20 rounded-xl border border-lime-200 dark:border-lime-400/30 p-4 w-28">
-                                        <div class="text-xs text-lime-600 dark:text-lime-300 mb-2 text-center">Event Schedule</div>
-                                        <div class="space-y-1.5">
-                                            <div class="h-2 bg-lime-400/40 rounded"></div>
-                                            <div class="h-2 bg-lime-400/40 rounded w-3/4"></div>
-                                            <div class="h-2 bg-lime-400/40 rounded w-1/2"></div>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col items-center gap-1">
-                                        <svg aria-hidden="true" class="w-6 h-6 text-lime-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                        </svg>
-                                        <svg aria-hidden="true" class="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                        </svg>
-                                    </div>
-                                    <div class="bg-gray-200 dark:bg-white/10 rounded-xl border border-gray-300 dark:border-white/20 p-4 w-28">
-                                        <div class="text-xs text-gray-600 dark:text-gray-300 mb-2 text-center">Google Calendar</div>
-                                        <div class="space-y-1.5">
-                                            <div class="h-2 bg-blue-400/40 rounded"></div>
-                                            <div class="h-2 bg-green-400/40 rounded w-3/4"></div>
-                                            <div class="h-2 bg-yellow-400/40 rounded w-1/2"></div>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div class="flex flex-col items-center gap-0.5">
+                            <svg aria-hidden="true" class="w-5 h-5 text-lime-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                            <svg aria-hidden="true" class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                        </div>
+                        <div class="bg-gray-200 dark:bg-white/10 rounded-xl border border-gray-300 dark:border-white/20 p-3 flex-1">
+                            <div class="text-xs text-gray-600 dark:text-gray-300 mb-1.5 text-center">Google Calendar</div>
+                            <div class="space-y-1">
+                                <div class="h-1.5 bg-blue-400/40 rounded"></div>
+                                <div class="h-1.5 bg-green-400/40 rounded w-3/4"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date Exceptions -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-sm font-medium mb-4">
+                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Date Exceptions
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Add or skip dates</h2>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">Include extra dates outside your pattern, or exclude dates that match it.</p>
+
+                    <div class="space-y-3">
+                        <div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">Include Dates</div>
+                            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-lime-500/10 border border-lime-500/20">
+                                <svg aria-hidden="true" class="w-4 h-4 text-lime-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                <span class="text-gray-900 dark:text-white text-sm">Thu, Dec 25 (bonus session)</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">Exclude Dates</div>
+                            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-red-500/10 border border-red-500/20">
+                                <svg aria-hidden="true" class="w-4 h-4 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                </svg>
+                                <span class="text-gray-900 dark:text-white text-sm">Tue, Dec 31 (holiday)</span>
                             </div>
                         </div>
                     </div>
@@ -469,16 +501,32 @@
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                <div class="bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden">
                     <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            How do recurring events sync with Google Calendar?
+                            Can I add or skip specific dates in a recurring series?
                         </h3>
                         <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
                     <div x-show="open === 3" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Use "Include Dates" to add extra dates outside your recurring pattern (like a bonus session), and "Exclude Dates" to skip dates that match the pattern (like holidays). Exclude dates take priority if a date appears in both lists.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            How do recurring events sync with Google Calendar?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 4" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
                             Recurring events sync to Google Calendar as individual occurrences. Each date appears separately in your Google Calendar, and changes sync both ways automatically.
                         </p>
@@ -577,6 +625,7 @@
             "Monthly same-weekday recurrence",
             "Yearly recurrence",
             "Three end conditions",
+            "Include and exclude specific dates",
             "Per-occurrence tickets",
             "Google Calendar sync",
             "Individual ticket sales"

@@ -534,7 +534,7 @@ class MetaAdsService
     protected function buildCreative(Event $event, string $eventType, $venue): array
     {
         $eventName = $event->translatedName();
-        $venueName = $venue ? $venue->translatedName() : '';
+        $venueName = $venue ? ($venue->translatedName() ?: $venue->translatedAddress1()) : '';
         $city = $venue ? $venue->translatedCity() : '';
 
         switch ($eventType) {

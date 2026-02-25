@@ -1189,8 +1189,93 @@
             $myEventLevelPendingPhotos = $myEventLevelPendingPhotos->filter(fn($p) => $p->event_date === $date || $p->event_date === null);
           }
         @endphp
-        @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $eventLevelPhotos->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $myEventLevelPendingPhotos->count() > 0 || $event->parts->count() == 0))
+        @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $eventLevelPhotos->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $myEventLevelPendingPhotos->count() > 0 || ($role->isPro() && $event->activePolls->count() > 0) || $event->parts->count() == 0))
         <div id="event-media-section" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+
+          {{-- Polls --}}
+          @if ($role->isPro() && $event->activePolls->count() > 0)
+          <div class="space-y-4 mb-6" x-data="pollsComponent()">
+              @foreach ($event->activePolls as $poll)
+              <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                  <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ $poll->question }}</h4>
+
+                  @auth
+                      @php $userVote = $poll->getUserVote(auth()->id()); @endphp
+                      @if ($userVote === null && $poll->is_active)
+                          {{-- Voting buttons --}}
+                          @php $pollHash = \App\Utils\UrlUtils::encodeId($poll->id); @endphp
+                          <div x-show="!voted['{{ $pollHash }}']">
+                              @foreach ($poll->options as $idx => $option)
+                              <button @click="vote('{{ $pollHash }}', {{ $idx }})"
+                                      :disabled="voting"
+                                      class="w-full text-start px-3 py-2.5 mb-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 dark:text-gray-200 hover:border-gray-500 transition-colors">
+                                  {{ $option }}
+                              </button>
+                              @endforeach
+                          </div>
+                          {{-- Results (shown after voting via Alpine) --}}
+                          <div x-show="voted['{{ $pollHash }}']" x-cloak>
+                              <template x-for="(option, idx) in pollData['{{ $pollHash }}']?.options || []" :key="idx">
+                                  <div class="mb-2.5">
+                                      <div class="flex justify-between text-sm mb-1">
+                                          <span class="text-gray-800 dark:text-gray-200" x-text="option"></span>
+                                          <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums" x-text="getCount('{{ $pollHash }}', idx) + ' (' + getPercent('{{ $pollHash }}', idx) + '%)'"></span>
+                                      </div>
+                                      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                          <div class="h-2.5 rounded-full transition-all duration-500"
+                                               :style="{ width: getPercent('{{ $pollHash }}', idx) + '%', backgroundColor: idx === pollData['{{ $pollHash }}']?.userVote ? '{{ $accentColor }}' : '#9ca3af' }"></div>
+                                      </div>
+                                  </div>
+                              </template>
+                              <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                                  <span x-text="pollData['{{ $pollHash }}']?.totalVotes || 0"></span> {{ __('messages.votes') }}
+                              </p>
+                          </div>
+                      @else
+                          {{-- Already voted or poll closed: show results server-rendered --}}
+                          @php
+                              $results = $poll->getResults();
+                              $totalVotes = $poll->votes()->count();
+                              $maxCount = $totalVotes > 0 ? max(array_values($results + [0])) : 0;
+                          @endphp
+                          @foreach ($poll->options as $idx => $option)
+                          @php
+                              $count = $results[$idx] ?? 0;
+                              $pct = $totalVotes > 0 ? round($count / $totalVotes * 100) : 0;
+                              $isLeading = $count === $maxCount && $totalVotes > 0;
+                              $isUserChoice = $idx === $userVote;
+                          @endphp
+                          <div class="mb-2.5">
+                              <div class="flex justify-between text-sm mb-1">
+                                  <span class="text-gray-800 dark:text-gray-200 {{ $isLeading ? 'font-semibold' : '' }}">{{ $option }}</span>
+                                  <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums">{{ $count }} ({{ $pct }}%)</span>
+                              </div>
+                              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                  <div class="h-2.5 rounded-full" style="width: {{ max($pct, $totalVotes > 0 ? 2 : 0) }}%; background-color: {{ $isUserChoice ? $accentColor : ($isLeading ? $accentColor . '80' : '#9ca3af') }}"></div>
+                              </div>
+                          </div>
+                          @endforeach
+                          <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                              {{ $totalVotes }} {{ __('messages.votes') }}
+                              @if (!$poll->is_active) &middot; {{ __('messages.poll_closed_status') }} @endif
+                          </p>
+                      @endif
+                  @else
+                      {{-- Not logged in: show options + sign in prompt --}}
+                      @foreach ($poll->options as $option)
+                      <div class="w-full text-start px-3 py-2.5 mb-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400">
+                          {{ $option }}
+                      </div>
+                      @endforeach
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          <a href="{{ app_url('/login') }}" class="underline">{{ __('messages.sign_in_to_vote') }}</a>
+                      </p>
+                  @endauth
+              </div>
+              @endforeach
+          </div>
+          @endif
+
           @if ($eventLevelVideos->count() > 0)
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             @foreach ($eventLevelVideos as $video)
@@ -1374,6 +1459,43 @@
   </div>
 
   <script {!! nonce_attr() !!}>
+    function pollsComponent() {
+      return {
+        voting: false,
+        voted: {},
+        pollData: {},
+        async vote(pollHash, optionIndex) {
+          this.voting = true;
+          try {
+            const resp = await fetch('{{ route('event.vote_poll', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id), 'poll_hash' => 'POLL_HASH']) }}'.replace('POLL_HASH', pollHash), {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+              body: JSON.stringify({ option_index: optionIndex }),
+            });
+            if (resp.status === 401) {
+              window.location.href = '{{ app_url("/login") }}';
+              return;
+            }
+            const data = await resp.json();
+            if (data.success) {
+              this.voted[pollHash] = true;
+              this.pollData[pollHash] = { options: data.options, results: data.results, totalVotes: data.total_votes, userVote: optionIndex };
+            }
+          } finally { this.voting = false; }
+        },
+        getCount(pollHash, idx) {
+          const pd = this.pollData[pollHash];
+          if (!pd || !pd.results) return 0;
+          return pd.results[idx] || 0;
+        },
+        getPercent(pollHash, idx) {
+          const pd = this.pollData[pollHash];
+          if (!pd || !pd.totalVotes) return 0;
+          return Math.round(((pd.results[idx] || 0) / pd.totalVotes) * 100);
+        }
+      }
+    }
+
     function clearVideos(url) {
       if (confirm(@json(__("messages.are_you_sure_clear_videos")))) {
         window.location.href = url;

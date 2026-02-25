@@ -104,7 +104,8 @@ class BoostController extends Controller
 
         // Require verified phone for boost (hosted mode only)
         if (config('app.hosted') && ! auth()->user()->hasVerifiedPhone()) {
-            return redirect()->back()->with('error', __('messages.phone_required_for_boost'));
+            return redirect()->to(route('profile.edit').'?highlight=phone#section-profile')
+                ->with('error', __('messages.phone_required_for_boost'));
         }
 
         // Check concurrent boost limit (trust-based)
@@ -157,6 +158,7 @@ class BoostController extends Controller
             'boostCredit' => $role->boost_credit,
             'pmLastFour' => $role->pm_last_four,
             'pmType' => $role->pm_type,
+            'roleLanguage' => $role->language_code,
         ]);
     }
 
@@ -220,10 +222,14 @@ class BoostController extends Controller
         // Require verified phone for boost (hosted mode only)
         if (config('app.hosted') && ! auth()->user()->hasVerifiedPhone()) {
             if ($isAjax) {
-                return response()->json(['error' => __('messages.phone_required_for_boost')], 403);
+                return response()->json([
+                    'error' => __('messages.phone_required_for_boost'),
+                    'redirect' => route('profile.edit').'?highlight=phone#section-profile',
+                ], 403);
             }
 
-            return redirect()->back()->with('error', __('messages.phone_required_for_boost'));
+            return redirect()->to(route('profile.edit').'?highlight=phone#section-profile')
+                ->with('error', __('messages.phone_required_for_boost'));
         }
 
         // Prevent duplicate campaigns from the same payment
@@ -836,5 +842,31 @@ class BoostController extends Controller
 
             return response()->json(['error' => __('messages.payment_error')], 500);
         }
+    }
+
+    /**
+     * AJAX: Regenerate ad copy defaults in English
+     */
+    public function translateDefaults(Request $request)
+    {
+        $eventId = UrlUtils::decodeId($request->event_id);
+        $event = Event::with(['roles', 'tickets'])->findOrFail($eventId);
+
+        if (! auth()->user()->canEditEvent($event)) {
+            abort(403);
+        }
+
+        $metaService = $this->getMetaService();
+
+        $originalLocale = app()->getLocale();
+        app()->setLocale('en');
+        $defaults = $metaService->generateQuickBoostDefaults($event);
+        app()->setLocale($originalLocale);
+
+        return response()->json([
+            'headline' => $defaults['headline'],
+            'primary_text' => $defaults['primary_text'],
+            'description' => $defaults['description'],
+        ]);
     }
 }

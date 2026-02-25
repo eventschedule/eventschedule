@@ -54,7 +54,7 @@
             @endif
         </div>
 
-        <div>
+        <div id="phone-field">
             <x-input-label for="phone" :value="__('messages.phone_number')" />
             <x-phone-input name="phone" :value="old('phone', $user->phone)" :disabled="is_demo_mode()" />
             <x-input-error class="mt-2" :messages="$errors->get('phone')" />

@@ -375,7 +375,7 @@
 
     <div class="pt-8 pb-4">
         <!-- Dropdown menu on small screens -->
-        <div class="sm:hidden">
+        <div class="md:hidden">
             <label for="current-tab" class="sr-only">{{ __('messages.select_a_tab') }}</label>
             <select id="current-tab" name="current-tab"
                 class="block w-full rounded-md border-0 py-1.5 ps-3 pe-10 ring-1 ring-inset ring-gray-300 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-inset focus:ring-[#4E81FA]">
@@ -406,7 +406,7 @@
         </div>
 
         <!-- Tabs at small breakpoint and up -->
-        <div class="hidden sm:block">
+        <div class="hidden md:block">
             <nav class="-mb-px flex gap-x-8">
                 <a href="{{ route('role.view_admin', ((now()->year == $year && now()->month == $month) || $tab == 'schedule') ? ['subdomain' => $role->subdomain, 'tab' => 'schedule'] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'month' => $month] : ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => $year, 'month' => $month])) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-[#4E81FA] px-3 pb-5 text-base font-medium text-[#4E81FA]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.schedule') }}</a>
