@@ -77,6 +77,99 @@
             </div>
         </div>
 
+        {{-- Amount Mismatch Sales --}}
+        @if ($mismatchSales->count() > 0 || $mismatchBoosts->count() > 0)
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-l-4 border-amber-500">
+            <h3 class="text-lg font-medium text-amber-600 dark:text-amber-400 mb-4">@lang('messages.amount_mismatch_sales')</h3>
+            @if ($mismatchSales->count() > 0)
+            <div class="overflow-x-auto mb-6">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.date')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.event')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.customer')</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.expected_amount')</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.paid_amount')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.reference')</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.actions')</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach ($mismatchSales as $sale)
+                        <tr>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white" title="{{ $sale->created_at->format('Y-m-d H:i:s') }}">
+                                {{ $sale->created_at->diffForHumans() }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                                {{ \Illuminate\Support\Str::limit($sale->event?->name ?? '-', 30) }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ $sale->name }} ({{ $sale->email }})</td>
+                            <td class="px-4 py-3 text-sm text-end font-medium text-gray-900 dark:text-white">${{ number_format($sale->calculateTotal(), 2) }}</td>
+                            <td class="px-4 py-3 text-sm text-end font-medium text-amber-600 dark:text-amber-400">${{ number_format($sale->payment_amount, 2) }}</td>
+                            <td class="px-4 py-3 text-sm font-mono text-gray-500 dark:text-gray-400" title="{{ $sale->transaction_reference }}">
+                                {{ $sale->transaction_reference ? \Illuminate\Support\Str::limit($sale->transaction_reference, 15) : '-' }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-end whitespace-nowrap">
+                                <form method="POST" action="{{ route('admin.sale.approve', $sale->id) }}" class="inline">
+                                    @csrf
+                                    <button type="submit" class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200 text-sm font-medium" onclick="return confirm('Approve this sale as paid?')">@lang('messages.approve_sale')</button>
+                                </form>
+                                <form method="POST" action="{{ route('admin.sale.refund', $sale->id) }}" class="inline ms-3">
+                                    @csrf
+                                    <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 text-sm font-medium" onclick="return confirm('Refund this sale via Stripe?')">@lang('messages.refund_sale')</button>
+                                </form>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @endif
+
+            @if ($mismatchBoosts->count() > 0)
+            <h4 class="text-md font-medium text-amber-600 dark:text-amber-400 mb-3">@lang('messages.amount_mismatch_boosts')</h4>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.date')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.event')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.user')</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.paid_amount')</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.actions')</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach ($mismatchBoosts as $campaign)
+                        <tr>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white" title="{{ $campaign->created_at->format('Y-m-d H:i:s') }}">
+                                {{ $campaign->created_at->diffForHumans() }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                                {{ \Illuminate\Support\Str::limit($campaign->event?->name ?? '-', 30) }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ $campaign->user?->name }} ({{ $campaign->user?->email }})</td>
+                            <td class="px-4 py-3 text-sm text-end font-medium text-amber-600 dark:text-amber-400">${{ number_format($campaign->total_charged, 2) }}</td>
+                            <td class="px-4 py-3 text-sm text-end whitespace-nowrap">
+                                <form method="POST" action="{{ route('admin.boost.approve', $campaign->id) }}" class="inline">
+                                    @csrf
+                                    <button type="submit" class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200 text-sm font-medium" onclick="return confirm('Approve this boost campaign?')">@lang('messages.approve_sale')</button>
+                                </form>
+                                <form method="POST" action="{{ route('admin.boost.refund', $campaign->id) }}" class="inline ms-3">
+                                    @csrf
+                                    <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 text-sm font-medium" onclick="return confirm('Refund this boost campaign via Stripe?')">@lang('messages.refund_sale')</button>
+                                </form>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @endif
+        </div>
+        @endif
+
         {{-- Recent Sales Table --}}
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.recent_sales')</h3>
@@ -113,9 +206,10 @@
                             <td class="px-4 py-3 text-sm">
                                 @php
                                     $statusClasses = match($sale->status) {
-                                        'completed' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                                        'completed', 'paid' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
                                         'pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
                                         'refunded' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+                                        'amount_mismatch' => 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
                                         'cancelled', 'expired' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
                                         default => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
                                     };

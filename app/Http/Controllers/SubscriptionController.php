@@ -86,9 +86,13 @@ class SubscriptionController extends Controller
                 $role->updateDefaultPaymentMethod($request->payment_method);
                 $subscription->swap($priceId);
 
-                $role->plan_type = 'enterprise';
-                $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
-                $role->save();
+                // Update plan info with lock to prevent race with webhook
+                \DB::transaction(function () use ($role, $request) {
+                    $role = \App\Models\Role::lockForUpdate()->find($role->id);
+                    $role->plan_type = 'enterprise';
+                    $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
+                    $role->save();
+                });
 
                 return redirect()
                     ->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])
@@ -145,9 +149,11 @@ class SubscriptionController extends Controller
 
             $subscriptionBuilder->create($request->payment_method);
 
-            // Update the role's plan info
+            // Update the role's plan info and clear legacy plan_expires
+            // to prevent dual-path access via legacy fields
             $role->plan_type = $tier;
             $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
+            $role->plan_expires = null;
             $role->save();
 
             UsageTrackingService::track(UsageTrackingService::STRIPE_SUBSCRIPTION, $role->id);
@@ -285,10 +291,13 @@ class SubscriptionController extends Controller
         try {
             $subscription->swap($priceId);
 
-            // Update the role's plan type and term
-            $role->plan_type = $tier;
-            $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
-            $role->save();
+            // Update plan info with lock to prevent race with webhook
+            \DB::transaction(function () use ($role, $tier, $request) {
+                $role = Role::lockForUpdate()->find($role->id);
+                $role->plan_type = $tier;
+                $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
+                $role->save();
+            });
         } catch (IncompletePayment $exception) {
             return redirect()->route(
                 'cashier.payment',

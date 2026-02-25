@@ -478,10 +478,9 @@ class TicketController extends Controller
             }
 
             // Store the transaction reference so the webhook can find this sale,
-            // but don't set status=paid here - the webhook handles that with proper
-            // locking to avoid race conditions with analytics double-counting
+            // but don't set status=paid or overwrite payment_amount here - the webhook
+            // handles that with proper locking and amount validation
             if ($sale->status !== 'paid') {
-                $sale->payment_amount = $session->amount_total / 100;
                 $sale->transaction_reference = $session->payment_intent;
                 $sale->save();
             }

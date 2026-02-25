@@ -94,8 +94,8 @@ Route::get('/nl/c/{token}/{encodedUrl}', [NewsletterTrackingController::class, '
 Route::get('/nl/u/{token}', [NewsletterTrackingController::class, 'showUnsubscribe'])->name('newsletter.show_unsubscribe');
 Route::post('/nl/u/{token}', [NewsletterTrackingController::class, 'unsubscribe'])->name('newsletter.unsubscribe')->middleware('throttle:2,2');
 
-Route::post('/stripe/webhook', [StripeController::class, 'webhook'])->name('stripe.webhook')->middleware('throttle:60,1');
-Route::post('/stripe/subscription-webhook', [SubscriptionWebhookController::class, 'handleWebhook'])->name('stripe.subscription_webhook')->middleware('throttle:60,1');
+Route::post('/stripe/webhook', [StripeController::class, 'webhook'])->name('stripe.webhook');
+Route::post('/stripe/subscription-webhook', [SubscriptionWebhookController::class, 'handleWebhook'])->name('stripe.subscription_webhook');
 Route::post('/invoiceninja/webhook/{secret?}', [InvoiceNinjaController::class, 'webhook'])->name('invoiceninja.webhook')->middleware('throttle:60,1');
 
 // Google Calendar webhook routes (no auth required)
@@ -303,6 +303,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/admin/plans/{role}', [AdminController::class, 'updatePlan'])->name('admin.plans.update');
 
         Route::get('/admin/audit-log', [AdminController::class, 'auditLog'])->name('admin.audit_log');
+        Route::post('/admin/sale/{sale}/approve', [AdminController::class, 'approveSale'])->name('admin.sale.approve');
+        Route::post('/admin/sale/{sale}/refund', [AdminController::class, 'refundSale'])->name('admin.sale.refund');
+        Route::post('/admin/boost/{campaign}/approve', [AdminController::class, 'approveBoost'])->name('admin.boost.approve');
+        Route::post('/admin/boost/{campaign}/refund', [AdminController::class, 'refundBoost'])->name('admin.boost.refund');
 
         // Admin queue routes
         Route::get('/admin/queue', [AdminController::class, 'queue'])->name('admin.queue');

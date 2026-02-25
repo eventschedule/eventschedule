@@ -402,7 +402,8 @@ class RoleController extends Controller
 
             if ($event) {
                 // Block direct URL access to private events for non-members
-                if ($event->is_private && ! $event->isPasswordProtected() && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
+                // Only enforce if the schedule still has Enterprise access
+                if ($event->is_private && $role->isEnterprise() && ! $event->isPasswordProtected() && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
                     $event = null;
                 }
             }
@@ -635,7 +636,7 @@ class RoleController extends Controller
             $bypassPassword = ($user && ($user->isAdmin() || $user->isMember($subdomain)))
                 || session()->has('event_password_'.$event->id);
 
-            if ($event->isPasswordProtected() && ! $bypassPassword) {
+            if ($event->isPasswordProtected() && $role->isEnterprise() && ! $bypassPassword) {
                 $fonts = [];
                 if ($event->venue) {
                     $fonts[] = $event->venue->font_family;

@@ -1943,4 +1943,25 @@ return [
     'no_subscribers' => 'No subscribers',
     'showing_first_of' => 'Showing first 50 of :count dynamically resolved recipients',
     'created' => 'Created',
+
+    // Subscription payment failed email
+    'subscription_payment_failed_subject' => 'Subscription Payment Failed',
+    'subscription_payment_failed_body' => 'We were unable to process the payment for your ":schedule" schedule subscription. Please update your payment method to avoid losing access to your plan features.',
+    'subscription_payment_failed_warning' => 'If the payment issue is not resolved, your subscription will be cancelled and your schedule will be downgraded to the free plan.',
+    'subscription_payment_failed_update' => 'Update Payment Method',
+
+    // Admin amount mismatch
+    'amount_mismatch_sales' => 'Amount Mismatch Sales',
+    'amount_mismatch_boosts' => 'Amount Mismatch Boosts',
+    'no_amount_mismatch' => 'No amount mismatch records found.',
+    'expected_amount' => 'Expected',
+    'paid_amount' => 'Paid',
+    'approve_sale' => 'Approve',
+    'refund_sale' => 'Refund',
+    'sale_approved' => 'Sale approved successfully.',
+    'sale_refunded' => 'Sale refunded successfully.',
+    'sale_not_found' => 'Sale not found.',
+    'boost_approved' => 'Boost campaign approved successfully.',
+    'boost_refunded' => 'Boost campaign refunded successfully.',
+    'boost_not_found' => 'Boost campaign not found.',
 ];

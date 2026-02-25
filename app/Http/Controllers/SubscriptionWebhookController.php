@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\SubscriptionPaymentFailed;
 use App\Models\Role;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Cashier\Http\Controllers\WebhookController;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -61,6 +63,19 @@ class SubscriptionWebhookController extends WebhookController
         if ($role) {
             if ($role->hasActiveSubscription()) {
                 $role->plan_type = $role->hasActiveEnterpriseSubscription() ? 'enterprise' : 'pro';
+
+                // Update plan_term from the invoice line items
+                $lines = $payload['data']['object']['lines']['data'] ?? [];
+                if (! empty($lines)) {
+                    $priceId = $lines[0]['price']['id'] ?? null;
+                    if ($priceId) {
+                        $yearlyPriceId = config('services.stripe_platform.price_yearly');
+                        $enterpriseYearlyPriceId = config('services.stripe_platform.enterprise_price_yearly');
+                        $isYearly = ($priceId === $yearlyPriceId) || ($priceId === $enterpriseYearlyPriceId);
+                        $role->plan_term = $isYearly ? 'year' : 'month';
+                    }
+                }
+
                 $role->save();
             }
         }
@@ -77,9 +92,15 @@ class SubscriptionWebhookController extends WebhookController
     {
         $role = Role::where('stripe_id', $payload['data']['object']['customer'])->first();
 
-        if ($role) {
-            // You could send a notification here if desired
-            // $role->notify(new PaymentFailedNotification());
+        if ($role && $role->user) {
+            try {
+                Mail::to($role->user->email)->send(new SubscriptionPaymentFailed($role));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send payment failed email', [
+                    'role_id' => $role->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         return new Response('Webhook Handled', 200);
@@ -108,9 +129,14 @@ class SubscriptionWebhookController extends WebhookController
             if ($currentPrice) {
                 $isYearly = ($currentPrice === $yearlyPriceId) || ($currentPrice === $enterpriseYearlyPriceId);
                 $isEnterprise = ($currentPrice === $enterpriseMonthlyPriceId) || ($currentPrice === $enterpriseYearlyPriceId);
-                $role->plan_type = $isEnterprise ? 'enterprise' : 'pro';
-                $role->plan_term = $isYearly ? 'year' : 'month';
-                $role->save();
+
+                // Use lock to prevent race with controller swap
+                \DB::transaction(function () use ($role, $isEnterprise, $isYearly) {
+                    $role = Role::lockForUpdate()->find($role->id);
+                    $role->plan_type = $isEnterprise ? 'enterprise' : 'pro';
+                    $role->plan_term = $isYearly ? 'year' : 'month';
+                    $role->save();
+                });
             }
         }
 

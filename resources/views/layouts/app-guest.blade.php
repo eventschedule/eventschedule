@@ -223,7 +223,7 @@
             @endif
         }
 
-        @if ($role->custom_css)
+        @if ($role->custom_css && $role->isPro())
         {!! $role->custom_css !!}
         @endif
 

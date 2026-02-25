@@ -17,6 +17,7 @@ use App\Models\Sale;
 use App\Models\UsageDaily;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Services\BoostBillingService;
 use App\Services\DemoService;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -505,6 +506,17 @@ class AdminController extends Controller
         // Revenue trends
         $trendData = $this->getTrendData($startDate, $endDate);
 
+        // Amount mismatch sales and boosts
+        $mismatchSales = Sale::with('event:id,name')
+            ->where('status', 'amount_mismatch')
+            ->orderByDesc('created_at')
+            ->get();
+
+        $mismatchBoosts = BoostCampaign::with('event:id,name', 'user:id,name,email')
+            ->where('billing_status', 'amount_mismatch')
+            ->orderByDesc('created_at')
+            ->get();
+
         // Recent sales for detailed table
         $recentSales = Sale::with('event:id,name')
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
@@ -530,7 +542,9 @@ class AdminController extends Controller
             'expiredTrialsNoSub',
             'trendData',
             'range',
-            'recentSales'
+            'recentSales',
+            'mismatchSales',
+            'mismatchBoosts'
         ));
     }
 
@@ -1834,5 +1848,127 @@ class AdminController extends Controller
         );
 
         return redirect()->back()->with('success', "Set boost spending limit to \${$request->amount} for {$role->subdomain}");
+    }
+
+    /**
+     * Approve an amount_mismatch sale (mark as paid).
+     */
+    public function approveSale(Request $request, $saleId)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $sale = Sale::find($saleId);
+
+        if (! $sale || $sale->status !== 'amount_mismatch') {
+            return redirect()->back()->with('error', __('messages.sale_not_found'));
+        }
+
+        DB::transaction(function () use ($sale) {
+            $sale = Sale::lockForUpdate()->find($sale->id);
+            $sale->status = 'paid';
+            $sale->save();
+
+            AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+        });
+
+        AuditService::log(AuditService::ADMIN_UPDATE, auth()->id(), 'Sale', $sale->id, null, null, 'Approved amount_mismatch sale');
+
+        return redirect()->back()->with('success', __('messages.sale_approved'));
+    }
+
+    /**
+     * Refund an amount_mismatch sale via Stripe.
+     */
+    public function refundSale(Request $request, $saleId)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $sale = Sale::find($saleId);
+
+        if (! $sale || $sale->status !== 'amount_mismatch' || ! $sale->transaction_reference) {
+            return redirect()->back()->with('error', __('messages.sale_not_found'));
+        }
+
+        try {
+            $stripe = new \Stripe\StripeClient(config('services.stripe.key'));
+            $stripe->refunds->create([
+                'payment_intent' => $sale->transaction_reference,
+            ]);
+        } catch (\Exception $e) {
+            // Try platform key if Connect key fails
+            try {
+                $stripe = new \Stripe\StripeClient(config('services.stripe_platform.secret'));
+                $stripe->refunds->create([
+                    'payment_intent' => $sale->transaction_reference,
+                ]);
+            } catch (\Exception $e2) {
+                Log::error('Failed to refund amount_mismatch sale', [
+                    'sale_id' => $sale->id,
+                    'error' => $e2->getMessage(),
+                ]);
+
+                return redirect()->back()->with('error', 'Refund failed: '.$e2->getMessage());
+            }
+        }
+
+        $sale->status = 'refunded';
+        $sale->save();
+
+        AuditService::log(AuditService::ADMIN_UPDATE, auth()->id(), 'Sale', $sale->id, null, null, 'Refunded amount_mismatch sale');
+
+        return redirect()->back()->with('success', __('messages.sale_refunded'));
+    }
+
+    /**
+     * Approve an amount_mismatch boost campaign.
+     */
+    public function approveBoost(Request $request, $campaignId)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $campaign = BoostCampaign::find($campaignId);
+
+        if (! $campaign || $campaign->billing_status !== 'amount_mismatch') {
+            return redirect()->back()->with('error', __('messages.boost_not_found'));
+        }
+
+        $campaign->update(['billing_status' => 'charged']);
+
+        AuditService::log(AuditService::ADMIN_UPDATE, auth()->id(), 'BoostCampaign', $campaign->id, null, null, 'Approved amount_mismatch boost');
+
+        return redirect()->back()->with('success', __('messages.boost_approved'));
+    }
+
+    /**
+     * Refund an amount_mismatch boost campaign.
+     */
+    public function refundBoost(Request $request, $campaignId)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $campaign = BoostCampaign::find($campaignId);
+
+        if (! $campaign || $campaign->billing_status !== 'amount_mismatch') {
+            return redirect()->back()->with('error', __('messages.boost_not_found'));
+        }
+
+        $billingService = new BoostBillingService;
+        $result = $billingService->refundFull($campaign);
+
+        if (! $result) {
+            return redirect()->back()->with('error', 'Refund failed. Check logs for details.');
+        }
+
+        AuditService::log(AuditService::ADMIN_UPDATE, auth()->id(), 'BoostCampaign', $campaign->id, null, null, 'Refunded amount_mismatch boost');
+
+        return redirect()->back()->with('success', __('messages.boost_refunded'));
     }
 }
