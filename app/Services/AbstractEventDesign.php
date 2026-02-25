@@ -262,10 +262,6 @@ abstract class AbstractEventDesign
      */
     protected function prepareFooter(): void
     {
-        if ($this->role->acceptEventRequests()) {
-            $this->footerHeight = self::FOOTER_HEIGHT;
-            $this->totalHeight += $this->footerHeight;
-        }
     }
 
     /**
@@ -273,19 +269,6 @@ abstract class AbstractEventDesign
      */
     protected function renderFooter(): void
     {
-        if ($this->footerHeight === 0) {
-            return;
-        }
-
-        $lang = strtolower($this->role->language_code);
-        $message = trans('messages.want_to_see_your_event_here', [], $lang);
-        $url = $this->getFooterRequestUrl();
-
-        $centerX = (int) ($this->totalWidth / 2);
-        $y = $this->totalHeight - $this->footerHeight + 8;
-
-        $this->addCenteredText($message, $centerX, $y, self::FOOTER_FONT_SIZE, $this->c['gray']);
-        $this->addCenteredText($url, $centerX, $y + 20, self::FOOTER_FONT_SIZE, $this->c['gray']);
     }
 
     /**

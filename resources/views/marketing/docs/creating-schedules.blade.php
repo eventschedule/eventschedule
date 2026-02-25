@@ -72,6 +72,7 @@
                         <a href="#subschedules" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Sub-schedules</a>
                         <a href="#auto-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Auto Import</a>
                         <a href="#calendar-integrations" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Calendar Integrations</a>
+                        <a href="#custom-domain" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Custom Domain</a>
                         <a href="#email-settings" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Email Settings</a>
                         <a href="#email-scheduling" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Email Scheduling</a>
                         <a href="#team-members" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Team Members</a>
@@ -196,6 +197,42 @@
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Selfhost Note</div>
                                 <p>Google Calendar integration requires API credentials configuration. See the <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="text-cyan-400 hover:text-cyan-300">selfhost Google Calendar docs</a> for setup instructions.</p>
+                            </div>
+                        </section>
+
+                        <!-- Custom Domain -->
+                        <section id="custom-domain" class="doc-section">
+                            <h2 class="doc-heading">Custom Domain <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span></h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Use your own domain name instead of <code class="doc-inline-code">yoursubdomain.eventschedule.com</code>. With a custom domain, visitors access your schedule at an address like <code class="doc-inline-code">events.yourdomain.com</code> or <code class="doc-inline-code">yourdomain.com</code>.</p>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Custom domains work by redirecting your domain to your Event Schedule URL using Cloudflare's free URL forwarding. Follow the steps below to set it up.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Setting Up Your Custom Domain with Cloudflare</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Create a free Cloudflare account</strong> - Sign up at <code class="doc-inline-code">cloudflare.com</code> if you don't already have one.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Add your custom domain to Cloudflare</strong> - In the Cloudflare dashboard, click "Add a site" and enter your domain name. Select the free plan.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Update your nameservers</strong> - Go to your domain registrar (where you purchased the domain) and change the nameservers to the ones Cloudflare provides. This may take up to 24 hours to propagate.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Configure DNS records</strong> - In Cloudflare DNS settings, remove any existing A records for your domain. Then add two new A records, both with the proxy enabled (orange cloud):
+                                    <ul class="doc-list mt-2">
+                                        <li><code class="doc-inline-code">@</code> pointing to <code class="doc-inline-code">192.0.2.1</code></li>
+                                        <li><code class="doc-inline-code">*</code> pointing to <code class="doc-inline-code">192.0.2.1</code></li>
+                                    </ul>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">The IP address doesn't matter since all requests will be redirected by the page rule in the next step.</p>
+                                </li>
+                                <li><strong class="text-gray-900 dark:text-white">Create a page rule for URL forwarding</strong> - In Cloudflare, go to <strong class="text-gray-900 dark:text-white">Rules &rarr; Page Rules</strong> and create a new rule:
+                                    <ul class="doc-list mt-2">
+                                        <li><strong class="text-gray-900 dark:text-white">URL:</strong> <code class="doc-inline-code">*yourcustomdomain.com/*</code></li>
+                                        <li><strong class="text-gray-900 dark:text-white">Setting:</strong> Forwarding URL (301 Permanent Redirect)</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Destination:</strong> <code class="doc-inline-code">https://yoursubdomain.eventschedule.com/$2</code></li>
+                                    </ul>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Replace <code class="doc-inline-code">yourcustomdomain.com</code> with your domain and <code class="doc-inline-code">yoursubdomain</code> with your Event Schedule subdomain.</p>
+                                </li>
+                                <li><strong class="text-gray-900 dark:text-white">Enter your custom domain in Event Schedule</strong> - Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit &rarr; Schedule Settings</strong> and enter your custom domain URL in the Custom Domain field.</li>
+                            </ol>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>DNS and nameserver changes can take up to 24 to 48 hours to fully propagate. If the redirect doesn't work immediately, give it some time and try again.</p>
                             </div>
                         </section>
 
@@ -334,6 +371,12 @@
                 "name": "Connect Google Calendar",
                 "text": "Scroll to Calendar Sync, click Connect Google Calendar, authorize access, and select which calendar to sync.",
                 "url": "{{ url(route('marketing.docs.creating_schedules')) }}#calendar-integrations"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Set Up a Custom Domain",
+                "text": "Use Cloudflare to redirect your own domain to your Event Schedule URL for a professional branded experience.",
+                "url": "{{ url(route('marketing.docs.creating_schedules')) }}#custom-domain"
             },
             {
                 "@type": "HowToStep",

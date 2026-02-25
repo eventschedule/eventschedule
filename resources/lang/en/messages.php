@@ -1965,4 +1965,5 @@ return [
     'boost_approved' => 'Boost campaign approved successfully.',
     'boost_refunded' => 'Boost campaign refunded successfully.',
     'boost_not_found' => 'Boost campaign not found.',
+    'custom_domain_setup_guide' => 'Learn how to set up your custom domain',
 ];

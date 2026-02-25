@@ -8,7 +8,8 @@
         var btn = e.target.closest('.js-cancel-btn');
         if (btn) {
             e.preventDefault();
-            window.location = btn.getAttribute('data-cancel-url');
+            window._skipUnsavedWarning = true;
+            window.location = btn.getAttribute('data-cancel-url') || btn.getAttribute('href');
         }
     });
 </script>

@@ -22,6 +22,21 @@ class EventTextGenerator
             $text .= "\n\n";
         }
 
+        // Append "Want to see your event here?" message if schedule accepts event requests
+        if ($role->acceptEventRequests()) {
+            $lang = strtolower($role->language_code ?? 'en');
+            $message = trans('messages.want_to_see_your_event_here', [], $lang);
+
+            if ($role->custom_domain) {
+                $url = $role->custom_domain . '/request';
+            } else {
+                $url = route('role.request', ['subdomain' => $role->subdomain]);
+            }
+            $url = preg_replace('#^https?://#', '', $url);
+
+            $text .= $message . "\n" . $url . "\n";
+        }
+
         // Prepend Right-to-Left Mark for RTL languages so text
         // displays correctly when pasted in apps like WhatsApp
         if ($role->isRtl()) {

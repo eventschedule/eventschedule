@@ -128,6 +128,11 @@
       animation: shake 0.4s ease-in-out;
     }
   </style>
+  <script {!! nonce_attr() !!}>
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+  </script>
   <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
   <script {!! nonce_attr() !!}>
     // --- Global time helper functions (used by main event and parts) ---
@@ -899,7 +904,7 @@
 
         {{-- Cancel button --}}
         <a href="{{ route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']) }}"
-           class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+           class="js-cancel-btn inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             {{ __('messages.cancel') }}
         </a>
     </div>
@@ -4003,20 +4008,7 @@
           dirtyForm.addEventListener('change', () => { this.isDirty = true; });
       }
       window.addEventListener('beforeunload', (e) => {
-          if (this.isDirty) { e.preventDefault(); e.returnValue = ''; }
-      });
-      document.addEventListener('click', (e) => {
-          if (!this.isDirty) return;
-          var link = e.target.closest('a[href]');
-          if (!link) return;
-          var href = link.getAttribute('href');
-          if (!href || href === '#' || href.startsWith('#') || href.startsWith('javascript:')) return;
-          if (link.closest('form[enctype]')) return;
-          if (!confirm(@json(__("messages.unsaved_changes")))) {
-              e.preventDefault();
-          } else {
-              this.isDirty = false;
-          }
+          if (this.isDirty && !window._skipUnsavedWarning) { e.preventDefault(); e.returnValue = ''; }
       });
     }
   });
@@ -4220,28 +4212,11 @@
     });
   }
 
-// Prevent browser from restoring scroll position
-if ('scrollRestoration' in history) {
-    history.scrollRestoration = 'manual';
-}
-
-// Scroll to top immediately (before DOMContentLoaded)
-window.scrollTo(0, 0);
-document.documentElement.scrollTop = 0;
-if (document.body) {
-    document.body.scrollTop = 0;
-}
-
 // Section navigation functionality
 document.addEventListener('DOMContentLoaded', function() {
     const sectionLinks = document.querySelectorAll('.section-nav-link');
     const sections = document.querySelectorAll('.section-content');
-    
-    // Ensure we're at the top
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    
+
     // Save the initial hash before anti-scroll logic strips it
     const initialHash = window.location.hash ? window.location.hash.replace('#', '') : '';
 
@@ -4488,26 +4463,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Scroll to top on page load - use multiple methods to ensure it works
-    function scrollToTop() {
-        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
-    }
-    
-    // Scroll immediately
-    scrollToTop();
-    
-    // Scroll after a short delay to override any hash navigation
-    setTimeout(scrollToTop, 0);
-    setTimeout(scrollToTop, 10);
-    setTimeout(scrollToTop, 50);
-    
-    // Use requestAnimationFrame to ensure it happens after layout
-    requestAnimationFrame(function() {
-        scrollToTop();
-        requestAnimationFrame(scrollToTop);
-    });
 });
 
 // Focus event name field without scrolling (replaces HTML autofocus)
@@ -4515,17 +4470,11 @@ var nameField = document.getElementById('event_name');
 if (nameField) {
     nameField.focus({ preventScroll: true });
 }
+window.scrollTo(0, 0);
 
-// Also scroll to top when window fully loads (backup)
+// Backup: scroll to top after all resources finish loading
 window.addEventListener('load', function() {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    
-    // Additional scroll after load
-    setTimeout(function() {
-        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    }, 0);
+    window.scrollTo(0, 0);
 });
 
 function deleteFlyer(url, hash, token, element) {

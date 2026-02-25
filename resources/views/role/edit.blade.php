@@ -1764,6 +1764,11 @@
                                 <x-text-input id="custom_domain" name="custom_domain" type="url" class="mt-1 block w-full"
                                     :value="old('custom_domain', $role->custom_domain)" />
                                 <x-input-error class="mt-2" :messages="$errors->get('custom_domain')" />
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    <a href="{{ marketing_url('/docs/creating-schedules#custom-domain') }}" target="_blank" class="text-[#4E81FA] hover:underline">
+                                        {{ __('messages.custom_domain_setup_guide') }}
+                                    </a>
+                                </p>
                                 @else
                                 <x-text-input id="custom_domain" name="custom_domain" type="url" class="mt-1 block w-full"
                                     :value="old('custom_domain', $role->custom_domain)" disabled />
@@ -2582,22 +2587,9 @@
             });
 
             window.addEventListener('beforeunload', function(e) {
-                if (isDirty) { e.preventDefault(); e.returnValue = ''; }
+                if (isDirty && !window._skipUnsavedWarning) { e.preventDefault(); e.returnValue = ''; }
             });
 
-            document.addEventListener('click', function(e) {
-                if (!isDirty) return;
-                var link = e.target.closest('a[href]');
-                if (!link) return;
-                var href = link.getAttribute('href');
-                if (!href || href === '#' || href.startsWith('#') || href.startsWith('javascript:')) return;
-                if (link.closest('form[enctype]')) return;
-                if (!confirm(@json(__("messages.unsaved_changes")))) {
-                    e.preventDefault();
-                } else {
-                    isDirty = false;
-                }
-            });
         })();
         </script>
     </form>
