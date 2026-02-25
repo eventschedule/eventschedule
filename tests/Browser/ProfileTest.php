@@ -28,8 +28,11 @@ class ProfileTest extends DuskTestCase
             // 1. Change timezone
             // -----------------------------------------------
             $browser->visit('/settings')
-                ->waitFor('#timezone', 5)
-                ->select('timezone', 'Pacific/Auckland')
+                ->waitFor('#timezone-search', 5)
+                ->clear('#timezone-search')
+                ->type('#timezone-search', 'Pacific/Auckland')
+                ->waitFor('[role="option"]')
+                ->click('[role="option"]')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
                 ->waitForLocation('/settings', 15);
@@ -39,8 +42,8 @@ class ProfileTest extends DuskTestCase
 
             // Verify persisted on reload
             $browser->visit('/settings')
-                ->waitFor('#timezone', 5)
-                ->assertSelected('timezone', 'Pacific/Auckland');
+                ->waitFor('#timezone-search', 5)
+                ->assertInputValue('#timezone-search', 'Pacific/Auckland');
 
             // -----------------------------------------------
             // 2. Toggle 24-hour time
