@@ -460,7 +460,7 @@ class RoleController extends Controller
             } elseif ($event->venue) {
                 if ($event->venue->subdomain == $subdomain) {
                     // When viewing from venue, find a talent role (exclude venue from roles)
-                    $talentRoles = $event->roles->filter(fn ($r) => $r->id !== $event->venue->id);
+                    $talentRoles = $event->roles->filter(fn ($r) => $r->type === 'talent');
                     if ($talentRoles->count() > 0) {
                         // Prioritize the role matching the URL slug, otherwise use first talent
                         $otherRole = $talentRoles->firstWhere('subdomain', $slug) ?? $talentRoles->first();
