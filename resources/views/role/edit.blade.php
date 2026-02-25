@@ -843,7 +843,7 @@
                         <div class="mb-6">
                             <x-input-label for="name" :value="__('messages.schedule_name') . ' *'" />
                             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
-                                :value="old('name', $role->name)" required autofocus data-action="update-preview-on-input" />
+                                :value="old('name', $role->name)" required data-action="update-preview-on-input" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
 
@@ -2597,15 +2597,9 @@
 </x-app-admin-layout>
 
 <script {!! nonce_attr() !!}>
-// Prevent browser scroll restoration and scroll to top immediately
-if ('scrollRestoration' in history) {
-    history.scrollRestoration = 'manual';
-}
-window.scrollTo(0, 0);
-document.documentElement.scrollTop = 0;
-if (document.body) {
-    document.body.scrollTop = 0;
-}
+// Scroll guard: force page to stay at top during all initialization.
+var _scrollGuard = function() { window.scrollTo(0, 0); };
+window.addEventListener('scroll', _scrollGuard);
 
 // Toggle "Required" label visibility for import fields
 document.querySelectorAll('.import-field-toggle').forEach(function(toggle) {
@@ -3363,17 +3357,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize on page load
     initializeSections();
 
-    // Multiple scroll guarantees to ensure page stays at top
-    function scrollToTop() {
-        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
-    }
-    scrollToTop();
-    setTimeout(scrollToTop, 0);
-    setTimeout(scrollToTop, 10);
-    requestAnimationFrame(scrollToTop);
-
     // Form validation error handling
     const form = document.getElementById('edit-form');
     if (form) {
@@ -3479,9 +3462,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Final scroll guarantee on window load
 window.addEventListener('load', function() {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
+    window.scrollTo(0, 0);
+    requestAnimationFrame(function() {
+        var nameField = document.getElementById('name');
+        if (nameField) {
+            nameField.focus({ preventScroll: true });
+        }
+        window.scrollTo(0, 0);
+        setTimeout(function() {
+            window.removeEventListener('scroll', _scrollGuard);
+        }, 300);
+    });
 });
 
 // Integration tabs switching

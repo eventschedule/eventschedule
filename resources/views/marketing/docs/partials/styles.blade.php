@@ -38,6 +38,9 @@
         border-bottom: none;
     }
     .doc-heading {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
         font-size: 1.5rem;
         font-weight: 700;
         color: #111827;
@@ -264,6 +267,27 @@
         color: #fbbf24;
     }
 
+    .doc-heading-copy {
+        background: none;
+        border: none;
+        padding: 0.25rem;
+        cursor: pointer;
+        color: #9ca3af;
+        opacity: 0;
+        transition: opacity 0.2s, color 0.2s;
+        flex-shrink: 0;
+        line-height: 1;
+    }
+    .doc-heading:hover .doc-heading-copy {
+        opacity: 1;
+    }
+    .doc-heading-copy:hover {
+        color: #4E81FA;
+    }
+    .dark .doc-heading-copy:hover {
+        color: #60a5fa;
+    }
+
     .doc-nav-link.active {
         color: #111827;
         background: rgba(0, 0, 0, 0.05);
@@ -271,6 +295,10 @@
     .dark .doc-nav-link.active {
         color: white;
         background: rgba(255, 255, 255, 0.1);
+    }
+
+    .prose-dark {
+        padding-bottom: 50vh;
     }
 
     .prose-dark a {

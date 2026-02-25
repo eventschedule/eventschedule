@@ -238,7 +238,7 @@ class HomeController extends Controller
             return null;
         }
 
-        $event = Event::with('parts')->find($eventId);
+        $event = Event::with(['parts', 'roles'])->find($eventId);
         if (! $event) {
             return null;
         }
@@ -291,7 +291,7 @@ class HomeController extends Controller
             });
 
             if (! $exists) {
-                EventVideo::create([
+                $video = EventVideo::create([
                     'event_id' => $event->id,
                     'event_part_id' => $eventPartId ?: null,
                     'event_date' => $eventDate,
@@ -299,23 +299,27 @@ class HomeController extends Controller
                     'youtube_url' => $youtubeUrl,
                     'is_approved' => false,
                 ]);
+                $returnUrl = $event->getGuestUrl($pending['subdomain']);
+                session()->flash('scroll_to', 'pending-video-' . $video->id);
             }
 
             session()->flash('message', __('messages.video_submitted'));
         } elseif ($pending['type'] === 'comment') {
-            $comment = $pending['comment'] ?? '';
-            if (! $comment) {
+            $commentText = $pending['comment'] ?? '';
+            if (! $commentText) {
                 return $returnUrl;
             }
 
-            EventComment::create([
+            $comment = EventComment::create([
                 'event_id' => $event->id,
                 'event_part_id' => $eventPartId ?: null,
                 'event_date' => $eventDate,
                 'user_id' => auth()->id(),
-                'comment' => $comment,
+                'comment' => $commentText,
                 'is_approved' => false,
             ]);
+            $returnUrl = $event->getGuestUrl($pending['subdomain']);
+            session()->flash('scroll_to', 'pending-comment-' . $comment->id);
 
             session()->flash('message', __('messages.comment_submitted'));
         } elseif ($pending['type'] === 'photo') {
@@ -336,7 +340,7 @@ class HomeController extends Controller
                 \Illuminate\Support\Facades\Storage::move('temp/' . $tempFilename, $filename);
             }
 
-            EventPhoto::create([
+            $photo = EventPhoto::create([
                 'event_id' => $event->id,
                 'event_part_id' => $eventPartId ?: null,
                 'event_date' => $eventDate,
@@ -344,6 +348,8 @@ class HomeController extends Controller
                 'photo_url' => $filename,
                 'is_approved' => false,
             ]);
+            $returnUrl = $event->getGuestUrl($pending['subdomain']);
+            session()->flash('scroll_to', 'pending-photo-' . $photo->id);
 
             session()->flash('message', __('messages.photo_submitted'));
         }

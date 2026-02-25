@@ -4465,16 +4465,24 @@ document.addEventListener('DOMContentLoaded', function() {
     
 });
 
-// Focus event name field without scrolling (replaces HTML autofocus)
-var nameField = document.getElementById('event_name');
-if (nameField) {
-    nameField.focus({ preventScroll: true });
-}
-window.scrollTo(0, 0);
+// Scroll guard: force page to stay at top during all initialization.
+// Catches any scroll from focus, hash anchors, layout shifts, or browser behavior.
+// Active immediately and removed 300ms after load + rAF.
+var _scrollGuard = function() { window.scrollTo(0, 0); };
+window.addEventListener('scroll', _scrollGuard);
 
-// Backup: scroll to top after all resources finish loading
 window.addEventListener('load', function() {
     window.scrollTo(0, 0);
+    requestAnimationFrame(function() {
+        var nameField = document.getElementById('event_name');
+        if (nameField) {
+            nameField.focus({ preventScroll: true });
+        }
+        window.scrollTo(0, 0);
+        setTimeout(function() {
+            window.removeEventListener('scroll', _scrollGuard);
+        }, 300);
+    });
 });
 
 function deleteFlyer(url, hash, token, element) {

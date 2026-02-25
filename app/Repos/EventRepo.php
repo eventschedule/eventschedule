@@ -554,7 +554,7 @@ class EventRepo
             $sendEmailToMembers = $request->input('send_email_to_members', []);
 
             foreach ($roles as $role) {
-                if ($event->wasRecentlyCreated && ! $role->isClaimed() && $role->is_subscribed && $role->email) {
+                if (! $role->isClaimed() && $role->is_subscribed && $role->email) {
                     $shouldSendEmail = false;
 
                     if ($role->isVenue()) {
