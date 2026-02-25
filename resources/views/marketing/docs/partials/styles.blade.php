@@ -30,6 +30,7 @@
         padding-bottom: 2rem;
         margin-bottom: 2rem;
         border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        scroll-margin-top: 5rem;
     }
     .dark .doc-section {
         border-bottom-color: rgba(255, 255, 255, 0.1);

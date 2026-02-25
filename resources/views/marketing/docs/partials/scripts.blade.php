@@ -44,16 +44,20 @@
         }).catch(() => {});
     });
 
+    var headerOffset = 80;
+
+    function scrollToTarget(target, behavior) {
+        var top = target.getBoundingClientRect().top + window.scrollY - headerOffset;
+        window.scrollTo({ top: top, behavior: behavior || 'smooth' });
+    }
+
     // Smooth scroll for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             e.preventDefault();
             const target = document.querySelector(this.getAttribute('href'));
             if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+                scrollToTarget(target);
                 history.pushState(null, null, this.getAttribute('href'));
             }
         });
@@ -67,8 +71,8 @@
         let currentSection = '';
 
         sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            if (window.scrollY >= sectionTop - 100) {
+            const rect = section.getBoundingClientRect();
+            if (rect.top <= headerOffset + 20) {
                 currentSection = section.getAttribute('id');
             }
         });
@@ -81,6 +85,27 @@
         });
     }
 
-    window.addEventListener('scroll', highlightNav);
-    highlightNav();
+    // Scroll to hash on page load
+    if (window.location.hash) {
+        // Immediately highlight the matching nav link
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === window.location.hash) {
+                link.classList.add('active');
+            }
+        });
+        const target = document.querySelector(window.location.hash);
+        if (target) {
+            setTimeout(function() {
+                scrollToTarget(target, 'instant');
+                // Attach scroll listener after hash scroll settles
+                setTimeout(function() { window.addEventListener('scroll', highlightNav); }, 50);
+            }, 100);
+        } else {
+            window.addEventListener('scroll', highlightNav);
+        }
+    } else {
+        window.addEventListener('scroll', highlightNav);
+        highlightNav();
+    }
 </script>

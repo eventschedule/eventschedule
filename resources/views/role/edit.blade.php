@@ -1765,9 +1765,9 @@
                                     :value="old('custom_domain', $role->custom_domain)" />
                                 <x-input-error class="mt-2" :messages="$errors->get('custom_domain')" />
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                    <a href="{{ marketing_url('/docs/creating-schedules#custom-domain') }}" target="_blank" class="text-[#4E81FA] hover:underline">
+                                    <x-link href="{{ marketing_url('/docs/creating-schedules#custom-domain') }}" target="_blank" class="text-sm">
                                         {{ __('messages.custom_domain_setup_guide') }}
-                                    </a>
+                                    </x-link>
                                 </p>
                                 @else
                                 <x-text-input id="custom_domain" name="custom_domain" type="url" class="mt-1 block w-full"
