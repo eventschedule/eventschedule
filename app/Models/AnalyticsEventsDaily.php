@@ -77,9 +77,10 @@ class AnalyticsEventsDaily extends Model
 
         DB::statement(
             'UPDATE analytics_events_daily
-             SET sales_count = GREATEST(sales_count - 1, 0), revenue = GREATEST(revenue - ?, 0)
+             SET sales_count = IF(sales_count > 0, sales_count - 1, 0),
+                 revenue = IF(revenue > ?, revenue - ?, 0)
              WHERE event_id = ? AND date = ?',
-            [$amount, $eventId, $date]
+            [$amount, $amount, $eventId, $date]
         );
     }
 
