@@ -110,6 +110,27 @@
             </div>
         </div>
 
+        {{-- Boost & Newsletter Stats --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_boost_campaigns')</p>
+                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeBoostCampaigns) }}</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.boost_markup_revenue')</p>
+                <p class="mt-2 text-2xl font-bold text-green-600 dark:text-green-400">${{ number_format($boostMarkupRevenue, 2) }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.in_period')</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.admin_newsletters_sent')</p>
+                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($adminNewslettersSent) }}</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.newsletter_subscribers')</p>
+                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($newsletterSubscribers) }}</p>
+            </div>
+        </div>
+
         {{-- Events by Country --}}
         @if($eventsByCountry->count() > 0)
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
@@ -145,7 +166,7 @@
         </div>
 
         {{-- Recent Activity --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {{-- Recent Schedules --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -218,6 +239,37 @@
                     @empty
                         <div class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                             @lang('messages.no_events_yet')
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
+            {{-- Recent Newsletters --}}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">@lang('messages.recent_newsletters')</h3>
+                </div>
+                <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                    @forelse ($recentNewsletters as $newsletter)
+                        <div class="px-6 py-4">
+                            <div class="flex items-center justify-between">
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                        {{ $newsletter->subject }}
+                                    </p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        {{ number_format($newsletter->sent_count) }} @lang('messages.recipients')
+                                        &bull; {{ number_format($newsletter->open_count) }} @lang('messages.opens')
+                                    </p>
+                                </div>
+                                <div class="text-end text-sm text-gray-500 dark:text-gray-400">
+                                    <p>{{ $newsletter->sent_at?->diffForHumans() }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                            @lang('messages.no_newsletters_sent')
                         </div>
                     @endforelse
                 </div>

@@ -6,7 +6,7 @@
         @include('admin.partials._date-range-filter', ['range' => $range])
 
         {{-- User Count with Period Comparison --}}
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
@@ -39,6 +39,12 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_users_30_days')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeUsers30Days) }}</p>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.newsletter_subscribers')</p>
+                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($newsletterSubscribed) }}</p>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ number_format($newsletterUnsubscribed) }} @lang('messages.unsubscribed')</p>
             </div>
         </div>
 

@@ -135,6 +135,24 @@
                         <div class="bg-amber-600 h-2.5 rounded-full" style="width: {{ min($customCssPercent, 100) }}%"></div>
                     </div>
                 </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.newsletter')</span>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $newsletterPercent }}% ({{ number_format($newsletterEnabled) }} @lang('messages.schedules'))</span>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                        <div class="bg-cyan-600 h-2.5 rounded-full" style="width: {{ min($newsletterPercent, 100) }}%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.boost')</span>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $boostPercent }}% ({{ number_format($boostEnabled) }} @lang('messages.schedules'))</span>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                        <div class="bg-red-600 h-2.5 rounded-full" style="width: {{ min($boostPercent, 100) }}%"></div>
+                    </div>
+                </div>
             </div>
             <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">
                 @lang('messages.based_on_total_schedules', ['count' => number_format($totalSchedules)])

@@ -12,6 +12,7 @@ use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\EventPart;
 use App\Models\EventRole;
+use App\Models\Newsletter;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\UsageDaily;
@@ -231,6 +232,25 @@ class AdminController extends Controller
         // Trends data - users, schedules, events over time
         $trendData = $this->getTrendData($startDate, $endDate);
 
+        // Boost & Newsletter stats
+        $activeBoostCampaigns = BoostCampaign::where('status', 'active')->count();
+        $boostMarkupRevenue = BoostBillingRecord::where('type', 'charge')
+            ->where('status', 'completed')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum('markup_amount');
+        $adminNewslettersSent = Newsletter::admin()->where('status', 'sent')->count();
+        $newsletterSubscribers = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNull('admin_newsletter_unsubscribed_at')
+            ->count();
+
+        // Recent admin newsletters
+        $recentNewsletters = Newsletter::admin()
+            ->where('status', 'sent')
+            ->orderByDesc('sent_at')
+            ->limit(5)
+            ->get();
+
         return view('admin.dashboard', compact(
             'totalUsers',
             'totalSchedules',
@@ -249,7 +269,12 @@ class AdminController extends Controller
             'recentSchedules',
             'recentEvents',
             'trendData',
-            'range'
+            'range',
+            'activeBoostCampaigns',
+            'boostMarkupRevenue',
+            'adminNewslettersSent',
+            'newsletterSubscribers',
+            'recentNewsletters',
         ));
     }
 
@@ -293,6 +318,16 @@ class AdminController extends Controller
         $activeUsers30Days = User::whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
             ->where('updated_at', '>=', now()->subDays(30))->count();
+
+        // Newsletter subscriber stats
+        $newsletterSubscribed = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNull('admin_newsletter_unsubscribed_at')
+            ->count();
+        $newsletterUnsubscribed = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('admin_newsletter_unsubscribed_at')
+            ->count();
 
         // User signup method breakdown (all time)
         $emailUsers = User::whereNotNull('email_verified_at')
@@ -406,6 +441,8 @@ class AdminController extends Controller
             'usersChangePercent',
             'activeUsers7Days',
             'activeUsers30Days',
+            'newsletterSubscribed',
+            'newsletterUnsubscribed',
             'emailUsers',
             'googleUsers',
             'hybridUsers',
@@ -455,6 +492,15 @@ class AdminController extends Controller
 
         $pendingSales = Sale::where('status', 'pending')->count();
         $pendingRevenue = Sale::where('status', 'pending')->sum('payment_amount');
+
+        // Boost markup revenue
+        $boostMarkupTotal = BoostBillingRecord::where('type', 'charge')
+            ->where('status', 'completed')
+            ->sum('markup_amount');
+        $boostMarkupInPeriod = BoostBillingRecord::where('type', 'charge')
+            ->where('status', 'completed')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum('markup_amount');
 
         // Subscription Health (for hosted mode)
         $activeSubscriptions = 0;
@@ -533,6 +579,8 @@ class AdminController extends Controller
             'refundRate',
             'pendingSales',
             'pendingRevenue',
+            'boostMarkupTotal',
+            'boostMarkupInPeriod',
             'activeSubscriptions',
             'trialingSubscriptions',
             'canceledSubscriptions',
@@ -618,6 +666,8 @@ class AdminController extends Controller
         })->count();
         $customDomainEnabled = (clone $baseRoleQuery)->whereNotNull('custom_domain')->count();
         $customCssEnabled = (clone $baseRoleQuery)->whereNotNull('custom_css')->where('custom_css', '!=', '')->count();
+        $newsletterEnabled = (clone $baseRoleQuery)->whereHas('newsletters', fn ($q) => $q->where('status', 'sent'))->count();
+        $boostEnabled = (clone $baseRoleQuery)->whereHas('boostCampaigns')->count();
 
         $googleCalendarPercent = $totalSchedules > 0 ? round(($googleCalendarEnabled / $totalSchedules) * 100, 1) : 0;
         $stripeConnectedPercent = $totalSchedules > 0 ? round(($stripeConnected / $totalSchedules) * 100, 1) : 0;
@@ -625,6 +675,8 @@ class AdminController extends Controller
         $stripeEventsPercent = $totalSchedules > 0 ? round(($stripeEvents / $totalSchedules) * 100, 1) : 0;
         $customDomainPercent = $totalSchedules > 0 ? round(($customDomainEnabled / $totalSchedules) * 100, 1) : 0;
         $customCssPercent = $totalSchedules > 0 ? round(($customCssEnabled / $totalSchedules) * 100, 1) : 0;
+        $newsletterPercent = $totalSchedules > 0 ? round(($newsletterEnabled / $totalSchedules) * 100, 1) : 0;
+        $boostPercent = $totalSchedules > 0 ? round(($boostEnabled / $totalSchedules) * 100, 1) : 0;
 
         // Top schedules by event count (excluding demo roles)
         $topSchedulesByEvents = Role::withCount('events')
@@ -651,12 +703,16 @@ class AdminController extends Controller
             'stripeEvents',
             'customDomainEnabled',
             'customCssEnabled',
+            'newsletterEnabled',
+            'boostEnabled',
             'googleCalendarPercent',
             'stripeConnectedPercent',
             'stripeOnboardedPercent',
             'stripeEventsPercent',
             'customDomainPercent',
             'customCssPercent',
+            'newsletterPercent',
+            'boostPercent',
             'topSchedulesByEvents',
             'totalSchedules',
             'range'
@@ -1726,7 +1782,7 @@ class AdminController extends Controller
             ->get();
 
         $topBoosterRoleIds = $topBoosters->pluck('role_id')->toArray();
-        $topBoosterRoles = Role::whereIn('id', $topBoosterRoleIds)->pluck('subdomain', 'id');
+        $topBoosterRoles = Role::whereIn('id', $topBoosterRoleIds)->get()->keyBy('id');
 
         // Grant credit section
         $rolesWithCredit = Role::where('boost_credit', '>', 0)
