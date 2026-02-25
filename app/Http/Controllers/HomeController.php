@@ -6,6 +6,7 @@ use App\Mail\SupportEmail;
 use App\Models\BlogPost;
 use App\Models\Event;
 use App\Models\EventComment;
+use App\Models\EventPhoto;
 use App\Models\EventVideo;
 use App\Models\Role;
 use App\Utils\UrlUtils;
@@ -317,6 +318,35 @@ class HomeController extends Controller
             ]);
 
             session()->flash('message', __('messages.comment_submitted'));
+        } elseif ($pending['type'] === 'photo') {
+            $tempFilename = $pending['temp_filename'] ?? '';
+            $extension = $pending['extension'] ?? '';
+            if (! $tempFilename || ! $extension) {
+                return $returnUrl;
+            }
+
+            $tempPath = storage_path('app/temp/' . $tempFilename);
+            if (! file_exists($tempPath)) {
+                return $returnUrl;
+            }
+
+            $filename = 'photo_' . \Illuminate\Support\Str::random(32) . '.' . $extension;
+            if (config('filesystems.default') == 'local') {
+                \Illuminate\Support\Facades\Storage::move('temp/' . $tempFilename, 'public/' . $filename);
+            } else {
+                \Illuminate\Support\Facades\Storage::move('temp/' . $tempFilename, $filename);
+            }
+
+            EventPhoto::create([
+                'event_id' => $event->id,
+                'event_part_id' => $eventPartId ?: null,
+                'event_date' => $eventDate,
+                'user_id' => auth()->id(),
+                'photo_url' => $filename,
+                'is_approved' => false,
+            ]);
+
+            session()->flash('message', __('messages.photo_submitted'));
         }
 
         return $returnUrl;

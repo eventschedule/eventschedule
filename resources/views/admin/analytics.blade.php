@@ -66,7 +66,7 @@
                 <div class="h-48">
                     <canvas id="trafficSourcesChart"></canvas>
                 </div>
-                <div class="mt-4 grid grid-cols-5 gap-2 text-center">
+                <div class="mt-4 grid grid-cols-3 sm:grid-cols-6 gap-2 text-center">
                     <div>
                         <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($directViews) }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.direct')</p>
@@ -82,6 +82,10 @@
                     <div>
                         <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($emailViews) }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.email')</p>
+                    </div>
+                    <div>
+                        <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($newsletterViews) }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.newsletter_source')</p>
                     </div>
                     <div>
                         <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($otherViews) }}</p>
@@ -208,11 +212,11 @@
             new Chart(trafficSourcesCtx, {
                 type: 'bar',
                 data: {
-                    labels: [@json(__('messages.direct')), @json(__('messages.search')), @json(__('messages.social')), @json(__('messages.email')), @json(__('messages.other'))],
+                    labels: [@json(__('messages.direct')), @json(__('messages.search')), @json(__('messages.social')), @json(__('messages.email')), @json(__('messages.newsletter_source')), @json(__('messages.other'))],
                     datasets: [{
                         label: @json(__('messages.views')),
-                        data: [{{ $directViews }}, {{ $searchViews }}, {{ $socialViews }}, {{ $emailViews }}, {{ $otherViews }}],
-                        backgroundColor: ['#6366F1', '#10B981', '#F59E0B', '#EF4444', '#6B7280']
+                        data: [{{ $directViews }}, {{ $searchViews }}, {{ $socialViews }}, {{ $emailViews }}, {{ $newsletterViews }}, {{ $otherViews }}],
+                        backgroundColor: ['#6366F1', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#6B7280']
                     }]
                 },
                 options: {

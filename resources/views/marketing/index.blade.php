@@ -712,6 +712,127 @@
         </div>
     </section>
 
+    <!-- Boost Highlight Section -->
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-24 overflow-hidden">
+        <!-- Background accent -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute top-1/2 left-0 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-orange-600/10 to-amber-600/10 rounded-full blur-[120px]"></div>
+        </div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                <!-- Left - Phone mockup -->
+                <div class="relative order-2 lg:order-1">
+                    <div class="relative mx-auto w-[280px]">
+                        <!-- Phone frame -->
+                        <div class="relative bg-white dark:bg-white/5 rounded-[2.5rem] border-[3px] border-gray-200 dark:border-white/10 shadow-2xl shadow-orange-500/10 overflow-hidden animate-float">
+                            <!-- Notch -->
+                            <div class="flex justify-center pt-2 pb-1 bg-gray-50 dark:bg-white/5">
+                                <div class="w-20 h-5 bg-gray-200 dark:bg-white/10 rounded-full"></div>
+                            </div>
+                            <!-- Sponsored post -->
+                            <div class="px-4 py-3">
+                                <!-- Post header -->
+                                <div class="flex items-center gap-2.5 mb-3">
+                                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-gray-900 dark:text-white">The Blue Note</div>
+                                        <div class="text-[10px] text-gray-400">Sponsored</div>
+                                    </div>
+                                </div>
+                                <!-- Event image placeholder -->
+                                <div class="h-40 rounded-xl bg-gradient-to-br from-orange-200 to-amber-200 dark:from-orange-800/60 dark:to-amber-800/60 flex items-center justify-center mb-3">
+                                    <div class="text-center">
+                                        <svg class="w-8 h-8 text-orange-500 dark:text-orange-300 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                        </svg>
+                                        <span class="text-orange-600 dark:text-orange-300 font-bold text-sm">Jazz Night</span>
+                                        <div class="text-orange-500/70 dark:text-orange-400/70 text-[10px]">Sat, Mar 15 - 8 PM</div>
+                                    </div>
+                                </div>
+                                <!-- CTA card -->
+                                <div class="bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10 p-3 mb-3">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">eventschedule.com</div>
+                                    <div class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Jazz Night at The Blue Note</div>
+                                    <div class="inline-block px-4 py-1.5 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-semibold">Learn More</div>
+                                </div>
+                                <!-- Engagement row -->
+                                <div class="flex items-center justify-between text-gray-400 dark:text-gray-500">
+                                    <div class="flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>
+                                        <span class="text-[10px]">142</span>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                                        <span class="text-[10px]">28</span>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                                        <span class="text-[10px]">Share</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right - Text content -->
+                <div class="order-1 lg:order-2">
+                    <span class="inline-block px-4 py-1.5 rounded-full text-sm font-medium bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30 mb-6">
+                        Event Boost
+                    </span>
+                    <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+                        Grow your audience<br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">automatically</span>
+                    </h2>
+                    <p class="text-lg text-gray-500 dark:text-gray-400 mb-8 max-w-lg">
+                        Turn your event details into Facebook and Instagram ads. Set a budget, pick your audience, and launch in minutes.
+                    </p>
+
+                    <!-- Feature badges -->
+                    <div class="flex flex-wrap gap-3">
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-gray-700 dark:text-gray-300">
+                            <svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Smart targeting
+                        </span>
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-gray-700 dark:text-gray-300">
+                            <svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Budget control
+                        </span>
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-gray-700 dark:text-gray-300">
+                            <svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                            </svg>
+                            Real-time analytics
+                        </span>
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-gray-700 dark:text-gray-300">
+                            <svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                            </svg>
+                            Facebook & Instagram
+                        </span>
+                    </div>
+
+                    <div class="mt-8">
+                        <a href="{{ route('marketing.boost') }}" class="inline-flex items-center gap-2 text-orange-600 dark:text-orange-400 font-semibold hover:gap-3 transition-all">
+                            Learn more about Boost
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     {{-- Testimonials Section - Hidden for now
     <section class="relative bg-gray-50 py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -787,6 +787,12 @@
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                                                     {{ __('messages.add_video') }}
                                                 </button>
+                                                <button @click.stop="togglePhotoForm(event, $event)"
+                                                        class="hover-accent inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md border"
+                                                        style="border-color: {{ $accentColor }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
+                                                    {{ __('messages.add_photo') }}
+                                                </button>
                                                 <button @click.stop="toggleCommentForm(event, $event)"
                                                         class="hover-accent inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md border"
                                                         style="border-color: {{ $accentColor }}">
@@ -811,6 +817,48 @@
                                                        class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
                                                 <button type="submit" class="self-start px-4 py-2 border border-transparent text-sm rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md"
                                                         style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}">{{ __('messages.submit') }}</button>
+                                            </div>
+                                        </form>
+
+                                        {{-- Photo form --}}
+                                        <form v-if="openPhotoForm[event.uniqueKey]" @click.stop
+                                              method="POST" :action="event.submit_photo_url" enctype="multipart/form-data"
+                                              :data-key="event.uniqueKey">
+                                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                            <input v-if="event.days_of_week" type="hidden" name="event_date" :value="event.occurrenceDate">
+                                            <div class="flex flex-col gap-2">
+                                                <select v-if="event.parts.length > 0" name="event_part_id"
+                                                        class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
+                                                    <option value="">{{ __('messages.general') }}</option>
+                                                    <option v-for="part in event.parts" :key="part.id" :value="part.id" v-text="part.name"></option>
+                                                </select>
+                                                <div @click="$event.currentTarget.querySelector('input[type=file]').click()"
+                                                     @dragover.prevent="$event.currentTarget.classList.add('border-blue-400')"
+                                                     @dragleave.prevent="$event.currentTarget.classList.remove('border-blue-400')"
+                                                     @drop.prevent="$event.currentTarget.classList.remove('border-blue-400'); const f = $event.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) { const inp = $event.currentTarget.querySelector('input[type=file]'); const dt = new DataTransfer(); dt.items.add(f); inp.files = dt.files; inp.dispatchEvent(new Event('change')); }"
+                                                     class="rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer transition-colors">
+                                                    <div class="photo-dropzone-placeholder flex flex-col items-center justify-center py-6 text-gray-500 dark:text-gray-400">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mb-1" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
+                                                        <span class="text-sm hidden sm:inline">{{ __('messages.drag_photo_or_click') }}</span>
+                                                        <span class="text-sm sm:hidden">{{ __('messages.choose_from_library') }}</span>
+                                                    </div>
+                                                    <div class="photo-dropzone-preview hidden relative p-2">
+                                                        <img src="" class="rounded-lg max-h-48 mx-auto object-cover">
+                                                        <button type="button" @click.stop="const zone = $event.target.closest('.rounded-lg.border-dashed'); zone.querySelector('.photo-dropzone-placeholder').classList.remove('hidden'); zone.querySelector('.photo-dropzone-preview').classList.add('hidden'); zone.querySelector('input[type=file]').value = ''; zone.closest('form').querySelector('.photo-submit-btn').classList.add('hidden'); const camBtn = zone.closest('form').querySelector('.photo-camera-btn'); if (camBtn) camBtn.classList.remove('hidden'); const camInp = zone.closest('form').querySelector('.camera-input'); if (camInp) camInp.value = '';" class="absolute top-3 {{ $role->isRtl() ? 'left-3' : 'right-3' }} bg-black/60 hover:bg-black/80 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm leading-none">&times;</button>
+                                                    </div>
+                                                    <input type="file" name="photo" accept="image/*" class="hidden"
+                                                           @change="if ($event.target.files[0]) { const zone = $event.target.closest('.rounded-lg.border-dashed'); const r = new FileReader(); r.onload = e => { zone.querySelector('.photo-dropzone-preview img').src = e.target.result; zone.querySelector('.photo-dropzone-placeholder').classList.add('hidden'); zone.querySelector('.photo-dropzone-preview').classList.remove('hidden'); zone.closest('form').querySelector('.photo-submit-btn').classList.remove('hidden'); const camBtn = zone.closest('form').querySelector('.photo-camera-btn'); if (camBtn) camBtn.classList.add('hidden'); }; r.readAsDataURL($event.target.files[0]); }">
+                                                </div>
+                                                <button type="button" @click="$event.currentTarget.closest('form').querySelector('.camera-input').click()"
+                                                        class="photo-camera-btn sm:hidden w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-lg border-2 transition-colors"
+                                                        style="border-color: {{ $accentColor }}; color: {{ $accentColor }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
+                                                    {{ __('messages.take_photo') }}
+                                                </button>
+                                                <input type="file" accept="image/*" capture="environment" class="camera-input hidden"
+                                                       @change="if ($event.target.files[0]) { const form = $event.target.closest('form'); const inp = form.querySelector('input[name=photo]'); const dt = new DataTransfer(); dt.items.add($event.target.files[0]); inp.files = dt.files; inp.dispatchEvent(new Event('change')); }">
+                                                <button type="submit" class="photo-submit-btn hidden self-start px-4 py-2 border border-transparent text-sm rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md"
+                                                        style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}">{{ __('messages.upload_photo') }}</button>
                                             </div>
                                         </form>
 
@@ -1020,6 +1068,12 @@
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                                                 {{ __('messages.add_video') }}
                                             </button>
+                                            <button @click.stop="togglePhotoForm(event, $event)"
+                                                    class="hover-accent inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 border"
+                                                    style="border-color: {{ $accentColor }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
+                                                {{ __('messages.add_photo') }}
+                                            </button>
                                             <button @click.stop="toggleCommentForm(event, $event)"
                                                     class="hover-accent inline-flex items-center gap-1.5 px-5 py-2 text-base font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 border"
                                                     style="border-color: {{ $accentColor }}">
@@ -1044,6 +1098,48 @@
                                                    class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
                                             <button type="submit" class="self-start px-4 py-2 border border-transparent text-sm rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md"
                                                     style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}">{{ __('messages.submit') }}</button>
+                                        </div>
+                                    </form>
+
+                                    {{-- Photo form --}}
+                                    <form v-if="openPhotoForm[event.uniqueKey]" @click.stop
+                                          method="POST" :action="event.submit_photo_url" enctype="multipart/form-data"
+                                          :data-key="event.uniqueKey">
+                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                        <input v-if="event.days_of_week" type="hidden" name="event_date" :value="event.occurrenceDate">
+                                        <div class="flex flex-col gap-2">
+                                            <select v-if="event.parts.length > 0" name="event_part_id"
+                                                    class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
+                                                <option value="">{{ __('messages.general') }}</option>
+                                                <option v-for="part in event.parts" :key="part.id" :value="part.id" v-text="part.name"></option>
+                                            </select>
+                                            <div @click="$event.currentTarget.querySelector('input[type=file]').click()"
+                                                 @dragover.prevent="$event.currentTarget.classList.add('border-blue-400')"
+                                                 @dragleave.prevent="$event.currentTarget.classList.remove('border-blue-400')"
+                                                 @drop.prevent="$event.currentTarget.classList.remove('border-blue-400'); const f = $event.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) { const inp = $event.currentTarget.querySelector('input[type=file]'); const dt = new DataTransfer(); dt.items.add(f); inp.files = dt.files; inp.dispatchEvent(new Event('change')); }"
+                                                 class="rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer transition-colors">
+                                                <div class="photo-dropzone-placeholder flex flex-col items-center justify-center py-6 text-gray-500 dark:text-gray-400">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mb-1" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
+                                                    <span class="text-sm hidden sm:inline">{{ __('messages.drag_photo_or_click') }}</span>
+                                                    <span class="text-sm sm:hidden">{{ __('messages.choose_from_library') }}</span>
+                                                </div>
+                                                <div class="photo-dropzone-preview hidden relative p-2">
+                                                    <img src="" class="rounded-lg max-h-48 mx-auto object-cover">
+                                                    <button type="button" @click.stop="const zone = $event.target.closest('.rounded-lg.border-dashed'); zone.querySelector('.photo-dropzone-placeholder').classList.remove('hidden'); zone.querySelector('.photo-dropzone-preview').classList.add('hidden'); zone.querySelector('input[type=file]').value = ''; zone.closest('form').querySelector('.photo-submit-btn').classList.add('hidden'); const camBtn = zone.closest('form').querySelector('.photo-camera-btn'); if (camBtn) camBtn.classList.remove('hidden'); const camInp = zone.closest('form').querySelector('.camera-input'); if (camInp) camInp.value = '';" class="absolute top-3 {{ $role->isRtl() ? 'left-3' : 'right-3' }} bg-black/60 hover:bg-black/80 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm leading-none">&times;</button>
+                                                </div>
+                                                <input type="file" name="photo" accept="image/*" class="hidden"
+                                                       @change="if ($event.target.files[0]) { const zone = $event.target.closest('.rounded-lg.border-dashed'); const r = new FileReader(); r.onload = e => { zone.querySelector('.photo-dropzone-preview img').src = e.target.result; zone.querySelector('.photo-dropzone-placeholder').classList.add('hidden'); zone.querySelector('.photo-dropzone-preview').classList.remove('hidden'); zone.closest('form').querySelector('.photo-submit-btn').classList.remove('hidden'); const camBtn = zone.closest('form').querySelector('.photo-camera-btn'); if (camBtn) camBtn.classList.add('hidden'); }; r.readAsDataURL($event.target.files[0]); }">
+                                            </div>
+                                            <button type="button" @click="$event.currentTarget.closest('form').querySelector('.camera-input').click()"
+                                                    class="photo-camera-btn sm:hidden w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-lg border-2 transition-colors"
+                                                    style="border-color: {{ $accentColor }}; color: {{ $accentColor }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
+                                                {{ __('messages.take_photo') }}
+                                            </button>
+                                            <input type="file" accept="image/*" capture="environment" class="camera-input hidden"
+                                                   @change="if ($event.target.files[0]) { const form = $event.target.closest('form'); const inp = form.querySelector('input[name=photo]'); const dt = new DataTransfer(); dt.items.add($event.target.files[0]); inp.files = dt.files; inp.dispatchEvent(new Event('change')); }">
+                                            <button type="submit" class="photo-submit-btn hidden self-start px-4 py-2 border border-transparent text-sm rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md"
+                                                    style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}">{{ __('messages.upload_photo') }}</button>
                                         </div>
                                     </form>
 
@@ -1503,6 +1599,7 @@ const calendarApp = createApp({
             openVideoForm: {},
             playingVideo: null,
             openCommentForm: {},
+            openPhotoForm: {},
             isLoadingEvents: {{ request()->graphic ? 'false' : 'true' }},
             uniqueCategoryIds: @json($uniqueCategoryIds ?? []),
             dropdownCustomFields: @json($dropdownCustomFields ?? []),
@@ -2348,11 +2445,20 @@ const calendarApp = createApp({
             this.openVideoForm = { ...this.openVideoForm, [key]: !this.openVideoForm[key] };
             if (this.openVideoForm[key]) {
                 this.openCommentForm = { ...this.openCommentForm, [key]: false };
+                this.openPhotoForm = { ...this.openPhotoForm, [key]: false };
                 this.$nextTick(() => {
                     if (!btn) return;
                     const form = btn.closest('div').parentElement.querySelector('form input[name="youtube_url"]');
                     if (form) form.focus();
                 });
+            }
+        },
+        togglePhotoForm(event, $event) {
+            const key = event.uniqueKey;
+            this.openPhotoForm = { ...this.openPhotoForm, [key]: !this.openPhotoForm[key] };
+            if (this.openPhotoForm[key]) {
+                this.openVideoForm = { ...this.openVideoForm, [key]: false };
+                this.openCommentForm = { ...this.openCommentForm, [key]: false };
             }
         },
         toggleCommentForm(event, $event) {
@@ -2361,6 +2467,7 @@ const calendarApp = createApp({
             this.openCommentForm = { ...this.openCommentForm, [key]: !this.openCommentForm[key] };
             if (this.openCommentForm[key]) {
                 this.openVideoForm = { ...this.openVideoForm, [key]: false };
+                this.openPhotoForm = { ...this.openPhotoForm, [key]: false };
                 this.$nextTick(() => {
                     if (!btn) return;
                     const form = btn.closest('div').parentElement.querySelector('form textarea[name="comment"]');

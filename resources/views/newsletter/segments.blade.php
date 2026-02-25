@@ -34,12 +34,16 @@
                         </p>
                         @endif
                     </div>
-                    <form method="POST" action="{{ route('newsletter.segment.delete', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
-                        class="js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="text-red-500 hover:text-red-700 text-sm">{{ __('messages.delete') }}</button>
-                    </form>
+                    <div class="flex gap-3 items-start">
+                        <a href="{{ route('newsletter.segment.edit', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
+                            class="text-[#4E81FA] hover:text-blue-700 text-sm">{{ __('messages.edit') }}</a>
+                        <form method="POST" action="{{ route('newsletter.segment.delete', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
+                            class="js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-500 hover:text-red-700 text-sm">{{ __('messages.delete') }}</button>
+                        </form>
+                    </div>
                 </div>
             </div>
             @endforeach

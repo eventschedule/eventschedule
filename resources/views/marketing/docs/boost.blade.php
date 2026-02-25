@@ -91,7 +91,7 @@
                                 Boost turns your event details into live Facebook and Instagram ads. It is designed for event organizers who want to reach a wider audience without needing ad manager experience.
                             </p>
 
-                            <x-doc-screenshot id="boost--page" alt="Boost campaigns page" loading="eager" />
+                            <x-doc-screenshot id="boost--page" alt="Boost event creation form" loading="eager" />
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 With Boost you can:

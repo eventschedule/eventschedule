@@ -31,6 +31,7 @@ class Sale extends Model
         'utm_medium',
         'utm_campaign',
         'boost_campaign_id',
+        'newsletter_id',
     ];
 
     protected static function booted()

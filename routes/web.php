@@ -50,6 +50,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::get('/curate-event/{hash}', [EventController::class, 'curate'])->name('event.curate');
         Route::post('/submit-video/{event_hash}', [EventController::class, 'submitVideo'])->name('event.submit_video')->middleware('throttle:10,60');
         Route::post('/submit-comment/{event_hash}', [EventController::class, 'submitComment'])->name('event.submit_comment')->middleware('throttle:20,60');
+        Route::post('/submit-photo/{event_hash}', [EventController::class, 'submitPhoto'])->name('event.submit_photo')->middleware('throttle:10,60');
         Route::post('/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
         Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
         Route::get('/checkout/success/{sale_id}/{date}', [TicketController::class, 'success'])->name('checkout.success');
@@ -152,6 +153,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/newsletter-segments', [NewsletterController::class, 'storeSegment'])->name('newsletter.segment.store');
     Route::put('/newsletter-segments/{hash}', [NewsletterController::class, 'updateSegment'])->name('newsletter.segment.update');
     Route::delete('/newsletter-segments/{hash}', [NewsletterController::class, 'deleteSegment'])->name('newsletter.segment.delete');
+    Route::get('/newsletter-segments/{hash}/edit', [NewsletterController::class, 'editSegment'])->name('newsletter.segment.edit');
+    Route::post('/newsletter-segments/{hash}/users', [NewsletterController::class, 'storeSegmentUser'])->name('newsletter.segment.user.store');
+    Route::put('/newsletter-segments/{hash}/users/{userHash}', [NewsletterController::class, 'updateSegmentUser'])->name('newsletter.segment.user.update');
+    Route::delete('/newsletter-segments/{hash}/users/{userHash}', [NewsletterController::class, 'deleteSegmentUser'])->name('newsletter.segment.user.delete');
     Route::get('/newsletter-import', [NewsletterController::class, 'importForm'])->name('newsletter.import');
     Route::post('/newsletter-import', [NewsletterController::class, 'importStore'])->name('newsletter.import.store');
 
@@ -260,6 +265,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/{subdomain}/reject-video/{hash}', [EventController::class, 'rejectVideo'])->name('event.reject_video');
     Route::post('/{subdomain}/approve-comment/{hash}', [EventController::class, 'approveComment'])->name('event.approve_comment');
     Route::delete('/{subdomain}/reject-comment/{hash}', [EventController::class, 'rejectComment'])->name('event.reject_comment');
+    Route::post('/{subdomain}/approve-photo/{hash}', [EventController::class, 'approvePhoto'])->name('event.approve_photo');
+    Route::delete('/{subdomain}/reject-photo/{hash}', [EventController::class, 'rejectPhoto'])->name('event.reject_photo');
 
     Route::get('/{subdomain}/scan-agenda', [EventController::class, 'scanAgenda'])->name('event.scan_agenda')->where('subdomain', '(?!docs(?=/|$))[^/]+');
     Route::post('/{subdomain}/save-event-parts', [EventController::class, 'saveEventParts'])->name('event.save_parts');
@@ -879,6 +886,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     Route::get('/{subdomain}/curate-event/{hash}', [EventController::class, 'curate'])->name('event.curate');
     Route::post('/{subdomain}/submit-video/{event_hash}', [EventController::class, 'submitVideo'])->name('event.submit_video')->middleware('throttle:10,60');
     Route::post('/{subdomain}/submit-comment/{event_hash}', [EventController::class, 'submitComment'])->name('event.submit_comment')->middleware('throttle:20,60');
+    Route::post('/{subdomain}/submit-photo/{event_hash}', [EventController::class, 'submitPhoto'])->name('event.submit_photo')->middleware('throttle:10,60');
     Route::post('/{subdomain}/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
     Route::post('/{subdomain}/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
     Route::get('/{subdomain}/checkout/success/{sale_id}', [TicketController::class, 'success'])->name('checkout.success');

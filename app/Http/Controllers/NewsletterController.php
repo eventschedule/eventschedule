@@ -104,6 +104,9 @@ class NewsletterController extends Controller
         $role = $this->getRole($request);
 
         $segments = NewsletterSegment::where('role_id', $role->id)->get();
+        foreach ($segments as $segment) {
+            $segment->recipient_count = $segment->recipientCount();
+        }
         $events = $role->events()
             ->where('starts_at', '>=', now())
             ->orderBy('starts_at')
@@ -172,6 +175,9 @@ class NewsletterController extends Controller
             ->firstOrFail();
 
         $segments = NewsletterSegment::where('role_id', $role->id)->get();
+        foreach ($segments as $segment) {
+            $segment->recipient_count = $segment->recipientCount();
+        }
         $events = $role->events()
             ->where('starts_at', '>=', now())
             ->orderBy('starts_at')
@@ -599,6 +605,139 @@ class NewsletterController extends Controller
         return back()->with('status', __('messages.segment_deleted'));
     }
 
+    public function editSegment(Request $request, string $hash)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $segment = NewsletterSegment::where('role_id', $role->id)
+            ->where('id', UrlUtils::decodeId($hash))
+            ->firstOrFail();
+
+        $recipientCount = $segment->recipientCount();
+
+        if ($segment->type === 'manual') {
+            $subscribers = $segment->segmentUsers()
+                ->orderBy('created_at', 'desc')
+                ->paginate(50)
+                ->appends(['role_id' => UrlUtils::encodeId($role->id)]);
+        } else {
+            $subscribers = $segment->resolveRecipients()->take(50);
+        }
+
+        return view('newsletter.segment-edit', [
+            'role' => $role,
+            'segment' => $segment,
+            'subscribers' => $subscribers,
+            'recipientCount' => $recipientCount,
+        ]);
+    }
+
+    public function storeSegmentUser(Request $request, string $hash)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $segment = NewsletterSegment::where('role_id', $role->id)
+            ->where('id', UrlUtils::decodeId($hash))
+            ->where('type', 'manual')
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'email' => 'required|email|max:255',
+            'name' => 'nullable|string|max:255',
+        ]);
+
+        $email = strtolower(trim($validated['email']));
+
+        $exists = $segment->segmentUsers()->where('email', $email)->exists();
+        if ($exists) {
+            return back()->with('error', __('messages.email_already_in_segment'));
+        }
+
+        $user = User::where('email', $email)->first();
+        if (! $user) {
+            $user = User::create([
+                'email' => $email,
+                'name' => $validated['name'] ?? '',
+                'is_subscribed' => true,
+            ]);
+        }
+
+        $isFollower = DB::table('role_user')
+            ->where('role_id', $role->id)
+            ->where('user_id', $user->id)
+            ->exists();
+
+        if (! $isFollower) {
+            $role->followers()->attach($user->id, ['level' => 'follower', 'created_at' => now()]);
+        }
+
+        NewsletterSegmentUser::create([
+            'newsletter_segment_id' => $segment->id,
+            'user_id' => $user->id,
+            'email' => $email,
+            'name' => $validated['name'] ?? '',
+            'created_at' => now(),
+        ]);
+
+        return back()->with('status', __('messages.subscriber_added'));
+    }
+
+    public function updateSegmentUser(Request $request, string $hash, string $userHash)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $segment = NewsletterSegment::where('role_id', $role->id)
+            ->where('id', UrlUtils::decodeId($hash))
+            ->where('type', 'manual')
+            ->firstOrFail();
+
+        $segmentUser = $segment->segmentUsers()
+            ->where('id', UrlUtils::decodeId($userHash))
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'email' => 'required|email|max:255',
+            'name' => 'nullable|string|max:255',
+        ]);
+
+        $email = strtolower(trim($validated['email']));
+
+        if ($email !== strtolower($segmentUser->email)) {
+            $exists = $segment->segmentUsers()->where('email', $email)->exists();
+            if ($exists) {
+                return back()->with('error', __('messages.email_already_in_segment'));
+            }
+        }
+
+        $segmentUser->update([
+            'email' => $email,
+            'name' => $validated['name'] ?? '',
+        ]);
+
+        return back()->with('status', __('messages.subscriber_updated'));
+    }
+
+    public function deleteSegmentUser(Request $request, string $hash, string $userHash)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $segment = NewsletterSegment::where('role_id', $role->id)
+            ->where('id', UrlUtils::decodeId($hash))
+            ->where('type', 'manual')
+            ->firstOrFail();
+
+        $segment->segmentUsers()
+            ->where('id', UrlUtils::decodeId($userHash))
+            ->firstOrFail()
+            ->delete();
+
+        return back()->with('status', __('messages.subscriber_removed'));
+    }
+
     public function createAbTest(Request $request, string $hash)
     {
         $this->authorizeAccess();
@@ -766,11 +905,10 @@ class NewsletterController extends Controller
             'segment_id' => 'required_if:segment_target,existing|nullable|string',
             'entries' => 'required|array|min:1|max:10000',
             'entries.*.email' => 'required|email',
-            'entries.*.name' => 'required|string|max:255',
+            'entries.*.name' => 'nullable|string|max:255',
         ], [
             'entries.*.email.required' => __('messages.row_error', ['row' => ':index', 'error' => __('messages.email_required')]),
             'entries.*.email.email' => __('messages.row_error', ['row' => ':index', 'error' => __('messages.invalid_email')]),
-            'entries.*.name.required' => __('messages.row_error', ['row' => ':index', 'error' => __('messages.name_required')]),
         ]);
 
         if ($validated['segment_target'] === 'new') {
@@ -810,7 +948,7 @@ class NewsletterController extends Controller
                 if (! $user) {
                     $user = User::create([
                         'email' => $email,
-                        'name' => $entry['name'] ?? null,
+                        'name' => $entry['name'] ?? '',
                         'is_subscribed' => true,
                     ]);
                     $existingUsers->put($email, $user);
@@ -825,7 +963,7 @@ class NewsletterController extends Controller
                     'newsletter_segment_id' => $segment->id,
                     'user_id' => $user->id,
                     'email' => $email,
-                    'name' => $entry['name'] ?? null,
+                    'name' => $entry['name'] ?? '',
                     'created_at' => now(),
                 ]);
                 $imported++;

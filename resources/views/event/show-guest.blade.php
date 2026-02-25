@@ -801,6 +801,15 @@
         </div>
         @endif
 
+        {{-- Agenda image --}}
+        @if ($event->agenda_image_url)
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
+          <img src="{{ $event->agenda_image_url }}"
+            alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.agenda') }}"
+            class="w-full" loading="lazy" decoding="async"/>
+        </div>
+        @endif
+
         {{-- Event parts --}}
         @if ($event->parts->count() > 0)
         <div id="agenda" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
@@ -828,9 +837,11 @@
                   @php
                     $partVideos = $part->approvedVideos;
                     $partComments = $part->approvedComments;
+                    $partPhotos = $part->approvedPhotos;
                     if ($event->days_of_week && $date) {
                       $partVideos = $partVideos->filter(fn($v) => $v->event_date === $date || $v->event_date === null);
                       $partComments = $partComments->filter(fn($c) => $c->event_date === $date || $c->event_date === null);
+                      $partPhotos = $partPhotos->filter(fn($p) => $p->event_date === $date || $p->event_date === null);
                     }
                   @endphp
                   @if ($partVideos->count() > 0)
@@ -839,6 +850,15 @@
                     <div class="rounded-lg overflow-hidden">
                       <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                     </div>
+                    @endforeach
+                  </div>
+                  @endif
+                  @if ($partPhotos->count() > 0)
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    @foreach ($partPhotos as $photo)
+                    <a href="{{ $photo->photo_url }}" target="_blank" class="block rounded-lg overflow-hidden flex-shrink-0">
+                      <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto rounded-lg object-cover" loading="lazy">
+                    </a>
                     @endforeach
                   </div>
                   @endif
@@ -854,9 +874,11 @@
                   @php
                     $myPartPendingVideos = $myPendingVideos->where('event_part_id', $part->id);
                     $myPartPendingComments = $myPendingComments->where('event_part_id', $part->id);
+                    $myPartPendingPhotos = $myPendingPhotos->where('event_part_id', $part->id);
                     if ($event->days_of_week && $date) {
                       $myPartPendingVideos = $myPartPendingVideos->filter(fn($v) => $v->event_date === $date || $v->event_date === null);
                       $myPartPendingComments = $myPartPendingComments->filter(fn($c) => $c->event_date === $date || $c->event_date === null);
+                      $myPartPendingPhotos = $myPartPendingPhotos->filter(fn($p) => $p->event_date === $date || $p->event_date === null);
                     }
                   @endphp
                   @if ($myPartPendingVideos->count() > 0)
@@ -865,6 +887,16 @@
                     <div id="pending-video-{{ $video->id }}" class="rounded-lg overflow-hidden relative">
                       <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                       <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
+                    </div>
+                    @endforeach
+                  </div>
+                  @endif
+                  @if ($myPartPendingPhotos->count() > 0)
+                  <div class="mt-2 flex flex-wrap gap-2 opacity-60">
+                    @foreach ($myPartPendingPhotos as $photo)
+                    <div id="pending-photo-{{ $photo->id }}" class="relative rounded-lg overflow-hidden flex-shrink-0">
+                      <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto rounded-lg object-cover" loading="lazy">
+                      <span class="absolute top-1 {{ $role->isRtl() ? 'left-1' : 'right-1' }} inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
                     </div>
                     @endforeach
                   </div>
@@ -879,12 +911,16 @@
                     @endforeach
                   </div>
                   @endif
-                  <div class="mt-2 flex gap-3" x-data="{ showVideo: false, showComment: false }">
-                    <button @click="showVideo = !showVideo; showComment = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+                  <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
+                    <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                       {{ __('messages.add_video') }}
                     </button>
-                    <button @click="showComment = !showComment; showVideo = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+                    <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
+                      {{ __('messages.add_photo') }}
+                    </button>
+                    <button @click="showComment = !showComment; showVideo = false; showPhoto = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                       {{ __('messages.add_comment') }}
                     </button>
@@ -897,6 +933,43 @@
                         @endif
                         <input x-ref="videoInput" type="url" name="youtube_url" pattern="https?://(www\.)?((m\.)?youtube\.com|youtu\.be)/.+" title="{{ __('messages.invalid_youtube_url') }}" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
                         <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                      </form>
+                    </div>
+                    <div x-show="showPhoto" x-cloak class="mt-2 w-full">
+                      <form method="POST" action="{{ route('event.submit_photo', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" enctype="multipart/form-data" class="flex flex-col gap-2">
+                        @csrf
+                        <input type="hidden" name="event_part_id" value="{{ \App\Utils\UrlUtils::encodeId($part->id) }}">
+                        @if ($event->days_of_week && $date)
+                        <input type="hidden" name="event_date" value="{{ $date }}">
+                        @endif
+                        <div @click="$refs.photoInput.click()"
+                             @dragover.prevent="dragging = true"
+                             @dragenter.prevent="dragging = true"
+                             @dragleave.prevent="dragging = false"
+                             @drop.prevent="dragging = false; if ($event.dataTransfer.files[0] && $event.dataTransfer.files[0].type.startsWith('image/')) { const f = $event.dataTransfer.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }"
+                             class="rounded-lg border-2 border-dashed cursor-pointer transition-colors"
+                             :class="dragging ? '' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'"
+                             :style="dragging ? 'border-color: {{ $accentColor }}' : ''">
+                          <div x-show="!photoPreview" class="flex flex-col items-center justify-center py-6 text-gray-500 dark:text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mb-1" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
+                            <span class="text-sm hidden sm:inline">{{ __('messages.drag_photo_or_click') }}</span>
+                            <span class="text-sm sm:hidden">{{ __('messages.choose_from_library') }}</span>
+                          </div>
+                          <div x-show="photoPreview" class="relative p-2">
+                            <img :src="photoPreview" class="rounded-lg max-h-48 mx-auto object-cover">
+                            <button type="button" @click.stop="photoPreview = null; $refs.photoInput.value = ''; $refs.cameraInput.value = ''" class="absolute top-3 {{ $role->isRtl() ? 'left-3' : 'right-3' }} bg-black/60 hover:bg-black/80 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm leading-none">&times;</button>
+                          </div>
+                        </div>
+                        <button type="button" x-show="!photoPreview" @click="$refs.cameraInput.click()"
+                                class="sm:hidden w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-lg border-2 transition-colors"
+                                style="border-color: {{ $accentColor }}; color: {{ $accentColor }}">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
+                          {{ __('messages.take_photo') }}
+                        </button>
+                        <input x-ref="cameraInput" type="file" accept="image/*" capture="environment" class="hidden"
+                               @change="if ($event.target.files[0]) { const f = $event.target.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }">
+                        <input x-ref="photoInput" type="file" name="photo" accept="image/*" class="hidden" @change="if ($event.target.files[0]) { const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL($event.target.files[0]); }">
+                        <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.upload_photo') }}</button>
                       </form>
                     </div>
                     <div x-show="showComment" x-cloak class="mt-2 w-full">
@@ -931,9 +1004,11 @@
                   @php
                     $partVideos = $part->approvedVideos;
                     $partComments = $part->approvedComments;
+                    $partPhotos = $part->approvedPhotos;
                     if ($event->days_of_week && $date) {
                       $partVideos = $partVideos->filter(fn($v) => $v->event_date === $date || $v->event_date === null);
                       $partComments = $partComments->filter(fn($c) => $c->event_date === $date || $c->event_date === null);
+                      $partPhotos = $partPhotos->filter(fn($p) => $p->event_date === $date || $p->event_date === null);
                     }
                   @endphp
                   @if ($partVideos->count() > 0)
@@ -942,6 +1017,15 @@
                     <div class="rounded-lg overflow-hidden">
                       <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                     </div>
+                    @endforeach
+                  </div>
+                  @endif
+                  @if ($partPhotos->count() > 0)
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    @foreach ($partPhotos as $photo)
+                    <a href="{{ $photo->photo_url }}" target="_blank" class="block rounded-lg overflow-hidden flex-shrink-0">
+                      <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto rounded-lg object-cover" loading="lazy">
+                    </a>
                     @endforeach
                   </div>
                   @endif
@@ -957,9 +1041,11 @@
                   @php
                     $myPartPendingVideos = $myPendingVideos->where('event_part_id', $part->id);
                     $myPartPendingComments = $myPendingComments->where('event_part_id', $part->id);
+                    $myPartPendingPhotos = $myPendingPhotos->where('event_part_id', $part->id);
                     if ($event->days_of_week && $date) {
                       $myPartPendingVideos = $myPartPendingVideos->filter(fn($v) => $v->event_date === $date || $v->event_date === null);
                       $myPartPendingComments = $myPartPendingComments->filter(fn($c) => $c->event_date === $date || $c->event_date === null);
+                      $myPartPendingPhotos = $myPartPendingPhotos->filter(fn($p) => $p->event_date === $date || $p->event_date === null);
                     }
                   @endphp
                   @if ($myPartPendingVideos->count() > 0)
@@ -968,6 +1054,16 @@
                     <div id="pending-video-{{ $video->id }}" class="rounded-lg overflow-hidden relative">
                       <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                       <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
+                    </div>
+                    @endforeach
+                  </div>
+                  @endif
+                  @if ($myPartPendingPhotos->count() > 0)
+                  <div class="mt-2 flex flex-wrap gap-2 opacity-60">
+                    @foreach ($myPartPendingPhotos as $photo)
+                    <div id="pending-photo-{{ $photo->id }}" class="relative rounded-lg overflow-hidden flex-shrink-0">
+                      <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto rounded-lg object-cover" loading="lazy">
+                      <span class="absolute top-1 {{ $role->isRtl() ? 'left-1' : 'right-1' }} inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
                     </div>
                     @endforeach
                   </div>
@@ -982,12 +1078,16 @@
                     @endforeach
                   </div>
                   @endif
-                  <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false }">
-                    <button @click="showVideo = !showVideo; showComment = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+                  <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
+                    <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                       {{ __('messages.add_video') }}
                     </button>
-                    <button @click="showComment = !showComment; showVideo = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+                    <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
+                      {{ __('messages.add_photo') }}
+                    </button>
+                    <button @click="showComment = !showComment; showVideo = false; showPhoto = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                       {{ __('messages.add_comment') }}
                     </button>
@@ -1002,7 +1102,44 @@
                         <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
-                    <div x-show="showComment" x-cloak class="w-full">
+                    <div x-show="showPhoto" x-cloak class="mt-2 w-full">
+                      <form method="POST" action="{{ route('event.submit_photo', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" enctype="multipart/form-data" class="flex flex-col gap-2">
+                        @csrf
+                        <input type="hidden" name="event_part_id" value="{{ \App\Utils\UrlUtils::encodeId($part->id) }}">
+                        @if ($event->days_of_week && $date)
+                        <input type="hidden" name="event_date" value="{{ $date }}">
+                        @endif
+                        <div @click="$refs.photoInput.click()"
+                             @dragover.prevent="dragging = true"
+                             @dragenter.prevent="dragging = true"
+                             @dragleave.prevent="dragging = false"
+                             @drop.prevent="dragging = false; if ($event.dataTransfer.files[0] && $event.dataTransfer.files[0].type.startsWith('image/')) { const f = $event.dataTransfer.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }"
+                             class="rounded-lg border-2 border-dashed cursor-pointer transition-colors"
+                             :class="dragging ? '' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'"
+                             :style="dragging ? 'border-color: {{ $accentColor }}' : ''">
+                          <div x-show="!photoPreview" class="flex flex-col items-center justify-center py-6 text-gray-500 dark:text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mb-1" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
+                            <span class="text-sm hidden sm:inline">{{ __('messages.drag_photo_or_click') }}</span>
+                            <span class="text-sm sm:hidden">{{ __('messages.choose_from_library') }}</span>
+                          </div>
+                          <div x-show="photoPreview" class="relative p-2">
+                            <img :src="photoPreview" class="rounded-lg max-h-48 mx-auto object-cover">
+                            <button type="button" @click.stop="photoPreview = null; $refs.photoInput.value = ''; $refs.cameraInput.value = ''" class="absolute top-3 {{ $role->isRtl() ? 'left-3' : 'right-3' }} bg-black/60 hover:bg-black/80 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm leading-none">&times;</button>
+                          </div>
+                        </div>
+                        <button type="button" x-show="!photoPreview" @click="$refs.cameraInput.click()"
+                                class="sm:hidden w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-lg border-2 transition-colors"
+                                style="border-color: {{ $accentColor }}; color: {{ $accentColor }}">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
+                          {{ __('messages.take_photo') }}
+                        </button>
+                        <input x-ref="cameraInput" type="file" accept="image/*" capture="environment" class="hidden"
+                               @change="if ($event.target.files[0]) { const f = $event.target.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }">
+                        <input x-ref="photoInput" type="file" name="photo" accept="image/*" class="hidden" @change="if ($event.target.files[0]) { const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL($event.target.files[0]); }">
+                        <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.upload_photo') }}</button>
+                      </form>
+                    </div>
+                    <div x-show="showComment" x-cloak class="mt-2 w-full">
                       <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex flex-col gap-2">
                         @csrf
                         <input type="hidden" name="event_part_id" value="{{ \App\Utils\UrlUtils::encodeId($part->id) }}">
@@ -1027,16 +1164,20 @@
         @php
           $eventLevelVideos = $event->approvedVideos->whereNull('event_part_id');
           $eventLevelComments = $event->approvedComments->whereNull('event_part_id');
+          $eventLevelPhotos = $event->approvedPhotos->whereNull('event_part_id');
           $myEventLevelPendingVideos = $myPendingVideos->whereNull('event_part_id');
           $myEventLevelPendingComments = $myPendingComments->whereNull('event_part_id');
+          $myEventLevelPendingPhotos = $myPendingPhotos->whereNull('event_part_id');
           if ($event->days_of_week && $date) {
             $eventLevelVideos = $eventLevelVideos->filter(fn($v) => $v->event_date === $date || $v->event_date === null);
             $eventLevelComments = $eventLevelComments->filter(fn($c) => $c->event_date === $date || $c->event_date === null);
+            $eventLevelPhotos = $eventLevelPhotos->filter(fn($p) => $p->event_date === $date || $p->event_date === null);
             $myEventLevelPendingVideos = $myEventLevelPendingVideos->filter(fn($v) => $v->event_date === $date || $v->event_date === null);
             $myEventLevelPendingComments = $myEventLevelPendingComments->filter(fn($c) => $c->event_date === $date || $c->event_date === null);
+            $myEventLevelPendingPhotos = $myEventLevelPendingPhotos->filter(fn($p) => $p->event_date === $date || $p->event_date === null);
           }
         @endphp
-        @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $event->parts->count() == 0))
+        @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $eventLevelPhotos->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $myEventLevelPendingPhotos->count() > 0 || $event->parts->count() == 0))
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
           @if ($eventLevelVideos->count() > 0)
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -1045,6 +1186,20 @@
               <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $event->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
             </div>
             @endforeach
+          </div>
+          @endif
+          @if ($eventLevelPhotos->count() > 0)
+          <div class="flex flex-wrap gap-3 mb-4" x-data="{ lightbox: false, lightboxSrc: '' }">
+            @foreach ($eventLevelPhotos as $photo)
+            <button @click="lightboxSrc = '{{ $photo->photo_url }}'; lightbox = true" class="block rounded-lg overflow-hidden flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+              <img src="{{ $photo->photo_url }}" alt="{{ $event->translatedName() }}" class="h-32 sm:h-40 w-auto rounded-lg object-cover" loading="lazy">
+            </button>
+            @endforeach
+            {{-- Lightbox modal --}}
+            <div x-show="lightbox" x-cloak @click="lightbox = false" @keydown.escape.window="lightbox = false" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" style="font-family: sans-serif">
+              <button @click="lightbox = false" class="absolute top-4 {{ $role->isRtl() ? 'left-4' : 'right-4' }} text-white text-3xl leading-none hover:text-gray-300">&times;</button>
+              <img :src="lightboxSrc" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl" @click.stop>
+            </div>
           </div>
           @endif
           @if ($eventLevelComments->count() > 0)
@@ -1066,6 +1221,16 @@
             @endforeach
           </div>
           @endif
+          @if ($myEventLevelPendingPhotos->count() > 0)
+          <div class="flex flex-wrap gap-3 mb-4 opacity-60">
+            @foreach ($myEventLevelPendingPhotos as $photo)
+            <div id="pending-photo-{{ $photo->id }}" class="relative rounded-lg overflow-hidden flex-shrink-0">
+              <img src="{{ $photo->photo_url }}" alt="{{ $event->translatedName() }}" class="h-32 sm:h-40 w-auto rounded-lg object-cover" loading="lazy">
+              <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
+            </div>
+            @endforeach
+          </div>
+          @endif
           @if ($myEventLevelPendingComments->count() > 0)
           <div class="space-y-2 mb-4 opacity-60">
             @foreach ($myEventLevelPendingComments as $comment)
@@ -1077,12 +1242,16 @@
           </div>
           @endif
           @if ($event->parts->count() == 0)
-          <div class="flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false }">
-            <button @click="showVideo = !showVideo; showComment = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+          <div class="flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
+            <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
               {{ __('messages.add_video') }}
             </button>
-            <button @click="showComment = !showComment; showVideo = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+            <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
+              {{ __('messages.add_photo') }}
+            </button>
+            <button @click="showComment = !showComment; showVideo = false; showPhoto = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
               {{ __('messages.add_comment') }}
             </button>
@@ -1094,6 +1263,42 @@
                 @endif
                 <input x-ref="videoInput" type="url" name="youtube_url" pattern="https?://(www\.)?((m\.)?youtube\.com|youtu\.be)/.+" title="{{ __('messages.invalid_youtube_url') }}" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
                 <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+              </form>
+            </div>
+            <div x-show="showPhoto" x-cloak class="w-full mt-2">
+              <form method="POST" action="{{ route('event.submit_photo', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" enctype="multipart/form-data" class="flex flex-col gap-2">
+                @csrf
+                @if ($event->days_of_week && $date)
+                <input type="hidden" name="event_date" value="{{ $date }}">
+                @endif
+                <div @click="$refs.photoInput.click()"
+                     @dragover.prevent="dragging = true"
+                     @dragenter.prevent="dragging = true"
+                     @dragleave.prevent="dragging = false"
+                     @drop.prevent="dragging = false; if ($event.dataTransfer.files[0] && $event.dataTransfer.files[0].type.startsWith('image/')) { const f = $event.dataTransfer.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }"
+                     class="rounded-lg border-2 border-dashed cursor-pointer transition-colors"
+                     :class="dragging ? '' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'"
+                     :style="dragging ? 'border-color: {{ $accentColor }}' : ''">
+                  <div x-show="!photoPreview" class="flex flex-col items-center justify-center py-6 text-gray-500 dark:text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mb-1" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
+                    <span class="text-sm hidden sm:inline">{{ __('messages.drag_photo_or_click') }}</span>
+                    <span class="text-sm sm:hidden">{{ __('messages.choose_from_library') }}</span>
+                  </div>
+                  <div x-show="photoPreview" class="relative p-2">
+                    <img :src="photoPreview" class="rounded-lg max-h-48 mx-auto object-cover">
+                    <button type="button" @click.stop="photoPreview = null; $refs.photoInput.value = ''; $refs.cameraInput.value = ''" class="absolute top-3 {{ $role->isRtl() ? 'left-3' : 'right-3' }} bg-black/60 hover:bg-black/80 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm leading-none">&times;</button>
+                  </div>
+                </div>
+                <button type="button" x-show="!photoPreview" @click="$refs.cameraInput.click()"
+                        class="sm:hidden w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-lg border-2 transition-colors"
+                        style="border-color: {{ $accentColor }}; color: {{ $accentColor }}">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
+                  {{ __('messages.take_photo') }}
+                </button>
+                <input x-ref="cameraInput" type="file" accept="image/*" capture="environment" class="hidden"
+                       @change="if ($event.target.files[0]) { const f = $event.target.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }">
+                <input x-ref="photoInput" type="file" name="photo" accept="image/*" class="hidden" @change="if ($event.target.files[0]) { const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL($event.target.files[0]); }">
+                <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.upload_photo') }}</button>
               </form>
             </div>
             <div x-show="showComment" x-cloak class="w-full mt-2">

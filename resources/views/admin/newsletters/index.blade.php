@@ -87,7 +87,7 @@
                                         @csrf
                                         <button type="submit" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">{{ __('messages.clone') }}</button>
                                     </form>
-                                    @if ($newsletter->status === 'draft')
+                                    @if ($newsletter->status !== 'sending')
                                     <form method="POST" action="{{ route('admin.newsletters.delete', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]) }}" class="inline js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
                                         @csrf
                                         @method('DELETE')

@@ -34,6 +34,8 @@
 
     <script src="{{ asset('js/jquery.min.js') }}" {!! nonce_attr() !!}></script>
     <script type="text/javascript" src="{{ asset('js/toastify-js.js') }}" {!! nonce_attr() !!}></script>
+    <script {!! nonce_attr() !!}>window._ssI18n={noResults:@json(__('messages.no_results_found'))};</script>
+    <script src="{{ asset('js/searchable-select.js') }}" defer {!! nonce_attr() !!}></script>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/toastify.min.css') }}">
 
     @if (config('services.google.analytics') && (! auth()->user() || ! auth()->user()->isAdmin()))

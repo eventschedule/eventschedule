@@ -356,6 +356,116 @@
         </div>
         @endif
 
+        {{-- Newsletter Performance --}}
+        @if ($newsletterStats['has_data'])
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.newsletter_funnel') }}</h3>
+
+            {{-- Funnel visualization --}}
+            <div class="flex flex-col md:flex-row items-stretch gap-0 mb-6">
+                {{-- Sent --}}
+                <div class="flex-1 bg-gray-50 dark:bg-gray-700/50 rounded-lg md:rounded-r-none p-4 text-center">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('messages.total_sent') }}</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ number_format($newsletterStats['total_sent']) }}</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                        {{ count($newsletterStats['campaigns']) }} {{ Str::lower(__('messages.newsletters')) }}
+                    </p>
+                </div>
+                {{-- Arrow --}}
+                <div class="hidden md:flex items-center text-gray-300 dark:text-gray-600 px-1">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                </div>
+                {{-- Opens --}}
+                <div class="flex-1 bg-gray-50 dark:bg-gray-700/50 rounded-lg md:rounded-none p-4 text-center">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('messages.opens') }}</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ number_format($newsletterStats['total_opens']) }}</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ $newsletterStats['open_rate'] }}% {{ __('messages.open_rate') }}</p>
+                </div>
+                {{-- Arrow --}}
+                <div class="hidden md:flex items-center text-gray-300 dark:text-gray-600 px-1">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                </div>
+                {{-- Clicks --}}
+                <div class="flex-1 bg-gray-50 dark:bg-gray-700/50 rounded-lg md:rounded-none p-4 text-center">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('messages.clicks') }}</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ number_format($newsletterStats['total_clicks']) }}</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ $newsletterStats['click_rate'] }}% {{ __('messages.click_rate') }}</p>
+                </div>
+                {{-- Arrow --}}
+                <div class="hidden md:flex items-center text-gray-300 dark:text-gray-600 px-1">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                </div>
+                {{-- Page Views --}}
+                <div class="flex-1 bg-gray-50 dark:bg-gray-700/50 rounded-lg md:rounded-none p-4 text-center">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('messages.page_views') }}</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ number_format($newsletterStats['newsletter_views']) }}</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                        @if ($newsletterStats['total_clicks'] > 0)
+                            {{ number_format(($newsletterStats['newsletter_views'] / $newsletterStats['total_clicks']) * 100, 0) }}% {{ __('messages.landed') }}
+                        @endif
+                    </p>
+                </div>
+                {{-- Arrow --}}
+                <div class="hidden md:flex items-center text-gray-300 dark:text-gray-600 px-1">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                </div>
+                {{-- Sales --}}
+                <div class="flex-1 bg-gray-50 dark:bg-gray-700/50 rounded-lg md:rounded-l-none p-4 text-center">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('messages.sales') }}</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ number_format($newsletterStats['newsletter_sales']) }}</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                        @if ($newsletterStats['newsletter_revenue'] > 0)
+                            ${{ number_format($newsletterStats['newsletter_revenue'], 2) }} {{ __('messages.revenue') }}
+                        @endif
+                    </p>
+                </div>
+            </div>
+
+            {{-- Campaigns table --}}
+            @if (count($newsletterStats['campaigns']) > 0)
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.newsletters_in_period') }}</h4>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                            <th class="pb-2 font-medium">{{ __('messages.subject') }}</th>
+                            <th class="pb-2 font-medium">{{ __('messages.sent_at') }}</th>
+                            <th class="pb-2 font-medium text-end">{{ __('messages.sent') }}</th>
+                            <th class="pb-2 font-medium text-end">{{ __('messages.opens') }}</th>
+                            <th class="pb-2 font-medium text-end">{{ __('messages.clicks') }}</th>
+                            <th class="pb-2 font-medium"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                        @foreach ($newsletterStats['campaigns'] as $campaign)
+                        <tr>
+                            <td class="py-2 text-gray-900 dark:text-white max-w-[200px] truncate">{{ $campaign['subject'] }}</td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300">{{ $campaign['sent_at']->format('M j, Y') }}</td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ number_format($campaign['sent_count']) }}</td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">
+                                {{ number_format($campaign['open_count']) }}
+                                @if ($campaign['sent_count'] > 0)
+                                    <span class="text-xs text-gray-400">({{ number_format(($campaign['open_count'] / $campaign['sent_count']) * 100, 0) }}%)</span>
+                                @endif
+                            </td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">
+                                {{ number_format($campaign['click_count']) }}
+                                @if ($campaign['sent_count'] > 0)
+                                    <span class="text-xs text-gray-400">({{ number_format(($campaign['click_count'] / $campaign['sent_count']) * 100, 0) }}%)</span>
+                                @endif
+                            </td>
+                            <td class="py-2">
+                                <a href="{{ route('newsletter.stats', ['hash' => $campaign['hash']]) }}" class="text-blue-600 dark:text-blue-400 hover:underline text-xs">{{ __('messages.view_details') }}</a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @endif
+        </div>
+        @endif
+
         @if ($totalViews > 0 || $appearanceViews > 0)
             {{-- Charts Row --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -412,6 +522,10 @@
                         <div class="flex items-start gap-1">
                             <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: #EF4444;"></span>
                             <span><strong>{{ __('messages.email_source') }}:</strong> {{ __('messages.email_description') }}</span>
+                        </div>
+                        <div class="flex items-start gap-1">
+                            <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: #8B5CF6;"></span>
+                            <span><strong>{{ __('messages.newsletter_source') }}:</strong> {{ __('messages.newsletter_source_description') }}</span>
                         </div>
                         <div class="flex items-start gap-1">
                             <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: #F97316;"></span>
@@ -547,6 +661,23 @@
                     data: boostViewsData,
                     borderColor: '#F97316',
                     backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    borderDash: [5, 5]
+                });
+            }
+            @endif
+
+            @if ($newsletterViewsByPeriod->isNotEmpty())
+            // Build newsletter views data aligned to the same labels
+            const newsletterViewsMap = @json($newsletterViewsByPeriod->pluck('view_count', 'period')->toArray());
+            const newsletterViewsData = viewsLabels.map(label => newsletterViewsMap[label] || 0);
+            if (newsletterViewsData.some(v => v > 0)) {
+                viewsDatasets.push({
+                    label: @json(__('messages.newsletter_source') . ' ' . __('messages.views')),
+                    data: newsletterViewsData,
+                    borderColor: '#8B5CF6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
                     fill: true,
                     tension: 0.3,
                     borderDash: [5, 5]
@@ -817,6 +948,7 @@
             'search': @json(__('messages.search')),
             'social': @json(__('messages.social')),
             'email': @json(__('messages.email')),
+            'newsletter': @json(__('messages.newsletter_source')),
             'boost': @json(__('messages.boost')),
             'other': @json(__('messages.other'))
         };
@@ -825,6 +957,7 @@
             'search': '#10B981',
             'social': '#F59E0B',
             'email': '#EF4444',
+            'newsletter': '#8B5CF6',
             'boost': '#F97316',
             'other': '#6B7280'
         };

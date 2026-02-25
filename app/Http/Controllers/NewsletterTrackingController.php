@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\NewsletterRecipient;
 use App\Models\NewsletterUnsubscribe;
+use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 
 class NewsletterTrackingController extends Controller
@@ -61,10 +62,26 @@ class NewsletterTrackingController extends Controller
             request()->userAgent()
         );
 
-        if ($isFirstClick && $recipient->status !== 'test') {
-            $newsletter = $recipient->newsletter;
-            if ($newsletter) {
-                $newsletter->increment('click_count');
+        $newsletter = $recipient->newsletter;
+
+        if ($isFirstClick && $recipient->status !== 'test' && $newsletter) {
+            $newsletter->increment('click_count');
+        }
+
+        // Append UTM params for analytics attribution
+        if ($newsletter && ! str_contains($url, 'utm_source=')) {
+            $utmParams = http_build_query([
+                'utm_source' => 'newsletter',
+                'utm_medium' => 'email',
+                'utm_campaign' => UrlUtils::encodeId($newsletter->id),
+            ]);
+            $fragment = parse_url($url, PHP_URL_FRAGMENT);
+            if ($fragment !== null) {
+                $url = preg_replace('/#.*$/', '', $url);
+            }
+            $url .= (str_contains($url, '?') ? '&' : '?') . $utmParams;
+            if ($fragment !== null) {
+                $url .= '#' . $fragment;
             }
         }
 

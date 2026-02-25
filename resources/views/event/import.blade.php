@@ -451,7 +451,7 @@
                             <!-- Venue dropdown - only for authenticated users -->
                             @auth
                             <div v-if="eventVenueTypes[idx] === 'use_existing' && venues.length > 0">
-                                <select :id="'selected_venue_' + idx"
+                                <select :id="'selected_venue_' + idx" data-searchable
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
                                         @change="onVenueSelect(idx, $event.target.value ? venues.find(v => v.id === $event.target.value) : null)"
                                         :value="eventSelectedVenues[idx]?.id || ''">
@@ -556,7 +556,7 @@
                         <div class="mt-4" v-if="importFields.ticket_price || showAllFields" v-show="!savedEvents[idx]">
                             <x-input-label>{{ __('messages.price') }}<span v-if="requiredFields.ticket_price" class="text-red-500"> *</span></x-input-label>
                             <div class="mt-1 flex gap-3">
-                                <select v-model="preview.parsed[idx].ticket_currency_code"
+                                <select v-model="preview.parsed[idx].ticket_currency_code" data-searchable
                                     v-bind:disabled="savedEvents[idx]"
                                     class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                     @foreach ($currencies as $currency)

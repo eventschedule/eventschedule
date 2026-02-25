@@ -571,6 +571,7 @@ class AdminController extends Controller
         $searchViews = $trafficSources['search'] ?? 0;
         $socialViews = $trafficSources['social'] ?? 0;
         $emailViews = $trafficSources['email'] ?? 0;
+        $newsletterViews = $trafficSources['newsletter'] ?? 0;
         $otherViews = $trafficSources['other'] ?? 0;
 
         // Feature Adoption
@@ -628,6 +629,7 @@ class AdminController extends Controller
             'searchViews',
             'socialViews',
             'emailViews',
+            'newsletterViews',
             'otherViews',
             'googleCalendarEnabled',
             'stripeConnected',

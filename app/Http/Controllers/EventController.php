@@ -6,6 +6,7 @@ use App\Http\Requests\EventCommentSubmitRequest;
 use App\Http\Requests\EventCreateRequest;
 use App\Http\Requests\EventParseRequest;
 use App\Http\Requests\EventPartsSaveRequest;
+use App\Http\Requests\EventPhotoSubmitRequest;
 use App\Http\Requests\EventUpdateRequest;
 use App\Http\Requests\EventVideoSubmitRequest;
 use App\Jobs\SendQueuedEmail;
@@ -15,6 +16,7 @@ use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\EventComment;
 use App\Models\EventPart;
+use App\Models\EventPhoto;
 use App\Models\EventVideo;
 use App\Models\Role;
 use App\Models\Ticket;
@@ -64,6 +66,19 @@ class EventController extends Controller
                 Storage::delete($path);
 
                 $event->flyer_image_url = null;
+                $event->save();
+            }
+        }
+
+        if ($request->image_type == 'agenda') {
+            if ($event->agenda_image_url) {
+                $path = $event->getAttributes()['agenda_image_url'];
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/'.$path;
+                }
+                Storage::delete($path);
+
+                $event->agenda_image_url = null;
                 $event->save();
             }
         }
@@ -528,6 +543,8 @@ class EventController extends Controller
         $approvedVideos = $event->exists ? $event->approvedVideos()->with(['eventPart', 'user'])->get() : collect();
         $pendingComments = $event->exists ? $event->pendingComments()->with(['eventPart', 'user'])->get() : collect();
         $approvedComments = $event->exists ? $event->approvedComments()->with(['eventPart', 'user'])->get() : collect();
+        $pendingPhotos = $event->exists ? $event->pendingPhotos()->with(['eventPart', 'user'])->get() : collect();
+        $approvedPhotos = $event->exists ? $event->approvedPhotos()->with(['eventPart', 'user'])->get() : collect();
 
         return view('event/edit', [
             'role' => $role,
@@ -547,6 +564,8 @@ class EventController extends Controller
             'approvedVideos' => $approvedVideos,
             'pendingComments' => $pendingComments,
             'approvedComments' => $approvedComments,
+            'pendingPhotos' => $pendingPhotos,
+            'approvedPhotos' => $approvedPhotos,
         ]);
     }
 
@@ -600,6 +619,7 @@ class EventController extends Controller
             $role->agenda_ai_prompt = $request->input('agenda_ai_prompt');
             $role->agenda_show_times = $request->boolean('agenda_show_times');
             $role->agenda_show_description = $request->boolean('agenda_show_description');
+            $role->agenda_save_image = $request->boolean('save_agenda_image');
             $role->save();
         }
 
@@ -792,10 +812,15 @@ class EventController extends Controller
             $event->agenda_ai_prompt = $request->input('agenda_ai_prompt');
             $event->save();
         }
+        if ($request->input('agenda_image_url')) {
+            $event->agenda_image_url = $request->input('agenda_image_url');
+            $event->save();
+        }
         if ($request->input('save_ai_prompt_default')) {
             $role->agenda_ai_prompt = $request->input('agenda_ai_prompt');
             $role->agenda_show_times = $request->boolean('agenda_show_times');
             $role->agenda_show_description = $request->boolean('agenda_show_description');
+            $role->agenda_save_image = $request->boolean('save_agenda_image');
             $role->save();
         }
 
@@ -1042,6 +1067,7 @@ class EventController extends Controller
 
             if ($request->input('save_ai_prompt_default')) {
                 $role->agenda_ai_prompt = $aiPrompt;
+                $role->agenda_save_image = $request->boolean('save_agenda_image');
                 $role->save();
             }
 
@@ -1058,7 +1084,48 @@ class EventController extends Controller
 
             $parts = GeminiUtils::parseEventParts($imageData, $textDescription, $aiPrompt);
 
-            return response()->json($parts);
+            $agendaImageUrl = null;
+            $agendaImageFullUrl = null;
+
+            if ($request->input('save_agenda_image') && $imageData && $request->hasFile('parts_image')) {
+                $file = $request->file('parts_image');
+                $extension = strtolower($file->getClientOriginalExtension());
+                $filename = strtolower('agenda_'.Str::random(32).'.'.$extension);
+
+                if (isset($event)) {
+                    // Delete old agenda image
+                    $oldPath = $event->getAttributes()['agenda_image_url'];
+                    if ($oldPath) {
+                        $deletePath = $oldPath;
+                        if (config('filesystems.default') == 'local') {
+                            $deletePath = 'public/'.$deletePath;
+                        }
+                        Storage::delete($deletePath);
+                    }
+                }
+
+                $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+                $agendaImageUrl = $filename;
+
+                if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                    $agendaImageFullUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
+                } elseif (config('filesystems.default') == 'local') {
+                    $agendaImageFullUrl = url('/storage/'.$filename);
+                } else {
+                    $agendaImageFullUrl = $filename;
+                }
+
+                if (isset($event)) {
+                    $event->agenda_image_url = $filename;
+                    $event->save();
+                }
+            }
+
+            return response()->json([
+                'parts' => $parts,
+                'agenda_image_url' => $agendaImageUrl,
+                'agenda_image_full_url' => $agendaImageFullUrl,
+            ]);
         } catch (\Exception $e) {
             \Log::error('Event parts parsing failed: '.$e->getMessage());
 
@@ -1581,6 +1648,135 @@ class EventController extends Controller
         $comment->delete();
 
         return redirect()->to(url()->previous().'#section-fan-content')->with('message', __('messages.comment_rejected'));
+    }
+
+    public function submitPhoto(EventPhotoSubmitRequest $request, $subdomain, $event_hash)
+    {
+        $role = Role::where('subdomain', $subdomain)->firstOrFail();
+        if (is_demo_role($role)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $event_id = UrlUtils::decodeId($event_hash);
+        $event = Event::with('parts')->findOrFail($event_id);
+
+        if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
+            abort(404);
+        }
+
+        $user = auth()->user();
+        $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+        if ($event->is_private && ! $isMemberOrAdmin) {
+            abort(404);
+        }
+
+        $file = $request->file('photo');
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (! in_array($extension, $allowedExtensions)) {
+            return redirect()->back()->with('error', __('messages.invalid_photo'));
+        }
+
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (! in_array($file->getMimeType(), $allowedMimes)) {
+            return redirect()->back()->with('error', __('messages.invalid_photo'));
+        }
+
+        if (! @getimagesize($file->getPathname())) {
+            return redirect()->back()->with('error', __('messages.invalid_photo'));
+        }
+
+        if (! auth()->check()) {
+            $tempFilename = 'photo_' . Str::random(32) . '.' . $extension;
+            $file->storeAs('temp', $tempFilename);
+
+            session()->put('pending_fan_content', [
+                'type' => 'photo',
+                'subdomain' => $subdomain,
+                'event_hash' => $event_hash,
+                'temp_filename' => $tempFilename,
+                'extension' => $extension,
+                'event_part_id' => $request->input('event_part_id'),
+                'event_date' => $request->input('event_date'),
+                'return_url' => url()->previous(),
+            ]);
+
+            return redirect(app_url(route('sign_up', [], false)));
+        }
+
+        $eventPartId = $request->input('event_part_id');
+        if ($eventPartId) {
+            $eventPartId = UrlUtils::decodeId($eventPartId);
+            $part = $event->parts->firstWhere('id', $eventPartId);
+            if (! $part) {
+                return redirect()->back()->with('error', __('messages.not_authorized'));
+            }
+        }
+
+        $eventDate = $event->days_of_week ? $request->input('event_date') : null;
+
+        $filename = 'photo_' . Str::random(32) . '.' . $extension;
+        if (config('filesystems.default') == 'local') {
+            $file->storeAs('public', $filename);
+        } else {
+            $file->storeAs('/', $filename);
+        }
+
+        $isApproved = $request->user()->canEditEvent($event);
+
+        $photo = EventPhoto::create([
+            'event_id' => $event->id,
+            'event_part_id' => $eventPartId ?: null,
+            'event_date' => $eventDate,
+            'user_id' => $request->user()->id,
+            'photo_url' => $filename,
+            'is_approved' => $isApproved,
+        ]);
+
+        if (! $request->user()->isConnected($role->subdomain)) {
+            $request->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+        }
+
+        $message = $isApproved
+            ? __('messages.photo_submitted_approved')
+            : __('messages.photo_submitted');
+
+        $redirect = redirect()->to($event->getGuestUrl($subdomain))->with('message', $message);
+
+        if (! $isApproved) {
+            $redirect = $redirect->with('scroll_to', 'pending-photo-' . $photo->id);
+        }
+
+        return $redirect;
+    }
+
+    public function approvePhoto(Request $request, $subdomain, $hash)
+    {
+        $id = UrlUtils::decodeId($hash);
+        $photo = EventPhoto::with('event')->findOrFail($id);
+
+        if ($request->user()->cannot('update', $photo->event)) {
+            return redirect()->to(url()->previous().'#section-fan-content')->with('error', __('messages.not_authorized'));
+        }
+
+        $photo->is_approved = true;
+        $photo->save();
+
+        return redirect()->to(url()->previous().'#section-fan-content')->with('message', __('messages.photo_approved'));
+    }
+
+    public function rejectPhoto(Request $request, $subdomain, $hash)
+    {
+        $id = UrlUtils::decodeId($hash);
+        $photo = EventPhoto::with('event')->findOrFail($id);
+
+        if ($request->user()->cannot('update', $photo->event)) {
+            return redirect()->to(url()->previous().'#section-fan-content')->with('error', __('messages.not_authorized'));
+        }
+
+        $photo->delete();
+
+        return redirect()->to(url()->previous().'#section-fan-content')->with('message', __('messages.photo_rejected'));
     }
 
     public function scanAgenda(Request $request, $subdomain)

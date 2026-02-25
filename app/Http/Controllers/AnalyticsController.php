@@ -104,6 +104,14 @@ class AnalyticsController extends Controller
             ? $analytics->getBoostViewsByPeriod($user, $period, $start, $end, $selectedRoleId)
             : collect();
 
+        // Get newsletter stats
+        $newsletterStats = $analytics->getNewsletterStats($user, $start, $end, $selectedRoleId);
+
+        // Get newsletter views by period for chart overlay (only if newsletter data exists)
+        $newsletterViewsByPeriod = $newsletterStats['has_data']
+            ? $analytics->getNewsletterViewsByPeriod($user, $period, $start, $end, $selectedRoleId)
+            : collect();
+
         return view('analytics.index', compact(
             'roles',
             'selectedRoleId',
@@ -124,7 +132,9 @@ class AnalyticsController extends Controller
             'trafficSources',
             'topReferrers',
             'boostStats',
-            'boostViewsByPeriod'
+            'boostViewsByPeriod',
+            'newsletterStats',
+            'newsletterViewsByPeriod'
         ));
     }
 }

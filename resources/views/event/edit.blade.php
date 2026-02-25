@@ -1076,7 +1076,7 @@
                             </a>
                             @endif
                             @if ($event->exists)
-                            @php $fanContentPendingCount = ($pendingVideos->count() ?? 0) + ($pendingComments->count() ?? 0); @endphp
+                            @php $fanContentPendingCount = ($pendingVideos->count() ?? 0) + ($pendingComments->count() ?? 0) + ($pendingPhotos->count() ?? 0); @endphp
                             <a href="#section-fan-content" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-fan-content">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
@@ -2019,12 +2019,32 @@
                                 <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.show_description') }}</span>
                             </label>
                             <label class="flex items-center">
+                                <input type="checkbox" v-model="saveAgendaImage" class="rounded border-gray-300 dark:border-gray-700 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800" />
+                                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.save_agenda_image') }}</span>
+                            </label>
+                            <label class="flex items-center">
                                 <input type="checkbox" v-model="savePartsAiPromptDefault" class="rounded border-gray-300 dark:border-gray-700 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800" />
                                 <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.save_as_default') }}</span>
                             </label>
                         </div>
                         <input type="hidden" name="agenda_show_times" :value="agendaShowTimes ? '1' : '0'" />
                         <input type="hidden" name="agenda_show_description" :value="agendaShowDescription ? '1' : '0'" />
+                        <input type="hidden" name="save_agenda_image" :value="saveAgendaImage ? '1' : '0'" />
+                        <input type="hidden" name="agenda_image_url" :value="agendaImageUrl" />
+
+                        {{-- Agenda image preview --}}
+                        <div v-if="agendaImageFullUrl" class="mt-4">
+                            <div class="relative inline-block">
+                                <img :src="agendaImageFullUrl" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                                <button type="button" @click="deleteAgendaImage"
+                                    style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
+                                    class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
 
                         <!-- Preview Modal -->
                         <div v-if="showPartsPreview" class="mt-4 border border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
@@ -2213,7 +2233,7 @@
                             <div class="mb-6" v-show="!event.tickets_enabled">
                                 <x-input-label :value="__('messages.price')" />
                                 <div class="mt-1 flex gap-3">
-                                    <select name="ticket_currency_code" v-model="event.ticket_currency_code"
+                                    <select name="ticket_currency_code" v-model="event.ticket_currency_code" data-searchable
                                         class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                         @foreach ($currencies as $currency)
                                         @if ($loop->index == 2)
@@ -2288,7 +2308,7 @@
 
                                 <div class="mb-6">
                                     <x-input-label for="ticket_currency_code" :value="__('messages.currency')"/>
-                                    <select id="ticket_currency_code" name="ticket_currency_code" v-model="event.ticket_currency_code" :required="event.tickets_enabled"
+                                    <select id="ticket_currency_code" name="ticket_currency_code" v-model="event.ticket_currency_code" :required="event.tickets_enabled" data-searchable
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                         @foreach ($currencies as $currency)
                                         @if ($loop->index == 2)
@@ -2771,12 +2791,12 @@
                     {{ __('messages.fan_content') }}
                 </h2>
 
-                @if ($pendingVideos->count() == 0 && $pendingComments->count() == 0 && $approvedVideos->count() == 0 && $approvedComments->count() == 0)
+                @if ($pendingVideos->count() == 0 && $pendingComments->count() == 0 && $pendingPhotos->count() == 0 && $approvedVideos->count() == 0 && $approvedComments->count() == 0 && $approvedPhotos->count() == 0)
                 <p class="text-gray-500 dark:text-gray-400">{{ __('messages.no_fan_content') }}</p>
                 @else
 
                 {{-- Pending Section --}}
-                @if ($pendingVideos->count() > 0 || $pendingComments->count() > 0)
+                @if ($pendingVideos->count() > 0 || $pendingComments->count() > 0 || $pendingPhotos->count() > 0)
                 <div class="mb-8">
                     <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-4">{{ __('messages.pending_approval') }}</h3>
                     <div class="space-y-4">
@@ -2819,12 +2839,31 @@
                             </div>
                         </div>
                         @endforeach
+
+                        @foreach ($pendingPhotos as $photo)
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                            <div class="flex-1">
+                                <img src="{{ $photo->photo_url }}" alt="" class="h-32 w-auto rounded object-cover mb-2">
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    {{ $photo->eventPart ? $photo->eventPart->name : __('messages.general') }}
+                                    @if ($photo->event_date)
+                                    &middot; {{ \Carbon\Carbon::parse($photo->event_date)->format('M j, Y') }}
+                                    @endif
+                                    &middot; {{ __('messages.submitted_by') }} {{ $photo->user?->name }}
+                                </p>
+                            </div>
+                            <div class="flex gap-2 shrink-0">
+                                <button type="submit" form="form-approve-photo-{{ $photo->id }}" class="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">{{ __('messages.approve') }}</button>
+                                <button type="submit" form="form-reject-photo-{{ $photo->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
+                            </div>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
                 @endif
 
                 {{-- Approved Section --}}
-                @if ($approvedVideos->count() > 0 || $approvedComments->count() > 0)
+                @if ($approvedVideos->count() > 0 || $approvedComments->count() > 0 || $approvedPhotos->count() > 0)
                 <div>
                     <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-4">{{ __('messages.approved_content') }}</h3>
                     <div class="space-y-4">
@@ -2862,6 +2901,24 @@
                             </div>
                             <div class="shrink-0">
                                 <button type="submit" form="form-reject-comment-{{ $comment->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
+                            </div>
+                        </div>
+                        @endforeach
+
+                        @foreach ($approvedPhotos as $photo)
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div class="flex-1">
+                                <img src="{{ $photo->photo_url }}" alt="" class="h-32 w-auto rounded object-cover mb-2">
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    {{ $photo->eventPart ? $photo->eventPart->name : __('messages.general') }}
+                                    @if ($photo->event_date)
+                                    &middot; {{ \Carbon\Carbon::parse($photo->event_date)->format('M j, Y') }}
+                                    @endif
+                                    &middot; {{ __('messages.submitted_by') }} {{ $photo->user?->name }}
+                                </p>
+                            </div>
+                            <div class="shrink-0">
+                                <button type="submit" form="form-reject-photo-{{ $photo->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
                             </div>
                         </div>
                         @endforeach
@@ -2915,6 +2972,13 @@
         @endforeach
         @foreach ($approvedComments as $comment)
         <form id="form-reject-comment-{{ $comment->id }}" method="POST" action="{{ route('event.reject_comment', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($comment->id)]) }}" class="hidden">@csrf @method('DELETE')</form>
+        @endforeach
+        @foreach ($pendingPhotos as $photo)
+        <form id="form-approve-photo-{{ $photo->id }}" method="POST" action="{{ route('event.approve_photo', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($photo->id)]) }}" class="hidden">@csrf</form>
+        <form id="form-reject-photo-{{ $photo->id }}" method="POST" action="{{ route('event.reject_photo', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($photo->id)]) }}" class="hidden">@csrf @method('DELETE')</form>
+        @endforeach
+        @foreach ($approvedPhotos as $photo)
+        <form id="form-reject-photo-{{ $photo->id }}" method="POST" action="{{ route('event.reject_photo', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($photo->id)]) }}" class="hidden">@csrf @method('DELETE')</form>
         @endforeach
     @endif
 
@@ -3009,6 +3073,9 @@
         savePartsAiPromptDefault: false,
         agendaShowTimes: @json($role->agenda_show_times ?? true),
         agendaShowDescription: @json($role->agenda_show_description ?? true),
+        saveAgendaImage: @json($role->agenda_save_image ?? false),
+        agendaImageUrl: @json($event->getAttributes()['agenda_image_url'] ?? ''),
+        agendaImageFullUrl: @json($event->agenda_image_url ?: ''),
         partDragIndex: null,
         partDropTargetIndex: null,
         partEditors: {},
@@ -3407,6 +3474,7 @@
         formData.append('parts_image', file);
         formData.append('ai_prompt', this.partsAiPrompt);
         formData.append('save_ai_prompt_default', this.savePartsAiPromptDefault ? '1' : '0');
+        formData.append('save_agenda_image', this.saveAgendaImage ? '1' : '0');
         @if($event->exists)
         formData.append('event_id', '{{ \App\Utils\UrlUtils::encodeId($event->id) }}');
         @endif
@@ -3422,9 +3490,16 @@
           event.target.value = '';
           if (data.error) {
             alert(@json(__('messages.error')) + ': ' + data.error);
-          } else if (Array.isArray(data) && data.length > 0) {
-            this.parsedPartsPreview = data;
-            this.showPartsPreview = true;
+          } else {
+            const parts = data.parts || [];
+            if (parts.length > 0) {
+              this.parsedPartsPreview = parts;
+              this.showPartsPreview = true;
+            }
+            if (data.agenda_image_url) {
+              this.agendaImageUrl = data.agenda_image_url;
+              this.agendaImageFullUrl = data.agenda_image_full_url;
+            }
           }
         })
         .catch(() => {
@@ -3454,9 +3529,12 @@
           this.parsingParts = false;
           if (data.error) {
             alert(@json(__('messages.error')) + ': ' + data.error);
-          } else if (Array.isArray(data) && data.length > 0) {
-            this.parsedPartsPreview = data;
-            this.showPartsPreview = true;
+          } else {
+            const parts = data.parts || [];
+            if (parts.length > 0) {
+              this.parsedPartsPreview = parts;
+              this.showPartsPreview = true;
+            }
           }
         })
         .catch(() => {
@@ -3479,6 +3557,28 @@
         this.showPartsPreview = false;
         this.showPartsTextInput = false;
         this.partsText = '';
+      },
+      deleteAgendaImage() {
+        if (!confirm(@json(__('messages.are_you_sure')))) return;
+        @if($event->exists)
+        fetch('{{ route('event.delete_image', ['subdomain' => $subdomain]) }}' + '?hash={{ \App\Utils\UrlUtils::encodeId($event->id) }}&image_type=agenda', {
+          method: 'DELETE',
+          headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+          }
+        }).then(response => {
+          if (response.ok) {
+            this.agendaImageUrl = '';
+            this.agendaImageFullUrl = '';
+          } else {
+            alert('Failed to delete image');
+          }
+        });
+        @else
+        this.agendaImageUrl = '';
+        this.agendaImageFullUrl = '';
+        @endif
       },
       onChangeVenueType(type) {
         if (type === 'in_person' && !this.isInPerson && !this.roleIsVenue) {

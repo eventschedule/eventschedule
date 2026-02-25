@@ -191,6 +191,9 @@ class TicketController extends Controller
                 if (($utmParams['utm_source'] ?? null) === 'boost' && ($utmParams['utm_campaign'] ?? null)) {
                     $sale->boost_campaign_id = UrlUtils::decodeId($utmParams['utm_campaign']);
                 }
+                if (($utmParams['utm_source'] ?? null) === 'newsletter' && ($utmParams['utm_campaign'] ?? null)) {
+                    $sale->newsletter_id = UrlUtils::decodeId($utmParams['utm_campaign']);
+                }
 
                 if (! $sale->event_date) {
                     $sale->event_date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');

@@ -242,7 +242,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             cameraStarted.value = false;
                             return;
                         }
-                        parts.value = (Array.isArray(data) ? data : []).map(p => ({
+                        const partsArray = Array.isArray(data) ? data : (data.parts || []);
+                        parts.value = partsArray.map(p => ({
                             name: p.name || '',
                             description: p.description || '',
                             start_time: p.start_time || '',

@@ -8,10 +8,12 @@ use App\Models\AnalyticsEventsDaily;
 use App\Models\AnalyticsReferrersDaily;
 use App\Models\BoostCampaign;
 use App\Models\Event;
+use App\Models\Newsletter;
 use App\Models\PageView;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\User;
+use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -720,6 +722,127 @@ class AnalyticsService
                 'spend' => (float) ($c->actual_spend ?? 0),
                 'impressions' => (int) ($c->impressions ?? 0),
                 'clicks' => (int) ($c->clicks ?? 0),
+            ])->toArray(),
+        ];
+    }
+
+    /**
+     * Get newsletter-attributed page views for given roles in a date range
+     */
+    public function getNewsletterAttributedViews(Collection $roleIds, Carbon $start, Carbon $end): int
+    {
+        return (int) AnalyticsReferrersDaily::forRoles($roleIds)
+            ->inDateRange($start, $end)
+            ->bySource('newsletter')
+            ->sum('views');
+    }
+
+    /**
+     * Get newsletter-attributed sales and revenue for given roles in a date range
+     */
+    public function getNewsletterSalesStats(Collection $roleIds, Carbon $start, Carbon $end): array
+    {
+        $eventIds = DB::table('event_role')
+            ->whereIn('role_id', $roleIds)
+            ->pluck('event_id')
+            ->unique();
+
+        if ($eventIds->isEmpty()) {
+            return ['sales' => 0, 'revenue' => 0];
+        }
+
+        $result = Sale::whereIn('event_id', $eventIds)
+            ->whereNotNull('newsletter_id')
+            ->where('status', 'paid')
+            ->whereBetween('created_at', [$start, $end])
+            ->selectRaw('COUNT(*) as sales_count, COALESCE(SUM(payment_amount), 0) as total_revenue')
+            ->first();
+
+        return [
+            'sales' => (int) ($result->sales_count ?? 0),
+            'revenue' => (float) ($result->total_revenue ?? 0),
+        ];
+    }
+
+    /**
+     * Get newsletter views grouped by period for chart overlay
+     */
+    public function getNewsletterViewsByPeriod(User $user, string $period, Carbon $start, Carbon $end, ?int $roleId = null): Collection
+    {
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return collect();
+        }
+
+        $dateFormatExpr = match ($period) {
+            'daily' => DB::raw("DATE_FORMAT(date, '%Y-%m-%d') as period"),
+            'weekly' => DB::raw("DATE_FORMAT(date, '%x-%v') as period"),
+            'monthly' => DB::raw("DATE_FORMAT(date, '%Y-%m') as period"),
+            default => DB::raw("DATE_FORMAT(date, '%Y-%m-%d') as period"),
+        };
+
+        return AnalyticsReferrersDaily::select(
+            $dateFormatExpr,
+            DB::raw('SUM(views) as view_count')
+        )
+            ->forRoles($roleIds)
+            ->inDateRange($start, $end)
+            ->bySource('newsletter')
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get();
+    }
+
+    /**
+     * Get newsletter stats for the analytics dashboard
+     */
+    public function getNewsletterStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null): array
+    {
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return ['has_data' => false];
+        }
+
+        $newsletters = Newsletter::whereIn('role_id', $roleIds)
+            ->where('status', 'sent')
+            ->whereBetween('sent_at', [$start, $end])
+            ->orderByDesc('sent_at')
+            ->get();
+
+        if ($newsletters->isEmpty()) {
+            return ['has_data' => false];
+        }
+
+        $totalSent = $newsletters->sum('sent_count') ?? 0;
+        $totalOpens = $newsletters->sum('open_count') ?? 0;
+        $totalClicks = $newsletters->sum('click_count') ?? 0;
+
+        $openRate = $totalSent > 0 ? round(($totalOpens / $totalSent) * 100, 1) : 0;
+        $clickRate = $totalSent > 0 ? round(($totalClicks / $totalSent) * 100, 1) : 0;
+
+        // Newsletter-attributed page views and sales
+        $newsletterViews = $this->getNewsletterAttributedViews($roleIds, $start, $end);
+        $newsletterSalesStats = $this->getNewsletterSalesStats($roleIds, $start, $end);
+
+        return [
+            'has_data' => true,
+            'total_sent' => (int) $totalSent,
+            'total_opens' => (int) $totalOpens,
+            'total_clicks' => (int) $totalClicks,
+            'open_rate' => $openRate,
+            'click_rate' => $clickRate,
+            'newsletter_views' => $newsletterViews,
+            'newsletter_sales' => $newsletterSalesStats['sales'],
+            'newsletter_revenue' => $newsletterSalesStats['revenue'],
+            'campaigns' => $newsletters->map(fn ($n) => [
+                'hash' => UrlUtils::encodeId($n->id),
+                'subject' => $n->subject,
+                'sent_at' => $n->sent_at,
+                'sent_count' => (int) ($n->sent_count ?? 0),
+                'open_count' => (int) ($n->open_count ?? 0),
+                'click_count' => (int) ($n->click_count ?? 0),
             ])->toArray(),
         ];
     }

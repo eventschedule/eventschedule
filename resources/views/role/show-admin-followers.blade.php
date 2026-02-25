@@ -66,7 +66,11 @@
                             @foreach ($followersWithRoles as $follower)
                             <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                                 <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
-                                    {{ $follower->name }}
+                                    @if($follower->name)
+                                        {{ $follower->name }}
+                                    @else
+                                        <span class="italic text-gray-400 dark:text-gray-500">{{ __('messages.no_name') }}</span>
+                                    @endif
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                                     @if($follower->roles->isNotEmpty())

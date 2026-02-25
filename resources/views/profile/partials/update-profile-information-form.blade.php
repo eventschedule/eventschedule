@@ -92,7 +92,7 @@
 
         <div>
             <x-input-label for="timezone" :value="__('messages.timezone')" />
-            <select name="timezone" id="timezone" required {{ is_demo_mode() ? 'disabled' : '' }}
+            <select name="timezone" id="timezone" required {{ is_demo_mode() ? 'disabled' : '' }} data-searchable
                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                 @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
                 <option value="{{ $timezone }}" {{ $user->timezone == $timezone ? 'SELECTED' : '' }}>{{ $timezone }}

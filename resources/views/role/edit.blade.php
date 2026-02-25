@@ -906,7 +906,7 @@
 
                         <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
                             <x-input-label for="timezone" :value="__('messages.timezone')" />
-                            <select name="timezone" id="timezone" required {{ is_demo_mode() ? 'disabled' : '' }}
+                            <select name="timezone" id="timezone" required {{ is_demo_mode() ? 'disabled' : '' }} data-searchable
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                 @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
                                 <option value="{{ $timezone }}" {{ $role->timezone == $timezone ? 'SELECTED' : '' }}>
@@ -1202,7 +1202,7 @@
                             <div class="mb-6">
                                 <x-input-label for="font_family" :value="__('messages.font_family')" />
                                 <div class="flex items-center gap-1">
-                                    <select id="font_family" name="font_family" data-action="font-family-change"
+                                    <select id="font_family" name="font_family" data-searchable data-action="font-family-change"
                                         class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                         @foreach($fonts as $font)
                                         <option value="{{ $font->value }}"
@@ -1230,7 +1230,7 @@
                                     </button>
                                 </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('font_family')" />
-                                <div id="font_preview" class="mt-3 text-2xl text-gray-900 dark:text-gray-100" style="font-family: '{{ $role->font_family }}', sans-serif;">
+                                <div id="font_preview" class="mt-3 text-4xl text-gray-900 dark:text-gray-100" style="font-family: '{{ $role->font_family }}', sans-serif;">
                                     {{ $role->name }}
                                 </div>
                             </div>

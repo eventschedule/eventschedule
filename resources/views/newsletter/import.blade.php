@@ -41,6 +41,7 @@
                 </label>
                 <div x-show="segmentTarget === 'new'" x-cloak class="{{ is_rtl() ? 'mr-7' : 'ml-7' }}">
                     <x-text-input x-model="segmentName" type="text" class="block w-full max-w-md" :placeholder="__('messages.name')" />
+                    <p x-show="segmentError && segmentTarget === 'new'" x-text="segmentError" class="text-sm text-red-600 dark:text-red-400 mt-1"></p>
                 </div>
 
                 @if ($manualSegments->count())
@@ -55,6 +56,7 @@
                             <option value="{{ \App\Utils\UrlUtils::encodeId($segment->id) }}">{{ $segment->name }}</option>
                         @endforeach
                     </select>
+                    <p x-show="segmentError && segmentTarget === 'existing'" x-text="segmentError" class="text-sm text-red-600 dark:text-red-400 mt-1"></p>
                 </div>
                 @endif
             </div>
@@ -128,7 +130,7 @@
                     </button>
                 </div>
 
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">{{ __('messages.name_and_email_required') }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">{{ __('messages.email_required_name_optional') }}</p>
 
                 <div class="flex items-center justify-between mt-4">
                     <p class="text-sm text-gray-600 dark:text-gray-400">
@@ -267,6 +269,7 @@
                 formEntries: [{ name: '', email: '' }],
                 formErrors: [],
                 csvErrors: [],
+                segmentError: '',
 
                 handleCsvFile(event) {
                     const file = event.target.files[0];
@@ -349,10 +352,6 @@
                     return this.columnMappings.includes('email');
                 },
 
-                hasNameColumn() {
-                    return this.columnMappings.includes('name');
-                },
-
                 addFormRow() {
                     this.formEntries.push({ name: '', email: '' });
                 },
@@ -374,9 +373,6 @@
                         if (!email && !name) return;
 
                         const rowNum = i + 1;
-                        if (!name) {
-                            this.formErrors.push(@json(__('messages.row_error', ['row' => ''])).replace(':row', rowNum).replace(':error', @json(__('messages.name_required'))));
-                        }
                         if (!email) {
                             this.formErrors.push(@json(__('messages.row_error', ['row' => ''])).replace(':row', rowNum).replace(':error', @json(__('messages.email_required'))));
                         } else if (!this.isValidEmail(email)) {
@@ -385,7 +381,7 @@
                             this.formErrors.push(@json(__('messages.row_error', ['row' => ''])).replace(':row', rowNum).replace(':error', @json(__('messages.duplicate_email'))));
                         }
 
-                        if (name && email && this.isValidEmail(email) && !seen[email]) {
+                        if (email && this.isValidEmail(email) && !seen[email]) {
                             seen[email] = true;
                             entries.push({ email, name });
                         }
@@ -406,7 +402,7 @@
 
                 getValidEntryCount() {
                     return this.formEntries.filter(e =>
-                        e.email && e.name && this.isValidEmail(e.email.trim())
+                        e.email && this.isValidEmail(e.email.trim())
                     ).length;
                 },
 
@@ -464,11 +460,6 @@
                         return;
                     }
 
-                    if (!this.hasNameColumn()) {
-                        this.csvErrors.push(@json(__('messages.name_required')));
-                        return;
-                    }
-
                     const emailIdx = this.columnMappings.indexOf('email');
                     const nameIndices = this.columnMappings.reduce((acc, val, idx) => {
                         if (val === 'name') acc.push(idx);
@@ -485,9 +476,6 @@
 
                         if (!email && !name) return; // Skip empty rows
 
-                        if (!name) {
-                            this.csvErrors.push(@json(__('messages.row_error', ['row' => ''])).replace(':row', rowNum).replace(':error', @json(__('messages.name_required'))));
-                        }
                         if (!email) {
                             this.csvErrors.push(@json(__('messages.row_error', ['row' => ''])).replace(':row', rowNum).replace(':error', @json(__('messages.email_required'))));
                         } else if (!this.isValidEmail(email)) {
@@ -496,7 +484,7 @@
                             this.csvErrors.push(@json(__('messages.row_error', ['row' => ''])).replace(':row', rowNum).replace(':error', @json(__('messages.duplicate_email'))));
                         }
 
-                        if (email && name && this.isValidEmail(email) && !seen[email]) {
+                        if (email && this.isValidEmail(email) && !seen[email]) {
                             seen[email] = true;
                             entries.push({ email, name });
                         }
@@ -551,12 +539,13 @@
                 },
 
                 validateSegment() {
+                    this.segmentError = '';
                     if (this.segmentTarget === 'new' && !this.segmentName.trim()) {
-                        alert(@json(__('messages.name')));
+                        this.segmentError = @json(__('messages.name_required'));
                         return false;
                     }
                     if (this.segmentTarget === 'existing' && !this.segmentId) {
-                        alert(@json(__('messages.select_segment')));
+                        this.segmentError = @json(__('messages.select_segment'));
                         return false;
                     }
                     return true;

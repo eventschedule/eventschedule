@@ -29,17 +29,18 @@ class NotifyFanContentChanges extends Command
     {
         \Log::info('Checking for new fan content changes...');
 
-        // Get all events that have pending fan content (videos or comments)
+        // Get all events that have pending fan content (videos, comments, or photos)
         $events = Event::where(function ($query) {
             $query->whereHas('pendingVideos')
-                ->orWhereHas('pendingComments');
-        })->with(['user', 'roles', 'pendingVideos', 'pendingComments'])->get();
+                ->orWhereHas('pendingComments')
+                ->orWhereHas('pendingPhotos');
+        })->with(['user', 'roles', 'pendingVideos', 'pendingComments', 'pendingPhotos'])->get();
 
         $notifiedCount = 0;
 
         foreach ($events as $event) {
             // Count current pending fan content
-            $currentCount = $event->pendingVideos->count() + $event->pendingComments->count();
+            $currentCount = $event->pendingVideos->count() + $event->pendingComments->count() + $event->pendingPhotos->count();
 
             // Get last notified count (default to 0 if null)
             $lastNotifiedCount = $event->last_notified_fan_content_count ?? 0;

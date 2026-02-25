@@ -80,6 +80,7 @@ class Role extends Model implements MustVerifyEmail
         'agenda_ai_prompt',
         'agenda_show_times',
         'agenda_show_description',
+        'agenda_save_image',
         'slug_pattern',
         'direct_registration',
         'first_day_of_week',

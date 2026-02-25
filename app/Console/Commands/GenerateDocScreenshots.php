@@ -48,8 +48,13 @@ class GenerateDocScreenshots extends Command
 
         $venueRole = Role::where('subdomain', 'demo-moestavern')->first();
 
+        $demoEvent = $role ? \App\Models\Event::whereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
+            ->where('starts_at', '>', now())
+            ->orderBy('starts_at')
+            ->first() : null;
+
         // Build screenshot definitions
-        $pages = $this->getPages($role, $venueRole);
+        $pages = $this->getPages($role, $venueRole, $demoEvent);
 
         // Filter to single page if requested
         $singlePage = $this->option('page');
@@ -104,7 +109,7 @@ class GenerateDocScreenshots extends Command
         }
     }
 
-    private function getPages(?Role $role, ?Role $venueRole): array
+    private function getPages(?Role $role, ?Role $venueRole, ?\App\Models\Event $demoEvent = null): array
     {
         $encodedRoleId = $role ? UrlUtils::encodeId($role->id) : null;
 
@@ -158,7 +163,9 @@ class GenerateDocScreenshots extends Command
                 ['id' => 'scan-agenda--page', 'route' => '/simpsons/scan-agenda'],
             ],
             'boost' => [
-                ['id' => 'boost--page', 'route' => '/boost'],
+                ['id' => 'boost--page', 'route' => $demoEvent
+                    ? '/boost/create?event_id='.UrlUtils::encodeId($demoEvent->id).'&role_id='.$encodedRoleId
+                    : '/boost'],
             ],
             'fan-content' => [
                 ['id' => 'fan-content--videos-tab', 'route' => '/simpsons/videos'],
@@ -250,6 +257,7 @@ class GenerateDocScreenshots extends Command
             $this->info('Logged in.');
 
             // Force light mode for consistent screenshots
+            $browser->script("localStorage.setItem('theme', 'light')");
             $browser->script("document.documentElement.classList.remove('dark')");
             $browser->pause(300);
 
@@ -316,6 +324,7 @@ class GenerateDocScreenshots extends Command
                     }
 
                     // Take dark screenshot
+                    $browser->script("localStorage.setItem('theme', 'dark')");
                     $browser->script("document.documentElement.classList.add('dark')");
                     $browser->pause(800);
                     $browser->screenshot($id.'-dark');
@@ -329,6 +338,7 @@ class GenerateDocScreenshots extends Command
                     }
 
                     // Restore light mode for next screenshot
+                    $browser->script("localStorage.setItem('theme', 'light')");
                     $browser->script("document.documentElement.classList.remove('dark')");
                     $browser->pause(300);
                 }

@@ -249,6 +249,21 @@ class Event extends Model
         return $this->hasMany(EventComment::class)->where('is_approved', false);
     }
 
+    public function photos()
+    {
+        return $this->hasMany(EventPhoto::class);
+    }
+
+    public function approvedPhotos()
+    {
+        return $this->hasMany(EventPhoto::class)->where('is_approved', true);
+    }
+
+    public function pendingPhotos()
+    {
+        return $this->hasMany(EventPhoto::class)->where('is_approved', false);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -970,6 +985,26 @@ class Event extends Model
     }
 
     public function getFlyerImageUrlAttribute($value)
+    {
+        if (! $value) {
+            return '';
+        }
+
+        // Handle demo images in public/images/demo/
+        if (str_starts_with($value, 'demo_')) {
+            return url('/images/demo/'.$value);
+        }
+
+        if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$value;
+        } elseif (config('filesystems.default') == 'local') {
+            return url('/storage/'.$value);
+        } else {
+            return $value;
+        }
+    }
+
+    public function getAgendaImageUrlAttribute($value)
     {
         if (! $value) {
             return '';

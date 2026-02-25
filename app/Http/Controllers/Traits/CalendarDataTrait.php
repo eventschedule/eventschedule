@@ -73,6 +73,7 @@ trait CalendarDataTrait
             ])->values()->toArray(),
             'video_count' => $event->approved_videos_count ?? 0,
             'comment_count' => $event->approved_comments_count ?? 0,
+            'photo_count' => $event->approved_photos_count ?? 0,
             'venue_profile_image' => $event->venue?->profile_image_url ?: null,
             'venue_header_image' => ($event->venue && $event->venue->getAttributes()['header_image'] && $event->venue->getAttributes()['header_image'] !== 'none') ? $event->venue->getHeaderImageUrlAttribute($event->venue->getAttributes()['header_image']) : null,
             'venue_guest_url' => ($event->venue && isset($role) && $event->venue->subdomain === $role->subdomain) ? null : ($event->venue?->getGuestUrl() ?: null),
@@ -95,6 +96,7 @@ trait CalendarDataTrait
             'uniqueKey' => UrlUtils::encodeId($event->id),
             'submit_video_url' => isset($role) ? route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => UrlUtils::encodeId($event->id)]) : null,
             'submit_comment_url' => isset($role) ? route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => UrlUtils::encodeId($event->id)]) : null,
+            'submit_photo_url' => isset($role) ? route('event.submit_photo', ['subdomain' => $role->subdomain, 'event_hash' => UrlUtils::encodeId($event->id)]) : null,
             'custom_field_values' => $event->custom_field_values ?? [],
             'is_password_protected' => $event->isPasswordProtected(),
         ];

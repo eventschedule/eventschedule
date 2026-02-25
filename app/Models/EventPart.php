@@ -95,4 +95,14 @@ class EventPart extends Model
     {
         return $this->hasMany(EventComment::class)->where('is_approved', true);
     }
+
+    public function photos()
+    {
+        return $this->hasMany(EventPhoto::class);
+    }
+
+    public function approvedPhotos()
+    {
+        return $this->hasMany(EventPhoto::class)->where('is_approved', true);
+    }
 }

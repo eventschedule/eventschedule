@@ -138,8 +138,8 @@
                 </a>
             </div>
 
-            <p class="mt-6 text-gray-500 dark:text-gray-400">
-                <a href="{{ marketing_url('/docs/boost') }}" class="underline hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Read the Boost guide</a>
+            <p class="mt-6 text-gray-500 dark:text-gray-400 animate-reveal delay-300" style="opacity: 0;">
+                <a href="{{ route('marketing.docs.boost') }}" class="underline hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Read the Boost guide</a>
             </p>
 
         </div>

@@ -1,7 +1,7 @@
 <x-marketing-layout>
-    <x-slot name="title">Fan Videos & Comments for Events | Community Engagement - Event Schedule</x-slot>
-    <x-slot name="description">Let fans share YouTube videos and comments on your event pages for free. Organizer approval workflow, agenda integration, and recurring event support. No credit card required.</x-slot>
-    <x-slot name="breadcrumbTitle">Fan Videos & Comments</x-slot>
+    <x-slot name="title">Fan Videos, Photos & Comments for Events | Community Engagement - Event Schedule</x-slot>
+    <x-slot name="description">Let fans share YouTube videos, photos, and comments on your event pages for free. Organizer approval workflow, agenda integration, and recurring event support. No credit card required.</x-slot>
+    <x-slot name="breadcrumbTitle">Fan Videos, Photos & Comments</x-slot>
 
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
@@ -14,7 +14,7 @@
                 "name": "Are fan videos moderated before appearing?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. All fan-submitted videos and comments require your approval before they appear on your schedule. You have full control over what gets published."
+                    "text": "Yes. All fan-submitted videos, photos, and comments require your approval before they appear on your schedule. You have full control over what gets published."
                 }
             },
             {
@@ -30,7 +30,7 @@
                 "name": "Where do fan videos appear?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Approved videos and comments appear on the individual event page where they were submitted. They help build social proof and community engagement around your events."
+                    "text": "Approved videos, photos, and comments appear on the individual event page where they were submitted. They help build social proof and community engagement around your events."
                 }
             }
         ]
@@ -75,12 +75,12 @@
             </div>
 
             <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight animate-reveal delay-100" style="opacity: 0;">
-                Fan videos &<br>
+                Fan videos, photos &<br>
                 <span class="text-gradient">comments</span>
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12 animate-reveal delay-200" style="opacity: 0;">
-                Let fans and attendees sign in and share YouTube videos and comments on your events. All submissions need your approval. Turn every show into a shared memory.
+                Let fans and attendees sign in and share YouTube videos, photos, and comments on your events. All submissions need your approval. Turn every show into a shared memory.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4 animate-reveal delay-300" style="opacity: 0;">
@@ -92,6 +92,10 @@
                 </a>
             </div>
 
+            <p class="mt-6 text-gray-500 dark:text-gray-400 animate-reveal delay-300" style="opacity: 0;">
+                <a href="{{ route('marketing.docs.fan_content') }}" class="underline hover:text-rose-600 dark:hover:text-rose-400 transition-colors">Read the Fan Content guide</a>
+            </p>
+
         </div>
     </section>
 
@@ -99,6 +103,42 @@
     <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-12 text-center">Community-powered event pages</h2>
+
+            <!-- Photo Uploads Card -->
+            <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-orange-100 dark:from-rose-900 dark:to-orange-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 mb-6">
+                <div class="flex flex-col lg:flex-row gap-8 items-center">
+                    <div class="flex-1">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
+                            <svg class="w-4 h-4" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Photo Uploads
+                        </div>
+                        <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Fan photo gallery</h3>
+                        <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Fans upload photos directly to your event pages. Photos appear in a scrollable gallery with a lightbox viewer. Supports JPG, PNG, GIF, and WebP up to 5MB.</p>
+                        <div class="flex flex-wrap gap-3">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Direct upload</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Photo gallery</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Lightbox viewer</span>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0 w-full lg:w-auto" aria-hidden="true">
+                        <div class="relative animate-float">
+                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl border border-gray-200 dark:border-white/10 p-4 w-56">
+                                <div class="text-xs text-gray-500 dark:text-white/70 mb-2">Concert Photos</div>
+                                <div class="grid grid-cols-2 gap-1.5">
+                                    <div class="bg-rose-200 dark:bg-rose-800/40 rounded-lg aspect-square"></div>
+                                    <div class="bg-orange-200 dark:bg-orange-800/40 rounded-lg aspect-square"></div>
+                                    <div class="bg-amber-200 dark:bg-amber-800/40 rounded-lg aspect-square"></div>
+                                    <div class="bg-rose-300 dark:bg-rose-700/40 rounded-lg aspect-square"></div>
+                                </div>
+                                <div class="text-[10px] text-gray-600 dark:text-gray-300 mt-2">4 photos by fans</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
@@ -186,7 +226,7 @@
                         Moderation
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Approval workflow</h3>
-                    <p class="text-gray-600 dark:text-white/80 mb-6">All submissions default to pending. You approve or reject every video and comment from the event edit page before it goes live.</p>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">All submissions default to pending. You approve or reject every video, photo, and comment from the event edit page before it goes live.</p>
 
                     <div class="space-y-2" aria-hidden="true">
                         <!-- Pending item -->
@@ -221,7 +261,7 @@
                                 Per-Segment
                             </div>
                             <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Agenda integration</h3>
-                            <p class="text-gray-600 dark:text-white/80 text-lg">Attach videos and comments to individual agenda segments. Fans can share feedback on specific parts of your event, not just the event as a whole.</p>
+                            <p class="text-gray-600 dark:text-white/80 text-lg">Attach videos, photos, and comments to individual agenda segments. Fans can share feedback on specific parts of your event, not just the event as a whole.</p>
                         </div>
                         <div aria-hidden="true">
                             <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl border border-gray-200 dark:border-white/10 p-4 space-y-3">
@@ -286,7 +326,7 @@
                                 Recurring
                             </div>
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Per-occurrence content</h3>
-                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">For recurring events, fan videos and comments are tied to specific occurrence dates. Each week's show gets its own collection of fan content, keeping memories organized.</p>
+                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">For recurring events, fan videos, photos, and comments are tied to specific occurrence dates. Each week's show gets its own collection of fan content, keeping memories organized.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Date-specific</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Organized history</span>
@@ -375,7 +415,7 @@
                     Frequently asked questions
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400">
-                    Everything you need to know about fan videos and comments.
+                    Everything you need to know about fan videos, photos, and comments.
                 </p>
             </div>
 
@@ -389,7 +429,7 @@
                         </svg>
                     </button>
                     <div x-show="open === 1" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">Yes. All fan-submitted videos and comments require your approval before they appear on your schedule. You have full control over what gets published.</p>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">Yes. All fan-submitted videos, photos, and comments require your approval before they appear on your schedule. You have full control over what gets published.</p>
                     </div>
                 </div>
 
@@ -415,7 +455,7 @@
                         </svg>
                     </button>
                     <div x-show="open === 3" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">Approved videos and comments appear on the individual event page where they were submitted. They help build social proof and community engagement around your events.</p>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">Approved videos, photos, and comments appear on the individual event page where they were submitted. They help build social proof and community engagement around your events.</p>
                     </div>
                 </div>
             </div>
@@ -569,11 +609,11 @@
     {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
-        "name": "Event Schedule Fan Videos & Comments",
+        "name": "Event Schedule Fan Videos, Photos & Comments",
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Community Engagement Software",
         "operatingSystem": "Web",
-        "description": "Let fans share YouTube videos and comments on your event pages for free. Organizer approval workflow, agenda integration, and recurring event support. No credit card required.",
+        "description": "Let fans share YouTube videos, photos, and comments on your event pages for free. Organizer approval workflow, agenda integration, and recurring event support. No credit card required.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -582,6 +622,7 @@
         },
         "featureList": [
             "YouTube video submissions",
+            "Photo uploads",
             "Text comments",
             "Organizer approval workflow",
             "Agenda segment integration",
