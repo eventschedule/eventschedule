@@ -121,19 +121,10 @@
                                             <td>Promoters, bloggers, community organizers</td>
                                             <td>Aggregate events from multiple sources</td>
                                         </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Vendor</span></td>
-                                            <td>Food trucks, mobile businesses, pop-up shops</td>
-                                            <td>Location-focused for mobile operations</td>
-                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
 
-                            <div class="doc-callout doc-callout-tip">
-                                <div class="doc-callout-title">Tip</div>
-                                <p>You can change your schedule type at any time. Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and select a new type. The type affects how your events are displayed and what information is shown.</p>
-                            </div>
                         </section>
 
                         <!-- Basic Information -->
@@ -565,7 +556,7 @@
             {
                 "@type": "HowToStep",
                 "name": "Choose Your Schedule Type",
-                "text": "Select the appropriate schedule type: Talent for performers, Venue for event spaces, Curator for promoters, or Vendor for mobile businesses.",
+                "text": "Select the appropriate schedule type: Talent for performers, Venue for event spaces, or Curator for promoters.",
                 "url": "{{ url(route('marketing.docs.schedule_basics')) }}#schedule-types"
             },
             {
