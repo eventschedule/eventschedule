@@ -53,6 +53,7 @@
                     </svg>
                 </div>
                 <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Availability Calendar</h1>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span>
             </div>
             <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
                 Mark your available and unavailable dates so team members and collaborators know when you can be booked.

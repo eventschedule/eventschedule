@@ -149,12 +149,15 @@ class SubscriptionController extends Controller
 
             $subscriptionBuilder->create($request->payment_method);
 
-            // Update the role's plan info and clear legacy plan_expires
-            // to prevent dual-path access via legacy fields
-            $role->plan_type = $tier;
-            $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
-            $role->plan_expires = null;
-            $role->save();
+            // Update the role's plan info with lock to prevent race with webhook
+            // and clear legacy plan_expires to prevent dual-path access via legacy fields
+            \DB::transaction(function () use ($role, $tier, $request) {
+                $role = Role::lockForUpdate()->find($role->id);
+                $role->plan_type = $tier;
+                $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
+                $role->plan_expires = null;
+                $role->save();
+            });
 
             UsageTrackingService::track(UsageTrackingService::STRIPE_SUBSCRIPTION, $role->id);
 

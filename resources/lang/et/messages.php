@@ -112,6 +112,7 @@ return [
     'colors' => 'Värvid',
     'rotation' => 'Pöörlemine',
     'settings' => 'Seaded',
+    'help' => 'Abi',
     'unlisted' => 'Registreerimata',
     'public' => 'Avalik',
     'accept_requests' => 'Nõustuge taotlustega',
@@ -1510,6 +1511,7 @@ return [
     'video_rejected' => 'Video eemaldatud',
     'comment_rejected' => 'Kommentaar eemaldatud',
     'invalid_youtube_url' => 'Sisestage kehtiv YouTube\'i URL',
+    'invalid_url' => 'Sisestage kehtiv URL',
     'video_already_submitted' => 'See video on juba esitatud',
     'add_photo' => 'Add Photo',
     'upload_photo' => 'Upload Photo',
@@ -1939,4 +1941,26 @@ return [
     'showing_first_of' => 'Näidatakse esimesed 50 :count dünaamiliselt määratud saajast',
     'created' => 'Loodud',
     'phone_number_required' => 'Telefoninumber on kohustuslik',
+
+    // Subscription payment failed email
+    'subscription_payment_failed_subject' => 'Tellimuse makse ebaõnnestus',
+    'subscription_payment_failed_body' => 'Me ei suutnud töödelda teie ":schedule" ajakava tellimuse makset. Palun uuendage oma makseviisi, et vältida juurdepääsu kaotamist oma plaani funktsioonidele.',
+    'subscription_payment_failed_warning' => 'Kui makseprobleem ei lahene, tühistatakse teie tellimus ja teie ajakava alandatakse tasuta plaanile.',
+    'subscription_payment_failed_update' => 'Uuenda makseviisi',
+
+    // Admin amount mismatch
+    'amount_mismatch_sales' => 'Summa mittevastavus müügid',
+    'amount_mismatch_boosts' => 'Summa mittevastavus võimendused',
+    'no_amount_mismatch' => 'Summa mittevastavuse kirjeid ei leitud.',
+    'expected_amount' => 'Oodatud',
+    'paid_amount' => 'Makstud',
+    'approve_sale' => 'Kinnita',
+    'refund_sale' => 'Tagasta',
+    'sale_approved' => 'Müük edukalt kinnitatud.',
+    'sale_refunded' => 'Müük edukalt tagastatud.',
+    'sale_not_found' => 'Müüki ei leitud.',
+    'boost_approved' => 'Võimenduskampaania edukalt kinnitatud.',
+    'boost_refunded' => 'Võimenduskampaania edukalt tagastatud.',
+    'boost_not_found' => 'Võimenduskampaaniat ei leitud.',
+    'custom_domain_setup_guide' => 'Vaadake, kuidas seadistada oma kohandatud domeeni',
 ];

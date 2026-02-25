@@ -301,7 +301,7 @@
 
                         <!-- Team Members -->
                         <section id="team-members" class="doc-section">
-                            <h2 class="doc-heading">Team Members</h2>
+                            <h2 class="doc-heading">Team Members <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span></h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Add team members to your schedule so multiple people can collaborate on managing events.</p>
 
                             <div class="space-y-4 mb-6">

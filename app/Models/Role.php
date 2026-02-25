@@ -930,6 +930,11 @@ class Role extends Model implements MustVerifyEmail
             return true;
         }
 
+        // Enterprise plans get white-labeling
+        if ($this->isEnterprise()) {
+            return true;
+        }
+
         // Legacy: Check the plan_expires field
         return $this->plan_expires >= now()->format('Y-m-d') && $this->plan_type == 'pro';
     }

@@ -53,6 +53,7 @@
                     </svg>
                 </div>
                 <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Event Graphics</h1>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Pro</span>
             </div>
             <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
                 Generate shareable images and formatted text for your upcoming events. Perfect for social media, messaging apps, and newsletters.
@@ -379,7 +380,7 @@ https://example.com/event/summer-concert</code></pre>
                                 </table>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Custom Fields</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Custom Fields <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Pro</span></h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 If you have defined <a href="{{ marketing_url('/features/custom-fields') }}" class="text-rose-400 hover:text-rose-300">Event Custom Fields</a> in your schedule settings, you can include their values in graphics using numbered variables.
                             </p>

@@ -112,6 +112,7 @@ return [
     'colors' => 'Цвета',
     'rotation' => 'Вращение',
     'settings' => 'Настройки',
+    'help' => 'Помощь',
     'unlisted' => 'Незарегистрированный',
     'public' => 'Общественный',
     'accept_requests' => 'Принимать запросы',
@@ -1512,6 +1513,7 @@ return [
     'video_rejected' => 'Видео удалено',
     'comment_rejected' => 'Комментарий удален',
     'invalid_youtube_url' => 'Введите действительный URL-адрес YouTube',
+    'invalid_url' => 'Введите действительный URL-адрес',
     'video_already_submitted' => 'Это видео уже отправлено',
     'add_photo' => 'Add Photo',
     'upload_photo' => 'Upload Photo',
@@ -1942,4 +1944,26 @@ return [
     'showing_first_of' => 'Показаны первые 50 из :count динамически определённых получателей',
     'created' => 'Создано',
     'phone_number_required' => 'Номер телефона обязателен',
+
+    // Subscription payment failed email
+    'subscription_payment_failed_subject' => 'Ошибка оплаты подписки',
+    'subscription_payment_failed_body' => 'Нам не удалось обработать платеж за подписку на ваше расписание ":schedule". Пожалуйста, обновите способ оплаты, чтобы не потерять доступ к функциям вашего тарифа.',
+    'subscription_payment_failed_warning' => 'Если проблема с оплатой не будет решена, ваша подписка будет отменена, а ваше расписание будет переведено на бесплатный тариф.',
+    'subscription_payment_failed_update' => 'Обновить способ оплаты',
+
+    // Admin amount mismatch
+    'amount_mismatch_sales' => 'Несоответствие сумм продажи',
+    'amount_mismatch_boosts' => 'Несоответствие сумм продвижения',
+    'no_amount_mismatch' => 'Записи о несоответствии сумм не найдены.',
+    'expected_amount' => 'Ожидаемая',
+    'paid_amount' => 'Оплачено',
+    'approve_sale' => 'Одобрить',
+    'refund_sale' => 'Возврат',
+    'sale_approved' => 'Продажа успешно одобрена.',
+    'sale_refunded' => 'Продажа успешно возвращена.',
+    'sale_not_found' => 'Продажа не найдена.',
+    'boost_approved' => 'Кампания продвижения успешно одобрена.',
+    'boost_refunded' => 'Кампания продвижения успешно возвращена.',
+    'boost_not_found' => 'Кампания продвижения не найдена.',
+    'custom_domain_setup_guide' => 'Узнайте, как настроить свой пользовательский домен',
 ];

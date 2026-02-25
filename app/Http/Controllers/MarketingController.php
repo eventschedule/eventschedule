@@ -191,6 +191,30 @@ class MarketingController extends Controller
     }
 
     /**
+     * White Label page
+     */
+    public function whiteLabel()
+    {
+        return view('marketing.white-label');
+    }
+
+    /**
+     * Custom CSS page
+     */
+    public function customCss()
+    {
+        return view('marketing.custom-css');
+    }
+
+    /**
+     * Custom Domain page
+     */
+    public function customDomain()
+    {
+        return view('marketing.custom-domain');
+    }
+
+    /**
      * Custom Fields page
      */
     public function customFields()

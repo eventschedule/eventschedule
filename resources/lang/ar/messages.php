@@ -106,6 +106,7 @@ return [
     'colors' => 'الألوان',
     'rotation' => 'الدوران',
     'settings' => 'الإعدادات',
+    'help' => 'مساعدة',
     'use_24_hour_time_format' => 'استخدام تنسيق 24 ساعة',
     'no_followers' => 'لا يوجد متابعون',
     'share_your_event_schedule_link' => 'شارك رابط أو كود QR لجدول أحداثك لجذب المزيد من المتابعين',
@@ -1498,6 +1499,7 @@ return [
     'video_rejected' => 'تم حذف الفيديو',
     'comment_rejected' => 'تم حذف التعليق',
     'invalid_youtube_url' => 'يرجى ادخال رابط YouTube صالح',
+    'invalid_url' => 'يرجى إدخال رابط صالح',
     'video_already_submitted' => 'تم تقديم هذا الفيديو بالفعل',
     'add_photo' => 'Add Photo',
     'upload_photo' => 'Upload Photo',
@@ -1924,4 +1926,26 @@ return [
     'showing_first_of' => 'عرض أول 50 من :count مستلم',
     'created' => 'تاريخ الإنشاء',
     'phone_number_required' => 'رقم الهاتف مطلوب',
+
+    // Subscription payment failed email
+    'subscription_payment_failed_subject' => 'فشل دفع الاشتراك',
+    'subscription_payment_failed_body' => 'لم نتمكن من معالجة الدفع لاشتراك جدولك ":schedule". يرجى تحديث طريقة الدفع لتجنب فقدان الوصول إلى ميزات خطتك.',
+    'subscription_payment_failed_warning' => 'إذا لم يتم حل مشكلة الدفع، سيتم إلغاء اشتراكك وتخفيض جدولك إلى الخطة المجانية.',
+    'subscription_payment_failed_update' => 'تحديث طريقة الدفع',
+
+    // Admin amount mismatch
+    'amount_mismatch_sales' => 'مبيعات عدم تطابق المبلغ',
+    'amount_mismatch_boosts' => 'تعزيزات عدم تطابق المبلغ',
+    'no_amount_mismatch' => 'لم يتم العثور على سجلات عدم تطابق المبلغ.',
+    'expected_amount' => 'المتوقع',
+    'paid_amount' => 'المدفوع',
+    'approve_sale' => 'موافقة',
+    'refund_sale' => 'استرداد',
+    'sale_approved' => 'تمت الموافقة على البيع بنجاح.',
+    'sale_refunded' => 'تم استرداد البيع بنجاح.',
+    'sale_not_found' => 'لم يتم العثور على البيع.',
+    'boost_approved' => 'تمت الموافقة على حملة التعزيز بنجاح.',
+    'boost_refunded' => 'تم استرداد حملة التعزيز بنجاح.',
+    'boost_not_found' => 'لم يتم العثور على حملة التعزيز.',
+    'custom_domain_setup_guide' => 'تعرف على كيفية إعداد نطاقك المخصص',
 ];

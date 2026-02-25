@@ -582,22 +582,24 @@ class BoostController extends Controller
         if (! in_array($campaign->billing_status, ['refunded', 'partially_refunded'])) {
             if (! $campaign->stripe_payment_intent_id && $campaign->billing_status === 'charged') {
                 // Credit-paid campaign - return credit to role
-                DB::transaction(function () use ($campaign) {
-                    $role = Role::lockForUpdate()->find($campaign->role_id);
-                    if (! $role) {
-                        return;
-                    }
-                    $refundAmount = $campaign->total_charged;
-                    $role->increment('boost_credit', $refundAmount);
-                    BoostBillingRecord::create([
-                        'boost_campaign_id' => $campaign->id,
-                        'type' => 'refund',
-                        'amount' => $refundAmount,
-                        'status' => 'completed',
-                        'notes' => 'Credit returned - campaign cancelled',
-                    ]);
-                    $campaign->update(['billing_status' => 'refunded']);
-                });
+                $refundAmount = $campaign->total_charged ?? 0;
+                if ($refundAmount > 0) {
+                    DB::transaction(function () use ($campaign, $refundAmount) {
+                        $role = Role::lockForUpdate()->find($campaign->role_id);
+                        if (! $role) {
+                            return;
+                        }
+                        $role->increment('boost_credit', $refundAmount);
+                        BoostBillingRecord::create([
+                            'boost_campaign_id' => $campaign->id,
+                            'type' => 'refund',
+                            'amount' => $refundAmount,
+                            'status' => 'completed',
+                            'notes' => 'Credit returned - campaign cancelled',
+                        ]);
+                        $campaign->update(['billing_status' => 'refunded']);
+                    });
+                }
             } elseif (config('app.hosted') && ! config('app.is_testing')) {
                 $billingService = new BoostBillingService;
 

@@ -847,8 +847,11 @@
                   @if ($partVideos->count() > 0)
                   <div class="mt-2 space-y-2">
                     @foreach ($partVideos as $video)
-                    <div class="rounded-lg overflow-hidden">
-                      <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                    <div>
+                      <div class="rounded-lg overflow-hidden">
+                        <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                      </div>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $video->user?->first_name ?? $video->user?->name ?? __('messages.user') }}</p>
                     </div>
                     @endforeach
                   </div>
@@ -856,9 +859,12 @@
                   @if ($partPhotos->count() > 0)
                   <div class="mt-2 flex flex-wrap gap-2">
                     @foreach ($partPhotos as $photo)
-                    <a href="{{ $photo->photo_url }}" target="_blank" class="block rounded-lg overflow-hidden flex-shrink-0">
-                      <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto rounded-lg object-cover" loading="lazy">
-                    </a>
+                    <div class="flex flex-col">
+                      <a href="{{ $photo->photo_url }}" target="_blank" class="block rounded-lg overflow-hidden max-w-full">
+                        <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto max-w-full rounded-lg object-cover" loading="lazy">
+                      </a>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->user?->first_name ?? $photo->user?->name ?? __('messages.user') }}</p>
+                    </div>
                     @endforeach
                   </div>
                   @endif
@@ -1014,8 +1020,11 @@
                   @if ($partVideos->count() > 0)
                   <div class="mt-2 space-y-2">
                     @foreach ($partVideos as $video)
-                    <div class="rounded-lg overflow-hidden">
-                      <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                    <div>
+                      <div class="rounded-lg overflow-hidden">
+                        <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                      </div>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $video->user?->first_name ?? $video->user?->name ?? __('messages.user') }}</p>
                     </div>
                     @endforeach
                   </div>
@@ -1023,9 +1032,12 @@
                   @if ($partPhotos->count() > 0)
                   <div class="mt-2 flex flex-wrap gap-2">
                     @foreach ($partPhotos as $photo)
-                    <a href="{{ $photo->photo_url }}" target="_blank" class="block rounded-lg overflow-hidden flex-shrink-0">
-                      <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto rounded-lg object-cover" loading="lazy">
-                    </a>
+                    <div class="flex flex-col">
+                      <a href="{{ $photo->photo_url }}" target="_blank" class="block rounded-lg overflow-hidden max-w-full">
+                        <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto max-w-full rounded-lg object-cover" loading="lazy">
+                      </a>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->user?->first_name ?? $photo->user?->name ?? __('messages.user') }}</p>
+                    </div>
                     @endforeach
                   </div>
                   @endif
@@ -1178,12 +1190,15 @@
           }
         @endphp
         @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $eventLevelPhotos->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $myEventLevelPendingPhotos->count() > 0 || $event->parts->count() == 0))
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="event-media-section" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
           @if ($eventLevelVideos->count() > 0)
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             @foreach ($eventLevelVideos as $video)
-            <div class="rounded-lg overflow-hidden">
-              <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $event->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+            <div>
+              <div class="rounded-lg overflow-hidden">
+                <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $event->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+              </div>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $video->user?->first_name ?? $video->user?->name ?? __('messages.user') }}</p>
             </div>
             @endforeach
           </div>
@@ -1191,15 +1206,20 @@
           @if ($eventLevelPhotos->count() > 0)
           <div class="flex flex-wrap gap-3 mb-4" x-data="{ lightbox: false, lightboxSrc: '' }">
             @foreach ($eventLevelPhotos as $photo)
-            <button @click="lightboxSrc = '{{ $photo->photo_url }}'; lightbox = true" class="block rounded-lg overflow-hidden flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
-              <img src="{{ $photo->photo_url }}" alt="{{ $event->translatedName() }}" class="h-32 sm:h-40 w-auto rounded-lg object-cover" loading="lazy">
-            </button>
+            <div class="flex flex-col">
+              <button @click="lightboxSrc = '{{ $photo->photo_url }}'; lightbox = true" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
+                <img src="{{ $photo->photo_url }}" alt="{{ $event->translatedName() }}" class="h-32 sm:h-40 w-auto max-w-full rounded-lg object-cover" loading="lazy">
+              </button>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->user?->first_name ?? $photo->user?->name ?? __('messages.user') }}</p>
+            </div>
             @endforeach
             {{-- Lightbox modal --}}
-            <div x-show="lightbox" x-cloak @click="lightbox = false" @keydown.escape.window="lightbox = false" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" style="font-family: sans-serif">
-              <button @click="lightbox = false" class="absolute top-4 {{ $role->isRtl() ? 'left-4' : 'right-4' }} text-white text-3xl leading-none hover:text-gray-300">&times;</button>
-              <img :src="lightboxSrc" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl" @click.stop>
-            </div>
+            <template x-teleport="body">
+              <div x-show="lightbox" x-cloak @click="lightbox = false" @keydown.escape.window="lightbox = false" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-2" style="font-family: sans-serif">
+                <button @click="lightbox = false" class="absolute top-3 {{ $role->isRtl() ? 'left-3' : 'right-3' }} text-white/80 hover:text-white text-4xl leading-none z-10">&times;</button>
+                <img :src="lightboxSrc" class="w-[96vw] h-[96vh] object-contain pointer-events-none">
+              </div>
+            </template>
           </div>
           @endif
           @if ($eventLevelComments->count() > 0)
@@ -1224,8 +1244,8 @@
           @if ($myEventLevelPendingPhotos->count() > 0)
           <div class="flex flex-wrap gap-3 mb-4 opacity-60">
             @foreach ($myEventLevelPendingPhotos as $photo)
-            <div id="pending-photo-{{ $photo->id }}" class="relative rounded-lg overflow-hidden flex-shrink-0">
-              <img src="{{ $photo->photo_url }}" alt="{{ $event->translatedName() }}" class="h-32 sm:h-40 w-auto rounded-lg object-cover" loading="lazy">
+            <div id="pending-photo-{{ $photo->id }}" class="relative rounded-lg overflow-hidden max-w-full">
+              <img src="{{ $photo->photo_url }}" alt="{{ $event->translatedName() }}" class="h-32 sm:h-40 w-auto max-w-full rounded-lg object-cover" loading="lazy">
               <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
             </div>
             @endforeach

@@ -381,6 +381,9 @@ if (config('app.is_nexus')) {
         Route::get('/features/boost', [MarketingController::class, 'boost'])->name('marketing.boost');
         Route::get('/features/private-events', [MarketingController::class, 'privateEvents'])->name('marketing.private_events');
         Route::get('/features/event-graphics', [MarketingController::class, 'eventGraphics'])->name('marketing.event_graphics');
+        Route::get('/features/white-label', [MarketingController::class, 'whiteLabel'])->name('marketing.white_label');
+        Route::get('/features/custom-css', [MarketingController::class, 'customCss'])->name('marketing.custom_css');
+        Route::get('/features/custom-domain', [MarketingController::class, 'customDomain'])->name('marketing.custom_domain');
         // Redirects from old feature URLs
         Route::get('/wp/analytics', fn () => redirect()->route('marketing.analytics', [], 301));
         Route::get('/wp/newsletters', fn () => redirect()->route('marketing.newsletters', [], 301));
@@ -512,6 +515,9 @@ if (config('app.is_nexus')) {
             Route::get('/features/boost', [MarketingController::class, 'boost'])->name('marketing.boost');
             Route::get('/features/private-events', [MarketingController::class, 'privateEvents'])->name('marketing.private_events');
             Route::get('/features/event-graphics', [MarketingController::class, 'eventGraphics'])->name('marketing.event_graphics');
+            Route::get('/features/white-label', [MarketingController::class, 'whiteLabel'])->name('marketing.white_label');
+            Route::get('/features/custom-css', [MarketingController::class, 'customCss'])->name('marketing.custom_css');
+            Route::get('/features/custom-domain', [MarketingController::class, 'customDomain'])->name('marketing.custom_domain');
             // Redirects from old feature URLs
             Route::get('/ticketing', fn () => redirect()->route('marketing.ticketing', [], 301));
             Route::get('/ai', fn () => redirect()->route('marketing.ai', [], 301));
@@ -657,6 +663,9 @@ if (config('app.is_nexus')) {
             Route::get('/features/boost', fn () => redirect('https://eventschedule.com/features/boost', 301));
             Route::get('/features/private-events', fn () => redirect('https://eventschedule.com/features/private-events', 301));
             Route::get('/features/event-graphics', fn () => redirect('https://eventschedule.com/features/event-graphics', 301));
+            Route::get('/features/white-label', fn () => redirect('https://eventschedule.com/features/white-label', 301));
+            Route::get('/features/custom-css', fn () => redirect('https://eventschedule.com/features/custom-css', 301));
+            Route::get('/features/custom-domain', fn () => redirect('https://eventschedule.com/features/custom-domain', 301));
             Route::get('/for-talent', fn () => redirect('https://eventschedule.com/for-talent', 301));
             Route::get('/for-venues', fn () => redirect('https://eventschedule.com/for-venues', 301));
             Route::get('/for-curators', fn () => redirect('https://eventschedule.com/for-curators', 301));
@@ -773,6 +782,9 @@ if (config('app.is_nexus')) {
     Route::get('/features/boost', fn () => redirect()->route('home'));
     Route::get('/features/private-events', fn () => redirect()->route('home'))->name('marketing.private_events');
     Route::get('/features/event-graphics', fn () => redirect()->route('home'));
+    Route::get('/features/white-label', fn () => redirect()->route('home'));
+    Route::get('/features/custom-css', fn () => redirect()->route('home'));
+    Route::get('/features/custom-domain', fn () => redirect()->route('home'));
     Route::get('/features/analytics', fn () => redirect()->route('home'));
     // Old URLs still redirect to home
     Route::get('/ticketing', fn () => redirect()->route('home'));

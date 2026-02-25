@@ -107,6 +107,7 @@ return [
     'colors' => 'Farben',
     'rotation' => 'Drehung',
     'settings' => 'Einstellungen',
+    'help' => 'Hilfe',
     'use_24_hour_time_format' => '24-Stunden-Format verwenden',
     'no_followers' => 'Keine Follower',
     'share_your_event_schedule_link' => 'Teilen Sie Ihren Veranstaltungsplan-Link oder QR-Code, um mehr Follower zu gewinnen',
@@ -1501,6 +1502,7 @@ return [
     'video_rejected' => 'Video entfernt',
     'comment_rejected' => 'Kommentar entfernt',
     'invalid_youtube_url' => 'Bitte geben Sie eine gueltige YouTube-URL ein',
+    'invalid_url' => 'Bitte geben Sie eine gueltige URL ein',
     'video_already_submitted' => 'Dieses Video wurde bereits eingereicht',
     'add_photo' => 'Add Photo',
     'upload_photo' => 'Upload Photo',
@@ -1927,4 +1929,26 @@ return [
     'showing_first_of' => 'Zeigt die ersten 50 von :count dynamisch aufgelösten Empfängern',
     'created' => 'Erstellt',
     'phone_number_required' => 'Telefonnummer ist erforderlich',
+
+    // Subscription payment failed email
+    'subscription_payment_failed_subject' => 'Abonnementzahlung fehlgeschlagen',
+    'subscription_payment_failed_body' => 'Wir konnten die Zahlung fuer Ihr ":schedule"-Zeitplan-Abonnement nicht verarbeiten. Bitte aktualisieren Sie Ihre Zahlungsmethode, um den Zugang zu Ihren Planfunktionen nicht zu verlieren.',
+    'subscription_payment_failed_warning' => 'Wenn das Zahlungsproblem nicht behoben wird, wird Ihr Abonnement gekuendigt und Ihr Zeitplan auf den kostenlosen Plan herabgestuft.',
+    'subscription_payment_failed_update' => 'Zahlungsmethode aktualisieren',
+
+    // Admin amount mismatch
+    'amount_mismatch_sales' => 'Betragsabweichung Verkaeufe',
+    'amount_mismatch_boosts' => 'Betragsabweichung Boosts',
+    'no_amount_mismatch' => 'Keine Betragsabweichungen gefunden.',
+    'expected_amount' => 'Erwartet',
+    'paid_amount' => 'Bezahlt',
+    'approve_sale' => 'Genehmigen',
+    'refund_sale' => 'Erstatten',
+    'sale_approved' => 'Verkauf erfolgreich genehmigt.',
+    'sale_refunded' => 'Verkauf erfolgreich erstattet.',
+    'sale_not_found' => 'Verkauf nicht gefunden.',
+    'boost_approved' => 'Boost-Kampagne erfolgreich genehmigt.',
+    'boost_refunded' => 'Boost-Kampagne erfolgreich erstattet.',
+    'boost_not_found' => 'Boost-Kampagne nicht gefunden.',
+    'custom_domain_setup_guide' => 'Erfahren Sie, wie Sie Ihre benutzerdefinierte Domain einrichten',
 ];

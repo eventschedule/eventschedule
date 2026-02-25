@@ -103,6 +103,17 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 The newsletter builder provides a drag-and-drop interface with live preview, pre-built templates, and audience segmentation so you can reach the right people with the right message.
                             </p>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Sending Limits by Plan</div>
+                                <p>Newsletter sending limits vary by plan tier:</p>
+                                <ul class="doc-list mt-2">
+                                    <li><strong class="text-gray-900 dark:text-white">Free:</strong> 10 newsletters per month</li>
+                                    <li><strong class="text-gray-900 dark:text-white">Pro:</strong> 100 newsletters per month</li>
+                                    <li><strong class="text-gray-900 dark:text-white">Enterprise:</strong> 1,000 newsletters per month</li>
+                                    <li><strong class="text-gray-900 dark:text-white">Selfhosted</strong> (with own email settings): Unlimited</li>
+                                </ul>
+                            </div>
                         </section>
 
                         <!-- Newsletter Builder -->

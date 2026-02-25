@@ -273,8 +273,8 @@
                                     <p class="text-sm text-gray-500 dark:text-gray-400">When enabled, clicking events on the calendar or scanning QR codes in event graphics will link directly to the event's registration URL instead of showing the event detail page first. Only affects events that have a registration URL configured.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Unlisted Schedule</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Make your schedule private - it won't appear in search results or public listings. Only people with the direct link can access it.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Unlisted Schedule <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-1">Enterprise</span></h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Make your schedule private - it won't appear in search results or public listings. Only people with the direct link can access it. For per-event privacy with password protection, see <a href="{{ route('marketing.docs.creating_events') }}#private-events" class="text-cyan-400 hover:text-cyan-300">Private Events</a>.</p>
                                 </div>
                             </div>
                         </section>

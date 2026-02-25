@@ -75,6 +75,7 @@
                         <a href="#backgrounds" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Background Options</a>
                         <a href="#color-scheme" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Color Scheme</a>
                         <a href="#typography" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Typography</a>
+                        <a href="#remove-branding" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Remove Branding</a>
                         <a href="#custom-css" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Custom CSS</a>
                         <a href="#live-preview" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Live Preview</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
@@ -217,6 +218,19 @@
                                     <p class="text-sm text-gray-500 dark:text-gray-400">See how each font looks on your schedule in real-time before committing. Test readability with your content.</p>
                                 </div>
                             </div>
+                        </section>
+
+                        <!-- Remove Branding -->
+                        <section id="remove-branding" class="doc-section">
+                            <h2 class="doc-heading">Remove Branding <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Pro</span></h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">By default, schedules display a small "Powered by Event Schedule" badge. With the Pro plan, you can remove this branding for a fully white-labeled experience.</p>
+                            <div class="space-y-3 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">White-Label Your Schedule</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">When branding is removed, your schedule appears entirely as your own - no Event Schedule branding is visible to visitors. This is ideal for businesses, venues, and organizations that want a professional, branded presence.</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Branding is automatically removed for all Pro and Enterprise plans. Selfhosted installations also have branding removed by default.</p>
                         </section>
 
                         <!-- Custom CSS -->

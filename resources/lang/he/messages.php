@@ -109,6 +109,7 @@ return [
     'colors' => 'צבעים',
     'rotation' => 'סיבוב',
     'settings' => 'הגדרות',
+    'help' => 'עזרה',
     'accept_requests' => 'קבל בקשות',
     'accept_requests_help' => 'אפשר לאחרים לשלוח אירועים ללוח הזמנים שלך.',
     'direct_registration' => 'קישור ישיר להרשמה',
@@ -1499,6 +1500,7 @@ return [
     'video_rejected' => 'הסרטון הוסר',
     'comment_rejected' => 'התגובה הוסרה',
     'invalid_youtube_url' => 'אנא הזן קישור YouTube תקין',
+    'invalid_url' => 'אנא הזן קישור תקין',
     'video_already_submitted' => 'סרטון זה כבר הוגש',
     'add_photo' => 'Add Photo',
     'upload_photo' => 'Upload Photo',
@@ -1916,4 +1918,26 @@ return [
     'showing_first_of' => 'מציג 50 הראשונים מתוך :count נמענים',
     'created' => 'נוצר',
     'phone_number_required' => 'מספר טלפון הוא שדה חובה',
+
+    // Subscription payment failed email
+    'subscription_payment_failed_subject' => 'תשלום המנוי נכשל',
+    'subscription_payment_failed_body' => 'לא הצלחנו לעבד את התשלום עבור מנוי לוח הזמנים ":schedule" שלך. אנא עדכן את אמצעי התשלום שלך כדי להימנע מאובדן גישה לתכונות התוכנית שלך.',
+    'subscription_payment_failed_warning' => 'אם בעיית התשלום לא תיפתר, המנוי שלך יבוטל ולוח הזמנים שלך יורד לתוכנית החינמית.',
+    'subscription_payment_failed_update' => 'עדכון אמצעי תשלום',
+
+    // Admin amount mismatch
+    'amount_mismatch_sales' => 'אי התאמת סכום מכירות',
+    'amount_mismatch_boosts' => 'אי התאמת סכום קידומים',
+    'no_amount_mismatch' => 'לא נמצאו רשומות אי התאמת סכום.',
+    'expected_amount' => 'צפוי',
+    'paid_amount' => 'שולם',
+    'approve_sale' => 'אישור',
+    'refund_sale' => 'החזר',
+    'sale_approved' => 'המכירה אושרה בהצלחה.',
+    'sale_refunded' => 'המכירה הוחזרה בהצלחה.',
+    'sale_not_found' => 'המכירה לא נמצאה.',
+    'boost_approved' => 'קמפיין הקידום אושר בהצלחה.',
+    'boost_refunded' => 'קמפיין הקידום הוחזר בהצלחה.',
+    'boost_not_found' => 'קמפיין הקידום לא נמצא.',
+    'custom_domain_setup_guide' => 'למד כיצד להגדיר את הדומיין המותאם אישית שלך',
 ];

@@ -106,6 +106,7 @@ return [
     'colors' => 'Colores',
     'rotation' => 'Rotación',
     'settings' => 'Configuración',
+    'help' => 'Ayuda',
     'accept_requests' => 'Aceptar solicitudes',
     'accept_requests_help' => 'Permite que otros envien eventos a tu calendario.',
     'direct_registration' => 'Enlazar Directamente al Registro',
@@ -1497,6 +1498,7 @@ return [
     'video_rejected' => 'Video eliminado',
     'comment_rejected' => 'Comentario eliminado',
     'invalid_youtube_url' => 'Por favor ingrese una URL de YouTube valida',
+    'invalid_url' => 'Por favor ingrese una URL valida',
     'video_already_submitted' => 'Este video ya ha sido enviado',
     'add_photo' => 'Add Photo',
     'upload_photo' => 'Upload Photo',
@@ -1923,4 +1925,26 @@ return [
     'showing_first_of' => 'Mostrando los primeros 50 de :count destinatarios resueltos dinámicamente',
     'created' => 'Creado',
     'phone_number_required' => 'El número de teléfono es obligatorio',
+
+    // Subscription payment failed email
+    'subscription_payment_failed_subject' => 'Pago de suscripción fallido',
+    'subscription_payment_failed_body' => 'No pudimos procesar el pago de la suscripción de su calendario ":schedule". Por favor actualice su método de pago para evitar perder el acceso a las funciones de su plan.',
+    'subscription_payment_failed_warning' => 'Si el problema de pago no se resuelve, su suscripción será cancelada y su calendario será degradado al plan gratuito.',
+    'subscription_payment_failed_update' => 'Actualizar método de pago',
+
+    // Admin amount mismatch
+    'amount_mismatch_sales' => 'Ventas con discrepancia de monto',
+    'amount_mismatch_boosts' => 'Impulsos con discrepancia de monto',
+    'no_amount_mismatch' => 'No se encontraron registros con discrepancia de monto.',
+    'expected_amount' => 'Esperado',
+    'paid_amount' => 'Pagado',
+    'approve_sale' => 'Aprobar',
+    'refund_sale' => 'Reembolsar',
+    'sale_approved' => 'Venta aprobada exitosamente.',
+    'sale_refunded' => 'Venta reembolsada exitosamente.',
+    'sale_not_found' => 'Venta no encontrada.',
+    'boost_approved' => 'Campaña de impulso aprobada exitosamente.',
+    'boost_refunded' => 'Campaña de impulso reembolsada exitosamente.',
+    'boost_not_found' => 'Campaña de impulso no encontrada.',
+    'custom_domain_setup_guide' => 'Aprenda cómo configurar su dominio personalizado',
 ];

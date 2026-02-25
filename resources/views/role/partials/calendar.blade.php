@@ -121,6 +121,10 @@
                     'author' => $c->user ? ($c->user->first_name ?: 'User') : 'User',
                     'text' => Str::limit($c->comment, 80),
                 ])->values()->toArray() : [],
+                'photos' => $event->relationLoaded('approvedPhotos') ? $event->approvedPhotos->take(4)->map(fn($p) => [
+                    'url' => $p->photo_url,
+                ])->values()->toArray() : [],
+                'photo_count' => $event->approved_photos_count ?? 0,
                 'occurrenceDate' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
                 'uniqueKey' => \App\Utils\UrlUtils::encodeId($event->id),
                 'submit_video_url' => isset($role) ? route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : null,
@@ -738,6 +742,16 @@
                                             </div>
                                         </div>
 
+                                        {{-- Photo Thumbnails --}}
+                                        <div v-if="event.photos && event.photos.length > 0 && !event.is_password_protected" class="mt-3">
+                                            <div class="flex gap-2 overflow-x-auto">
+                                                <div v-for="(photo, photoIdx) in event.photos" :key="'photo-' + photoIdx"
+                                                     class="relative flex-shrink-0 w-28 h-20 rounded-lg overflow-hidden shadow-sm">
+                                                    <img :src="photo.url" class="w-full h-full object-cover" alt="" loading="lazy">
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         {{-- Recent Comments --}}
                                         <div v-if="event.recent_comments && event.recent_comments.length > 0 && !event.is_password_protected" class="space-y-1.5" :dir="isRtl ? 'rtl' : 'ltr'">
                                             <div v-for="(comment, cIdx) in event.recent_comments" :key="'c-' + cIdx"
@@ -831,9 +845,10 @@
                                                     <option v-for="part in event.parts" :key="part.id" :value="part.id" v-text="part.name"></option>
                                                 </select>
                                                 <div @click="$event.currentTarget.querySelector('input[type=file]').click()"
-                                                     @dragover.prevent="$event.currentTarget.classList.add('border-blue-400')"
-                                                     @dragleave.prevent="$event.currentTarget.classList.remove('border-blue-400')"
-                                                     @drop.prevent="$event.currentTarget.classList.remove('border-blue-400'); const f = $event.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) { const inp = $event.currentTarget.querySelector('input[type=file]'); const dt = new DataTransfer(); dt.items.add(f); inp.files = dt.files; inp.dispatchEvent(new Event('change')); }"
+                                                     @dragover.prevent="$event.currentTarget.style.borderColor = '{{ $accentColor }}'"
+                                                     @dragenter.prevent="$event.currentTarget.style.borderColor = '{{ $accentColor }}'"
+                                                     @dragleave.prevent="$event.currentTarget.style.borderColor = ''"
+                                                     @drop.prevent="const zone = $event.currentTarget; zone.style.borderColor = ''; const f = $event.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) { const inp = zone.querySelector('input[type=file]'); inp.files = $event.dataTransfer.files; const r = new FileReader(); r.onload = ev => { zone.querySelector('.photo-dropzone-preview img').src = ev.target.result; zone.querySelector('.photo-dropzone-placeholder').classList.add('hidden'); zone.querySelector('.photo-dropzone-preview').classList.remove('hidden'); zone.closest('form').querySelector('.photo-submit-btn').classList.remove('hidden'); const camBtn = zone.closest('form').querySelector('.photo-camera-btn'); if (camBtn) camBtn.classList.add('hidden'); }; r.readAsDataURL(f); }"
                                                      class="rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer transition-colors">
                                                     <div class="photo-dropzone-placeholder flex flex-col items-center justify-center py-6 text-gray-500 dark:text-gray-400">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mb-1" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
@@ -854,7 +869,7 @@
                                                     {{ __('messages.take_photo') }}
                                                 </button>
                                                 <input type="file" accept="image/*" capture="environment" class="camera-input hidden"
-                                                       @change="if ($event.target.files[0]) { const form = $event.target.closest('form'); const inp = form.querySelector('input[name=photo]'); const dt = new DataTransfer(); dt.items.add($event.target.files[0]); inp.files = dt.files; inp.dispatchEvent(new Event('change')); }">
+                                                       @change="if ($event.target.files[0]) { const form = $event.target.closest('form'); const zone = form.querySelector('.rounded-lg.border-dashed'); const inp = form.querySelector('input[name=photo]'); inp.files = $event.target.files; const r = new FileReader(); r.onload = e => { zone.querySelector('.photo-dropzone-preview img').src = e.target.result; zone.querySelector('.photo-dropzone-placeholder').classList.add('hidden'); zone.querySelector('.photo-dropzone-preview').classList.remove('hidden'); form.querySelector('.photo-submit-btn').classList.remove('hidden'); const camBtn = form.querySelector('.photo-camera-btn'); if (camBtn) camBtn.classList.add('hidden'); }; r.readAsDataURL($event.target.files[0]); }">
                                                 <button type="submit" class="photo-submit-btn hidden self-start px-4 py-2 border border-transparent text-sm rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md"
                                                         style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}">{{ __('messages.upload_photo') }}</button>
                                             </div>
@@ -1017,6 +1032,16 @@
                                         </div>
                                     </div>
 
+                                    {{-- Photo Thumbnails --}}
+                                    <div v-if="event.photos && event.photos.length > 0 && !event.is_password_protected" class="mt-3">
+                                        <div class="flex gap-2 overflow-x-auto">
+                                            <div v-for="(photo, photoIdx) in event.photos" :key="'photo2-' + photoIdx"
+                                                 class="relative flex-shrink-0 w-28 h-20 rounded-lg overflow-hidden shadow-sm">
+                                                <img :src="photo.url" class="w-full h-full object-cover" alt="" loading="lazy">
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     {{-- Recent Comments --}}
                                     <div v-if="event.recent_comments && event.recent_comments.length > 0 && !event.is_password_protected" class="space-y-1.5" :dir="isRtl ? 'rtl' : 'ltr'">
                                         <div v-for="(comment, cIdx) in event.recent_comments" :key="'c-' + cIdx"
@@ -1110,9 +1135,10 @@
                                                 <option v-for="part in event.parts" :key="part.id" :value="part.id" v-text="part.name"></option>
                                             </select>
                                             <div @click="$event.currentTarget.querySelector('input[type=file]').click()"
-                                                 @dragover.prevent="$event.currentTarget.classList.add('border-blue-400')"
-                                                 @dragleave.prevent="$event.currentTarget.classList.remove('border-blue-400')"
-                                                 @drop.prevent="$event.currentTarget.classList.remove('border-blue-400'); const f = $event.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) { const inp = $event.currentTarget.querySelector('input[type=file]'); const dt = new DataTransfer(); dt.items.add(f); inp.files = dt.files; inp.dispatchEvent(new Event('change')); }"
+                                                 @dragover.prevent="$event.currentTarget.style.borderColor = '{{ $accentColor }}'"
+                                                 @dragenter.prevent="$event.currentTarget.style.borderColor = '{{ $accentColor }}'"
+                                                 @dragleave.prevent="$event.currentTarget.style.borderColor = ''"
+                                                 @drop.prevent="const zone = $event.currentTarget; zone.style.borderColor = ''; const f = $event.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) { const inp = zone.querySelector('input[type=file]'); inp.files = $event.dataTransfer.files; const r = new FileReader(); r.onload = ev => { zone.querySelector('.photo-dropzone-preview img').src = ev.target.result; zone.querySelector('.photo-dropzone-placeholder').classList.add('hidden'); zone.querySelector('.photo-dropzone-preview').classList.remove('hidden'); zone.closest('form').querySelector('.photo-submit-btn').classList.remove('hidden'); const camBtn = zone.closest('form').querySelector('.photo-camera-btn'); if (camBtn) camBtn.classList.add('hidden'); }; r.readAsDataURL(f); }"
                                                  class="rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer transition-colors">
                                                 <div class="photo-dropzone-placeholder flex flex-col items-center justify-center py-6 text-gray-500 dark:text-gray-400">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mb-1" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
@@ -1133,7 +1159,7 @@
                                                 {{ __('messages.take_photo') }}
                                             </button>
                                             <input type="file" accept="image/*" capture="environment" class="camera-input hidden"
-                                                   @change="if ($event.target.files[0]) { const form = $event.target.closest('form'); const inp = form.querySelector('input[name=photo]'); const dt = new DataTransfer(); dt.items.add($event.target.files[0]); inp.files = dt.files; inp.dispatchEvent(new Event('change')); }">
+                                                   @change="if ($event.target.files[0]) { const form = $event.target.closest('form'); const zone = form.querySelector('.rounded-lg.border-dashed'); const inp = form.querySelector('input[name=photo]'); inp.files = $event.target.files; const r = new FileReader(); r.onload = e => { zone.querySelector('.photo-dropzone-preview img').src = e.target.result; zone.querySelector('.photo-dropzone-placeholder').classList.add('hidden'); zone.querySelector('.photo-dropzone-preview').classList.remove('hidden'); form.querySelector('.photo-submit-btn').classList.remove('hidden'); const camBtn = form.querySelector('.photo-camera-btn'); if (camBtn) camBtn.classList.add('hidden'); }; r.readAsDataURL($event.target.files[0]); }">
                                             <button type="submit" class="photo-submit-btn hidden self-start px-4 py-2 border border-transparent text-sm rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md"
                                                     style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}">{{ __('messages.upload_photo') }}</button>
                                         </div>
@@ -3003,6 +3029,7 @@ const calendarApp = createApp({
     }
 });
 
+calendarApp.config.globalProperties.FileReader = FileReader;
 const calendarAppInstance = calendarApp.mount('#calendar-app');
 window.calendarVueApp = calendarAppInstance;
 

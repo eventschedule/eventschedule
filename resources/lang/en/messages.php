@@ -112,6 +112,7 @@ return [
     'colors' => 'Colors',
     'rotation' => 'Rotation',
     'settings' => 'Settings',
+    'help' => 'Help',
     'unlisted' => 'Unlisted',
     'public' => 'Public',
     'accept_requests' => 'Accept requests',

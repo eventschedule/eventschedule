@@ -108,6 +108,7 @@ return [
     'colors' => 'Kleuren',
     'rotation' => 'Rotatie',
     'settings' => 'Instellingen',
+    'help' => 'Help',
     'accept_requests' => 'Accepteer Verzoeken',
     'accept_requests_help' => 'Sta anderen toe evenementen in te dienen bij uw agenda.',
     'direct_registration' => 'Direct Linken naar Registratie',
@@ -1504,6 +1505,7 @@ return [
     'video_rejected' => 'Video verwijderd',
     'comment_rejected' => 'Reactie verwijderd',
     'invalid_youtube_url' => 'Voer een geldige YouTube-URL in',
+    'invalid_url' => 'Voer een geldige URL in',
     'video_already_submitted' => 'Deze video is al ingediend',
     'add_photo' => 'Add Photo',
     'upload_photo' => 'Upload Photo',
@@ -1921,4 +1923,26 @@ return [
     'showing_first_of' => 'Toont de eerste 50 van :count dynamisch opgeloste ontvangers',
     'created' => 'Aangemaakt',
     'phone_number_required' => 'Telefoonnummer is verplicht',
+
+    // Subscription payment failed email
+    'subscription_payment_failed_subject' => 'Abonnementsbetaling mislukt',
+    'subscription_payment_failed_body' => 'We konden de betaling voor uw ":schedule" schema-abonnement niet verwerken. Werk uw betaalmethode bij om te voorkomen dat u de toegang tot uw planfuncties verliest.',
+    'subscription_payment_failed_warning' => 'Als het betalingsprobleem niet wordt opgelost, wordt uw abonnement geannuleerd en wordt uw schema gedegradeerd naar het gratis plan.',
+    'subscription_payment_failed_update' => 'Betaalmethode bijwerken',
+
+    // Admin amount mismatch
+    'amount_mismatch_sales' => 'Bedragsverschil verkopen',
+    'amount_mismatch_boosts' => 'Bedragsverschil boosts',
+    'no_amount_mismatch' => 'Geen records met bedragsverschil gevonden.',
+    'expected_amount' => 'Verwacht',
+    'paid_amount' => 'Betaald',
+    'approve_sale' => 'Goedkeuren',
+    'refund_sale' => 'Terugbetalen',
+    'sale_approved' => 'Verkoop succesvol goedgekeurd.',
+    'sale_refunded' => 'Verkoop succesvol terugbetaald.',
+    'sale_not_found' => 'Verkoop niet gevonden.',
+    'boost_approved' => 'Boostcampagne succesvol goedgekeurd.',
+    'boost_refunded' => 'Boostcampagne succesvol terugbetaald.',
+    'boost_not_found' => 'Boostcampagne niet gevonden.',
+    'custom_domain_setup_guide' => 'Leer hoe u uw aangepast domein instelt',
 ];

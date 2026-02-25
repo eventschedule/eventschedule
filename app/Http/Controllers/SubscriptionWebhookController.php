@@ -62,9 +62,10 @@ class SubscriptionWebhookController extends WebhookController
 
         if ($role) {
             if ($role->hasActiveSubscription()) {
-                $role->plan_type = $role->hasActiveEnterpriseSubscription() ? 'enterprise' : 'pro';
+                $planType = $role->hasActiveEnterpriseSubscription() ? 'enterprise' : 'pro';
 
-                // Update plan_term from the invoice line items
+                // Determine plan_term from the invoice line items
+                $planTerm = null;
                 $lines = $payload['data']['object']['lines']['data'] ?? [];
                 if (! empty($lines)) {
                     $priceId = $lines[0]['price']['id'] ?? null;
@@ -72,11 +73,20 @@ class SubscriptionWebhookController extends WebhookController
                         $yearlyPriceId = config('services.stripe_platform.price_yearly');
                         $enterpriseYearlyPriceId = config('services.stripe_platform.enterprise_price_yearly');
                         $isYearly = ($priceId === $yearlyPriceId) || ($priceId === $enterpriseYearlyPriceId);
-                        $role->plan_term = $isYearly ? 'year' : 'month';
+                        $planTerm = $isYearly ? 'year' : 'month';
                     }
                 }
 
-                $role->save();
+                // Use lock to prevent race with controller swap
+                \DB::transaction(function () use ($role, $planType, $planTerm) {
+                    $role = Role::lockForUpdate()->find($role->id);
+                    $role->plan_type = $planType;
+                    if ($planTerm) {
+                        $role->plan_term = $planTerm;
+                    }
+                    $role->plan_expires = null;
+                    $role->save();
+                });
             }
         }
 
@@ -135,6 +145,7 @@ class SubscriptionWebhookController extends WebhookController
                     $role = Role::lockForUpdate()->find($role->id);
                     $role->plan_type = $isEnterprise ? 'enterprise' : 'pro';
                     $role->plan_term = $isYearly ? 'year' : 'month';
+                    $role->plan_expires = null;
                     $role->save();
                 });
             }

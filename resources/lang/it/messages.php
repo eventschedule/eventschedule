@@ -109,6 +109,7 @@ return [
     'colors' => 'Colori',
     'rotation' => 'Rotazione',
     'settings' => 'Impostazioni',
+    'help' => 'Aiuto',
     'unlisted' => 'Non Elencato',
     'public' => 'Pubblico',
     'accept_requests' => 'Accetta Richieste',
@@ -1506,6 +1507,7 @@ return [
     'video_rejected' => 'Video rimosso',
     'comment_rejected' => 'Commento rimosso',
     'invalid_youtube_url' => 'Inserisci un URL YouTube valido',
+    'invalid_url' => 'Inserisci un URL valido',
     'video_already_submitted' => 'Questo video e gia stato inviato',
     'add_photo' => 'Add Photo',
     'upload_photo' => 'Upload Photo',
@@ -1923,4 +1925,26 @@ return [
     'showing_first_of' => 'Visualizzazione dei primi 50 di :count destinatari risolti dinamicamente',
     'created' => 'Creato',
     'phone_number_required' => 'Il numero di telefono è obbligatorio',
+
+    // Subscription payment failed email
+    'subscription_payment_failed_subject' => 'Pagamento dell\'abbonamento non riuscito',
+    'subscription_payment_failed_body' => 'Non siamo riusciti a elaborare il pagamento per l\'abbonamento del tuo calendario ":schedule". Aggiorna il tuo metodo di pagamento per evitare di perdere l\'accesso alle funzionalità del tuo piano.',
+    'subscription_payment_failed_warning' => 'Se il problema di pagamento non viene risolto, il tuo abbonamento verrà cancellato e il tuo calendario verrà declassato al piano gratuito.',
+    'subscription_payment_failed_update' => 'Aggiorna metodo di pagamento',
+
+    // Admin amount mismatch
+    'amount_mismatch_sales' => 'Discrepanza importo vendite',
+    'amount_mismatch_boosts' => 'Discrepanza importo boost',
+    'no_amount_mismatch' => 'Nessun record di discrepanza importo trovato.',
+    'expected_amount' => 'Previsto',
+    'paid_amount' => 'Pagato',
+    'approve_sale' => 'Approva',
+    'refund_sale' => 'Rimborsa',
+    'sale_approved' => 'Vendita approvata con successo.',
+    'sale_refunded' => 'Vendita rimborsata con successo.',
+    'sale_not_found' => 'Vendita non trovata.',
+    'boost_approved' => 'Campagna boost approvata con successo.',
+    'boost_refunded' => 'Campagna boost rimborsata con successo.',
+    'boost_not_found' => 'Campagna boost non trovata.',
+    'custom_domain_setup_guide' => 'Scopri come configurare il tuo dominio personalizzato',
 ];

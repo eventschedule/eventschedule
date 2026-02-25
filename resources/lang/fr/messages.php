@@ -106,6 +106,7 @@ return [
     'colors' => 'Couleurs',
     'rotation' => 'Rotation',
     'settings' => 'Paramètres',
+    'help' => 'Aide',
     'accept_requests' => 'Accepter les demandes',
     'accept_requests_help' => 'Permettre a d\'autres de soumettre des evenements a votre planning.',
     'direct_registration' => 'Lien Direct vers l\'Inscription',
@@ -1497,6 +1498,7 @@ return [
     'video_rejected' => 'Vidéo supprimée',
     'comment_rejected' => 'Commentaire supprimé',
     'invalid_youtube_url' => 'Veuillez entrer une URL YouTube valide',
+    'invalid_url' => 'Veuillez entrer une URL valide',
     'video_already_submitted' => 'Cette vidéo a déjà été soumise',
     'add_photo' => 'Add Photo',
     'upload_photo' => 'Upload Photo',
@@ -1923,4 +1925,26 @@ return [
     'showing_first_of' => 'Affichage des 50 premiers sur :count destinataires résolus dynamiquement',
     'created' => 'Créé',
     'phone_number_required' => 'Le numéro de téléphone est requis',
+
+    // Subscription payment failed email
+    'subscription_payment_failed_subject' => 'Échec du paiement de l\'abonnement',
+    'subscription_payment_failed_body' => 'Nous n\'avons pas pu traiter le paiement de l\'abonnement de votre calendrier ":schedule". Veuillez mettre à jour votre méthode de paiement pour éviter de perdre l\'accès aux fonctionnalités de votre forfait.',
+    'subscription_payment_failed_warning' => 'Si le problème de paiement n\'est pas résolu, votre abonnement sera annulé et votre calendrier sera rétrogradé au forfait gratuit.',
+    'subscription_payment_failed_update' => 'Mettre à jour le moyen de paiement',
+
+    // Admin amount mismatch
+    'amount_mismatch_sales' => 'Écart de montant ventes',
+    'amount_mismatch_boosts' => 'Écart de montant boosts',
+    'no_amount_mismatch' => 'Aucun enregistrement d\'écart de montant trouvé.',
+    'expected_amount' => 'Attendu',
+    'paid_amount' => 'Payé',
+    'approve_sale' => 'Approuver',
+    'refund_sale' => 'Rembourser',
+    'sale_approved' => 'Vente approuvée avec succès.',
+    'sale_refunded' => 'Vente remboursée avec succès.',
+    'sale_not_found' => 'Vente introuvable.',
+    'boost_approved' => 'Campagne de boost approuvée avec succès.',
+    'boost_refunded' => 'Campagne de boost remboursée avec succès.',
+    'boost_not_found' => 'Campagne de boost introuvable.',
+    'custom_domain_setup_guide' => 'Découvrez comment configurer votre domaine personnalisé',
 ];

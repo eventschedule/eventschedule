@@ -187,6 +187,16 @@
                         {{ __('messages.settings') }}
                     </a>
                 </li>
+                <li>
+                    <a href="{{ \App\Utils\HelpUtils::getDocUrl() }}" target="_blank"
+                        class="js-help-link group flex gap-x-4 items-center rounded-md p-2 text-lg font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white">
+                        <svg class="h-8 w-8 shrink-0" viewBox="0 0 24 24"
+                            fill="#666" aria-hidden="true">
+                            <path d="M15.07,11.25L14.17,12.17C13.45,12.89 13,13.5 13,15H11V14.5C11,13.39 11.45,12.39 12.17,11.67L13.41,10.41C13.78,10.05 14,9.55 14,9C14,7.89 13.1,7 12,7A2,2 0 0,0 10,9H8A4,4 0 0,1 12,5A4,4 0 0,1 16,9C16,9.88 15.64,10.67 15.07,11.25M13,19H11V17H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12C22,6.47 17.5,2 12,2Z" />
+                        </svg>
+                        {{ __('messages.help') }}
+                    </a>
+                </li>
             </ul>
         </li>
 
@@ -319,3 +329,51 @@
         }
     });
 </script>
+
+@once
+<script {!! nonce_attr() !!}>
+    (function() {
+        var anchorMap = @json(\App\Utils\HelpUtils::getAnchorMap());
+        var baseUrl = @json(\App\Utils\HelpUtils::getDocUrl());
+
+        function updateHelpLinks(url) {
+            document.querySelectorAll('.js-help-link').forEach(function(link) {
+                link.href = url;
+            });
+        }
+
+        if (Object.keys(anchorMap).length === 0) {
+            return;
+        }
+
+        function resolveUrl() {
+            var hash = window.location.hash.replace('#', '');
+            if (hash && anchorMap[hash]) {
+                updateHelpLinks(anchorMap[hash]);
+            } else {
+                updateHelpLinks(baseUrl);
+            }
+        }
+
+        // Set initial state based on URL hash
+        resolveUrl();
+
+        // Listen for section nav clicks (pushState doesn't fire hashchange)
+        document.addEventListener('click', function(e) {
+            var target = e.target.closest('.section-nav-link, .mobile-section-header');
+            if (!target) return;
+            var sectionId = target.getAttribute('data-section');
+            if (sectionId && anchorMap[sectionId]) {
+                updateHelpLinks(anchorMap[sectionId]);
+            } else {
+                updateHelpLinks(baseUrl);
+            }
+        });
+
+        // Handle browser back/forward
+        window.addEventListener('popstate', function() {
+            resolveUrl();
+        });
+    })();
+</script>
+@endonce

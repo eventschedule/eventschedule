@@ -80,6 +80,8 @@
                         <a href="#end-conditions" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">End Conditions</a>
                         <a href="#event-details" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Event Details</a>
                         <a href="#managing" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Managing Events</a>
+                        <a href="#custom-fields" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Custom Fields</a>
+                        <a href="#private-events" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Private Events</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
                 </aside>
@@ -115,7 +117,7 @@
 
                         <!-- AI Import -->
                         <section id="ai-import" class="doc-section">
-                            <h2 class="doc-heading">Let AI Do the Heavy Lifting</h2>
+                            <h2 class="doc-heading">Let AI Do the Heavy Lifting <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span></h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Save hours of manual data entry. Paste any event text - emails, social media posts, website listings, or even flyer descriptions - and watch it transform into a ready-to-publish event in seconds.</p>
 
                             <x-doc-screenshot id="creating-events--import" alt="Import events page" />
@@ -189,7 +191,7 @@
 
                         <!-- Agenda Scanning -->
                         <section id="agenda-scanning" class="doc-section">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Scanning Printed Agendas</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Scanning Printed Agendas <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span></h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Have a printed conference program, setlist, or event schedule? You can scan it to automatically populate your event's parts (sessions, acts, segments).</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
@@ -428,6 +430,64 @@
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Pending Events</div>
                                 <p>If you have <a href="{{ route('marketing.docs.schedule_basics') }}#settings" class="text-cyan-400 hover:text-cyan-300">Require Approval</a> enabled, submitted events appear in a pending queue. Review them in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong> and approve or reject each one.</p>
+                            </div>
+                        </section>
+
+                        <!-- Custom Fields -->
+                        <section id="custom-fields" class="doc-section">
+                            <h2 class="doc-heading">Custom Fields <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Pro</span></h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Add custom data fields to your events to capture additional information beyond the standard fields.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Setting Up Custom Fields</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong></li>
+                                <li>Scroll to <strong class="text-gray-900 dark:text-white">Custom Fields</strong></li>
+                                <li>Add fields with a name and type (text, number, date, or dropdown)</li>
+                                <li>Save your settings</li>
+                            </ol>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Once configured, custom fields appear on the event creation and edit forms. You can define up to 8 custom fields per schedule.</p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Use Cases</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Track performer names, room numbers, age restrictions, dress codes, or any event-specific data. Custom field values are available as variables in <a href="{{ route('marketing.docs.event_graphics') }}#variables" class="text-cyan-400 hover:text-cyan-300">event graphics text templates</a>.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Field Types</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Text:</strong> Free-form text input. <strong class="text-gray-900 dark:text-white">Number:</strong> Numeric values. <strong class="text-gray-900 dark:text-white">Date:</strong> Date picker. <strong class="text-gray-900 dark:text-white">Dropdown:</strong> Predefined list of options.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Private Events -->
+                        <section id="private-events" class="doc-section">
+                            <h2 class="doc-heading">Private & Password-Protected Events <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span></h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Control event visibility with per-event privacy settings. Private events are hidden from your public schedule and require a password to view.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Making an Event Private</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>When creating or editing an event, toggle the <strong class="text-gray-900 dark:text-white">"Private"</strong> option</li>
+                                <li>Set a password for the event</li>
+                                <li>Save the event</li>
+                            </ol>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Private events are hidden from your public schedule page and calendar views. Visitors can only access them via a direct link and must enter the correct password to view the event details.</p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Mix Public and Private</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Privacy is set per event, not per schedule. You can freely mix public and private events on the same schedule. Public events appear normally while private events remain hidden.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sharing Private Events</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Share the event's direct link and password with your intended audience via email, messaging, or any other channel. Only people with both the link and the correct password can view the event.</p>
+                                </div>
+                            </div>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>For schedule-level privacy (hiding the entire schedule from public listings), see the <a href="{{ route('marketing.docs.schedule_basics') }}#settings" class="text-cyan-400 hover:text-cyan-300">Unlisted Schedule</a> setting.</p>
                             </div>
                         </section>
 

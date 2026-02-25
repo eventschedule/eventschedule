@@ -92,6 +92,9 @@ trait CalendarDataTrait
                 'author' => $c->user ? ($c->user->first_name ?: 'User') : 'User',
                 'text' => Str::limit($c->comment, 80),
             ])->values()->toArray() : [],
+            'photos' => $event->relationLoaded('approvedPhotos') ? $event->approvedPhotos->take(4)->map(fn ($p) => [
+                'url' => $p->photo_url,
+            ])->values()->toArray() : [],
             'occurrenceDate' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
             'uniqueKey' => UrlUtils::encodeId($event->id),
             'submit_video_url' => isset($role) ? route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => UrlUtils::encodeId($event->id)]) : null,
@@ -114,6 +117,7 @@ trait CalendarDataTrait
             $data['talent'] = [];
             $data['videos'] = [];
             $data['recent_comments'] = [];
+            $data['photos'] = [];
             $data['parts'] = [];
             $data['image_url'] = null;
             $data['flyer_url'] = null;

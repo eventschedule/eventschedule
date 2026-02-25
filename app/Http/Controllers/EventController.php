@@ -1520,7 +1520,9 @@ class EventController extends Controller
 
         $redirect = redirect()->to($event->getGuestUrl($subdomain))->with('message', $message);
 
-        if (! $isApproved) {
+        if ($isApproved) {
+            $redirect = $redirect->with('scroll_to', 'event-media-section');
+        } else {
             $redirect = $redirect->with('scroll_to', 'pending-video-'.$video->id);
         }
 
@@ -1596,7 +1598,9 @@ class EventController extends Controller
 
         $redirect = redirect()->to($event->getGuestUrl($subdomain))->with('message', $message);
 
-        if (! $isApproved) {
+        if ($isApproved) {
+            $redirect = $redirect->with('scroll_to', 'event-media-section');
+        } else {
             $redirect = $redirect->with('scroll_to', 'pending-comment-'.$eventComment->id);
         }
 
@@ -1754,7 +1758,9 @@ class EventController extends Controller
 
         $redirect = redirect()->to($event->getGuestUrl($subdomain))->with('message', $message);
 
-        if (! $isApproved) {
+        if ($isApproved) {
+            $redirect = $redirect->with('scroll_to', 'event-media-section');
+        } else {
             $redirect = $redirect->with('scroll_to', 'pending-photo-' . $photo->id);
         }
 
