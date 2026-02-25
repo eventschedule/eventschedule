@@ -607,6 +607,26 @@ class BoostController extends Controller
                         $billingService->cancelPaymentIntent($campaign);
                     }
                 } else {
+                    // Sync actual_spend from Meta before refund to prevent over-refund
+                    if ($campaign->meta_campaign_id && $campaign->actual_spend === null) {
+                        try {
+                            $metaService = $this->getMetaService();
+                            $insights = $metaService->fetchCampaignInsights($campaign);
+                            if ($insights && isset($insights['spend'])) {
+                                $campaign->update([
+                                    'actual_spend' => (float) $insights['spend'],
+                                    'analytics_synced_at' => now(),
+                                ]);
+                                $campaign->refresh();
+                            }
+                        } catch (\Exception $e) {
+                            Log::warning('Failed to sync Meta spend before boost refund', [
+                                'campaign_id' => $campaign->id,
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
+                    }
+
                     $refunded = $campaign->actual_spend && $campaign->actual_spend > 0
                         ? $billingService->refundUnspent($campaign)
                         : $billingService->refundFull($campaign);
@@ -739,7 +759,13 @@ class BoostController extends Controller
             if ($request->previous_payment_intent_id) {
                 try {
                     $previous = $stripe->paymentIntents->retrieve($request->previous_payment_intent_id);
-                    if (in_array($previous->status, ['requires_payment_method', 'requires_confirmation', 'requires_action'])) {
+                    if (isset($previous->metadata->event_id) && (int) $previous->metadata->event_id !== $eventId) {
+                        Log::warning('Previous payment intent does not belong to this event', [
+                            'previous_id' => $request->previous_payment_intent_id,
+                            'expected_event_id' => $eventId,
+                            'actual_event_id' => $previous->metadata->event_id,
+                        ]);
+                    } elseif (in_array($previous->status, ['requires_payment_method', 'requires_confirmation', 'requires_action'])) {
                         $stripe->paymentIntents->cancel($request->previous_payment_intent_id);
                     }
                 } catch (\Exception $e) {

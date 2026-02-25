@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const editingPrompt = ref(false);
             const showTimes = ref({{ ($role->agenda_show_times ?? true) ? 'true' : 'false' }});
             const showDescription = ref({{ ($role->agenda_show_description ?? true) ? 'true' : 'false' }});
+            const saveAgendaImage = ref({{ ($role->agenda_save_image ?? false) ? 'true' : 'false' }});
             const parts = ref([]);
             const errorMessage = ref('');
 
@@ -223,6 +224,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     if (saveAsDefault.value) {
                         formData.append('save_ai_prompt_default', '1');
+                    }
+                    if (saveAgendaImage.value) {
+                        formData.append('save_agenda_image', '1');
                     }
                     formData.append('event_id', selectedEventId.value);
 
@@ -427,7 +431,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             return {
                 state, events, selectedEventId, selectedEvent, aiPrompt, saveAsDefault,
-                editingPrompt, showTimes, showDescription,
+                editingPrompt, showTimes, showDescription, saveAgendaImage,
                 parts, errorMessage, cameraError, cameraErrorType, isMobile,
                 videoEl, canvasEl, selectedEventName, hasEvents,
                 cameras, selectedCameraId, cameraStarted, selectCameraLabel,
@@ -643,32 +647,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
             <!-- Buttons row below preview -->
             <div v-if="cameraStarted" class="mt-3 grid gap-2" :class="cameras.length > 1 ? 'grid-cols-2' : 'grid-cols-1'">
-                <button @click="editingPrompt = !editingPrompt" class="text-sm font-medium text-[#4E81FA] hover:text-[#3a6de0] border border-[#4E81FA] rounded-md px-3 py-2">
-                    {{ __('messages.edit_prompt') }}
-                </button>
                 <button v-if="cameras.length > 1" @click="changeCamera" class="text-sm font-medium text-[#4E81FA] hover:text-[#3a6de0] border border-[#4E81FA] rounded-md px-3 py-2">
                     {{ __('messages.change_camera') }}
                 </button>
+                <button @click="editingPrompt = !editingPrompt" class="text-sm font-medium text-[#4E81FA] hover:text-[#3a6de0] border border-[#4E81FA] rounded-md px-3 py-2">
+                    {{ __('messages.edit_prompt') }}
+                </button>
             </div>
 
-            <!-- AI Prompt (always visible under buttons) -->
-            <div v-if="cameraStarted" class="mt-3">
-                <div v-if="!editingPrompt">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        <span v-if="aiPrompt">@{{ aiPrompt }}</span>
-                        <span v-else class="italic">No AI prompt set</span>
-                    </p>
-                </div>
-                <div v-else>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.ai_agenda_prompt') }}</label>
-                    <textarea v-model="aiPrompt" rows="2" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm" placeholder="{{ __('messages.ai_agenda_prompt_placeholder') }}"></textarea>
-                    <div class="flex items-center justify-between mt-2">
-                        <label class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                            <input type="checkbox" v-model="saveAsDefault" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA] me-2">
-                            {{ __('messages.save_as_default') }}
-                        </label>
-                        <button @click="editingPrompt = false" class="text-sm font-medium text-[#4E81FA] hover:text-[#3a6de0] whitespace-nowrap border border-[#4E81FA] rounded-md px-4 py-2">{{ __('messages.done') }}</button>
-                    </div>
+            <!-- Save image checkbox and AI prompt display -->
+            <div v-if="cameraStarted && !editingPrompt" class="mt-3 flex items-center justify-between">
+                <label class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                    <input type="checkbox" v-model="saveAgendaImage" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA] me-2">
+                    {{ __('messages.save_agenda_image') }}
+                </label>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <span v-if="aiPrompt">@{{ aiPrompt }}</span>
+                    <span v-else class="italic">{{ __('messages.no_prompt_set') }}</span>
+                </p>
+            </div>
+
+            <!-- AI Prompt editing -->
+            <div v-if="cameraStarted && editingPrompt" class="mt-3">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.ai_agenda_prompt') }}</label>
+                <textarea v-model="aiPrompt" rows="2" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm" placeholder="{{ __('messages.ai_agenda_prompt_placeholder') }}"></textarea>
+                <div class="flex items-center justify-between mt-2">
+                    <label class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                        <input type="checkbox" v-model="saveAsDefault" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA] me-2">
+                        {{ __('messages.save_as_default') }}
+                    </label>
+                    <button @click="editingPrompt = false" class="text-sm font-medium text-[#4E81FA] hover:text-[#3a6de0] whitespace-nowrap border border-[#4E81FA] rounded-md px-4 py-2">{{ __('messages.done') }}</button>
                 </div>
             </div>
         </div>

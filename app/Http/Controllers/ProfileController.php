@@ -329,6 +329,11 @@ class ProfileController extends Controller
         }
 
         if ($paymentUrl) {
+            $parsed = parse_url($paymentUrl);
+            if (! $parsed || ! isset($parsed['scheme']) || ! in_array($parsed['scheme'], ['http', 'https'])) {
+                return Redirect::to(route('profile.edit').'#section-payment-methods')
+                    ->with('error', __('messages.invalid_url'));
+            }
             $user->payment_url = $paymentUrl;
             $user->payment_secret = strtolower(\Str::random(32));
             $user->save();

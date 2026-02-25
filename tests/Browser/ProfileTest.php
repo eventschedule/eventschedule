@@ -28,10 +28,17 @@ class ProfileTest extends DuskTestCase
             // 1. Change timezone
             // -----------------------------------------------
             $browser->visit('/settings')
-                ->waitFor('#timezone-search', 5)
-                ->clear('#timezone-search')
-                ->type('#timezone-search', 'Pacific/Auckland')
-                ->waitFor('[role="option"]')
+                ->waitFor('#timezone-search', 5);
+
+            // Use JavaScript to interact with searchable select (more reliable than sendKeys with custom components)
+            $browser->script("
+                var input = document.getElementById('timezone-search');
+                input.focus();
+                input.value = 'Pacific/Auckland';
+                input.dispatchEvent(new Event('input', {bubbles: true}));
+            ");
+
+            $browser->waitFor('[role="option"]', 5)
                 ->click('[role="option"]')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')

@@ -1514,6 +1514,7 @@ return [
     'video_rejected' => 'Video removed',
     'comment_rejected' => 'Comment removed',
     'invalid_youtube_url' => 'Please enter a valid YouTube URL',
+    'invalid_url' => 'Please enter a valid URL',
     'video_already_submitted' => 'This video has already been submitted',
     'add_photo' => 'Add Photo',
     'upload_photo' => 'Upload Photo',
