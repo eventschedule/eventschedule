@@ -746,7 +746,14 @@
     <div id="tooltip" class="hidden fixed z-50 px-3 py-2 text-sm text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg pointer-events-none max-w-xs"></div>
 
     @if (config('app.is_testing'))
-        <div class="fixed bottom-4 right-4 z-50 h-6 w-6 rounded-full bg-orange-500 shadow-lg pointer-events-none"></div>
+        <style {!! nonce_attr() !!}>
+            @keyframes es-ping { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(3); opacity: 0; } }
+        </style>
+        <div class="fixed bottom-4 right-4 z-50 pointer-events-none" style="width:24px;height:24px">
+            <div style="position:absolute;inset:0;border-radius:9999px;background:#f97316;animation:es-ping 3s cubic-bezier(0,0,0.2,1) infinite"></div>
+            <div style="position:absolute;inset:0;border-radius:9999px;background:#f97316;animation:es-ping 3s cubic-bezier(0,0,0.2,1) 1.5s infinite"></div>
+            <div style="position:absolute;inset:0;border-radius:9999px;background:#f97316"></div>
+        </div>
     @endif
 
 </body>
