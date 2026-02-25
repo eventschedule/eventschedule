@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const showDescription = ref({{ ($role->agenda_show_description ?? true) ? 'true' : 'false' }});
             const saveAgendaImage = ref({{ ($role->agenda_save_image ?? false) ? 'true' : 'false' }});
             const parts = ref([]);
+            const capturedImageUrl = ref('');
             const errorMessage = ref('');
 
             const cameraError = ref('');
@@ -216,6 +217,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 state.value = 'loading';
                 errorMessage.value = '';
 
+                if (saveAgendaImage.value) {
+                    capturedImageUrl.value = canvas.toDataURL('image/jpeg', 0.85);
+                }
+
                 canvas.toBlob(function(blob) {
                     const formData = new FormData();
                     formData.append('parts_image', blob, 'agenda.jpg');
@@ -255,9 +260,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         }));
                         if (parts.value.length === 0) {
                             errorMessage.value = @json(__("messages.no_events_found"));
-                            state.value = 'camera';
-                            cameraStarted.value = false;
-                            return;
+                            if (!saveAgendaImage.value) {
+                                state.value = 'camera';
+                                cameraStarted.value = false;
+                                return;
+                            }
                         }
                         state.value = 'editing';
                     })
@@ -333,7 +340,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             function saveParts() {
-                if (parts.value.length === 0) return;
+                if (parts.value.length === 0) {
+                    const ev = events.value.find(e => e.id === selectedEventId.value);
+                    if (ev && ev.view_url) {
+                        window.location.href = ev.view_url + '#agenda';
+                    }
+                    return;
+                }
 
                 state.value = 'loading';
                 errorMessage.value = '';
@@ -379,12 +392,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
             function cancelEditing() {
                 parts.value = [];
+                capturedImageUrl.value = '';
                 state.value = 'camera';
                 cameraStarted.value = false;
             }
 
             function scanAnother() {
                 parts.value = [];
+                capturedImageUrl.value = '';
                 state.value = 'camera';
                 cameraStarted.value = false;
             }
@@ -432,7 +447,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return {
                 state, events, selectedEventId, selectedEvent, aiPrompt, saveAsDefault,
                 editingPrompt, showTimes, showDescription, saveAgendaImage,
-                parts, errorMessage, cameraError, cameraErrorType, isMobile,
+                parts, capturedImageUrl, errorMessage, cameraError, cameraErrorType, isMobile,
                 videoEl, canvasEl, selectedEventName, hasEvents,
                 cameras, selectedCameraId, cameraStarted, selectCameraLabel,
                 showCameraModal, selectedCameraLabel,
@@ -692,6 +707,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         <!-- Editing parts -->
         <div v-if="state === 'editing'">
+            <div v-if="capturedImageUrl" class="mb-4">
+                <img :src="capturedImageUrl" class="w-full rounded-lg border border-gray-200 dark:border-gray-700" />
+            </div>
             <div :class="showAllFields ? 'space-y-3' : 'space-y-1'" class="mb-24">
                 <!-- Compact layout (name only) -->
                 <div @dragover.prevent="onContainerDragOver($event)" @drop="onDrop()" class="space-y-3">

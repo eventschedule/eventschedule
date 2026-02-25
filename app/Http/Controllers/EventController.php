@@ -1832,12 +1832,13 @@ class EventController extends Controller
             ->limit(50)
             ->get();
 
-        $eventsData = $events->map(function ($e) {
+        $eventsData = $events->map(function ($e) use ($subdomain) {
             return [
                 'id' => UrlUtils::encodeId($e->id),
                 'name' => $e->name,
                 'starts_at' => $e->starts_at ? Carbon::parse($e->starts_at)->format('D, M j, Y') : null,
                 'image_url' => $e->getImageUrl(),
+                'view_url' => route('event.view_guest', ['subdomain' => $subdomain, 'slug' => $e->slug]),
             ];
         });
 

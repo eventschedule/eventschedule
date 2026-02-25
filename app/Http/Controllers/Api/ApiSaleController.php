@@ -430,6 +430,8 @@ class ApiSaleController extends Controller
                 if ($total == 0) {
                     $sale->status = 'paid';
                     $sale->save();
+
+                    AnalyticsEventsDaily::incrementSale($event->id, 0);
                 }
 
                 return $sale;
