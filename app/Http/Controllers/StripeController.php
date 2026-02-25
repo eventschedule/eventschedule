@@ -83,6 +83,7 @@ class StripeController extends Controller
         $payload = $request->getContent();
         $sig_header = $request->header('stripe-signature');
         $event = null;
+        $verifiedViaConnect = false;
 
         // Try Connect webhook secret first (hosted mode)
         $connectSecret = config('services.stripe.webhook_secret');
@@ -91,6 +92,7 @@ class StripeController extends Controller
                 $event = \Stripe\Webhook::constructEvent(
                     $payload, $sig_header, $connectSecret
                 );
+                $verifiedViaConnect = true;
             } catch (\Stripe\Exception\SignatureVerificationException $e) {
                 // Connect secret didn't work, will try platform secret
             } catch (\UnexpectedValueException $e) {
@@ -98,7 +100,7 @@ class StripeController extends Controller
             }
         }
 
-        // Try platform webhook secret (self-hosted mode / direct payments)
+        // Try platform webhook secret (selfhosted mode / direct payments)
         if (! $event) {
             $platformSecret = config('services.stripe_platform.webhook_secret');
             if ($platformSecret) {
@@ -131,6 +133,16 @@ class StripeController extends Controller
                 }
 
                 if ($sale) {
+                    // Verify webhook key matches payment context to prevent cross-context forgery
+                    $isConnectSale = $sale->event && $sale->event->user && $sale->event->user->stripe_account_id;
+                    if (! $verifiedViaConnect && $isConnectSale) {
+                        \Log::warning('Stripe webhook key mismatch: platform key used for Connect sale', [
+                            'sale_id' => $sale->id,
+                            'payment_intent_id' => $paymentIntent->id,
+                        ]);
+                        break;
+                    }
+
                     // Use lockForUpdate to prevent race with the success redirect handler
                     \DB::transaction(function () use ($sale, $paymentIntent) {
                         $sale = Sale::lockForUpdate()->find($sale->id);
@@ -176,12 +188,23 @@ class StripeController extends Controller
                 break;
 
             case 'checkout.session.completed':
-                // Direct Stripe payments (self-hosted mode)
+                // Direct Stripe payments (selfhosted mode)
                 $session = $event->data->object;
                 if ($session->payment_status === 'paid' && isset($session->metadata->sale_id)) {
                     $saleId = UrlUtils::decodeId($session->metadata->sale_id);
                     $sale = Sale::find($saleId);
                     if ($sale) {
+                        // Verify webhook key matches: checkout.session.completed is for direct/platform payments
+                        $isConnectSale = $sale->event && $sale->event->user && $sale->event->user->stripe_account_id;
+                        if ($verifiedViaConnect && $isConnectSale) {
+                            // Connect sales should use payment_intent.succeeded, not checkout.session.completed
+                            \Log::warning('Stripe webhook: checkout.session.completed received for Connect sale', [
+                                'sale_id' => $sale->id,
+                                'session_id' => $session->id,
+                            ]);
+                            break;
+                        }
+
                         // Use lockForUpdate to prevent race with the success redirect handler
                         \DB::transaction(function () use ($sale, $session) {
                             $sale = Sale::lockForUpdate()->find($sale->id);

@@ -33,6 +33,8 @@ class InvoiceNinjaController extends Controller
 
     public function webhook(Request $request, $secret = null)
     {
+        $secretFromUrl = $secret !== null;
+
         // Prefer Authorization header over URL parameter for security
         // (URL secrets appear in logs and Referer headers)
         $headerSecret = $request->header('X-Webhook-Secret') ?? $request->header('Authorization');
@@ -40,10 +42,15 @@ class InvoiceNinjaController extends Controller
             // Remove "Bearer " prefix if present
             $headerSecret = preg_replace('/^Bearer\s+/i', '', $headerSecret);
             $secret = $headerSecret;
+            $secretFromUrl = false;
         }
 
         if (! $secret) {
             return response()->json(['status' => 'error', 'message' => 'Missing webhook secret'], 400);
+        }
+
+        if ($secretFromUrl) {
+            \Log::warning('Invoice Ninja webhook authenticated via URL path parameter (deprecated). Use X-Webhook-Secret header instead.');
         }
 
         // Find user with matching webhook secret using constant-time comparison

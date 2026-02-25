@@ -19,6 +19,19 @@ class BoostBillingService
             $paymentIntent = $stripe->paymentIntents->retrieve($paymentIntentId);
 
             if ($paymentIntent->status === 'succeeded') {
+                // Verify payment intent belongs to this campaign's event
+                $intentEventId = $paymentIntent->metadata->event_id ?? null;
+                if ($intentEventId && (int) $intentEventId !== $campaign->event_id) {
+                    Log::error('Boost Billing: Payment intent event_id mismatch', [
+                        'campaign_id' => $campaign->id,
+                        'campaign_event_id' => $campaign->event_id,
+                        'intent_event_id' => $intentEventId,
+                        'payment_intent_id' => $paymentIntentId,
+                    ]);
+
+                    return false;
+                }
+
                 // Always save the payment intent ID so refunds can be issued if needed
                 $campaign->update(['stripe_payment_intent_id' => $paymentIntentId]);
 

@@ -615,11 +615,13 @@ class EventController extends Controller
             $event->agenda_ai_prompt = $request->input('agenda_ai_prompt');
             $event->save();
         }
+        $role->agenda_show_times = $request->boolean('agenda_show_times');
+        $role->agenda_show_description = $request->boolean('agenda_show_description');
+        $role->agenda_save_image = $request->boolean('save_agenda_image');
+        $role->save();
+
         if ($request->input('save_ai_prompt_default')) {
             $role->agenda_ai_prompt = $request->input('agenda_ai_prompt');
-            $role->agenda_show_times = $request->boolean('agenda_show_times');
-            $role->agenda_show_description = $request->boolean('agenda_show_description');
-            $role->agenda_save_image = $request->boolean('save_agenda_image');
             $role->save();
         }
 
@@ -819,11 +821,13 @@ class EventController extends Controller
                 $event->save();
             }
         }
+        $role->agenda_show_times = $request->boolean('agenda_show_times');
+        $role->agenda_show_description = $request->boolean('agenda_show_description');
+        $role->agenda_save_image = $request->boolean('save_agenda_image');
+        $role->save();
+
         if ($request->input('save_ai_prompt_default')) {
             $role->agenda_ai_prompt = $request->input('agenda_ai_prompt');
-            $role->agenda_show_times = $request->boolean('agenda_show_times');
-            $role->agenda_show_description = $request->boolean('agenda_show_description');
-            $role->agenda_save_image = $request->boolean('save_agenda_image');
             $role->save();
         }
 

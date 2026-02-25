@@ -32,7 +32,6 @@ class BoostCampaign extends Model
         'targeting',
         'placements',
         'user_budget',
-        'markup_rate',
         'total_charged',
         'actual_spend',
         'stripe_payment_intent_id',

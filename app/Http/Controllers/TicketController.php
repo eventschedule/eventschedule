@@ -523,8 +523,9 @@ class TicketController extends Controller
         $user = $event->user;
 
         // Verify the secret from the URL (using constant-time comparison to prevent timing attacks)
+        // Accept either a per-sale HMAC token or the legacy global secret
         $secret = request()->query('secret');
-        if (! $secret || ! $user->payment_secret || ! hash_equals($user->payment_secret, $secret)) {
+        if (! $secret || ! $user->payment_secret || ! $this->verifyPaymentUrlSecret($secret, $sale, $user)) {
             abort(403, 'Invalid secret');
         }
 
@@ -552,8 +553,9 @@ class TicketController extends Controller
         $user = $event->user;
 
         // Verify the secret from the URL (using constant-time comparison to prevent timing attacks)
+        // Accept either a per-sale HMAC token or the legacy global secret
         $secret = request()->query('secret');
-        if (! $secret || ! $user->payment_secret || ! hash_equals($user->payment_secret, $secret)) {
+        if (! $secret || ! $user->payment_secret || ! $this->verifyPaymentUrlSecret($secret, $sale, $user)) {
             abort(403, 'Invalid secret');
         }
 
@@ -563,6 +565,31 @@ class TicketController extends Controller
         });
 
         return redirect($event->getGuestUrl($sale->subdomain, $sale->event_date).'&tickets=true');
+    }
+
+    /**
+     * Generate a per-sale HMAC token for payment URL callbacks.
+     * This produces a unique token per sale without requiring schema changes.
+     */
+    public static function generatePaymentUrlHmac(Sale $sale, $paymentSecret): string
+    {
+        return hash_hmac('sha256', (string) $sale->id, $paymentSecret);
+    }
+
+    /**
+     * Verify a payment URL secret: accepts either a per-sale HMAC token
+     * or the legacy global payment_secret for backward compatibility.
+     */
+    private function verifyPaymentUrlSecret(string $secret, Sale $sale, $user): bool
+    {
+        // Check per-sale HMAC token first (preferred)
+        $expectedHmac = self::generatePaymentUrlHmac($sale, $user->payment_secret);
+        if (hash_equals($expectedHmac, $secret)) {
+            return true;
+        }
+
+        // Fall back to legacy global secret for backward compatibility
+        return hash_equals($user->payment_secret, $secret);
     }
 
     public function scan()

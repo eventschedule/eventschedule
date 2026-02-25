@@ -297,10 +297,13 @@ class BoostController extends Controller
                 'targeting' => $request->targeting ? json_decode($request->targeting, true) : $defaults['targeting'],
                 'placements' => $request->placements ? json_decode($request->placements, true) : null,
                 'user_budget' => $budget,
-                'markup_rate' => $markupRate,
                 'billing_status' => config('app.hosted') ? 'pending' : 'charged',
                 'stripe_payment_intent_id' => $request->payment_intent_id ?? (config('app.is_testing') ? 'test_pi_'.\Illuminate\Support\Str::random(24) : null),
             ]);
+
+            // Set markup_rate explicitly (not via $fillable to prevent mass-assignment)
+            $campaign->markup_rate = $markupRate;
+            $campaign->save();
 
             DB::commit();
         } catch (QueryException $e) {

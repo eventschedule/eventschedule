@@ -103,6 +103,9 @@ class Role extends Model implements MustVerifyEmail
         'boost_credit' => 'decimal:2',
         'boost_max_budget' => 'decimal:2',
         'phone_verified_at' => 'datetime',
+        'agenda_show_times' => 'boolean',
+        'agenda_show_description' => 'boolean',
+        'agenda_save_image' => 'boolean',
     ];
 
     /**
