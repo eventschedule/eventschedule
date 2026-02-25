@@ -348,7 +348,7 @@
                         Followers
                     </div>
                     <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Build your audience</h2>
-                    <p class="text-gray-600 dark:text-gray-400 mb-6">Visitors can follow your schedule. They get notified when you add new events.</p>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">Visitors can follow your schedule and get notified when you add new events. Engage followers with polls and interactive content.</p>
 
                     <div class="text-center">
                         <div class="text-4xl font-bold text-emerald-400 mb-1">2,847</div>

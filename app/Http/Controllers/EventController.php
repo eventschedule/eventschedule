@@ -362,6 +362,7 @@ class EventController extends Controller
             'clonedCuratorGroups' => $clonedCuratorGroups,
             'isCloned' => $isCloned,
             'clonedParts' => $clonedParts,
+            'polls' => collect(),
         ]);
     }
 
@@ -592,6 +593,43 @@ class EventController extends Controller
 
         $this->eventRepo->saveEvent($role, $request, $event);
 
+        // Sync polls from form data
+        if ($role->isPro() && $request->has('polls')) {
+            $maxSort = $event->polls()->max('sort_order') ?? 0;
+            foreach (array_slice($request->input('polls', []), 0, 5) as $pollData) {
+                $question = trim($pollData['question'] ?? '');
+                $options = json_decode($pollData['options'] ?? '[]', true);
+                $options = array_values(array_filter(array_map('trim', $options ?: [])));
+                $hash = $pollData['hash'] ?? '';
+
+                if (!$question || count($options) < 2) {
+                    continue;
+                }
+
+                if ($hash) {
+                    $poll = EventPoll::where('event_id', $event->id)
+                        ->find(UrlUtils::decodeId($hash));
+                    if ($poll) {
+                        if ($poll->votes()->exists()) {
+                            $poll->update(['question' => Str::limit($question, 500)]);
+                        } else {
+                            $poll->update([
+                                'question' => Str::limit($question, 500),
+                                'options' => array_slice($options, 0, 10),
+                            ]);
+                        }
+                    }
+                } else {
+                    EventPoll::create([
+                        'event_id' => $event->id,
+                        'question' => Str::limit($question, 500),
+                        'options' => array_slice($options, 0, 10),
+                        'sort_order' => ++$maxSort,
+                    ]);
+                }
+            }
+        }
+
         if ($request->has('save_default_tickets')) {
             $role = Role::subdomain($subdomain)->firstOrFail();
             $defaultTickets = [
@@ -790,6 +828,24 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
         $event = $this->eventRepo->saveEvent($role, $request, null);
+
+        // Create polls from form data
+        if ($role->isPro() && $request->has('polls')) {
+            $sortOrder = 0;
+            foreach (array_slice($request->input('polls', []), 0, 5) as $pollData) {
+                $question = trim($pollData['question'] ?? '');
+                $options = json_decode($pollData['options'] ?? '[]', true);
+                $options = array_values(array_filter(array_map('trim', $options ?: [])));
+                if ($question && count($options) >= 2) {
+                    EventPoll::create([
+                        'event_id' => $event->id,
+                        'question' => Str::limit($question, 500),
+                        'options' => array_slice($options, 0, 10),
+                        'sort_order' => $sortOrder++,
+                    ]);
+                }
+            }
+        }
 
         if ($request->has('save_default_tickets')) {
             $role = Role::subdomain($subdomain)->firstOrFail();
@@ -1950,29 +2006,58 @@ class EventController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
         if (is_demo_role($role)) {
+            if ($request->ajax()) {
+                return response()->json(['error' => __('messages.not_authorized')], 403);
+            }
+
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
         if (! $role->isPro()) {
+            if ($request->ajax()) {
+                return response()->json(['error' => __('messages.not_authorized')], 403);
+            }
+
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $event = Event::with('roles')->findOrFail(UrlUtils::decodeId($eventHash));
         if (! $request->user()->canEditEvent($event)) {
+            if ($request->ajax()) {
+                return response()->json(['error' => __('messages.not_authorized')], 403);
+            }
+
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        if ($event->polls()->count() >= 5) {
+        $pollCount = $event->polls()->count();
+        if ($pollCount >= 5) {
+            if ($request->ajax()) {
+                return response()->json(['error' => __('messages.max_polls_reached')], 422);
+            }
+
             return redirect()->to(url()->previous().'#section-polls')->with('error', __('messages.max_polls_reached'));
         }
 
         $maxSort = $event->polls()->max('sort_order') ?? 0;
 
-        EventPoll::create([
+        $poll = EventPoll::create([
             'event_id' => $event->id,
             'question' => $request->input('question'),
             'options' => $request->input('options'),
             'sort_order' => $maxSort + 1,
         ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'hash' => UrlUtils::encodeId($poll->id),
+                'question' => $poll->question,
+                'options' => $poll->options,
+                'is_active' => $poll->is_active,
+                'votes_count' => 0,
+                'results' => [],
+                'poll_count' => $pollCount + 1,
+            ]);
+        }
 
         return redirect()->to(url()->previous().'#section-polls')->with('message', __('messages.poll_created'));
     }
@@ -2010,19 +2095,38 @@ class EventController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
         if (is_demo_role($role)) {
+            if ($request->ajax()) {
+                return response()->json(['error' => __('messages.not_authorized')], 403);
+            }
+
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
         if (! $role->isPro()) {
+            if ($request->ajax()) {
+                return response()->json(['error' => __('messages.not_authorized')], 403);
+            }
+
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $event = Event::with('roles')->findOrFail(UrlUtils::decodeId($eventHash));
         if (! $request->user()->canEditEvent($event)) {
+            if ($request->ajax()) {
+                return response()->json(['error' => __('messages.not_authorized')], 403);
+            }
+
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $poll = EventPoll::where('event_id', $event->id)->findOrFail(UrlUtils::decodeId($pollHash));
         $poll->delete();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'message' => __('messages.poll_deleted'),
+                'poll_count' => $event->polls()->count(),
+            ]);
+        }
 
         return redirect()->to(url()->previous().'#section-polls')->with('message', __('messages.poll_deleted'));
     }
@@ -2031,14 +2135,26 @@ class EventController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
         if (is_demo_role($role)) {
+            if ($request->ajax()) {
+                return response()->json(['error' => __('messages.not_authorized')], 403);
+            }
+
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
         if (! $role->isPro()) {
+            if ($request->ajax()) {
+                return response()->json(['error' => __('messages.not_authorized')], 403);
+            }
+
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $event = Event::with('roles')->findOrFail(UrlUtils::decodeId($eventHash));
         if (! $request->user()->canEditEvent($event)) {
+            if ($request->ajax()) {
+                return response()->json(['error' => __('messages.not_authorized')], 403);
+            }
+
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -2046,6 +2162,13 @@ class EventController extends Controller
         $poll->update(['is_active' => ! $poll->is_active]);
 
         $message = $poll->is_active ? __('messages.poll_reopened') : __('messages.poll_closed');
+
+        if ($request->ajax()) {
+            return response()->json([
+                'is_active' => $poll->is_active,
+                'message' => $message,
+            ]);
+        }
 
         return redirect()->to(url()->previous().'#section-polls')->with('message', $message);
     }

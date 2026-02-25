@@ -1090,7 +1090,7 @@
                                 @endif
                             </a>
                             @endif
-                            @if ($event->exists && $role->isPro())
+                            @if ($role->isPro())
                             <a href="#section-polls" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-polls">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
@@ -2975,7 +2975,7 @@
             </div>
             @endif
 
-            @if ($event->exists && $role->isPro())
+            @if ($role->isPro())
             <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-polls">
                 <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -2996,92 +2996,97 @@
                         {{ __('messages.polls') }}
                     </h2>
 
+                    {{-- Poll message/error --}}
+                    <div v-if="pollMessage" class="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-700 dark:text-green-400">
+                        @{{ pollMessage }}
+                    </div>
+                    <div v-if="pollError" class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">
+                        @{{ pollError }}
+                    </div>
+
                     {{-- Existing Polls --}}
-                    @if ($polls->count() > 0)
-                    <div class="space-y-4 mb-6">
-                        @foreach ($polls as $poll)
-                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <div v-if="polls.length > 0" class="space-y-4 mb-4">
+                        <div v-for="(poll, pollIndex) in polls" :key="poll.hash || ('new-' + pollIndex)" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                            {{-- Question input --}}
                             <div class="flex items-start justify-between gap-3 mb-3">
-                                <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ $poll->question }}</h3>
-                                <span class="shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $poll->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400' }}">
-                                    {{ $poll->is_active ? __('messages.poll_active') : __('messages.poll_closed_status') }}
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_question') }}</label>
+                                    <input type="text" v-model="poll.question" maxlength="500" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.poll_question') }}'">
+                                </div>
+                                <span v-if="poll.hash" class="shrink-0 mt-6 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                                      :class="poll.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'">
+                                    @{{ poll.is_active ? pollLabelActive : pollLabelClosed }}
                                 </span>
                             </div>
 
-                            @php
-                                $results = $poll->getResults();
-                                $totalVotes = $poll->votes_count ?? 0;
-                                $maxCount = $totalVotes > 0 ? max(array_values($results + [0])) : 0;
-                            @endphp
-
-                            @foreach ($poll->options as $idx => $option)
-                            @php
-                                $count = $results[$idx] ?? 0;
-                                $pct = $totalVotes > 0 ? round($count / $totalVotes * 100) : 0;
-                            @endphp
-                            <div class="mb-2">
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span class="text-gray-700 dark:text-gray-300">{{ $option }}</span>
-                                    <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums">{{ $count }} ({{ $pct }}%)</span>
+                            {{-- Options: read-only with vote results when has votes --}}
+                            <template v-if="poll.votes_count > 0">
+                                <div v-for="(option, idx) in poll.options" :key="idx" class="mb-2">
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-700 dark:text-gray-300">@{{ option }}</span>
+                                        <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums">@{{ pollOptionCount(poll, idx) }} (@{{ pollOptionPct(poll, idx) }}%)</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                        <div class="h-2 rounded-full" :style="pollBarStyle(poll, idx)"></div>
+                                    </div>
                                 </div>
-                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                    <div class="h-2 rounded-full" style="width: {{ max($pct, $totalVotes > 0 ? 2 : 0) }}%; background-color: {{ $count === $maxCount && $totalVotes > 0 ? '#4E81FA' : '#9ca3af' }}"></div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 mb-3">
+                                    @{{ poll.votes_count }} {{ __('messages.votes') }}
+                                </p>
+                                <p class="text-xs text-amber-600 dark:text-amber-400 mb-3">{{ __('messages.cannot_edit_poll_with_votes') }}</p>
+                            </template>
+
+                            {{-- Options: editable when no votes --}}
+                            <template v-else>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_options') }}</label>
+                                    <div v-for="(option, idx) in poll.options" :key="idx" class="flex items-center gap-1 mb-2">
+                                        <input type="text" v-model="poll.options[idx]" maxlength="200" class="flex-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.option_placeholder') }} ' + (idx + 1)">
+                                        <button v-if="poll.options.length > 2" type="button" @click="poll.options.splice(idx, 1)" class="flex-shrink-0 p-1 text-gray-400 hover:text-red-500">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center justify-between mt-1">
+                                        <button v-if="poll.options.length < 10" type="button" @click="poll.options.push('')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                                            {{ __('messages.add_option') }}
+                                        </button>
+                                        <span v-else></span>
+                                        <button v-if="!poll.hash" type="button" @click="polls.splice(pollIndex, 1)" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
+                                            {{ __('messages.remove') }}
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                            @endforeach
+                            </template>
 
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 mb-3">
-                                {{ $totalVotes }} {{ __('messages.votes') }}
-                            </p>
-
-                            @if ($poll->votes_count > 0)
-                            <p class="text-xs text-amber-600 dark:text-amber-400 mb-3">{{ __('messages.cannot_edit_poll_with_votes') }}</p>
-                            @endif
-
-                            <div class="flex items-center gap-2">
-                                <button type="submit" form="form-toggle-poll-{{ $poll->id }}" class="text-sm px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                    {{ $poll->is_active ? __('messages.close_poll') : __('messages.reopen_poll') }}
+                            {{-- Actions --}}
+                            <div v-if="poll.hash" class="flex items-center gap-2">
+                                <button type="button" @click="togglePoll(poll)" :disabled="pollSubmitting" class="text-sm px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
+                                    @{{ poll.is_active ? pollLabelClose : pollLabelReopen }}
                                 </button>
-                                <button type="submit" form="form-delete-poll-{{ $poll->id }}" class="text-sm px-3 py-1.5 rounded border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20" onclick="return confirm('{{ __('messages.delete_poll') }}?')">
+                                <button type="button" @click="deletePoll(poll, pollIndex)" :disabled="pollSubmitting" class="text-sm px-3 py-1.5 rounded border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50">
                                     {{ __('messages.delete') }}
                                 </button>
                             </div>
                         </div>
-                        @endforeach
                     </div>
-                    @else
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.no_polls') }}</p>
-                    @endif
+                    <p v-else class="text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.no_polls') }}</p>
 
-                    {{-- Add Poll Form --}}
-                    @if ($polls->count() < 5)
-                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.add_poll') }}</h3>
+                    {{-- Hidden inputs for form submission --}}
+                    <template v-for="(poll, pIdx) in polls" :key="'poll-input-' + pIdx">
+                        <input type="hidden" :name="'polls[' + pIdx + '][hash]'" :value="poll.hash || ''">
+                        <input type="hidden" :name="'polls[' + pIdx + '][question]'" :value="poll.question">
+                        <input type="hidden" :name="'polls[' + pIdx + '][options]'" :value="JSON.stringify(poll.options)">
+                    </template>
 
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_question') }}</label>
-                            <input type="text" v-model="newPollQuestion" maxlength="500" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.poll_question') }}'">
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_options') }}</label>
-                            <div v-for="(option, index) in newPollOptions" :key="index" class="flex items-center gap-2 mb-2">
-                                <input type="text" v-model="newPollOptions[index]" maxlength="200" class="flex-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.option_placeholder') }} ' + (index + 1)">
-                                <button v-if="newPollOptions.length > 2" type="button" @click="newPollOptions.splice(index, 1)" class="p-1 text-gray-400 hover:text-red-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
-                                </button>
-                            </div>
-                            <button v-if="newPollOptions.length < 10" type="button" @click="newPollOptions.push('')" class="mt-1 text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                                {{ __('messages.add_option') }}
-                            </button>
-                        </div>
-
-                        <button type="button" @click="submitPoll" :disabled="!newPollQuestion.trim() || newPollOptions.filter(o => o.trim()).length < 2" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                            {{ __('messages.add_poll') }}
-                        </button>
-                    </div>
-                    @endif
+                    {{-- Add Poll Link --}}
+                    <button type="button" @click="polls.push({hash: null, question: '', options: ['', ''], is_active: true, votes_count: 0, results: []})" v-if="polls.length < 5"
+                            class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        {{ __('messages.add_poll') }}
+                    </button>
                 </div>
             </div>
             @endif
@@ -3138,13 +3143,6 @@
         @endforeach
     @endif
 
-    {{-- External forms for poll toggle/delete buttons (outside main form to avoid nesting) --}}
-    @if ($event->exists && $role->isPro())
-        @foreach ($polls as $poll)
-        <form id="form-toggle-poll-{{ $poll->id }}" method="POST" action="{{ route('event.toggle_poll', ['subdomain' => $subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id), 'poll_hash' => \App\Utils\UrlUtils::encodeId($poll->id)]) }}" class="hidden">@csrf</form>
-        <form id="form-delete-poll-{{ $poll->id }}" method="POST" action="{{ route('event.delete_poll', ['subdomain' => $subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id), 'poll_hash' => \App\Utils\UrlUtils::encodeId($poll->id)]) }}" class="hidden">@csrf @method('DELETE')</form>
-        @endforeach
-    @endif
 
 </div>
 
@@ -3245,8 +3243,27 @@
         partDragIndex: null,
         partDropTargetIndex: null,
         partEditors: {},
-        newPollQuestion: '',
-        newPollOptions: ['', ''],
+        @php
+            $pollsJson = $polls->map(function ($poll) {
+                return [
+                    'hash' => \App\Utils\UrlUtils::encodeId($poll->id),
+                    'question' => $poll->question,
+                    'options' => $poll->options,
+                    'is_active' => $poll->is_active,
+                    'votes_count' => $poll->votes_count ?? 0,
+                    'results' => $poll->getResults(),
+                ];
+            })->values();
+        @endphp
+        polls: @json($pollsJson),
+        eventExists: @json($event->exists),
+        pollSubmitting: false,
+        pollMessage: '',
+        pollError: '',
+        pollLabelActive: @json(__('messages.poll_active')),
+        pollLabelClosed: @json(__('messages.poll_closed_status')),
+        pollLabelClose: @json(__('messages.close_poll')),
+        pollLabelReopen: @json(__('messages.reopen_poll')),
       }
     },
     methods: {
@@ -3847,38 +3864,82 @@
       removeTicket(index) {
         this.tickets.splice(index, 1);
       },
-      submitPoll() {
-        const question = this.newPollQuestion.trim();
-        const options = this.newPollOptions.filter(o => o.trim());
-        if (!question || options.length < 2) return;
+      togglePoll(poll) {
+        this.pollSubmitting = true;
+        this.pollMessage = '';
+        this.pollError = '';
 
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '{{ $event->exists ? route("event.store_poll", ["subdomain" => $subdomain, "event_hash" => \App\Utils\UrlUtils::encodeId($event->id)]) : "" }}';
-        form.style.display = 'none';
+        const url = '{{ $event->exists ? route("event.toggle_poll", ["subdomain" => $subdomain, "event_hash" => \App\Utils\UrlUtils::encodeId($event->id), "poll_hash" => "POLL_HASH"]) : "" }}'.replace('POLL_HASH', poll.hash);
 
-        const csrf = document.createElement('input');
-        csrf.type = 'hidden';
-        csrf.name = '_token';
-        csrf.value = '{{ csrf_token() }}';
-        form.appendChild(csrf);
-
-        const q = document.createElement('input');
-        q.type = 'hidden';
-        q.name = 'question';
-        q.value = question;
-        form.appendChild(q);
-
-        options.forEach(opt => {
-          const o = document.createElement('input');
-          o.type = 'hidden';
-          o.name = 'options[]';
-          o.value = opt.trim();
-          form.appendChild(o);
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+          },
+        })
+        .then(response => {
+          if (!response.ok) return response.json().then(data => { throw data; });
+          return response.json();
+        })
+        .then(data => {
+          poll.is_active = data.is_active;
+          this.pollMessage = data.message;
+        })
+        .catch(err => {
+          this.pollError = err.error || err.message || '{{ __("messages.error") }}';
+        })
+        .finally(() => {
+          this.pollSubmitting = false;
         });
+      },
+      deletePoll(poll, index) {
+        if (!confirm('{{ __("messages.delete_poll") }}?')) return;
 
-        document.body.appendChild(form);
-        form.submit();
+        this.pollSubmitting = true;
+        this.pollMessage = '';
+        this.pollError = '';
+
+        const url = '{{ $event->exists ? route("event.delete_poll", ["subdomain" => $subdomain, "event_hash" => \App\Utils\UrlUtils::encodeId($event->id), "poll_hash" => "POLL_HASH"]) : "" }}'.replace('POLL_HASH', poll.hash);
+
+        fetch(url, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+          },
+        })
+        .then(response => {
+          if (!response.ok) return response.json().then(data => { throw data; });
+          return response.json();
+        })
+        .then(data => {
+          this.polls.splice(index, 1);
+          this.pollMessage = data.message;
+        })
+        .catch(err => {
+          this.pollError = err.error || err.message || '{{ __("messages.error") }}';
+        })
+        .finally(() => {
+          this.pollSubmitting = false;
+        });
+      },
+      pollOptionCount(poll, idx) {
+        return poll.results[idx] || 0;
+      },
+      pollOptionPct(poll, idx) {
+        const count = poll.results[idx] || 0;
+        return poll.votes_count > 0 ? Math.round(count / poll.votes_count * 100) : 0;
+      },
+      pollBarStyle(poll, idx) {
+        const count = poll.results[idx] || 0;
+        const pct = poll.votes_count > 0 ? Math.round(count / poll.votes_count * 100) : 0;
+        const maxCount = poll.votes_count > 0 ? Math.max(...poll.options.map((_, i) => poll.results[i] || 0)) : 0;
+        const width = Math.max(pct, poll.votes_count > 0 ? 2 : 0);
+        const color = (count === maxCount && poll.votes_count > 0) ? '#4E81FA' : '#9ca3af';
+        return { width: width + '%', backgroundColor: color };
       },
       getNextAvailableEventFieldIndex() {
         const usedIndices = Object.values(this.eventCustomFields || {}).map(f => f.index).filter(i => i);

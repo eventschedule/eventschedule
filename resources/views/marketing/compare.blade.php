@@ -155,6 +155,8 @@
                                     ['Ticketing', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
                                     ['QR check-ins', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
                                     ['Online events', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
+                                    ['Recurring events', 'Yes (Free)', 'Yes', 'Yes', 'No', 'Yes'],
+                                    ['Event polls', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
                                 ],
                                 'Integrations' => [
                                     ['Google Calendar sync', 'Yes (Free)', 'No native 2-way sync', 'Yes', 'No', 'N/A'],
@@ -172,6 +174,7 @@
                                     ['Event graphics gen', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
                                     ['Sub-schedules', 'Yes (Free)', 'No', 'No', 'No', 'Multiple calendars'],
                                     ['Fan videos & comments', 'Yes (Free)', 'No', 'No', 'No', 'No'],
+                                    ['Event boost (ads)', 'Yes (Pro)', 'Yes (paid)', 'No', 'No', 'No'],
                                     ['Team collaboration', 'Yes (Enterprise)', 'Yes', '3 admins (free), 5 (Plus)', 'Yes', 'Yes'],
                                 ],
                                 'Platform' => [

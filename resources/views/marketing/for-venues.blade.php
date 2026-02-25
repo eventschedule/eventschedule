@@ -400,10 +400,11 @@
                                 Fan Engagement
                             </div>
                             <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Fan videos & comments</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">After the show, fans share YouTube clips and comments on your events. You approve what goes live. Build a gallery of great nights at your venue.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">After the show, fans share YouTube clips and comments on your events. You approve what goes live. Run polls to let guests vote on upcoming themes or events.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">YouTube videos</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Comments</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Event polls</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Organizer approval</span>
                             </div>
                         </div>

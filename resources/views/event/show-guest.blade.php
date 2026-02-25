@@ -1189,13 +1189,13 @@
             $myEventLevelPendingPhotos = $myEventLevelPendingPhotos->filter(fn($p) => $p->event_date === $date || $p->event_date === null);
           }
         @endphp
-        @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $eventLevelPhotos->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $myEventLevelPendingPhotos->count() > 0 || ($role->isPro() && $event->activePolls->count() > 0) || $event->parts->count() == 0))
+        @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $eventLevelPhotos->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $myEventLevelPendingPhotos->count() > 0 || ($role->isPro() && $event->polls->count() > 0) || $event->parts->count() == 0))
         <div id="event-media-section" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
 
           {{-- Polls --}}
-          @if ($role->isPro() && $event->activePolls->count() > 0)
+          @if ($role->isPro() && $event->polls->count() > 0)
           <div class="space-y-4 mb-6" x-data="pollsComponent()">
-              @foreach ($event->activePolls as $poll)
+              @foreach ($event->polls as $poll)
               <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
                   <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ $poll->question }}</h4>
 
@@ -1261,6 +1261,7 @@
                           </p>
                       @endif
                   @else
+                      @if ($poll->is_active)
                       {{-- Not logged in: show options + sign in prompt --}}
                       @foreach ($poll->options as $option)
                       <div class="w-full text-start px-3 py-2.5 mb-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400">
@@ -1270,6 +1271,33 @@
                       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                           <a href="{{ app_url('/login') }}" class="underline">{{ __('messages.sign_in_to_vote') }}</a>
                       </p>
+                      @else
+                      {{-- Closed poll: show results --}}
+                      @php
+                          $results = $poll->getResults();
+                          $totalVotes = $poll->votes()->count();
+                          $maxCount = $totalVotes > 0 ? max(array_values($results + [0])) : 0;
+                      @endphp
+                      @foreach ($poll->options as $idx => $option)
+                      @php
+                          $count = $results[$idx] ?? 0;
+                          $pct = $totalVotes > 0 ? round($count / $totalVotes * 100) : 0;
+                          $isLeading = $count === $maxCount && $totalVotes > 0;
+                      @endphp
+                      <div class="mb-2.5">
+                          <div class="flex justify-between text-sm mb-1">
+                              <span class="text-gray-800 dark:text-gray-200 {{ $isLeading ? 'font-semibold' : '' }}">{{ $option }}</span>
+                              <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums">{{ $count }} ({{ $pct }}%)</span>
+                          </div>
+                          <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                              <div class="h-2.5 rounded-full" style="width: {{ max($pct, $totalVotes > 0 ? 2 : 0) }}%; background-color: {{ $isLeading ? $accentColor . '80' : '#9ca3af' }}"></div>
+                          </div>
+                      </div>
+                      @endforeach
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                          {{ $totalVotes }} {{ __('messages.votes') }} &middot; {{ __('messages.poll_closed_status') }}
+                      </p>
+                      @endif
                   @endauth
               </div>
               @endforeach

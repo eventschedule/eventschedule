@@ -337,5 +337,9 @@
 
     @include('marketing.partials.footer')
 
+    @if (config('app.is_testing'))
+        <div class="fixed bottom-4 right-4 z-50 h-6 w-6 rounded-full bg-orange-500 shadow-lg pointer-events-none"></div>
+    @endif
+
 </body>
 </html>

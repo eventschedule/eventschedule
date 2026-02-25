@@ -323,6 +323,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/admin/queue/clear-failed', [AdminController::class, 'queueClearFailed'])->name('admin.queue.clear-failed');
         Route::post('/admin/queue/flush-pending', [AdminController::class, 'queueFlushPending'])->name('admin.queue.flush-pending');
 
+        // Admin log viewer routes
+        Route::get('/admin/logs', [AdminController::class, 'logs'])->name('admin.logs');
+        Route::post('/admin/logs/clear', [AdminController::class, 'logsClear'])->name('admin.logs.clear');
+        Route::get('/admin/logs/download', [AdminController::class, 'logsDownload'])->name('admin.logs.download');
+
         // Admin newsletter routes
         Route::get('/admin/newsletters', [AdminNewsletterController::class, 'index'])->name('admin.newsletters.index');
         Route::get('/admin/newsletters/create', [AdminNewsletterController::class, 'create'])->name('admin.newsletters.create');

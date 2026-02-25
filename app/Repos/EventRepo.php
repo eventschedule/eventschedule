@@ -39,7 +39,7 @@ class EventRepo
     {
         [$startOfDay, $endOfDay] = $this->getUtcDateRange($eventDate);
 
-        return Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'activePolls' => fn ($q) => $q->withCount('votes')])
+        return Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
             ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id))
             ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id))
             ->where(function ($query) use ($startOfDay, $endOfDay, $eventDate) {
@@ -61,7 +61,7 @@ class EventRepo
     {
         [$startOfDay, $endOfDay] = $this->getUtcDateRange($eventDate);
 
-        return Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'activePolls' => fn ($q) => $q->withCount('votes')])
+        return Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
             ->where('slug', $slug)
             ->where(function ($query) use ($startOfDay, $endOfDay, $eventDate) {
                 $query->whereBetween('starts_at', [$startOfDay, $endOfDay])
@@ -86,7 +86,7 @@ class EventRepo
     {
         [$startOfDay, $endOfDay] = $this->getUtcDateRange($eventDate);
 
-        return Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'activePolls' => fn ($q) => $q->withCount('votes')])
+        return Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
             ->whereBetween('starts_at', [$startOfDay, $endOfDay])
             ->where(function ($query) use ($subdomain) {
                 $query->whereHas('roles', function ($q) use ($subdomain) {
@@ -776,7 +776,7 @@ class EventRepo
         $eventDateUtc = $date ? Carbon::parse($date, 'UTC') : null;
 
         if ($subdomainRole && $lookupEventId) {
-            $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'activePolls' => fn ($q) => $q->withCount('votes')])
+            $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
                 ->where('id', $lookupEventId)
                 ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id)->where('is_accepted', true))
                 ->first();
@@ -803,7 +803,7 @@ class EventRepo
 
             // No date provided - find most recent/upcoming
             if (! $event && ! $date) {
-                $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'activePolls' => fn ($q) => $q->withCount('votes')])
+                $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id))
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id))
                     ->where('starts_at', '>=', now()->subDay())
@@ -811,7 +811,7 @@ class EventRepo
                     ->first();
 
                 if (! $event) {
-                    $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'activePolls' => fn ($q) => $q->withCount('votes')])
+                    $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
                         ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id))
                         ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id))
                         ->where('starts_at', '<', now())
@@ -834,7 +834,7 @@ class EventRepo
                 $event = $this->findEventBySlug($subdomain, $slug, $eventDateUtc);
             }
         } else {
-            $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'activePolls' => fn ($q) => $q->withCount('votes')])
+            $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
                 ->where('slug', $slug)
                 ->where('starts_at', '>=', now()->subDay())
                 ->where(function ($query) use ($subdomain) {
@@ -846,7 +846,7 @@ class EventRepo
                 ->first();
 
             if (! $event) {
-                $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'activePolls' => fn ($q) => $q->withCount('votes')])
+                $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
                     ->where('slug', $slug)
                     ->where('starts_at', '<', now())
                     ->where(function ($query) use ($subdomain) {

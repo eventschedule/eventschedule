@@ -129,7 +129,7 @@
                 'uniqueKey' => \App\Utils\UrlUtils::encodeId($event->id),
                 'submit_video_url' => isset($role) ? route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : null,
                 'submit_comment_url' => isset($role) ? route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : null,
-                'polls' => (isset($role) && $role->isPro() && $event->relationLoaded('activePolls')) ? $event->activePolls->map(fn($poll) => [
+                'polls' => (isset($role) && $role->isPro() && $event->relationLoaded('polls')) ? $event->polls->map(fn($poll) => [
                     'id' => \App\Utils\UrlUtils::encodeId($poll->id),
                     'question' => $poll->question,
                     'options' => $poll->options,
@@ -138,7 +138,7 @@
                     'user_vote' => auth()->check() ? $poll->getUserVote(auth()->id()) : null,
                     'is_active' => $poll->is_active,
                 ])->values()->toArray() : [],
-                'poll_count' => (isset($role) && $role->isPro()) ? ($event->active_polls_count ?? 0) : 0,
+                'poll_count' => (isset($role) && $role->isPro()) ? ($event->polls_count ?? 0) : 0,
                 'vote_poll_url' => (isset($role) && $role->isPro()) ? route('event.vote_poll', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id), 'poll_hash' => 'POLL_HASH']) : null,
                 'custom_field_values' => $event->custom_field_values ?? [],
             ];
@@ -796,7 +796,12 @@
                                                 <div v-else>
                                                     <div v-for="(option, idx) in poll.options" :key="idx" class="mb-2.5">
                                                         <div class="flex justify-between text-sm mb-1">
-                                                            <span class="text-gray-800 dark:text-gray-200" :class="{ 'font-semibold': getVoteCount(poll, idx) === getMaxVoteCount(poll) && poll.total_votes > 0 }" v-text="option"></span>
+                                                            <span class="flex items-center gap-1 text-gray-800 dark:text-gray-200" :class="{ 'font-semibold': getVoteCount(poll, idx) === getMaxVoteCount(poll) && poll.total_votes > 0 }">
+                                                                <span v-text="option"></span>
+                                                                <svg v-if="idx === poll.user_vote" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 shrink-0" :style="{ color: accentColor }">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                                </svg>
+                                                            </span>
                                                             <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums">
                                                                 <span v-text="getVoteCount(poll, idx)"></span> (<span v-text="getVotePercent(poll, idx)"></span>%)
                                                             </span>
@@ -1129,7 +1134,12 @@
                                             <div v-else>
                                                 <div v-for="(option, idx) in poll.options" :key="idx" class="mb-2.5">
                                                     <div class="flex justify-between text-sm mb-1">
-                                                        <span class="text-gray-800 dark:text-gray-200" :class="{ 'font-semibold': getVoteCount(poll, idx) === getMaxVoteCount(poll) && poll.total_votes > 0 }" v-text="option"></span>
+                                                        <span class="flex items-center gap-1 text-gray-800 dark:text-gray-200" :class="{ 'font-semibold': getVoteCount(poll, idx) === getMaxVoteCount(poll) && poll.total_votes > 0 }">
+                                                            <span v-text="option"></span>
+                                                            <svg v-if="idx === poll.user_vote" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 shrink-0" :style="{ color: accentColor }">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                            </svg>
+                                                        </span>
                                                         <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums">
                                                             <span v-text="getVoteCount(poll, idx)"></span> (<span v-text="getVotePercent(poll, idx)"></span>%)
                                                         </span>

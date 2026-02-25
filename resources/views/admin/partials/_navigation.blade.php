@@ -4,7 +4,7 @@
 @php
     $insightsActive = in_array($active, ['users', 'revenue', 'analytics', 'usage']);
     $manageActive = in_array($active, ['boost', 'plans', 'newsletters', 'blog']);
-    $systemActive = in_array($active, ['audit-log', 'queue']);
+    $systemActive = in_array($active, ['audit-log', 'queue', 'logs']);
 
     $tabActive = 'border-[#4E81FA] text-[#4E81FA]';
     $tabInactive = 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300';
@@ -119,6 +119,9 @@
                         </a>
                         <a href="{{ route('admin.queue') }}" class="{{ $active === 'queue' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.queue')
+                        </a>
+                        <a href="{{ route('admin.logs') }}" class="{{ $active === 'logs' ? $dropdownItemActive : $dropdownItem }}">
+                            Logs
                         </a>
                     </div>
                 </div>

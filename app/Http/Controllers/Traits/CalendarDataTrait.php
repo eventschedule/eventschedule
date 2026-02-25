@@ -100,7 +100,7 @@ trait CalendarDataTrait
             'submit_video_url' => isset($role) ? route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => UrlUtils::encodeId($event->id)]) : null,
             'submit_comment_url' => isset($role) ? route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => UrlUtils::encodeId($event->id)]) : null,
             'submit_photo_url' => isset($role) ? route('event.submit_photo', ['subdomain' => $role->subdomain, 'event_hash' => UrlUtils::encodeId($event->id)]) : null,
-            'polls' => (isset($role) && $role->isPro() && $event->relationLoaded('activePolls')) ? $event->activePolls->map(fn ($poll) => [
+            'polls' => (isset($role) && $role->isPro() && $event->relationLoaded('polls')) ? $event->polls->map(fn ($poll) => [
                 'id' => UrlUtils::encodeId($poll->id),
                 'question' => $poll->question,
                 'options' => $poll->options,
@@ -109,7 +109,7 @@ trait CalendarDataTrait
                 'user_vote' => $user ? $poll->getUserVote($user->id) : null,
                 'is_active' => $poll->is_active,
             ])->values()->toArray() : [],
-            'poll_count' => (isset($role) && $role->isPro()) ? ($event->active_polls_count ?? 0) : 0,
+            'poll_count' => (isset($role) && $role->isPro()) ? ($event->polls_count ?? 0) : 0,
             'vote_poll_url' => (isset($role) && $role->isPro()) ? route('event.vote_poll', ['subdomain' => $role->subdomain, 'event_hash' => UrlUtils::encodeId($event->id), 'poll_hash' => 'POLL_HASH']) : null,
             'custom_field_values' => $event->custom_field_values ?? [],
             'is_password_protected' => $event->isPasswordProtected(),

@@ -1601,6 +1601,226 @@ class AdminController extends Controller
     }
 
     /**
+     * Display the log viewer page.
+     */
+    public function logs(Request $request)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $logPath = storage_path('logs/laravel.log');
+        $fileExists = file_exists($logPath);
+        $fileSize = $fileExists ? filesize($logPath) : 0;
+
+        $allEntries = collect();
+
+        if ($fileExists && $fileSize > 0) {
+            $allEntries = $this->parseLogEntries($logPath, 5 * 1024 * 1024);
+        }
+
+        // Count levels
+        $levelCounts = $allEntries->groupBy('level')->map->count();
+
+        // Build repeated errors grouping
+        $repeatedErrors = $allEntries
+            ->filter(fn ($e) => in_array($e['level'], ['ERROR', 'CRITICAL', 'EMERGENCY', 'ALERT']))
+            ->groupBy(fn ($e) => $this->normalizeErrorMessage($e['message']))
+            ->map(fn ($group) => [
+                'count' => $group->count(),
+                'message' => $group->first()['message'],
+                'last_seen' => $group->first()['timestamp'],
+                'first_seen' => $group->last()['timestamp'],
+                'stack_trace' => $group->first()['stack_trace'],
+                'level' => $group->first()['level'],
+            ])
+            ->sortByDesc('count')
+            ->filter(fn ($group) => $group['count'] >= 2);
+
+        // Apply filters for entries table
+        $entries = $allEntries;
+
+        if ($request->filled('level')) {
+            $entries = $entries->filter(fn ($e) => $e['level'] === $request->input('level'));
+        }
+
+        if ($request->filled('search')) {
+            $search = strtolower($request->input('search'));
+            $entries = $entries->filter(fn ($e) => str_contains(strtolower($e['message']), $search)
+                || str_contains(strtolower($e['stack_trace'] ?? ''), $search));
+        }
+
+        $totalCount = $allEntries->count();
+        $filteredCount = $entries->count();
+        $entries = $entries->take(200);
+
+        $levels = ['EMERGENCY', 'ALERT', 'CRITICAL', 'ERROR', 'WARNING', 'NOTICE', 'INFO', 'DEBUG'];
+
+        return view('admin.logs', compact(
+            'entries',
+            'repeatedErrors',
+            'fileSize',
+            'fileExists',
+            'levels',
+            'levelCounts',
+            'totalCount',
+            'filteredCount',
+        ));
+    }
+
+    /**
+     * Clear the log file.
+     */
+    public function logsClear()
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $logPath = storage_path('logs/laravel.log');
+
+        if (file_exists($logPath)) {
+            file_put_contents($logPath, '');
+        }
+
+        return redirect()->route('admin.logs')->with('success', 'Log file cleared.');
+    }
+
+    /**
+     * Download the log file.
+     */
+    public function logsDownload()
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $logPath = storage_path('logs/laravel.log');
+
+        if (! file_exists($logPath)) {
+            return redirect()->route('admin.logs')->with('error', 'Log file not found.');
+        }
+
+        $filename = 'laravel-'.date('Y-m-d-His').'.log';
+
+        return response()->download($logPath, $filename);
+    }
+
+    /**
+     * Parse log entries from the end of the file up to $maxBytes.
+     */
+    private function parseLogEntries(string $logPath, int $maxBytes): \Illuminate\Support\Collection
+    {
+        $fileSize = filesize($logPath);
+        $readFrom = max(0, $fileSize - $maxBytes);
+
+        $handle = fopen($logPath, 'r');
+        if (! $handle) {
+            return collect();
+        }
+
+        fseek($handle, $readFrom);
+
+        // If we're not at the start, skip the first partial line
+        if ($readFrom > 0) {
+            fgets($handle);
+        }
+
+        $content = fread($handle, $maxBytes);
+        fclose($handle);
+
+        if (! $content) {
+            return collect();
+        }
+
+        // Split on log entry boundaries: [YYYY-MM-DD HH:MM:SS]
+        $pattern = '/(?=\[\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})/';
+        $rawEntries = preg_split($pattern, $content, -1, PREG_SPLIT_NO_EMPTY);
+
+        $entries = collect();
+
+        foreach ($rawEntries as $raw) {
+            $entry = $this->parseLogEntry(trim($raw));
+            if ($entry) {
+                $entries->push($entry);
+            }
+        }
+
+        // Return newest first
+        return $entries->reverse()->values();
+    }
+
+    /**
+     * Parse a single log entry string into a structured array.
+     */
+    private function parseLogEntry(string $raw): ?array
+    {
+        // Match: [2024-01-15 10:30:45] production.ERROR: Message here
+        if (! preg_match('/^\[(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})[^\]]*\]\s+(\S+)\.(\w+):\s*(.*)/s', $raw, $matches)) {
+            return null;
+        }
+
+        $timestamp = $matches[1];
+        $environment = $matches[2];
+        $level = strtoupper($matches[3]);
+        $body = $matches[4];
+
+        // Separate message from stack trace
+        $message = $body;
+        $stackTrace = '';
+        $context = '';
+
+        // Look for stack trace starting with #0 or [stacktrace]
+        if (preg_match('/^(.*?)(\[stacktrace\].*|#0\s.*)/s', $body, $bodyParts)) {
+            $message = trim($bodyParts[1]);
+            $stackTrace = trim($bodyParts[2]);
+        }
+
+        // Try to extract JSON context from end of message
+        if (preg_match('/^(.*?)\s+(\{.*\})\s*$/s', $message, $ctxParts)) {
+            $decoded = json_decode($ctxParts[2], true);
+            if ($decoded !== null) {
+                $message = trim($ctxParts[1]);
+                $context = $ctxParts[2];
+            }
+        }
+
+        return [
+            'timestamp' => str_replace('T', ' ', $timestamp),
+            'environment' => $environment,
+            'level' => $level,
+            'message' => $message,
+            'context' => $context,
+            'stack_trace' => $stackTrace,
+        ];
+    }
+
+    /**
+     * Normalize an error message for grouping repeated errors.
+     */
+    private function normalizeErrorMessage(string $message): string
+    {
+        // Extract exception class if present
+        if (preg_match('/^([\w\\\\]+Exception|[\w\\\\]+Error):\s*(.*)$/s', $message, $matches)) {
+            $class = $matches[1];
+            $firstLine = strtok($matches[2], "\n");
+
+            // Strip variable parts (IDs, hashes, timestamps, numbers in specific patterns)
+            $firstLine = preg_replace('/\b[0-9a-f]{8,}\b/', '{hash}', $firstLine);
+            $firstLine = preg_replace('/\b\d{4,}\b/', '{id}', $firstLine);
+
+            return $class.': '.\Illuminate\Support\Str::limit($firstLine, 120, '');
+        }
+
+        // No exception class - use first ~120 chars
+        $firstLine = strtok($message, "\n");
+        $firstLine = preg_replace('/\b[0-9a-f]{8,}\b/', '{hash}', $firstLine);
+        $firstLine = preg_replace('/\b\d{4,}\b/', '{id}', $firstLine);
+
+        return \Illuminate\Support\Str::limit($firstLine, 120, '');
+    }
+
+    /**
      * Display the audit log.
      */
     public function auditLog(Request $request)

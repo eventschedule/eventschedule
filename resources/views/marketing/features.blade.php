@@ -976,7 +976,89 @@
             </div>
         </section>
 
-        <!-- Banner 13: Online Events (Text Left, Visual Right) -->
+        <!-- Banner 13: Event Polls (Text Left, Visual Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-20 left-1/3 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
+                <div class="absolute bottom-20 right-1/4 w-[300px] h-[300px] bg-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.2s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ marketing_url('/features/polls') }}" class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                                </svg>
+                                Event Polls
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Let your audience decide</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Add polls to any event. Guests vote on multiple choice questions and see real-time results. A simple way to boost engagement.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple choice</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">One vote per user</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Real-time results</span>
+                            </div>
+                            <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float" style="animation-delay: 0.6s;">
+                                <div class="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-cyan-900 rounded-xl border border-blue-200 dark:border-blue-500/30 p-4 w-56">
+                                    <!-- Poll question -->
+                                    <div class="text-xs font-medium text-gray-900 dark:text-white mb-3">What genre next week?</div>
+                                    <!-- Results with bars -->
+                                    <div class="space-y-2">
+                                        <div>
+                                            <div class="flex justify-between text-[10px] mb-1">
+                                                <span class="text-gray-600 dark:text-gray-300">Jazz</span>
+                                                <span class="text-blue-600 dark:text-blue-300 font-medium">45%</span>
+                                            </div>
+                                            <div class="h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+                                                <div class="h-full w-[45%] bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-[10px] mb-1">
+                                                <span class="text-gray-600 dark:text-gray-300">Rock</span>
+                                                <span class="text-blue-600 dark:text-blue-300 font-medium">35%</span>
+                                            </div>
+                                            <div class="h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+                                                <div class="h-full w-[35%] bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-[10px] mb-1">
+                                                <span class="text-gray-600 dark:text-gray-300">Blues</span>
+                                                <span class="text-blue-600 dark:text-blue-300 font-medium">20%</span>
+                                            </div>
+                                            <div class="h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+                                                <div class="h-full w-[20%] bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Vote count -->
+                                    <div class="mt-3 text-center">
+                                        <div class="text-[10px] text-gray-500 dark:text-white/70">42 votes</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Banner 14: Online Events (Visual Left, Text Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
@@ -986,7 +1068,7 @@
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <a href="{{ marketing_url('/features/online-events') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
@@ -1038,7 +1120,7 @@
             </div>
         </section>
 
-        <!-- Banner 14: Sub-schedules (Visual Left, Text Right) -->
+        <!-- Banner 15: Sub-schedules (Text Left, Visual Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
@@ -1048,7 +1130,7 @@
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <a href="{{ marketing_url('/features/sub-schedules') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
+                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
@@ -1102,7 +1184,7 @@
             </div>
         </section>
 
-        <!-- Banner 15: Open Source (Text Left, Visual Right) -->
+        <!-- Banner 16: Open Source (Visual Left, Text Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
@@ -1112,7 +1194,7 @@
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <a href="{{ marketing_url('/open-source') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-500/20 text-gray-600 dark:text-gray-300 text-sm font-medium mb-4">
