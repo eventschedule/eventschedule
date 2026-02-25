@@ -33,7 +33,7 @@ trait AccountSetupTrait
         $browser->visit('/new/venue')
             ->waitFor('#name', 15)
             ->pause(1000)
-            ->value('#name', $name);
+            ->type('name', $name);
 
         // Use JavaScript to switch to address section (more reliable than clicking the nav link)
         $browser->script("document.querySelector('a[data-section=\"section-address\"]').click()");
@@ -56,7 +56,8 @@ trait AccountSetupTrait
         $browser->visit('/new/talent')
             ->waitFor('#name', 15)
             ->pause(1000)
-            ->value('#name', $name);
+            ->clear('name')
+            ->type('name', $name);
 
         // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
         $browser->script("document.getElementById('edit-form').requestSubmit()");
@@ -73,7 +74,7 @@ trait AccountSetupTrait
         $browser->visit('/new/curator')
             ->waitFor('#name', 15)
             ->pause(1000)
-            ->value('#name', $name);
+            ->type('name', $name);
 
         // Use JavaScript to switch to settings section (more reliable than clicking the nav link)
         $browser->script("document.querySelector('a[data-section=\"section-settings\"]').click()");

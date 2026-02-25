@@ -68,7 +68,6 @@ class GraphicEmail extends Mailable
             with: [
                 'role' => $this->role,
                 'eventText' => $this->eventText,
-                'scheduleUrl' => $this->role->getGuestUrl(),
             ]
         );
     }

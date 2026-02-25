@@ -30,17 +30,13 @@ class ProfileTest extends DuskTestCase
             $browser->visit('/settings')
                 ->waitFor('#timezone-search', 5);
 
-            // Use JavaScript to interact with searchable select (more reliable than sendKeys with custom components)
             $browser->script("
-                var input = document.getElementById('timezone-search');
-                input.focus();
-                input.value = 'Pacific/Auckland';
-                input.dispatchEvent(new Event('input', {bubbles: true}));
+                var select = document.getElementById('timezone');
+                select.value = 'Pacific/Auckland';
+                select.dispatchEvent(new Event('change', { bubbles: true }));
             ");
 
-            $browser->waitFor('[role="option"]', 5)
-                ->click('[role="option"]')
-                ->scrollIntoView('button[type="submit"]')
+            $browser->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
                 ->waitForLocation('/settings', 15);
 
