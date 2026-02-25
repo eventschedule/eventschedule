@@ -140,7 +140,8 @@ class ProfileController extends Controller
             Mail::to('contact@eventschedule.com')->send(new SupportEmail(
                 $user->name ?? $user->email,
                 $user->email,
-                'Account Deletion Feedback: '.$request->feedback
+                $request->feedback,
+                'Account Deletion Feedback'
             ));
         }
 

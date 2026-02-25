@@ -20,14 +20,17 @@ class SupportEmail extends Mailable
 
     protected $message;
 
+    protected $subjectPrefix;
+
     /**
      * Create a new message instance.
      */
-    public function __construct($name, $email, $message)
+    public function __construct($name, $email, $message, $subject = 'Support Email')
     {
         $this->name = $name;
         $this->email = $email;
         $this->message = $message;
+        $this->subjectPrefix = $subject;
     }
 
     /**
@@ -36,7 +39,7 @@ class SupportEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Support Email - '.date('F j Y, g:i A'),
+            subject: $this->subjectPrefix.' - '.date('F j Y, g:i A'),
             replyTo: [
                 new Address($this->email, $this->name),
             ],
