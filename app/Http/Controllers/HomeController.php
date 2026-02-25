@@ -325,8 +325,7 @@ class HomeController extends Controller
                 return $returnUrl;
             }
 
-            $tempPath = storage_path('app/temp/' . $tempFilename);
-            if (! file_exists($tempPath)) {
+            if (! \Illuminate\Support\Facades\Storage::exists('temp/' . $tempFilename)) {
                 return $returnUrl;
             }
 

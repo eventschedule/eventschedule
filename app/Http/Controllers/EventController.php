@@ -813,8 +813,11 @@ class EventController extends Controller
             $event->save();
         }
         if ($request->input('agenda_image_url')) {
-            $event->agenda_image_url = $request->input('agenda_image_url');
-            $event->save();
+            $agendaUrl = $request->input('agenda_image_url');
+            if (preg_match('/^agenda_[a-z0-9]+\.(jpg|jpeg|png|gif|webp)$/', $agendaUrl)) {
+                $event->agenda_image_url = $agendaUrl;
+                $event->save();
+            }
         }
         if ($request->input('save_ai_prompt_default')) {
             $role->agenda_ai_prompt = $request->input('agenda_ai_prompt');
@@ -1090,6 +1093,10 @@ class EventController extends Controller
             if ($request->input('save_agenda_image') && $imageData && $request->hasFile('parts_image')) {
                 $file = $request->file('parts_image');
                 $extension = strtolower($file->getClientOriginalExtension());
+                $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                if (! in_array($extension, $allowedExtensions)) {
+                    return response()->json(['error' => __('messages.invalid_image')], 422);
+                }
                 $filename = strtolower('agenda_'.Str::random(32).'.'.$extension);
 
                 if (isset($event)) {
