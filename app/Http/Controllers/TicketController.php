@@ -469,7 +469,7 @@ class TicketController extends Controller
     {
         $user = $event->user;
 
-        if (str_starts_with($user->invoiceninja_mode, 'payment_link')) {
+        if ($user->invoiceninja_mode === 'payment_link') {
             return $this->invoiceninjaPaymentLinkCheckout($subdomain, $sale, $event);
         }
 
@@ -555,70 +555,57 @@ class TicketController extends Controller
 
     private function invoiceninjaPaymentLinkCheckout($subdomain, $sale, $event)
     {
+        // Promo codes require per-customer pricing, fall back to invoice mode
+        if ($sale->promo_code_id) {
+            return $this->invoiceninjaInvoiceCheckout($subdomain, $sale, $event);
+        }
+
         try {
             $user = $event->user;
             $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
 
-            $promoCode = $sale->promo_code_id ? $sale->promoCode : null;
-            $discount = $sale->discount_amount ?? 0;
-
-            $eligibleSubtotal = 0;
-            if ($promoCode && $discount > 0) {
-                foreach ($sale->saleTickets as $saleTicket) {
-                    if ($promoCode->appliesToTicket($saleTicket->ticket_id)) {
-                        $eligibleSubtotal += $saleTicket->ticket->price * $saleTicket->quantity;
+            // Lazy-create the shared subscription for this event
+            if (! $event->invoiceninja_subscription_id) {
+                // Create an IN product for each ticket on the event
+                foreach ($event->tickets as $ticket) {
+                    if (! $ticket->invoiceninja_product_id) {
+                        $productKey = $ticket->type ?: __('messages.tickets');
+                        $product = $invoiceNinja->createProduct(
+                            $productKey,
+                            $ticket->description ?? '',
+                            $ticket->price
+                        );
+                        $ticket->invoiceninja_product_id = $product['id'];
+                        $ticket->save();
                     }
                 }
-            }
-            $discountRatio = ($eligibleSubtotal > 0 && $discount > 0)
-                ? ($eligibleSubtotal - $discount) / $eligibleSubtotal
-                : 1;
 
-            $productIds = [];
-            foreach ($sale->saleTickets as $saleTicket) {
-                $productKey = $saleTicket->ticket->type ?: __('messages.tickets');
-                $price = $saleTicket->ticket->price;
-                if ($promoCode && $discount > 0 && $promoCode->appliesToTicket($saleTicket->ticket_id)) {
-                    $price = round($price * $discountRatio, 2);
-                }
-                $product = $invoiceNinja->createProduct(
-                    $productKey,
-                    $saleTicket->ticket->description ?? '',
-                    $price
+                $optionalProductIds = $event->tickets->pluck('invoiceninja_product_id')->filter()->values()->toArray();
+
+                $encodedEventId = UrlUtils::encodeId($event->id);
+                $subscriptionName = 'ES-'.($event->name ?: $encodedEventId).'-'.time();
+
+                $webhookConfig = [
+                    'post_purchase_url' => route('invoiceninja.event_purchase_webhook', ['event' => $encodedEventId]),
+                    'post_purchase_rest_method' => 'post',
+                    'post_purchase_headers' => ['X-Webhook-Secret' => $user->invoiceninja_webhook_secret],
+                ];
+
+                $subscription = $invoiceNinja->createSubscription(
+                    $subscriptionName,
+                    $optionalProductIds,
+                    $webhookConfig
                 );
-                for ($i = 0; $i < $saleTicket->quantity; $i++) {
-                    $productIds[] = $product['id'];
-                }
+
+                $event->invoiceninja_subscription_id = $subscription['id'];
+                $event->invoiceninja_subscription_url = $subscription['purchase_page'];
+                $event->save();
             }
 
-            $encodedSaleId = UrlUtils::encodeId($sale->id);
-            $subscriptionName = 'ES-'.$encodedSaleId.'-'.time();
-
-            $webhookConfig = [
-                'post_purchase_url' => route('invoiceninja.purchase_webhook', ['sale' => $encodedSaleId]),
-                'post_purchase_rest_method' => 'post',
-                'post_purchase_headers' => ['X-Webhook-Secret' => $user->invoiceninja_webhook_secret],
-            ];
-
-            $steps = ($user->invoiceninja_mode === 'payment_link_v3') ? 'auth.login-or-register,cart' : 'cart';
-
-            $subscription = $invoiceNinja->createSubscription(
-                $subscriptionName,
-                $productIds,
-                $sale->payment_amount,
-                $webhookConfig,
-                $steps
-            );
-
-            $sale->transaction_reference = 'sub:'.$subscription['id'];
+            $sale->transaction_reference = 'sub:'.$event->invoiceninja_subscription_id;
             $sale->save();
 
-            $purchaseUrl = $subscription['purchase_page'];
-            if ($user->invoiceninja_mode === 'payment_link_v2') {
-                $purchaseUrl .= '/v2';
-            } elseif ($user->invoiceninja_mode === 'payment_link_v3') {
-                $purchaseUrl .= '/v3';
-            }
+            $purchaseUrl = $event->invoiceninja_subscription_url.'/v3';
 
             return redirect($purchaseUrl);
         } catch (\Exception $e) {
@@ -917,21 +904,6 @@ class TicketController extends Controller
         switch ($request->action) {
             case 'mark_paid':
                 if ($sale->status === 'unpaid') {
-                    // Clean up IN subscription for payment link mode sales
-                    if ($sale->payment_method === 'invoiceninja' && str_starts_with($sale->transaction_reference ?? '', 'sub:')) {
-                        try {
-                            $user = $sale->event->user;
-                            $subscriptionId = str_replace('sub:', '', $sale->transaction_reference);
-                            $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
-                            $invoiceNinja->deleteSubscription($subscriptionId);
-                        } catch (\Exception $e) {
-                            \Log::warning('Failed to delete IN subscription on mark_paid', [
-                                'sale_id' => $sale->id,
-                                'error' => $e->getMessage(),
-                            ]);
-                        }
-                    }
-
                     DB::transaction(function () use ($sale) {
                         $sale->status = 'paid';
                         $sale->transaction_reference = __('messages.manual_payment');
@@ -966,21 +938,6 @@ class TicketController extends Controller
                 if (in_array($sale->status, ['unpaid', 'paid'])) {
                     $wasPaid = $sale->status === 'paid';
 
-                    // Clean up IN subscription for payment link mode sales
-                    if (! $wasPaid && $sale->payment_method === 'invoiceninja' && str_starts_with($sale->transaction_reference ?? '', 'sub:')) {
-                        try {
-                            $user = $sale->event->user;
-                            $subscriptionId = str_replace('sub:', '', $sale->transaction_reference);
-                            $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
-                            $invoiceNinja->deleteSubscription($subscriptionId);
-                        } catch (\Exception $e) {
-                            \Log::warning('Failed to delete IN subscription on cancel', [
-                                'sale_id' => $sale->id,
-                                'error' => $e->getMessage(),
-                            ]);
-                        }
-                    }
-
                     DB::transaction(function () use ($sale) {
                         $sale->status = 'cancelled';
                         $sale->save();
@@ -998,21 +955,6 @@ class TicketController extends Controller
                 break;
 
             case 'delete':
-                // Clean up IN subscription for unpaid payment link mode sales
-                if ($sale->status === 'unpaid' && $sale->payment_method === 'invoiceninja' && str_starts_with($sale->transaction_reference ?? '', 'sub:')) {
-                    try {
-                        $user = $sale->event->user;
-                        $subscriptionId = str_replace('sub:', '', $sale->transaction_reference);
-                        $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
-                        $invoiceNinja->deleteSubscription($subscriptionId);
-                    } catch (\Exception $e) {
-                        \Log::warning('Failed to delete IN subscription on delete', [
-                            'sale_id' => $sale->id,
-                            'error' => $e->getMessage(),
-                        ]);
-                    }
-                }
-
                 DB::transaction(function () use ($sale) {
                     // If the sale was paid, cancel first to release ticket inventory
                     // (triggers Sale::booted hook) and decrement analytics

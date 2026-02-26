@@ -353,7 +353,7 @@ class ProfileController extends Controller
         }
 
         $request->validate([
-            'invoiceninja_mode' => ['required', 'in:invoice,payment_link,payment_link_v2,payment_link_v3'],
+            'invoiceninja_mode' => ['required', 'in:invoice,payment_link'],
         ]);
 
         $user = $request->user();

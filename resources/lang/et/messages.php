@@ -514,7 +514,6 @@ return [
     'invoiceninja_mode' => 'Makserežiim',
     'invoiceninja_mode_invoice' => 'Arve',
     'invoiceninja_mode_payment_link' => 'Makselink',
-    'invoiceninja_mode_payment_link_version' => 'Versioon',
     'api_token' => 'API tunnus',
     'qr_code_is_your_ticket' => 'See QR-kood on teie ürituse sissepääsupilet',
     'not_authorized' => 'Teil pole selle toimingu tegemiseks volitusi',

@@ -465,7 +465,6 @@ return [
     'invoiceninja_mode' => 'Checkout-Modus',
     'invoiceninja_mode_invoice' => 'Rechnung',
     'invoiceninja_mode_payment_link' => 'Zahlungslink',
-    'invoiceninja_mode_payment_link_version' => 'Version',
     'api_token' => 'API-Token',
     'qr_code_is_your_ticket' => 'Dieser QR-Code ist Ihr Eintrittskarte für die Veranstaltung',
     'clear' => 'Löschen',

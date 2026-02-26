@@ -515,7 +515,6 @@ return [
     'invoiceninja_mode' => 'Режим оплаты',
     'invoiceninja_mode_invoice' => 'Счёт',
     'invoiceninja_mode_payment_link' => 'Платёжная ссылка',
-    'invoiceninja_mode_payment_link_version' => 'Версия',
     'api_token' => 'API-токен',
     'qr_code_is_your_ticket' => 'Этот QR-код является вашим входным билетом на мероприятие.',
     'not_authorized' => 'У вас нет прав на выполнение этого действия',

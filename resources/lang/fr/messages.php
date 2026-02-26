@@ -470,7 +470,6 @@ return [
     'invoiceninja_mode' => 'Mode de paiement',
     'invoiceninja_mode_invoice' => 'Facture',
     'invoiceninja_mode_payment_link' => 'Lien de paiement',
-    'invoiceninja_mode_payment_link_version' => 'Version',
     'api_token' => 'Jeton API',
     'qr_code_is_your_ticket' => 'Ce QR code est votre billet d\'entrée à l\'événement',
     'not_authorized' => 'Vous n\'êtes pas autorisé à effectuer cette action',

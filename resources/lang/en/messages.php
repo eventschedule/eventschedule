@@ -514,7 +514,6 @@ return [
     'invoiceninja_mode' => 'Checkout mode',
     'invoiceninja_mode_invoice' => 'Invoice',
     'invoiceninja_mode_payment_link' => 'Payment link',
-    'invoiceninja_mode_payment_link_version' => 'Version',
     'api_token' => 'API Token',
     'qr_code_is_your_ticket' => 'This QR code is your event entry ticket',
     'not_authorized' => 'You are not authorized to perform this action',

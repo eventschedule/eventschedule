@@ -309,7 +309,6 @@ return [
     'invoiceninja_mode' => 'Modalità di pagamento',
     'invoiceninja_mode_invoice' => 'Fattura',
     'invoiceninja_mode_payment_link' => 'Link di pagamento',
-    'invoiceninja_mode_payment_link_version' => 'Versione',
     'api_token' => 'Token API',
     'qr_code_is_your_ticket' => 'Questo codice QR è il tuo biglietto di ingresso all\'evento',
     'not_authorized' => 'Non sei autorizzato a eseguire questa azione',

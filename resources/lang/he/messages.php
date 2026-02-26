@@ -270,7 +270,6 @@ return [
     'invoiceninja_mode' => 'מצב תשלום',
     'invoiceninja_mode_invoice' => 'חשבונית',
     'invoiceninja_mode_payment_link' => 'קישור תשלום',
-    'invoiceninja_mode_payment_link_version' => 'גרסה',
     'api_token' => 'מפתח API',
     'qr_code_is_your_ticket' => 'קוד QR זה מהווה את כרטיס הכניסה לאירוע',
     'not_authorized' => 'אין לך הרשאה לבצע פעולה זו',

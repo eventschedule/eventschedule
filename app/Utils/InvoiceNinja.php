@@ -87,13 +87,13 @@ class InvoiceNinja
         return $product;
     }
 
-    public function createSubscription($name, $productIds, $price, $webhookConfig, $steps = 'cart')
+    public function createSubscription($name, $optionalProductIds, $webhookConfig, $steps = 'auth.login-or-register,cart')
     {
         $subscription = $this->sendRequest('subscriptions', 'POST', [
             'name' => $name,
             'steps' => $steps,
-            'product_ids' => implode(',', $productIds),
-            'price' => $price,
+            'optional_product_ids' => implode(',', $optionalProductIds),
+            'allow_query_overrides' => true,
             'webhook_configuration' => $webhookConfig,
         ]);
 

@@ -301,7 +301,6 @@ return [
     'invoiceninja_mode' => 'Betaalmodus',
     'invoiceninja_mode_invoice' => 'Factuur',
     'invoiceninja_mode_payment_link' => 'Betaallink',
-    'invoiceninja_mode_payment_link_version' => 'Versie',
     'api_token' => 'API Token',
     'qr_code_is_your_ticket' => 'Deze QR-code is je toegangsticket voor het evenement',
     'not_authorized' => 'Je bent niet geautoriseerd om deze actie uit te voeren',

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AnalyticsEventsDaily;
+use App\Models\Event;
 use App\Models\Sale;
 use App\Models\User;
 use App\Utils\InvoiceNinja;
@@ -171,18 +172,68 @@ class InvoiceNinjaController extends Controller
             }
         });
 
-        // Best-effort cleanup: delete the subscription from IN
-        try {
-            $subscriptionId = str_replace('sub:', '', $sale->transaction_reference);
-            $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
-            $invoiceNinja->deleteSubscription($subscriptionId);
-        } catch (\Exception $e) {
-            \Log::warning('Failed to delete IN subscription after payment', [
-                'sale_id' => $sale->id,
-                'subscription_id' => $subscriptionId ?? null,
-                'error' => $e->getMessage(),
-            ]);
+        return response()->json(['status' => 'success']);
+    }
+
+    public function eventPurchaseWebhook(Request $request, $event)
+    {
+        $event = Event::find(UrlUtils::decodeId($event));
+
+        if (! $event) {
+            return response()->json(['status' => 'error', 'message' => 'Event not found'], 400);
         }
+
+        $user = $event->user;
+
+        // Validate webhook secret
+        $headerSecret = $request->header('X-Webhook-Secret');
+        if (! $headerSecret || ! $user->invoiceninja_webhook_secret || ! hash_equals($user->invoiceninja_webhook_secret, $headerSecret)) {
+            return response()->json(['status' => 'error', 'message' => 'Invalid webhook secret'], 400);
+        }
+
+        // Extract client email from webhook payload
+        $payload = json_decode($request->getContent(), true);
+        $clientEmail = null;
+        if (isset($payload['client']['contacts']) && count($payload['client']['contacts']) > 0) {
+            $clientEmail = $payload['client']['contacts'][0]['email'] ?? null;
+        }
+
+        if (! $clientEmail) {
+            \Log::warning('Invoice Ninja event purchase webhook missing client email', [
+                'event_id' => $event->id,
+            ]);
+
+            return response()->json(['status' => 'error', 'message' => 'Missing client email'], 400);
+        }
+
+        // Find the most recent unpaid sale for this event matching the client email
+        $sale = Sale::where('event_id', $event->id)
+            ->where('payment_method', 'invoiceninja')
+            ->where('email', $clientEmail)
+            ->where('status', 'unpaid')
+            ->where('transaction_reference', 'LIKE', 'sub:%')
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if (! $sale) {
+            return response()->json(['status' => 'error', 'message' => 'Sale not found'], 400);
+        }
+
+        // Mark sale as paid with row locking
+        \DB::transaction(function () use ($sale) {
+            $sale = Sale::lockForUpdate()->find($sale->id);
+            if ($sale->status !== 'unpaid') {
+                return;
+            }
+
+            $sale->status = 'paid';
+            $sale->save();
+
+            AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+            if ($sale->discount_amount > 0) {
+                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+            }
+        });
 
         return response()->json(['status' => 'success']);
     }

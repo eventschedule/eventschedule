@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\Sale;
-use App\Utils\InvoiceNinja;
 use Illuminate\Console\Command;
 
 class ReleaseTickets extends Command
@@ -46,21 +45,6 @@ class ReleaseTickets extends Command
         \Log::info('Found '.$expiredSales->count().' expired sales to process');
 
         foreach ($expiredSales as $sale) {
-            // Clean up IN subscription for payment link mode sales
-            if ($sale->payment_method === 'invoiceninja' && str_starts_with($sale->transaction_reference, 'sub:')) {
-                try {
-                    $user = $sale->event->user;
-                    $subscriptionId = str_replace('sub:', '', $sale->transaction_reference);
-                    $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
-                    $invoiceNinja->deleteSubscription($subscriptionId);
-                } catch (\Exception $e) {
-                    \Log::warning('Failed to delete IN subscription during ticket release', [
-                        'sale_id' => $sale->id,
-                        'error' => $e->getMessage(),
-                    ]);
-                }
-            }
-
             \DB::transaction(function () use ($sale) {
                 $sale->status = 'expired';
                 $sale->save();

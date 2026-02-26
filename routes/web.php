@@ -101,6 +101,7 @@ Route::post('/stripe/webhook', [StripeController::class, 'webhook'])->name('stri
 Route::post('/stripe/subscription-webhook', [SubscriptionWebhookController::class, 'handleWebhook'])->name('stripe.subscription_webhook');
 Route::post('/invoiceninja/webhook/{secret?}', [InvoiceNinjaController::class, 'webhook'])->name('invoiceninja.webhook')->middleware('throttle:60,1');
 Route::post('/invoiceninja/purchase-webhook/{sale}', [InvoiceNinjaController::class, 'purchaseWebhook'])->name('invoiceninja.purchase_webhook')->middleware('throttle:60,1');
+Route::post('/invoiceninja/event-purchase-webhook/{event}', [InvoiceNinjaController::class, 'eventPurchaseWebhook'])->name('invoiceninja.event_purchase_webhook')->middleware('throttle:60,1');
 
 // Google Calendar webhook routes (no auth required)
 Route::get('/google-calendar/webhook', [GoogleCalendarWebhookController::class, 'verify'])->name('google.calendar.webhook.verify')->middleware('throttle:10,1');

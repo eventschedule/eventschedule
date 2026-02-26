@@ -458,7 +458,6 @@ return [
     'invoiceninja_mode' => 'وضع الدفع',
     'invoiceninja_mode_invoice' => 'فاتورة',
     'invoiceninja_mode_payment_link' => 'رابط دفع',
-    'invoiceninja_mode_payment_link_version' => 'الإصدار',
     'api_token' => 'رمز API',
     'qr_code_is_your_ticket' => 'رمز QR هذا هو تذكرة دخولك للفعالية',
     'not_authorized' => 'غير مصرح لك بتنفيذ هذا الإجراء',
