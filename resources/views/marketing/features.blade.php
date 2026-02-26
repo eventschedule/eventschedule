@@ -549,7 +549,7 @@
                             <div class="text-blue-200 text-sm">Platform fees on tickets</div>
                         </div>
                         <div>
-                            <div class="text-3xl md:text-4xl font-bold text-white mb-2">9</div>
+                            <div class="text-3xl md:text-4xl font-bold text-white mb-2">11</div>
                             <div class="text-blue-200 text-sm">Languages supported</div>
                         </div>
                     </div>

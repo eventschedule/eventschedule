@@ -175,7 +175,9 @@
                                     ['Sub-schedules', 'Yes (Free)', 'No', 'No', 'No', 'Multiple calendars'],
                                     ['Fan videos & comments', 'Yes (Free)', 'No', 'No', 'No', 'No'],
                                     ['Event boost (ads)', 'Yes (Pro)', 'Yes (paid)', 'No', 'No', 'No'],
-                                    ['Team collaboration', 'Yes (Enterprise)', 'Yes', '3 admins (free), 5 (Plus)', 'Yes', 'Yes'],
+                                    ['Team collaboration', '1 member (Free), multiple (Enterprise)', 'Yes', '3 admins (free), 5 (Plus)', 'Yes', 'Yes'],
+                                    ['Private/password-protected events', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
+                                    ['Availability management', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
                                 ],
                                 'Platform' => [
                                     ['REST API', 'Yes (Pro)', 'Yes', 'Yes (Plus)', 'Yes', 'Yes'],

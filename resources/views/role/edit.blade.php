@@ -1846,7 +1846,7 @@
                                         </label>
                                     </div>
                                     @else
-                                    <input type="hidden" name="custom_domain_mode" value="redirect">
+                                    <input type="hidden" name="custom_domain_mode" value="">
                                     @endif
 
                                     {{-- Redirect mode: Cloudflare guide link --}}

@@ -39,10 +39,10 @@
                         <div v-else-if="role.videos && role.videos.length > 0" class="space-y-3">
                             <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.select_video') }}</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                <div v-for="video in role.videos" :key="video.id" 
-                                        class="border rounded-lg p-3 cursor-pointer hover:border-blue-300 dark:hover:border-blue-600 transition-colors relative"
-                                        :class="isVideoSelected(role, video) ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-200 dark:border-gray-600'"
-                                        @click="selectVideo(role, video)">
+                                <div v-for="video in role.videos" :key="video.id"
+                                        class="border rounded-lg p-3 transition-colors relative"
+                                        :class="[isVideoSelected(role, video) ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-200 dark:border-gray-600', isViewer ? '' : 'cursor-pointer hover:border-blue-300 dark:hover:border-blue-600']"
+                                        @click="!isViewer && selectVideo(role, video)">
                                     <div class="aspect-video bg-gray-100 dark:bg-gray-600 rounded mb-2 flex items-center justify-center relative">
                                         <img v-if="video.thumbnail" :src="video.thumbnail" :alt="video.title" class="w-full h-full object-cover rounded">
                                         <svg v-else class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

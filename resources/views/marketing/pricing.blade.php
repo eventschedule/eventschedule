@@ -26,7 +26,7 @@
                 "price": "5.00",
                 "priceCurrency": "USD",
                 "billingIncrement": "MON",
-                "description": "Everything in Free plus remove branding, ticketing with QR check-ins, Stripe payments, event graphics, event boosting with ads, custom CSS styling, and REST API access.",
+                "description": "Everything in Free plus remove branding, ticketing with QR check-ins, Stripe payments, event graphics, event boosting with ads, event polls, custom fields, custom CSS styling, and REST API access.",
                 "availability": "https://schema.org/InStock",
                 "priceSpecification": [
                     {

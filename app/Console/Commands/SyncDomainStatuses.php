@@ -59,6 +59,12 @@ class SyncDomainStatuses extends Command
             return;
         }
 
+        if (empty($doStatuses)) {
+            $this->warn('No domains returned from DigitalOcean, skipping to avoid false failures.');
+
+            return;
+        }
+
         $updated = 0;
         $failed = 0;
 
