@@ -146,46 +146,52 @@ class TicketController extends Controller
             $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
         }
 
+        // In payment link mode, quantities are selected on the Invoice Ninja purchase page
+        $isPaymentLink = $event->payment_method === 'invoiceninja'
+            && $event->user->invoiceninja_mode === 'payment_link';
+
         // Use database transaction with row locking to prevent race conditions
         // that could lead to overselling tickets
         try {
-            $sale = DB::transaction(function () use ($request, $event, $user, $subdomain) {
-                // Check ticket availability with row locking
-                foreach ($request->tickets as $ticketId => $quantity) {
-                    if ($quantity > 0) {
-                        // Lock the ticket row to prevent concurrent modifications
-                        $ticketModel = $event->tickets()->lockForUpdate()->find(UrlUtils::decodeId($ticketId));
+            $sale = DB::transaction(function () use ($request, $event, $user, $subdomain, $isPaymentLink) {
+                // Check ticket availability with row locking (skip for payment link mode)
+                if (! $isPaymentLink) {
+                    foreach ($request->tickets as $ticketId => $quantity) {
+                        if ($quantity > 0) {
+                            // Lock the ticket row to prevent concurrent modifications
+                            $ticketModel = $event->tickets()->lockForUpdate()->find(UrlUtils::decodeId($ticketId));
 
-                        if (! $ticketModel) {
-                            throw new \Exception(__('messages.ticket_not_found'));
-                        }
+                            if (! $ticketModel) {
+                                throw new \Exception(__('messages.ticket_not_found'));
+                            }
 
-                        if ($ticketModel->quantity > 0) {
-                            // Handle combined mode logic
-                            if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
-                                // Lock all tickets for combined mode
-                                $lockedTickets = $event->tickets()->lockForUpdate()->get();
-                                $totalSold = $lockedTickets->sum(function ($ticket) use ($request) {
-                                    $ticketSold = $ticket->sold ? json_decode($ticket->sold, true) : [];
+                            if ($ticketModel->quantity > 0) {
+                                // Handle combined mode logic
+                                if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
+                                    // Lock all tickets for combined mode
+                                    $lockedTickets = $event->tickets()->lockForUpdate()->get();
+                                    $totalSold = $lockedTickets->sum(function ($ticket) use ($request) {
+                                        $ticketSold = $ticket->sold ? json_decode($ticket->sold, true) : [];
 
-                                    return $ticketSold[$request->event_date] ?? 0;
-                                });
-                                // In combined mode, the total quantity is the same as individual quantity
-                                $totalQuantity = $event->getSameTicketQuantity();
-                                $remainingTickets = $totalQuantity - $totalSold;
+                                        return $ticketSold[$request->event_date] ?? 0;
+                                    });
+                                    // In combined mode, the total quantity is the same as individual quantity
+                                    $totalQuantity = $event->getSameTicketQuantity();
+                                    $remainingTickets = $totalQuantity - $totalSold;
 
-                                // Check if the total requested quantity exceeds remaining tickets
-                                $totalRequested = array_sum($request->tickets);
-                                if ($totalRequested > $remainingTickets) {
-                                    throw new \Exception(__('messages.tickets_not_available'));
-                                }
-                            } else {
-                                $sold = json_decode($ticketModel->sold, true);
-                                $soldCount = $sold[$request->event_date] ?? 0;
-                                $remainingTickets = $ticketModel->quantity - $soldCount;
+                                    // Check if the total requested quantity exceeds remaining tickets
+                                    $totalRequested = array_sum($request->tickets);
+                                    if ($totalRequested > $remainingTickets) {
+                                        throw new \Exception(__('messages.tickets_not_available'));
+                                    }
+                                } else {
+                                    $sold = json_decode($ticketModel->sold, true);
+                                    $soldCount = $sold[$request->event_date] ?? 0;
+                                    $remainingTickets = $ticketModel->quantity - $soldCount;
 
-                                if ($quantity > $remainingTickets) {
-                                    throw new \Exception(__('messages.tickets_not_available'));
+                                    if ($quantity > $remainingTickets) {
+                                        throw new \Exception(__('messages.tickets_not_available'));
+                                    }
                                 }
                             }
                         }
@@ -241,58 +247,63 @@ class TicketController extends Controller
 
                 $sale->save();
 
-                // Store ticket-level custom field values
-                $ticketCustomValues = $request->input('ticket_custom_values', []);
+                if ($isPaymentLink) {
+                    // Payment link mode: quantities selected on IN, SaleTickets created by webhook
+                    $sale->payment_amount = 0;
+                } else {
+                    // Store ticket-level custom field values
+                    $ticketCustomValues = $request->input('ticket_custom_values', []);
 
-                foreach ($request->tickets as $ticketId => $quantity) {
-                    if ($quantity > 0) {
-                        $ticketModel = $event->tickets()->findOrFail(UrlUtils::decodeId($ticketId));
-                        $ticketCustomFields = $ticketModel->custom_fields ?? [];
+                    foreach ($request->tickets as $ticketId => $quantity) {
+                        if ($quantity > 0) {
+                            $ticketModel = $event->tickets()->findOrFail(UrlUtils::decodeId($ticketId));
+                            $ticketCustomFields = $ticketModel->custom_fields ?? [];
 
-                        $saleTicketData = [
-                            'sale_id' => $sale->id,
-                            'ticket_id' => UrlUtils::decodeId($ticketId),
-                            'quantity' => $quantity,
-                            'seats' => json_encode(array_fill(1, $quantity, null)),
-                        ];
+                            $saleTicketData = [
+                                'sale_id' => $sale->id,
+                                'ticket_id' => UrlUtils::decodeId($ticketId),
+                                'quantity' => $quantity,
+                                'seats' => json_encode(array_fill(1, $quantity, null)),
+                            ];
 
-                        // Store ticket-level custom field values using stable indices
-                        // Fallback to iteration order for backward compatibility with fields without index
-                        $ticketFallbackIndex = 1;
-                        foreach ($ticketCustomFields as $fieldKey => $fieldConfig) {
-                            $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
-                            $ticketFallbackIndex++;
-                            if ($index >= 1 && $index <= 8) {
-                                $value = $ticketCustomValues[$ticketId][$fieldKey] ?? null;
-                                // Sanitize custom field values to prevent stored XSS
-                                if ($value !== null) {
-                                    $value = trim(strip_tags($value));
+                            // Store ticket-level custom field values using stable indices
+                            // Fallback to iteration order for backward compatibility with fields without index
+                            $ticketFallbackIndex = 1;
+                            foreach ($ticketCustomFields as $fieldKey => $fieldConfig) {
+                                $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
+                                $ticketFallbackIndex++;
+                                if ($index >= 1 && $index <= 8) {
+                                    $value = $ticketCustomValues[$ticketId][$fieldKey] ?? null;
+                                    // Sanitize custom field values to prevent stored XSS
+                                    if ($value !== null) {
+                                        $value = trim(strip_tags($value));
+                                    }
+                                    $saleTicketData["custom_value{$index}"] = $value;
                                 }
-                                $saleTicketData["custom_value{$index}"] = $value;
                             }
+
+                            $sale->saleTickets()->create($saleTicketData);
                         }
-
-                        $sale->saleTickets()->create($saleTicketData);
                     }
-                }
 
-                $subtotal = $sale->calculateTotal();
-                $sale->payment_amount = $subtotal;
+                    $subtotal = $sale->calculateTotal();
+                    $sale->payment_amount = $subtotal;
 
-                // Apply promo code if provided
-                if ($request->promo_code) {
-                    $promoCode = PromoCode::where('event_id', $event->id)
-                        ->whereRaw('LOWER(code) = ?', [strtolower($request->promo_code)])
-                        ->lockForUpdate()
-                        ->first();
+                    // Apply promo code if provided
+                    if ($request->promo_code) {
+                        $promoCode = PromoCode::where('event_id', $event->id)
+                            ->whereRaw('LOWER(code) = ?', [strtolower($request->promo_code)])
+                            ->lockForUpdate()
+                            ->first();
 
-                    if ($promoCode && $promoCode->isValid()) {
-                        $discountAmount = $promoCode->calculateDiscount($sale->saleTickets);
-                        if ($discountAmount > 0) {
-                            $sale->promo_code_id = $promoCode->id;
-                            $sale->discount_amount = $discountAmount;
-                            $sale->payment_amount = max(0, $subtotal - $discountAmount);
-                            $promoCode->increment('times_used');
+                        if ($promoCode && $promoCode->isValid()) {
+                            $discountAmount = $promoCode->calculateDiscount($sale->saleTickets);
+                            if ($discountAmount > 0) {
+                                $sale->promo_code_id = $promoCode->id;
+                                $sale->discount_amount = $discountAmount;
+                                $sale->payment_amount = max(0, $subtotal - $discountAmount);
+                                $promoCode->increment('times_used');
+                            }
                         }
                     }
                 }
@@ -312,7 +323,7 @@ class TicketController extends Controller
 
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'event_id:'.$event->id);
 
-        if ($total == 0) {
+        if ($total == 0 && ! $isPaymentLink) {
             $sale->status = 'paid';
             $sale->save();
 
@@ -515,7 +526,7 @@ class TicketController extends Controller
             foreach ($sale->saleTickets as $saleTicket) {
                 $lineItems[] = [
                     'product_key' => $saleTicket->ticket->type,
-                    'notes' => $saleTicket->ticket->description ?? __('messages.tickets'),
+                    'notes' => $saleTicket->ticket->description ?: $saleTicket->ticket->type,
                     'quantity' => $saleTicket->quantity,
                     'cost' => $saleTicket->ticket->price,
                 ];
@@ -555,11 +566,6 @@ class TicketController extends Controller
 
     private function invoiceninjaPaymentLinkCheckout($subdomain, $sale, $event)
     {
-        // Promo codes require per-customer pricing, fall back to invoice mode
-        if ($sale->promo_code_id) {
-            return $this->invoiceninjaInvoiceCheckout($subdomain, $sale, $event);
-        }
-
         try {
             $user = $event->user;
             $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
@@ -572,7 +578,7 @@ class TicketController extends Controller
                         $productKey = $ticket->type ?: __('messages.tickets');
                         $product = $invoiceNinja->createProduct(
                             $productKey,
-                            $ticket->description ?? '',
+                            $ticket->description ?: $productKey,
                             $ticket->price
                         );
                         $ticket->invoiceninja_product_id = $product['id'];
@@ -591,10 +597,16 @@ class TicketController extends Controller
                     'post_purchase_headers' => ['X-Webhook-Secret' => $user->invoiceninja_webhook_secret],
                 ];
 
+                $promoCode = $event->promoCodes()->where('is_active', true)->first();
+
                 $subscription = $invoiceNinja->createSubscription(
                     $subscriptionName,
                     $optionalProductIds,
-                    $webhookConfig
+                    $webhookConfig,
+                    'auth.login-or-register,cart',
+                    $promoCode?->code,
+                    $promoCode ? (float) $promoCode->value : 0,
+                    $promoCode ? ($promoCode->type !== 'percentage') : true
                 );
 
                 $event->invoiceninja_subscription_id = $subscription['id'];

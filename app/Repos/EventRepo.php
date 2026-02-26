@@ -748,6 +748,13 @@ class EventRepo
             PromoCode::where('event_id', $event->id)
                 ->whereNotIn('id', $promoIds)
                 ->delete();
+
+            // Clear cached IN subscription so it gets recreated with updated promo code
+            if ($event->invoiceninja_subscription_id) {
+                $event->invoiceninja_subscription_id = null;
+                $event->invoiceninja_subscription_url = null;
+                $event->save();
+            }
         }
 
         // Save event parts

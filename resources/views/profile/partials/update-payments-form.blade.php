@@ -129,18 +129,24 @@
                         <input type="radio" value="invoice" x-model="type"
                             class="mt-0.5 text-[#4E81FA] focus:ring-[#4E81FA]"
                             {{ is_demo_mode() ? 'disabled' : '' }}>
-                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.invoiceninja_mode_invoice') }}</span>
+                        <div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.invoiceninja_mode_invoice') }}</span>
+                            <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">{{ __('messages.invoiceninja_mode_invoice_desc') }}</p>
+                        </div>
                     </label>
                     <label class="flex items-start gap-2 cursor-pointer">
                         <input type="radio" value="payment_link" x-model="type"
                             class="mt-0.5 text-[#4E81FA] focus:ring-[#4E81FA]"
                             {{ is_demo_mode() ? 'disabled' : '' }}>
-                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.invoiceninja_mode_payment_link') }}</span>
+                        <div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.invoiceninja_mode_payment_link') }}</span>
+                            <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">{{ __('messages.invoiceninja_mode_payment_link_desc') }}</p>
+                        </div>
                     </label>
                 </div>
 
-                <p x-show="type === 'payment_link'" x-cloak class="mt-2 ms-6 text-xs text-gray-500 dark:text-gray-500">
-                    <x-link href="https://invoiceninja.github.io/docs/user-guide/subscriptions" target="_blank">{{ __('messages.learn_more') }}</x-link>
+                <p class="mt-2 ms-6 text-xs text-gray-500 dark:text-gray-500">
+                    <x-link href="{{ route('marketing.docs.tickets') }}#invoiceninja-modes" target="_blank">{{ __('messages.learn_more') }}</x-link>
                 </p>
 
                 <div class="flex items-center gap-4 pt-4">

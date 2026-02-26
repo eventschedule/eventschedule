@@ -148,7 +148,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Invoice Ninja</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect your Invoice Ninja account for payment processing. Provide your Invoice Ninja URL and API token to link the accounts. This is especially useful for selfhosted deployments.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect your Invoice Ninja account for payment processing. Provide your Invoice Ninja URL and API token to link the accounts. Supports two checkout modes: invoice mode (ticket selection in Event Schedule) and payment link mode (ticket selection on Invoice Ninja's purchase page with grouped invoices). See <a href="{{ route('marketing.docs.tickets') }}#invoiceninja-modes" class="text-cyan-400 hover:text-cyan-300">Invoice Ninja Modes</a> for details. This is especially useful for selfhosted deployments.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payment URL</h4>

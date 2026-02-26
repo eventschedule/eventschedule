@@ -70,6 +70,7 @@
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
                         <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Overview</a>
                         <a href="#payment-setup" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Payment Setup</a>
+                        <a href="#invoiceninja-modes" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Invoice Ninja Modes</a>
                         <a href="#create-tickets" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Creating Tickets</a>
                         <a href="#ticket-types" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Ticket Types</a>
                         <a href="#checkout-fields" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Custom Checkout Fields</a>
@@ -150,6 +151,72 @@
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Recommended</div>
                                 <p>We recommend using Stripe with Invoice Ninja for the best experience. Invoice Ninja provides additional features like invoicing, payment reminders, and financial reporting.</p>
+                            </div>
+                        </section>
+
+                        <!-- Invoice Ninja Modes -->
+                        <section id="invoiceninja-modes" class="doc-section">
+                            <h2 class="doc-heading">Invoice Ninja Modes</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">When using Invoice Ninja, choose between two checkout modes in your <a href="{{ route('marketing.docs.account_settings') }}#payments" class="text-cyan-400 hover:text-cyan-300">payment settings</a>.</p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Invoice Mode</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Ticket selection and promo codes are handled in Event Schedule. An invoice is created in Invoice Ninja for each purchase. Supports multiple promo codes and per-ticket promo targeting. Buyers can optionally create an Event Schedule account during checkout.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payment Link Mode</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Buyers select tickets and enter promo codes on the Invoice Ninja purchase page. Invoices are grouped in Invoice Ninja, making bulk management easier. Supports one promo code per event (applied to all tickets). Buyers can optionally create an Event Schedule account during checkout.</p>
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>Invoice</th>
+                                            <th>Payment Link</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Ticket selection</td>
+                                            <td>Event Schedule</td>
+                                            <td>Invoice Ninja</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Promo code entry</td>
+                                            <td>Event Schedule</td>
+                                            <td>Invoice Ninja</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Multiple promo codes</td>
+                                            <td>Yes</td>
+                                            <td>One per event</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Per-ticket promo targeting</td>
+                                            <td>Yes</td>
+                                            <td>No</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Invoices grouped in IN</td>
+                                            <td>No</td>
+                                            <td>Yes</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Account creation</td>
+                                            <td>Yes</td>
+                                            <td>Yes</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>Start with invoice mode for maximum flexibility. Switch to payment link mode if you want invoices grouped together in Invoice Ninja.</p>
                             </div>
                         </section>
 

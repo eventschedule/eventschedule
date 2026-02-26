@@ -10,7 +10,7 @@
         const app = createApp({
             data() {
                 return {
-                    createAccount: @json(old('create_account', false)),
+                    createAccount: @json((bool) old('create_account', false)),
                     tickets: @json($event->tickets->map(function ($ticket) {
                         $data = $ticket->toData(request()->date);
                         $data['selectedQty'] = old('tickets')[$data['id']] ?? 0;
@@ -22,7 +22,7 @@
                     eventCustomValues: @json(old('event_custom_values', [])),
                     name: @json(old('name', auth()->check() ? auth()->user()->name : '')),
                     email: @json(old('email', auth()->check() ? auth()->user()->email : '')),
-                    password: '',
+                    password: @json(old('password', '')),
                     totalTicketsMode: @json($event->total_tickets_mode ?? 'individual'),
                     turnstileEnabled: @json(\App\Utils\TurnstileUtils::isEnabled()),
                     turnstileSiteKey: @json(\App\Utils\TurnstileUtils::getSiteKey()),
@@ -34,6 +34,8 @@
                     discountAmount: 0,
                     isValidatingPromo: false,
                     promoCodeExpanded: false,
+                    isPaymentLinkMode: @json($event->payment_method === 'invoiceninja' && $event->user->invoiceninja_mode === 'payment_link'),
+                    isSubmitting: false,
                 };
             },
             created() {
@@ -85,10 +87,12 @@
                     return Math.max(0, this.subtotalAmount - this.discountAmount);
                 },
                 hasSelectedTickets() {
-                    const hasValidForm = this.tickets.some(ticket => ticket.selectedQty > 0) &&
+                    if (this.isPaymentLinkMode) {
+                        return this.name.trim() !== '' && this.email.trim() !== '';
+                    }
+                    return this.tickets.some(ticket => ticket.selectedQty > 0) &&
                         this.name.trim() !== '' &&
                         this.email.trim() !== '';
-                    return hasValidForm;
                 },
                 hasEventCustomFields() {
                     return this.eventCustomFields && Object.keys(this.eventCustomFields).length > 0;
@@ -134,6 +138,7 @@
                         alert(@json(__('messages.turnstile_verification_failed')));
                         return;
                     }
+                    this.isSubmitting = true;
                 },
                 getAvailableQuantity(ticket) {
                     if (!this.isCombinedMode) {
@@ -355,7 +360,7 @@
             </div>
         </div>
 
-        <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-6 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4 border-[#4E81FA]">
+        <div v-if="!isPaymentLinkMode" v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-6 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4 border-[#4E81FA]">
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ ticket.type }}</h3>
@@ -437,7 +442,7 @@
 
         <!-- Promo Code -->
         @if($event->hasActivePromoCodes())
-        <div class="mb-6">
+        <div v-if="!isPaymentLinkMode" class="mb-6">
             <button type="button" v-if="!promoCodeExpanded" @click="promoCodeExpanded = true" class="text-sm text-[#4E81FA] hover:text-blue-700 dark:hover:text-blue-300 font-medium">
                 {{ __('messages.have_a_promo_code') }}
             </button>
@@ -467,7 +472,7 @@
         @endif
 
         <!-- Total -->
-        <div class="mb-6 bg-white dark:bg-gray-700/50 rounded-lg p-4">
+        <div v-if="!isPaymentLinkMode" class="mb-6 bg-white dark:bg-gray-700/50 rounded-lg p-4">
             <div v-if="discountAmount > 0">
                 <div class="flex justify-between items-center mb-1">
                     <span class="text-gray-600 dark:text-gray-400 text-sm">@lang('messages.subtotal')</span>
@@ -499,9 +504,10 @@
             <x-brand-button
                 type="submit"
                 class="mt-4 text-lg px-6"
-                v-bind:disabled="!hasSelectedTickets"
+                v-bind:disabled="!hasSelectedTickets || isSubmitting"
             >
-                {{ strtoupper(__('messages.checkout')) }}
+                <span v-if="isSubmitting">{{ strtoupper(__('messages.processing')) }}</span>
+                <span v-else>{{ strtoupper(__('messages.checkout')) }}</span>
             </x-brand-button>
         </div>
 

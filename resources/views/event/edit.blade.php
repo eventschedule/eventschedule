@@ -2690,7 +2690,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="mt-3" v-if="tickets.length > 1">
+                                        <div class="mt-3" v-if="tickets.length > 1 && !(isInvoiceNinjaPaymentLink && event.payment_method === 'invoiceninja')">
                                             <x-input-label :value="__('messages.applies_to')" class="text-xs" />
                                             <div class="mt-1 flex items-center gap-3">
                                                 <label class="flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
@@ -2733,7 +2733,9 @@
                                         </div>
                                     </div>
 
-                                    <button type="button" @click="addPromoCode" class="mt-2 text-sm text-[#4E81FA] hover:text-blue-700">
+                                    <button type="button" @click="addPromoCode"
+                                        v-show="!(isInvoiceNinjaPaymentLink && event.payment_method === 'invoiceninja' && promoCodes.length >= 1)"
+                                        class="mt-2 text-sm text-[#4E81FA] hover:text-blue-700">
                                         + {{ __('messages.add_promo_code') }}
                                     </button>
                                 </div>
@@ -3353,6 +3355,7 @@
         })),
         eventCustomFields: @json($event->custom_fields ?? []),
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
+        isInvoiceNinjaPaymentLink: @json($user->invoiceninja_api_key && $user->invoiceninja_mode === 'payment_link'),
         activeTicketTab: 'tickets',
         promoCodes: (() => {
           var pcs = @json($event->promoCodes ?? []).map(pc => ({

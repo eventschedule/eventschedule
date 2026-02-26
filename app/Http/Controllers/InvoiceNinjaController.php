@@ -220,10 +220,56 @@ class InvoiceNinjaController extends Controller
         }
 
         // Mark sale as paid with row locking
-        \DB::transaction(function () use ($sale) {
+        \DB::transaction(function () use ($sale, $event, $payload) {
             $sale = Sale::lockForUpdate()->find($sale->id);
             if ($sale->status !== 'unpaid') {
                 return;
+            }
+
+            // Create SaleTickets from webhook line items (payment link mode)
+            if ($sale->saleTickets()->count() === 0) {
+                $lineItems = $payload['line_items'] ?? [];
+                foreach ($lineItems as $lineItem) {
+                    $productId = $lineItem['product_id'] ?? null;
+                    $quantity = (int) ($lineItem['quantity'] ?? 0);
+                    if (! $productId || $quantity <= 0) {
+                        continue;
+                    }
+
+                    $ticket = $event->tickets()->where('invoiceninja_product_id', $productId)->first();
+                    if (! $ticket) {
+                        continue;
+                    }
+
+                    $sale->saleTickets()->create([
+                        'ticket_id' => $ticket->id,
+                        'quantity' => $quantity,
+                        'seats' => json_encode(array_fill(1, $quantity, null)),
+                    ]);
+                }
+
+                $sale->payment_amount = $sale->calculateTotal();
+
+                // Check if a promo code discount was applied on the IN purchase page
+                $invoiceDiscount = (float) ($payload['discount'] ?? 0);
+                if ($invoiceDiscount > 0) {
+                    $isAmountDiscount = $payload['is_amount_discount'] ?? true;
+                    if ($isAmountDiscount) {
+                        $discountAmount = $invoiceDiscount;
+                    } else {
+                        $discountAmount = round($sale->payment_amount * ($invoiceDiscount / 100), 2);
+                    }
+
+                    if ($discountAmount > 0) {
+                        $promoCode = $event->promoCodes()->where('is_active', true)->first();
+                        if ($promoCode) {
+                            $sale->promo_code_id = $promoCode->id;
+                            $sale->discount_amount = $discountAmount;
+                            $sale->payment_amount = max(0, $sale->payment_amount - $discountAmount);
+                            $promoCode->increment('times_used');
+                        }
+                    }
+                }
             }
 
             $sale->status = 'paid';

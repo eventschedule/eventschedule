@@ -443,8 +443,74 @@
         </div>
     </section>
 
-    <!-- Benefits Section -->
+    <!-- Two Checkout Modes -->
     <section class="bg-white dark:bg-[#0a0a0f] py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Two checkout modes
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400">
+                    Choose the mode that fits your workflow.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Invoice Mode -->
+                <div class="rounded-2xl p-8 border border-emerald-200 dark:border-emerald-800/50 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Invoice mode</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6">
+                        Customers select tickets and enter promo codes in Event Schedule. Each purchase creates a separate invoice in Invoice Ninja.
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                            <span class="text-gray-700 dark:text-gray-300 text-sm">Multiple promo codes per event</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                            <span class="text-gray-700 dark:text-gray-300 text-sm">Per-ticket promo targeting</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                            <span class="text-gray-700 dark:text-gray-300 text-sm">Full checkout control in Event Schedule</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Payment Link Mode -->
+                <div class="rounded-2xl p-8 border border-teal-200 dark:border-teal-800/50 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Payment link mode</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6">
+                        Customers select tickets and enter promo codes on Invoice Ninja's purchase page. Invoices are grouped together for easier management.
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                            <span class="text-gray-700 dark:text-gray-300 text-sm">Invoices grouped in Invoice Ninja</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                            <span class="text-gray-700 dark:text-gray-300 text-sm">Invoice Ninja purchase page</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                            <span class="text-gray-700 dark:text-gray-300 text-sm">One promo code per event</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="text-center mt-8">
+                <a href="{{ route('marketing.docs.tickets') }}#invoiceninja-modes" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 text-sm font-medium">
+                    Compare modes in detail &rarr;
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">

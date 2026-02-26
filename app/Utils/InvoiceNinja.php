@@ -87,15 +87,23 @@ class InvoiceNinja
         return $product;
     }
 
-    public function createSubscription($name, $optionalProductIds, $webhookConfig, $steps = 'auth.login-or-register,cart')
+    public function createSubscription($name, $optionalProductIds, $webhookConfig, $steps = 'auth.login-or-register,cart', $promoCode = null, $promoDiscount = 0, $isAmountDiscount = true)
     {
-        $subscription = $this->sendRequest('subscriptions', 'POST', [
+        $data = [
             'name' => $name,
             'steps' => $steps,
             'optional_product_ids' => implode(',', $optionalProductIds),
             'allow_query_overrides' => true,
             'webhook_configuration' => $webhookConfig,
-        ]);
+        ];
+
+        if ($promoCode) {
+            $data['promo_code'] = $promoCode;
+            $data['promo_discount'] = $promoDiscount;
+            $data['is_amount_discount'] = $isAmountDiscount;
+        }
+
+        $subscription = $this->sendRequest('subscriptions', 'POST', $data);
 
         UsageTrackingService::track(UsageTrackingService::INVOICENINJA_PAYMENT_LINK);
 
