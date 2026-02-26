@@ -95,7 +95,7 @@
                         <div class="p-6 flex flex-col flex-1">
                             <div class="flex items-center gap-4 mb-4">
                                 @if($schedule->profile_image_url)
-                                    <img src="{{ $schedule->profile_image_url }}" alt="{{ $schedule->name }}" class="w-12 h-12 rounded-full object-cover">
+                                    <img src="{{ $schedule->profile_image_url }}" alt="{{ $schedule->name }}" class="w-12 h-12 rounded-full object-cover" width="48" height="48" loading="lazy" decoding="async">
                                 @else
                                     <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#4E81FA] to-sky-500 flex items-center justify-center text-white font-bold text-lg">
                                         {{ strtoupper(substr($schedule->name, 0, 1)) }}

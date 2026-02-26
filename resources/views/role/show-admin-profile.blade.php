@@ -1,6 +1,6 @@
 @if ($role->description_html)
 <div class="mt-5 overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-md">
-    <div class="px-4 py-5 sm:p-6 text-gray-700 dark:text-gray-300 custom-content [&>*:first-child]:mt-0">
+    <div class="px-4 py-5 sm:p-6 text-gray-700 dark:text-gray-300 custom-content">
         {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->description_html) !!}
     </div>
 </div>

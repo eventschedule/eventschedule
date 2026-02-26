@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}" sizes="32x32">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/favicon.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}">
 
     <!-- Preconnect to external resources -->
     @if (config('services.google.analytics'))
@@ -108,15 +108,20 @@
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
+        "@id": "{{ config('app.url') }}/#website",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
-        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}"
+        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}",
+        "publisher": {
+            "@id": "{{ config('app.url') }}/#organization"
+        }
     }
     </script>
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "Organization",
+        "@id": "{{ config('app.url') }}/#organization",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
         "logo": {
@@ -317,7 +322,9 @@
     </script>
 
 
-    @if(!config('app.hosted') || config('app.is_nexus'))
+    @if(config('app.hosted') && !config('app.is_nexus'))
+    <link rel="alternate" type="application/rss+xml" title="Event Schedule Blog" href="https://blog.eventschedule.com/feed">
+    @else
     <link rel="alternate" type="application/rss+xml" title="Event Schedule Blog" href="{{ route('blog.feed') }}">
     @endif
 

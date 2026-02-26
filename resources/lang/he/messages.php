@@ -2021,4 +2021,11 @@ return [
     'invalid_custom_domain' => 'Cannot use an eventschedule.com domain as a custom domain',
     'custom_domain_mode_requires_domain' => 'A custom domain URL is required when selecting a domain mode',
     'custom_domain_already_taken' => 'This custom domain is already in use by another schedule',
+
+    // Boost
+    'use_simple_boost' => 'Use simple boost',
+    'geo_radius_description' => ':radius :unit around :location',
+    'miles' => 'miles',
+    'kilometers' => 'kilometers',
+    'location' => 'Location',
 ];

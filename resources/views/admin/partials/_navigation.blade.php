@@ -3,7 +3,11 @@
 
 @php
     $insightsActive = in_array($active, ['users', 'revenue', 'analytics', 'usage']);
-    $manageActive = in_array($active, ['boost', 'plans', 'domains', 'newsletters', 'blog']);
+    $manageKeys = ['boost', 'newsletters'];
+    if (config('app.hosted')) {
+        $manageKeys = array_merge($manageKeys, ['plans', 'domains', 'blog']);
+    }
+    $manageActive = in_array($active, $manageKeys);
     $systemActive = in_array($active, ['audit-log', 'queue', 'logs']);
 
     $tabActive = 'border-[#4E81FA] text-[#4E81FA]';
@@ -81,18 +85,22 @@
                         <a href="{{ route('admin.boost') }}" class="{{ $active === 'boost' ? $dropdownItemActive : $dropdownItem }}">
                             Boost
                         </a>
+                        @if (config('app.hosted'))
                         <a href="{{ route('admin.plans') }}" class="{{ $active === 'plans' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.plans')
                         </a>
                         <a href="{{ route('admin.domains') }}" class="{{ $active === 'domains' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.domains')
                         </a>
+                        @endif
                         <a href="{{ route('admin.newsletters.index') }}" class="{{ $active === 'newsletters' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.newsletters')
                         </a>
+                        @if (config('app.hosted'))
                         <a href="{{ route('blog.admin.index') }}" class="{{ $active === 'blog' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.blog')
                         </a>
+                        @endif
                     </div>
                 </div>
             </div>

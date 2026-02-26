@@ -433,7 +433,7 @@
                   </button>
                 </div>
                 <div x-show="expanded" x-cloak>
-                  <div class="custom-content [&>*:first-child]:mt-0">
+                  <div class="custom-content">
                     {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                   </div>
                   <button @click="collapse()" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
@@ -442,7 +442,7 @@
                 </div>
               </div>
               @else
-              <div class="mt-2 text-sm text-[#33383C] dark:text-gray-300 custom-content [&>*:first-child]:mt-0">
+              <div class="mt-2 text-sm text-[#33383C] dark:text-gray-300 custom-content">
                 {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
               </div>
               @endif

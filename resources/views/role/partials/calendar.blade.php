@@ -1698,8 +1698,10 @@
     </div>
 </div>
 
+@if (isset($role) && $role->isPro() && $events->contains(fn($e) => ($e->polls_count ?? 0) > 0))
 <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!}></script>
 <script src="{{ asset('js/poll-confetti.js') }}" {!! nonce_attr() !!}></script>
+@endif
 <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
 <script {!! nonce_attr() !!}>
 const { createApp } = Vue;
@@ -2654,6 +2656,8 @@ const calendarApp = createApp({
                             this.pollAnimating = { ...this.pollAnimating, [poll.id]: false };
                         });
                     });
+                } else {
+                    alert(data.message || '{{ __("messages.an_error_occurred") }}');
                 }
             } finally {
                 this.votingPoll = { ...this.votingPoll, [poll.id]: null };

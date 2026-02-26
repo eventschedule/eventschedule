@@ -239,7 +239,7 @@
                         </button>
                       </span>
                       <div x-show="expanded" x-cloak class="description-expanded">
-                        <div class="custom-content [&>*:first-child]:mt-0 {{ $role->isRtl() ? 'rtl' : '' }}">
+                        <div class="custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
                           {!! \App\Utils\UrlUtils::convertUrlsToLinks($each->description_html) !!}
                         </div>
                         <button :aria-expanded="expanded" @click="expanded = false" class="font-medium hover:underline whitespace-nowrap mt-1 text-blue-600 dark:text-blue-400">
@@ -248,7 +248,7 @@
                       </div>
                     </div>
                   @else
-                    <div class="text-sm text-gray-700 dark:text-gray-300 custom-content [&>*:first-child]:mt-0 {{ $role->isRtl() ? 'rtl' : '' }}">
+                    <div class="text-sm text-gray-700 dark:text-gray-300 custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
                       {!! \App\Utils\UrlUtils::convertUrlsToLinks($each->description_html) !!}
                     </div>
                   @endif
@@ -794,7 +794,7 @@
             {{ __('messages.about') }}
           </h2>
           <div class="{{ $role->isRtl() || ($translation && $translation->role->isRtl()) ? 'rtl' : '' }}">
-            <div class="text-gray-700 dark:text-gray-300 text-base custom-content [&>*:first-child]:mt-0">
+            <div class="text-gray-700 dark:text-gray-300 text-base custom-content">
               {!! \App\Utils\UrlUtils::convertUrlsToLinks($translation ? ($translation->description_html_translated ?: $translation->description_translated) : $event->translatedDescription()) !!}
             </div>
           </div>
@@ -1514,7 +1514,6 @@
   <script {!! nonce_attr() !!}>
     function pollsComponent() {
       return {
-        voting: false,
         votingOption: {},
         voted: {},
         pollData: {},
@@ -1545,9 +1544,10 @@
                   self.showResults[pollHash] = true;
                 });
               });
+            } else {
+              alert(data.message || '{{ __("messages.an_error_occurred") }}');
             }
           } finally {
-            this.voting = false;
             this.votingOption[pollHash] = null;
           }
         },

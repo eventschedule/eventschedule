@@ -308,12 +308,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/admin/boost/grant-credit', [AdminController::class, 'boostGrantCredit'])->name('admin.boost.grant_credit');
         Route::post('/admin/boost/set-limit', [AdminController::class, 'boostSetLimit'])->name('admin.boost.set_limit');
         Route::post('/admin/translation/retry', [AdminController::class, 'retryTranslation'])->name('admin.translation.retry');
-        Route::get('/admin/domains', [AdminController::class, 'domains'])->name('admin.domains');
-        Route::post('/admin/domains/{role}/reprovision', [AdminController::class, 'domainReprovision'])->name('admin.domains.reprovision');
-        Route::post('/admin/domains/{role}/remove', [AdminController::class, 'domainRemove'])->name('admin.domains.remove');
-        Route::get('/admin/plans', [AdminController::class, 'plans'])->name('admin.plans');
-        Route::get('/admin/plans/{role}/edit', [AdminController::class, 'editPlan'])->name('admin.plans.edit');
-        Route::put('/admin/plans/{role}', [AdminController::class, 'updatePlan'])->name('admin.plans.update');
+        if (config('app.hosted')) {
+            Route::get('/admin/domains', [AdminController::class, 'domains'])->name('admin.domains');
+            Route::post('/admin/domains/{role}/reprovision', [AdminController::class, 'domainReprovision'])->name('admin.domains.reprovision');
+            Route::post('/admin/domains/{role}/remove', [AdminController::class, 'domainRemove'])->name('admin.domains.remove');
+            Route::get('/admin/plans', [AdminController::class, 'plans'])->name('admin.plans');
+            Route::get('/admin/plans/{role}/edit', [AdminController::class, 'editPlan'])->name('admin.plans.edit');
+            Route::put('/admin/plans/{role}', [AdminController::class, 'updatePlan'])->name('admin.plans.update');
+        }
 
         Route::get('/admin/audit-log', [AdminController::class, 'auditLog'])->name('admin.audit_log');
         Route::post('/admin/sale/{sale}/approve', [AdminController::class, 'approveSale'])->name('admin.sale.approve');
@@ -354,13 +356,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/admin/newsletter-segments/{hash}', [AdminNewsletterController::class, 'deleteSegment'])->name('admin.newsletters.segment.delete');
 
         // Admin blog routes
-        Route::get('/admin/blog', [BlogController::class, 'adminIndex'])->name('blog.admin.index');
-        Route::get('/admin/blog/create', [BlogController::class, 'create'])->name('blog.create');
-        Route::post('/admin/blog', [BlogController::class, 'store'])->name('blog.store');
-        Route::get('/admin/blog/{blog_post}/edit', [BlogController::class, 'edit'])->name('blog.edit');
-        Route::put('/admin/blog/{blog_post}', [BlogController::class, 'update'])->name('blog.update');
-        Route::delete('/admin/blog/{blog_post}', [BlogController::class, 'destroy'])->name('blog.destroy');
-        Route::post('/admin/blog/generate-content', [BlogController::class, 'generateContent'])->name('blog.generate-content');
+        if (config('app.hosted')) {
+            Route::get('/admin/blog', [BlogController::class, 'adminIndex'])->name('blog.admin.index');
+            Route::get('/admin/blog/create', [BlogController::class, 'create'])->name('blog.create');
+            Route::post('/admin/blog', [BlogController::class, 'store'])->name('blog.store');
+            Route::get('/admin/blog/{blog_post}/edit', [BlogController::class, 'edit'])->name('blog.edit');
+            Route::put('/admin/blog/{blog_post}', [BlogController::class, 'update'])->name('blog.update');
+            Route::delete('/admin/blog/{blog_post}', [BlogController::class, 'destroy'])->name('blog.destroy');
+            Route::post('/admin/blog/generate-content', [BlogController::class, 'generateContent'])->name('blog.generate-content');
+        }
     });
 });
 
