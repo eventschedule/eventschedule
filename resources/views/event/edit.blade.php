@@ -3373,12 +3373,6 @@
                 expires_at_date: '', expires_at_time: '',
                 is_active: pc.is_active ? true : true, ticket_ids: pc.ticket_ids || [],
               }));
-            } else {
-              pcs.push({
-                id: null, code: '', type: 'percentage', value: null,
-                max_uses: null, times_used: 0, expires_at_date: '', expires_at_time: '',
-                is_active: true, ticket_ids: [],
-              });
             }
           }
           return pcs;
