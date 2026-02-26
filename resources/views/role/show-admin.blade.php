@@ -1,3 +1,4 @@
+@php $isViewer = auth()->user()->isViewer($role->subdomain); @endphp
 <x-app-admin-layout>
 
     <x-slot name="head">
@@ -31,6 +32,12 @@
 
             .dark .day-x::after {
                 color: rgba(252, 165, 165, 0.9);
+            }
+
+            @media (max-width: 767px) {
+                .day-x::after {
+                    content: none;
+                }
             }
         </style>
         <script {!! nonce_attr() !!}>
@@ -224,6 +231,7 @@
 
             {{-- Desktop buttons (hidden on mobile) --}}
             <div class="mt-2 hidden md:flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:gap-x-3 flex-shrink-0 md:ms-4">
+                @if (!$isViewer)
                 <x-secondary-link href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}" class="w-full sm:w-auto">
                     <svg class="-ms-0.5 me-2 h-6 w-6 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor"
                         aria-hidden="true">
@@ -232,6 +240,7 @@
                     </svg>
                     {{ __('messages.edit_schedule') }}
                 </x-secondary-link>
+                @endif
                 <x-secondary-link href="{{ $viewGuestUrl }}"
                     target="_blank"
                     class="{{ ! $role->email_verified_at ? 'w-full sm:w-auto opacity-50 pointer-events-none' : 'w-full sm:w-auto' }}"
@@ -258,6 +267,7 @@
                         <div class="py-2" role="none" data-popup-target="role-actions-pop-up-menu">
                             {{-- Show edit/view options only when desktop buttons are hidden (mobile) --}}
                             <div class="md:hidden">
+                                @if (!$isViewer)
                                 <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                     <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                         <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
@@ -266,6 +276,7 @@
                                         {{ __('messages.edit_schedule') }}
                                     </div>
                                 </a>
+                                @endif
                                 <a href="{{ $viewGuestUrl }}" target="_blank" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                     <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                         <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
@@ -275,6 +286,7 @@
                                     </div>
                                 </a>
                             </div>
+                            @if (!$isViewer)
                             <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                 <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M14,12L10,8V11H2V13H10V16M20,18V6C20,4.89 19.1,4 18,4H6A2,2 0 0,0 4,6V9H6V6H18V18H6V15H4V18A2,2 0 0,0 6,20H18A2,2 0 0,0 20,18Z" />
@@ -313,6 +325,7 @@
                                     {{ __('messages.sync_events') }}
                                 </div>
                             </a>
+                            @endif
                             @endif
                             <a href="#" id="events-graphic-link" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                 <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

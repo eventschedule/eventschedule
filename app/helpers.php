@@ -305,6 +305,26 @@ if (! function_exists('detect_24_hour_time')) {
     }
 }
 
+if (! function_exists('custom_domain_url')) {
+    /**
+     * Rewrite a URL to use the custom domain if the current request is via one.
+     * Used for URLs passed to external services (e.g. Stripe) that bypass the middleware.
+     */
+    function custom_domain_url(string $url): string
+    {
+        $customDomainHost = request()->attributes->get('custom_domain_host');
+        if (! $customDomainHost) {
+            return $url;
+        }
+        $subdomain = request()->attributes->get('custom_domain_subdomain');
+        $baseDomain = _base_domain();
+        $url = str_replace("https://{$subdomain}.{$baseDomain}", "https://{$customDomainHost}", $url);
+        $url = str_replace("https://app.{$baseDomain}", "https://{$customDomainHost}", $url);
+
+        return $url;
+    }
+}
+
 if (! function_exists('get_sub_audience_blog')) {
     /**
      * Get a blog post for a sub-audience by slug

@@ -98,6 +98,7 @@ Route::post('/nl/u/{token}', [NewsletterTrackingController::class, 'unsubscribe'
 Route::post('/stripe/webhook', [StripeController::class, 'webhook'])->name('stripe.webhook');
 Route::post('/stripe/subscription-webhook', [SubscriptionWebhookController::class, 'handleWebhook'])->name('stripe.subscription_webhook');
 Route::post('/invoiceninja/webhook/{secret?}', [InvoiceNinjaController::class, 'webhook'])->name('invoiceninja.webhook')->middleware('throttle:60,1');
+Route::post('/invoiceninja/purchase-webhook/{sale}', [InvoiceNinjaController::class, 'purchaseWebhook'])->name('invoiceninja.purchase_webhook')->middleware('throttle:60,1');
 
 // Google Calendar webhook routes (no auth required)
 Route::get('/google-calendar/webhook', [GoogleCalendarWebhookController::class, 'verify'])->name('google.calendar.webhook.verify')->middleware('throttle:10,1');
@@ -184,6 +185,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/stripe/unlink', [StripeController::class, 'unlink'])->name('stripe.unlink');
     Route::get('/stripe/complete', [StripeController::class, 'complete'])->name('stripe.complete');
     Route::post('/invoiceninja/unlink', [InvoiceNinjaController::class, 'unlink'])->name('invoiceninja.unlink');
+    Route::patch('/settings/invoiceninja-mode', [ProfileController::class, 'updateInvoiceninjaMode'])->name('profile.update_invoiceninja_mode');
     Route::post('/payment_url/unlink', [ProfileController::class, 'unlinkPaymentUrl'])->name('profile.unlink_payment_url');
 
     // Google Calendar routes
@@ -252,6 +254,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{subdomain}/team/add-member', [RoleController::class, 'createMember'])->name('role.create_member');
     Route::post('/{subdomain}/team/add-member', [RoleController::class, 'storeMember'])->name('role.store_member');
     Route::delete('/{subdomain}/team/remove-member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
+    Route::patch('/{subdomain}/team/update-member-level/{hash}', [RoleController::class, 'updateMemberLevel'])->name('role.update_member_level');
     Route::delete('/{subdomain}/uncurate-event/{hash}', [EventController::class, 'uncurate'])->name('event.uncurate');
     Route::get('/{subdomain}/import', [EventController::class, 'showImport'])->name('event.show_import');
     Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse');
@@ -305,6 +308,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/admin/boost/grant-credit', [AdminController::class, 'boostGrantCredit'])->name('admin.boost.grant_credit');
         Route::post('/admin/boost/set-limit', [AdminController::class, 'boostSetLimit'])->name('admin.boost.set_limit');
         Route::post('/admin/translation/retry', [AdminController::class, 'retryTranslation'])->name('admin.translation.retry');
+        Route::get('/admin/domains', [AdminController::class, 'domains'])->name('admin.domains');
+        Route::post('/admin/domains/{role}/reprovision', [AdminController::class, 'domainReprovision'])->name('admin.domains.reprovision');
+        Route::post('/admin/domains/{role}/remove', [AdminController::class, 'domainRemove'])->name('admin.domains.remove');
         Route::get('/admin/plans', [AdminController::class, 'plans'])->name('admin.plans');
         Route::get('/admin/plans/{role}/edit', [AdminController::class, 'editPlan'])->name('admin.plans.edit');
         Route::put('/admin/plans/{role}', [AdminController::class, 'updatePlan'])->name('admin.plans.update');
@@ -486,6 +492,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/selfhost/boost', [MarketingController::class, 'docsSelfhostBoost'])->name('marketing.docs.selfhost.boost');
         // SaaS section
         Route::get('/docs/saas', [MarketingController::class, 'docsSaasSetup'])->name('marketing.docs.saas.setup');
+        Route::get('/docs/saas/custom-domains', [MarketingController::class, 'docsSaasCustomDomains'])->name('marketing.docs.saas.custom_domains');
         // Developer section
         Route::get('/docs/developer/api', [MarketingController::class, 'docsDeveloperApi'])->name('marketing.docs.developer.api');
         // Redirects from old URLs to new URLs
@@ -624,6 +631,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/selfhost/boost', [MarketingController::class, 'docsSelfhostBoost'])->name('marketing.docs.selfhost.boost');
             // SaaS section
             Route::get('/docs/saas', [MarketingController::class, 'docsSaasSetup'])->name('marketing.docs.saas.setup');
+            Route::get('/docs/saas/custom-domains', [MarketingController::class, 'docsSaasCustomDomains'])->name('marketing.docs.saas.custom_domains');
             // Developer section
             Route::get('/docs/developer/api', [MarketingController::class, 'docsDeveloperApi'])->name('marketing.docs.developer.api');
             // Redirects from old URLs to new URLs
@@ -761,6 +769,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/selfhost/boost', fn () => redirect('https://eventschedule.com/docs/selfhost/boost', 301));
             // SaaS section
             Route::get('/docs/saas', fn () => redirect('https://eventschedule.com/docs/saas', 301));
+            Route::get('/docs/saas/custom-domains', fn () => redirect('https://eventschedule.com/docs/saas/custom-domains', 301));
             // Developer section
             Route::get('/docs/developer/api', fn () => redirect('https://eventschedule.com/docs/developer/api', 301));
             Route::get('/docs/developer', fn () => redirect('https://eventschedule.com/docs/developer/api', 301));
@@ -882,6 +891,7 @@ if (config('app.is_nexus')) {
     Route::get('/docs/selfhost/boost', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.boost');
     // SaaS section
     Route::get('/docs/saas', fn () => redirect()->route('home'))->name('marketing.docs.saas.setup');
+    Route::get('/docs/saas/custom-domains', fn () => redirect()->route('home'))->name('marketing.docs.saas.custom_domains');
     // Developer section
     Route::get('/docs/developer', fn () => redirect()->route('home'));
     Route::get('/docs/developer/api', fn () => redirect()->route('home'))->name('marketing.docs.developer.api');

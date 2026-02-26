@@ -41,7 +41,7 @@ class DemoAutoLogin
                 }
             }
 
-            return $next($request);
+            return redirect(config('app.url'))->with('error', __('messages.demo_logout_required'));
         }
 
         // Find the demo user and log them in

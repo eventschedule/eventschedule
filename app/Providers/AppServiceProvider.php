@@ -73,13 +73,13 @@ class AppServiceProvider extends ServiceProvider
             $view->with([
                 'schedules' => $allRoles
                     ->where('type', 'talent')
-                    ->whereIn('pivot.level', ['owner', 'admin']),
+                    ->whereIn('pivot.level', ['owner', 'admin', 'viewer']),
                 'venues' => $allRoles
                     ->where('type', 'venue')
-                    ->whereIn('pivot.level', ['owner', 'admin']),
+                    ->whereIn('pivot.level', ['owner', 'admin', 'viewer']),
                 'curators' => $allRoles
                     ->where('type', 'curator')
-                    ->whereIn('pivot.level', ['owner', 'admin']),
+                    ->whereIn('pivot.level', ['owner', 'admin', 'viewer']),
             ]);
         });
 

@@ -499,28 +499,46 @@
         }
 
         .custom-content h1 {
-            font-size: 1rem;
+            font-size: 1.8rem;
             font-weight: 700;
             margin-top: 1rem;
             margin-bottom: 0.25rem;
         }
 
         .custom-content h2 {
-            font-size: 1rem;
+            font-size: 1.55rem;
             font-weight: 600;
             margin-top: 0.75rem;
             margin-bottom: 0.25rem;
         }
 
-        .custom-content h3,
-        .custom-content h4,
-        .custom-content h5,
-        .custom-content h6 {
-            font-size: 1rem;
+        .custom-content h3 {
+            font-size: 1.3rem;
             font-weight: 600;
             margin-top: 0.5rem;
             margin-bottom: 0.25rem;
         }
+
+        .custom-content h4,
+        .custom-content h5,
+        .custom-content h6 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .custom-content > :first-child {
+            margin-top: 0 !important;
+            margin-block-start: 0 !important;
+        }
+
+        .cm-s-easymde .cm-header-1 { font-size: 1.8rem !important; }
+        .cm-s-easymde .cm-header-2 { font-size: 1.55rem !important; }
+        .cm-s-easymde .cm-header-3 { font-size: 1.3rem !important; }
+        .cm-s-easymde .cm-header-4,
+        .cm-s-easymde .cm-header-5,
+        .cm-s-easymde .cm-header-6 { font-size: 1.15rem !important; }
 
         input[type="text"],
         input[type="email"],

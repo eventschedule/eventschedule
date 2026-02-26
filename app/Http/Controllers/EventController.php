@@ -205,7 +205,7 @@ class EventController extends Controller
 
     public function create(Request $request, $subdomain)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -374,7 +374,7 @@ class EventController extends Controller
         $subdomain = null;
 
         foreach ($event->roles as $each) {
-            if ($user->isMember($each->subdomain)) {
+            if ($user->isEditor($each->subdomain)) {
                 $subdomain = $each->subdomain;
                 break;
             }
@@ -389,7 +389,7 @@ class EventController extends Controller
 
     public function clone(Request $request, $subdomain, $hash)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -484,7 +484,7 @@ class EventController extends Controller
 
     public function edit(Request $request, $subdomain, $hash)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -578,7 +578,7 @@ class EventController extends Controller
 
     public function update(EventUpdateRequest $request, $subdomain, $hash)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -602,7 +602,7 @@ class EventController extends Controller
                 $options = array_values(array_filter(array_map('trim', $options ?: [])));
                 $hash = $pollData['hash'] ?? '';
 
-                if (!$question || count($options) < 2) {
+                if (! $question || count($options) < 2) {
                     continue;
                 }
 
@@ -677,7 +677,7 @@ class EventController extends Controller
 
         // A user may be using a different subdomain to edit an event
         // if they clicked on the edit link from the guest view
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return redirect(route('home'));
         }
 
@@ -696,7 +696,7 @@ class EventController extends Controller
 
     public function accept(Request $request, $subdomain, $hash)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -705,7 +705,7 @@ class EventController extends Controller
         $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if ($user->isMember($subdomain)) {
+        if ($user->isEditor($subdomain)) {
             $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
             $role->last_notified_request_count = 0;
             $role->save();
@@ -733,7 +733,7 @@ class EventController extends Controller
 
     public function decline(Request $request, $subdomain, $hash)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -742,7 +742,7 @@ class EventController extends Controller
         $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if ($user->isMember($subdomain)) {
+        if ($user->isEditor($subdomain)) {
             $event->roles()->updateExistingPivot($role->id, ['is_accepted' => false]);
             $role->last_notified_request_count = 0;
             $role->save();
@@ -775,7 +775,7 @@ class EventController extends Controller
 
     public function acceptAll(Request $request, $subdomain)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -793,7 +793,7 @@ class EventController extends Controller
         $acceptedCount = 0;
 
         foreach ($pendingEvents as $event) {
-            if ($user->isMember($subdomain)) {
+            if ($user->isEditor($subdomain)) {
                 $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
                 $acceptedCount++;
 
@@ -822,7 +822,7 @@ class EventController extends Controller
 
     public function store(EventCreateRequest $request, $subdomain)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -936,7 +936,7 @@ class EventController extends Controller
         }
 
         // Check if the user is authorized to curate events for this role
-        if ((! auth()->user() || ! auth()->user()->isMember($subdomain)) && ! $role->acceptEventRequests()) {
+        if ((! auth()->user() || ! auth()->user()->isEditor($subdomain)) && ! $role->acceptEventRequests()) {
             if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
@@ -960,7 +960,7 @@ class EventController extends Controller
         }
 
         // Add the event to the curator's schedule
-        $role->events()->attach($event->id, ['is_accepted' => auth()->user() && auth()->user()->isMember($subdomain) ? true : null]);
+        $role->events()->attach($event->id, ['is_accepted' => auth()->user() && auth()->user()->isEditor($subdomain) ? true : null]);
 
         if ($request->ajax()) {
             return response()->json([
@@ -978,7 +978,7 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
 
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return back()->with('error', __('messages.not_authorized'));
         }
 
@@ -990,7 +990,7 @@ class EventController extends Controller
 
     public function showImport(Request $request, $subdomain)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             abort(403, __('messages.not_authorized'));
         }
 
@@ -1074,7 +1074,7 @@ class EventController extends Controller
 
     public function parse(EventParseRequest $request, $subdomain)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
@@ -1104,7 +1104,7 @@ class EventController extends Controller
 
     public function parseEventParts(Request $request, $subdomain)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
@@ -1860,7 +1860,7 @@ class EventController extends Controller
 
     public function scanAgenda(Request $request, $subdomain)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -1921,7 +1921,7 @@ class EventController extends Controller
 
     public function saveEventParts(EventPartsSaveRequest $request, $subdomain)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 

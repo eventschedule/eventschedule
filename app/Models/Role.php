@@ -65,6 +65,9 @@ class Role extends Model implements MustVerifyEmail
         'require_approval',
         'import_config',
         'custom_domain', // Stored as full URL with protocol (e.g. https://example.com)
+        'custom_domain_mode',
+        'custom_domain_host',
+        'custom_domain_status',
         'event_layout',
         'google_calendar_id',
         'sync_direction',
@@ -1201,10 +1204,19 @@ class Role extends Model implements MustVerifyEmail
 
     /**
      * Normalize the custom_domain to strip trailing slashes on all save paths.
+     * Also extract and store the hostname for fast middleware lookup.
      */
     public function setCustomDomainAttribute($value)
     {
-        $this->attributes['custom_domain'] = $value ? rtrim($value, '/') : $value;
+        if ($value) {
+            $value = preg_replace('/^http:\/\//', 'https://', rtrim($value, '/'));
+            $parsed = parse_url($value);
+            if ($parsed && isset($parsed['host'])) {
+                $value = ($parsed['scheme'] ?? 'https') . '://' . $parsed['host'];
+            }
+        }
+        $this->attributes['custom_domain'] = $value;
+        $this->attributes['custom_domain_host'] = $value ? parse_url($value, PHP_URL_HOST) : null;
     }
 
     /**

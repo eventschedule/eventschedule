@@ -562,7 +562,7 @@
             </div>
 
             <div class="space-y-4" x-data="{ open: null }">
-                <div class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden">
+                <div class="bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
                     <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Is there really a free plan?
@@ -578,7 +578,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900 dark:to-cyan-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden">
+                <div class="bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
                     <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             How does the free trial work?
@@ -594,7 +594,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900 dark:to-yellow-900 rounded-2xl border border-amber-200 dark:border-white/10 shadow-sm overflow-hidden">
+                <div class="bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
                     <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             What is the difference between Pro and Enterprise?
@@ -610,7 +610,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                <div class="bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
                     <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Can I cancel anytime?
@@ -626,7 +626,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden">
+                <div class="bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
                     <button @click="open = open === 5 ? null : 5" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Do you take a cut of ticket sales?

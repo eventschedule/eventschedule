@@ -224,16 +224,16 @@
     <div class="flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between gap-4">
 
         {{-- Month and Year Title: Always visible and positioned first (hidden in list view). --}}
-        <h1 v-show="currentView === 'calendar'" class="text-2xl font-semibold leading-6 flex-shrink-0 hidden md:block text-gray-900 dark:text-gray-100">
+        <h1 v-show="currentView === 'calendar'" class="text-2xl font-semibold leading-6 flex-shrink-0 {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:block' }} text-gray-900 dark:text-gray-100">
             <time datetime="{{ sprintf('%04d-%02d', $year, $month) }}">{{ Carbon\Carbon::create($year, $month, 1)->locale($isAdminRoute && auth()->check() ? app()->getLocale() : (session()->has('translate') ? 'en' : (isset($role) && $role->language_code ? $role->language_code : 'en')))->translatedFormat('F Y') }}</time>
         </h1>
 
 
         {{-- All Controls Wrapper: Groups all interactive elements. Stacks on mobile, row on desktop. --}}
-        <div class="flex flex-col md:flex-row md:items-center md:ms-auto gap-3">
+        <div class="flex {{ ($tab ?? '') == 'availability' ? 'flex-row flex-wrap items-center' : 'flex-col' }} md:flex-row md:flex-nowrap md:items-center md:ms-auto gap-3">
 
             {{-- Month Navigation Controls --}}
-            <div v-show="currentView === 'calendar'" class="flex items-center bg-white/95 dark:bg-gray-900/95 rounded-md shadow-sm hidden md:flex">
+            <div v-show="currentView === 'calendar'" class="flex items-center bg-white/95 dark:bg-gray-900/95 rounded-md shadow-sm {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:flex' }}">
                 <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-s-md border-s border-y border-gray-300 dark:border-gray-600 pe-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:pe-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
                     <span class="sr-only">{{ __('messages.previous_month') }}</span>
                     <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
@@ -252,9 +252,9 @@
             </div>
 
             {{-- Save Button --}}
-            @if ($route == 'admin' && $role->email_verified_at)
+            @if ($route == 'admin' && $role->email_verified_at && !(auth()->check() && auth()->user()->isViewer($role->subdomain)))
                 @if ($tab == 'availability')
-                    <x-brand-button id="saveButton" :disabled="true" class="w-full md:w-auto">
+                    <x-brand-button id="saveButton" :disabled="true" class="flex-grow md:flex-grow-0">
                         <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M6.5 20Q4.22 20 2.61 18.43 1 16.85 1 14.58 1 12.63 2.17 11.1 3.35 9.57 5.25 9.15 5.88 6.85 7.75 5.43 9.63 4 12 4 14.93 4 16.96 6.04 19 8.07 19 11 20.73 11.2 21.86 12.5 23 13.78 23 15.5 23 17.38 21.69 18.69 20.38 20 18.5 20H13Q12.18 20 11.59 19.41 11 18.83 11 18V12.85L9.4 14.4L8 13L12 9L16 13L14.6 14.4L13 12.85V18H18.5Q19.55 18 20.27 17.27 21 16.55 21 15.5 21 14.45 20.27 13.73 19.55 13 18.5 13H17V11Q17 8.93 15.54 7.46 14.08 6 12 6 9.93 6 8.46 7.46 7 8.93 7 11H6.5Q5.05 11 4.03 12.03 3 13.05 3 14.5 3 15.95 4.03 17 5.05 18 6.5 18H9V20M12 13Z" />
                         </svg>
@@ -324,7 +324,7 @@
                     </button>
                 </template>
                 {{-- Mobile Add Event Button --}}
-                @if ($route == 'admin' && $role->email_verified_at && $tab == 'schedule')
+                @if ($route == 'admin' && $role->email_verified_at && $tab == 'schedule' && !(auth()->check() && auth()->user()->isViewer($role->subdomain)))
                     <x-brand-link href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}" class="flex-1">
                         <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
@@ -359,7 +359,7 @@
             @endif
 
             {{-- Desktop Add Event Button --}}
-            @if ($route == 'admin' && $role->email_verified_at && $tab == 'schedule')
+            @if ($route == 'admin' && $role->email_verified_at && $tab == 'schedule' && !(auth()->check() && auth()->user()->isViewer($role->subdomain)))
                 <x-brand-link href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}" class="hidden md:inline-flex w-auto">
                     <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
@@ -398,7 +398,7 @@
                 </div>
             </div>
         </div>
-        <div v-show="!isLoadingEvents" class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
+        <div v-show="!isLoadingEvents" class="{{ ($tab ?? '') == 'availability' ? '' : 'hidden md:block' }} {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
             <div
                 class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-center text-xs font-semibold leading-6 text-gray-700 dark:text-gray-300">
                 @php
@@ -433,7 +433,7 @@
                 <div class="cursor-pointer relative calendar-day-navigate {{ count($unavailable) ? ($currentDate->month == $month ? 'bg-orange-50 dark:bg-orange-900/30 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-orange-50 dark:bg-orange-900/30 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-500 dark:text-gray-400') : ($currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600') }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600"
                     data-href="{{ route('event.create', ['subdomain' => $role->subdomain, 'date' => $currentDate->format('Y-m-d')]) }}">
                     @elseif ($route == 'admin' && $tab == 'availability' && $role->email_verified_at)
-                        <div class="{{ $tab == 'availability' && $currentDate->month != $month ? 'hidden md:block' : '' }} cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600 day-element" data-date="{{ $currentDate->format('Y-m-d') }}">
+                        <div class="{{ $tab == 'availability' && $currentDate->month != $month ? 'hidden md:block' : '' }} cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-1 py-1 md:px-3 md:py-2 min-h-[44px] md:min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600 day-element" data-date="{{ $currentDate->format('Y-m-d') }}">
                         @if (is_array($datesUnavailable) && in_array($currentDate->format('Y-m-d'), $datesUnavailable))
                             <div class="day-x"></div>
                         @endif
@@ -1424,7 +1424,7 @@
             </div>
 
             {{-- Empty State --}}
-            <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="pb-4 text-center">
+            <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0 && {{ ($tab ?? '') != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
                         {{ __('messages.no_scheduled_events') }}

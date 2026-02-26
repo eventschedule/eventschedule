@@ -78,6 +78,7 @@
                         <a href="#verification" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Verification Steps</a>
                         <a href="#demo" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Demo Mode</a>
                         <a href="#troubleshooting" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Troubleshooting</a>
+                        <a href="#related" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Related Documentation</a>
                         <a href="#security" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Security Considerations</a>
                     </nav>
                 </aside>
@@ -631,6 +632,14 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                                 </div>
                                 <pre><code>tail -f storage/logs/laravel.log</code></pre>
                             </div>
+                        </section>
+
+                        <!-- Related Documentation -->
+                        <section id="related" class="doc-section">
+                            <h2 class="doc-heading">Related Documentation</h2>
+                            <ul class="doc-list">
+                                <li><x-link href="/docs/saas/custom-domains">Custom Domains</x-link> - Allow your customers to use their own domain names with their schedules, including DigitalOcean App Platform setup</li>
+                            </ul>
                         </section>
 
                         <!-- Security Considerations -->

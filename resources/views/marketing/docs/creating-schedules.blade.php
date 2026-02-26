@@ -205,9 +205,27 @@
                             <h2 class="doc-heading">Custom Domain <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span></h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Use your own domain name instead of <code class="doc-inline-code">yoursubdomain.eventschedule.com</code>. With a custom domain, visitors access your schedule at an address like <code class="doc-inline-code">events.yourdomain.com</code> or <code class="doc-inline-code">yourdomain.com</code>.</p>
 
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">Custom domains work by redirecting your domain to your Event Schedule URL using Cloudflare's free URL forwarding. Follow the steps below to set it up.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">There are two ways to use a custom domain:</p>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Redirect mode</strong> - Your domain redirects visitors to your <code class="doc-inline-code">eventschedule.com</code> URL using Cloudflare. Simple to set up and free.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Direct mode</strong> - Your schedule is served directly on your custom domain with automatic SSL. Visitors see your domain in the address bar at all times.</li>
+                            </ul>
 
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Setting Up Your Custom Domain with Cloudflare</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Option 1: Direct Mode (CNAME)</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Direct mode serves your schedule directly on your custom domain. SSL is provisioned automatically.</p>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Go to your schedule settings</strong> - Navigate to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit &rarr; Schedule Settings</strong>.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Enter your custom domain</strong> - Type your full domain URL (e.g., <code class="doc-inline-code">https://events.yourdomain.com</code>) and select <strong class="text-gray-900 dark:text-white">Direct</strong> mode.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Add a CNAME record</strong> - Go to your domain registrar's DNS settings and add a CNAME record pointing to the hostname shown in the setup instructions.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Wait for DNS propagation</strong> - DNS changes can take up to 48 hours. SSL will be provisioned automatically once DNS is verified.</li>
+                            </ol>
+
+                            <div class="doc-callout doc-callout-tip mb-6">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>Direct mode is the recommended option. Your visitors will see your custom domain in their browser at all times, and SSL is handled automatically.</p>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Option 2: Redirect Mode (Cloudflare)</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li><strong class="text-gray-900 dark:text-white">Create a free Cloudflare account</strong> - Sign up at <code class="doc-inline-code">cloudflare.com</code> if you don't already have one.</li>
                                 <li><strong class="text-gray-900 dark:text-white">Add your custom domain to Cloudflare</strong> - In the Cloudflare dashboard, click "Add a site" and enter your domain name. Select the free plan.</li>

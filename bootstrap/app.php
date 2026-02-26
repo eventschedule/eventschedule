@@ -7,6 +7,7 @@ use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\HandleBotTraffic;
 use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Middleware\ResolveCustomDomain;
 use App\Http\Middleware\SanitizeUserAgent;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetUserLanguage;
@@ -33,10 +34,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'stripe/webhook',
             'stripe/subscription-webhook',
             'invoiceninja/webhook/*',
+            'invoiceninja/purchase-webhook/*',
             'test_database',
             'nl/u/*',
             'webhooks/meta',
         ]);
+
+        // Resolve custom domains before routing (must be first)
+        $middleware->prepend(ResolveCustomDomain::class);
 
         // Sanitize user agent before session middleware processes it
         $middleware->prepend(SanitizeUserAgent::class);

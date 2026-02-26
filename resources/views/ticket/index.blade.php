@@ -1,6 +1,21 @@
 <x-app-admin-layout>
 
     <div class="flow-root">
+        <div class="mb-4">
+            @if($past)
+                <a href="{{ route('tickets') }}" class="inline-flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                    <svg class="w-4 h-4 me-1 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    {{ __('messages.back') }}
+                </a>
+            @elseif(!empty($hasPastTickets))
+                <a href="{{ route('tickets', ['past' => 1]) }}" class="inline-flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                    {{ __('messages.show_past_events') }}
+                </a>
+            @endif
+        </div>
+
         @if($sales->count() > 0)
             <!-- Desktop Table View -->
             <div class="hidden md:block -mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -186,8 +201,10 @@
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                 </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.no_tickets') }}</h3>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_tickets_description') }}</p>
+                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{{ $past ? __('messages.no_past_tickets') : __('messages.no_tickets') }}</h3>
+                @if(!$past)
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_tickets_description') }}</p>
+                @endif
             </div>
         @endif
     </div>

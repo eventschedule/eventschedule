@@ -167,8 +167,9 @@
             @if (config('cashier.key') && !$role->hasActiveSubscription() && !$role->onGracePeriod() && ($role->onGenericTrial() || $role->plan_type == 'free' || ($role->plan_type == 'pro' && !$role->isPro())))
             <div>
                 <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain]) }}"
-                    class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                    {{ __('messages.upgrade_to_pro_plan') }}
+                    class="relative overflow-hidden inline-flex items-center rounded-md bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all">
+                    <span class="relative z-10">{{ __('messages.upgrade_to_pro_plan') }}</span>
+                    <div class="absolute inset-0 animate-shimmer"></div>
                 </a>
                 @if ($role->isEligibleForTrial())
                 <span class="ms-3 text-sm text-green-600 dark:text-green-400 font-medium">

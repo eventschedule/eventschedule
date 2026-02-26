@@ -6,6 +6,7 @@ use App\Models\AnalyticsEventsDaily;
 use App\Models\Sale;
 use App\Models\User;
 use App\Utils\InvoiceNinja;
+use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 
 class InvoiceNinjaController extends Controller
@@ -26,6 +27,7 @@ class InvoiceNinjaController extends Controller
         $user->invoiceninja_api_key = null;
         $user->invoiceninja_company_name = null;
         $user->invoiceninja_webhook_secret = null;
+        $user->invoiceninja_mode = 'invoice';
         $user->save();
 
         return redirect()->back()->with('message', __('messages.invoiceninja_unlinked'));
@@ -94,7 +96,7 @@ class InvoiceNinjaController extends Controller
         // Use lockForUpdate to prevent race conditions from webhook retries
         \DB::transaction(function () use ($sale, $payload, $invoiceId) {
             $sale = Sale::lockForUpdate()->find($sale->id);
-            if ($sale->status === 'paid') {
+            if ($sale->status !== 'unpaid') {
                 return;
             }
 
@@ -127,6 +129,54 @@ class InvoiceNinjaController extends Controller
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
         });
+
+        return response()->json(['status' => 'success']);
+    }
+
+    public function purchaseWebhook(Request $request, $sale)
+    {
+        $sale = Sale::where('id', UrlUtils::decodeId($sale))
+            ->where('payment_method', 'invoiceninja')
+            ->where('transaction_reference', 'LIKE', 'sub:%')
+            ->first();
+
+        if (! $sale) {
+            return response()->json(['status' => 'error', 'message' => 'Sale not found'], 400);
+        }
+
+        $user = $sale->event->user;
+
+        // Validate webhook secret
+        $headerSecret = $request->header('X-Webhook-Secret');
+        if (! $headerSecret || ! $user->invoiceninja_webhook_secret || ! hash_equals($user->invoiceninja_webhook_secret, $headerSecret)) {
+            return response()->json(['status' => 'error', 'message' => 'Invalid webhook secret'], 400);
+        }
+
+        // Mark sale as paid with row locking
+        \DB::transaction(function () use ($sale) {
+            $sale = Sale::lockForUpdate()->find($sale->id);
+            if ($sale->status !== 'unpaid') {
+                return;
+            }
+
+            $sale->status = 'paid';
+            $sale->save();
+
+            AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+        });
+
+        // Best-effort cleanup: delete the subscription from IN
+        try {
+            $subscriptionId = str_replace('sub:', '', $sale->transaction_reference);
+            $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
+            $invoiceNinja->deleteSubscription($subscriptionId);
+        } catch (\Exception $e) {
+            \Log::warning('Failed to delete IN subscription after payment', [
+                'sale_id' => $sale->id,
+                'subscription_id' => $subscriptionId ?? null,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return response()->json(['status' => 'success']);
     }

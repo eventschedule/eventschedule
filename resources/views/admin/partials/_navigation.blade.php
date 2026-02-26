@@ -3,7 +3,7 @@
 
 @php
     $insightsActive = in_array($active, ['users', 'revenue', 'analytics', 'usage']);
-    $manageActive = in_array($active, ['boost', 'plans', 'newsletters', 'blog']);
+    $manageActive = in_array($active, ['boost', 'plans', 'domains', 'newsletters', 'blog']);
     $systemActive = in_array($active, ['audit-log', 'queue', 'logs']);
 
     $tabActive = 'border-[#4E81FA] text-[#4E81FA]';
@@ -83,6 +83,9 @@
                         </a>
                         <a href="{{ route('admin.plans') }}" class="{{ $active === 'plans' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.plans')
+                        </a>
+                        <a href="{{ route('admin.domains') }}" class="{{ $active === 'domains' ? $dropdownItemActive : $dropdownItem }}">
+                            @lang('messages.domains')
                         </a>
                         <a href="{{ route('admin.newsletters.index') }}" class="{{ $active === 'newsletters' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.newsletters')

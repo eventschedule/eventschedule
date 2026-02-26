@@ -397,6 +397,12 @@
                                     </svg>
                                     Meta Ads Boost Integration
                                 </div>
+                                <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                    <svg aria-hidden="true" class="w-4 h-4 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                    Custom Domains
+                                </div>
                             </div>
 
                             <div class="inline-flex items-center text-sm font-medium text-sky-600 dark:text-sky-400 group-hover:text-sky-700 dark:group-hover:text-sky-300 transition-colors">

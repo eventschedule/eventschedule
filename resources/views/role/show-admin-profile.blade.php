@@ -1,6 +1,6 @@
 @if ($role->description_html)
 <div class="mt-5 overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-md">
-    <div class="px-4 py-5 sm:p-6 text-gray-700 dark:text-gray-300 custom-content">
+    <div class="px-4 py-5 sm:p-6 text-gray-700 dark:text-gray-300 custom-content [&>*:first-child]:mt-0">
         {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->description_html) !!}
     </div>
 </div>
@@ -20,11 +20,13 @@
             <div class="flex-auto ps-4">
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
                     {{ __('messages.youtube_videos') }}
+                    @if(!$isViewer)
                     <button type="button"
                         class="btn-show-add inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                         data-link-type="youtube_links">
                         {{ __('messages.add') }}
                     </button>
+                    @endif
                 </h4>
 
             @if ($role->youtube_links)
@@ -68,11 +70,13 @@
             <div class="flex-auto ps-4">
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
                     {{ __('messages.social_links') }}
+                    @if(!$isViewer)
                     <button type="button"
                         class="btn-show-add inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                         data-link-type="social_links">
                         {{ __('messages.add') }}
                     </button>
+                    @endif
                 </h4>
 
             @if ($role->social_links)
@@ -116,11 +120,13 @@
             <div class="flex-auto ps-4">
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
                     {{ __('messages.payment_links') }}
+                    @if(!$isViewer)
                     <button type="button"
                         class="btn-show-add inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                         data-link-type="payment_links">
                         {{ __('messages.add') }}
                     </button>
+                    @endif
                 </h4>
             @if ($role->payment_links)
             <p class="text-gray-700 dark:text-gray-300">

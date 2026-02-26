@@ -345,6 +345,24 @@ class ProfileController extends Controller
         return Redirect::to(route('profile.edit').'#section-payment-methods')->with('status', 'payments-updated');
     }
 
+    public function updateInvoiceninjaMode(Request $request): RedirectResponse
+    {
+        if (is_demo_mode()) {
+            return Redirect::to(route('profile.edit').'#section-payment-methods')
+                ->with('error', __('messages.demo_mode_restriction'));
+        }
+
+        $request->validate([
+            'invoiceninja_mode' => ['required', 'in:invoice,payment_link,payment_link_v2,payment_link_v3'],
+        ]);
+
+        $user = $request->user();
+        $user->invoiceninja_mode = $request->invoiceninja_mode;
+        $user->save();
+
+        return Redirect::to(route('profile.edit').'#section-payment-methods')->with('status', 'payments-updated');
+    }
+
     public function unlinkPaymentUrl(Request $request): RedirectResponse
     {
         // Demo mode: prevent payment settings changes

@@ -57,3 +57,9 @@ Schedule::call(function () {
 Schedule::call(function () {
     Artisan::call('boost:expire-pending');
 })->everyFifteenMinutes()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
+    if (config('app.hosted')) {
+        Artisan::call('app:sync-domain-statuses');
+    }
+})->everyFiveMinutes()->appendOutputTo(storage_path('logs/scheduler.log'));

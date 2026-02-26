@@ -58,6 +58,8 @@ class UsageTrackingService
 
     const INVOICENINJA_INVOICE = 'invoiceninja_invoice';
 
+    const INVOICENINJA_PAYMENT_LINK = 'invoiceninja_payment_link';
+
     // CalDAV operations
     const CALDAV_SYNC = 'caldav_sync';
 

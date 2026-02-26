@@ -25,6 +25,7 @@ use App\Services\AnalyticsService;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\DemoService;
+use App\Services\DigitalOceanService;
 use App\Services\EmailService;
 use App\Services\MetaAdsService;
 use App\Services\SmsService;
@@ -145,6 +146,23 @@ class RoleController extends Controller
         }
 
         $emails = $role->members()->pluck('email');
+
+        // Clean up custom domain from DigitalOcean before deleting role
+        if ($role->custom_domain_mode === 'direct' && $role->custom_domain_host) {
+            try {
+                $doService = app(DigitalOceanService::class);
+                if ($doService->isConfigured()) {
+                    $doService->removeDomain($role->custom_domain_host);
+                    \Illuminate\Support\Facades\Cache::forget("custom_domain:{$role->custom_domain_host}");
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Failed to clean up custom domain during role deletion', [
+                    'role_id' => $role->id,
+                    'hostname' => $role->custom_domain_host,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
 
         // Clean up Google Calendar webhook before deleting role
         if ($role->google_webhook_id && $role->google_webhook_resource_id) {
@@ -1262,16 +1280,18 @@ class RoleController extends Controller
             $user->save();
         }
 
+        $level = in_array($request->input('level'), ['admin', 'viewer']) ? $request->input('level') : 'admin';
+
         if ($user->isFollowing($subdomain)) {
             $roleUser = RoleUser::where('user_id', $user->id)
                 ->where('role_id', $role->id)
                 ->first();
 
-            $roleUser->level = 'admin';
+            $roleUser->level = $level;
             $roleUser->save();
 
         } else {
-            $user->roles()->attach($role->id, ['level' => 'admin', 'created_at' => now()]);
+            $user->roles()->attach($role->id, ['level' => $level, 'created_at' => now()]);
         }
 
         Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
@@ -1320,6 +1340,36 @@ class RoleController extends Controller
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
             ->with('message', __('messages.removed_member'));
+    }
+
+    public function updateMemberLevel(Request $request, $subdomain, $hash)
+    {
+        $userId = UrlUtils::decodeId($hash);
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $this->authorize('manageMembers', $role);
+
+        $request->validate([
+            'level' => ['required', 'in:admin,viewer'],
+        ]);
+
+        if ($userId == $role->user_id) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $roleUser = RoleUser::where('user_id', $userId)
+            ->where('role_id', $role->id)
+            ->first();
+
+        if (! $roleUser || $roleUser->level == 'owner') {
+            return redirect()->back()->with('error', __('messages.not_found'));
+        }
+
+        $roleUser->level = $request->level;
+        $roleUser->save();
+
+        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
+            ->with('message', __('messages.member_level_updated'));
     }
 
     public function following()
@@ -1650,7 +1700,7 @@ class RoleController extends Controller
 
     public function edit($subdomain)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -1727,7 +1777,7 @@ class RoleController extends Controller
 
     public function update(RoleUpdateRequest $request, $subdomain): RedirectResponse
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -1759,8 +1809,17 @@ class RoleController extends Controller
 
         // Guard custom_domain behind Enterprise plan
         if (! $role->isEnterprise()) {
-            $request->merge(['custom_domain' => $role->custom_domain]);
+            $request->merge([
+                'custom_domain' => $role->custom_domain,
+                'custom_domain_mode' => $role->custom_domain_mode,
+            ]);
         }
+
+        // Track custom domain changes for DO API
+        $oldCustomDomain = $role->custom_domain;
+        $oldCustomDomainMode = $role->custom_domain_mode;
+        $oldCustomDomainHost = $role->custom_domain_host;
+        $oldCustomDomainStatus = $role->custom_domain_status;
 
         $existingSettings = $role->getEmailSettings();
 
@@ -1990,6 +2049,50 @@ class RoleController extends Controller
 
         $role->save();
 
+        // Handle DigitalOcean custom domain provisioning
+        $newCustomDomainHost = $role->custom_domain_host;
+        $newCustomDomainMode = $role->custom_domain_mode;
+        $doService = app(DigitalOceanService::class);
+
+        if ($doService->isConfigured()) {
+            try {
+                // Remove old domain from DO if it was direct mode and domain/mode changed
+                if ($oldCustomDomainMode === 'direct' && $oldCustomDomainHost &&
+                    ($oldCustomDomainHost !== $newCustomDomainHost || $newCustomDomainMode !== 'direct')) {
+                    $doService->removeDomain($oldCustomDomainHost);
+                    \Illuminate\Support\Facades\Cache::forget("custom_domain:{$oldCustomDomainHost}");
+                }
+
+                // Add new domain to DO if direct mode
+                if ($newCustomDomainMode === 'direct' && $newCustomDomainHost &&
+                    ($oldCustomDomainHost !== $newCustomDomainHost || $oldCustomDomainMode !== 'direct'
+                     || $oldCustomDomainStatus === 'failed')) {
+                    // Clear any stale cache for the new domain (e.g., previously assigned to a different schedule)
+                    \Illuminate\Support\Facades\Cache::forget("custom_domain:{$newCustomDomainHost}");
+                    $success = $doService->addDomain($newCustomDomainHost);
+                    $role->update(['custom_domain_status' => $success ? 'pending' : 'failed']);
+                    \Illuminate\Support\Facades\Cache::forget("custom_domain:{$newCustomDomainHost}");
+                }
+
+                // Clear status and cache if switching away from direct mode
+                if ($newCustomDomainMode !== 'direct' && $oldCustomDomainMode === 'direct') {
+                    $role->update(['custom_domain_status' => null]);
+                    if ($oldCustomDomainHost) {
+                        \Illuminate\Support\Facades\Cache::forget("custom_domain:{$oldCustomDomainHost}");
+                    }
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to manage custom domain in DO', [
+                    'role_id' => $role->id,
+                    'error' => $e->getMessage(),
+                ]);
+                $role->update(['custom_domain_status' => 'failed']);
+                if ($newCustomDomainHost) {
+                    \Illuminate\Support\Facades\Cache::forget("custom_domain:{$newCustomDomainHost}");
+                }
+            }
+        }
+
         // Sync groups
         $existingGroupIds = $role->groups()->pluck('id')->toArray();
         $submittedGroups = $request->input('groups', []);
@@ -2153,7 +2256,7 @@ class RoleController extends Controller
 
     public function updateLinks(RoleLinkUpdateRequest $request, $subdomain): RedirectResponse
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -2204,7 +2307,7 @@ class RoleController extends Controller
 
     public function removeLinks(RoleLinkRemoveRequest $request, $subdomain): RedirectResponse
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -2530,7 +2633,7 @@ class RoleController extends Controller
 
     public function resendInvite(Request $request, $subdomain, $hash)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -2741,7 +2844,7 @@ class RoleController extends Controller
 
     public function testImport(Request $request, $subdomain)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
@@ -2960,7 +3063,7 @@ class RoleController extends Controller
 
     public function saveVideo(RoleVideoSaveRequest $request, $subdomain)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
@@ -3010,7 +3113,7 @@ class RoleController extends Controller
 
     public function saveVideos(RoleVideosSaveRequest $request, $subdomain)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
@@ -3165,7 +3268,7 @@ class RoleController extends Controller
      */
     public function testEmail(Request $request, $subdomain): JsonResponse
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
@@ -3243,7 +3346,7 @@ class RoleController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
@@ -3286,7 +3389,7 @@ class RoleController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 

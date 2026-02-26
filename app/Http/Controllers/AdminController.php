@@ -20,12 +20,14 @@ use App\Models\User;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\DemoService;
+use App\Services\DigitalOceanService;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -2264,5 +2266,142 @@ class AdminController extends Controller
         AuditService::log(AuditService::ADMIN_UPDATE, auth()->id(), 'BoostCampaign', $campaign->id, null, null, 'Refunded amount_mismatch boost');
 
         return redirect()->back()->with('success', __('messages.boost_refunded'));
+    }
+
+    /**
+     * Admin domains management page.
+     */
+    public function domains(Request $request)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $query = Role::whereNotNull('custom_domain');
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('subdomain', 'like', "%{$search}%")
+                    ->orWhere('custom_domain', 'like', "%{$search}%")
+                    ->orWhere('custom_domain_host', 'like', "%{$search}%");
+            });
+        }
+
+        if ($mode = $request->input('mode')) {
+            $query->where('custom_domain_mode', $mode);
+        }
+
+        if ($status = $request->input('status')) {
+            $query->where('custom_domain_status', $status);
+        }
+
+        $roles = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
+
+        // Statistics
+        $totalCustomDomains = Role::whereNotNull('custom_domain')->count();
+        $directCount = Role::where('custom_domain_mode', 'direct')->count();
+        $activeCount = Role::where('custom_domain_mode', 'direct')->where('custom_domain_status', 'active')->count();
+        $pendingCount = Role::where('custom_domain_mode', 'direct')->where('custom_domain_status', 'pending')->count();
+
+        // Fetch live DO statuses for direct-mode domains on this page
+        $doStatuses = [];
+        $doService = app(DigitalOceanService::class);
+        if ($doService->isConfigured()) {
+            try {
+                $doStatuses = $doService->getAppDomains();
+            } catch (\Exception $e) {
+                Log::error('Failed to fetch DO domain statuses', ['error' => $e->getMessage()]);
+            }
+        }
+
+        return view('admin.domains', compact(
+            'roles',
+            'totalCustomDomains',
+            'directCount',
+            'activeCount',
+            'pendingCount',
+            'doStatuses',
+        ));
+    }
+
+    /**
+     * Re-provision a custom domain in DigitalOcean.
+     */
+    public function domainReprovision(Role $role)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        if (! $role->custom_domain_host || $role->custom_domain_mode !== 'direct') {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $doService = app(DigitalOceanService::class);
+        if (! $doService->isConfigured()) {
+            return redirect()->back()->with('error', 'DigitalOcean service not configured.');
+        }
+
+        try {
+            $doService->removeDomain($role->custom_domain_host);
+            $doService->addDomain($role->custom_domain_host);
+            $role->update(['custom_domain_status' => 'pending']);
+            Cache::forget("custom_domain:{$role->custom_domain_host}");
+        } catch (\Exception $e) {
+            Log::error('Failed to re-provision domain', [
+                'role_id' => $role->id,
+                'hostname' => $role->custom_domain_host,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'Re-provision failed: '.$e->getMessage());
+        }
+
+        AuditService::log(AuditService::ADMIN_UPDATE, auth()->id(), 'Role', $role->id, null, null, "Re-provisioned domain: {$role->custom_domain_host}");
+
+        return redirect()->back()->with('success', __('messages.reprovision_success'));
+    }
+
+    /**
+     * Remove a custom domain from DigitalOcean.
+     */
+    public function domainRemove(Role $role)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        if (! $role->custom_domain_host) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $hostname = $role->custom_domain_host;
+
+        $doService = app(DigitalOceanService::class);
+        if ($doService->isConfigured() && $role->custom_domain_mode === 'direct') {
+            try {
+                $doService->removeDomain($hostname);
+            } catch (\Exception $e) {
+                Log::error('Failed to remove domain from DO', [
+                    'role_id' => $role->id,
+                    'hostname' => $hostname,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        $role->update([
+            'custom_domain' => null,
+            'custom_domain_mode' => null,
+            'custom_domain_host' => null,
+            'custom_domain_status' => null,
+        ]);
+
+        Cache::forget("custom_domain:{$hostname}");
+
+        AuditService::log(AuditService::ADMIN_UPDATE, auth()->id(), 'Role', $role->id, null, null, "Removed domain: {$hostname}");
+
+        return redirect()->back()->with('success', __('messages.domain_removed'));
     }
 }

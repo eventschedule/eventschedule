@@ -15,8 +15,8 @@
         "featureList": [
             "Custom domain mapping",
             "Branded schedule URLs",
-            "Cloudflare integration",
-            "Free SSL via Cloudflare"
+            "Direct mode with automatic SSL",
+            "Redirect mode via Cloudflare"
         ],
         "offers": {
             "@type": "Offer",
@@ -36,7 +36,7 @@
                 "name": "How do I set up a custom domain?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Set up a free Cloudflare account, configure DNS records and a page rule to redirect your domain to your Event Schedule URL, then enter your custom domain in the schedule settings."
+                    "text": "Choose between two modes: Direct mode (recommended) - add a CNAME record and SSL is provisioned automatically; or Redirect mode - set up Cloudflare to redirect your domain to your Event Schedule URL."
                 }
             },
             {
@@ -52,7 +52,7 @@
                 "name": "Is SSL/HTTPS included?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. When you use Cloudflare for the domain setup, SSL/HTTPS is included for free through Cloudflare's free plan."
+                    "text": "Yes. In Direct mode, SSL is provisioned automatically. In Redirect mode, SSL is included for free through Cloudflare's free plan."
                 }
             },
             {
@@ -107,7 +107,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12 animate-reveal delay-200" style="opacity: 0;">
-                Replace the default subdomain with your own domain name. Your audience visits <strong class="text-gray-900 dark:text-white">events.yourdomain.com</strong> instead of a third-party URL.
+                Serve your schedule directly on your own domain with automatic SSL, or redirect via Cloudflare. Your audience visits <strong class="text-gray-900 dark:text-white">events.yourdomain.com</strong> instead of a third-party URL.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4 animate-reveal delay-300" style="opacity: 0;">

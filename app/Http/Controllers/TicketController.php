@@ -27,18 +27,39 @@ class TicketController extends Controller
     public function tickets()
     {
         $user = auth()->user();
+        $past = request()->query('past') == 1;
 
-        $sales = Sale::with('event', 'saleTickets')
+        $query = Sale::with('event', 'saleTickets')
             ->where('user_id', $user->id)
-            ->where('is_deleted', false)
-            ->where('event_date', '>=', now()->subDay()->startOfDay())
-            ->whereHas('event', function ($query) {
-                $query->where('starts_at', '>=', now()->subDay()->startOfDay());
-            })
-            ->orderBy('event_date', 'ASC')
-            ->get();
+            ->where('is_deleted', false);
 
-        return view('ticket.index', compact('sales'));
+        if ($past) {
+            $query->where(function ($q) {
+                $q->where('event_date', '<', now()->subDay()->startOfDay())
+                    ->orWhereHas('event', function ($eq) {
+                        $eq->where('starts_at', '<', now()->subDay()->startOfDay());
+                    });
+            });
+            $sales = $query->orderBy('event_date', 'DESC')->get();
+        } else {
+            $query->where('event_date', '>=', now()->subDay()->startOfDay())
+                ->whereHas('event', function ($eq) {
+                    $eq->where('starts_at', '>=', now()->subDay()->startOfDay());
+                });
+            $sales = $query->orderBy('event_date', 'ASC')->get();
+
+            $hasPastTickets = Sale::where('user_id', $user->id)
+                ->where('is_deleted', false)
+                ->where(function ($q) {
+                    $q->where('event_date', '<', now()->subDay()->startOfDay())
+                        ->orWhereHas('event', function ($eq) {
+                            $eq->where('starts_at', '<', now()->subDay()->startOfDay());
+                        });
+                })
+                ->exists();
+        }
+
+        return view('ticket.index', compact('sales', 'past') + ($past ? [] : compact('hasPastTickets')));
     }
 
     public function sales()
@@ -338,8 +359,8 @@ class TicketController extends Controller
                             'sale_id' => UrlUtils::encodeId($sale->id),
                         ],
                     ],
-                    'success_url' => route('checkout.success', $data).'?session_id={CHECKOUT_SESSION_ID}',
-                    'cancel_url' => route('checkout.cancel', $data).'?secret='.$sale->secret,
+                    'success_url' => custom_domain_url(route('checkout.success', $data).'?session_id={CHECKOUT_SESSION_ID}'),
+                    'cancel_url' => custom_domain_url(route('checkout.cancel', $data).'?secret='.$sale->secret),
                 ],
                 [
                     'stripe_account' => $event->user->stripe_account_id,
@@ -362,8 +383,8 @@ class TicketController extends Controller
                         'sale_id' => UrlUtils::encodeId($sale->id),
                     ],
                 ],
-                'success_url' => route('checkout.success', $data).'?session_id={CHECKOUT_SESSION_ID}&direct=1',
-                'cancel_url' => route('checkout.cancel', $data).'?secret='.$sale->secret,
+                'success_url' => custom_domain_url(route('checkout.success', $data).'?session_id={CHECKOUT_SESSION_ID}&direct=1'),
+                'cancel_url' => custom_domain_url(route('checkout.cancel', $data).'?secret='.$sale->secret),
             ]);
         }
 
@@ -371,6 +392,17 @@ class TicketController extends Controller
     }
 
     private function invoiceninjaCheckout($subdomain, $sale, $event)
+    {
+        $user = $event->user;
+
+        if (str_starts_with($user->invoiceninja_mode, 'payment_link')) {
+            return $this->invoiceninjaPaymentLinkCheckout($subdomain, $sale, $event);
+        }
+
+        return $this->invoiceninjaInvoiceCheckout($subdomain, $sale, $event);
+    }
+
+    private function invoiceninjaInvoiceCheckout($subdomain, $sale, $event)
     {
         $user = $event->user;
         $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
@@ -425,6 +457,57 @@ class TicketController extends Controller
             return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
         } else {
             return redirect($invoice['invitations'][0]['link']);
+        }
+    }
+
+    private function invoiceninjaPaymentLinkCheckout($subdomain, $sale, $event)
+    {
+        try {
+            $user = $event->user;
+            $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
+
+            $productIds = [];
+            foreach ($sale->saleTickets as $saleTicket) {
+                $productKey = $saleTicket->ticket->type ?: __('messages.tickets');
+                $product = $invoiceNinja->createProduct(
+                    $productKey,
+                    $saleTicket->ticket->description ?? '',
+                    $saleTicket->ticket->price
+                );
+                for ($i = 0; $i < $saleTicket->quantity; $i++) {
+                    $productIds[] = $product['id'];
+                }
+            }
+
+            $encodedSaleId = UrlUtils::encodeId($sale->id);
+            $subscriptionName = 'ES-'.$encodedSaleId.'-'.time();
+
+            $webhookConfig = [
+                'post_purchase_url' => route('invoiceninja.purchase_webhook', ['sale' => $encodedSaleId]),
+                'post_purchase_rest_method' => 'post',
+                'post_purchase_headers' => ['X-Webhook-Secret' => $user->invoiceninja_webhook_secret],
+            ];
+
+            $subscription = $invoiceNinja->createSubscription(
+                $subscriptionName,
+                $productIds,
+                $sale->payment_amount,
+                $webhookConfig
+            );
+
+            $sale->transaction_reference = 'sub:'.$subscription['id'];
+            $sale->save();
+
+            $purchaseUrl = $subscription['purchase_page'];
+            if ($user->invoiceninja_mode === 'payment_link_v2') {
+                $purchaseUrl .= '/v2';
+            } elseif ($user->invoiceninja_mode === 'payment_link_v3') {
+                $purchaseUrl .= '/v3';
+            }
+
+            return redirect($purchaseUrl);
+        } catch (\Exception $e) {
+            return back()->with('error', __('messages.error'));
         }
     }
 
@@ -618,7 +701,7 @@ class TicketController extends Controller
             return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
         }
 
-        if (! $user->canEditEvent($event)) {
+        if (! $user->canScanEvent($event)) {
             return response()->json(['error' => __('messages.you_are_not_authorized_to_scan_this_ticket')], 200);
         }
 
@@ -710,12 +793,28 @@ class TicketController extends Controller
         switch ($request->action) {
             case 'mark_paid':
                 if ($sale->status === 'unpaid') {
-                    $sale->status = 'paid';
-                    $sale->transaction_reference = __('messages.manual_payment');
-                    $sale->save();
+                    // Clean up IN subscription for payment link mode sales
+                    if ($sale->payment_method === 'invoiceninja' && str_starts_with($sale->transaction_reference ?? '', 'sub:')) {
+                        try {
+                            $user = $sale->event->user;
+                            $subscriptionId = str_replace('sub:', '', $sale->transaction_reference);
+                            $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
+                            $invoiceNinja->deleteSubscription($subscriptionId);
+                        } catch (\Exception $e) {
+                            \Log::warning('Failed to delete IN subscription on mark_paid', [
+                                'sale_id' => $sale->id,
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
+                    }
+
+                    DB::transaction(function () use ($sale) {
+                        $sale->status = 'paid';
+                        $sale->transaction_reference = __('messages.manual_payment');
+                        $sale->save();
+                    });
                     $actionPerformed = true;
 
-                    // Record sale in analytics
                     AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
                 }
                 break;
@@ -735,6 +834,22 @@ class TicketController extends Controller
             case 'cancel':
                 if (in_array($sale->status, ['unpaid', 'paid'])) {
                     $wasPaid = $sale->status === 'paid';
+
+                    // Clean up IN subscription for payment link mode sales
+                    if (! $wasPaid && $sale->payment_method === 'invoiceninja' && str_starts_with($sale->transaction_reference ?? '', 'sub:')) {
+                        try {
+                            $user = $sale->event->user;
+                            $subscriptionId = str_replace('sub:', '', $sale->transaction_reference);
+                            $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
+                            $invoiceNinja->deleteSubscription($subscriptionId);
+                        } catch (\Exception $e) {
+                            \Log::warning('Failed to delete IN subscription on cancel', [
+                                'sale_id' => $sale->id,
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
+                    }
+
                     DB::transaction(function () use ($sale) {
                         $sale->status = 'cancelled';
                         $sale->save();
@@ -748,6 +863,21 @@ class TicketController extends Controller
                 break;
 
             case 'delete':
+                // Clean up IN subscription for unpaid payment link mode sales
+                if ($sale->status === 'unpaid' && $sale->payment_method === 'invoiceninja' && str_starts_with($sale->transaction_reference ?? '', 'sub:')) {
+                    try {
+                        $user = $sale->event->user;
+                        $subscriptionId = str_replace('sub:', '', $sale->transaction_reference);
+                        $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
+                        $invoiceNinja->deleteSubscription($subscriptionId);
+                    } catch (\Exception $e) {
+                        \Log::warning('Failed to delete IN subscription on delete', [
+                            'sale_id' => $sale->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+
                 DB::transaction(function () use ($sale) {
                     // If the sale was paid, cancel first to release ticket inventory
                     // (triggers Sale::booted hook) and decrement analytics

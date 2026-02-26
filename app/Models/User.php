@@ -31,6 +31,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'invoiceninja_api_key',
         'invoiceninja_api_url',
         'invoiceninja_webhook_secret',
+        'invoiceninja_mode',
         'payment_url',
         'payment_secret',
         'is_subscribed',
@@ -181,6 +182,11 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function member()
     {
+        return $this->roles()->wherePivotIn('level', ['owner', 'admin', 'viewer']);
+    }
+
+    public function editor()
+    {
         return $this->roles()->wherePivotIn('level', ['owner', 'admin']);
     }
 
@@ -191,17 +197,17 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function venues()
     {
-        return $this->member()->type('venue');
+        return $this->editor()->type('venue');
     }
 
     public function talents()
     {
-        return $this->member()->type('talent');
+        return $this->editor()->type('talent');
     }
 
     public function curators()
     {
-        return $this->member()->type('curator');
+        return $this->editor()->type('curator');
     }
 
     public function allCurators()
@@ -237,6 +243,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isMember($subdomain): bool
     {
         return $this->member()->where('subdomain', $subdomain)->exists();
+    }
+
+    public function isEditor($subdomain): bool
+    {
+        return $this->editor()->where('subdomain', $subdomain)->exists();
+    }
+
+    public function isViewer($subdomain): bool
+    {
+        return $this->roles()->where('subdomain', $subdomain)->wherePivot('level', 'viewer')->exists();
     }
 
     public function isFollowing($subdomain): bool
@@ -288,6 +304,27 @@ class User extends Authenticatable implements MustVerifyEmail
             $pivot = $this->roles()
                 ->where('roles.id', $role->id)
                 ->wherePivotIn('level', ['owner', 'admin'])
+                ->first();
+
+            if ($pivot) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function canScanEvent($event)
+    {
+        if ($this->canEditEvent($event)) {
+            return true;
+        }
+
+        // Viewers can also scan tickets
+        foreach ($event->roles as $role) {
+            $pivot = $this->roles()
+                ->where('roles.id', $role->id)
+                ->wherePivot('level', 'viewer')
                 ->first();
 
             if ($pivot) {

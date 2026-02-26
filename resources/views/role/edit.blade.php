@@ -95,6 +95,50 @@
         </style>
 
         <script {!! nonce_attr() !!}>
+        var allFonts = @json($fonts);
+
+        var languageSubsetMap = {
+            'he': 'hebrew',
+            'ar': 'arabic',
+            'ru': 'cyrillic'
+        };
+
+        function filterFontsByLanguage(langCode) {
+            var requiredSubset = languageSubsetMap[langCode];
+            if (!requiredSubset) {
+                return allFonts;
+            }
+            return allFonts.filter(function(font) {
+                return font.subsets && font.subsets.indexOf(requiredSubset) !== -1;
+            });
+        }
+
+        function updateFontOptions() {
+            var langCode = $('#language_code').val();
+            var filteredFonts = filterFontsByLanguage(langCode);
+            var select = document.getElementById('font_family');
+            var currentValue = select.value;
+
+            select.innerHTML = '';
+            filteredFonts.forEach(function(font) {
+                var option = document.createElement('option');
+                option.value = font.value;
+                option.textContent = font.label;
+                if (font.value === currentValue) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+
+            // If current font is not compatible, select the first available font
+            if (select.value !== currentValue) {
+                select.selectedIndex = 0;
+                onChangeFont();
+            }
+
+            updateFontNavButtons();
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             $('#background').val('{{ old('background', $role->background) }}');
             $('#background_colors').val('{{ old('background_colors', $role->background_colors) }}');
@@ -113,9 +157,11 @@
             $('#font_family').val('{{ old('font_family', $role->font_family) }}');
             $('#language_code').val('{{ old('language_code', $role->language_code) }}');
             $('#timezone').val('{{ old('timezone', $role->timezone) }}');
-            
+
             $('#header_image').trigger('input');
-            
+
+            updateFontOptions();
+
             updatePreview();
             onChangeBackground();
             onChangeCountry();
@@ -386,8 +432,16 @@
             var backgroundColors = $('#background_colors').val();
             var backgroundRotation = $('#background_rotation').val();
             var fontColor = isDark ? '#F3F4F6' : '#151B26';
-            var fontFamily = $('#font_family').find(':selected').val();
+            var fontFamily = $('#font_family').find(':selected').text().trim();
             var accentColor = $('#accent_color').val() || '#4E81FA';
+            var langCode = $('#language_code').val();
+            var isRtl = (langCode === 'ar' || langCode === 'he');
+            var followTranslations = {
+                @foreach(config('app.supported_languages') as $lang)
+                    '{{ $lang }}': @json(__('messages.follow', [], $lang), JSON_UNESCAPED_UNICODE),
+                @endforeach
+            };
+            var followText = followTranslations[langCode] || followTranslations['en'];
             var name = $('#name').val();
             var headerImage = $('#header_image').val();
             var profileImagePreview = $('#profile_image_preview').attr('src');
@@ -398,6 +452,8 @@
             } else if (name.length > 20) {
                 name = name.substring(0, 20) + '...';
             }
+
+            $('#font_preview').text(name);
 
             // Build header image HTML
             var headerHtml = '';
@@ -418,21 +474,22 @@
             if (profileSrc) {
                 var marginTop = headerHtml ? '-mt-6' : '-mt-8';
                 var profileBg = isDark ? '#111827' : '#F5F9FE';
-                profileHtml = '<div class="' + marginTop + ' mb-2"><div class="w-12 h-12 rounded-lg p-0.5 shadow-sm" style="background-color: ' + profileBg + '"><img src="' + profileSrc + '" class="w-full h-full object-cover rounded-lg" /></div></div>';
+                var profileAlign = isRtl ? ' ml-auto' : '';
+                profileHtml = '<div class="' + marginTop + ' mb-2' + profileAlign + '"><div class="w-12 h-12 rounded-lg p-0.5 shadow-sm" style="background-color: ' + profileBg + '"><img src="' + profileSrc + '" class="w-full h-full object-cover rounded-lg" /></div></div>';
             }
 
             // Build content HTML with accent color elements
             var contentTopPadding = !profileSrc && !headerHtml ? 'pt-3' : '';
             var cardBg = isDark ? '#111827' : '#F5F9FE';
             var contentHtml =
-                '<div class="rounded-lg flex flex-col ' + (profileSrc && !headerHtml ? 'mt-8' : '') + '" style="background-color: ' + cardBg + '">' +
+                '<div dir="' + (isRtl ? 'rtl' : 'ltr') + '" class="rounded-lg flex flex-col ' + (profileSrc && !headerHtml ? 'mt-8' : '') + '" style="background-color: ' + cardBg + '">' +
                     headerHtml +
                     '<div class="px-3 pb-3 flex flex-col">' +
                         profileHtml +
                         '<div class="flex items-center justify-between gap-2 ' + contentTopPadding + '">' +
-                            '<div class="text-sm font-semibold text-[#151B26]" style="color: ' + fontColor + '; font-family: ' + fontFamily + ';">' + name + '</div>' +
+                            '<div class="text-sm font-semibold text-[#151B26]" style="color: ' + fontColor + "; font-family: '" + fontFamily + "';\">" + name + '</div>' +
                             '<div class="rounded-md px-2.5 py-1 text-xs font-semibold shadow-sm" style="background-color: ' + accentColor + '; color: ' + getContrastColor(accentColor) + '">' +
-                                @json(__('messages.follow'), JSON_UNESCAPED_UNICODE) +
+                                followText +
                             '</div>' +
                         '</div>' +
                     '</div>' +
@@ -882,6 +939,7 @@
                         <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
                             <x-input-label for="language_code" :value="__('messages.language') " />
                             <select name="language_code" id="language_code" required {{ is_demo_mode() ? 'disabled' : '' }}
+                                data-action="language-change"
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                 @foreach([
                                 'ar' => 'arabic',
@@ -1230,7 +1288,7 @@
                                     </button>
                                 </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('font_family')" />
-                                <div id="font_preview" class="mt-3 text-4xl text-gray-900 dark:text-gray-100" style="font-family: '{{ $role->font_family }}', sans-serif;">
+                                <div id="font_preview" class="mt-3 text-4xl text-gray-900 dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
                                     {{ $role->name }}
                                 </div>
                             </div>
@@ -1764,11 +1822,88 @@
                                 <x-text-input id="custom_domain" name="custom_domain" type="url" class="mt-1 block w-full"
                                     :value="old('custom_domain', $role->custom_domain)" />
                                 <x-input-error class="mt-2" :messages="$errors->get('custom_domain')" />
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                    <x-link href="{{ marketing_url('/docs/creating-schedules#custom-domain') }}" target="_blank" class="text-sm">
-                                        {{ __('messages.custom_domain_setup_guide') }}
-                                    </x-link>
-                                </p>
+
+                                {{-- Domain mode selector --}}
+                                <div class="mt-3" x-data="{ mode: '{{ old('custom_domain_mode', $role->custom_domain_mode ?? 'redirect') }}' }">
+                                    @if (config('services.digitalocean.app_hostname'))
+                                    <x-input-label :value="__('messages.custom_domain_mode')" />
+                                    <div class="mt-2 space-y-2">
+                                        <label class="flex items-start gap-3 cursor-pointer">
+                                            <input type="radio" name="custom_domain_mode" value="redirect" x-model="mode"
+                                                class="mt-1 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                            <div>
+                                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ __('messages.custom_domain_mode_redirect') }}</span>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.custom_domain_mode_redirect_desc') }}</p>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-start gap-3 cursor-pointer">
+                                            <input type="radio" name="custom_domain_mode" value="direct" x-model="mode"
+                                                class="mt-1 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                            <div>
+                                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ __('messages.custom_domain_mode_direct') }}</span>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.custom_domain_mode_direct_desc') }}</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    @else
+                                    <input type="hidden" name="custom_domain_mode" value="redirect">
+                                    @endif
+
+                                    {{-- Redirect mode: Cloudflare guide link --}}
+                                    <div x-show="mode === 'redirect'" x-cloak class="mt-3">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                                            <x-link href="{{ marketing_url('/docs/creating-schedules#custom-domain') }}" target="_blank" class="text-sm">
+                                                {{ __('messages.custom_domain_setup_guide') }}
+                                            </x-link>
+                                        </p>
+                                    </div>
+
+                                    {{-- Direct mode: CNAME instructions and status --}}
+                                    <div x-show="mode === 'direct'" x-cloak class="mt-3">
+                                        @if (config('services.digitalocean.app_hostname'))
+                                        <div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
+
+                                            <p class="text-sm font-medium text-gray-900 dark:text-white mb-2">{{ __('messages.custom_domain_cname_instructions', ['hostname' => config('services.digitalocean.app_hostname')]) }}</p>
+                                            <ol class="text-xs text-gray-600 dark:text-gray-400 space-y-1 list-decimal list-inside mb-3">
+                                                <li>{{ __('messages.cname_step_1') }}</li>
+                                                <li>{{ __('messages.cname_step_2') }}</li>
+                                                <li>{{ __('messages.cname_step_3') }}</li>
+                                                <li>{{ __('messages.cname_step_4') }}</li>
+                                            </ol>
+                                            <div class="flex items-center gap-2">
+                                                <code class="text-xs bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded px-2 py-1 font-mono select-all text-gray-900 dark:text-gray-100">{{ config('services.digitalocean.app_hostname') }}</code>
+                                                <button type="button" data-action="copy-hostname" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy') }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        @endif
+
+                                        {{-- Status badge --}}
+                                        @if ($role->custom_domain_mode === 'direct' && $role->custom_domain_status)
+                                        <div class="mt-3">
+                                            @if ($role->custom_domain_status === 'active')
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                    {{ __('messages.domain_active') }}
+                                                </span>
+                                            @elseif ($role->custom_domain_status === 'pending')
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                                                    <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                                    {{ __('messages.domain_pending') }}
+                                                </span>
+                                            @elseif ($role->custom_domain_status === 'failed')
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                                    {{ __('messages.domain_failed') }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                        @endif
+                                    </div>
+                                </div>
                                 @else
                                 <x-text-input id="custom_domain" name="custom_domain" type="url" class="mt-1 block w-full"
                                     :value="old('custom_domain', $role->custom_domain)" disabled />
@@ -2689,6 +2824,21 @@ function addGroupField() {
     div.querySelectorAll('.vue-color-picker').forEach(window.mountColorPicker);
 }
 
+function copyHostname(button) {
+    const hostname = '{{ config("services.digitalocean.app_hostname") }}';
+    navigator.clipboard.writeText(hostname).then(() => {
+        const originalHTML = button.innerHTML;
+        button.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-green-500">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+        `;
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+        }, 2000);
+    }).catch(() => {});
+}
+
 function copyRoleUrl(button) {
     const url = '{{ $role->exists ? $role->getGuestUrl(true) : "" }}';
     navigator.clipboard.writeText(url).then(() => {
@@ -3436,6 +3586,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         firstInvalidField.reportValidity();
                     }, 100);
                 }
+            } else {
+                // Disable all submit buttons and show saving state
+                var submitButtons = form.querySelectorAll('button[type="submit"]');
+                submitButtons.forEach(function(btn) {
+                    btn.disabled = true;
+                    btn.textContent = @json(__('messages.saving'));
+                });
             }
         });
 
@@ -4078,6 +4235,9 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'copy-role-url':
                 copyRoleUrl(btn);
                 break;
+            case 'copy-hostname':
+                copyHostname(btn);
+                break;
             case 'copy-group-url':
                 copyGroupUrl(btn, btn.dataset.copyUrl);
                 break;
@@ -4181,6 +4341,10 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'background-colors-input':
                 updatePreview();
                 updateColorNavButtons();
+                break;
+            case 'language-change':
+                updateFontOptions();
+                updatePreview();
                 break;
         }
     });

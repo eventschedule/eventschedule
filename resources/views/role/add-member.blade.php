@@ -30,7 +30,14 @@
                             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
                                 :value="old('email')" required autocomplete="username" />
                             <x-input-error class="mt-2" :messages="$errors->get('email')" />
+                        </div>
 
+                        <div class="mb-6">
+                            <x-input-label for="level" :value="__('messages.role')" />
+                            <select id="level" name="level" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                                <option value="admin" {{ old('level', 'admin') == 'admin' ? 'selected' : '' }}>{{ __('messages.admin') }}</option>
+                                <option value="viewer" {{ old('level') == 'viewer' ? 'selected' : '' }}>{{ __('messages.viewer') }}</option>
+                            </select>
                         </div>
 
                     </div>

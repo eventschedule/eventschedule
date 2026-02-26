@@ -876,6 +876,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * SaaS custom domains documentation page
+     */
+    public function docsSaasCustomDomains()
+    {
+        return view('marketing.docs.saas.custom-domains');
+    }
+
+    /**
      * Boost documentation page
      */
     public function docsSelfhostBoost()

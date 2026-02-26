@@ -114,6 +114,61 @@
                     </form>
                 </div>
             </div>
+
+            <form method="POST" action="{{ route('profile.update_invoiceninja_mode') }}" class="mt-6">
+                @csrf
+                @method('patch')
+
+                <x-input-label :value="__('messages.invoiceninja_mode')" />
+
+                <div class="mt-2 space-y-2">
+                    <label class="flex items-start gap-2 cursor-pointer">
+                        <input type="radio" name="invoiceninja_mode" value="invoice"
+                            {{ !str_starts_with($user->invoiceninja_mode ?? '', 'payment_link') ? 'checked' : '' }}
+                            class="mt-0.5 text-[#4E81FA] focus:ring-[#4E81FA]"
+                            {{ is_demo_mode() ? 'disabled' : '' }}>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.invoiceninja_mode_invoice') }}</span>
+                    </label>
+                    <label class="flex items-start gap-2 cursor-pointer">
+                        <input type="radio" name="invoiceninja_mode" value="payment_link"
+                            {{ $user->invoiceninja_mode === 'payment_link' ? 'checked' : '' }}
+                            class="mt-0.5 text-[#4E81FA] focus:ring-[#4E81FA]"
+                            {{ is_demo_mode() ? 'disabled' : '' }}>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.invoiceninja_mode_payment_link') }}</span>
+                    </label>
+                    <label class="flex items-start gap-2 cursor-pointer">
+                        <input type="radio" name="invoiceninja_mode" value="payment_link_v2"
+                            {{ $user->invoiceninja_mode === 'payment_link_v2' ? 'checked' : '' }}
+                            class="mt-0.5 text-[#4E81FA] focus:ring-[#4E81FA]"
+                            {{ is_demo_mode() ? 'disabled' : '' }}>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.invoiceninja_mode_payment_link_v2') }}</span>
+                    </label>
+                    <label class="flex items-start gap-2 cursor-pointer">
+                        <input type="radio" name="invoiceninja_mode" value="payment_link_v3"
+                            {{ $user->invoiceninja_mode === 'payment_link_v3' ? 'checked' : '' }}
+                            class="mt-0.5 text-[#4E81FA] focus:ring-[#4E81FA]"
+                            {{ is_demo_mode() ? 'disabled' : '' }}>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.invoiceninja_mode_payment_link_v3') }}</span>
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-4 pt-4">
+                    @if (is_demo_mode())
+                        <button type="button"
+                            data-alert="{{ __('messages.saving_disabled_demo_mode') }}"
+                            class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
+                            {{ __('messages.save') }}
+                        </button>
+                    @else
+                        <x-primary-button>{{ __('messages.save') }}</x-primary-button>
+                    @endif
+
+                    @if (session('status') === 'payments-updated')
+                    <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
+                        class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.saved') }}</p>
+                    @endif
+                </div>
+            </form>
         @else
             <p class="text-sm text-gray-600 dark:text-gray-400">
                 <x-link href="https://invoiceninja.com/partner-perks/event-schedule-perk/" target="_blank">

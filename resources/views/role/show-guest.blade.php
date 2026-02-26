@@ -110,7 +110,7 @@
             <div class="flex sm:hidden flex-col items-center gap-3 mb-5">
               {{-- Name/Location (centered) --}}
               <div class="text-center mb-1">
-                <h1 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2" style="font-family: '{{ $role->font_family }}', sans-serif;">
+                <h1 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2" style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
                   {!! str_replace(' , ', '<br>', e($role->translatedName())) !!}
                 </h1>
                 @if($role->translatedShortDescription())
@@ -244,7 +244,7 @@
                     </button>
                   </div>
                   <div x-show="expanded" x-cloak>
-                    <div class="custom-content [&>*:first-child]:mt-0">
+                    <div class="custom-content">
                       {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                     </div>
                     <button @click="collapse()" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
@@ -253,7 +253,7 @@
                   </div>
                 </div>
                 @else
-                <div class="text-center text-sm text-[#33383C] dark:text-gray-300 custom-content [&>*:first-child]:mt-0">
+                <div class="text-center text-sm text-[#33383C] dark:text-gray-300 custom-content">
                   {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                 </div>
                 @endif
@@ -267,7 +267,7 @@
               <div class="flex flex-wrap items-center gap-3">
                 {{-- Name/Location --}}
                 <div class="min-w-0">
-                  <h1 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2" style="font-family: '{{ $role->font_family }}', sans-serif;">
+                  <h1 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2" style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
                     {!! str_replace(' , ', '<br>', e($role->translatedName())) !!}
                   </h1>
                   @if($role->translatedShortDescription())

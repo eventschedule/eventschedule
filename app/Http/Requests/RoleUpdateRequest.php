@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Rules\NoFakeEmail;
 use App\Rules\SquareImage;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class RoleUpdateRequest extends FormRequest
 {
@@ -29,7 +30,31 @@ class RoleUpdateRequest extends FormRequest
                 ['string', 'max:50']
             ),
             'phone' => ['nullable', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/'],
-            'custom_domain' => ['nullable', 'string', 'url', 'max:255'],
+            'custom_domain' => [
+                'nullable', 'string', 'url', 'max:255',
+                Rule::unique('roles', 'custom_domain')->ignore($role->id),
+                function ($attribute, $value, $fail) {
+                    if ($value && str_contains(parse_url($value, PHP_URL_HOST) ?? '', 'eventschedule.com')) {
+                        $fail(__('messages.invalid_custom_domain'));
+                    }
+                },
+                function ($attribute, $value, $fail) use ($role) {
+                    if ($value) {
+                        $host = parse_url($value, PHP_URL_HOST);
+                        if ($host && Role::where('custom_domain_host', $host)->where('id', '!=', $role->id)->exists()) {
+                            $fail(__('messages.custom_domain_already_taken'));
+                        }
+                    }
+                },
+            ],
+            'custom_domain_mode' => [
+                'nullable', 'string', 'in:redirect,direct',
+                function ($attribute, $value, $fail) {
+                    if ($value && ! $this->input('custom_domain')) {
+                        $fail(__('messages.custom_domain_mode_requires_domain'));
+                    }
+                },
+            ],
             'profile_image' => ['image', 'max:2500', new SquareImage],
             'background_image_url' => ['image', 'max:2500'],
             'header_image_url' => ['image', 'max:2500'],

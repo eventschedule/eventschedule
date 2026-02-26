@@ -9,7 +9,7 @@ class RolePolicy
 {
     public function update(User $user, Role $role): bool
     {
-        return $user->isMember($role->subdomain);
+        return $user->isEditor($role->subdomain);
     }
 
     public function manageMembers(User $user, Role $role): bool

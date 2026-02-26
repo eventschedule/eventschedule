@@ -24,6 +24,7 @@
                     </dl>
                 </div>
             </x-link>
+            @if (!$isViewer)
             <div>
                 <div class="-mt-px flex divide-x divide-gray-200 dark:divide-gray-700">
                     <div class="flex w-0 flex-1 cursor-pointer btn-navigate"
@@ -55,6 +56,7 @@
                     </form>
                 </div>
             </div>
+            @endif
         </li>
         @endif
         @endforeach

@@ -85,7 +85,7 @@ abstract class AbstractEventDesign
 
         // Language code only affects RTL layout direction, not font selection
         // Fonts are automatically selected based on text content
-        $this->lang = in_array(strtolower($role->language_code), ['ar', 'de', 'en', 'es', 'fr', 'he', 'it', 'nl', 'pt'], true)
+        $this->lang = in_array(strtolower($role->language_code), config('app.supported_languages'), true)
             ? strtolower($role->language_code) : 'en';
 
         // RTL layout is determined by role language (Hebrew/Arabic = RTL)
@@ -260,16 +260,12 @@ abstract class AbstractEventDesign
     /**
      * Prepare footer - adds height if schedule accepts event requests
      */
-    protected function prepareFooter(): void
-    {
-    }
+    protected function prepareFooter(): void {}
 
     /**
      * Render footer with "Want to see your event here?" message
      */
-    protected function renderFooter(): void
-    {
-    }
+    protected function renderFooter(): void {}
 
     /**
      * Get the URL for the event request page

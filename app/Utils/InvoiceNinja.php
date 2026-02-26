@@ -76,6 +76,40 @@ class InvoiceNinja
         return null;
     }
 
+    public function createProduct($productKey, $notes, $price)
+    {
+        $product = $this->sendRequest('products', 'POST', [
+            'product_key' => $productKey,
+            'notes' => $notes,
+            'price' => $price,
+        ]);
+
+        return $product;
+    }
+
+    public function createSubscription($name, $productIds, $price, $webhookConfig)
+    {
+        $subscription = $this->sendRequest('subscriptions', 'POST', [
+            'name' => $name,
+            'steps' => 'cart',
+            'product_ids' => implode(',', $productIds),
+            'price' => $price,
+            'webhook_configuration' => $webhookConfig,
+        ]);
+
+        UsageTrackingService::track(UsageTrackingService::INVOICENINJA_PAYMENT_LINK);
+
+        return $subscription;
+    }
+
+    public function deleteSubscription($id)
+    {
+        $this->sendRequest('subscriptions/bulk', 'POST', [
+            'ids' => [$id],
+            'action' => 'delete',
+        ]);
+    }
+
     public function createInvoice($clientId, $lineItems, $qrCodeUrl, $sendEmail = false)
     {
         $url = 'invoices';

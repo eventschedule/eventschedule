@@ -1101,8 +1101,9 @@
                         </nav>
                         <!-- Sidebar Save Button -->
                         <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                            <x-primary-button class="w-full justify-center">
-                                {{ __('messages.save') }}
+                            <x-primary-button class="w-full justify-center" v-bind:disabled="isSaving">
+                                <span v-if="isSaving">{{ __('messages.saving') }}</span>
+                                <span v-else>{{ __('messages.save') }}</span>
                             </x-primary-button>
                             @if (! $event->exists)
                             <p v-show="!event.is_private" class="text-sm text-gray-500 dark:text-gray-400 mt-3 flex items-center justify-center gap-1.5">
@@ -3109,8 +3110,9 @@
             </p>
             @endif
             <div class="flex gap-3 justify-center max-w-lg mx-auto">
-                <x-primary-button class="flex-1 justify-center">
-                    {{ __('messages.save') }}
+                <x-primary-button class="flex-1 justify-center" v-bind:disabled="isSaving">
+                    <span v-if="isSaving">{{ __('messages.saving') }}</span>
+                    <span v-else>{{ __('messages.save') }}</span>
                 </x-primary-button>
                 <x-cancel-button class="flex-1 justify-center" />
             </div>
@@ -3211,6 +3213,7 @@
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
         activeTicketTab: 'tickets',
         formSubmitAttempted: false,
+        isSaving: false,
         isDirty: false,
         soldLabel: @json(__('messages.sold_reserved')),
         isRecurring: @json($event->days_of_week ? true : false),
@@ -3848,6 +3851,8 @@
             return;
           }
         }
+
+        this.isSaving = true;
 
         this.isDirty = false;
       },
@@ -4767,6 +4772,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!form.checkValidity()) {
                 e.preventDefault();
                 e.stopPropagation();
+
+                if (window.vueApp) {
+                    window.vueApp.isSaving = false;
+                }
 
                 // Find first invalid field across ALL form elements
                 let firstInvalidField = null;

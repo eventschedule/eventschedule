@@ -80,6 +80,12 @@ return [
         'from' => env('TWILIO_FROM_NUMBER'),
     ],
 
+    'digitalocean' => [
+        'api_token' => env('DO_API_TOKEN'),
+        'app_id' => env('DO_APP_ID'),
+        'app_hostname' => env('DO_APP_HOSTNAME'),
+    ],
+
     'meta' => [
         'app_id' => env('META_APP_ID'),
         'app_secret' => env('META_APP_SECRET'),

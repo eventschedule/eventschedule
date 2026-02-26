@@ -1,3 +1,4 @@
+@php $isOwner = auth()->user()->id == $role->user_id; @endphp
 <div class="sm:flex sm:items-center">
     <div class="sm:flex-auto">
         <!--
@@ -7,6 +8,7 @@
         -->
     </div>
     <div class="mt-6 sm:ms-16 sm:mt-0 sm:flex-none">
+        @if (!$isViewer)
         @if ($role->isEnterprise())
         <x-brand-link href="{{ route('role.create_member', ['subdomain' => $role->subdomain]) }}" class="w-full md:w-auto">
             <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -27,6 +29,7 @@
         <x-upgrade-modal name="upgrade-members" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.creating_schedules') }}#team-members">
             {{ __('messages.upgrade_feature_description_members') }}
         </x-upgrade-modal>
+        @endif
         @endif
     </div>
 </div>
@@ -63,10 +66,20 @@
                                     <a href="mailto:{{ $member->email }}" class="hover:text-gray-700 dark:hover:text-gray-300">{{ $member->email }}</a>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    @if ($member->email_verified_at)
+                                    @if ($isOwner && $member->pivot->level != 'owner' && $member->email_verified_at)
+                                        <form method="POST" action="{{ route('role.update_member_level', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}" class="inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <select name="level" onchange="this.form.submit()"
+                                                class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 text-sm shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                                                <option value="admin" {{ $member->pivot->level == 'admin' ? 'selected' : '' }}>{{ __('messages.admin') }}</option>
+                                                <option value="viewer" {{ $member->pivot->level == 'viewer' ? 'selected' : '' }}>{{ __('messages.viewer') }}</option>
+                                            </select>
+                                        </form>
+                                    @elseif ($member->email_verified_at)
                                         {{ __('messages.' . strtolower($member->pivot->level)) }}
-                                    @else      
-                                        <a href="{{ route('role.resend_invite', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}">    
+                                    @else
+                                        <a href="{{ route('role.resend_invite', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}">
                                             <button type="button"
                                                 class="inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
                                                 {{ __('messages.resend_invite') }}
@@ -75,7 +88,13 @@
                                     @endif
                                 </td>
                                 <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
-                                    @if ($member->pivot->level != 'owner')
+                                    @if ($member->pivot->level != 'owner' && $isOwner)
+                                        <form method="POST" action="{{ route('role.remove_member', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}" data-confirm="{{ __('messages.are_you_sure') }}" class="inline form-confirm">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-[#4E81FA] hover:text-[#4E81FA]">{{ __('messages.remove') }}</button>
+                                        </form>
+                                    @elseif ($member->id == auth()->user()->id && $member->pivot->level != 'owner')
                                         <form method="POST" action="{{ route('role.remove_member', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}" data-confirm="{{ __('messages.are_you_sure') }}" class="inline form-confirm">
                                             @csrf
                                             @method('DELETE')
@@ -92,4 +111,3 @@
         </div>
     </div>
 </div>
-

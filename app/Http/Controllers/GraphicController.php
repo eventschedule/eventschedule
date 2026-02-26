@@ -65,7 +65,7 @@ class GraphicController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
@@ -134,7 +134,7 @@ class GraphicController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
@@ -419,7 +419,7 @@ class GraphicController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
@@ -481,7 +481,7 @@ class GraphicController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! auth()->user()->isMember($subdomain)) {
+        if (! auth()->user()->isEditor($subdomain)) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
