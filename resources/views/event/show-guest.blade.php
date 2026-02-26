@@ -1206,10 +1206,12 @@
                           @php $pollHash = \App\Utils\UrlUtils::encodeId($poll->id); @endphp
                           <div x-show="!voted['{{ $pollHash }}']">
                               @foreach ($poll->options as $idx => $option)
-                              <button @click="vote('{{ $pollHash }}', {{ $idx }})"
-                                      :disabled="voting"
-                                      class="w-full text-start px-3 py-2.5 mb-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 dark:text-gray-200 hover:border-gray-500 transition-colors">
-                                  {{ $option }}
+                              <button @click="vote('{{ $pollHash }}', {{ $idx }}, $event, $el)"
+                                      :disabled="votingOption['{{ $pollHash }}'] != null"
+                                      class="w-full text-start px-3 py-2.5 mb-1.5 text-sm rounded-lg border transition-all duration-200"
+                                      :class="votingOption['{{ $pollHash }}'] != null && votingOption['{{ $pollHash }}'] !== {{ $idx }} ? 'opacity-40 border-gray-300 dark:border-gray-600' : 'border-gray-300 dark:border-gray-600 hover:border-gray-500'"
+                                      :style="votingOption['{{ $pollHash }}'] === {{ $idx }} ? { borderColor: '{{ $accentColor }}', backgroundColor: '{{ $accentColor }}15' } : {}">
+                                  <span class="dark:text-gray-200" :class="votingOption['{{ $pollHash }}'] === {{ $idx }} ? 'font-medium' : ''">{{ $option }}</span>
                               </button>
                               @endforeach
                           </div>
@@ -1218,12 +1220,23 @@
                               <template x-for="(option, idx) in pollData['{{ $pollHash }}']?.options || []" :key="idx">
                                   <div class="mb-2.5">
                                       <div class="flex justify-between text-sm mb-1">
-                                          <span class="text-gray-800 dark:text-gray-200" x-text="option"></span>
+                                          <span class="flex items-center gap-1 text-gray-800 dark:text-gray-200" :class="{ 'font-semibold': getCount('{{ $pollHash }}', idx) === getMaxCount('{{ $pollHash }}') && (pollData['{{ $pollHash }}']?.totalVotes || 0) > 0 }">
+                                              <span x-text="option"></span>
+                                              <svg x-show="idx === pollData['{{ $pollHash }}']?.userVote" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 shrink-0" style="color: {{ $accentColor }}">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                              </svg>
+                                          </span>
                                           <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums" x-text="getCount('{{ $pollHash }}', idx) + ' (' + getPercent('{{ $pollHash }}', idx) + '%)'"></span>
                                       </div>
                                       <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                                          <div class="h-2.5 rounded-full transition-all duration-500"
-                                               :style="{ width: getPercent('{{ $pollHash }}', idx) + '%', backgroundColor: idx === pollData['{{ $pollHash }}']?.userVote ? '{{ $accentColor }}' : '#9ca3af' }"></div>
+                                          <div class="h-2.5 rounded-full"
+                                               :style="{
+                                                   width: (showResults['{{ $pollHash }}'] ? getPercent('{{ $pollHash }}', idx) : 0) + '%',
+                                                   backgroundColor: idx === pollData['{{ $pollHash }}']?.userVote ? '{{ $accentColor }}' : (getCount('{{ $pollHash }}', idx) === getMaxCount('{{ $pollHash }}') && (pollData['{{ $pollHash }}']?.totalVotes || 0) > 0 ? '{{ $accentColor }}80' : '#9ca3af'),
+                                                   boxShadow: idx === pollData['{{ $pollHash }}']?.userVote ? '0 0 8px {{ $accentColor }}40' : 'none',
+                                                   transition: 'width 700ms ease-out',
+                                                   transitionDelay: (idx * 120) + 'ms'
+                                               }"></div>
                                       </div>
                                   </div>
                               </template>
@@ -1247,11 +1260,18 @@
                           @endphp
                           <div class="mb-2.5">
                               <div class="flex justify-between text-sm mb-1">
-                                  <span class="text-gray-800 dark:text-gray-200 {{ $isLeading ? 'font-semibold' : '' }}">{{ $option }}</span>
+                                  <span class="flex items-center gap-1 text-gray-800 dark:text-gray-200 {{ $isLeading ? 'font-semibold' : '' }}">
+                                      {{ $option }}
+                                      @if ($isUserChoice)
+                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 shrink-0" style="color: {{ $accentColor }}">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                      </svg>
+                                      @endif
+                                  </span>
                                   <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums">{{ $count }} ({{ $pct }}%)</span>
                               </div>
                               <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                                  <div class="h-2.5 rounded-full" style="width: {{ max($pct, $totalVotes > 0 ? 2 : 0) }}%; background-color: {{ $isUserChoice ? $accentColor : ($isLeading ? $accentColor . '80' : '#9ca3af') }}"></div>
+                                  <div class="h-2.5 rounded-full" style="width: {{ max($pct, $totalVotes > 0 ? 2 : 0) }}%; background-color: {{ $isUserChoice ? $accentColor : ($isLeading ? $accentColor . '80' : '#9ca3af') }};{{ $isUserChoice ? ' box-shadow: 0 0 8px ' . $accentColor . '40' : '' }}"></div>
                               </div>
                           </div>
                           @endforeach
@@ -1486,14 +1506,22 @@
     @endif
   </div>
 
+  @if ($role->isPro() && $event->polls->count() > 0)
+  <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!}></script>
+  <script src="{{ asset('js/poll-confetti.js') }}" {!! nonce_attr() !!}></script>
+  @endif
+
   <script {!! nonce_attr() !!}>
     function pollsComponent() {
       return {
         voting: false,
+        votingOption: {},
         voted: {},
         pollData: {},
-        async vote(pollHash, optionIndex) {
-          this.voting = true;
+        showResults: {},
+        async vote(pollHash, optionIndex, clickEvent, buttonEl) {
+          if (this.votingOption[pollHash] != null) return;
+          this.votingOption[pollHash] = optionIndex;
           try {
             const resp = await fetch('{{ route('event.vote_poll', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id), 'poll_hash' => 'POLL_HASH']) }}'.replace('POLL_HASH', pollHash), {
               method: 'POST',
@@ -1506,20 +1534,37 @@
             }
             const data = await resp.json();
             if (data.success) {
-              this.voted[pollHash] = true;
               this.pollData[pollHash] = { options: data.options, results: data.results, totalVotes: data.total_votes, userVote: optionIndex };
+              var btn = clickEvent?.target?.closest('button') || buttonEl;
+              if (btn) firePollConfetti(btn, '{{ $accentColor }}');
+              await new Promise(function(r) { setTimeout(r, 600); });
+              this.voted[pollHash] = true;
+              var self = this;
+              requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                  self.showResults[pollHash] = true;
+                });
+              });
             }
-          } finally { this.voting = false; }
+          } finally {
+            this.voting = false;
+            this.votingOption[pollHash] = null;
+          }
         },
         getCount(pollHash, idx) {
-          const pd = this.pollData[pollHash];
+          var pd = this.pollData[pollHash];
           if (!pd || !pd.results) return 0;
           return pd.results[idx] || 0;
         },
         getPercent(pollHash, idx) {
-          const pd = this.pollData[pollHash];
+          var pd = this.pollData[pollHash];
           if (!pd || !pd.totalVotes) return 0;
           return Math.round(((pd.results[idx] || 0) / pd.totalVotes) * 100);
+        },
+        getMaxCount(pollHash) {
+          var pd = this.pollData[pollHash];
+          if (!pd || !pd.results) return 0;
+          return Math.max.apply(null, Object.values(pd.results).concat([0]));
         }
       }
     }

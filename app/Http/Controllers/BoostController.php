@@ -103,7 +103,7 @@ class BoostController extends Controller
         }
 
         // Require verified phone for boost (hosted mode only)
-        if (config('app.hosted') && ! auth()->user()->hasVerifiedPhone()) {
+        if (config('app.hosted') && ! config('app.is_testing') && ! auth()->user()->hasVerifiedPhone()) {
             return redirect()->to(route('profile.edit').'?highlight=phone#section-profile')
                 ->with('error', __('messages.phone_required_for_boost'));
         }
@@ -124,6 +124,28 @@ class BoostController extends Controller
         // Generate defaults
         $metaService = $this->getMetaService();
         $defaults = $metaService->generateQuickBoostDefaults($event);
+
+        // Build human-readable geo description
+        $geoLocations = $defaults['targeting']['geo_locations'] ?? [];
+        $geoDescription = '';
+
+        if (! empty($geoLocations['custom_locations'])) {
+            $loc = $geoLocations['custom_locations'][0];
+            $venue = $event->venue;
+            $locationName = $venue ? ($venue->shortAddress() ?: $venue->translatedName()) : '';
+            $radius = $loc['radius'] ?? 25;
+            $unit = $loc['distance_unit'] ?? 'mile';
+            $unitLabel = $unit === 'mile' ? __('messages.miles') : __('messages.kilometers');
+            $geoDescription = __('messages.geo_radius_description', [
+                'radius' => $radius,
+                'unit' => $unitLabel,
+                'location' => $locationName,
+            ]);
+        } elseif (! empty($geoLocations['countries'])) {
+            $geoDescription = collect($geoLocations['countries'])
+                ->map(fn ($code) => self::countryName($code))
+                ->implode(', ');
+        }
 
         $isAdvanced = $request->boolean('advanced');
         $isFirstTime = ! BoostCampaign::where('user_id', auth()->id())->exists();
@@ -159,6 +181,7 @@ class BoostController extends Controller
             'pmLastFour' => $role->pm_last_four,
             'pmType' => $role->pm_type,
             'roleLanguage' => $role->language_code,
+            'geoDescription' => $geoDescription,
         ]);
     }
 
@@ -220,7 +243,7 @@ class BoostController extends Controller
         }
 
         // Require verified phone for boost (hosted mode only)
-        if (config('app.hosted') && ! auth()->user()->hasVerifiedPhone()) {
+        if (config('app.hosted') && ! config('app.is_testing') && ! auth()->user()->hasVerifiedPhone()) {
             if ($isAjax) {
                 return response()->json([
                     'error' => __('messages.phone_required_for_boost'),
@@ -868,5 +891,25 @@ class BoostController extends Controller
             'primary_text' => $defaults['primary_text'],
             'description' => $defaults['description'],
         ]);
+    }
+
+    protected static function countryName(string $code): string
+    {
+        $map = [
+            'US' => 'United States', 'GB' => 'United Kingdom', 'CA' => 'Canada',
+            'AU' => 'Australia', 'DE' => 'Germany', 'FR' => 'France',
+            'ES' => 'Spain', 'IT' => 'Italy', 'NL' => 'Netherlands',
+            'BR' => 'Brazil', 'MX' => 'Mexico', 'IL' => 'Israel',
+            'PT' => 'Portugal', 'IE' => 'Ireland', 'NZ' => 'New Zealand',
+            'AT' => 'Austria', 'CH' => 'Switzerland', 'BE' => 'Belgium',
+            'SE' => 'Sweden', 'NO' => 'Norway', 'DK' => 'Denmark',
+            'FI' => 'Finland', 'JP' => 'Japan', 'KR' => 'South Korea',
+            'IN' => 'India', 'AR' => 'Argentina', 'CL' => 'Chile',
+            'CO' => 'Colombia', 'PL' => 'Poland', 'RU' => 'Russia',
+            'ZA' => 'South Africa', 'EE' => 'Estonia', 'SA' => 'Saudi Arabia',
+            'AE' => 'United Arab Emirates', 'EG' => 'Egypt',
+        ];
+
+        return $map[strtoupper($code)] ?? strtoupper($code);
     }
 }

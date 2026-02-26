@@ -782,10 +782,13 @@
                                                     v-text="poll.question"></h4>
                                                 <div v-if="poll.user_vote === null && poll.is_active">
                                                     <button v-for="(option, idx) in poll.options" :key="idx"
-                                                            @click.stop="votePoll(event, poll, idx)"
-                                                            :disabled="votingPoll[poll.id]"
-                                                            class="w-full text-start px-3 py-2.5 mb-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 dark:text-gray-200 hover:border-gray-500 transition-colors">
-                                                        <span v-text="option"></span>
+                                                            @click.stop="votePoll(event, poll, idx, $event)"
+                                                            :disabled="votingPoll[poll.id] != null"
+                                                            class="w-full text-start px-3 py-2.5 mb-1.5 text-sm rounded-lg border transition-all duration-200"
+                                                            :class="votingPoll[poll.id] != null && votingPoll[poll.id] !== idx ? 'opacity-40 border-gray-300 dark:border-gray-600' : 'border-gray-300 dark:border-gray-600 hover:border-gray-500'"
+                                                            :style="votingPoll[poll.id] === idx ? { borderColor: accentColor, backgroundColor: accentColor + '15' } : {}"
+                                                            >
+                                                        <span v-text="option" class="dark:text-gray-200" :class="votingPoll[poll.id] === idx ? 'font-medium' : ''"></span>
                                                     </button>
                                                     @guest
                                                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -807,10 +810,13 @@
                                                             </span>
                                                         </div>
                                                         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                                                            <div class="h-2.5 rounded-full transition-all duration-500"
+                                                            <div class="h-2.5 rounded-full"
                                                                  :style="{
-                                                                     width: Math.max(getVotePercent(poll, idx), poll.total_votes > 0 ? 2 : 0) + '%',
-                                                                     backgroundColor: idx === poll.user_vote ? accentColor : (getVoteCount(poll, idx) === getMaxVoteCount(poll) && poll.total_votes > 0 ? accentColor + '80' : '#9ca3af')
+                                                                     width: (pollAnimating[poll.id] ? 0 : Math.max(getVotePercent(poll, idx), poll.total_votes > 0 ? 2 : 0)) + '%',
+                                                                     backgroundColor: idx === poll.user_vote ? accentColor : (getVoteCount(poll, idx) === getMaxVoteCount(poll) && poll.total_votes > 0 ? accentColor + '80' : '#9ca3af'),
+                                                                     boxShadow: idx === poll.user_vote ? '0 0 8px ' + accentColor + '40' : 'none',
+                                                                     transition: 'width 700ms ease-out',
+                                                                     transitionDelay: (idx * 120) + 'ms'
                                                                  }"></div>
                                                         </div>
                                                     </div>
@@ -1120,10 +1126,13 @@
                                                 v-text="poll.question"></h4>
                                             <div v-if="poll.user_vote === null && poll.is_active">
                                                 <button v-for="(option, idx) in poll.options" :key="idx"
-                                                        @click.stop="votePoll(event, poll, idx)"
-                                                        :disabled="votingPoll[poll.id]"
-                                                        class="w-full text-start px-3 py-2.5 mb-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 dark:text-gray-200 hover:border-gray-500 transition-colors">
-                                                    <span v-text="option"></span>
+                                                        @click.stop="votePoll(event, poll, idx, $event)"
+                                                        :disabled="votingPoll[poll.id] != null"
+                                                        class="w-full text-start px-3 py-2.5 mb-1.5 text-sm rounded-lg border transition-all duration-200"
+                                                        :class="votingPoll[poll.id] != null && votingPoll[poll.id] !== idx ? 'opacity-40 border-gray-300 dark:border-gray-600' : 'border-gray-300 dark:border-gray-600 hover:border-gray-500'"
+                                                        :style="votingPoll[poll.id] === idx ? { borderColor: accentColor, backgroundColor: accentColor + '15' } : {}"
+                                                        >
+                                                    <span v-text="option" class="dark:text-gray-200" :class="votingPoll[poll.id] === idx ? 'font-medium' : ''"></span>
                                                 </button>
                                                 @guest
                                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -1145,10 +1154,13 @@
                                                         </span>
                                                     </div>
                                                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                                                        <div class="h-2.5 rounded-full transition-all duration-500"
+                                                        <div class="h-2.5 rounded-full"
                                                              :style="{
-                                                                 width: Math.max(getVotePercent(poll, idx), poll.total_votes > 0 ? 2 : 0) + '%',
-                                                                 backgroundColor: idx === poll.user_vote ? accentColor : (getVoteCount(poll, idx) === getMaxVoteCount(poll) && poll.total_votes > 0 ? accentColor + '80' : '#9ca3af')
+                                                                 width: (pollAnimating[poll.id] ? 0 : Math.max(getVotePercent(poll, idx), poll.total_votes > 0 ? 2 : 0)) + '%',
+                                                                 backgroundColor: idx === poll.user_vote ? accentColor : (getVoteCount(poll, idx) === getMaxVoteCount(poll) && poll.total_votes > 0 ? accentColor + '80' : '#9ca3af'),
+                                                                 boxShadow: idx === poll.user_vote ? '0 0 8px ' + accentColor + '40' : 'none',
+                                                                 transition: 'width 700ms ease-out',
+                                                                 transitionDelay: (idx * 120) + 'ms'
                                                              }"></div>
                                                     </div>
                                                 </div>
@@ -1686,6 +1698,8 @@
     </div>
 </div>
 
+<script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!}></script>
+<script src="{{ asset('js/poll-confetti.js') }}" {!! nonce_attr() !!}></script>
 <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
 <script {!! nonce_attr() !!}>
 const { createApp } = Vue;
@@ -1729,7 +1743,9 @@ const calendarApp = createApp({
             playingVideo: null,
             openCommentForm: {},
             openPhotoForm: {},
+            accentColor: '{{ $accentColor ?? "#4E81FA" }}',
             votingPoll: {},
+            pollAnimating: {},
             isLoadingEvents: {{ request()->graphic ? 'false' : 'true' }},
             uniqueCategoryIds: @json($uniqueCategoryIds ?? []),
             dropdownCustomFields: @json($dropdownCustomFields ?? []),
@@ -2605,9 +2621,9 @@ const calendarApp = createApp({
                 });
             }
         },
-        async votePoll(event, poll, optionIndex) {
-            if (this.votingPoll[poll.id]) return;
-            this.votingPoll = { ...this.votingPoll, [poll.id]: true };
+        async votePoll(event, poll, optionIndex, clickEvent) {
+            if (this.votingPoll[poll.id] != null) return;
+            this.votingPoll = { ...this.votingPoll, [poll.id]: optionIndex };
             try {
                 const url = event.vote_poll_url.replace('POLL_HASH', poll.id);
                 const response = await fetch(url, {
@@ -2625,12 +2641,22 @@ const calendarApp = createApp({
                 }
                 const data = await response.json();
                 if (data.success) {
-                    poll.user_vote = optionIndex;
                     poll.results = data.results;
                     poll.total_votes = data.total_votes;
+                    const btn = clickEvent?.target?.closest('button');
+                    if (btn) firePollConfetti(btn, this.accentColor);
+                    this.pollAnimating = { ...this.pollAnimating, [poll.id]: true };
+                    await new Promise(r => setTimeout(r, 600));
+                    poll.user_vote = optionIndex;
+                    await this.$nextTick();
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            this.pollAnimating = { ...this.pollAnimating, [poll.id]: false };
+                        });
+                    });
                 }
             } finally {
-                this.votingPoll = { ...this.votingPoll, [poll.id]: false };
+                this.votingPoll = { ...this.votingPoll, [poll.id]: null };
             }
         },
         getVoteCount(poll, idx) {

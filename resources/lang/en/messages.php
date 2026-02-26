@@ -1778,6 +1778,7 @@ return [
     'cancel_campaign' => 'Cancel Campaign',
     'service_fee' => 'Service fee',
     'customize_targeting_creative' => 'Customize targeting & creative',
+    'use_simple_boost' => 'Use simple boost',
     'sponsored' => 'Sponsored',
     'budget_and_duration' => 'Budget & Duration',
     'budget_type' => 'Budget Type',
@@ -2054,4 +2055,10 @@ return [
     // Boost translate
     'translate_ad_to_english' => 'Translate ad copy to English',
     'translate_ad_to_english_desc' => 'Recommended if your target audience speaks English',
+
+    // Boost geo targeting
+    'geo_radius_description' => ':radius :unit around :location',
+    'miles' => 'miles',
+    'kilometers' => 'kilometers',
+    'location' => 'Location',
 ];

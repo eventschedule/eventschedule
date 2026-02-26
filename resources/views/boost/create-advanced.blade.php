@@ -96,6 +96,13 @@
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">2. {{ __('messages.targeting') }}</h2>
 
                 <div class="space-y-4">
+                    @if (!empty($geoDescription))
+                    <div class="p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-md">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.location') }}</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $geoDescription }}</p>
+                    </div>
+                    @endif
+
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.age_min') }}</label>
@@ -216,7 +223,11 @@
                 <div id="payment-errors" class="text-sm text-red-600 dark:text-red-400 hidden"></div>
             </div>
 
-            <div class="flex justify-end">
+            <div class="flex items-center justify-between">
+                <a href="{{ route('boost.create', ['event_id' => $event->hashedId(), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
+                   class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                    {{ __('messages.use_simple_boost') }}
+                </a>
                 <button type="submit" id="submit-btn"
                     class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                     <span id="submit-text">{{ __('messages.launch_boost') }}</span>
