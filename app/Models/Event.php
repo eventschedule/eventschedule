@@ -804,13 +804,15 @@ class Event extends Model
         });
 
         if ($role && $role->custom_domain && $useCustomDomain) {
-            $url = route($routeName, $data, false);
-            $url = $role->custom_domain.$url;
+            if ($role->custom_domain_mode !== 'direct' || $role->custom_domain_status === 'active') {
+                $url = route($routeName, $data, false);
+                $url = $role->custom_domain.$url;
 
-            return $url;
-        } else {
-            return route($routeName, $data);
+                return $url;
+            }
         }
+
+        return route($routeName, $data);
     }
 
     public function getGuestUrlData($subdomain = false, $date = null)

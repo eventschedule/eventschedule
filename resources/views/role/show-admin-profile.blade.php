@@ -151,11 +151,13 @@
                                 <p class="mt-1 line-clamp-2 break-all text-gray-600 dark:text-gray-400">{{ \App\Utils\UrlUtils::clean($link->url) }}
                                 </p>
                             </x-link>
+                            @if(!$isViewer)
                             <button type="button"
                                 class="btn-remove-link mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                                 data-link-type="payment_links" data-link-url="{{ $link->url }}">
                                 {{ __('messages.remove') }}
                             </button>
+                            @endif
                         </div>
                     </div>
                 </li>
@@ -172,6 +174,7 @@
 </div>
 
 
+@if(!$isViewer)
 <div id="add_modal" class="hidden relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <!--
 Background backdrop, show/hide based on modal state.
@@ -236,6 +239,7 @@ Leaving: "ease-in duration-200"
         </div>
     </div>
 </div>
+@endif
 
 <script {!! nonce_attr() !!}>
 function showAdd(link_type) {

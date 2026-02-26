@@ -40,6 +40,7 @@
                 }
             }
         </style>
+        @if(!$isViewer)
         <script {!! nonce_attr() !!}>
         $(document).ready(function () {
             const availableDays = new Set();
@@ -77,6 +78,7 @@
             });
         });
         </script>
+        @endif
         @elseif (config('services.google.maps') && $tab == 'profile' && $role->formatted_address)
         <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps') }}&callback=initMap"
             loading="async" defer {!! nonce_attr() !!}></script>

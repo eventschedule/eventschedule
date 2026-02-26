@@ -60,6 +60,7 @@ class SyncDomainStatuses extends Command
         }
 
         $updated = 0;
+        $failed = 0;
 
         foreach ($roles as $role) {
             $doStatus = $doStatuses[$role->custom_domain_host] ?? null;
@@ -69,9 +70,13 @@ class SyncDomainStatuses extends Command
                 Cache::forget("custom_domain:{$role->custom_domain_host}");
                 $updated++;
                 $this->info("Activated: {$role->custom_domain_host}");
+            } elseif (! $doStatus) {
+                $role->update(['custom_domain_status' => 'failed']);
+                $failed++;
+                $this->warn("Failed (not found in DO): {$role->custom_domain_host}");
             }
         }
 
-        $this->info("Sync complete. {$updated} domain(s) activated.");
+        $this->info("Sync complete. {$updated} domain(s) activated, {$failed} domain(s) failed.");
     }
 }

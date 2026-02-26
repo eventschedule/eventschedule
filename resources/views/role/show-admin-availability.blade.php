@@ -1,3 +1,4 @@
+@if(!$isViewer)
 <form method="post" id="availability_form"
         action="{{ route('role.availability', ['subdomain' => $subdomain]) }}">
 
@@ -9,5 +10,6 @@
     <input type="hidden" id="year" name="year" value="{{ $year }}"/>
 
 </form>
+@endif
 
 @include('role/partials/calendar', ['route' => 'admin', 'tab' => 'availability'])

@@ -3,7 +3,7 @@
         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.videos') }}</h2>
         <p class="text-gray-600 dark:text-gray-400 mb-6">{{ __('messages.videos_description') }}</p>
         
-        <div id="videos-app">
+        <div id="videos-app" data-is-viewer="{{ $isViewer ? 'true' : 'false' }}">
             <div v-if="loading" class="text-center py-8">
                 <div class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-blue-500 hover:bg-blue-400 transition ease-in-out duration-150">
                     <svg class="animate-spin -ms-1 me-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -93,14 +93,14 @@
                                 </div>
                             </div>
                             
-                            <div v-if="role.selectedVideos && role.selectedVideos.length > 0" class="mt-4">
+                            <div v-if="!isViewer && role.selectedVideos && role.selectedVideos.length > 0" class="mt-4">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-x-3">
-                                        <button @click="skipRole(role)" 
+                                        <button @click="skipRole(role)"
                                                 class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
                                             {{ __('messages.skip') }}
                                         </button>
-                                        <button @click="saveVideos(role)" 
+                                        <button @click="saveVideos(role)"
                                                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
                                             {{ __('messages.save_videos') }}
                                         </button>
@@ -110,10 +110,10 @@
                             
                             <div v-else-if="role.videos && role.videos.length > 0" class="mt-4">
                                 <div class="flex items-center justify-between">
-                                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                                    <div v-if="!isViewer" class="text-sm text-gray-600 dark:text-gray-400">
                                         {{ __('messages.no_videos_selected') }}
                                     </div>
-                                    <button @click="skipRole(role)" 
+                                    <button v-if="!isViewer" @click="skipRole(role)"
                                             class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
                                         {{ __('messages.skip') }}
                                     </button>
@@ -127,7 +127,7 @@
                         
                         <div v-else class="text-sm text-gray-500 dark:text-gray-400">
                             {{ __('messages.no_videos_found') }}
-                            <button @click="skipRole(role)" 
+                            <button v-if="!isViewer" @click="skipRole(role)"
                                     class="ms-3 inline-flex items-center px-3 py-1 border border-gray-300 dark:border-gray-600 text-xs font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
                                 {{ __('messages.skip') }}
                             </button>
@@ -148,7 +148,8 @@ document.addEventListener('DOMContentLoaded', function() {
         data() {
             return {
                 talentRoles: [],
-                loading: true
+                loading: true,
+                isViewer: document.getElementById('videos-app').dataset.isViewer === 'true'
             }
         },
         mounted() {

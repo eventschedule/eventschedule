@@ -756,7 +756,9 @@ class Role extends Model implements MustVerifyEmail
         }
 
         if ($useCustomDomain && $this->custom_domain) {
-            return $this->custom_domain;
+            if ($this->custom_domain_mode !== 'direct' || $this->custom_domain_status === 'active') {
+                return $this->custom_domain;
+            }
         }
 
         return route('role.view_guest', ['subdomain' => $this->subdomain]);
