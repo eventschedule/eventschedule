@@ -47,11 +47,13 @@
                                 <h4 class="text-lg font-bold break-words line-clamp-2 text-gray-900 dark:text-gray-100">{{ $link->name }}</h4>
                                 <img src="{{ $link->thumbnail_url }}"/>
                             </x-link>
+                            @if(!$isViewer)
                             <button type="button"
                                 class="btn-remove-link mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                                 data-link-type="youtube_links" data-link-url="{{ $link->url }}">
                                 {{ __('messages.remove') }}
                             </button>
+                            @endif
                         </div>
                     </div>
                 </li>
@@ -98,11 +100,13 @@
                                 <p class="mt-1 line-clamp-2 break-all text-gray-600 dark:text-gray-400">{{ \App\Utils\UrlUtils::clean($link->url) }}
                                 </p>
                             </x-link>
+                            @if(!$isViewer)
                             <button type="button"
                                 class="btn-remove-link mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                                 data-link-type="social_links" data-link-url="{{ $link->url }}">
                                 {{ __('messages.remove') }}
                             </button>
+                            @endif
                         </div>
                     </div>
                 </li>
