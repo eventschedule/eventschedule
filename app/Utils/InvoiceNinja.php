@@ -87,11 +87,11 @@ class InvoiceNinja
         return $product;
     }
 
-    public function createSubscription($name, $productIds, $price, $webhookConfig)
+    public function createSubscription($name, $productIds, $price, $webhookConfig, $steps = 'cart')
     {
         $subscription = $this->sendRequest('subscriptions', 'POST', [
             'name' => $name,
-            'steps' => 'cart',
+            'steps' => $steps,
             'product_ids' => implode(',', $productIds),
             'price' => $price,
             'webhook_configuration' => $webhookConfig,
@@ -176,19 +176,42 @@ class InvoiceNinja
             'X-API-TOKEN: '.$this->apiKey,
             'X-CLIENT-PLATFORM: '.'Event Schedule',
             'Content-Type: application/json',
+            'Accept: application/json',
         ]);
 
-        $result = curl_exec($response);
+        $rawResult = curl_exec($response);
+        $httpCode = curl_getinfo($response, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($response)) {
+            $curlError = curl_error($response);
+            curl_close($response);
+            throw new \Exception('Invoice Ninja API curl error: '.$curlError);
+        }
+
+        if (in_array($httpCode, [301, 302, 303, 307, 308])) {
+            $redirectUrl = curl_getinfo($response, CURLINFO_REDIRECT_URL);
+            curl_close($response);
+            $message = 'Invoice Ninja API request was redirected (HTTP '.$httpCode.')';
+            \Log::error($message, [
+                'url' => $url,
+                'redirect_url' => $redirectUrl,
+            ]);
+            throw new \Exception($message);
+        }
 
         curl_close($response);
 
-        $result = json_decode($result, true);
+        $result = json_decode($rawResult, true);
 
         if (! isset($result['data'])) {
-            $message = 'Invoice Ninja API request failed';
+            $message = 'Invoice Ninja API request failed (HTTP '.$httpCode.')';
             if (isset($result['message'])) {
                 $message .= ': '.$result['message'];
             }
+            \Log::error($message, [
+                'url' => $url,
+                'response' => mb_substr($rawResult, 0, 2000),
+            ]);
             throw new \Exception($message);
         }
 

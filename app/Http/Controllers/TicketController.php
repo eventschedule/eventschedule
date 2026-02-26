@@ -478,68 +478,78 @@ class TicketController extends Controller
 
     private function invoiceninjaInvoiceCheckout($subdomain, $sale, $event)
     {
-        $user = $event->user;
-        $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
-        $company = null;
+        try {
+            $user = $event->user;
+            $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
+            $company = null;
 
-        $foundClient = false;
-        $clientMachesEmail = false;
-        $requirePassword = false;
-        $sendEmail = false;
+            $foundClient = false;
+            $clientMachesEmail = false;
+            $requirePassword = false;
+            $sendEmail = false;
 
-        $client = $invoiceNinja->findClient($sale->email, $event->ticket_currency_code);
+            $client = $invoiceNinja->findClient($sale->email, $event->ticket_currency_code);
 
-        if ($client) {
-            $foundClient = true;
-            if (auth()->user() && auth()->user()->email_verified_at) {
-                foreach ($client['contacts'] as $contact) {
-                    if ($contact['email'] == auth()->user()->email) {
-                        $clientMachesEmail = true;
+            if ($client) {
+                $foundClient = true;
+                if (auth()->user() && auth()->user()->email_verified_at) {
+                    foreach ($client['contacts'] as $contact) {
+                        if ($contact['email'] == auth()->user()->email) {
+                            $clientMachesEmail = true;
+                        }
                     }
                 }
+                if (! $clientMachesEmail) {
+                    $company = $invoiceNinja->getCompany();
+                    $requirePassword = $company['settings']['enable_client_portal_password'];
+                }
+            } else {
+                $client = $invoiceNinja->createClient($sale->name, $sale->email, $event->ticket_currency_code);
             }
-            if (! $clientMachesEmail) {
-                $company = $invoiceNinja->getCompany();
-                $requirePassword = $company['settings']['enable_client_portal_password'];
+
+            if ($foundClient && ! $clientMachesEmail && ! $requirePassword) {
+                $sendEmail = true;
             }
-        } else {
-            $client = $invoiceNinja->createClient($sale->name, $sale->email, $event->ticket_currency_code);
-        }
 
-        if ($foundClient && ! $clientMachesEmail && ! $requirePassword) {
-            $sendEmail = true;
-        }
+            $lineItems = [];
+            foreach ($sale->saleTickets as $saleTicket) {
+                $lineItems[] = [
+                    'product_key' => $saleTicket->ticket->type,
+                    'notes' => $saleTicket->ticket->description ?? __('messages.tickets'),
+                    'quantity' => $saleTicket->quantity,
+                    'cost' => $saleTicket->ticket->price,
+                ];
+            }
 
-        $lineItems = [];
-        foreach ($sale->saleTickets as $saleTicket) {
-            $lineItems[] = [
-                'product_key' => $saleTicket->ticket->type,
-                'notes' => $saleTicket->ticket->description ?? __('messages.tickets'),
-                'quantity' => $saleTicket->quantity,
-                'cost' => $saleTicket->ticket->price,
-            ];
-        }
+            if ($sale->discount_amount > 0 && $sale->promoCode) {
+                $lineItems[] = [
+                    'product_key' => __('messages.discount'),
+                    'notes' => $sale->promoCode->code,
+                    'quantity' => 1,
+                    'cost' => -$sale->discount_amount,
+                ];
+            }
 
-        if ($sale->discount_amount > 0 && $sale->promoCode) {
-            $lineItems[] = [
-                'product_key' => __('messages.discount'),
-                'notes' => $sale->promoCode->code,
-                'quantity' => 1,
-                'cost' => -$sale->discount_amount,
-            ];
-        }
+            $qrCodeUrl = route('ticket.qr_code', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+            $invoice = $invoiceNinja->createInvoice($client['id'], $lineItems, $qrCodeUrl, $sendEmail);
 
-        $qrCodeUrl = route('ticket.qr_code', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
-        $invoice = $invoiceNinja->createInvoice($client['id'], $lineItems, $qrCodeUrl, $sendEmail);
+            $sale->transaction_reference = $invoice['id'];
+            $sale->payment_amount = $invoice['amount'];
+            $sale->save();
 
-        $sale->transaction_reference = $invoice['id'];
-        $sale->payment_amount = $invoice['amount'];
-        $sale->save();
+            if ($sendEmail) {
+                return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+            } else {
+                return redirect($invoice['invitations'][0]['link']);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Invoice Ninja invoice checkout failed', [
+                'sale_id' => $sale->id,
+                'event_id' => $event->id,
+                'error' => $e->getMessage(),
+            ]);
 
-        if ($sendEmail) {
-            return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
-        } else {
-            return redirect($invoice['invitations'][0]['link']);
+            return back()->with('error', __('messages.error'));
         }
     }
 
@@ -590,11 +600,14 @@ class TicketController extends Controller
                 'post_purchase_headers' => ['X-Webhook-Secret' => $user->invoiceninja_webhook_secret],
             ];
 
+            $steps = ($user->invoiceninja_mode === 'payment_link_v3') ? 'auth.login-or-register,cart' : 'cart';
+
             $subscription = $invoiceNinja->createSubscription(
                 $subscriptionName,
                 $productIds,
                 $sale->payment_amount,
-                $webhookConfig
+                $webhookConfig,
+                $steps
             );
 
             $sale->transaction_reference = 'sub:'.$subscription['id'];
@@ -609,7 +622,13 @@ class TicketController extends Controller
 
             return redirect($purchaseUrl);
         } catch (\Exception $e) {
-            return back()->with('error', __('messages.error'));
+            \Log::warning('Invoice Ninja payment link checkout failed, falling back to invoice mode', [
+                'sale_id' => $sale->id,
+                'event_id' => $event->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return $this->invoiceninjaInvoiceCheckout($subdomain, $sale, $event);
         }
     }
 
