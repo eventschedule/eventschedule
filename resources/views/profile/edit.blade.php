@@ -238,6 +238,9 @@
     </div>
 
     <script {!! nonce_attr() !!}>
+    var _scrollGuard = function() { window.scrollTo(0, 0); };
+    window.addEventListener('scroll', _scrollGuard);
+
     // Section navigation functionality
     document.addEventListener('DOMContentLoaded', function() {
         const sectionLinks = document.querySelectorAll('.section-nav-link');
@@ -352,6 +355,16 @@
                 }, 5000);
             }
         }
+    });
+
+    window.addEventListener('load', function() {
+        window.scrollTo(0, 0);
+        requestAnimationFrame(function() {
+            window.scrollTo(0, 0);
+            setTimeout(function() {
+                window.removeEventListener('scroll', _scrollGuard);
+            }, 300);
+        });
     });
     </script>
 

@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Invoice Ninja Integration - Event Schedule</x-slot>
-    <x-slot name="description">Generate professional invoices for ticket purchases. Automatic client management, QR code tickets, and automatic payment tracking with Invoice Ninja.</x-slot>
+    <x-slot name="description">Generate invoices and payment links for ticket purchases. Automatic client management, QR code tickets, and payment tracking with Invoice Ninja.</x-slot>
     <x-slot name="breadcrumbTitle">Invoice Ninja</x-slot>
 
     <x-slot name="structuredData">
@@ -11,9 +11,10 @@
         "name": "Event Schedule - Invoice Ninja Integration",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
-        "description": "Generate professional invoices for ticket purchases. Automatic client management, QR code tickets, and automatic payment tracking with Invoice Ninja.",
+        "description": "Generate invoices and payment links for ticket purchases. Automatic client management, QR code tickets, and payment tracking with Invoice Ninja.",
         "featureList": [
             "Professional invoice generation",
+            "Payment links",
             "Automatic client management",
             "QR code tickets",
             "Payment tracking",
@@ -82,7 +83,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
-                Automatic invoice generation for ticket purchases. Perfect for B2B sales and corporate events.
+                Invoices and payment links for ticket purchases. Perfect for B2B sales and corporate events.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">

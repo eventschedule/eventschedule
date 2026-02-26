@@ -54,6 +54,14 @@
                     "@type": "Answer",
                     "text": "Refunds are managed directly through your Stripe dashboard. You have full control over your refund policy and can issue full or partial refunds to individual ticket buyers at any time."
                 }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I offer promo codes or discounts?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes! You can create promo codes with either percentage or fixed amount discounts. Promo codes can be targeted to specific ticket types, giving you full control over your discount strategy."
+                }
             }
         ]
     }
@@ -190,27 +198,26 @@
                     </div>
                 </div>
 
-                <!-- Payment Integration -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-sky-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/20 text-sky-700 dark:text-sky-300 text-sm font-medium mb-4">
+                <!-- Promo Codes -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 border border-amber-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 text-sm font-medium mb-4">
                         <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                         </svg>
-                        Payments
+                        Promo Codes
                     </div>
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Flexible payments</h2>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Choose Stripe for instant checkout or Invoice Ninja for B2B invoicing.</p>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Discount codes</h2>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Offer percentage or fixed amount discounts. Target specific ticket types.</p>
 
-                    <div class="flex justify-center gap-4">
-                        <a href="{{ marketing_url('/stripe') }}" class="bg-white dark:bg-gray-800 rounded-xl px-4 py-3 shadow-lg hover:scale-105 transition-transform">
-                            <span class="text-lg font-bold" style="color: #635BFF;">stripe</span>
-                        </a>
-                        <a href="{{ marketing_url('/invoiceninja') }}" class="bg-emerald-500/20 border border-emerald-400/30 rounded-xl px-4 py-3 hover:scale-105 transition-transform flex items-center gap-2">
-                            <svg aria-hidden="true" class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <span class="text-emerald-600 dark:text-emerald-300 font-medium text-sm">Invoicing</span>
-                        </a>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-amber-500/10 border border-amber-400/20">
+                            <div class="text-gray-900 dark:text-white font-mono text-sm">EARLY20</div>
+                            <div class="text-amber-600 dark:text-amber-300 font-semibold text-sm">20% off</div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-amber-500/10 border border-amber-400/20">
+                            <div class="text-gray-900 dark:text-white font-mono text-sm">VIP10</div>
+                            <div class="text-amber-600 dark:text-amber-300 font-semibold text-sm">$10 off</div>
+                        </div>
                     </div>
                 </div>
 
@@ -520,6 +527,22 @@
                     <div x-show="open === 4" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
                             Refunds are managed directly through your Stripe dashboard. You have full control over your refund policy and can issue full or partial refunds to individual ticket buyers at any time.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900 dark:to-yellow-900 rounded-2xl border border-amber-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 5 ? null : 5" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I offer promo codes or discounts?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 5 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 5" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes! You can create promo codes with either percentage or fixed amount discounts. Promo codes can be targeted to specific ticket types, giving you full control over your discount strategy.
                         </p>
                     </div>
                 </div>

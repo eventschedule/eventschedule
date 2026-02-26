@@ -166,7 +166,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payment Link Mode</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Buyers select tickets and enter promo codes on the Invoice Ninja purchase page. Invoices are grouped in Invoice Ninja, making bulk management easier. Supports one promo code per event (applied to all tickets). Buyers can optionally create an Event Schedule account during checkout.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Buyers select tickets and enter promo codes on the Invoice Ninja purchase page. Invoices are grouped in Invoice Ninja, making bulk management easier. Supports one promo code per event (applied to all tickets). Buyers can optionally create an Event Schedule account during checkout. See the <x-link href="https://invoiceninja.github.io/docs/user-guide/subscriptions" target="_blank">Invoice Ninja payment link docs</x-link> for more details.</p>
                                 </div>
                             </div>
 

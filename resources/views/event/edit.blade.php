@@ -1066,6 +1066,14 @@
                                 {{ __('messages.schedules') }}
                             </a>
                             @endif
+                            @if ($event->exists && $event->canBeSyncedToGoogleCalendarForSubdomain(request()->subdomain))
+                            <a href="#section-google-calendar" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-google-calendar">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                </svg>
+                                {{ __('messages.google_calendar_sync') }}
+                            </a>
+                            @endif
                             @if ($event->user_id == $user->id)
                             <a href="#section-tickets" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-tickets">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -1089,12 +1097,12 @@
                                 {{ __('messages.custom_fields') }}
                             </a>
                             @endif
-                            @if ($event->exists && $event->canBeSyncedToGoogleCalendarForSubdomain(request()->subdomain))
-                            <a href="#section-google-calendar" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-google-calendar">
+                            @if ($role->isPro())
+                            <a href="#section-polls" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-polls">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                                 </svg>
-                                {{ __('messages.google_calendar_sync') }}
+                                {{ __('messages.polls') }}
                             </a>
                             @endif
                             @if ($event->exists)
@@ -1107,14 +1115,6 @@
                                 @if ($fanContentPendingCount > 0)
                                 <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $fanContentPendingCount }}</span>
                                 @endif
-                            </a>
-                            @endif
-                            @if ($role->isPro())
-                            <a href="#section-polls" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-polls">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                                </svg>
-                                {{ __('messages.polls') }}
                             </a>
                             @endif
                         </nav>
@@ -2233,6 +2233,67 @@
                 </div>
                 @endif
 
+            @if ($event->exists && $event->canBeSyncedToGoogleCalendarForSubdomain(request()->subdomain))
+            <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-google-calendar">
+                <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                    </svg>
+                    {{ __('messages.google_calendar_sync') }}
+                </span>
+                <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+            <div id="section-google-calendar" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div class="max-w-xl">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                        </svg>
+                        {{ __('messages.google_calendar_sync') }}
+                    </h2>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                        {{ __('messages.sync_this_event_description') }}
+                    </p>
+
+                    <div class="flex items-center space-x-4">
+                        @if ($event->isSyncedToGoogleCalendarForSubdomain(request()->subdomain))
+                            <div class="flex items-center text-green-600 dark:text-green-400">
+                                <svg class="w-4 h-4 me-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span class="text-sm">{{ __('messages.synced_to_google_calendar') }}</span>
+                            </div>
+                            <x-secondary-button type="button" id="unsync-event-btn" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">
+                                {{ __('messages.remove_from_google_calendar') }}
+                            </x-secondary-button>
+                        @else
+                            <div class="flex items-center text-gray-500 dark:text-gray-400">
+                                <svg class="w-4 h-4 me-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm8 0a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V8zm0 4a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1v-2z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span class="text-sm">{{ __('messages.not_synced_to_google_calendar') }}</span>
+                            </div>
+                            <x-primary-button type="button" id="sync-event-btn" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">
+                                {{ __('messages.sync_to_google_calendar') }}
+                            </x-primary-button>
+                        @endif
+                    </div>
+
+                    <div id="sync-status-{{ $event->id }}" class="hidden mt-3">
+                        <div class="flex items-center text-blue-600 dark:text-blue-400">
+                            <svg class="animate-spin -ms-1 me-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span class="text-sm">{{ __('messages.syncing') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
                     @if ($event->user_id == $user->id)
                     <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-tickets">
                         <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -2903,63 +2964,118 @@
                 </div>
                 @endif
 
-            @if ($event->exists && $event->canBeSyncedToGoogleCalendarForSubdomain(request()->subdomain))
-            <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-google-calendar">
+            @if ($role->isPro())
+            <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-polls">
                 <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                     </svg>
-                    {{ __('messages.google_calendar_sync') }}
+                    {{ __('messages.polls') }}
                 </span>
                 <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
             </button>
-            <div id="section-google-calendar" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
-                <div class="max-w-xl">                                                
+            <div id="section-polls" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div class="max-w-2xl">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                         </svg>
-                        {{ __('messages.google_calendar_sync') }}
+                        {{ __('messages.polls') }}
                     </h2>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                        {{ __('messages.sync_this_event_description') }}
-                    </p>
-                
-                    <div class="flex items-center space-x-4">
-                        @if ($event->isSyncedToGoogleCalendarForSubdomain(request()->subdomain))
-                            <div class="flex items-center text-green-600 dark:text-green-400">
-                                <svg class="w-4 h-4 me-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                </svg>
-                                <span class="text-sm">{{ __('messages.synced_to_google_calendar') }}</span>
-                            </div>
-                            <x-secondary-button type="button" id="unsync-event-btn" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">
-                                {{ __('messages.remove_from_google_calendar') }}
-                            </x-secondary-button>
-                        @else
-                            <div class="flex items-center text-gray-500 dark:text-gray-400">
-                                <svg class="w-4 h-4 me-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm8 0a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V8zm0 4a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1v-2z" clip-rule="evenodd"></path>
-                                </svg>
-                                <span class="text-sm">{{ __('messages.not_synced_to_google_calendar') }}</span>
-                            </div>
-                            <x-primary-button type="button" id="sync-event-btn" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">
-                                {{ __('messages.sync_to_google_calendar') }}
-                            </x-primary-button>
-                        @endif
+
+                    {{-- Poll message/error --}}
+                    <div v-if="pollMessage" class="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-700 dark:text-green-400">
+                        @{{ pollMessage }}
                     </div>
-                
-                    <div id="sync-status-{{ $event->id }}" class="hidden mt-3">
-                        <div class="flex items-center text-blue-600 dark:text-blue-400">
-                            <svg class="animate-spin -ms-1 me-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span class="text-sm">{{ __('messages.syncing') }}</span>
+                    <div v-if="pollError" class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">
+                        @{{ pollError }}
+                    </div>
+
+                    {{-- Existing Polls --}}
+                    <div v-if="polls.length > 0" class="space-y-4 mb-4">
+                        <div v-for="(poll, pollIndex) in polls" :key="poll.hash || ('new-' + pollIndex)" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                            {{-- Question input --}}
+                            <div class="flex items-start justify-between gap-3 mb-3">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_question') }}</label>
+                                    <input type="text" v-model="poll.question" maxlength="500" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.poll_question') }}'">
+                                </div>
+                                <span v-if="poll.hash" class="shrink-0 mt-6 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                                      :class="poll.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'">
+                                    @{{ poll.is_active ? pollLabelActive : pollLabelClosed }}
+                                </span>
+                            </div>
+
+                            {{-- Options: read-only with vote results when has votes --}}
+                            <template v-if="poll.votes_count > 0">
+                                <div v-for="(option, idx) in poll.options" :key="idx" class="mb-2">
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-700 dark:text-gray-300">@{{ option }}</span>
+                                        <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums">@{{ pollOptionCount(poll, idx) }} (@{{ pollOptionPct(poll, idx) }}%)</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                        <div class="h-2 rounded-full" :style="pollBarStyle(poll, idx)"></div>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 mb-3">
+                                    @{{ poll.votes_count }} {{ __('messages.votes') }}
+                                </p>
+                                <p class="text-xs text-amber-600 dark:text-amber-400 mb-3">{{ __('messages.cannot_edit_poll_with_votes') }}</p>
+                            </template>
+
+                            {{-- Options: editable when no votes --}}
+                            <template v-else>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_options') }}</label>
+                                    <div v-for="(option, idx) in poll.options" :key="idx" class="flex items-center gap-2 mb-2">
+                                        <input type="text" v-model="poll.options[idx]" maxlength="200" class="flex-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.option_placeholder') }} ' + (idx + 1)">
+                                        <button v-if="poll.options.length > 2" type="button" @click="poll.options.splice(idx, 1)" class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center justify-between mt-1">
+                                        <button v-if="poll.options.length < 10" type="button" @click="poll.options.push('')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                                            {{ __('messages.add_option') }}
+                                        </button>
+                                        <span v-else></span>
+                                        <button v-if="!poll.hash" type="button" @click="polls.splice(pollIndex, 1)" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
+                                            {{ __('messages.remove') }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+
+                            {{-- Actions --}}
+                            <div v-if="poll.hash" class="flex items-center gap-2">
+                                <button type="button" @click="togglePoll(poll)" :disabled="pollSubmitting" class="text-sm px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
+                                    @{{ poll.is_active ? pollLabelClose : pollLabelReopen }}
+                                </button>
+                                <button type="button" @click="deletePoll(poll, pollIndex)" :disabled="pollSubmitting" class="text-sm px-3 py-1.5 rounded border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50">
+                                    {{ __('messages.delete') }}
+                                </button>
+                            </div>
                         </div>
                     </div>
+                    <p v-else class="text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.no_polls') }}</p>
+
+                    {{-- Hidden inputs for form submission --}}
+                    <template v-for="(poll, pIdx) in polls" :key="'poll-input-' + pIdx">
+                        <input type="hidden" :name="'polls[' + pIdx + '][hash]'" :value="poll.hash || ''">
+                        <input type="hidden" :name="'polls[' + pIdx + '][question]'" :value="poll.question">
+                        <input type="hidden" :name="'polls[' + pIdx + '][options]'" :value="JSON.stringify(poll.options)">
+                    </template>
+
+                    {{-- Add Poll Link --}}
+                    <button type="button" @click="polls.push({hash: null, question: '', options: ['', ''], is_active: true, votes_count: 0, results: []})" v-if="polls.length < 5"
+                            class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        {{ __('messages.add_poll') }}
+                    </button>
                 </div>
             </div>
             @endif
@@ -3117,122 +3233,6 @@
                 @endif
 
                 @endif
-            </div>
-            @endif
-
-            @if ($role->isPro())
-            <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-polls">
-                <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                    </svg>
-                    {{ __('messages.polls') }}
-                </span>
-                <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-            </button>
-            <div id="section-polls" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
-                <div class="max-w-2xl">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                        </svg>
-                        {{ __('messages.polls') }}
-                    </h2>
-
-                    {{-- Poll message/error --}}
-                    <div v-if="pollMessage" class="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-700 dark:text-green-400">
-                        @{{ pollMessage }}
-                    </div>
-                    <div v-if="pollError" class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">
-                        @{{ pollError }}
-                    </div>
-
-                    {{-- Existing Polls --}}
-                    <div v-if="polls.length > 0" class="space-y-4 mb-4">
-                        <div v-for="(poll, pollIndex) in polls" :key="poll.hash || ('new-' + pollIndex)" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                            {{-- Question input --}}
-                            <div class="flex items-start justify-between gap-3 mb-3">
-                                <div class="flex-1">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_question') }}</label>
-                                    <input type="text" v-model="poll.question" maxlength="500" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.poll_question') }}'">
-                                </div>
-                                <span v-if="poll.hash" class="shrink-0 mt-6 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
-                                      :class="poll.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'">
-                                    @{{ poll.is_active ? pollLabelActive : pollLabelClosed }}
-                                </span>
-                            </div>
-
-                            {{-- Options: read-only with vote results when has votes --}}
-                            <template v-if="poll.votes_count > 0">
-                                <div v-for="(option, idx) in poll.options" :key="idx" class="mb-2">
-                                    <div class="flex justify-between text-sm mb-1">
-                                        <span class="text-gray-700 dark:text-gray-300">@{{ option }}</span>
-                                        <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums">@{{ pollOptionCount(poll, idx) }} (@{{ pollOptionPct(poll, idx) }}%)</span>
-                                    </div>
-                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                        <div class="h-2 rounded-full" :style="pollBarStyle(poll, idx)"></div>
-                                    </div>
-                                </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 mb-3">
-                                    @{{ poll.votes_count }} {{ __('messages.votes') }}
-                                </p>
-                                <p class="text-xs text-amber-600 dark:text-amber-400 mb-3">{{ __('messages.cannot_edit_poll_with_votes') }}</p>
-                            </template>
-
-                            {{-- Options: editable when no votes --}}
-                            <template v-else>
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_options') }}</label>
-                                    <div v-for="(option, idx) in poll.options" :key="idx" class="flex items-center gap-2 mb-2">
-                                        <input type="text" v-model="poll.options[idx]" maxlength="200" class="flex-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.option_placeholder') }} ' + (idx + 1)">
-                                        <button v-if="poll.options.length > 2" type="button" @click="poll.options.splice(idx, 1)" class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex items-center justify-between mt-1">
-                                        <button v-if="poll.options.length < 10" type="button" @click="poll.options.push('')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                                            {{ __('messages.add_option') }}
-                                        </button>
-                                        <span v-else></span>
-                                        <button v-if="!poll.hash" type="button" @click="polls.splice(pollIndex, 1)" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
-                                            {{ __('messages.remove') }}
-                                        </button>
-                                    </div>
-                                </div>
-                            </template>
-
-                            {{-- Actions --}}
-                            <div v-if="poll.hash" class="flex items-center gap-2">
-                                <button type="button" @click="togglePoll(poll)" :disabled="pollSubmitting" class="text-sm px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
-                                    @{{ poll.is_active ? pollLabelClose : pollLabelReopen }}
-                                </button>
-                                <button type="button" @click="deletePoll(poll, pollIndex)" :disabled="pollSubmitting" class="text-sm px-3 py-1.5 rounded border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50">
-                                    {{ __('messages.delete') }}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <p v-else class="text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.no_polls') }}</p>
-
-                    {{-- Hidden inputs for form submission --}}
-                    <template v-for="(poll, pIdx) in polls" :key="'poll-input-' + pIdx">
-                        <input type="hidden" :name="'polls[' + pIdx + '][hash]'" :value="poll.hash || ''">
-                        <input type="hidden" :name="'polls[' + pIdx + '][question]'" :value="poll.question">
-                        <input type="hidden" :name="'polls[' + pIdx + '][options]'" :value="JSON.stringify(poll.options)">
-                    </template>
-
-                    {{-- Add Poll Link --}}
-                    <button type="button" @click="polls.push({hash: null, question: '', options: ['', ''], is_active: true, votes_count: 0, results: []})" v-if="polls.length < 5"
-                            class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        {{ __('messages.add_poll') }}
-                    </button>
-                </div>
             </div>
             @endif
 
