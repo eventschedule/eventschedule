@@ -9,6 +9,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BoostController;
 use App\Http\Controllers\CalDAVController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\PromoCodeController;
 use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\GoogleCalendarWebhookController;
 use App\Http\Controllers\GraphicController;
@@ -53,6 +54,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::post('/submit-photo/{event_hash}', [EventController::class, 'submitPhoto'])->name('event.submit_photo')->middleware('throttle:10,60');
         Route::post('/vote-poll/{event_hash}/{poll_hash}', [EventController::class, 'votePoll'])->name('event.vote_poll')->middleware('throttle:30,60');
         Route::post('/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
+        Route::post('/promo-code/validate', [PromoCodeController::class, 'validate'])->name('promo_code.validate')->middleware('throttle:20,1');
         Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
         Route::get('/checkout/success/{sale_id}/{date}', [TicketController::class, 'success'])->name('checkout.success');
         Route::get('/checkout/cancel/{sale_id}/{date}', [TicketController::class, 'cancel'])->name('checkout.cancel');
@@ -939,6 +941,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     Route::post('/{subdomain}/submit-photo/{event_hash}', [EventController::class, 'submitPhoto'])->name('event.submit_photo')->middleware('throttle:10,60');
     Route::post('/{subdomain}/vote-poll/{event_hash}/{poll_hash}', [EventController::class, 'votePoll'])->name('event.vote_poll')->middleware('throttle:30,60');
     Route::post('/{subdomain}/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
+    Route::post('/{subdomain}/promo-code/validate', [PromoCodeController::class, 'validate'])->name('promo_code.validate')->middleware('throttle:20,1');
     Route::post('/{subdomain}/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
     Route::get('/{subdomain}/checkout/success/{sale_id}', [TicketController::class, 'success'])->name('checkout.success');
     Route::get('/{subdomain}/checkout/cancel/{sale_id}', [TicketController::class, 'cancel'])->name('checkout.cancel');

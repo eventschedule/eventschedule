@@ -1545,7 +1545,7 @@
                 });
               });
             } else {
-              alert(data.message || '{{ __("messages.an_error_occurred") }}');
+              alert(data.error || '{{ __("messages.an_error_occurred") }}');
             }
           } finally {
             this.votingOption[pollHash] = null;

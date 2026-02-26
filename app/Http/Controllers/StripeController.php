@@ -179,6 +179,9 @@ class StripeController extends Controller
                         $sale->save();
 
                         AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
+                        if ($sale->discount_amount > 0) {
+                            AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+                        }
                         UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
 
                         // Send conversion event to Meta CAPI if event has active boost
@@ -244,6 +247,9 @@ class StripeController extends Controller
 
                             // Record sale in analytics
                             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+                            if ($sale->discount_amount > 0) {
+                                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+                            }
 
                             // Send conversion event to Meta CAPI if event has active boost
                             $this->sendMetaConversion($sale, $sale->payment_amount);

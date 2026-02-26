@@ -231,6 +231,60 @@
         </div>
         @endif
 
+        {{-- Promo Code Stats --}}
+        @if ($conversionStats['promo_sales'] > 0)
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.promo_codes') }}</h3>
+
+            {{-- Summary cards --}}
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.promo_sales') }}</p>
+                    <p class="text-xl font-bold text-gray-900 dark:text-white">
+                        {{ number_format($conversionStats['promo_sales']) }}
+                        <span class="text-sm font-normal text-gray-500 dark:text-gray-400">/ {{ number_format($conversionStats['total_sales']) }}</span>
+                    </p>
+                </div>
+                <div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.total_discounts') }}</p>
+                    <p class="text-xl font-bold text-orange-600 dark:text-orange-400">{{ number_format($conversionStats['promo_discounts'], 2) }}</p>
+                </div>
+            </div>
+
+            {{-- Per-code table --}}
+            @if ($promoCodeStats->isNotEmpty())
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                            <th class="pb-2 font-medium">{{ __('messages.promo_code') }}</th>
+                            <th class="pb-2 font-medium text-end">{{ __('messages.discount') }}</th>
+                            <th class="pb-2 font-medium text-end">{{ __('messages.sales') }}</th>
+                            <th class="pb-2 font-medium text-end">{{ __('messages.total_discounts') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                        @foreach ($promoCodeStats as $stat)
+                        <tr>
+                            <td class="py-2 text-gray-900 dark:text-white font-mono">{{ $stat['code'] }}</td>
+                            <td class="py-2 text-gray-500 dark:text-gray-400 text-end">
+                                @if ($stat['type'] === 'percentage')
+                                    {{ rtrim(rtrim(number_format($stat['value'], 3), '0'), '.') }}%
+                                @else
+                                    {{ rtrim(rtrim(number_format($stat['value'], 3), '0'), '.') }}
+                                @endif
+                            </td>
+                            <td class="py-2 text-gray-900 dark:text-white text-end">{{ number_format($stat['sales_count']) }}</td>
+                            <td class="py-2 text-orange-600 dark:text-orange-400 text-end">{{ number_format($stat['total_discount'], 2) }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @endif
+        </div>
+        @endif
+
         {{-- Boost Performance --}}
         @if ($boostStats['has_data'])
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
@@ -530,6 +584,10 @@
                         <div class="flex items-start gap-1">
                             <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: #F97316;"></span>
                             <span><strong>{{ __('messages.boost') }}:</strong> {{ __('messages.boost_traffic_desc') }}</span>
+                        </div>
+                        <div class="flex items-start gap-1">
+                            <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: #F472B6;"></span>
+                            <span><strong>{{ __('messages.promo_code') }}:</strong> {{ __('messages.promo_traffic_desc') }}</span>
                         </div>
                         <div class="flex items-start gap-1">
                             <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: #6B7280;"></span>
@@ -950,6 +1008,7 @@
             'email': @json(__('messages.email')),
             'newsletter': @json(__('messages.newsletter_source')),
             'boost': @json(__('messages.boost')),
+            'promo': @json(__('messages.promo_code')),
             'other': @json(__('messages.other'))
         };
         const sourceColors = {
@@ -959,6 +1018,7 @@
             'email': '#EF4444',
             'newsletter': '#8B5CF6',
             'boost': '#F97316',
+            'promo': '#F472B6',
             'other': '#6B7280'
         };
         const trafficData = @json($trafficSources->toArray());

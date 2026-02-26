@@ -21,6 +21,9 @@
                 <a href="{{ marketing_url('/pricing') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 pb-0.5 {{ request()->is('*/pricing') || request()->is('pricing') ? 'text-blue-600 dark:text-blue-400 font-medium !border-blue-600 dark:!border-blue-400 hover:!border-blue-600 dark:hover:!border-blue-400' : '' }}">
                     Pricing
                 </a>
+                <a href="{{ marketing_url('/features/online-events') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 pb-0.5 {{ request()->is('*/features/online-events') || request()->is('features/online-events') ? 'text-blue-600 dark:text-blue-400 font-medium !border-blue-600 dark:!border-blue-400 hover:!border-blue-600 dark:hover:!border-blue-400' : '' }}">
+                    Online Events
+                </a>
                 <a href="{{ marketing_url('/use-cases') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 pb-0.5 {{ request()->is('*/use-cases') || request()->is('use-cases') || request()->is('*/for-*') || request()->is('for-*') ? 'text-blue-600 dark:text-blue-400 font-medium !border-blue-600 dark:!border-blue-400 hover:!border-blue-600 dark:hover:!border-blue-400' : '' }}">
                     Use Cases
                 </a>
@@ -29,9 +32,6 @@
                 </a>
                 <a href="{{ marketing_url('/docs') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 pb-0.5 {{ request()->is('*/docs*') || request()->is('docs*') ? 'text-blue-600 dark:text-blue-400 font-medium !border-blue-600 dark:!border-blue-400 hover:!border-blue-600 dark:hover:!border-blue-400' : '' }}">
                     Docs
-                </a>
-                <a href="{{ marketing_url('/about') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 pb-0.5 {{ request()->is('*/about') || request()->is('about') ? 'text-blue-600 dark:text-blue-400 font-medium !border-blue-600 dark:!border-blue-400 hover:!border-blue-600 dark:hover:!border-blue-400' : '' }}">
-                    About
                 </a>
             </div>
 
@@ -114,6 +114,9 @@
                 <a href="{{ marketing_url('/pricing') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
                     Pricing
                 </a>
+                <a href="{{ marketing_url('/features/online-events') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
+                    Online Events
+                </a>
                 <a href="{{ marketing_url('/use-cases') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
                     Use Cases
                 </a>
@@ -122,9 +125,6 @@
                 </a>
                 <a href="{{ marketing_url('/docs') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
                     Docs
-                </a>
-                <a href="{{ marketing_url('/about') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
-                    About
                 </a>
                 <div class="pt-3 border-t border-gray-200 dark:border-gray-700 flex flex-col space-y-3">
                     @auth

@@ -1816,15 +1816,15 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('new_subdomain')" />
                             </div>
 
-                            <div>
+                            <div x-data="{ domain: '{{ old('custom_domain', $role->custom_domain) }}', mode: '{{ old('custom_domain_mode', $role->custom_domain_mode ?? 'redirect') }}' }">
                                 <x-input-label for="custom_domain" :value="__('messages.custom_domain')" />
                                 @if ($role->isEnterprise())
                                 <x-text-input id="custom_domain" name="custom_domain" type="url" class="mt-1 block w-full"
-                                    :value="old('custom_domain', $role->custom_domain)" />
+                                    :value="old('custom_domain', $role->custom_domain)" x-model="domain" />
                                 <x-input-error class="mt-2" :messages="$errors->get('custom_domain')" />
 
                                 {{-- Domain mode selector --}}
-                                <div class="mt-3" x-data="{ mode: '{{ old('custom_domain_mode', $role->custom_domain_mode ?? 'redirect') }}' }">
+                                <div class="mt-3" x-show="domain" x-cloak>
                                     @if (config('services.digitalocean.app_hostname'))
                                     <x-input-label :value="__('messages.custom_domain_mode')" />
                                     <div class="mt-2 space-y-2">

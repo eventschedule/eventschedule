@@ -20,6 +20,8 @@ class AnalyticsEventsDaily extends Model
         'unknown_views',
         'sales_count',
         'revenue',
+        'promo_sales_count',
+        'promo_discount_total',
     ];
 
     protected $casts = [
@@ -65,6 +67,37 @@ class AnalyticsEventsDaily extends Model
              VALUES (?, ?, 1, ?)
              ON DUPLICATE KEY UPDATE sales_count = sales_count + 1, revenue = revenue + ?',
             [$eventId, $date, $amount, $amount]
+        );
+    }
+
+    /**
+     * Increment promo sale count and discount total for an event/date combination using upsert
+     */
+    public static function incrementPromoSale(int $eventId, float $discountAmount): void
+    {
+        $date = now()->toDateString();
+
+        DB::statement(
+            'INSERT INTO analytics_events_daily (event_id, date, promo_sales_count, promo_discount_total)
+             VALUES (?, ?, 1, ?)
+             ON DUPLICATE KEY UPDATE promo_sales_count = promo_sales_count + 1, promo_discount_total = promo_discount_total + ?',
+            [$eventId, $date, $discountAmount, $discountAmount]
+        );
+    }
+
+    /**
+     * Decrement promo sale count and discount total for an event when a sale is refunded or cancelled
+     */
+    public static function decrementPromoSale(int $eventId, float $discountAmount): void
+    {
+        $date = now()->toDateString();
+
+        DB::statement(
+            'UPDATE analytics_events_daily
+             SET promo_sales_count = IF(promo_sales_count > 0, promo_sales_count - 1, 0),
+                 promo_discount_total = IF(promo_discount_total > ?, promo_discount_total - ?, 0)
+             WHERE event_id = ? AND date = ?',
+            [$discountAmount, $discountAmount, $eventId, $date]
         );
     }
 

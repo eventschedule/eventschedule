@@ -270,6 +270,7 @@ class EventController extends Controller
                 $event->total_tickets_mode = $defaultTickets['total_tickets_mode'] ?? 'individual';
                 $event->custom_fields = $defaultTickets['custom_fields'] ?? null;
                 $event->tickets = $defaultTickets['tickets'] ?? [new Ticket];
+                $defaultPromoCodes = $defaultTickets['promo_codes'] ?? [];
             } else {
                 $event->ticket_currency_code = MoneyUtils::getCurrencyForCountry($role->country_code);
                 $event->payment_method = 'cash';
@@ -363,6 +364,7 @@ class EventController extends Controller
             'isCloned' => $isCloned,
             'clonedParts' => $clonedParts,
             'polls' => collect(),
+            'defaultPromoCodes' => $defaultPromoCodes ?? [],
         ]);
     }
 
@@ -489,7 +491,7 @@ class EventController extends Controller
         }
 
         $event_id = UrlUtils::decodeId($hash);
-        $event = Event::with(['creatorRole', 'curators', 'parts'])->findOrFail($event_id);
+        $event = Event::with(['creatorRole', 'curators', 'parts', 'promoCodes'])->findOrFail($event_id);
         $user = $request->user();
 
         if ($user->cannot('update', $event)) {
@@ -632,6 +634,7 @@ class EventController extends Controller
 
         if ($request->has('save_default_tickets')) {
             $role = Role::subdomain($subdomain)->firstOrFail();
+            $event->load('promoCodes');
             $defaultTickets = [
                 'currency_code' => $event->ticket_currency_code,
                 'payment_method' => $event->payment_method,
@@ -648,6 +651,16 @@ class EventController extends Controller
                         'price' => $ticket->price,
                         'description' => $ticket->description,
                         'custom_fields' => $ticket->custom_fields,
+                    ];
+                })->toArray(),
+                'promo_codes' => $event->promoCodes->map(function ($pc) {
+                    return [
+                        'code' => $pc->code,
+                        'type' => $pc->type,
+                        'value' => $pc->value,
+                        'max_uses' => $pc->max_uses,
+                        'is_active' => $pc->is_active,
+                        'ticket_ids' => $pc->ticket_ids,
                     ];
                 })->toArray(),
             ];
@@ -849,6 +862,7 @@ class EventController extends Controller
 
         if ($request->has('save_default_tickets')) {
             $role = Role::subdomain($subdomain)->firstOrFail();
+            $event->load('promoCodes');
             $defaultTickets = [
                 'currency_code' => $event->ticket_currency_code,
                 'payment_method' => $event->payment_method,
@@ -865,6 +879,16 @@ class EventController extends Controller
                         'price' => $ticket->price,
                         'description' => $ticket->description,
                         'custom_fields' => $ticket->custom_fields,
+                    ];
+                })->toArray(),
+                'promo_codes' => $event->promoCodes->map(function ($pc) {
+                    return [
+                        'code' => $pc->code,
+                        'type' => $pc->type,
+                        'value' => $pc->value,
+                        'max_uses' => $pc->max_uses,
+                        'is_active' => $pc->is_active,
+                        'ticket_ids' => $pc->ticket_ids,
                     ];
                 })->toArray(),
             ];
@@ -2187,14 +2211,14 @@ class EventController extends Controller
         $event = Event::findOrFail(UrlUtils::decodeId($eventHash));
 
         if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
-            return response()->json(['error' => 'Not found'], 404);
+            return response()->json(['error' => __('messages.not_authorized')], 404);
         }
 
         if ($event->is_private) {
             $user = auth()->user();
             $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
             if (! $isMemberOrAdmin) {
-                return response()->json(['error' => 'Not found'], 404);
+                return response()->json(['error' => __('messages.not_authorized')], 404);
             }
         }
 
@@ -2208,7 +2232,7 @@ class EventController extends Controller
 
         $optionIndex = $request->input('option_index');
         if ($optionIndex >= count($poll->options)) {
-            return response()->json(['error' => 'Invalid option'], 422);
+            return response()->json(['error' => __('messages.invalid_option')], 422);
         }
 
         try {

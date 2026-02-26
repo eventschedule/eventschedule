@@ -15,6 +15,13 @@ class RoleUpdateRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
      */
+    protected function prepareForValidation(): void
+    {
+        if (! $this->input('custom_domain')) {
+            $this->merge(['custom_domain_mode' => null]);
+        }
+    }
+
     public function rules(): array
     {
         $role = Role::subdomain(request()->subdomain)->firstOrFail();

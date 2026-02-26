@@ -150,13 +150,13 @@
     {
         "@context": "https://schema.org",
         "@type": "SiteNavigationElement",
-        "name": ["Features", "Pricing", "Selfhost", "Docs", "About"],
+        "name": ["Features", "Pricing", "Online Events", "Selfhost", "Docs"],
         "url": [
             "{{ config('app.url') }}/features",
             "{{ config('app.url') }}/pricing",
+            "{{ config('app.url') }}/features/online-events",
             "{{ config('app.url') }}/selfhost",
-            "{{ config('app.url') }}/docs",
-            "{{ config('app.url') }}/about"
+            "{{ config('app.url') }}/docs"
         ]
     }
     </script>

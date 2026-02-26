@@ -272,7 +272,7 @@ abstract class AbstractEventDesign
      */
     protected function getFooterRequestUrl(): string
     {
-        if ($this->role->custom_domain) {
+        if ($this->role->custom_domain && ($this->role->custom_domain_mode !== 'direct' || $this->role->custom_domain_status === 'active')) {
             $url = $this->role->custom_domain.'/request';
         } else {
             $url = route('role.request', ['subdomain' => $this->role->subdomain]);

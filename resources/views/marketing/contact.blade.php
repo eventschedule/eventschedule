@@ -94,6 +94,8 @@
                 </svg>
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Open Source Community</h3>
                 <p class="text-gray-600 dark:text-gray-400">Event Schedule is open source. Join us on GitHub.</p>
+
+                @include('marketing.partials.github-star-badge')
             </div>
 
             <!-- GitHub Cards Grid -->

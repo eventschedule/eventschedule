@@ -216,6 +216,23 @@ class Event extends Model
         return $this->hasMany(Ticket::class)->where('is_deleted', false)->orderBy('price', 'desc');
     }
 
+    public function promoCodes()
+    {
+        return $this->hasMany(PromoCode::class);
+    }
+
+    public function hasActivePromoCodes(): bool
+    {
+        return $this->promoCodes()->where('is_active', true)
+            ->where(function ($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
+            ->where(function ($q) {
+                $q->whereNull('max_uses')->orWhereColumn('times_used', '<', 'max_uses');
+            })
+            ->exists();
+    }
+
     public function parts()
     {
         return $this->hasMany(EventPart::class)->orderBy('sort_order');
@@ -973,7 +990,7 @@ class Event extends Model
         }
 
         if ($date) {
-            $customDate = Carbon::createFromFormat('Y-m-d', $date);
+            $customDate = Carbon::parse($date);
             $startAt->setDate($customDate->year, $customDate->month, $customDate->day);
         }
 

@@ -264,6 +264,14 @@
               </div>
             @endforeach
           </div>
+          @if ($sale->discount_amount > 0)
+            <div class="mt-[12px] pt-[12px] border-t border-white/10 print:border-slate-200">
+              <div class="flex items-center justify-between">
+                <span class="text-[13px] text-emerald-400 print:text-emerald-600 font-medium">{{ __('messages.discount') }}@if ($sale->promoCode) ({{ $sale->promoCode->code }})@endif</span>
+                <span class="text-[13px] text-emerald-400 print:text-emerald-600 font-medium">-{{ number_format($sale->discount_amount, 2) }} {{ $event->ticket_currency_code }}</span>
+              </div>
+            </div>
+          @endif
         </div>
 
         {{-- Custom Fields Section --}}

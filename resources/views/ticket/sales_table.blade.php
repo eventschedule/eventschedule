@@ -47,6 +47,12 @@
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                                     <span class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format($sale->payment_amount, 2, '.', ',') }}</span>
                                     <span class="text-gray-500 dark:text-gray-400">{{ $sale->event->ticket_currency_code }}</span>
+                                    @if ($sale->promo_code_id && $sale->promoCode)
+                                        <span class="ms-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
+                                            {{ $sale->promoCode->code }}
+                                            <span class="ms-1 text-green-600 dark:text-green-400">-{{ number_format($sale->discount_amount, 2, '.', ',') }}</span>
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                                     @if ($sale->transaction_reference == __('messages.manual_payment'))
@@ -244,6 +250,11 @@
                         <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.total') }}</div>
                         <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ number_format($sale->payment_amount, 2, '.', ',') }}</div>
                         <div class="text-sm text-gray-500 dark:text-gray-400">{{ $sale->event->ticket_currency_code }}</div>
+                        @if ($sale->promo_code_id && $sale->promoCode)
+                            <span class="mt-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
+                                {{ $sale->promoCode->code }} -{{ number_format($sale->discount_amount, 2, '.', ',') }}
+                            </span>
+                        @endif
                     </div>
 
                     <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">

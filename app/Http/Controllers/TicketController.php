@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\TicketCheckoutRequest;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
+use App\Models\PromoCode;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\User;
@@ -67,7 +68,7 @@ class TicketController extends Controller
         $user = auth()->user();
         $filter = strtolower(request()->filter);
 
-        $query = Sale::with('event', 'saleTickets')
+        $query = Sale::with('event', 'saleTickets', 'promoCode')
             ->where('is_deleted', false)
             ->whereHas('event', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
@@ -275,9 +276,27 @@ class TicketController extends Controller
                     }
                 }
 
-                $total = $sale->calculateTotal();
+                $subtotal = $sale->calculateTotal();
+                $sale->payment_amount = $subtotal;
 
-                $sale->payment_amount = $total;
+                // Apply promo code if provided
+                if ($request->promo_code) {
+                    $promoCode = PromoCode::where('event_id', $event->id)
+                        ->whereRaw('LOWER(code) = ?', [strtolower($request->promo_code)])
+                        ->lockForUpdate()
+                        ->first();
+
+                    if ($promoCode && $promoCode->isValid()) {
+                        $discountAmount = $promoCode->calculateDiscount($sale->saleTickets);
+                        if ($discountAmount > 0) {
+                            $sale->promo_code_id = $promoCode->id;
+                            $sale->discount_amount = $discountAmount;
+                            $sale->payment_amount = max(0, $subtotal - $discountAmount);
+                            $promoCode->increment('times_used');
+                        }
+                    }
+                }
+
                 $sale->save();
 
                 return $sale;
@@ -299,6 +318,9 @@ class TicketController extends Controller
 
             // Record free ticket sale in analytics (0 revenue)
             AnalyticsEventsDaily::incrementSale($event->id, 0);
+            if ($sale->discount_amount > 0) {
+                AnalyticsEventsDaily::incrementPromoSale($event->id, $sale->discount_amount);
+            }
 
             return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
         } else {
@@ -317,8 +339,35 @@ class TicketController extends Controller
 
     private function stripeCheckout($subdomain, $sale, $event)
     {
+        $promoCode = $sale->promo_code_id ? $sale->promoCode : null;
+        $discount = $sale->discount_amount ?? 0;
+
+        // Calculate discount ratio for eligible tickets
+        $eligibleSubtotal = 0;
+        if ($promoCode && $discount > 0) {
+            foreach ($sale->saleTickets as $saleTicket) {
+                if ($promoCode->appliesToTicket($saleTicket->ticket_id)) {
+                    $eligibleSubtotal += $saleTicket->ticket->price * $saleTicket->quantity;
+                }
+            }
+        }
+        $discountRatio = ($eligibleSubtotal > 0 && $discount > 0)
+            ? ($eligibleSubtotal - $discount) / $eligibleSubtotal
+            : 1;
+
         $lineItems = [];
-        foreach ($sale->saleTickets as $saleTicket) {
+        $totalCents = 0;
+        $lastEligibleIndex = null;
+
+        foreach ($sale->saleTickets as $index => $saleTicket) {
+            $unitPrice = $saleTicket->ticket->price;
+            if ($promoCode && $discount > 0 && $promoCode->appliesToTicket($saleTicket->ticket_id)) {
+                $unitPrice = $unitPrice * $discountRatio;
+                $lastEligibleIndex = count($lineItems);
+            }
+            $unitAmountCents = (int) round($unitPrice * 100);
+            $totalCents += $unitAmountCents * $saleTicket->quantity;
+
             $lineItems[] = [
                 'price_data' => [
                     'currency' => $event->ticket_currency_code,
@@ -326,10 +375,35 @@ class TicketController extends Controller
                         'name' => $saleTicket->ticket->type ? $saleTicket->ticket->type : __('messages.tickets'),
                         ...$saleTicket->ticket->description ? ['description' => $saleTicket->ticket->description] : [],
                     ],
-                    'unit_amount' => (int) round($saleTicket->ticket->price * 100),
+                    'unit_amount' => $unitAmountCents,
                 ],
                 'quantity' => $saleTicket->quantity,
             ];
+        }
+
+        // Fix rounding difference to match payment_amount exactly
+        $expectedCents = (int) round($sale->payment_amount * 100);
+        if ($totalCents !== $expectedCents && $lastEligibleIndex !== null) {
+            $diff = $expectedCents - $totalCents;
+            $lastItem = &$lineItems[$lastEligibleIndex];
+            if ($lastItem['quantity'] > 1) {
+                // Split: (quantity-1) at original price + 1 at adjusted price
+                $originalUnit = $lastItem['price_data']['unit_amount'];
+                $lastItem['quantity'] -= 1;
+                $totalCents -= $originalUnit; // remove one unit from total
+                $adjustedUnit = $originalUnit + $diff;
+                $lineItems[] = [
+                    'price_data' => [
+                        'currency' => $lastItem['price_data']['currency'],
+                        'product_data' => $lastItem['price_data']['product_data'],
+                        'unit_amount' => $adjustedUnit,
+                    ],
+                    'quantity' => 1,
+                ];
+            } else {
+                $lastItem['price_data']['unit_amount'] += $diff;
+            }
+            unset($lastItem);
         }
 
         $data = [
@@ -446,6 +520,15 @@ class TicketController extends Controller
             ];
         }
 
+        if ($sale->discount_amount > 0 && $sale->promoCode) {
+            $lineItems[] = [
+                'product_key' => __('messages.discount'),
+                'notes' => $sale->promoCode->code,
+                'quantity' => 1,
+                'cost' => -$sale->discount_amount,
+            ];
+        }
+
         $qrCodeUrl = route('ticket.qr_code', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
         $invoice = $invoiceNinja->createInvoice($client['id'], $lineItems, $qrCodeUrl, $sendEmail);
 
@@ -466,13 +549,32 @@ class TicketController extends Controller
             $user = $event->user;
             $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
 
+            $promoCode = $sale->promo_code_id ? $sale->promoCode : null;
+            $discount = $sale->discount_amount ?? 0;
+
+            $eligibleSubtotal = 0;
+            if ($promoCode && $discount > 0) {
+                foreach ($sale->saleTickets as $saleTicket) {
+                    if ($promoCode->appliesToTicket($saleTicket->ticket_id)) {
+                        $eligibleSubtotal += $saleTicket->ticket->price * $saleTicket->quantity;
+                    }
+                }
+            }
+            $discountRatio = ($eligibleSubtotal > 0 && $discount > 0)
+                ? ($eligibleSubtotal - $discount) / $eligibleSubtotal
+                : 1;
+
             $productIds = [];
             foreach ($sale->saleTickets as $saleTicket) {
                 $productKey = $saleTicket->ticket->type ?: __('messages.tickets');
+                $price = $saleTicket->ticket->price;
+                if ($promoCode && $discount > 0 && $promoCode->appliesToTicket($saleTicket->ticket_id)) {
+                    $price = round($price * $discountRatio, 2);
+                }
                 $product = $invoiceNinja->createProduct(
                     $productKey,
                     $saleTicket->ticket->description ?? '',
-                    $saleTicket->ticket->price
+                    $price
                 );
                 for ($i = 0; $i < $saleTicket->quantity; $i++) {
                     $productIds[] = $product['id'];
@@ -624,6 +726,9 @@ class TicketController extends Controller
             $sale->save();
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+            if ($sale->discount_amount > 0) {
+                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+            }
         });
 
         return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
@@ -772,7 +877,7 @@ class TicketController extends Controller
     public function view($eventId, $secret)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
-        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
+        $sale = Sale::with('promoCode')->where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
         $role = $event->role();
 
         return view('ticket.view', compact('event', 'sale', 'role'));
@@ -816,6 +921,9 @@ class TicketController extends Controller
                     $actionPerformed = true;
 
                     AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+                    if ($sale->discount_amount > 0) {
+                        AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+                    }
                 }
                 break;
 
@@ -826,6 +934,10 @@ class TicketController extends Controller
                         $sale->save();
 
                         AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+
+                        if ($sale->discount_amount > 0) {
+                            AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                        }
                     });
                     $actionPerformed = true;
                 }
@@ -858,6 +970,10 @@ class TicketController extends Controller
 
                     if ($wasPaid) {
                         AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+
+                        if ($sale->discount_amount > 0) {
+                            AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                        }
                     }
                 }
                 break;
@@ -886,6 +1002,10 @@ class TicketController extends Controller
                         $sale->save();
 
                         AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+
+                        if ($sale->discount_amount > 0) {
+                            AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                        }
                     }
 
                     $sale->is_deleted = true;

@@ -225,7 +225,11 @@
 
         {{-- Month and Year Title: Always visible and positioned first (hidden in list view). --}}
         <h1 v-show="currentView === 'calendar'" class="text-2xl font-semibold leading-6 flex-shrink-0 {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:block' }} text-gray-900 dark:text-gray-100">
+            @if ($route === 'guest' && !request()->graphic)
+            <time :datetime="monthYearDatetime" v-text="monthYearLabel"></time>
+            @else
             <time datetime="{{ sprintf('%04d-%02d', $year, $month) }}">{{ Carbon\Carbon::create($year, $month, 1)->locale($isAdminRoute && auth()->check() ? app()->getLocale() : (session()->has('translate') ? 'en' : (isset($role) && $role->language_code ? $role->language_code : 'en')))->translatedFormat('F Y') }}</time>
+            @endif
         </h1>
 
 
@@ -234,6 +238,23 @@
 
             {{-- Month Navigation Controls --}}
             <div v-show="currentView === 'calendar'" class="flex items-center bg-white/95 dark:bg-gray-900/95 rounded-md shadow-sm {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:flex' }}">
+                @if ($route === 'guest' && !request()->graphic)
+                <button @click="navigateMonth(-1)" class="flex h-11 w-14 items-center justify-center rounded-s-md border-s border-y border-gray-300 dark:border-gray-600 pe-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:pe-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700">
+                    <span class="sr-only">{{ __('messages.previous_month') }}</span>
+                    <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <button @click="navigateMonth(0)" class="flex h-11 items-center justify-center border-y border-gray-300 dark:border-gray-600 px-4 text-base font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 focus:relative">
+                    <span class="h-6 flex items-center">{{ __('messages.this_month') }}</span>
+                </button>
+                <button @click="navigateMonth(1)" class="flex h-11 w-14 items-center justify-center rounded-e-md border-e border-y border-gray-300 dark:border-gray-600 ps-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:ps-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700">
+                    <span class="sr-only">{{ __('messages.next_month') }}</span>
+                    <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                @else
                 <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-s-md border-s border-y border-gray-300 dark:border-gray-600 pe-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:pe-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
                     <span class="sr-only">{{ __('messages.previous_month') }}</span>
                     <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
@@ -249,6 +270,7 @@
                         <path fill-rule="evenodd" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" clip-rule="evenodd" />
                     </svg>
                 </a>
+                @endif
             </div>
 
             {{-- Save Button --}}
@@ -419,6 +441,51 @@
                 $firstRole = auth()->user()->member()->where('email_verified_at', '!=', null)->first();
             }
             @endphp
+            @if ($route === 'guest' && !request()->graphic)
+            {{-- Vue-driven calendar grid for guest route (supports AJAX month navigation) --}}
+            <div class="w-full grid grid-cols-7 gap-px" :style="{ gridTemplateRows: 'repeat(' + totalWeeksComputed + ', minmax(0, 1fr))' }">
+                <div v-for="day in calendarDays" :key="day.date"
+                    class="relative px-3 py-2 min-h-[100px] border-1 border-transparent"
+                    :class="day.isCurrentMonth ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400'">
+                    <div class="flex justify-between">
+                        <time :datetime="day.date"
+                            :style="day.isToday ? 'background-color: ' + accentColor + '; color: {{ accent_contrast_color($accentColor ?? '#4E81FA') }}' : ''"
+                            :class="day.isToday ? 'flex h-6 w-6 items-center justify-center rounded font-semibold' : ''"
+                            v-text="day.day">
+                        </time>
+                    </div>
+                    <ol class="mt-4 divide-y divide-gray-100 dark:divide-gray-700 text-sm leading-6 md:col-span-7 xl:col-span-8">
+                        <li v-for="event in getEventsForDate(day.date)" :key="event.id"
+                            class="relative group"
+                            :class="event.can_edit ? 'hover:pe-8' : ''"
+                            v-show="isEventVisible(event)">
+                            <a :href="getEventUrl(event, day.date)"
+                                class="flex event-link-popup"
+                                :data-event-id="event.id"
+                                @click.stop @if (isset($embed) && $embed) target="_blank" @endif>
+                                <p class="flex-auto font-medium text-gray-900 dark:text-gray-100 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }} truncate">
+                                    <span class="flex items-start gap-1.5">
+                                        <span v-if="getEventGroupColor(event)" class="inline-block w-2 h-2 rounded-full flex-shrink-0 mt-1.5" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
+                                        <span :class="getEventsForDate(day.date).filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'"
+                                          class="hover:underline truncate" dir="auto" v-text="getEventDisplayName(event)">
+                                        </span>
+                                    </span>
+                                    <span v-if="getEventsForDate(day.date).filter(e => isEventVisible(e)).length == 1"
+                                          class="text-gray-500 dark:text-gray-400 truncate" v-text="getEventTime(event)">
+                                    </span>
+                                </p>
+                            </a>
+                            <a v-if="event.can_edit" :href="event.edit_url"
+                                class="absolute end-0 top-0 hidden group-hover:inline-block text-gray-900 dark:text-white hover:underline"
+                                @click.stop>
+                                {{ __('messages.edit') }}
+                            </a>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+            @else
+            {{-- PHP-rendered calendar grid for admin/home/graphic routes --}}
             <div class="w-full grid grid-cols-7 grid-rows-{{ $totalWeeks }} gap-px">
                 @while ($currentDate->lte($endOfMonth))
                 @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at)
@@ -504,6 +571,7 @@
                     @php $currentDate->addDay(); @endphp
                     @endwhile
                 </div>
+            @endif
             </div>
         </div>
         @endif
@@ -1713,6 +1781,7 @@ const calendarApp = createApp({
             selectedCategory: '{{ $category ?? "" }}',
             allEvents: @json($eventsForVue),
             eventsMap: @json($eventsMapForVue),
+            eventIdsInViewedMonth: [],
             groups: @json($groupsForVue),
             categories: @json(get_translated_categories()),
             startOfMonth: '{{ $startOfMonth->format('Y-m-d') }}',
@@ -1754,10 +1823,62 @@ const calendarApp = createApp({
             selectedCustomFields: @json(collect($dropdownCustomFields ?? [])->pluck('key')->mapWithKeys(fn($k) => [$k => ''])),
             pageMonth: {{ $month }},
             pageYear: {{ $year }},
-            listDataLoaded: false
+            listDataLoaded: false,
+            firstDayOfWeek: {{ $firstDay }},
+            todayDate: '{{ $today->format('Y-m-d') }}'
         }
     },
     computed: {
+        calendarDays() {
+            const year = this.pageYear;
+            const month = this.pageMonth;
+            const firstDay = this.firstDayOfWeek;
+            const lastDay = (firstDay + 6) % 7;
+
+            // First day of the month
+            const firstOfMonth = new Date(year, month - 1, 1);
+            // Last day of the month
+            const lastOfMonth = new Date(year, month, 0);
+
+            // Start of calendar grid: go back to the start of the week containing the 1st
+            const start = new Date(firstOfMonth);
+            while (start.getDay() !== firstDay) {
+                start.setDate(start.getDate() - 1);
+            }
+
+            // End of calendar grid: go forward to the end of the week containing the last day
+            const end = new Date(lastOfMonth);
+            while (end.getDay() !== lastDay) {
+                end.setDate(end.getDate() + 1);
+            }
+
+            const days = [];
+            const current = new Date(start);
+            while (current <= end) {
+                const y = current.getFullYear();
+                const m = String(current.getMonth() + 1).padStart(2, '0');
+                const d = String(current.getDate()).padStart(2, '0');
+                const dateStr = `${y}-${m}-${d}`;
+                days.push({
+                    date: dateStr,
+                    day: current.getDate(),
+                    isCurrentMonth: current.getMonth() + 1 === month && current.getFullYear() === year,
+                    isToday: dateStr === this.todayDate
+                });
+                current.setDate(current.getDate() + 1);
+            }
+            return days;
+        },
+        totalWeeksComputed() {
+            return Math.ceil(this.calendarDays.length / 7);
+        },
+        monthYearLabel() {
+            const date = new Date(this.pageYear, this.pageMonth - 1, 1);
+            return date.toLocaleDateString(this.languageCode, { month: 'long', year: 'numeric' });
+        },
+        monthYearDatetime() {
+            return String(this.pageYear).padStart(4, '0') + '-' + String(this.pageMonth).padStart(2, '0');
+        },
         hasDesktopFilters() {
             return this.groups.length > 1 || this.availableCategories.length > 1 || this.hasOnlineEvents || this.uniqueVenues.length > 1 || this.hasFreeEvents || this.dropdownCustomFields.length > 0;
         },
@@ -1795,7 +1916,7 @@ const calendarApp = createApp({
         },
         eventCountByGroup() {
             // Filter by other active filters (except group)
-            const baseEvents = this.futureEvents.filter(e => {
+            const baseEvents = this.eventsForFilters.filter(e => {
                 if (this.showOnlineOnly && !e.is_online) return false;
                 if (this.selectedVenue && e.venue_subdomain !== this.selectedVenue) return false;
                 if (this.showFreeOnly && !e.is_free) return false;
@@ -1816,7 +1937,7 @@ const calendarApp = createApp({
         },
         eventCountByCategory() {
             // Filter by group, online status, venue, price, and custom fields
-            const filteredEvents = this.futureEvents.filter(event => {
+            const filteredEvents = this.eventsForFilters.filter(event => {
                 if (this.selectedGroup) {
                     const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
                     if (selectedGroupObj && event.group_id !== selectedGroupObj.id) {
@@ -1838,6 +1959,12 @@ const calendarApp = createApp({
                 counts[c.id] = filteredEvents.filter(e => e.category_id == c.id).length;
             });
             return counts;
+        },
+        eventsForFilters() {
+            if (this.currentView === 'list') {
+                return this.allEvents;
+            }
+            return this.allEvents.filter(e => this.eventIdsInViewedMonth.includes(e.id));
         },
         futureEvents() {
             return this.allEvents.filter(event => {
@@ -1874,7 +2001,7 @@ const calendarApp = createApp({
         },
         availableCategories() {
             // Get events filtered only by group (not by category) to show all available categories
-            const groupFilteredEvents = this.futureEvents.filter(event => {
+            const groupFilteredEvents = this.eventsForFilters.filter(event => {
                 if (this.selectedGroup) {
                     // Find the group by slug to get its ID for filtering
                     const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
@@ -1884,7 +2011,7 @@ const calendarApp = createApp({
                 }
                 return true;
             });
-            
+
             // Get unique category IDs from the group-filtered events
             const categoryIds = [...new Set(groupFilteredEvents.map(event => event.category_id).filter(id => id))];
             
@@ -1896,7 +2023,7 @@ const calendarApp = createApp({
         },
         uniqueVenues() {
             const venuesMap = new Map();
-            this.futureEvents.forEach(event => {
+            this.eventsForFilters.forEach(event => {
                 if (event.venue_subdomain && event.venue_name) {
                     venuesMap.set(event.venue_subdomain, event.venue_name);
                 }
@@ -1907,7 +2034,7 @@ const calendarApp = createApp({
         },
         hasFreeEvents() {
             let hasFree = false, hasPaid = false;
-            for (const event of this.futureEvents) {
+            for (const event of this.eventsForFilters) {
                 if (event.is_free) hasFree = true;
                 else hasPaid = true;
                 if (hasFree && hasPaid) return true;
@@ -1915,11 +2042,11 @@ const calendarApp = createApp({
             return false;
         },
         hasOnlineEvents() {
-            return this.futureEvents.some(e => e.is_online);
+            return this.eventsForFilters.some(e => e.is_online);
         },
         eventCountByVenue() {
             // Filter by group, category, online, price, and custom fields first
-            const baseEvents = this.futureEvents.filter(event => {
+            const baseEvents = this.eventsForFilters.filter(event => {
                 if (this.selectedGroup) {
                     const selectedGroupObj = this.groups.find(g => g.slug === this.selectedGroup);
                     if (selectedGroupObj && event.group_id !== selectedGroupObj.id) return false;
@@ -1943,7 +2070,7 @@ const calendarApp = createApp({
             const result = {};
             this.dropdownCustomFields.forEach(field => {
                 const values = new Set();
-                this.futureEvents.forEach(event => {
+                this.eventsForFilters.forEach(event => {
                     const val = (event.custom_field_values || {})[field.key];
                     if (val) values.add(val);
                 });
@@ -1954,7 +2081,7 @@ const calendarApp = createApp({
         eventCountByCustomField() {
             const result = {};
             this.dropdownCustomFields.forEach(field => {
-                const baseEvents = this.futureEvents.filter(e => {
+                const baseEvents = this.eventsForFilters.filter(e => {
                     if (this.selectedGroup) {
                         const selectedGroupObj = this.groups.find(g => g.slug === this.selectedGroup);
                         if (selectedGroupObj && e.group_id !== selectedGroupObj.id) return false;
@@ -2403,7 +2530,7 @@ const calendarApp = createApp({
             } else if (view === 'calendar' && this.listDataLoaded) {
                 this.listDataLoaded = false;
                 this.isLoadingEvents = true;
-                this.fetchCalendarEvents();
+                this.fetchCalendarEventsForMonth(this.pageMonth, this.pageYear);
             }
         },
         updatePanelWrapper(view) {
@@ -2527,6 +2654,15 @@ const calendarApp = createApp({
                 });
             }
             return [];
+        },
+        updateEventIdsInViewedMonth(rawEventsMap) {
+            const ids = new Set();
+            for (const dateStr in rawEventsMap) {
+                if (rawEventsMap[dateStr]) {
+                    rawEventsMap[dateStr].forEach(id => ids.add(id));
+                }
+            }
+            this.eventIdsInViewedMonth = Array.from(ids);
         },
         isEventVisible(event) {
             if (this.selectedGroup) {
@@ -2657,7 +2793,7 @@ const calendarApp = createApp({
                         });
                     });
                 } else {
-                    alert(data.message || '{{ __("messages.an_error_occurred") }}');
+                    alert(data.error || '{{ __("messages.an_error_occurred") }}');
                 }
             } finally {
                 this.votingPoll = { ...this.votingPoll, [poll.id]: null };
@@ -3048,14 +3184,47 @@ const calendarApp = createApp({
                 }
             });
         },
-        async fetchCalendarEvents(options = {}) {
+        navigateMonth(direction) {
+            let newMonth = this.pageMonth;
+            let newYear = this.pageYear;
+
+            if (direction === 0) {
+                const now = new Date();
+                newMonth = now.getMonth() + 1;
+                newYear = now.getFullYear();
+            } else {
+                newMonth += direction;
+                if (newMonth > 12) {
+                    newMonth = 1;
+                    newYear++;
+                } else if (newMonth < 1) {
+                    newMonth = 12;
+                    newYear--;
+                }
+            }
+
+            this.pageMonth = newMonth;
+            this.pageYear = newYear;
+            this.listDataLoaded = false;
+            this.isLoadingEvents = true;
+
+            this.fetchCalendarEventsForMonth(newMonth, newYear);
+
+            // Update browser URL (skip in embed mode)
+            if (!this.embed) {
+                const currentUrl = new URL(window.location);
+                currentUrl.searchParams.set('year', newYear);
+                currentUrl.searchParams.set('month', newMonth);
+                window.history.pushState({ month: newMonth, year: newYear }, '', currentUrl.toString());
+            }
+        },
+        async fetchCalendarEventsForMonth(month, year) {
             if (this.tab === 'availability') {
                 this.isLoadingEvents = false;
                 return;
             }
 
-            const skipMonthFilter = options.skipMonthFilter || false;
-            const cacheKeySuffix = skipMonthFilter ? 'list' : '{{ $month }}_{{ $year }}';
+            const cacheKeySuffix = month + '_' + year;
             const cacheKey = `es_cal_${this.route}_${this.subdomain}_${cacheKeySuffix}`;
 
             // Show cached data immediately if available
@@ -3066,6 +3235,7 @@ const calendarApp = createApp({
                     if (data && data.events && data.eventsMap && data.filterMeta) {
                         this.allEvents = data.events;
                         this.eventsMap = data.eventsMap;
+                        this.updateEventIdsInViewedMonth(data.eventsMap);
                         this.pastEvents = data.pastEvents || [];
                         this.hasMorePastEvents = data.hasMorePastEvents || false;
                         this.uniqueCategoryIds = data.filterMeta.uniqueCategoryIds;
@@ -3087,25 +3257,90 @@ const calendarApp = createApp({
                     url = '{{ isset($subdomain) ? route("role.calendar_events", ["subdomain" => $subdomain]) : "" }}';
                 }
                 const separator = url.includes('?') ? '&' : '?';
-                if (skipMonthFilter) {
-                    // Omit month/year so backend defaults to current month
-                    url += separator + '_=1';
-                } else {
-                    url += separator + 'month={{ $month }}&year={{ $year }}';
-                }
+                url += separator + 'month=' + month + '&year=' + year;
 
                 const response = await fetch(url);
                 const data = await response.json();
 
                 this.allEvents = data.events;
                 this.eventsMap = data.eventsMap;
+                this.updateEventIdsInViewedMonth(data.eventsMap);
                 this.pastEvents = data.pastEvents || [];
                 this.hasMorePastEvents = data.hasMorePastEvents || false;
                 this.uniqueCategoryIds = data.filterMeta.uniqueCategoryIds;
 
-                if (skipMonthFilter) {
-                    this.listDataLoaded = true;
+                // Cache for stale-while-revalidate on next visit
+                try {
+                    sessionStorage.setItem(cacheKey, JSON.stringify(data));
+                } catch (e) {
+                    // Quota exceeded or unavailable
                 }
+
+            } catch (e) {
+                console.error('Failed to load calendar events:', e);
+            } finally {
+                this.isLoadingEvents = false;
+                this.onEventsReady();
+            }
+        },
+        async fetchCalendarEvents(options = {}) {
+            if (this.tab === 'availability') {
+                this.isLoadingEvents = false;
+                return;
+            }
+
+            const skipMonthFilter = options.skipMonthFilter || false;
+
+            if (!skipMonthFilter) {
+                return this.fetchCalendarEventsForMonth(this.pageMonth, this.pageYear);
+            }
+
+            const cacheKey = `es_cal_${this.route}_${this.subdomain}_list`;
+
+            // Show cached data immediately if available
+            try {
+                const cached = sessionStorage.getItem(cacheKey);
+                if (cached) {
+                    const data = JSON.parse(cached);
+                    if (data && data.events && data.eventsMap && data.filterMeta) {
+                        this.allEvents = data.events;
+                        this.eventsMap = data.eventsMap;
+                        this.updateEventIdsInViewedMonth(data.eventsMap);
+                        this.pastEvents = data.pastEvents || [];
+                        this.hasMorePastEvents = data.hasMorePastEvents || false;
+                        this.uniqueCategoryIds = data.filterMeta.uniqueCategoryIds;
+                        this.isLoadingEvents = false;
+                        this.onEventsReady();
+                    }
+                }
+            } catch (e) {
+                // sessionStorage unavailable
+            }
+
+            try {
+                let url;
+                if (this.route === 'home') {
+                    url = '{{ route("home.calendar_events") }}';
+                } else if (this.route === 'admin') {
+                    url = '{{ isset($subdomain) ? route("role.admin_calendar_events", ["subdomain" => $subdomain]) : "" }}';
+                } else {
+                    url = '{{ isset($subdomain) ? route("role.calendar_events", ["subdomain" => $subdomain]) : "" }}';
+                }
+                const separator = url.includes('?') ? '&' : '?';
+                // Omit month/year so backend defaults to current month
+                url += separator + '_=1';
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                this.allEvents = data.events;
+                this.eventsMap = data.eventsMap;
+                this.updateEventIdsInViewedMonth(data.eventsMap);
+                this.pastEvents = data.pastEvents || [];
+                this.hasMorePastEvents = data.hasMorePastEvents || false;
+                this.uniqueCategoryIds = data.filterMeta.uniqueCategoryIds;
+
+                this.listDataLoaded = true;
 
                 // Cache for stale-while-revalidate on next visit
                 try {
@@ -3202,6 +3437,22 @@ const calendarApp = createApp({
         this.$watch('filteredEvents', () => {
             this.initPopups();
         });
+
+        // Handle browser back/forward for AJAX month navigation
+        @if ($route === 'guest' && !request()->graphic)
+        window.addEventListener('popstate', (e) => {
+            const params = new URLSearchParams(window.location.search);
+            const month = parseInt(params.get('month')) || {{ now()->month }};
+            const year = parseInt(params.get('year')) || {{ now()->year }};
+            if (month !== this.pageMonth || year !== this.pageYear) {
+                this.pageMonth = month;
+                this.pageYear = year;
+                this.listDataLoaded = false;
+                this.isLoadingEvents = true;
+                this.fetchCalendarEventsForMonth(month, year);
+            }
+        });
+        @endif
 
     }
 });

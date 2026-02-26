@@ -7,6 +7,7 @@ use App\Mail\ClaimRole;
 use App\Mail\ClaimVenue;
 use App\Models\Event;
 use App\Models\EventPart;
+use App\Models\PromoCode;
 use App\Models\Role;
 use App\Models\Ticket;
 use App\Models\User;
@@ -703,6 +704,50 @@ class EventRepo
                 ->update(['is_deleted' => true]);
         } else {
             $event->tickets()->update(['is_deleted' => true]);
+        }
+
+        // Save promo codes
+        if ($event->tickets_enabled) {
+            $promoData = $request->input('promo_codes', []);
+            $promoIds = [];
+
+            foreach ($promoData as $data) {
+                if (empty($data['code'])) {
+                    continue;
+                }
+
+                $ticketIds = null;
+                if (! empty($data['ticket_ids'])) {
+                    $decoded = is_string($data['ticket_ids']) ? json_decode($data['ticket_ids'], true) : $data['ticket_ids'];
+                    $ticketIds = ! empty($decoded) ? $decoded : null;
+                }
+
+                $promoFields = [
+                    'event_id' => $event->id,
+                    'code' => strtoupper(trim($data['code'])),
+                    'type' => $data['type'] ?? 'percentage',
+                    'value' => $data['value'] ?? 0,
+                    'max_uses' => ! empty($data['max_uses']) ? $data['max_uses'] : null,
+                    'expires_at' => ! empty($data['expires_at']) ? $data['expires_at'] : null,
+                    'is_active' => ! empty($data['is_active']),
+                    'ticket_ids' => $ticketIds,
+                ];
+
+                if (! empty($data['id'])) {
+                    $promoCode = PromoCode::find($data['id']);
+                    if ($promoCode && $promoCode->event_id == $event->id) {
+                        $promoCode->update($promoFields);
+                        $promoIds[] = $promoCode->id;
+                    }
+                } else {
+                    $promoCode = PromoCode::create($promoFields);
+                    $promoIds[] = $promoCode->id;
+                }
+            }
+
+            PromoCode::where('event_id', $event->id)
+                ->whereNotIn('id', $promoIds)
+                ->delete();
         }
 
         // Save event parts

@@ -2167,6 +2167,9 @@ class AdminController extends Controller
             $sale->save();
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+            if ($sale->discount_amount > 0) {
+                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+            }
         });
 
         AuditService::log(AuditService::ADMIN_UPDATE, auth()->id(), 'Sale', $sale->id, null, null, 'Approved amount_mismatch sale');

@@ -175,6 +175,8 @@
                     Event Schedule is open source under the Attribution Assurance License (AAL). Selfhost on your own server, contribute to the codebase, or just use it free forever.
                 </p>
 
+                @include('marketing.partials.github-star-badge')
+
                 <div class="flex flex-wrap justify-center gap-4">
                     <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 border border-gray-300 dark:border-white/20 rounded-2xl text-gray-900 dark:text-white font-medium transition-all">
                         <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

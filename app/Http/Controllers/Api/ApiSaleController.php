@@ -152,6 +152,9 @@ class ApiSaleController extends Controller
                     $actionPerformed = true;
 
                     AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+                    if ($sale->discount_amount > 0) {
+                        AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+                    }
                 }
                 break;
 
@@ -162,6 +165,10 @@ class ApiSaleController extends Controller
                         $sale->save();
 
                         AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+
+                        if ($sale->discount_amount > 0) {
+                            AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                        }
                     });
                     $actionPerformed = true;
                 }
@@ -178,6 +185,10 @@ class ApiSaleController extends Controller
 
                     if ($wasPaid) {
                         AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+
+                        if ($sale->discount_amount > 0) {
+                            AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                        }
                     }
                 }
                 break;
@@ -235,6 +246,10 @@ class ApiSaleController extends Controller
                 $sale->save();
 
                 AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+
+                if ($sale->discount_amount > 0) {
+                    AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                }
             }
 
             $sale->is_deleted = true;
@@ -432,6 +447,9 @@ class ApiSaleController extends Controller
                     $sale->save();
 
                     AnalyticsEventsDaily::incrementSale($event->id, 0);
+                    if ($sale->discount_amount > 0) {
+                        AnalyticsEventsDaily::incrementPromoSale($event->id, $sale->discount_amount);
+                    }
                 }
 
                 return $sale;

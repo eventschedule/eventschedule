@@ -128,6 +128,9 @@ class InvoiceNinjaController extends Controller
             $sale->save();
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
+            if ($sale->discount_amount > 0) {
+                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+            }
         });
 
         return response()->json(['status' => 'success']);
@@ -163,6 +166,9 @@ class InvoiceNinjaController extends Controller
             $sale->save();
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+            if ($sale->discount_amount > 0) {
+                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+            }
         });
 
         // Best-effort cleanup: delete the subscription from IN

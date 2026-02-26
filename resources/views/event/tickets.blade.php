@@ -28,6 +28,12 @@
                     turnstileSiteKey: @json(\App\Utils\TurnstileUtils::getSiteKey()),
                     turnstileToken: '',
                     turnstileWidgetId: null,
+                    promoCode: '',
+                    promoCodeValid: false,
+                    promoCodeMessage: '',
+                    discountAmount: 0,
+                    isValidatingPromo: false,
+                    promoCodeExpanded: false,
                 };
             },
             created() {
@@ -38,6 +44,17 @@
                 });
                 if (this.tickets.length === 1 && this.tickets[0].quantity > 0) {
                     this.tickets[0].selectedQty = 1;
+                }
+                const urlParams = new URLSearchParams(window.location.search);
+                const promoParam = urlParams.get('promo');
+                if (promoParam) {
+                    this.promoCode = promoParam;
+                    this.promoCodeExpanded = true;
+                    this.$nextTick(() => {
+                        if (this.tickets.some(t => t.selectedQty > 0)) {
+                            this.applyPromoCode();
+                        }
+                    });
                 }
             },
             mounted() {
@@ -59,10 +76,13 @@
                 }
             },
             computed: {
-                totalAmount() {
+                subtotalAmount() {
                     return this.tickets.reduce((total, ticket) => {
                         return total + (ticket.price * ticket.selectedQty);
                     }, 0);
+                },
+                totalAmount() {
+                    return Math.max(0, this.subtotalAmount - this.discountAmount);
                 },
                 hasSelectedTickets() {
                     const hasValidForm = this.tickets.some(ticket => ticket.selectedQty > 0) &&
@@ -91,6 +111,9 @@
                         return this.totalAvailableTickets - this.totalSelectedTickets;
                     }
                     return null;
+                },
+                ticketSelectionKey() {
+                    return this.tickets.map(t => t.id + ':' + t.selectedQty).join(',');
                 }
             },
             methods: {
@@ -133,6 +156,67 @@
                             }
                         });
                     }
+                },
+                onTicketChange() {
+                    this.updateTicketQuantities();
+                    if (this.promoCodeValid) {
+                        this.applyPromoCode();
+                    }
+                },
+                applyPromoCode() {
+                    if (!this.promoCode.trim() || this.isValidatingPromo) return;
+
+                    const ticketData = {};
+                    this.tickets.forEach(ticket => {
+                        if (ticket.selectedQty > 0) {
+                            ticketData[ticket.id] = ticket.selectedQty;
+                        }
+                    });
+
+                    if (Object.keys(ticketData).length === 0) {
+                        this.promoCodeMessage = @json(__('messages.please_select_ticket'));
+                        this.promoCodeValid = false;
+                        return;
+                    }
+
+                    this.isValidatingPromo = true;
+                    this.promoCodeMessage = '';
+
+                    fetch(@json(route('promo_code.validate', ['subdomain' => $subdomain])), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            event_id: @json(\App\Utils\UrlUtils::encodeId($event->id)),
+                            code: this.promoCode.trim(),
+                            tickets: ticketData,
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.isValidatingPromo = false;
+                        this.promoCodeValid = data.valid;
+                        this.promoCodeMessage = data.message;
+                        if (data.valid) {
+                            this.discountAmount = parseFloat(data.discount_amount);
+                        } else {
+                            this.discountAmount = 0;
+                        }
+                    })
+                    .catch(() => {
+                        this.isValidatingPromo = false;
+                        this.promoCodeMessage = @json(__('messages.error'));
+                        this.promoCodeValid = false;
+                        this.discountAmount = 0;
+                    });
+                },
+                removePromoCode() {
+                    this.promoCodeValid = false;
+                    this.promoCodeMessage = '';
+                    this.discountAmount = 0;
                 }
             },
             watch: {
@@ -141,6 +225,19 @@
                         this.updateTicketQuantities();
                     },
                     deep: true
+                },
+                ticketSelectionKey() {
+                    if (this.promoCodeValid) {
+                        this.applyPromoCode();
+                    }
+                },
+                totalSelectedTickets(newVal, oldVal) {
+                    if (newVal > 0 && oldVal === 0 && this.promoCode && !this.promoCodeValid && !this.isValidatingPromo) {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        if (urlParams.get('promo')) {
+                            this.applyPromoCode();
+                        }
+                    }
                 }
             },
         }).mount('#ticket-selector');
@@ -270,11 +367,11 @@
                     <p v-else>
                     <select
                         v-model="ticket.selectedQty"
-                        @change="updateTicketQuantities"
+                        @change="onTicketChange"
                         class="block w-24 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-center font-medium"
                         :name="`tickets[${ticket.id}]`" :id="`ticket-${index}`"
                     >
-                        <option value="0">0</option>
+                        <option :value="0">0</option>
                         <template v-for="n in getAvailableQuantity(ticket)">
                             <option :value="n" :selected="ticket.selectedQty === n">@{{ n }}</option>
                             </template>
@@ -338,7 +435,49 @@
             </div>
         </div>
 
+        <!-- Promo Code -->
+        @if($event->hasActivePromoCodes())
+        <div class="mb-6">
+            <button type="button" v-if="!promoCodeExpanded" @click="promoCodeExpanded = true" class="text-sm text-[#4E81FA] hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+                {{ __('messages.have_a_promo_code') }}
+            </button>
+            <div v-if="promoCodeExpanded" class="bg-white dark:bg-gray-700/50 rounded-lg p-4">
+                <label class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.promo_code') }}</label>
+                <div class="flex gap-2 mt-1">
+                    <input type="text" v-model="promoCode" :disabled="promoCodeValid"
+                        class="flex-1 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm"
+                        :class="{'opacity-50': promoCodeValid}"
+                        placeholder="{{ __('messages.enter_promo_code') }}" />
+                    <button type="button" v-if="!promoCodeValid" @click="applyPromoCode" :disabled="isValidatingPromo || !promoCode.trim()"
+                        class="px-4 py-2 bg-[#4E81FA] text-white text-sm font-medium rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        <span v-if="isValidatingPromo">...</span>
+                        <span v-else>{{ __('messages.apply') }}</span>
+                    </button>
+                    <button type="button" v-else @click="removePromoCode"
+                        class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+                        &times;
+                    </button>
+                </div>
+                <p v-if="promoCodeMessage" class="mt-2 text-sm" :class="promoCodeValid ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                    @{{ promoCodeMessage }}
+                </p>
+            </div>
+            <input type="hidden" name="promo_code" :value="promoCodeValid ? promoCode.trim() : ''">
+        </div>
+        @endif
+
+        <!-- Total -->
         <div class="mb-6 bg-white dark:bg-gray-700/50 rounded-lg p-4">
+            <div v-if="discountAmount > 0">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-gray-600 dark:text-gray-400 text-sm">@lang('messages.subtotal')</span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400 line-through">@{{ formatPrice(subtotalAmount) }}</span>
+                </div>
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-green-600 dark:text-green-400 text-sm">@lang('messages.discount')</span>
+                    <span class="text-sm text-green-600 dark:text-green-400">-@{{ formatPrice(discountAmount) }}</span>
+                </div>
+            </div>
             <div class="flex justify-between items-center">
                 <span class="text-gray-600 dark:text-gray-400">@lang('messages.total')</span>
                 <span class="text-xl font-bold text-gray-900 dark:text-gray-100">@{{ formatPrice(totalAmount) }}</span>

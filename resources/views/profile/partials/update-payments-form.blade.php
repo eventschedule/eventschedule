@@ -115,41 +115,44 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('profile.update_invoiceninja_mode') }}" class="mt-6">
+            <form method="POST" action="{{ route('profile.update_invoiceninja_mode') }}" class="mt-6"
+                x-data="{
+                    type: '{{ str_starts_with($user->invoiceninja_mode ?? '', 'payment_link') ? 'payment_link' : 'invoice' }}',
+                    version: '{{ match($user->invoiceninja_mode) { 'payment_link_v2' => 'payment_link_v2', 'payment_link_v3' => 'payment_link_v3', default => 'payment_link' } }}'
+                }">
                 @csrf
                 @method('patch')
+
+                <input type="hidden" name="invoiceninja_mode" :value="type === 'invoice' ? 'invoice' : version">
 
                 <x-input-label :value="__('messages.invoiceninja_mode')" />
 
                 <div class="mt-2 space-y-2">
                     <label class="flex items-start gap-2 cursor-pointer">
-                        <input type="radio" name="invoiceninja_mode" value="invoice"
-                            {{ !str_starts_with($user->invoiceninja_mode ?? '', 'payment_link') ? 'checked' : '' }}
+                        <input type="radio" value="invoice" x-model="type"
                             class="mt-0.5 text-[#4E81FA] focus:ring-[#4E81FA]"
                             {{ is_demo_mode() ? 'disabled' : '' }}>
                         <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.invoiceninja_mode_invoice') }}</span>
                     </label>
                     <label class="flex items-start gap-2 cursor-pointer">
-                        <input type="radio" name="invoiceninja_mode" value="payment_link"
-                            {{ $user->invoiceninja_mode === 'payment_link' ? 'checked' : '' }}
+                        <input type="radio" value="payment_link" x-model="type"
                             class="mt-0.5 text-[#4E81FA] focus:ring-[#4E81FA]"
                             {{ is_demo_mode() ? 'disabled' : '' }}>
                         <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.invoiceninja_mode_payment_link') }}</span>
                     </label>
-                    <label class="flex items-start gap-2 cursor-pointer">
-                        <input type="radio" name="invoiceninja_mode" value="payment_link_v2"
-                            {{ $user->invoiceninja_mode === 'payment_link_v2' ? 'checked' : '' }}
-                            class="mt-0.5 text-[#4E81FA] focus:ring-[#4E81FA]"
-                            {{ is_demo_mode() ? 'disabled' : '' }}>
-                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.invoiceninja_mode_payment_link_v2') }}</span>
-                    </label>
-                    <label class="flex items-start gap-2 cursor-pointer">
-                        <input type="radio" name="invoiceninja_mode" value="payment_link_v3"
-                            {{ $user->invoiceninja_mode === 'payment_link_v3' ? 'checked' : '' }}
-                            class="mt-0.5 text-[#4E81FA] focus:ring-[#4E81FA]"
-                            {{ is_demo_mode() ? 'disabled' : '' }}>
-                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.invoiceninja_mode_payment_link_v3') }}</span>
-                    </label>
+                </div>
+
+                <div x-show="type === 'payment_link'" x-cloak class="mt-3 ms-6">
+                    <x-input-label :value="__('messages.invoiceninja_mode_payment_link_version')" />
+                    <select x-model="version" class="mt-1 block w-full sm:w-48 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm text-sm"
+                        {{ is_demo_mode() ? 'disabled' : '' }}>
+                        <option value="payment_link">v1</option>
+                        <option value="payment_link_v2">v2</option>
+                        <option value="payment_link_v3">v3</option>
+                    </select>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">
+                        <x-link href="https://invoiceninja.github.io/docs/user-guide/subscriptions" target="_blank">{{ __('messages.learn_more') }}</x-link>
+                    </p>
                 </div>
 
                 <div class="flex items-center gap-4 pt-4">

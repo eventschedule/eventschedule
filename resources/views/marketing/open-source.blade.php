@@ -91,6 +91,8 @@
                     </svg>
                 </a>
             </div>
+
+            @include('marketing.partials.github-star-badge')
         </div>
     </section>
 

@@ -3,7 +3,7 @@
     <x-slot name="description">Create professional event calendars, sell tickets with no platform fees, and check in attendees with QR codes. Free for venues, performers, and communities.</x-slot>
     <x-slot name="breadcrumbTitle">Home</x-slot>
     <x-slot name="preload">
-        <link rel="preload" as="image" type="image/webp" href="{{ url(webp_path('/images/screenshots/marketing_1_800w.jpg')) }}">
+        <link rel="preload" as="image" type="image/webp" href="{{ url(webp_path('/images/screenshots/list_battleofthebands_800w.jpg')) }}">
     </x-slot>
 
     <style {!! nonce_attr() !!}>
@@ -17,21 +17,24 @@
             100% { transform: translateX(-50%); }
         }
         @keyframes scroll-step {
-            0%, 12% { transform: translateX(0); }
-            14%, 26% { transform: translateX(-100%); }
-            28%, 40% { transform: translateX(-200%); }
-            42%, 54% { transform: translateX(-300%); }
-            56%, 68% { transform: translateX(-400%); }
-            70%, 82% { transform: translateX(-500%); }
-            84%, 96% { transform: translateX(-600%); }
-            100% { transform: translateX(-700%); }
+            0%, 8% { transform: translateX(0); }
+            10%, 18% { transform: translateX(-100%); }
+            20%, 28% { transform: translateX(-200%); }
+            30%, 38% { transform: translateX(-300%); }
+            40%, 48% { transform: translateX(-400%); }
+            50%, 58% { transform: translateX(-500%); }
+            60%, 68% { transform: translateX(-600%); }
+            70%, 78% { transform: translateX(-700%); }
+            80%, 88% { transform: translateX(-800%); }
+            90%, 98% { transform: translateX(-900%); }
+            100% { transform: translateX(-1000%); }
         }
         .animate-gradient {
             background-size: 200% 200%;
             animation: gradient-shift 8s ease infinite;
         }
         .animate-marquee { animation: marquee 30s linear infinite; }
-        .animate-scroll-step { animation: scroll-step 21s ease-in-out infinite; }
+        .animate-scroll-step { animation: scroll-step 30s ease-in-out infinite; }
         .screenshot-carousel:hover .animate-scroll-step {
             animation-play-state: paused;
         }
@@ -155,14 +158,17 @@
                     <div class="flex animate-scroll-step">
                         @php
                         $screenshots = [
-                            ['/images/screenshots/marketing_1.jpg', 'Event Schedule calendar view showing upcoming events in a clean grid layout'],
-                            ['/images/screenshots/marketing_2.jpg', 'Event details page with ticket options and event information'],
-                            ['/images/screenshots/marketing_3.jpg', 'Mobile-friendly event schedule on a smartphone display'],
-                            ['/images/screenshots/marketing_4.jpg', 'Event management dashboard for organizing your schedule'],
-                            ['/images/screenshots/marketing_5.jpg', 'Ticket sales and check-in management interface'],
-                            ['/images/screenshots/marketing_6.jpg', 'Event analytics showing page views and visitor statistics'],
-                            ['/images/screenshots/marketing_7.jpg', 'Schedule customization options with branding settings'],
-                            ['/images/screenshots/marketing_1.jpg', 'Event Schedule calendar view showing upcoming events in a clean grid layout'], // duplicate for seamless loop
+                            ['/images/screenshots/list_battleofthebands.jpg', 'Battle of the Bands upcoming events list'],
+                            ['/images/screenshots/event_battleofthebands.jpg', 'Battle of the Bands event detail'],
+                            ['/images/screenshots/list_nateswoodworkingshop.jpg', "Nate's Woodworking Shop upcoming events list"],
+                            ['/images/screenshots/event_nateswoodworkingshop.jpg', "Nate's Woodworking Shop event detail"],
+                            ['/images/screenshots/list_villageidiot.jpg', 'Village Idiot upcoming events list'],
+                            ['/images/screenshots/event_villageidiot.jpg', 'Village Idiot event detail'],
+                            ['/images/screenshots/list_karateclub.jpg', 'Karate Club upcoming events list'],
+                            ['/images/screenshots/event_karateclub.jpg', 'Karate Club event detail'],
+                            ['/images/screenshots/list_pagesbooknookshop.jpg', 'Pages Book Nook Shop upcoming events list'],
+                            ['/images/screenshots/event_pagesbooknookshop.jpg', 'Pages Book Nook Shop event detail'],
+                            ['/images/screenshots/list_battleofthebands.jpg', 'Battle of the Bands upcoming events list'], // duplicate for seamless loop
                         ];
                         @endphp
                         @foreach($screenshots as $index => $screenshot)
@@ -172,7 +178,7 @@
                         <div class="flex-shrink-0 w-full overflow-hidden">
                             <picture>
                                 <source srcset="{{ url(webp_path($smallPath)) }}" type="image/webp">
-                                <img src="{{ url($smallPath) }}" alt="{{ $screenshot[1] }}" width="800" height="1094" class="block w-full h-auto scale-[1.05]" @if($index === 0) fetchpriority="high" @else loading="lazy" decoding="async" @endif />
+                                <img src="{{ url($smallPath) }}" alt="{{ $screenshot[1] }}" width="585" height="800" class="block w-full h-auto" @if($index === 0) fetchpriority="high" @else loading="lazy" decoding="async" @endif />
                             </picture>
                         </div>
                         @endforeach

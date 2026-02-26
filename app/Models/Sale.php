@@ -32,6 +32,8 @@ class Sale extends Model
         'utm_campaign',
         'boost_campaign_id',
         'newsletter_id',
+        'promo_code_id',
+        'discount_amount',
     ];
 
     protected static function booted()
@@ -40,6 +42,12 @@ class Sale extends Model
             if ($sale->isDirty('status') && in_array($sale->status, ['cancelled', 'refunded', 'expired'])) {
                 foreach ($sale->saleTickets as $saleTicket) {
                     $saleTicket->ticket->updateSold($sale->event_date, -$saleTicket->quantity);
+                }
+
+                if ($sale->promo_code_id) {
+                    PromoCode::where('id', $sale->promo_code_id)
+                        ->lockForUpdate()
+                        ->decrement('times_used');
                 }
             }
         });
@@ -58,6 +66,11 @@ class Sale extends Model
     public function boostCampaign()
     {
         return $this->belongsTo(BoostCampaign::class);
+    }
+
+    public function promoCode()
+    {
+        return $this->belongsTo(PromoCode::class);
     }
 
     public function calculateTotal()

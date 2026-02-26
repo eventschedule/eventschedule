@@ -286,6 +286,9 @@ class PageView
             'newsletter' => 'newsletter',
             default => null,
         };
+        if (! $sourceOverride && $request->query('promo')) {
+            $sourceOverride = 'promo';
+        }
         AnalyticsReferrersDaily::incrementView($role->id, $referrer, $role->custom_domain, $sourceOverride);
 
         // Increment event-level analytics if event exists

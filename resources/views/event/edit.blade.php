@@ -829,10 +829,20 @@
     <div class="hidden lg:flex items-center gap-3">
         @if ($event->exists)
         {{-- Boost button --}}
-        @if (config('services.meta.app_id') && $event->name && $event->starts_at && \Carbon\Carbon::parse($event->starts_at)->isFuture())
-        @if ($role->isPro())
         @php
-            $activeBoost = $event->boostCampaigns()->whereIn('status', ['active', 'paused'])->first();
+            $boostDisabledReason = null;
+            $activeBoost = null;
+            if (!config('services.meta.app_id')) {
+                $boostDisabledReason = __('messages.boost_not_configured');
+            } elseif (!$role->isPro()) {
+                $boostDisabledReason = 'upgrade';
+            } elseif (!$event->name || !$event->starts_at) {
+                $boostDisabledReason = __('messages.boost_requires_name_and_date');
+            } elseif (!\Carbon\Carbon::parse($event->starts_at)->isFuture()) {
+                $boostDisabledReason = __('messages.boost_past_event');
+            } else {
+                $activeBoost = $event->boostCampaigns()->whereIn('status', ['active', 'paused'])->first();
+            }
         @endphp
         @if ($activeBoost)
         <a href="{{ route('boost.show', ['hash' => $activeBoost->hashedId()]) }}"
@@ -842,7 +852,7 @@
             </svg>
             {{ __('messages.boosted') }} - {{ number_format($activeBoost->reach) }} {{ __('messages.reach') }}
         </a>
-        @else
+        @elseif (!$boostDisabledReason)
         <a href="{{ route('boost.create', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
            class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             <svg class="me-2 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -850,8 +860,7 @@
             </svg>
             {{ __('messages.boost_event') }}
         </a>
-        @endif
-        @elseif (config('app.hosted'))
+        @elseif ($boostDisabledReason === 'upgrade' && config('app.hosted'))
         <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-boost')"
            class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             <svg class="me-2 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -859,7 +868,14 @@
             </svg>
             {{ __('messages.boost_event') }}
         </button>
-        @endif
+        @else
+        <button type="button" onclick="alert('{{ addslashes($boostDisabledReason) }}')"
+           class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+            <svg class="me-2 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
+            </svg>
+            {{ __('messages.boost_event') }}
+        </button>
         @endif
 
         {{-- Actions dropdown --}}
@@ -920,8 +936,6 @@
         </button>
         <div id="mobile-header-event-actions-pop-up-menu" class="pop-up-menu hidden absolute {{ is_rtl() ? 'start-0' : 'end-0' }} z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="mobile-header-event-actions-menu-button" tabindex="-1">
             <div class="py-2" role="none" id="mobile-header-event-actions-pop-up-menu-items" data-popup-target="mobile-header-event-actions-pop-up-menu">
-                @if (config('services.meta.app_id') && $event->name && $event->starts_at && \Carbon\Carbon::parse($event->starts_at)->isFuture())
-                @if ($role->isPro())
                 @if ($activeBoost)
                 <a href="{{ route('boost.show', ['hash' => $activeBoost->hashedId()]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                     <svg class="me-3 h-5 w-5 text-green-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -929,16 +943,22 @@
                     </svg>
                     <div>{{ __('messages.boosted') }} - {{ number_format($activeBoost->reach) }} {{ __('messages.reach') }}</div>
                 </a>
-                @else
+                @elseif (!$boostDisabledReason)
                 <a href="{{ route('boost.create', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                     <svg class="me-3 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
                     </svg>
                     <div>{{ __('messages.boost_event') }}</div>
                 </a>
-                @endif
-                @elseif (config('app.hosted'))
+                @elseif ($boostDisabledReason === 'upgrade' && config('app.hosted'))
                 <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-boost')" class="w-full group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                    <svg class="me-3 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
+                    </svg>
+                    <div>{{ __('messages.boost_event') }}</div>
+                </button>
+                @else
+                <button type="button" onclick="alert('{{ addslashes($boostDisabledReason) }}')" class="w-full group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                     <svg class="me-3 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
                     </svg>
@@ -948,7 +968,6 @@
                 <div class="py-2" role="none">
                     <div class="border-t border-gray-100 dark:border-gray-700"></div>
                 </div>
-                @endif
                 <a href="{{ route('event.clone', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                     <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
@@ -2321,6 +2340,11 @@
                                             class="flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
                                             {{ __('messages.options') }}
                                         </button>
+                                        <button type="button" @click="activeTicketTab = 'promo_codes'"
+                                            :class="activeTicketTab === 'promo_codes' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
+                                            class="flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            {{ __('messages.promo_codes') }}
+                                        </button>
                                     </nav>
                                 </div>
 
@@ -2597,6 +2621,124 @@
                                     </div>
                                 </div>
                                 </div>
+
+                                <!-- Promo Codes Tab -->
+                                <div v-show="activeTicketTab === 'promo_codes'">
+                                <div class="mb-6">
+                                    <div v-for="(promoCode, pcIndex) in promoCodes" :key="pcIndex" class="mt-4 p-4 border border-gray-300 dark:border-gray-700 rounded-lg">
+                                        <input type="hidden" v-bind:name="`promo_codes[${pcIndex}][id]`" :value="promoCode.id">
+
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <x-input-label :value="__('messages.promo_code') . ' *'" class="text-xs" />
+                                                <x-text-input type="text" v-bind:name="`promo_codes[${pcIndex}][code]`" v-model="promoCode.code" class="mt-1 block w-full text-sm" required maxlength="50" style="text-transform: uppercase" />
+                                            </div>
+                                            <div>
+                                                <x-input-label :value="__('messages.discount_type')" class="text-xs" />
+                                                <select v-bind:name="`promo_codes[${pcIndex}][type]`" v-model="promoCode.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                                    <option value="percentage">{{ __('messages.percentage') }}</option>
+                                                    <option value="fixed">{{ __('messages.fixed_amount') }}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+                                            <div>
+                                                <x-input-label :value="__('messages.discount_value') . ' *'" class="text-xs" />
+                                                <div class="relative mt-1">
+                                                    <x-text-input type="number" step="0.01" min="0.01" v-bind:max="promoCode.type === 'percentage' ? 100 : undefined" v-bind:name="`promo_codes[${pcIndex}][value]`" v-model="promoCode.value" class="block w-full text-sm" required />
+                                                    <span class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 text-sm">@{{ promoCode.type === 'percentage' ? '%' : event.ticket_currency_code }}</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <x-input-label :value="__('messages.max_uses')" class="text-xs" />
+                                                <x-text-input type="number" min="1" v-bind:name="`promo_codes[${pcIndex}][max_uses]`" v-model="promoCode.max_uses" class="mt-1 block w-full text-sm" :placeholder="__('messages.unlimited')" />
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+                                            <div>
+                                                <x-input-label :value="__('messages.expires_at')" class="text-xs" />
+                                                <div class="flex items-center gap-2 mt-1">
+                                                    <input type="text"
+                                                        :class="'datepicker-promo-date flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm'"
+                                                        :data-pc-index="pcIndex"
+                                                        :value="promoCode.expires_at_date"
+                                                        autocomplete="off" />
+                                                    <div class="relative w-28">
+                                                        <input type="text"
+                                                            class="promo-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm"
+                                                            :data-pc-index="pcIndex"
+                                                            :value="formatPartTime(promoCode.expires_at_time)"
+                                                            @focus="initPromoTimePickerOnFocus($event, pcIndex)"
+                                                            @change="onPromoTimeChange(pcIndex, $event)"
+                                                            autocomplete="off" placeholder="{{ __('messages.time') }}" />
+                                                        <div class="time-dropdown" :ref="'promo_time_dropdown_' + pcIndex"></div>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" v-bind:name="`promo_codes[${pcIndex}][expires_at]`" :value="promoCode.expires_at_date && promoCode.expires_at_time ? promoCode.expires_at_date + ' ' + promoCode.expires_at_time + ':00' : (promoCode.expires_at_date ? promoCode.expires_at_date + ' 23:59:00' : '')" />
+                                            </div>
+                                            <div class="flex items-end pb-1 gap-4">
+                                                <label class="flex items-center gap-2 cursor-pointer">
+                                                    <input type="checkbox" :checked="promoCode.is_active" @change="promoCode.is_active = $event.target.checked" class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.active') }}</span>
+                                                </label>
+                                                <input type="hidden" v-bind:name="`promo_codes[${pcIndex}][is_active]`" :value="promoCode.is_active ? 1 : 0">
+                                                <span v-if="promoCode.times_used > 0" class="text-xs text-gray-500 dark:text-gray-400">
+                                                    {{ __('messages.times_used') }}: @{{ promoCode.times_used }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-3" v-if="tickets.length > 1">
+                                            <x-input-label :value="__('messages.applies_to')" class="text-xs" />
+                                            <div class="mt-1 flex items-center gap-3">
+                                                <label class="flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                                                    <input type="radio" :name="`promo_ticket_mode_${pcIndex}`" value="all" :checked="!promoCode.ticket_ids || promoCode.ticket_ids.length === 0" @change="promoCode.ticket_ids = []" class="text-[#4E81FA] focus:ring-[#4E81FA]">
+                                                    {{ __('messages.all_tickets') }}
+                                                </label>
+                                                <label class="flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                                                    <input type="radio" :name="`promo_ticket_mode_${pcIndex}`" value="specific" :checked="promoCode.ticket_ids && promoCode.ticket_ids.length > 0" @change="promoCode.ticket_ids = promoCode.ticket_ids && promoCode.ticket_ids.length > 0 ? promoCode.ticket_ids : [tickets[0]?.id]" class="text-[#4E81FA] focus:ring-[#4E81FA]">
+                                                    {{ __('messages.specific_tickets') }}
+                                                </label>
+                                            </div>
+                                            <div v-if="promoCode.ticket_ids && promoCode.ticket_ids.length > 0" class="mt-2 ms-6 space-y-1">
+                                                <label v-for="ticket in tickets" :key="ticket.id" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+                                                    <input type="checkbox" :value="ticket.id" v-model="promoCode.ticket_ids" class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                                    <span v-text="ticket.type || '{{ __('messages.ticket') }}'"></span>
+                                                </label>
+                                            </div>
+                                            <input type="hidden" v-bind:name="`promo_codes[${pcIndex}][ticket_ids]`" :value="JSON.stringify(promoCode.ticket_ids || [])">
+                                        </div>
+
+                                        <div class="mt-3 flex items-center justify-between">
+                                            <div v-if="promoCode.code && promoLinkBaseUrl" class="flex items-center gap-1.5 min-w-0 flex-1 me-3">
+                                                <a :href="promoLinkBaseUrl + '?promo=' + promoCode.code.trim().toUpperCase()"
+                                                   target="_blank"
+                                                   class="text-xs text-gray-500 dark:text-gray-400 hover:text-[#4E81FA] dark:hover:text-[#4E81FA] truncate min-w-0 flex-1"
+                                                   :title="promoLinkBaseUrl + '?promo=' + promoCode.code.trim().toUpperCase()">@{{ (promoLinkBaseUrl + '?promo=' + promoCode.code.trim().toUpperCase()).replace(/^https?:\/\//, '') }}</a>
+                                                <button type="button" @click="copyPromoLink(promoCode)" class="flex-shrink-0 text-gray-400 hover:text-[#4E81FA] transition-colors" :title="promoCode._copied ? '{{ __('messages.copied') }}' : '{{ __('messages.copy_link') }}'">
+                                                    <svg v-if="!promoCode._copied" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9.75a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
+                                                    </svg>
+                                                    <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-green-500">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <div v-else></div>
+                                            <button type="button" @click="removePromoCode(pcIndex)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm flex-shrink-0">
+                                                {{ __('messages.remove') }}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <button type="button" @click="addPromoCode" class="mt-2 text-sm text-[#4E81FA] hover:text-blue-700">
+                                        + {{ __('messages.add_promo_code') }}
+                                    </button>
+                                </div>
+                                </div>
+
                             </div>
                             @endif
                         </div>
@@ -3212,6 +3354,35 @@
         eventCustomFields: @json($event->custom_fields ?? []),
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
         activeTicketTab: 'tickets',
+        promoCodes: (() => {
+          var pcs = @json($event->promoCodes ?? []).map(pc => ({
+            ...pc,
+            value: pc.value ? parseFloat(pc.value) : pc.value,
+            ticket_ids: pc.ticket_ids || [],
+            is_active: pc.is_active ? true : false,
+            expires_at_date: pc.expires_at ? pc.expires_at.substring(0, 10) : '',
+            expires_at_time: pc.expires_at ? pc.expires_at.substring(11, 16) : '',
+          }));
+          if (pcs.length === 0) {
+            var defaults = @json($defaultPromoCodes ?? []);
+            if (defaults.length > 0) {
+              pcs = defaults.map(pc => ({
+                id: null, code: pc.code || '', type: pc.type || 'percentage',
+                value: pc.value ? parseFloat(pc.value) : null,
+                max_uses: pc.max_uses || null, times_used: 0,
+                expires_at_date: '', expires_at_time: '',
+                is_active: pc.is_active ? true : true, ticket_ids: pc.ticket_ids || [],
+              }));
+            } else {
+              pcs.push({
+                id: null, code: '', type: 'percentage', value: null,
+                max_uses: null, times_used: 0, expires_at_date: '', expires_at_time: '',
+                is_active: true, ticket_ids: [],
+              });
+            }
+          }
+          return pcs;
+        })(),
         formSubmitAttempted: false,
         isSaving: false,
         isDirty: false,
@@ -3245,6 +3416,7 @@
         agendaImageFullUrl: @json($event->agenda_image_url ?: ''),
         partDragIndex: null,
         partDropTargetIndex: null,
+        promoLinkBaseUrl: @json($event->exists ? $event->getGuestUrl($subdomain) : ''),
         partEditors: {},
         @php
             $pollsJson = $polls->map(function ($poll) {
@@ -3869,6 +4041,98 @@
       removeTicket(index) {
         this.tickets.splice(index, 1);
       },
+      addPromoCode() {
+        this.promoCodes.push({
+            id: null,
+            code: '',
+            type: 'percentage',
+            value: null,
+            max_uses: null,
+            times_used: 0,
+            expires_at_date: '',
+            expires_at_time: '',
+            is_active: true,
+            ticket_ids: [],
+        });
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            this.initPromoDatePicker(this.promoCodes.length - 1);
+          });
+        });
+      },
+      removePromoCode(index) {
+        // Destroy flatpickr instances before removing
+        document.querySelectorAll('.datepicker-promo-date').forEach(input => {
+          if (input._flatpickr) input._flatpickr.destroy();
+        });
+        this.promoCodes.splice(index, 1);
+        if (this.promoCodes.length > 0) {
+          this.$nextTick(() => { this.initAllPromoDatePickers(); });
+        }
+      },
+      copyPromoLink(promoCode) {
+        if (!promoCode.code) return;
+        if (!this.promoLinkBaseUrl) {
+            alert(@json(__('messages.save_event_first')));
+            return;
+        }
+        const url = this.promoLinkBaseUrl + '?promo=' + encodeURIComponent(promoCode.code.trim().toUpperCase());
+        navigator.clipboard.writeText(url);
+        promoCode._copied = true;
+        setTimeout(() => { promoCode._copied = false; }, 2000);
+      },
+      initPromoDatePicker(pcIndex) {
+        this.$nextTick(() => {
+          var inputs = document.querySelectorAll('.datepicker-promo-date');
+          var input = null;
+          inputs.forEach(function(el) {
+            if (el.getAttribute('data-pc-index') == pcIndex) input = el;
+          });
+          if (!input || input._flatpickr) return;
+          var defaultDate = this.promoCodes[pcIndex].expires_at_date || null;
+          if (defaultDate) input.removeAttribute('value');
+          var fpLocale = window.flatpickrLocales ? window.flatpickrLocales[window.appLocale] : null;
+          var localeConfig = fpLocale ? { locale: fpLocale } : {};
+          var self = this;
+          var f = flatpickr(input, Object.assign({
+            allowInput: true,
+            enableTime: false,
+            altInput: true,
+            altFormat: "M j, Y",
+            dateFormat: "Y-m-d",
+            defaultDate: defaultDate,
+            onChange: function(selectedDates, dateStr) {
+              self.promoCodes[pcIndex].expires_at_date = dateStr;
+            },
+          }, localeConfig));
+          if (f._input) f._input.onkeydown = () => false;
+        });
+      },
+      initAllPromoDatePickers() {
+        for (var i = 0; i < this.promoCodes.length; i++) {
+          this.initPromoDatePicker(i);
+        }
+      },
+      initPromoTimePickerOnFocus(event, pcIndex) {
+        var inputEl = event.target;
+        var dropdownRef = 'promo_time_dropdown_' + pcIndex;
+        var dropdownEl = this.$refs[dropdownRef];
+        if (Array.isArray(dropdownEl)) dropdownEl = dropdownEl[0];
+        if (dropdownEl && !inputEl._timepickerInit) {
+          initPartTimePicker(inputEl, dropdownEl);
+        }
+      },
+      onPromoTimeChange(pcIndex, event) {
+        var minutes = parseTimeToMinutes(event.target.value);
+        if (minutes !== null) {
+          var h = Math.floor(minutes / 60);
+          var m = minutes % 60;
+          this.promoCodes[pcIndex].expires_at_time = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+          event.target.value = formatMinutesToTime(minutes);
+        } else {
+          this.promoCodes[pcIndex].expires_at_time = '';
+        }
+      },
       togglePoll(poll) {
         this.pollSubmitting = true;
         this.pollMessage = '';
@@ -4342,15 +4606,19 @@
         this.initAllPartEditors();
       });
 
-      // Initialize recurring end date picker if needed
-      if (this.event.recurring_end_type === 'on_date') {
-        this.initializeRecurringEndDatePicker();
-      }
-
-      // Initialize recurring include/exclude date pickers
-      if (this.isRecurring && (this.recurringIncludeDates.length > 0 || this.recurringExcludeDates.length > 0)) {
-        this.initAllRecurringDatePickers();
-      }
+      // Initialize date pickers after Vite module loads (modules execute before DOMContentLoaded)
+      var self = this;
+      document.addEventListener('DOMContentLoaded', function() {
+        if (self.event.recurring_end_type === 'on_date') {
+          self.initializeRecurringEndDatePicker();
+        }
+        if (self.isRecurring && (self.recurringIncludeDates.length > 0 || self.recurringExcludeDates.length > 0)) {
+          self.initAllRecurringDatePickers();
+        }
+        if (self.promoCodes.length > 0) {
+          self.initAllPromoDatePickers();
+        }
+      });
       
       // Initialize sendEmailToMembers for existing selectedMembers
       this.selectedMembers.forEach(member => {

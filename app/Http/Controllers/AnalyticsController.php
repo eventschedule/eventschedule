@@ -87,6 +87,11 @@ class AnalyticsController extends Controller
         // Get conversion stats
         $conversionStats = $analytics->getConversionStats($user, $start, $end, $selectedRoleId);
 
+        // Get per-promo-code breakdown
+        $promoCodeStats = $conversionStats['promo_sales'] > 0
+            ? $analytics->getPromoCodeStats($user, $start, $end, $selectedRoleId)
+            : collect();
+
         // Get top events by revenue
         $topEventsByRevenue = $analytics->getTopEventsByRevenue($user, 10, $start, $end);
 
@@ -128,6 +133,7 @@ class AnalyticsController extends Controller
             'period',
             'range',
             'conversionStats',
+            'promoCodeStats',
             'topEventsByRevenue',
             'trafficSources',
             'topReferrers',

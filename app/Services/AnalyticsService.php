@@ -10,6 +10,7 @@ use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\Newsletter;
 use App\Models\PageView;
+use App\Models\PromoCode;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\User;
@@ -440,6 +441,8 @@ class AnalyticsService
                 'conversion_rate' => 0,
                 'total_revenue' => 0,
                 'revenue_per_view' => 0,
+                'promo_sales' => 0,
+                'promo_discounts' => 0,
             ];
         }
 
@@ -456,13 +459,17 @@ class AnalyticsService
                 'conversion_rate' => 0,
                 'total_revenue' => 0,
                 'revenue_per_view' => 0,
+                'promo_sales' => 0,
+                'promo_discounts' => 0,
             ];
         }
 
         $stats = AnalyticsEventsDaily::select(
             DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as total_views'),
             DB::raw('SUM(sales_count) as total_sales'),
-            DB::raw('SUM(revenue) as total_revenue')
+            DB::raw('SUM(revenue) as total_revenue'),
+            DB::raw('SUM(promo_sales_count) as promo_sales'),
+            DB::raw('SUM(promo_discount_total) as promo_discounts')
         )
             ->forEvents($eventIds)
             ->inDateRange($start, $end)
@@ -471,6 +478,8 @@ class AnalyticsService
         $totalViews = (int) ($stats->total_views ?? 0);
         $totalSales = (int) ($stats->total_sales ?? 0);
         $totalRevenue = (float) ($stats->total_revenue ?? 0);
+        $promoSales = (int) ($stats->promo_sales ?? 0);
+        $promoDiscounts = (float) ($stats->promo_discounts ?? 0);
 
         return [
             'total_views' => $totalViews,
@@ -478,6 +487,8 @@ class AnalyticsService
             'conversion_rate' => $totalViews > 0 ? round(($totalSales / $totalViews) * 100, 2) : 0,
             'total_revenue' => $totalRevenue,
             'revenue_per_view' => $totalViews > 0 ? round($totalRevenue / $totalViews, 2) : 0,
+            'promo_sales' => $promoSales,
+            'promo_discounts' => $promoDiscounts,
         ];
     }
 
@@ -792,6 +803,54 @@ class AnalyticsService
             ->groupBy('period')
             ->orderBy('period')
             ->get();
+    }
+
+    /**
+     * Get per-promo-code usage breakdown
+     */
+    public function getPromoCodeStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null): Collection
+    {
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return collect();
+        }
+
+        $eventIds = DB::table('event_role')
+            ->whereIn('role_id', $roleIds)
+            ->pluck('event_id')
+            ->unique();
+
+        if ($eventIds->isEmpty()) {
+            return collect();
+        }
+
+        $stats = Sale::select(
+            'promo_code_id',
+            DB::raw('COUNT(*) as sales_count'),
+            DB::raw('SUM(discount_amount) as total_discount')
+        )
+            ->whereIn('event_id', $eventIds)
+            ->whereNotNull('promo_code_id')
+            ->where('status', 'paid')
+            ->whereBetween('created_at', [$start, $end])
+            ->groupBy('promo_code_id')
+            ->orderByDesc('sales_count')
+            ->get();
+
+        if ($stats->isEmpty()) {
+            return collect();
+        }
+
+        $promoCodes = PromoCode::whereIn('id', $stats->pluck('promo_code_id'))->get()->keyBy('id');
+
+        return $stats->map(fn ($row) => [
+            'code' => $promoCodes[$row->promo_code_id]->code ?? '—',
+            'type' => $promoCodes[$row->promo_code_id]->type ?? null,
+            'value' => $promoCodes[$row->promo_code_id]->value ?? null,
+            'sales_count' => (int) $row->sales_count,
+            'total_discount' => (float) $row->total_discount,
+        ]);
     }
 
     /**
