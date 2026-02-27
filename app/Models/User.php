@@ -58,6 +58,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'use_24_hour_time',
         'two_factor_confirmed_at',
         'admin_newsletter_unsubscribed_at',
+        'default_role_id',
     ];
 
     /**
@@ -168,6 +169,11 @@ class User extends Authenticatable implements MustVerifyEmail
             ->withPivot('level')
             ->where('is_deleted', false)
             ->orderBy('name');
+    }
+
+    public function defaultRole()
+    {
+        return $this->belongsTo(Role::class, 'default_role_id');
     }
 
     public function countRoles()

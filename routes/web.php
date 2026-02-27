@@ -504,6 +504,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/selfhost/stripe', [MarketingController::class, 'docsSelfhostStripe'])->name('marketing.docs.selfhost.stripe');
         Route::get('/docs/selfhost/google-calendar', [MarketingController::class, 'docsSelfhostGoogleCalendar'])->name('marketing.docs.selfhost.google_calendar');
         Route::get('/docs/selfhost/boost', [MarketingController::class, 'docsSelfhostBoost'])->name('marketing.docs.selfhost.boost');
+        Route::get('/docs/selfhost/admin', [MarketingController::class, 'docsSelfhostAdmin'])->name('marketing.docs.selfhost.admin');
         // SaaS section
         Route::get('/docs/saas', [MarketingController::class, 'docsSaasSetup'])->name('marketing.docs.saas.setup');
         Route::get('/docs/saas/custom-domains', [MarketingController::class, 'docsSaasCustomDomains'])->name('marketing.docs.saas.custom_domains');
@@ -646,6 +647,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/selfhost/stripe', [MarketingController::class, 'docsSelfhostStripe'])->name('marketing.docs.selfhost.stripe');
             Route::get('/docs/selfhost/google-calendar', [MarketingController::class, 'docsSelfhostGoogleCalendar'])->name('marketing.docs.selfhost.google_calendar');
             Route::get('/docs/selfhost/boost', [MarketingController::class, 'docsSelfhostBoost'])->name('marketing.docs.selfhost.boost');
+            Route::get('/docs/selfhost/admin', [MarketingController::class, 'docsSelfhostAdmin'])->name('marketing.docs.selfhost.admin');
             // SaaS section
             Route::get('/docs/saas', [MarketingController::class, 'docsSaasSetup'])->name('marketing.docs.saas.setup');
             Route::get('/docs/saas/custom-domains', [MarketingController::class, 'docsSaasCustomDomains'])->name('marketing.docs.saas.custom_domains');
@@ -786,6 +788,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/selfhost/stripe', fn () => redirect('https://eventschedule.com/docs/selfhost/stripe', 301));
             Route::get('/docs/selfhost/google-calendar', fn () => redirect('https://eventschedule.com/docs/selfhost/google-calendar', 301));
             Route::get('/docs/selfhost/boost', fn () => redirect('https://eventschedule.com/docs/selfhost/boost', 301));
+            Route::get('/docs/selfhost/admin', fn () => redirect('https://eventschedule.com/docs/selfhost/admin', 301));
             // SaaS section
             Route::get('/docs/saas', fn () => redirect('https://eventschedule.com/docs/saas', 301));
             Route::get('/docs/saas/custom-domains', fn () => redirect('https://eventschedule.com/docs/saas/custom-domains', 301));
@@ -910,6 +913,7 @@ if (config('app.is_nexus')) {
     Route::get('/docs/selfhost/stripe', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.stripe');
     Route::get('/docs/selfhost/google-calendar', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.google_calendar');
     Route::get('/docs/selfhost/boost', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.boost');
+    Route::get('/docs/selfhost/admin', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.admin');
     // SaaS section
     Route::get('/docs/saas', fn () => redirect()->route('home'))->name('marketing.docs.saas.setup');
     Route::get('/docs/saas/custom-domains', fn () => redirect()->route('home'))->name('marketing.docs.saas.custom_domains');

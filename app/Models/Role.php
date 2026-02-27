@@ -88,6 +88,7 @@ class Role extends Model implements MustVerifyEmail
         'direct_registration',
         'first_day_of_week',
         'approved_subdomains',
+        'default_curator_ids',
     ];
 
     /**
@@ -109,6 +110,7 @@ class Role extends Model implements MustVerifyEmail
         'agenda_show_times' => 'boolean',
         'agenda_show_description' => 'boolean',
         'agenda_save_image' => 'boolean',
+        'default_curator_ids' => 'array',
     ];
 
     /**
@@ -486,6 +488,30 @@ class Role extends Model implements MustVerifyEmail
     public function isClaimed()
     {
         return ($this->email_verified_at != null || $this->phone_verified_at != null) && $this->user_id != null;
+    }
+
+    public function autoCurateEvent(Event $event): void
+    {
+        $curatorIds = $this->default_curator_ids;
+        if (empty($curatorIds)) {
+            return;
+        }
+
+        foreach ($curatorIds as $curatorId) {
+            $curator = Role::where('id', $curatorId)->where('is_deleted', false)->where('type', 'curator')->first();
+            if (! $curator) {
+                continue;
+            }
+
+            if ($event->roles()->where('roles.id', $curator->id)->exists()) {
+                continue;
+            }
+
+            $isAccepted = ! $curator->require_approval
+                || ($curator->approved_subdomains && in_array($this->subdomain, $curator->approved_subdomains));
+
+            $event->roles()->attach($curator->id, ['is_accepted' => $isAccepted]);
+        }
     }
 
     public function getHeaderImageUrlAttribute($value)

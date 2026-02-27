@@ -547,8 +547,16 @@
                                     </ul>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Require Account</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Require submitters to have an account before they can submit event requests. This helps identify who is submitting events and prevents anonymous submissions.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Require Approval</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">When enabled, submitted events go to a <a href="{{ route('marketing.docs.creating_events') }}#manual" class="text-cyan-400 hover:text-cyan-300">pending queue</a> for your approval before appearing publicly. Review requests in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong>.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Approved Schedules</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">When Require Approval is enabled, you can restrict submissions to only pre-approved schedules. Add specific schedules to the approved list, and only those schedules will be able to submit event requests.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Request Terms</h4>
@@ -646,12 +654,26 @@
                             <!-- CalDAV -->
                             <h3 id="integrations-caldav" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">CalDAV</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">Connect to any CalDAV-compatible calendar (Apple Calendar, Fastmail, Nextcloud, etc.) for cross-platform synchronization.</p>
+
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong></li>
+                                <li>Scroll to <strong class="text-gray-900 dark:text-white">Integrations</strong></li>
+                                <li>Enter your CalDAV <strong class="text-gray-900 dark:text-white">server URL</strong>, <strong class="text-gray-900 dark:text-white">username</strong>, and <strong class="text-gray-900 dark:text-white">password</strong></li>
+                                <li>Select which <strong class="text-gray-900 dark:text-white">calendar</strong> to sync with</li>
+                                <li>Choose your <strong class="text-gray-900 dark:text-white">sync direction</strong>: to CalDAV, from CalDAV, or bidirectional</li>
+                            </ol>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Once connected, the integration status shows your server host. You can disconnect at any time to stop syncing.
+                            </p>
                         </section>
 
                         <!-- Email Settings -->
                         <section id="email-settings" class="doc-section">
                             <h2 class="doc-heading">Email Settings</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Configure email delivery for your schedule's notifications and communications.</p>
+
+                            <x-doc-screenshot id="creating-schedules--section-email-settings" alt="Email settings" />
 
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Availability</div>

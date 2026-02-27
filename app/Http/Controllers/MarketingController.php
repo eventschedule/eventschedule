@@ -895,6 +895,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Admin panel documentation page
+     */
+    public function docsSelfhostAdmin()
+    {
+        return view('marketing.docs.selfhost.admin');
+    }
+
+    /**
      * Stripe documentation page
      */
     public function docsSelfhostStripe()

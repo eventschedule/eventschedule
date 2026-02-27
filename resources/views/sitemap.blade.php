@@ -622,6 +622,12 @@
         <priority>0.7</priority>
     </url>
     <url>
+        <loc>{{ url('/docs/selfhost/admin') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
         <loc>{{ url('/docs/developer/api') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>

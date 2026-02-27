@@ -74,7 +74,6 @@
                         <a href="#quick-reference" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Quick Reference</a>
                         <a href="#variables" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">All Variables</a>
                         <a href="#ai-prompt" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">AI Text Prompt</a>
-                        <a href="#screen-capture" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Screen Capture</a>
                         <a href="#email-scheduling" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Email Scheduling</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
@@ -486,27 +485,6 @@ https://example.com/event/summer-concert</code></pre>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <code class="text-rose-300">Add relevant hashtags for Instagram</code>
                                 </div>
-                            </div>
-                        </section>
-
-                        <!-- Screen Capture -->
-                        <section id="screen-capture" class="doc-section">
-                            <h2 class="doc-heading">Screen Capture Rendering</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-500/20 text-blue-700 dark:text-blue-300 mr-2">Enterprise Feature</span>
-                                Use browser-based rendering for the graphic image instead of the default server-side generation.
-                            </p>
-
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">When to Use</h3>
-                            <ul class="doc-list mb-6">
-                                <li>Better support for right-to-left (RTL) languages like Hebrew and Arabic</li>
-                                <li>More accurate rendering of special characters and fonts</li>
-                                <li>Pixel-perfect representation of your schedule's styling</li>
-                            </ul>
-
-                            <div class="doc-callout doc-callout-info">
-                                <div class="doc-callout-title">Note</div>
-                                <p>Screen capture rendering may take slightly longer than server-side generation due to the browser rendering process.</p>
                             </div>
                         </section>
 

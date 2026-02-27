@@ -1,14 +1,14 @@
 <x-marketing-layout>
     <x-slot name="title">Managing Schedules - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Managing Schedules</x-slot>
-    <x-slot name="description">Learn how to manage your schedule in Event Schedule. View events, approve fan videos, set availability, handle requests, manage your team, and more.</x-slot>
+    <x-slot name="description">Learn how to manage your schedule in Event Schedule. View events, assign videos, set availability, handle requests, manage your team, and more.</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "TechArticle",
         "headline": "Managing Schedules - Event Schedule",
-        "description": "Learn how to manage your schedule in Event Schedule. View events, approve fan videos, set availability, handle requests, manage your team, and more.",
+        "description": "Learn how to manage your schedule in Event Schedule. View events, assign videos, set availability, handle requests, manage your team, and more.",
         "author": {
             "@type": "Organization",
             "name": "Event Schedule"
@@ -55,7 +55,7 @@
                 <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Managing Schedules</h1>
             </div>
             <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
-                View and manage your events, approve fan content, set availability, handle requests, and manage your team from the admin panel.
+                View and manage your events, assign videos, set availability, handle requests, and manage your team from the admin panel.
             </p>
         </div>
     </section>
@@ -123,20 +123,17 @@
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-400 mb-4">Curator schedules only</span>
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                The <strong class="text-gray-900 dark:text-white">Videos</strong> tab lets you review and manage fan-submitted video content. Videos are organized by talent, making it easy to find and curate submissions.
+                                The <strong class="text-gray-900 dark:text-white">Videos</strong> tab lets you find and assign YouTube videos to your talent. Videos are searched automatically by talent name, and you can select the best match for each.
                             </p>
 
-                            <x-doc-screenshot id="managing-schedules--videos-tab" alt="Videos tab showing fan submissions" />
+                            <x-doc-screenshot id="managing-schedules--videos-tab" alt="Videos tab showing YouTube search results" />
 
                             <ul class="doc-list mb-6">
-                                <li><strong>Approve</strong> or <strong>reject</strong> individual video submissions</li>
-                                <li>Videos are grouped by the talent they were submitted for</li>
-                                <li>Approved videos appear on the public event page</li>
+                                <li><strong>Search YouTube</strong> for videos matching each talent's name</li>
+                                <li>View video details including <strong>title</strong>, <strong>channel</strong>, <strong>views</strong>, and <strong>likes</strong></li>
+                                <li><strong>Select</strong> a video to display on the talent's public profile</li>
+                                <li><strong>Skip</strong> talents that don't need a video</li>
                             </ul>
-
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                To configure fan content settings for your events, see <x-link href="{{ route('marketing.docs.creating_events') }}#fan-content">Creating Events: Fan Content</x-link>.
-                            </p>
                         </section>
 
                         <!-- Availability -->
@@ -212,6 +209,7 @@
                                 <li><strong>Description</strong> - Your schedule's markdown-formatted description</li>
                                 <li><strong>YouTube videos</strong> - Any linked YouTube videos</li>
                                 <li><strong>Social links</strong> - Connected social media profiles</li>
+                                <li><strong>Payment links</strong> - Direct payment links (Stripe, PayPal, etc.)</li>
                                 <li><strong>Google Map</strong> - Displayed if an address is configured</li>
                             </ul>
 
@@ -231,6 +229,7 @@
                             <ul class="doc-list mb-6">
                                 <li>View a list of all your <strong>current followers</strong></li>
                                 <li>Share your schedule's <strong>follow link</strong> to grow your audience</li>
+                                <li>Generate a <strong>QR code</strong> for your follow link to share in print or at events</li>
                             </ul>
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
@@ -300,9 +299,13 @@
                             </p>
 
                             <ul class="doc-list mb-6">
-                                <li>View your <strong>current plan</strong> (Free, Pro, or Enterprise)</li>
+                                <li>View your <strong>current plan</strong> (Free, Pro, or Enterprise) and <strong>subscription status</strong> (Active, Trial, Cancelled, Past Due)</li>
                                 <li>See your <strong>trial status</strong> and remaining trial days</li>
-                                <li><strong>Upgrade</strong> or change your plan</li>
+                                <li>View your <strong>payment method</strong> on file</li>
+                                <li>Track <strong>newsletter usage</strong> with a progress bar showing how many you've sent this month relative to your plan limit</li>
+                                <li><strong>Upgrade</strong> to Pro or Enterprise</li>
+                                <li><strong>Manage subscription</strong> through the Stripe portal, switch between <strong>monthly and yearly</strong> billing, or <strong>cancel</strong> your subscription</li>
+                                <li><strong>Resume</strong> your subscription during a cancellation grace period</li>
                             </ul>
                             @else
                             <p class="text-gray-600 dark:text-gray-300 mb-4">

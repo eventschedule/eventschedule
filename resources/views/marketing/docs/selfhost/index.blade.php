@@ -95,7 +95,7 @@
     <!-- Documentation Cards -->
     <section class="bg-white dark:bg-[#0a0a0f] py-16">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-4 gap-6">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Installation Guide -->
                 <a href="{{ route('marketing.docs.selfhost.installation') }}" class="doc-card block">
                     <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900">
@@ -164,6 +164,26 @@
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Boost Setup</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Configure Meta/Facebook ads integration to let users promote events through paid social media campaigns.</p>
                         <div class="mt-auto inline-flex items-center text-sm font-medium text-amber-600 dark:text-amber-400">
+                            Read Guide
+                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Admin Panel -->
+                <a href="{{ route('marketing.docs.selfhost.admin') }}" class="doc-card block">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-gray-100 to-slate-200 dark:from-gray-800 dark:to-slate-800">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-gray-200 dark:bg-gray-500/20">
+                            <svg aria-hidden="true" class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Admin Panel</h2>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Monitor users, revenue, analytics, and manage platform settings from the admin panel.</p>
+                        <div class="mt-auto inline-flex items-center text-sm font-medium text-gray-600 dark:text-gray-400">
                             Read Guide
                             <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

@@ -170,6 +170,18 @@ class GenerateDocScreenshots extends Command
                     ? '/boost/create?event_id='.UrlUtils::encodeId($demoEvent->id).'&role_id='.$encodedRoleId
                     : '/boost'],
             ],
+            'selfhost-admin' => [
+                ['id' => 'selfhost-admin--dashboard', 'route' => '/admin', 'pause' => 3000],
+                ['id' => 'selfhost-admin--users', 'route' => '/admin/users', 'pause' => 2000],
+                ['id' => 'selfhost-admin--revenue', 'route' => '/admin/revenue', 'pause' => 2000],
+                ['id' => 'selfhost-admin--analytics', 'route' => '/admin/analytics', 'pause' => 2000],
+                ['id' => 'selfhost-admin--usage', 'route' => '/admin/usage', 'pause' => 2000],
+                ['id' => 'selfhost-admin--boost', 'route' => '/admin/boost'],
+                ['id' => 'selfhost-admin--newsletters', 'route' => '/admin/newsletters'],
+                ['id' => 'selfhost-admin--audit-log', 'route' => '/admin/audit-log'],
+                ['id' => 'selfhost-admin--queue', 'route' => '/admin/queue'],
+                ['id' => 'selfhost-admin--logs', 'route' => '/admin/logs'],
+            ],
         ];
 
         // Remove address screenshot if no venue role
