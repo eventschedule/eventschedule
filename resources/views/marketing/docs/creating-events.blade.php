@@ -1,14 +1,14 @@
 <x-marketing-layout>
     <x-slot name="title">Creating Events - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Creating Events</x-slot>
-    <x-slot name="description">Learn how to add events to your schedule. Create events manually, import from text or images using AI, or sync from Google Calendar.</x-slot>
+    <x-slot name="description">Learn how to add events to your schedule and configure event settings like venue, participants, tickets, and more.</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "TechArticle",
         "headline": "Creating Events - Event Schedule",
-        "description": "Learn how to add events to your schedule. Create events manually, import from text or images using AI, or sync from Google Calendar.",
+        "description": "Learn how to add events to your schedule and configure event settings like venue, participants, tickets, and more.",
         "author": {
             "@type": "Organization",
             "name": "Event Schedule"
@@ -55,7 +55,7 @@
                 <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Creating Events</h1>
             </div>
             <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
-                Add events to your schedule manually, import from text or images using AI, or sync from external calendars.
+                Add events to your schedule and configure event settings like venue, participants, tickets, and more.
             </p>
         </div>
     </section>
@@ -69,20 +69,18 @@
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
                         <a href="#manual" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Creating Events Manually</a>
-                        <a href="#ai-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">AI Import</a>
-                        <a href="#text-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">From Text</a>
-                        <a href="#image-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">From Images/Flyers</a>
-                        <a href="#agenda-scanning" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">Agenda Scanning</a>
-                        <a href="#custom-prompts" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">Custom AI Prompts</a>
-                        <a href="#calendar-sync" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Calendar Sync</a>
-                        <a href="#recurring" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Recurring Events</a>
-                        <a href="#frequency-options" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">Frequency Options</a>
-                        <a href="#end-conditions" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">End Conditions</a>
-                        <a href="#date-exceptions" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">Date Exceptions</a>
-                        <a href="#event-details" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Event Details</a>
-                        <a href="#managing" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Managing Events</a>
+                        <a href="#details" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Details</a>
+                        <a href="#venue" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Venue</a>
+                        <a href="#participants" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Participants</a>
+                        <a href="#recurring" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Recurring</a>
+                        <a href="#agenda" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Agenda</a>
+                        <a href="#schedules" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Schedules</a>
+                        <a href="#google-calendar" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Google Calendar</a>
+                        <a href="#tickets" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Tickets</a>
+                        <a href="#privacy" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Privacy</a>
                         <a href="#custom-fields" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Custom Fields</a>
-                        <a href="#private-events" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Private Events</a>
+                        <a href="#polls" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Polls</a>
+                        <a href="#fan-content" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Fan Content</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
                 </aside>
@@ -114,266 +112,22 @@
                             </ol>
 
                             <x-doc-screenshot id="creating-events--add-event" alt="Add event form" />
-                        </section>
-
-                        <!-- AI Import -->
-                        <section id="ai-import" class="doc-section">
-                            <h2 class="doc-heading">Let AI Do the Heavy Lifting <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span></h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Save hours of manual data entry. Paste any event text - emails, social media posts, website listings, or even flyer descriptions - and watch it transform into a ready-to-publish event in seconds.</p>
-
-                            <x-doc-screenshot id="creating-events--import" alt="Import events page" />
 
                             <div class="doc-callout doc-callout-tip">
-                                <div class="doc-callout-title">AI-Powered</div>
-                                <p>AI import uses Google Gemini to intelligently extract event name, date, time, venue, description, and more from unstructured text and images.</p>
-                            </div>
-                        </section>
-
-                        <!-- Text Import -->
-                        <section id="text-import" class="doc-section">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Importing from Text</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Copy and paste event information from any source - emails, websites, social media posts - and AI will extract the event details.</p>
-
-                            <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule</strong> and click <strong class="text-gray-900 dark:text-white">"Import"</strong></li>
-                                <li>Paste your event text into the text box</li>
-                                <li>Click <strong class="text-gray-900 dark:text-white">"Parse Events"</strong></li>
-                                <li>Review the extracted events and make any corrections</li>
-                                <li>Click <strong class="text-gray-900 dark:text-white">"Import"</strong> to add them to your schedule</li>
-                            </ol>
-
-                            <div class="grid md:grid-cols-2 gap-4 mb-6">
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Example Input</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 code-block">
-                                        Live Jazz Night<br>
-                                        Friday, March 15th at 8pm<br>
-                                        The Blue Note, 123 Main Street<br>
-                                        Featuring the John Smith Trio<br>
-                                        Tickets: $20
-                                    </p>
-                                </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-emerald-500/30">
-                                    <h4 class="font-semibold text-emerald-400 mb-2">AI Extracts</h4>
-                                    <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
-                                        <li><strong class="text-gray-900 dark:text-white">Name:</strong> Live Jazz Night</li>
-                                        <li><strong class="text-gray-900 dark:text-white">Date:</strong> March 15</li>
-                                        <li><strong class="text-gray-900 dark:text-white">Time:</strong> 8:00 PM</li>
-                                        <li><strong class="text-gray-900 dark:text-white">Venue:</strong> The Blue Note</li>
-                                        <li><strong class="text-gray-900 dark:text-white">Address:</strong> 123 Main Street</li>
-                                        <li><strong class="text-gray-900 dark:text-white">Description:</strong> Featuring the John Smith Trio</li>
-                                        <li><strong class="text-gray-900 dark:text-white">Price:</strong> $20</li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <p class="text-gray-600 dark:text-gray-300">Review the extracted details, make any corrections, and click Import. You can process multiple events at once.</p>
-                        </section>
-
-                        <!-- Image Import -->
-                        <section id="image-import" class="doc-section">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Importing from Images/Flyers</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Upload an event flyer or poster and AI will read the text and extract event information.</p>
-
-                            <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule</strong> and click <strong class="text-gray-900 dark:text-white">"Import"</strong></li>
-                                <li>Upload an image file (JPG, PNG, etc.)</li>
-                                <li>Click <strong class="text-gray-900 dark:text-white">"Parse Events"</strong></li>
-                                <li>Review the extracted events</li>
-                                <li>The uploaded image can automatically become the event's featured image</li>
-                                <li>Click <strong class="text-gray-900 dark:text-white">"Import"</strong> to add them to your schedule</li>
-                            </ol>
-
-                            <div class="doc-callout doc-callout-info">
-                                <div class="doc-callout-title">Image Tips</div>
-                                <p>For best results, use clear, high-contrast images where text is easily readable. The AI works best with images that have legible text.</p>
-                            </div>
-                        </section>
-
-                        <!-- Agenda Scanning -->
-                        <section id="agenda-scanning" class="doc-section">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Scanning Printed Agendas <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span></h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Have a printed conference program, setlist, or event schedule? You can scan it to automatically populate your event's parts (sessions, acts, segments).</p>
-
-                            <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Open an event and go to the <strong class="text-gray-900 dark:text-white">"Parts"</strong> section</li>
-                                <li>Click <strong class="text-gray-900 dark:text-white">"Scan agenda"</strong></li>
-                                <li>Take a photo with your camera or upload an image of the printed agenda</li>
-                                <li>AI reads each line item and creates parts automatically</li>
-                                <li>Review the extracted parts and make any corrections</li>
-                            </ol>
-
-                            <div class="doc-callout doc-callout-tip">
-                                <div class="doc-callout-title">Best for</div>
-                                <p>Conference programs, concert setlists, workshop agendas, and any printed schedule with line items and times.</p>
-                            </div>
-                        </section>
-
-                        <!-- Custom AI Prompts -->
-                        <section id="custom-prompts" class="doc-section">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Custom AI Prompts</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">You can add custom instructions to help AI understand your specific agenda format. This is useful when your agenda uses a non-standard layout.</p>
-
-                            <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
-                                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Example Prompt</h4>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 code-block">
-                                    Each line is a session. Format: time - speaker - topic. Ignore lunch breaks.
-                                </p>
-                            </div>
-
-                            <p class="text-gray-600 dark:text-gray-300">You can set a custom prompt per event, or set a default prompt for your entire schedule under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>.</p>
-                        </section>
-
-                        <!-- Calendar Sync -->
-                        <section id="calendar-sync" class="doc-section">
-                            <h2 class="doc-heading">Calendar Sync</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Sync events automatically from your existing calendars:</p>
-
-                            <div class="space-y-4 mb-6">
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Google Calendar</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect your Google Calendar for bidirectional sync. Events added in either place will appear in both. See <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-integrations" class="text-cyan-400 hover:text-cyan-300">Calendar Integrations</a> for setup details.</p>
-                                </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">CalDAV</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect any CalDAV-compatible calendar (Apple Calendar, Outlook, Fastmail, etc.). See <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-integrations" class="text-cyan-400 hover:text-cyan-300">Calendar Integrations</a> for setup details.</p>
-                                </div>
-                            </div>
-
-                            <p class="text-gray-600 dark:text-gray-300">To set up calendar sync, go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and scroll to the <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-integrations" class="text-cyan-400 hover:text-cyan-300">Calendar Sync</a> section.</p>
-                        </section>
-
-                        <!-- Recurring Events -->
-                        <section id="recurring" class="doc-section">
-                            <h2 class="doc-heading">Recurring Events</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">For events that happen regularly - weekly open mics, monthly meetups, daily happy hours - you can set them to repeat automatically or add multiple dates manually.</p>
-
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Adding Multiple Dates</h3>
-                            <ol class="doc-list doc-list-numbered mb-6">
-                                <li>When creating an event, look for the <strong class="text-gray-900 dark:text-white">"Add more dates"</strong> option</li>
-                                <li>Click to add additional dates - add as many as you need</li>
-                                <li>All dates will share the same event details (name, description, venue)</li>
-                                <li>Each date becomes its own event, so you can edit them individually later if needed</li>
-                            </ol>
-                        </section>
-
-                        <!-- Frequency Options -->
-                        <section id="frequency-options" class="doc-section">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recurrence Frequency</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Events can be set to repeat automatically on a schedule. Enable recurring on the event form, choose a frequency, and configure the options for that frequency.</p>
-
-                            <div class="overflow-x-auto mb-6">
-                                <table class="doc-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Frequency</th>
-                                            <th>Description</th>
-                                            <th>Example</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Daily</span></td>
-                                            <td>Repeats every day</td>
-                                            <td>Daily happy hour</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Weekly</span></td>
-                                            <td>Repeats on selected days each week</td>
-                                            <td>Trivia every Tuesday and Thursday</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Every N Weeks</span></td>
-                                            <td>Repeats on selected days every N weeks (2 to 52)</td>
-                                            <td>Biweekly book club</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Monthly (same date)</span></td>
-                                            <td>Same date each month</td>
-                                            <td>Board meeting on the 15th</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Monthly (same day of week)</span></td>
-                                            <td>Same weekday position each month</td>
-                                            <td>First Friday art walk</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Yearly</span></td>
-                                            <td>Same date each year</td>
-                                            <td>Annual gala</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div class="doc-callout-title">Import with AI</div>
+                                <p>Don't want to type everything manually? You can also <a href="{{ route('marketing.docs.ai_import') }}" class="text-cyan-400 hover:text-cyan-300">import events using AI</a> from text or images.</p>
                             </div>
 
                             <div class="doc-callout doc-callout-info">
-                                <div class="doc-callout-title">Day Picker</div>
-                                <p>The <strong>Weekly</strong> and <strong>Every N Weeks</strong> frequencies show a day-of-week picker so you can select which days the event repeats on. <strong>Every N Weeks</strong> also shows an interval selector (2 to 52 weeks).</p>
+                                <div class="doc-callout-title">Pending Events</div>
+                                <p>If you have <a href="{{ route('marketing.docs.creating_schedules') }}#settings-requests" class="text-cyan-400 hover:text-cyan-300">Require Approval</a> enabled, submitted events appear in a pending queue. Review them in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong> and approve or reject each one.</p>
                             </div>
                         </section>
 
-                        <!-- End Conditions -->
-                        <section id="end-conditions" class="doc-section">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">End Conditions</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Choose when a recurring series should stop generating new occurrences:</p>
-
-                            <div class="space-y-4 mb-6">
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Never</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">The event repeats indefinitely. New occurrences are created on an ongoing basis.</p>
-                                </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">On a specific date</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">The event stops repeating after a chosen date. No new occurrences are created past that date.</p>
-                                </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">After N occurrences</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">The event stops after a set number of occurrences. For example, a 6-week workshop series.</p>
-                                </div>
-                            </div>
-
-                            <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
-                                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Common Patterns</h4>
-                                <ul class="doc-list text-sm">
-                                    <li><strong class="text-gray-900 dark:text-white">Daily:</strong> Happy hours, daily standups</li>
-                                    <li><strong class="text-gray-900 dark:text-white">Weekly:</strong> Open mic nights, trivia, live music residencies</li>
-                                    <li><strong class="text-gray-900 dark:text-white">Every N Weeks:</strong> Biweekly book clubs, game nights</li>
-                                    <li><strong class="text-gray-900 dark:text-white">Monthly:</strong> Board meetings, first Friday art walks</li>
-                                    <li><strong class="text-gray-900 dark:text-white">Yearly:</strong> Annual galas, anniversary events</li>
-                                </ul>
-                            </div>
-
-                            <div class="doc-callout doc-callout-tip">
-                                <div class="doc-callout-title">Pro Tip: Google Calendar Sync</div>
-                                <p>Recurring events sync to <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-integrations" class="text-cyan-400 hover:text-cyan-300">Google Calendar</a> as individual occurrences, so each date appears separately in both calendars.</p>
-                            </div>
-
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mt-8 mb-4" id="date-exceptions">Date Exceptions</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">Real-world schedules need flexibility. Use include and exclude dates to handle exceptions to your recurring pattern.</p>
-
-                            <div class="grid md:grid-cols-2 gap-4 mb-6">
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Include Dates</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Add specific dates when the event should occur, even if they don't match the recurring pattern.</p>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Example:</strong> A weekly Tuesday class adds a bonus Thursday session for a holiday week.</p>
-                                </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Exclude Dates</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Remove specific dates when the event should not occur, even if they match the recurring pattern.</p>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Example:</strong> A weekly trivia night skips New Year's Eve.</p>
-                                </div>
-                            </div>
-
-                            <div class="doc-callout doc-callout-tip">
-                                <div class="doc-callout-title">Priority</div>
-                                <p>If a date appears in both lists, exclude takes priority and the event will not occur on that date.</p>
-                            </div>
-                        </section>
-
-                        <!-- Event Details -->
-                        <section id="event-details" class="doc-section">
-                            <h2 class="doc-heading">Event Details</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Here's what you can include with each event:</p>
+                        <!-- Details -->
+                        <section id="details" class="doc-section">
+                            <h2 class="doc-heading">Details</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">The Details tab contains the core information for your event:</p>
 
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
@@ -397,10 +151,6 @@
                                             <td>How long the event lasts (in hours)</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Venue</span></td>
-                                            <td>Where the event takes place (name and address)</td>
-                                        </tr>
-                                        <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Description</span></td>
                                             <td>Details about the event (supports markdown formatting)</td>
                                         </tr>
@@ -420,38 +170,193 @@
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Ticket Price</span></td>
                                             <td>For events using external ticketing, enter the ticket price. Used in <a href="{{ route('marketing.docs.event_graphics') }}#text-templates" class="text-cyan-400 hover:text-cyan-300">event graphics text templates</a> as <code class="text-xs bg-gray-200 dark:bg-white/10 px-1.5 py-0.5 rounded">{price}</code> and <code class="text-xs bg-gray-200 dark:bg-white/10 px-1.5 py-0.5 rounded">{currency}</code>. Leave blank if unknown, enter 0 for free events.</td>
                                         </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Members</span></td>
-                                            <td>Tag performers, speakers, or other participants</td>
-                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </section>
 
-                        <!-- Managing Events -->
-                        <section id="managing" class="doc-section">
-                            <h2 class="doc-heading">Managing Events</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Once events are created, you can edit, clone, or delete them from your schedule.</p>
+                        <!-- Venue -->
+                        <section id="venue" class="doc-section">
+                            <h2 class="doc-heading">Venue</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">The Venue tab lets you specify where your event takes place. Events can be in-person, online, or both.</p>
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Editing Events</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Click on any event in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule</strong> to edit it. Changes are saved immediately when you click Save.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">In-Person Events</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Enter the venue name and address. An interactive map is displayed on the public event page so guests can find the location.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Cloning Events</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Use the clone option to duplicate an event. Great for creating similar events on different dates - just clone and change the date.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Online Events</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Toggle the online event option and provide a URL (e.g., a Zoom or Google Meet link). The link is displayed on the event page for guests to join.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Deleting Events</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Delete events from the event edit page. <strong class="text-gray-900 dark:text-white">Warning:</strong> If the event has sold tickets, you should <a href="{{ route('marketing.docs.tickets') }}#financial" class="text-cyan-400 hover:text-cyan-300">refund ticket holders</a> before deleting.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Venue Contact</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Optionally add the venue's email and website so guests can contact the venue directly.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Participants -->
+                        <section id="participants" class="doc-section">
+                            <h2 class="doc-heading">Participants</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">The Participants tab lets you tag performers, speakers, or other participants on an event. Participants appear on the public event page with links to their profiles.</p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Adding Participants</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Search for existing members on your schedule or add new ones. Each participant is linked to their schedule profile page.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">When to Use</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Participants are most useful for Talent and Curator-type schedules where events feature specific performers, speakers, or artists. For Venue-type schedules, this tab is optional.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Recurring Events -->
+                        <section id="recurring" class="doc-section">
+                            <h2 class="doc-heading">Recurring</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">The Recurring tab lets you create events that repeat on a regular schedule. Instead of manually adding each date, you set a recurrence pattern and Event Schedule generates all the individual event dates for you.</p>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">To add multiple dates, click <strong class="text-gray-900 dark:text-white">"Add Dates"</strong> on the Recurring tab and choose a frequency pattern. You can also add individual dates manually.</p>
+
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Frequency</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Daily</span></td>
+                                            <td>Repeats every day</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Weekly</span></td>
+                                            <td>Repeats every week on the same day</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Every N weeks</span></td>
+                                            <td>Repeats every 2, 3, or more weeks (e.g., biweekly)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Monthly (same date)</span></td>
+                                            <td>Repeats on the same date each month (e.g., the 15th)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Monthly (same day)</span></td>
+                                            <td>Repeats on the same weekday each month (e.g., the second Tuesday)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Yearly</span></td>
+                                            <td>Repeats once a year on the same date</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Each recurrence pattern has an end condition that controls when the series stops:</p>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Never</strong> - The event repeats indefinitely until you stop it manually.</li>
+                                <li><strong class="text-gray-900 dark:text-white">On a specific date</strong> - The event repeats until the given end date.</li>
+                                <li><strong class="text-gray-900 dark:text-white">After N occurrences</strong> - The event repeats a fixed number of times.</li>
+                            </ul>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">You can also fine-tune the generated dates by adding <strong class="text-gray-900 dark:text-white">date exceptions</strong>. Exclude specific dates when the event will not take place (e.g., holidays), or include extra dates that fall outside the regular pattern.</p>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Google Calendar</div>
+                                <p>If you have <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="text-cyan-400 hover:text-cyan-300">Google Calendar sync</a> enabled, recurring events are synced as individual occurrences so each date appears separately in both calendars.</p>
+                            </div>
+                        </section>
+
+                        <!-- Agenda -->
+                        <section id="agenda" class="doc-section">
+                            <h2 class="doc-heading">Agenda</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">The Agenda tab lets you break an event into individual parts or segments, such as performances, sessions, or talks. Each part appears on the public event page so guests can see what to expect.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Adding Parts</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Click <strong class="text-gray-900 dark:text-white">"Add Part"</strong> on the Agenda tab and fill in the details:</p>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Name</strong> (required) - The title of the part (e.g., "Opening Keynote", "DJ Set")</li>
+                                <li><strong class="text-gray-900 dark:text-white">Start & End Time</strong> (optional) - When this part takes place within the event</li>
+                                <li><strong class="text-gray-900 dark:text-white">Description</strong> (optional) - Additional details about this part</li>
+                            </ul>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Reordering</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Rearrange parts using drag-and-drop or the up/down buttons to control the order they appear on the event page.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Display Options</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">You can choose whether to show or hide times and descriptions for event parts on the public event page.</p>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">AI Import</div>
+                                <p>You can import event parts from text or an image using AI. Paste an agenda or upload a flyer and the AI will extract each part automatically. Requires a <a href="{{ route('marketing.docs.ai_import') }}" class="text-cyan-400 hover:text-cyan-300">Gemini API key</a> to be configured.</p>
+                            </div>
+                        </section>
+
+                        <!-- Schedules -->
+                        <section id="schedules" class="doc-section">
+                            <h2 class="doc-heading">Schedules</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">The Schedules tab lets you share events to other Curator-type schedules you manage. This is useful when you want an event to appear on multiple schedules at once.</p>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Conditional Tab</div>
+                                <p>This tab only appears when you manage multiple Curator-type schedules. If you only have one schedule, you will not see this tab.</p>
+                            </div>
+                        </section>
+
+                        <!-- Google Calendar -->
+                        <section id="google-calendar" class="doc-section">
+                            <h2 class="doc-heading">Google Calendar</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">The Google Calendar tab lets you sync individual events to or from Google Calendar. When calendar sync is enabled, events created in either place will appear in both.</p>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">To use this tab, you must first set up calendar sync in your schedule settings. See <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="text-cyan-400 hover:text-cyan-300">Calendar Integrations</a> for setup instructions.</p>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>Recurring events sync to Google Calendar as individual occurrences, so each date appears separately in both calendars.</p>
+                            </div>
+                        </section>
+
+                        <!-- Tickets -->
+                        <section id="tickets" class="doc-section">
+                            <h2 class="doc-heading">Tickets <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-2">Pro</span></h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">
+                                Sell tickets directly from your event pages with built-in Stripe payments. Set up ticket types, manage sales, and check in attendees at the door. See the full <a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Selling Tickets</a> guide for setup, sales management, and check-in details.
+                            </p>
+                        </section>
+
+                        <!-- Privacy -->
+                        <section id="privacy" class="doc-section">
+                            <h2 class="doc-heading">Privacy <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span></h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Control event visibility with per-event privacy settings. Private events are hidden from your public schedule and require a password to view.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Making an Event Private</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>When creating or editing an event, toggle the <strong class="text-gray-900 dark:text-white">"Private"</strong> option</li>
+                                <li>Set a password for the event</li>
+                                <li>Save the event</li>
+                            </ol>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Private events are hidden from your public schedule page and calendar views. Visitors can only access them via a direct link and must enter the correct password to view the event details.</p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Mix Public and Private</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Privacy is set per event, not per schedule. You can freely mix public and private events on the same schedule. Public events appear normally while private events remain hidden.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sharing Private Events</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Share the event's direct link and password with your intended audience via email, messaging, or any other channel. Only people with both the link and the correct password can view the event.</p>
                                 </div>
                             </div>
 
-                            <div class="doc-callout doc-callout-info">
-                                <div class="doc-callout-title">Pending Events</div>
-                                <p>If you have <a href="{{ route('marketing.docs.schedule_basics') }}#settings" class="text-cyan-400 hover:text-cyan-300">Require Approval</a> enabled, submitted events appear in a pending queue. Review them in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong> and approve or reject each one.</p>
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>For schedule-level privacy (hiding the entire schedule from public listings), see the <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="text-cyan-400 hover:text-cyan-300">Unlisted Schedule</a> setting.</p>
                             </div>
                         </section>
 
@@ -482,45 +387,124 @@
                             </div>
                         </section>
 
-                        <!-- Private Events -->
-                        <section id="private-events" class="doc-section">
-                            <h2 class="doc-heading">Private & Password-Protected Events <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span></h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Control event visibility with per-event privacy settings. Private events are hidden from your public schedule and require a password to view.</p>
+                        <!-- Polls -->
+                        <section id="polls" class="doc-section">
+                            <h2 class="doc-heading">Polls <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-2">Pro</span></h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Add interactive multiple-choice questions to your events and let your guests vote on the options that matter most.
+                            </p>
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Note</div>
+                                <p>Event Polls is a Pro feature. Upgrade your schedule to Pro to start creating polls on your events.</p>
+                            </div>
 
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Making an Event Private</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Creating Polls</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>When creating or editing an event, toggle the <strong class="text-gray-900 dark:text-white">"Private"</strong> option</li>
-                                <li>Set a password for the event</li>
+                                <li>Go to the event edit page in your admin panel</li>
+                                <li>Scroll down to the <strong>Polls</strong> section</li>
+                                <li>Enter your question</li>
+                                <li>Add between 2 and 10 options for voters to choose from</li>
                                 <li>Save the event</li>
                             </ol>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">
+                                You can add up to 5 polls per event. Each poll has its own question and set of options.
+                            </p>
 
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">Private events are hidden from your public schedule page and calendar views. Visitors can only access them via a direct link and must enter the correct password to view the event details.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">How Voting Works</h3>
+                            <ul class="doc-list mb-6">
+                                <li><strong>Sign in required</strong> - Guests must be signed in to vote, which ensures each person can only vote once.</li>
+                                <li><strong>One click to vote</strong> - Guests simply click on the option they want to vote for.</li>
+                                <li><strong>One vote per poll</strong> - Each guest can cast one vote per poll. Votes cannot be changed after submission.</li>
+                                <li><strong>Instant results</strong> - After voting, results are shown immediately so guests can see how others voted.</li>
+                            </ul>
 
-                            <div class="space-y-4 mb-6">
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Mix Public and Private</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Privacy is set per event, not per schedule. You can freely mix public and private events on the same schedule. Public events appear normally while private events remain hidden.</p>
-                                </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sharing Private Events</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Share the event's direct link and password with your intended audience via email, messaging, or any other channel. Only people with both the link and the correct password can view the event.</p>
-                                </div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Viewing Results</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                After a guest casts their vote, poll results are displayed with progress bars showing the count and percentage for each option. The leading option is highlighted so it is easy to see which choice is ahead.
+                            </p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">
+                                As an organizer, you can always see poll results in the event edit page of your admin panel, regardless of whether you have voted.
+                            </p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Closing and Reopening</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                You can control whether a poll is accepting votes by toggling it between active and closed states:
+                            </p>
+                            <ul class="doc-list mb-6">
+                                <li><strong>Active polls</strong> - Guests can vote and results update in real time.</li>
+                                <li><strong>Closed polls</strong> - Results are still visible, but no new votes can be cast.</li>
+                            </ul>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                You can reopen a closed poll at any time if you want to allow voting again. Toggle the poll status from the event edit page in your admin panel.
+                            </p>
+                        </section>
+
+                        <!-- Fan Content -->
+                        <section id="fan-content" class="doc-section">
+                            <h2 class="doc-heading">Fan Content</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Fan Content lets your audience submit YouTube or Vimeo videos and text comments on event pages. This is available for Curator-type schedules and gives fans a way to share their experience while keeping you in control of what appears publicly.
+                            </p>
+
+                            <x-doc-screenshot id="fan-content--videos-tab" alt="Fan videos management tab" />
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                All fan submissions go through an approval workflow. Nothing appears on your public event page until you approve it.
+                            </p>
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Note</div>
+                                <p>Fan Content is available for schedules with the Curator type. You can change your schedule type in the schedule settings.</p>
                             </div>
 
-                            <div class="doc-callout doc-callout-tip">
-                                <div class="doc-callout-title">Tip</div>
-                                <p>For schedule-level privacy (hiding the entire schedule from public listings), see the <a href="{{ route('marketing.docs.schedule_basics') }}#settings" class="text-cyan-400 hover:text-cyan-300">Unlisted Schedule</a> setting.</p>
-                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Enabling Fan Content</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Go to your schedule's admin panel</li>
+                                <li>Open <strong>Settings</strong></li>
+                                <li>Set the schedule type to <strong>Curator</strong></li>
+                                <li>Save your changes</li>
+                            </ol>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">
+                                Once the schedule type is set to Curator, the <strong>Videos</strong> tab appears in your admin panel and fans can submit content on your public event pages.
+                            </p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Fan Videos</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Fans can submit YouTube or Vimeo video links on your public event pages. Videos can be attached to the event itself or to specific event parts (e.g., individual performances or sessions).
+                            </p>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>They paste a YouTube or Vimeo URL on the event page</li>
+                                <li>They select which event or event part the video belongs to</li>
+                                <li>The submission is sent to you for review</li>
+                                <li>Once approved, the video appears embedded on the public event page</li>
+                            </ol>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Fan Comments</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Fans can also leave text comments on events and event parts. Comments follow the same approval workflow as videos.
+                            </p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Moderation</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                You have full control over which fan content appears on your event pages:
+                            </p>
+                            <ul class="doc-list mb-6">
+                                <li><strong>Admin panel</strong> - Go to the Videos tab in your admin panel to see all pending submissions. You can approve or reject each one individually.</li>
+                                <li><strong>Email notifications</strong> - When a fan submits content, you receive an email notification with links to approve or reject the submission directly.</li>
+                            </ul>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Approved content appears on the public event page immediately. You can remove previously approved content at any time from the Videos tab in your admin panel.
+                            </p>
                         </section>
 
                         <!-- See Also -->
                         <section id="see-also" class="doc-section">
                             <h2 class="doc-heading">See Also</h2>
                             <ul class="doc-list">
+                                <li><a href="{{ route('marketing.docs.ai_import') }}" class="text-cyan-400 hover:text-cyan-300">AI Import</a> - Import events from text or images using AI</li>
                                 <li><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Selling Tickets</a> - Add tickets to your events</li>
                                 <li><a href="{{ route('marketing.docs.event_graphics') }}" class="text-cyan-400 hover:text-cyan-300">Event Graphics</a> - Create promotional images</li>
                                 <li><a href="{{ route('marketing.docs.sharing') }}" class="text-cyan-400 hover:text-cyan-300">Sharing Your Schedule</a> - Share and embed your events</li>
-                                <li><a href="{{ route('marketing.docs.creating_schedules') }}" class="text-cyan-400 hover:text-cyan-300">Advanced Schedule Settings</a> - Sub-schedules, auto-import, and calendar sync</li>
+                                <li><a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="text-cyan-400 hover:text-cyan-300">Calendar Integrations</a> - Set up Google Calendar and CalDAV sync</li>
                             </ul>
                         </section>
 
@@ -539,7 +523,7 @@
         "@context": "https://schema.org",
         "@type": "HowTo",
         "name": "How to Create Events in Event Schedule",
-        "description": "Learn how to add events to your schedule manually, import from text or images using AI, or sync from external calendars.",
+        "description": "Learn how to add events to your schedule and configure event settings like venue, participants, tickets, and more.",
         "totalTime": "PT3M",
         "step": [
             {
@@ -558,7 +542,7 @@
                 "@type": "HowToStep",
                 "name": "Fill in Event Details",
                 "text": "Enter the event name, date and time, duration, venue/location, description, and upload an event image.",
-                "url": "{{ url(route('marketing.docs.creating_events')) }}#event-details"
+                "url": "{{ url(route('marketing.docs.creating_events')) }}#details"
             },
             {
                 "@type": "HowToStep",

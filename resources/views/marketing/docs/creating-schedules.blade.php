@@ -1,14 +1,14 @@
 <x-marketing-layout>
-    <x-slot name="title">Advanced Schedule Settings - Event Schedule</x-slot>
-    <x-slot name="breadcrumbTitle">Advanced Schedule Settings</x-slot>
-    <x-slot name="description">Learn about advanced schedule features including sub-schedules, auto import, calendar integrations, and email settings.</x-slot>
+    <x-slot name="title">Creating Schedules - Event Schedule</x-slot>
+    <x-slot name="breadcrumbTitle">Creating Schedules</x-slot>
+    <x-slot name="description">Learn how to create and configure your schedule in Event Schedule. Set up details, address, contact info, settings, sub-schedules, auto import, calendar integrations, and more.</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "TechArticle",
-        "headline": "Advanced Schedule Settings - Event Schedule",
-        "description": "Learn about advanced schedule features including sub-schedules, auto import, calendar integrations, and email settings.",
+        "headline": "Creating Schedules - Event Schedule",
+        "description": "Learn how to create and configure your schedule in Event Schedule. Set up details, address, contact info, settings, sub-schedules, auto import, calendar integrations, and more.",
         "author": {
             "@type": "Organization",
             "name": "Event Schedule"
@@ -28,7 +28,7 @@
             "@id": "{{ url()->current() }}"
         },
         "datePublished": "2024-01-01",
-        "dateModified": "2026-02-01"
+        "dateModified": "2026-02-27"
     }
     </script>
     </x-slot>
@@ -44,18 +44,19 @@
         <div class="absolute inset-0 grid-pattern"></div>
 
         <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <x-docs-breadcrumb currentTitle="Advanced Schedule Settings" />
+            <x-docs-breadcrumb currentTitle="Creating Schedules" />
 
             <div class="flex items-center gap-4 mb-4">
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-500/20">
                     <svg aria-hidden="true" class="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Advanced Schedule Settings</h1>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Creating Schedules</h1>
             </div>
             <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
-                Automate your workflow and never manually add an event again. Configure sub-schedules, auto import, calendar integrations, and more.
+                Set up and configure your schedule - from basic details and contact info to sub-schedules, calendar integrations, and auto import.
             </p>
         </div>
     </section>
@@ -68,14 +69,22 @@
                 <aside class="lg:w-64 flex-shrink-0">
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
-                        <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Overview</a>
+                        <a href="#schedule-types" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Schedule Types</a>
+                        <a href="#details" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Details</a>
+                        <a href="#address" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Address</a>
+                        <a href="#contact-info" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Contact Info</a>
+                        <a href="#style" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Style</a>
                         <a href="#subschedules" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Sub-schedules</a>
+                        <a href="#settings" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Settings</a>
+                        <a href="#settings-general" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">General</a>
+                        <a href="#settings-custom-fields" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Custom Fields</a>
+                        <a href="#settings-requests" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Requests</a>
+                        <a href="#settings-advanced" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Advanced</a>
                         <a href="#auto-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Auto Import</a>
-                        <a href="#calendar-integrations" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Calendar Integrations</a>
-                        <a href="#custom-domain" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Custom Domain</a>
+                        <a href="#integrations" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Integrations</a>
+                        <a href="#integrations-google" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Google Calendar</a>
+                        <a href="#integrations-caldav" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">CalDAV</a>
                         <a href="#email-settings" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Email Settings</a>
-                        <a href="#email-scheduling" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Email Scheduling</a>
-                        <a href="#team-members" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Team Members</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
                 </aside>
@@ -83,21 +92,127 @@
                 <!-- Content -->
                 <div class="flex-1 min-w-0">
                     <div class="prose-dark">
-                        <!-- Overview -->
-                        <section id="overview" class="doc-section">
-                            <h2 class="doc-heading">Overview</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">This page covers advanced schedule features. If you're just getting started, see these pages first:</p>
+                        <!-- Schedule Types -->
+                        <section id="schedule-types" class="doc-section">
+                            <h2 class="doc-heading">Schedule Types</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Event Schedule supports three types of schedules, each designed for different use cases:</p>
 
-                            <div class="space-y-3 mb-6">
-                                <a href="{{ route('marketing.docs.schedule_basics') }}" class="block bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 hover:border-cyan-500/30 transition-colors">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-1">Schedule Basics</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Set up your schedule name, type, location, contact info, and core settings.</p>
-                                </a>
-                                <a href="{{ route('marketing.docs.schedule_styling') }}" class="block bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 hover:border-blue-500/30 transition-colors">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-1">Schedule Styling</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Customize colors, fonts, backgrounds, and visual appearance.</p>
-                                </a>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Best For</th>
+                                            <th>Key Features</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Talent</span></td>
+                                            <td>Musicians, DJs, performers, speakers</td>
+                                            <td>Events display venues, focused on "where you'll be"</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Venue</span></td>
+                                            <td>Bars, clubs, theaters, event spaces</td>
+                                            <td>Full address support, map integration</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Curator</span></td>
+                                            <td>Promoters, bloggers, community organizers</td>
+                                            <td>Aggregate events from multiple sources</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
+                        </section>
+
+                        <!-- Details -->
+                        <section id="details" class="doc-section">
+                            <h2 class="doc-heading">Details</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Configure your schedule's core identity in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>.</p>
+
+                            <x-doc-screenshot id="creating-schedules--section-details" alt="Schedule details settings" loading="eager" />
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Schedule Name</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Your schedule's display name. This appears at the top of your schedule page and in search results. Use your band name, venue name, or organization name.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">English Name</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">If your schedule name is in a non-English language, you can provide an English translation. This helps with discoverability and accessibility for international visitors.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Short Description</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">A brief subtitle for your schedule (up to 200 characters). This appears below your schedule name on the schedule page.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Description</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">A bio or description of your schedule. Supports <strong class="text-gray-900 dark:text-white">Markdown formatting</strong> for links, bold text, lists, and more. Tell visitors what you're about and what kind of events they can expect.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Address -->
+                        <section id="address" class="doc-section">
+                            <h2 class="doc-heading">Address</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">For <strong class="text-gray-900 dark:text-white">Venue</strong> schedules, you can add a full physical address. This enables map integration and helps visitors find your location.</p>
+
+                            <x-doc-screenshot id="creating-schedules--section-address" alt="Schedule address settings" />
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Street Address</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Your venue's street address (e.g., "123 Main Street").</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">City, State/Province, Postal Code</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Fill in your city, state or province, and postal/zip code for complete address information.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Country</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Select your country from the dropdown. This is used for address formatting and map display.</p>
+                                </div>
+                            </div>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Address Validation</div>
+                                <p>When you enter an address, Event Schedule validates it and generates map coordinates. This powers the interactive map on your schedule page.</p>
+                            </div>
+                        </section>
+
+                        <!-- Contact Info -->
+                        <section id="contact-info" class="doc-section">
+                            <h2 class="doc-heading">Contact Info</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Add contact details in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> so visitors can reach you. These appear on your public schedule page.</p>
+
+                            <x-doc-screenshot id="creating-schedules--section-contact-info" alt="Schedule contact information settings" />
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Email Address</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">A public contact email for inquiries. Use the <strong class="text-gray-900 dark:text-white">"Show email"</strong> toggle to control whether this is visible to visitors.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Phone Number</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">A contact phone number in international format. Use the <strong class="text-gray-900 dark:text-white">"Show phone number"</strong> toggle to control whether this is visible to visitors. On the hosted platform, the phone number must be verified via SMS before it will be displayed publicly.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Website URL</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Link to your main website. Opens in a new tab when visitors click it.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">City/Country</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">For non-Venue schedules (Talent, Curator), you can specify your city and country. This appears on your profile without requiring a full street address.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Style -->
+                        <section id="style" class="doc-section">
+                            <h2 class="doc-heading">Style</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Customize your schedule's visual appearance including colors, fonts, backgrounds, and layout. See the full <a href="{{ route('marketing.docs.schedule_styling') }}" class="text-cyan-400 hover:text-cyan-300">Schedule Styling</a> guide for all customization options.</p>
                         </section>
 
                         <!-- Sub-schedules -->
@@ -105,7 +220,7 @@
                             <h2 class="doc-heading">Sub-schedules</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Organize your events into sub-schedules (categories). This helps visitors filter and find events that interest them.</p>
 
-                            <x-doc-screenshot id="creating-schedules--section-subschedules" alt="Sub-schedules settings" loading="eager" />
+                            <x-doc-screenshot id="creating-schedules--section-subschedules" alt="Sub-schedules settings" />
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Creating Sub-schedules</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">To create a sub-schedule, go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and scroll to the Sub-schedules section.</p>
@@ -129,9 +244,343 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-4">When creating or editing an event, select a sub-schedule from the dropdown. Events can belong to one sub-schedule at a time.</p>
                         </section>
 
+                        <!-- Settings -->
+                        <section id="settings" class="doc-section">
+                            <h2 class="doc-heading">Settings</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Configure how your schedule works in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>. Settings are organized into four tabs.</p>
+
+                            <x-doc-screenshot id="creating-schedules--section-settings" alt="Schedule settings" />
+
+                            <!-- General Tab -->
+                            <h3 id="settings-general" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">General</h3>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Schedule URL / Subdomain</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Your unique URL identifier. On the hosted version, this becomes <code class="doc-inline-code">yourname.eventschedule.com</code>. Choose something memorable and easy to type.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Custom Domain <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-1">Enterprise</span></h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Use your own domain (e.g., <code class="doc-inline-code">events.yourbrand.com</code>) instead of a subdomain. A custom domain gives your <a href="{{ route('marketing.docs.sharing') }}#schedule-url" class="text-cyan-400 hover:text-cyan-300">shared schedule URL</a> a more professional look.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">There are two modes: <strong class="text-gray-900 dark:text-white">Direct mode</strong> (CNAME - your schedule is served on your domain with automatic SSL) and <strong class="text-gray-900 dark:text-white">Redirect mode</strong> (Cloudflare - your domain redirects to your eventschedule.com URL).</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Language</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose from 11 supported languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, and Russian. This affects the interface language on your schedule page.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Timezone</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Set your schedule's timezone. All event times are displayed in this timezone. Important for audiences in multiple regions.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Time Format</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose between 12-hour (2:00 PM) or 24-hour (14:00) time format based on your audience's preference.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Event URL Pattern</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Customize how event URLs are generated. Use variables like <code class="doc-inline-code">{event_name}</code>, <code class="doc-inline-code">{date_dmy}</code>, <code class="doc-inline-code">{venue}</code>, etc.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Example: <code class="doc-inline-code">{event_name}-{date_dmy}</code> creates URLs like <code class="doc-inline-code">my-event-27-1</code></p>
+                                </div>
+                            </div>
+
+                            <!-- URL Pattern Variables -->
+                            <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-4">URL Pattern Variables</h4>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Use these variables in your Event URL Pattern. All values are automatically converted to URL-safe format (lowercase, spaces become dashes).
+                            </p>
+
+                            <h5 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Date & Time</h5>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{day_name}</code></td>
+                                            <td>Full day name (translated)</td>
+                                            <td>wednesday</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{day_short}</code></td>
+                                            <td>Short day name (translated)</td>
+                                            <td>wed</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{date_dmy}</code></td>
+                                            <td>Day-month format</td>
+                                            <td>15-3</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{date_mdy}</code></td>
+                                            <td>Month-day format</td>
+                                            <td>3-15</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{date_full_dmy}</code></td>
+                                            <td>Full date (day-month-year)</td>
+                                            <td>15-03-2025</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{date_full_mdy}</code></td>
+                                            <td>Full date (month-day-year)</td>
+                                            <td>03-15-2025</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{month}</code></td>
+                                            <td>Month number</td>
+                                            <td>3</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{month_name}</code></td>
+                                            <td>Full month name (translated)</td>
+                                            <td>march</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{month_short}</code></td>
+                                            <td>Short month name (translated)</td>
+                                            <td>mar</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{day}</code></td>
+                                            <td>Day of month</td>
+                                            <td>15</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{year}</code></td>
+                                            <td>Year</td>
+                                            <td>2025</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{time}</code></td>
+                                            <td>Start time</td>
+                                            <td>20-00 or 8-00-pm</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{end_time}</code></td>
+                                            <td>End time</td>
+                                            <td>22-00 or 10-00-pm</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{duration}</code></td>
+                                            <td>Duration in hours</td>
+                                            <td>2</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h5 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Event Information</h5>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{event_name}</code></td>
+                                            <td>Event Name</td>
+                                            <td>summer-concert</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h5 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Venue Information</h5>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{venue}</code></td>
+                                            <td>Venue name (translated)</td>
+                                            <td>central-park</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{city}</code></td>
+                                            <td>City</td>
+                                            <td>new-york</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{address}</code></td>
+                                            <td>Street address</td>
+                                            <td>123-main-st</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{state}</code></td>
+                                            <td>State/Province</td>
+                                            <td>ny</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{country}</code></td>
+                                            <td>Country</td>
+                                            <td>us</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h5 class="text-sm font-semibold text-gray-900 dark:text-white mb-3"><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Ticket</a> Information</h5>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{currency}</code></td>
+                                            <td>Currency code</td>
+                                            <td>usd</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{price}</code></td>
+                                            <td>Lowest ticket price (or price range)</td>
+                                            <td>10 or 10-25</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{coupon_code}</code></td>
+                                            <td>Coupon code</td>
+                                            <td>SAVE20</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Custom Fields Tab -->
+                            <h3 id="settings-custom-fields" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Custom Fields</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Define <a href="{{ marketing_url('/features/custom-fields') }}" class="text-cyan-400 hover:text-cyan-300">Event Custom Fields</a> to add extra data to your events. Custom field values can also be used as URL pattern variables.
+                            </p>
+
+                            @if (!empty($customFieldsData))
+                                {{-- Dynamic: Show user's actual custom fields --}}
+                                @foreach ($customFieldsData as $scheduleData)
+                                    <h4 class="text-md font-medium text-gray-200 mb-2">{{ $scheduleData['role_name'] }}</h4>
+                                    <div class="overflow-x-auto mb-6">
+                                        <table class="doc-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Variable</th>
+                                                    <th>Field Name</th>
+                                                    <th>Type</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($scheduleData['fields'] as $index => $field)
+                                                <tr>
+                                                    <td><code class="doc-inline-code">{custom_{{ $loop->iteration }}}</code></td>
+                                                    <td>{{ $field['name'] }}</td>
+                                                    <td>{{ ucfirst(str_replace('_', ' ', $field['type'] ?? 'string')) }}</td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endforeach
+                            @else
+                                {{-- Static: Generic documentation for logged-out users or users without custom fields --}}
+                                <div class="overflow-x-auto mb-6">
+                                    <table class="doc-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Variable</th>
+                                                <th>Description</th>
+                                                <th>Example</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><code class="doc-inline-code">{custom_1}</code></td>
+                                                <td>Value of the 1st custom field</td>
+                                                <td>john-smith</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code class="doc-inline-code">{custom_2}</code></td>
+                                                <td>Value of the 2nd custom field</td>
+                                                <td>room-101</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code class="doc-inline-code">{custom_3}</code></td>
+                                                <td>Value of the 3rd custom field</td>
+                                                <td>workshop</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="3" class="text-gray-400 text-sm">...up to {custom_8}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">URL-Safe Formatting</div>
+                                <p>All variable values are automatically converted to URL-safe slugs: lowercase letters, numbers, and dashes only. For example, "Summer Concert" becomes "summer-concert" and "New York" becomes "new-york".</p>
+                            </div>
+
+                            <!-- Requests Tab -->
+                            <h3 id="settings-requests" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Requests</h3>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Accept Event Requests</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Allow others to submit events to your schedule. Submitted events can be reviewed in the <a href="{{ route('marketing.docs.creating_events') }}#manual" class="text-cyan-400 hover:text-cyan-300">pending queue</a>. Perfect for:</p>
+                                    <ul class="text-sm text-gray-500 dark:text-gray-400 list-disc list-inside space-y-1">
+                                        <li><strong class="text-gray-900 dark:text-white">Venues:</strong> Accept booking requests from bands and performers</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Curators:</strong> Let the community submit local events</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Organizations:</strong> Collect event submissions from members</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Require Approval</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">When enabled, submitted events go to a <a href="{{ route('marketing.docs.creating_events') }}#manual" class="text-cyan-400 hover:text-cyan-300">pending queue</a> for your approval before appearing publicly. Review requests in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong>.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Request Terms</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Add custom terms or guidelines that submitters must agree to when requesting events. Use this to set expectations about your booking policies, technical requirements, or submission guidelines.</p>
+                                </div>
+                            </div>
+
+                            <!-- Advanced Tab -->
+                            <h3 id="settings-advanced" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Advanced</h3>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">First Day of Week</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose whether your calendar starts on Sunday or Monday.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Import Form Fields</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Customize which fields are shown on the event request form. This lets you control what information submitters provide when requesting events.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Link Directly to Registration</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">When enabled, clicking events on the calendar or scanning QR codes in event graphics will link directly to the event's registration URL instead of showing the event detail page first. Only affects events that have a registration URL configured.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Unlisted Schedule <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-1">Enterprise</span></h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Make your schedule private - it won't appear in search results or public listings. Only people with the direct link can access it. For per-event privacy with password protection, see <a href="{{ route('marketing.docs.creating_events') }}#privacy" class="text-cyan-400 hover:text-cyan-300">Privacy</a>.</p>
+                                </div>
+                            </div>
+                        </section>
+
                         <!-- Auto Import -->
                         <section id="auto-import" class="doc-section">
-                            <h2 class="doc-heading">Auto Import</h2>
+                            <h2 class="doc-heading">Auto Import <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 ml-2">Selfhost</span></h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Automatically import events from external sources to keep your schedule up-to-date without manual entry.</p>
 
                             <x-doc-screenshot id="creating-schedules--section-auto-import" alt="Auto import settings" />
@@ -158,100 +607,45 @@
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
-                                <p>Auto-imported events go to your pending queue if you have <a href="{{ route('marketing.docs.schedule_basics') }}#settings" class="text-cyan-400 hover:text-cyan-300">Require Approval</a> enabled, so you can review them before they appear publicly.</p>
+                                <p>Auto-imported events go to your pending queue if you have <a href="#settings-requests" class="text-cyan-400 hover:text-cyan-300">Require Approval</a> enabled, so you can review them before they appear publicly.</p>
                             </div>
                         </section>
 
-                        <!-- Calendar Integrations -->
-                        <section id="calendar-integrations" class="doc-section">
-                            <h2 class="doc-heading">Calendar Integrations</h2>
+                        <!-- Integrations -->
+                        <section id="integrations" class="doc-section">
+                            <h2 class="doc-heading">Integrations</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Sync your schedule with external calendar systems for smooth event management.</p>
 
                             <x-doc-screenshot id="creating-schedules--section-integrations" alt="Calendar integration settings" />
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Google Calendar Sync</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect your Google Calendar for bidirectional sync. Events created in either place stay synchronized automatically. Supports webhook-based real-time updates.</p>
-                                </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">CalDAV Sync</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect to any CalDAV-compatible calendar (Apple Calendar, Fastmail, Nextcloud, etc.) for cross-platform synchronization.</p>
-                                </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sync Direction Options</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Choose one-way sync (import only or export only) or two-way sync to keep both calendars in perfect harmony.</p>
                                 </div>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Connecting Google Calendar</h3>
+                            <!-- Google Calendar -->
+                            <h3 id="integrations-google" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Google Calendar</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Connect your Google Calendar for bidirectional sync. Events created in either place stay synchronized automatically. Supports webhook-based real-time updates.</p>
+
                             <p class="text-gray-600 dark:text-gray-300 mb-4">First, make sure you've connected your Google account in <a href="{{ route('marketing.docs.account_settings') }}#google" class="text-cyan-400 hover:text-cyan-300">Account Settings</a>. Then:</p>
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong></li>
-                                <li>Scroll to <strong class="text-gray-900 dark:text-white">Calendar Sync</strong></li>
+                                <li>Scroll to <strong class="text-gray-900 dark:text-white">Integrations</strong></li>
                                 <li>Click <strong class="text-gray-900 dark:text-white">Connect Google Calendar</strong></li>
                                 <li>Authorize Event Schedule to access your Google Calendar</li>
                                 <li>Select which calendar to sync and choose sync direction</li>
                             </ol>
 
-                            <div class="doc-callout doc-callout-info">
+                            <div class="doc-callout doc-callout-info mb-6">
                                 <div class="doc-callout-title">Selfhost Note</div>
                                 <p>Google Calendar integration requires API credentials configuration. See the <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="text-cyan-400 hover:text-cyan-300">selfhost Google Calendar docs</a> for setup instructions.</p>
                             </div>
-                        </section>
 
-                        <!-- Custom Domain -->
-                        <section id="custom-domain" class="doc-section">
-                            <h2 class="doc-heading">Custom Domain <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span></h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Use your own domain name instead of <code class="doc-inline-code">yoursubdomain.eventschedule.com</code>. With a custom domain, visitors access your schedule at an address like <code class="doc-inline-code">events.yourdomain.com</code> or <code class="doc-inline-code">yourdomain.com</code>.</p>
-
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">There are two ways to use a custom domain:</p>
-                            <ul class="doc-list mb-6">
-                                <li><strong class="text-gray-900 dark:text-white">Redirect mode</strong> - Your domain redirects visitors to your <code class="doc-inline-code">eventschedule.com</code> URL using Cloudflare. Simple to set up and free.</li>
-                                <li><strong class="text-gray-900 dark:text-white">Direct mode</strong> - Your schedule is served directly on your custom domain with automatic SSL. Visitors see your domain in the address bar at all times.</li>
-                            </ul>
-
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Option 1: Direct Mode (CNAME)</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">Direct mode serves your schedule directly on your custom domain. SSL is provisioned automatically.</p>
-                            <ol class="doc-list doc-list-numbered mb-6">
-                                <li><strong class="text-gray-900 dark:text-white">Go to your schedule settings</strong> - Navigate to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit &rarr; Schedule Settings</strong>.</li>
-                                <li><strong class="text-gray-900 dark:text-white">Enter your custom domain</strong> - Type your full domain URL (e.g., <code class="doc-inline-code">https://events.yourdomain.com</code>) and select <strong class="text-gray-900 dark:text-white">Direct</strong> mode.</li>
-                                <li><strong class="text-gray-900 dark:text-white">Add a CNAME record</strong> - Go to your domain registrar's DNS settings and add a CNAME record pointing to the hostname shown in the setup instructions.</li>
-                                <li><strong class="text-gray-900 dark:text-white">Wait for DNS propagation</strong> - DNS changes can take up to 48 hours. SSL will be provisioned automatically once DNS is verified.</li>
-                            </ol>
-
-                            <div class="doc-callout doc-callout-tip mb-6">
-                                <div class="doc-callout-title">Tip</div>
-                                <p>Direct mode is the recommended option. Your visitors will see your custom domain in their browser at all times, and SSL is handled automatically.</p>
-                            </div>
-
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Option 2: Redirect Mode (Cloudflare)</h3>
-                            <ol class="doc-list doc-list-numbered mb-6">
-                                <li><strong class="text-gray-900 dark:text-white">Create a free Cloudflare account</strong> - Sign up at <code class="doc-inline-code">cloudflare.com</code> if you don't already have one.</li>
-                                <li><strong class="text-gray-900 dark:text-white">Add your custom domain to Cloudflare</strong> - In the Cloudflare dashboard, click "Add a site" and enter your domain name. Select the free plan.</li>
-                                <li><strong class="text-gray-900 dark:text-white">Update your nameservers</strong> - Go to your domain registrar (where you purchased the domain) and change the nameservers to the ones Cloudflare provides. This may take up to 24 hours to propagate.</li>
-                                <li><strong class="text-gray-900 dark:text-white">Configure DNS records</strong> - In Cloudflare DNS settings, remove any existing A records for your domain. Then add two new A records, both with the proxy enabled (orange cloud):
-                                    <ul class="doc-list mt-2">
-                                        <li><code class="doc-inline-code">@</code> pointing to <code class="doc-inline-code">192.0.2.1</code></li>
-                                        <li><code class="doc-inline-code">*</code> pointing to <code class="doc-inline-code">192.0.2.1</code></li>
-                                    </ul>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">The IP address doesn't matter since all requests will be redirected by the page rule in the next step.</p>
-                                </li>
-                                <li><strong class="text-gray-900 dark:text-white">Create a page rule for URL forwarding</strong> - In Cloudflare, go to <strong class="text-gray-900 dark:text-white">Rules &rarr; Page Rules</strong> and create a new rule:
-                                    <ul class="doc-list mt-2">
-                                        <li><strong class="text-gray-900 dark:text-white">URL:</strong> <code class="doc-inline-code">*yourcustomdomain.com/*</code></li>
-                                        <li><strong class="text-gray-900 dark:text-white">Setting:</strong> Forwarding URL (301 Permanent Redirect)</li>
-                                        <li><strong class="text-gray-900 dark:text-white">Destination:</strong> <code class="doc-inline-code">https://yoursubdomain.eventschedule.com/$2</code></li>
-                                    </ul>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Replace <code class="doc-inline-code">yourcustomdomain.com</code> with your domain and <code class="doc-inline-code">yoursubdomain</code> with your Event Schedule subdomain.</p>
-                                </li>
-                                <li><strong class="text-gray-900 dark:text-white">Enter your custom domain in Event Schedule</strong> - Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit &rarr; Schedule Settings</strong> and enter your custom domain URL in the Custom Domain field.</li>
-                            </ol>
-
-                            <div class="doc-callout doc-callout-tip">
-                                <div class="doc-callout-title">Tip</div>
-                                <p>DNS and nameserver changes can take up to 24 to 48 hours to fully propagate. If the redirect doesn't work immediately, give it some time and try again.</p>
-                            </div>
+                            <!-- CalDAV -->
+                            <h3 id="integrations-caldav" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">CalDAV</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Connect to any CalDAV-compatible calendar (Apple Calendar, Fastmail, Nextcloud, etc.) for cross-platform synchronization.</p>
                         </section>
 
                         <!-- Email Settings -->
@@ -287,70 +681,15 @@
                             </ol>
                         </section>
 
-                        <!-- Email Scheduling -->
-                        <section id="email-scheduling" class="doc-section">
-                            <h2 class="doc-heading">Email Scheduling</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Schedule automatic email delivery of your event graphics to keep your audience informed about upcoming events.</p>
-
-                            <div class="space-y-4 mb-6">
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Automated Delivery</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Set a recurring schedule to automatically email your event graphic to subscribers. Choose daily, weekly, or custom intervals.</p>
-                                </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Graphic Preview</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Recipients receive a visual snapshot of your upcoming events as an <a href="{{ route('marketing.docs.event_graphics') }}" class="text-cyan-400 hover:text-cyan-300">event graphic</a>, making it easy to see what's coming up at a glance.</p>
-                                </div>
-                            </div>
-
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Setting Up Email Scheduling</h3>
-                            <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Graphic</strong></li>
-                                <li>Click the <strong class="text-gray-900 dark:text-white">Email Scheduling</strong> button</li>
-                                <li>Configure the delivery frequency and recipient list</li>
-                                <li>Your event graphic will be emailed automatically on the chosen schedule</li>
-                            </ol>
-
-                            <div class="doc-callout doc-callout-tip">
-                                <div class="doc-callout-title">Tip</div>
-                                <p>Combine email scheduling with <a href="#email-settings" class="text-cyan-400 hover:text-cyan-300">custom email settings</a> to send from your own domain for a more professional look.</p>
-                            </div>
-                        </section>
-
-                        <!-- Team Members -->
-                        <section id="team-members" class="doc-section">
-                            <h2 class="doc-heading">Team Members <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span></h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Add team members to your schedule so multiple people can collaborate on managing events.</p>
-
-                            <div class="space-y-4 mb-6">
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Collaborative Management</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Invite team members by email to help manage your schedule. Each member gets their own login and can create, edit, and manage events.</p>
-                                </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Access Control</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Schedule owners maintain full control, including the ability to add or remove team members at any time.</p>
-                                </div>
-                            </div>
-
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Adding Team Members</h3>
-                            <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Team</strong></li>
-                                <li>Click <strong class="text-gray-900 dark:text-white">Add Member</strong></li>
-                                <li>Enter the team member's email address</li>
-                                <li>They'll receive an invitation and can start managing the schedule once they accept</li>
-                            </ol>
-                        </section>
-
                         <!-- See Also -->
                         <section id="see-also" class="doc-section">
                             <h2 class="doc-heading">See Also</h2>
                             <ul class="doc-list">
-                                <li><a href="{{ route('marketing.docs.schedule_basics') }}" class="text-cyan-400 hover:text-cyan-300">Schedule Basics</a> - Name, type, location, and core settings</li>
                                 <li><a href="{{ route('marketing.docs.schedule_styling') }}" class="text-cyan-400 hover:text-cyan-300">Schedule Styling</a> - Colors, fonts, backgrounds, and visual customization</li>
                                 <li><a href="{{ route('marketing.docs.creating_events') }}" class="text-cyan-400 hover:text-cyan-300">Creating Events</a> - Add events to your schedule</li>
                                 <li><a href="{{ route('marketing.docs.sharing') }}" class="text-cyan-400 hover:text-cyan-300">Sharing Your Schedule</a> - Embed and share your schedule</li>
                                 <li><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Selling Tickets</a> - Set up ticketing for your events</li>
+                                <li><a href="{{ route('marketing.docs.availability') }}" class="text-cyan-400 hover:text-cyan-300">Availability Calendar</a> - Mark available and unavailable dates (Talent and Venue schedules)</li>
                             </ul>
                         </section>
 
@@ -368,39 +707,45 @@
     {
         "@context": "https://schema.org",
         "@type": "HowTo",
-        "name": "How to Set Up Auto Import and Calendar Sync",
-        "description": "Configure sub-schedules, auto import from URLs, and connect Google Calendar or CalDAV for smooth event synchronization.",
+        "name": "How to Create and Configure Your Event Schedule",
+        "description": "Set up your schedule with details, address, contact info, settings, sub-schedules, auto import, and calendar integrations.",
         "totalTime": "PT10M",
         "step": [
             {
                 "@type": "HowToStep",
-                "name": "Create Sub-schedules",
-                "text": "Go to Admin Panel, then Profile, then Edit and scroll to Sub-schedules. Create categories like Live Music, DJ Nights, or Comedy Shows.",
-                "url": "{{ url(route('marketing.docs.creating_schedules')) }}#subschedules"
+                "name": "Choose Your Schedule Type",
+                "text": "Select the appropriate schedule type: Talent for performers, Venue for event spaces, or Curator for promoters.",
+                "url": "{{ url(route('marketing.docs.creating_schedules')) }}#schedule-types"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Enter Schedule Details",
+                "text": "Configure your schedule name, English name (if applicable), and description with Markdown formatting in Admin Panel, then Profile, then Edit.",
+                "url": "{{ url(route('marketing.docs.creating_schedules')) }}#details"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Set Your Address",
+                "text": "For Venue schedules, add your full address including street, city, state, postal code, and country for map integration.",
+                "url": "{{ url(route('marketing.docs.creating_schedules')) }}#address"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Configure Settings",
+                "text": "Set your schedule URL, language, timezone, time format, and configure event request and approval settings.",
+                "url": "{{ url(route('marketing.docs.creating_schedules')) }}#settings"
             },
             {
                 "@type": "HowToStep",
                 "name": "Set Up Auto Import",
-                "text": "Scroll to Auto Import section and add URLs or city names to automatically import events from external sources.",
+                "text": "Add URLs or city names to automatically import events from external sources.",
                 "url": "{{ url(route('marketing.docs.creating_schedules')) }}#auto-import"
             },
             {
                 "@type": "HowToStep",
-                "name": "Connect Google Calendar",
-                "text": "Scroll to Calendar Sync, click Connect Google Calendar, authorize access, and select which calendar to sync.",
-                "url": "{{ url(route('marketing.docs.creating_schedules')) }}#calendar-integrations"
-            },
-            {
-                "@type": "HowToStep",
-                "name": "Set Up a Custom Domain",
-                "text": "Use Cloudflare to redirect your own domain to your Event Schedule URL for a professional branded experience.",
-                "url": "{{ url(route('marketing.docs.creating_schedules')) }}#custom-domain"
-            },
-            {
-                "@type": "HowToStep",
-                "name": "Configure Email Settings",
-                "text": "Scroll to Email Settings to configure SMTP and custom sender address for your schedule's notifications.",
-                "url": "{{ url(route('marketing.docs.creating_schedules')) }}#email-settings"
+                "name": "Connect Calendar Integrations",
+                "text": "Sync with Google Calendar or CalDAV for smooth event management.",
+                "url": "{{ url(route('marketing.docs.creating_schedules')) }}#integrations"
             }
         ]
     }

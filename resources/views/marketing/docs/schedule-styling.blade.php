@@ -101,7 +101,7 @@
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Getting Started</div>
-                                <p>If you haven't set up your schedule's basic information yet, see <a href="{{ route('marketing.docs.schedule_basics') }}" class="text-cyan-400 hover:text-cyan-300">Schedule Basics</a> first.</p>
+                                <p>If you haven't set up your schedule's basic information yet, see <a href="{{ route('marketing.docs.creating_schedules') }}" class="text-cyan-400 hover:text-cyan-300">Creating Schedules</a> first.</p>
                             </div>
                         </section>
 
@@ -264,8 +264,7 @@
                         <section id="see-also" class="doc-section">
                             <h2 class="doc-heading">See Also</h2>
                             <ul class="doc-list">
-                                <li><a href="{{ route('marketing.docs.schedule_basics') }}" class="text-cyan-400 hover:text-cyan-300">Schedule Basics</a> - Configure name, type, location, and settings</li>
-                                <li><a href="{{ route('marketing.docs.creating_schedules') }}" class="text-cyan-400 hover:text-cyan-300">Advanced Schedule Settings</a> - Sub-schedules, calendar integrations, and auto-import</li>
+                                <li><a href="{{ route('marketing.docs.creating_schedules') }}" class="text-cyan-400 hover:text-cyan-300">Creating Schedules</a> - Configure details, settings, sub-schedules, and integrations</li>
                                 <li><a href="{{ route('marketing.docs.event_graphics') }}" class="text-cyan-400 hover:text-cyan-300">Event Graphics</a> - Generate shareable images for social media</li>
                                 <li><a href="{{ route('marketing.docs.sharing') }}" class="text-cyan-400 hover:text-cyan-300">Sharing Your Schedule</a> - Embed and share your schedule</li>
                                 <li><a href="{{ route('marketing.docs.creating_events') }}" class="text-cyan-400 hover:text-cyan-300">Creating Events</a> - Add events to see your styling in action</li>

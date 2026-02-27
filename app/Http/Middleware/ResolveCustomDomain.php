@@ -52,15 +52,14 @@ class ResolveCustomDomain
         $response = $next($request);
 
         $subdomainUrl = "https://{$role->subdomain}.{$baseDomain}";
-        $appUrl = "https://app.{$baseDomain}";
         $customDomainUrl = "https://{$host}";
 
         // Replace subdomain URLs with custom domain URLs in HTML responses
+        // Note: only replace the schedule's subdomain URL, not app URLs (login, admin, follow)
         if ($this->isHtmlResponse($response)) {
             $content = $response->getContent();
             if ($content) {
                 $content = str_replace($subdomainUrl, $customDomainUrl, $content);
-                $content = str_replace($appUrl, $customDomainUrl, $content);
 
                 // Also replace protocol-relative and http variants
                 $content = str_replace("http://{$role->subdomain}.{$baseDomain}", $customDomainUrl, $content);
@@ -74,7 +73,6 @@ class ResolveCustomDomain
         if ($response->isRedirection() && $response->headers->has('Location')) {
             $location = $response->headers->get('Location');
             $location = str_replace($subdomainUrl, $customDomainUrl, $location);
-            $location = str_replace($appUrl, $customDomainUrl, $location);
             $location = str_replace("http://{$role->subdomain}.{$baseDomain}", $customDomainUrl, $location);
             $response->headers->set('Location', $location);
         }

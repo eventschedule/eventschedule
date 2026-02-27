@@ -68,16 +68,16 @@
                 <aside class="lg:w-64 flex-shrink-0">
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
-                        <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Overview</a>
-                        <a href="#payment-setup" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Payment Setup</a>
-                        <a href="#invoiceninja-modes" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Invoice Ninja Modes</a>
-                        <a href="#create-tickets" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Creating Tickets</a>
-                        <a href="#ticket-types" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Ticket Types</a>
-                        <a href="#checkout-fields" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Custom Checkout Fields</a>
+                        <a href="#general" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">General</a>
+                        <a href="#ticket-types" class="doc-nav-link block px-3 py-2 ps-6 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Ticket Types</a>
+                        <a href="#free-events" class="doc-nav-link block px-3 py-2 ps-6 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Free Events & RSVPs</a>
+                        <a href="#payment" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Payment</a>
+                        <a href="#invoiceninja-modes" class="doc-nav-link block px-3 py-2 ps-6 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Invoice Ninja Modes</a>
+                        <a href="#options" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Options</a>
+                        <a href="#promo-codes" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Promo Codes</a>
                         <a href="#managing-sales" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Managing Sales</a>
-                        <a href="#export" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Exporting Sales Data</a>
+                        <a href="#export" class="doc-nav-link block px-3 py-2 ps-6 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Exporting Sales Data</a>
                         <a href="#check-in" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Check-in at the Door</a>
-                        <a href="#free-events" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Free Events & RSVPs</a>
                         <a href="#financial" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Financial Information</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
@@ -86,9 +86,9 @@
                 <!-- Content -->
                 <div class="flex-1 min-w-0">
                     <div class="prose-dark">
-                        <!-- Overview -->
-                        <section id="overview" class="doc-section">
-                            <h2 class="doc-heading">Overview</h2>
+                        <!-- General -->
+                        <section id="general" class="doc-section">
+                            <h2 class="doc-heading">General</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Event Schedule includes full ticketing functionality. Sell tickets directly from your event pages with secure payment processing, automatic confirmation emails, and QR code tickets. <strong class="text-gray-900 dark:text-white">Keep 100% of your ticket sales - we never charge platform fees.</strong></p>
 
                             <x-doc-screenshot id="tickets--sales" alt="Sales management page" loading="eager" />
@@ -110,22 +110,114 @@
                                         <li>Mobile-friendly checkout</li>
                                         <li>Pay-what-you-wish pricing option</li>
                                         <li>Custom checkout fields for attendee info</li>
+                                        <li>Promo codes with percentage or fixed discounts</li>
                                     </ul>
                                 </div>
                             </div>
 
-                            <div class="doc-callout doc-callout-info">
+                            <div class="doc-callout doc-callout-info mb-6">
                                 <div class="doc-callout-title">Pro Feature</div>
                                 <p>Ticketing is available on Pro plans. Starting at just $5/month with a 7-day free trial - and zero platform fees on your ticket sales.</p>
                             </div>
+
+                            <h3 id="create-tickets" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Creating Tickets</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Add tickets to any event from the event edit page.</p>
+
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Edit your event</li>
+                                <li>Scroll to the <strong class="text-gray-900 dark:text-white">"Tickets"</strong> section</li>
+                                <li>Click <strong class="text-gray-900 dark:text-white">"Add Ticket Type"</strong></li>
+                                <li>Enter ticket details:
+                                    <ul class="doc-list mt-2 mb-2">
+                                        <li>Name (e.g., "General Admission", "VIP")</li>
+                                        <li>Price (or $0 for free tickets, or leave blank for pay-what-you-wish)</li>
+                                        <li>Quantity available (leave blank for unlimited)</li>
+                                        <li>Description (optional)</li>
+                                    </ul>
+                                </li>
+                                <li>Save the event</li>
+                            </ol>
+
+                            <p class="text-gray-600 dark:text-gray-300">Once tickets are added, a "Get Tickets" button appears on your event page.</p>
                         </section>
 
-                        <!-- Payment Setup -->
-                        <section id="payment-setup" class="doc-section">
-                            <h2 class="doc-heading">Payment Setup</h2>
+                        <!-- Ticket Types -->
+                        <section id="ticket-types" class="doc-section">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Ticket Types</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Create multiple ticket types to offer different options:</p>
+
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Example</th>
+                                            <th>Use Case</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">General Admission</span></td>
+                                            <td>Standard entry ticket</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">VIP</span></td>
+                                            <td>Premium tickets with extra benefits</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Early Bird</span></td>
+                                            <td>Discounted tickets for early buyers</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Student/Senior</span></td>
+                                            <td>Discounted tickets for specific groups</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Table</span></td>
+                                            <td>Reserved seating for groups</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Pay What You Wish</span></td>
+                                            <td>Let attendees choose their price (set minimum optional)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Ticket Settings</h4>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Quantity:</strong> Limit how many tickets can be sold (leave blank for unlimited)</li>
+                                <li><strong class="text-gray-900 dark:text-white">Per-person limit:</strong> Limit how many one person can buy</li>
+                                <li><strong class="text-gray-900 dark:text-white">Sales end date:</strong> Stop selling tickets at a specific time</li>
+                                <li><strong class="text-gray-900 dark:text-white">Combined inventory:</strong> Set a total ticket limit across all ticket types for your event</li>
+                            </ul>
+                        </section>
+
+                        <!-- Free Events -->
+                        <section id="free-events" class="doc-section">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Free Events & RSVPs</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">You can also use the ticketing system for free events to collect RSVPs.</p>
+
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Create a ticket type</li>
+                                <li>Set the price to <strong class="text-gray-900 dark:text-white">$0</strong> (or leave it blank)</li>
+                                <li>Set a quantity limit if you have capacity constraints</li>
+                                <li>Save the event</li>
+                            </ol>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors can "purchase" free tickets to RSVP. They'll receive a confirmation email with a QR code, and you'll have a list of who's coming.</p>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>This is great for capacity management, even for free events. You'll know exactly how many people to expect.</p>
+                            </div>
+                        </section>
+
+                        <!-- Payment -->
+                        <section id="payment" class="doc-section">
+                            <h2 class="doc-heading">Payment</h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Before you can sell tickets, you need to connect a payment method. Event Schedule supports several options:</p>
 
-                            <div class="space-y-4 mb-6">
+                            <div class="space-y-4 mb-6" id="payment-setup">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Stripe</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Accept credit card payments directly. Money goes straight to your Stripe account. Set up Stripe in <a href="{{ route('marketing.docs.account_settings') }}#payments" class="text-cyan-400 hover:text-cyan-300">Account Settings</a>.</p>
@@ -137,6 +229,10 @@
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payment URL</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Use any payment link (PayPal, Venmo, Square, etc.) by entering the URL.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Cash</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Accept payment at the door. Add optional payment instructions for attendees.</p>
                                 </div>
                             </div>
 
@@ -156,7 +252,7 @@
 
                         <!-- Invoice Ninja Modes -->
                         <section id="invoiceninja-modes" class="doc-section">
-                            <h2 class="doc-heading">Invoice Ninja Modes</h2>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Invoice Ninja Modes</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">When using Invoice Ninja, choose between two checkout modes in your <a href="{{ route('marketing.docs.account_settings') }}#payments" class="text-cyan-400 hover:text-cyan-300">payment settings</a>.</p>
 
                             <div class="space-y-4 mb-6">
@@ -220,89 +316,17 @@
                             </div>
                         </section>
 
-                        <!-- Creating Tickets -->
-                        <section id="create-tickets" class="doc-section">
-                            <h2 class="doc-heading">Creating Tickets</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Add tickets to any event from the event edit page.</p>
+                        <!-- Options -->
+                        <section id="options" class="doc-section">
+                            <h2 class="doc-heading">Options</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Configure additional checkout settings for your event's tickets.</p>
 
-                            <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Edit your event</li>
-                                <li>Scroll to the <strong class="text-gray-900 dark:text-white">"Tickets"</strong> section</li>
-                                <li>Click <strong class="text-gray-900 dark:text-white">"Add Ticket Type"</strong></li>
-                                <li>Enter ticket details:
-                                    <ul class="doc-list mt-2 mb-2">
-                                        <li>Name (e.g., "General Admission", "VIP")</li>
-                                        <li>Price (or $0 for free tickets, or leave blank for pay-what-you-wish)</li>
-                                        <li>Quantity available (leave blank for unlimited)</li>
-                                        <li>Description (optional)</li>
-                                    </ul>
-                                </li>
-                                <li>Save the event</li>
-                            </ol>
-
-                            <p class="text-gray-600 dark:text-gray-300">Once tickets are added, a "Get Tickets" button appears on your event page.</p>
-                        </section>
-
-                        <!-- Ticket Types -->
-                        <section id="ticket-types" class="doc-section">
-                            <h2 class="doc-heading">Ticket Types</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Create multiple ticket types to offer different options:</p>
-
-                            <div class="overflow-x-auto mb-6">
-                                <table class="doc-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Example</th>
-                                            <th>Use Case</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">General Admission</span></td>
-                                            <td>Standard entry ticket</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">VIP</span></td>
-                                            <td>Premium tickets with extra benefits</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Early Bird</span></td>
-                                            <td>Discounted tickets for early buyers</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Student/Senior</span></td>
-                                            <td>Discounted tickets for specific groups</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Table</span></td>
-                                            <td>Reserved seating for groups</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Pay What You Wish</span></td>
-                                            <td>Let attendees choose their price (set minimum optional)</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Ticket Settings</h3>
-                            <ul class="doc-list mb-6">
-                                <li><strong class="text-gray-900 dark:text-white">Quantity:</strong> Limit how many tickets can be sold (leave blank for unlimited)</li>
-                                <li><strong class="text-gray-900 dark:text-white">Per-person limit:</strong> Limit how many one person can buy</li>
-                                <li><strong class="text-gray-900 dark:text-white">Sales end date:</strong> Stop selling tickets at a specific time</li>
-                                <li><strong class="text-gray-900 dark:text-white">Combined inventory:</strong> Set a total ticket limit across all ticket types for your event</li>
-                            </ul>
-                        </section>
-
-                        <!-- Custom Checkout Fields -->
-                        <section id="checkout-fields" class="doc-section">
-                            <h2 class="doc-heading">Custom Checkout Fields</h2>
+                            <h3 id="checkout-fields" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Custom Checkout Fields</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Collect additional information from attendees during checkout. You can add up to 8 custom fields per event.</p>
 
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Setting Up Custom Fields</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Edit your event</li>
-                                <li>Scroll to the <strong class="text-gray-900 dark:text-white">"Checkout Fields"</strong> section</li>
+                                <li>Go to the <strong class="text-gray-900 dark:text-white">Tickets &rarr; Options</strong> tab</li>
                                 <li>Add field labels (e.g., "Dietary Requirements", "T-Shirt Size")</li>
                                 <li>Mark fields as required or optional</li>
                                 <li>Save the event</li>
@@ -319,7 +343,51 @@
                                 </ul>
                             </div>
 
-                            <p class="text-gray-600 dark:text-gray-300">Responses are stored with each sale and can be viewed in your sales dashboard or exported.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Responses are stored with each sale and can be viewed in your sales dashboard or exported.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Additional Settings</h3>
+                            <ul class="doc-list">
+                                <li><strong class="text-gray-900 dark:text-white">Ticket notes:</strong> Add notes that appear on the ticket (e.g., parking instructions, what to bring)</li>
+                                <li><strong class="text-gray-900 dark:text-white">Terms URL:</strong> Link to your terms and conditions. Buyers must agree before purchasing.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Expire unpaid tickets:</strong> Automatically release unpaid tickets after a set number of hours, making them available for other buyers</li>
+                            </ul>
+                        </section>
+
+                        <!-- Promo Codes -->
+                        <section id="promo-codes" class="doc-section">
+                            <h2 class="doc-heading">Promo Codes</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Offer discounts to attendees with promo codes. Buyers enter a code during checkout to receive a discount on their purchase.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Adding a Promo Code</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Edit your event</li>
+                                <li>Go to the <strong class="text-gray-900 dark:text-white">Tickets &rarr; Promo Codes</strong> tab</li>
+                                <li>Click <strong class="text-gray-900 dark:text-white">"Add Promo Code"</strong></li>
+                                <li>Enter the code (e.g., "EARLYBIRD", "VIP50")</li>
+                                <li>Choose the discount type and value</li>
+                                <li>Save the event</li>
+                            </ol>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Discount Types</h3>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Percentage:</strong> A percentage off the ticket price (e.g., 20% off)</li>
+                                <li><strong class="text-gray-900 dark:text-white">Fixed amount:</strong> A flat amount off the ticket price (e.g., $10 off)</li>
+                            </ul>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Promo Code Settings</h3>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Max uses:</strong> Limit how many times the code can be used (leave blank for unlimited)</li>
+                                <li><strong class="text-gray-900 dark:text-white">Expiration date:</strong> Set a date and time when the code stops working</li>
+                                <li><strong class="text-gray-900 dark:text-white">Active/inactive:</strong> Toggle the code on or off without deleting it</li>
+                                <li><strong class="text-gray-900 dark:text-white">Applies to:</strong> Apply the code to all ticket types, or target specific tickets only</li>
+                            </ul>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Each promo code generates a shareable link that pre-fills the code at checkout, making it easy to distribute to your audience.</p>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Invoice Ninja Payment Link Mode</div>
+                                <p>When using Invoice Ninja in payment link mode, only one promo code per event is supported and it applies to all ticket types. Use invoice mode for multiple promo codes with per-ticket targeting.</p>
+                            </div>
                         </section>
 
                         <!-- Managing Sales -->
@@ -345,7 +413,7 @@
 
                         <!-- Export -->
                         <section id="export" class="doc-section">
-                            <h2 class="doc-heading">Exporting Sales Data</h2>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Exporting Sales Data</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Export your sales data for accounting, tax purposes, or to import into other systems.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
@@ -392,26 +460,6 @@
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Ticket Security</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">Each ticket has a unique QR code that can only be scanned once. If someone tries to use a ticket that's already been checked in, you'll see a warning.</p>
-                        </section>
-
-                        <!-- Free Events -->
-                        <section id="free-events" class="doc-section">
-                            <h2 class="doc-heading">Free Events & RSVPs</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">You can also use the ticketing system for free events to collect RSVPs.</p>
-
-                            <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Create a ticket type</li>
-                                <li>Set the price to <strong class="text-gray-900 dark:text-white">$0</strong> (or leave it blank)</li>
-                                <li>Set a quantity limit if you have capacity constraints</li>
-                                <li>Save the event</li>
-                            </ol>
-
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors can "purchase" free tickets to RSVP. They'll receive a confirmation email with a QR code, and you'll have a list of who's coming.</p>
-
-                            <div class="doc-callout doc-callout-tip">
-                                <div class="doc-callout-title">Tip</div>
-                                <p>This is great for capacity management, even for free events. You'll know exactly how many people to expect.</p>
-                            </div>
                         </section>
 
                         <!-- Financial Information -->

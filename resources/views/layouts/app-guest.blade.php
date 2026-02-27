@@ -15,7 +15,7 @@
     @endphp
 
     <x-slot name="meta">
-        @if (request()->embed || (isset($event) && $event->exists && $event->is_private))
+        @if (request()->embed || request('graphic') || (isset($event) && $event->exists && $event->is_private))
             <meta name="robots" content="noindex, nofollow">
         @else
             <meta name="robots" content="index, follow">
@@ -224,7 +224,7 @@
         }
 
         @if ($role->custom_css && $role->isPro())
-        {!! $role->custom_css !!}
+        {!! strip_tags($role->custom_css) !!}
         @endif
 
         </style>

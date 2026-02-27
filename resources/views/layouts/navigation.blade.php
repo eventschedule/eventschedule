@@ -361,12 +361,38 @@
         // Listen for section nav clicks (pushState doesn't fire hashchange)
         document.addEventListener('click', function(e) {
             var target = e.target.closest('.section-nav-link, .mobile-section-header');
-            if (!target) return;
-            var sectionId = target.getAttribute('data-section');
-            if (sectionId && anchorMap[sectionId]) {
-                updateHelpLinks(anchorMap[sectionId]);
-            } else {
-                updateHelpLinks(baseUrl);
+            if (target) {
+                var sectionId = target.getAttribute('data-section');
+                if (sectionId && anchorMap[sectionId]) {
+                    updateHelpLinks(anchorMap[sectionId]);
+                } else {
+                    updateHelpLinks(baseUrl);
+                }
+                return;
+            }
+
+            var tab = e.target.closest('.payment-tab');
+            if (tab) {
+                var tabKey = 'payment-tab-' + tab.getAttribute('data-tab');
+                if (anchorMap[tabKey]) {
+                    updateHelpLinks(anchorMap[tabKey]);
+                }
+            }
+
+            var settingsTab = e.target.closest('.settings-tab');
+            if (settingsTab) {
+                var tabKey = 'settings-tab-' + settingsTab.getAttribute('data-tab');
+                if (anchorMap[tabKey]) {
+                    updateHelpLinks(anchorMap[tabKey]);
+                }
+            }
+
+            var integrationTab = e.target.closest('.integration-tab');
+            if (integrationTab) {
+                var tabKey = 'integration-tab-' + integrationTab.getAttribute('data-tab');
+                if (anchorMap[tabKey]) {
+                    updateHelpLinks(anchorMap[tabKey]);
+                }
             }
         });
 

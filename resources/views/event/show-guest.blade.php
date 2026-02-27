@@ -13,6 +13,25 @@
             ? ($selectedGroup->role->accent_color ?? '#4E81FA')
             : ($role->accent_color ?? '#4E81FA'));
     $contrastColor = accent_contrast_color($accentColor);
+
+    // Collect all approved photo URLs for lightbox navigation
+    $allPhotoUrls = collect();
+    foreach ($event->parts as $part) {
+      $partPhotos = $part->approvedPhotos;
+      if ($event->days_of_week && isset($date) && $date) {
+        $partPhotos = $partPhotos->filter(fn($p) => $p->event_date === $date || $p->event_date === null);
+      }
+      foreach ($partPhotos as $photo) {
+        $allPhotoUrls->push($photo->photo_url);
+      }
+    }
+    $eventPhotos = $event->approvedPhotos->whereNull('event_part_id');
+    if ($event->days_of_week && isset($date) && $date) {
+      $eventPhotos = $eventPhotos->filter(fn($p) => $p->event_date === $date || $p->event_date === null);
+    }
+    foreach ($eventPhotos as $photo) {
+      $allPhotoUrls->push($photo->photo_url);
+    }
     @endphp
 
   {{-- Status alerts (full width, fixed at top) --}}
@@ -672,7 +691,7 @@
         @endif
 
         {{-- CTA buttons --}}
-        <div style="font-family: sans-serif" class="relative inline-block text-left hidden sm:block self-start {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div style="font-family: sans-serif" x-data="{ shareState: 'idle' }" class="relative items-center gap-3 text-left hidden sm:inline-flex self-start {{ $role->isRtl() ? 'rtl' : '' }}">
         @if ($event->canSellTickets($date) || $event->registration_url)
           @if (request()->get('tickets') !== 'true')
             <a href="{{ $event->registration_url ? $event->registration_url : request()->fullUrlWithQuery(['tickets' => 'true']) }}" {{ $event->registration_url ? 'target="_blank" rel="noopener noreferrer nofollow"' : '' }}
@@ -700,7 +719,7 @@
               </button>
 
             {{-- Desktop calendar dropdown --}}
-            <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute top-full end-0 z-50 mt-2 w-56 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+            <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute top-full end-0 z-50 mt-2 w-56 {{ $role->isRtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                 <div class="py-1 stop-propagation" role="none">
                     <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="menu-item-0">
                         <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -724,8 +743,34 @@
             </div>
 
         @endif
+        {{-- Share button --}}
+        <button type="button"
+                data-share-title="{{ $event->translatedName() }}"
+                @click="
+                  if (shareState !== 'idle') return;
+                  if (navigator.share) {
+                    shareState = 'sharing';
+                    navigator.share({ title: $event.currentTarget.dataset.shareTitle, url: window.location.href }).finally(() => shareState = 'idle');
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    shareState = 'copied';
+                    setTimeout(() => shareState = 'idle', 2000);
+                  }
+                "
+                class="flex-shrink-0 w-[42px] h-[42px] inline-flex items-center justify-center rounded-xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                :title="shareState === 'copied' ? '{{ __('messages.copied') }}' : '{{ __('messages.share') }}'">
+          <template x-if="shareState !== 'copied'">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" /></svg>
+          </template>
+          <template x-if="shareState === 'copied'">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-600 dark:text-green-400" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+          </template>
+        </button>
         </div>
         </div>
+
+        {{-- Sentinel for sticky mobile CTA visibility --}}
+        <div id="mobile-cta-sentinel" class="h-px w-full" aria-hidden="true"></div>
 
         {{-- Mobile calendar bottom sheet (outside hidden sm:block container so it's visible on mobile) --}}
         @if (!($event->canSellTickets($date) || $event->registration_url))
@@ -793,7 +838,7 @@
           <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
             {{ __('messages.about') }}
           </h2>
-          <div class="{{ $role->isRtl() || ($translation && $translation->role->isRtl()) ? 'rtl' : '' }}">
+          <div class="{{ $role->isRtl() || ($translation && $translation->role?->isRtl()) ? 'rtl' : '' }}">
             <div class="text-gray-700 dark:text-gray-300 text-base custom-content">
               {!! \App\Utils\UrlUtils::convertUrlsToLinks($translation ? ($translation->description_html_translated ?: $translation->description_translated) : $event->translatedDescription()) !!}
             </div>
@@ -860,9 +905,9 @@
                   <div class="mt-2 flex flex-wrap gap-2">
                     @foreach ($partPhotos as $photo)
                     <div class="flex flex-col">
-                      <a href="{{ $photo->photo_url }}" target="_blank" class="block rounded-lg overflow-hidden max-w-full">
+                      <button @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
                         <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto max-w-full rounded-lg object-cover" loading="lazy">
-                      </a>
+                      </button>
                       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->user?->first_name ?? $photo->user?->name ?? __('messages.user') }}</p>
                     </div>
                     @endforeach
@@ -1033,9 +1078,9 @@
                   <div class="mt-2 flex flex-wrap gap-2">
                     @foreach ($partPhotos as $photo)
                     <div class="flex flex-col">
-                      <a href="{{ $photo->photo_url }}" target="_blank" class="block rounded-lg overflow-hidden max-w-full">
+                      <button @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
                         <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto max-w-full rounded-lg object-cover" loading="lazy">
-                      </a>
+                      </button>
                       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->user?->first_name ?? $photo->user?->name ?? __('messages.user') }}</p>
                     </div>
                     @endforeach
@@ -1337,22 +1382,15 @@
           </div>
           @endif
           @if ($eventLevelPhotos->count() > 0)
-          <div class="flex flex-wrap gap-3 mb-4" x-data="{ lightbox: false, lightboxSrc: '' }">
+          <div class="flex flex-wrap gap-3 mb-4">
             @foreach ($eventLevelPhotos as $photo)
             <div class="flex flex-col">
-              <button @click="lightboxSrc = '{{ $photo->photo_url }}'; lightbox = true" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
+              <button @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
                 <img src="{{ $photo->photo_url }}" alt="{{ $event->translatedName() }}" class="h-32 sm:h-40 w-auto max-w-full rounded-lg object-cover" loading="lazy">
               </button>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->user?->first_name ?? $photo->user?->name ?? __('messages.user') }}</p>
             </div>
             @endforeach
-            {{-- Lightbox modal --}}
-            <template x-teleport="body">
-              <div x-show="lightbox" x-cloak @click="lightbox = false" @keydown.escape.window="lightbox = false" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-2" style="font-family: sans-serif">
-                <button @click="lightbox = false" class="absolute top-3 {{ $role->isRtl() ? 'left-3' : 'right-3' }} text-white/80 hover:text-white text-4xl leading-none z-10">&times;</button>
-                <img :src="lightboxSrc" class="w-[96vw] h-[96vh] object-contain pointer-events-none">
-              </div>
-            </template>
           </div>
           @endif
           @if ($eventLevelComments->count() > 0)
@@ -1477,33 +1515,141 @@
 
     </div>
   </div>
+
+  {{-- Shared photo lightbox --}}
+  @if ($allPhotoUrls->count() > 0)
+  <div x-data="{
+         lbOpen: false,
+         lbPhotos: {{ $allPhotoUrls->values()->toJson() }},
+         lbIndex: 0,
+         lbTouchStartX: 0,
+         lbRtl: {{ $role->isRtl() ? 'true' : 'false' }},
+         openAt(url) {
+           let idx = this.lbPhotos.indexOf(url);
+           this.lbIndex = idx >= 0 ? idx : 0;
+           this.lbOpen = true;
+           document.body.style.overflow = 'hidden';
+         },
+         close() {
+           this.lbOpen = false;
+           document.body.style.overflow = '';
+         },
+         prev() {
+           this.lbIndex = (this.lbIndex - 1 + this.lbPhotos.length) % this.lbPhotos.length;
+         },
+         next() {
+           this.lbIndex = (this.lbIndex + 1) % this.lbPhotos.length;
+         }
+       }"
+       @open-lightbox.window="openAt($event.detail.url)"
+       @keydown.escape.window="if (lbOpen) close()"
+       @keydown.left.window="if (lbOpen) { lbRtl ? next() : prev() }"
+       @keydown.right.window="if (lbOpen) { lbRtl ? prev() : next() }">
+    <template x-teleport="body">
+      <div x-show="lbOpen" x-cloak
+           @click.self="close()"
+           class="fixed inset-0 z-[70] flex items-center justify-center bg-black/90"
+           style="font-family: sans-serif"
+           @touchstart.passive="lbTouchStartX = $event.changedTouches[0].screenX"
+           @touchend="
+             let dx = $event.changedTouches[0].screenX - lbTouchStartX;
+             if (Math.abs(dx) > 50) {
+               if (lbRtl) { dx > 0 ? next() : prev(); }
+               else { dx > 0 ? prev() : next(); }
+             }
+           ">
+        {{-- Close button --}}
+        <button @click="close()" class="absolute top-3 {{ $role->isRtl() ? 'left-3' : 'right-3' }} text-white/80 hover:text-white text-4xl leading-none z-10 w-10 h-10 flex items-center justify-center">&times;</button>
+        {{-- Counter --}}
+        <div x-show="lbPhotos.length > 1" class="absolute top-4 left-1/2 -translate-x-1/2 text-white/70 text-sm tabular-nums z-10" x-text="(lbIndex + 1) + ' / ' + lbPhotos.length"></div>
+        {{-- Prev button (desktop) --}}
+        <button x-show="lbPhotos.length > 1" @click.stop="lbRtl ? next() : prev()" class="hidden sm:flex absolute {{ $role->isRtl() ? 'right-3' : 'left-3' }} top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>
+        </button>
+        {{-- Next button (desktop) --}}
+        <button x-show="lbPhotos.length > 1" @click.stop="lbRtl ? prev() : next()" class="hidden sm:flex absolute {{ $role->isRtl() ? 'left-3' : 'right-3' }} top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
+        </button>
+        {{-- Image --}}
+        <img :src="lbPhotos[lbIndex]" class="max-w-[96vw] max-h-[90vh] object-contain pointer-events-none" alt="">
+      </div>
+    </template>
+  </div>
+  @endif
+
   </main>
 
   {{-- Sticky mobile CTA --}}
-  <div class="fixed bottom-0 inset-x-0 z-40 sm:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 shadow-lg" style="font-family: sans-serif; padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
-    @if ($event->canSellTickets($date) || $event->registration_url)
-      @if (request()->get('tickets') !== 'true')
-        <a href="{{ $event->registration_url ? $event->registration_url : request()->fullUrlWithQuery(['tickets' => 'true']) }}" {{ $event->registration_url ? 'target="_blank" rel="noopener noreferrer nofollow"' : '' }}
-          @if ($event->payment_method === 'payment_url' && $event->user && $event->user->paymentUrlMobileOnly() && ! is_mobile())
-            class="payment-mobile-only-link"
-            data-mobile-msg="{{ __('messages.payment_url_mobile_only') }}"
-          @endif
-        >
-          <button type="button"
-                class="w-full justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
-            {{ $event->registration_url ? __('messages.view_event') : ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets')) }}
-          </button>
-        </a>
-      @endif
-    @else
+  <div x-data="{ ctaVisible: true, shareState: 'idle' }"
+       x-init="
+         let sentinel = document.getElementById('mobile-cta-sentinel');
+         if (sentinel && window.IntersectionObserver) {
+           new IntersectionObserver(function(entries) {
+             ctaVisible = entries[0].isIntersecting;
+           }, { threshold: 0 }).observe(sentinel);
+         } else {
+           ctaVisible = false;
+         }
+       "
+       x-show="!ctaVisible"
+       x-cloak
+       x-transition:enter="transition ease-out duration-200"
+       x-transition:enter-start="translate-y-full"
+       x-transition:enter-end="translate-y-0"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="translate-y-0"
+       x-transition:leave-end="translate-y-full"
+       class="fixed bottom-0 inset-x-0 z-40 sm:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 shadow-lg" style="font-family: sans-serif; padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
+    <div class="flex items-center gap-3 {{ $role->isRtl() ? 'rtl' : '' }}">
+      {{-- Mobile share button --}}
       <button type="button"
-          id="mobile-calendar-cta"
-          class="w-full justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
-          style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
-        {{ __('messages.add_to_calendar') }}
+              data-share-title="{{ $event->translatedName() }}"
+              @click="
+                if (shareState !== 'idle') return;
+                if (navigator.share) {
+                  shareState = 'sharing';
+                  navigator.share({ title: $event.currentTarget.dataset.shareTitle, url: window.location.href }).finally(() => shareState = 'idle');
+                } else {
+                  navigator.clipboard.writeText(window.location.href);
+                  shareState = 'copied';
+                  setTimeout(() => shareState = 'idle', 2000);
+                }
+              "
+              class="flex-shrink-0 w-[48px] h-[48px] inline-flex items-center justify-center rounded-xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+        <template x-if="shareState !== 'copied'">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" /></svg>
+        </template>
+        <template x-if="shareState === 'copied'">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-600 dark:text-green-400" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+        </template>
       </button>
-    @endif
+      {{-- Main CTA --}}
+      @if ($event->canSellTickets($date) || $event->registration_url)
+        @if (request()->get('tickets') !== 'true')
+          <a href="{{ $event->registration_url ? $event->registration_url : request()->fullUrlWithQuery(['tickets' => 'true']) }}" {{ $event->registration_url ? 'target="_blank" rel="noopener noreferrer nofollow"' : '' }}
+            @if ($event->payment_method === 'payment_url' && $event->user && $event->user->paymentUrlMobileOnly() && ! is_mobile())
+              class="payment-mobile-only-link flex-1"
+              data-mobile-msg="{{ __('messages.payment_url_mobile_only') }}"
+            @else
+              class="flex-1"
+            @endif
+          >
+            <button type="button"
+                  class="w-full justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                  style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+              {{ $event->registration_url ? __('messages.view_event') : ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets')) }}
+            </button>
+          </a>
+        @endif
+      @else
+        <button type="button"
+            id="mobile-calendar-cta"
+            class="flex-1 justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+            style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+          {{ __('messages.add_to_calendar') }}
+        </button>
+      @endif
+    </div>
   </div>
 
   @if ($role->isPro() && $event->polls->count() > 0)

@@ -516,7 +516,7 @@ class RoleController extends Controller
         }
 
         // Get timezone from user or role
-        $timezone = $user->timezone ?? $role->timezone ?? 'UTC';
+        $timezone = $user?->timezone ?? $role->timezone ?? 'UTC';
 
         // Calculate month boundaries in user's/role's timezone, then convert to UTC for database query
         $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();

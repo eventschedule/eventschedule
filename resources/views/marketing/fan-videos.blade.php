@@ -93,7 +93,7 @@
             </div>
 
             <p class="mt-6 text-gray-500 dark:text-gray-400 animate-reveal delay-300" style="opacity: 0;">
-                <a href="{{ route('marketing.docs.fan_content') }}" class="underline hover:text-rose-600 dark:hover:text-rose-400 transition-colors">Read the Fan Content guide</a>
+                <a href="{{ route('marketing.docs.creating_events') }}#fan-content" class="underline hover:text-rose-600 dark:hover:text-rose-400 transition-colors">Read the Fan Content guide</a>
             </p>
 
         </div>

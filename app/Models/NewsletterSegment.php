@@ -38,6 +38,7 @@ class NewsletterSegment extends Model
             'all_users' => $this->resolveAllUsers(),
             'plan_tier' => $this->resolvePlanTier(),
             'signup_date' => $this->resolveSignupDate(),
+            'admins' => $this->resolveAdmins(),
             default => collect(),
         };
     }
@@ -199,8 +200,31 @@ class NewsletterSegment extends Model
             ]);
     }
 
+    protected function resolveAdmins(): Collection
+    {
+        return User::where('is_admin', true)
+            ->whereNotNull('email_verified_at')
+            ->where('is_subscribed', true)
+            ->whereNull('admin_newsletter_unsubscribed_at')
+            ->select('id', 'email', 'name')
+            ->get()
+            ->map(fn ($user) => (object) [
+                'user_id' => $user->id,
+                'email' => strtolower($user->email),
+                'name' => $user->name,
+            ]);
+    }
+
     public function recipientCount(): int
     {
+        if ($this->type === 'admins') {
+            return User::where('is_admin', true)
+                ->whereNotNull('email_verified_at')
+                ->where('is_subscribed', true)
+                ->whereNull('admin_newsletter_unsubscribed_at')
+                ->count();
+        }
+
         if ($this->type === 'all_users') {
             return User::whereNotNull('email_verified_at')
                 ->where('is_subscribed', true)

@@ -22,32 +22,37 @@
         <div class="space-y-4 mb-8">
             @foreach ($segments as $segment)
             <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg p-6">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ $segment->name }}</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            {{ __('messages.type') }}:
-                            @if ($segment->type === 'all_users')
-                                {{ __('messages.all_platform_users') }}
-                            @elseif ($segment->type === 'plan_tier')
-                                {{ __('messages.plan_tier') }}{{ !empty($segment->filter_criteria['plan_type']) ? ': ' . $segment->filter_criteria['plan_type'] : '' }}
-                            @elseif ($segment->type === 'signup_date')
-                                {{ __('messages.signup_date') }}
-                            @else
-                                {{ $segment->type }}
-                            @endif
-                        </p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            {{ __('messages.recipients') }}: {{ number_format($segment->recipient_count) }}
-                        </p>
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 min-w-0">{{ $segment->name }}</h3>
+                    <div class="shrink-0 space-x-3">
+                        <a href="{{ route('admin.newsletters.segment.edit', ['hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}" class="text-[#4E81FA] hover:text-blue-700 text-sm">{{ __('messages.edit') }}</a>
+                        <form method="POST" action="{{ route('admin.newsletters.segment.delete', ['hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
+                            class="inline js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-500 hover:text-red-700 text-sm">{{ __('messages.delete') }}</button>
+                        </form>
                     </div>
-                    <form method="POST" action="{{ route('admin.newsletters.segment.delete', ['hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
-                        class="js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="text-red-500 hover:text-red-700 text-sm">{{ __('messages.delete') }}</button>
-                    </form>
                 </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    {{ __('messages.type') }}:
+                    @if ($segment->type === 'all_users')
+                        {{ __('messages.all_platform_users') }}
+                    @elseif ($segment->type === 'plan_tier')
+                        {{ __('messages.plan_tier') }}{{ !empty($segment->filter_criteria['plan_type']) ? ': ' . $segment->filter_criteria['plan_type'] : '' }}
+                    @elseif ($segment->type === 'signup_date')
+                        {{ __('messages.signup_date') }}
+                    @elseif ($segment->type === 'admins')
+                        {{ __('messages.admins') }}
+                    @elseif ($segment->type === 'manual')
+                        {{ __('messages.manual') }}
+                    @else
+                        {{ $segment->type }}
+                    @endif
+                </p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ __('messages.recipients') }}: {{ number_format($segment->recipient_count) }}
+                </p>
             </div>
             @endforeach
         </div>
@@ -71,6 +76,8 @@
                             <option value="all_users">{{ __('messages.all_platform_users') }}</option>
                             <option value="plan_tier">{{ __('messages.plan_tier') }}</option>
                             <option value="signup_date">{{ __('messages.signup_date') }}</option>
+                            <option value="admins">{{ __('messages.admins') }}</option>
+                            <option value="manual">{{ __('messages.manual') }}</option>
                         </select>
                     </div>
 

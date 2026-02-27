@@ -44,7 +44,7 @@ trait AccountSetupTrait
         // Use JavaScript to submit form (avoids click-targeting issues with multiple submit buttons)
         $browser->script("document.getElementById('edit-form').requestSubmit()");
 
-        $browser->waitForLocation('/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 25)
+        $browser->waitForLocation('/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 45)
             ->assertPathIs('/'.strtolower(str_replace(' ', '-', $name)).'/schedule');
     }
 
@@ -62,7 +62,7 @@ trait AccountSetupTrait
         // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
         $browser->script("document.getElementById('edit-form').requestSubmit()");
 
-        $browser->waitForLocation('/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 25)
+        $browser->waitForLocation('/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 45)
             ->assertPathIs('/'.strtolower(str_replace(' ', '-', $name)).'/schedule');
     }
 

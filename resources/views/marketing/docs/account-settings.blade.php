@@ -71,10 +71,14 @@
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
                         <a href="#profile" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Profile Information</a>
                         <a href="#payments" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Payment Methods</a>
+                        <a href="#stripe" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Stripe</a>
+                        <a href="#invoice-ninja" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Invoice Ninja</a>
+                        <a href="#payment-url" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Payment URL</a>
                         <a href="#api" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">API Settings</a>
                         <a href="#google" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Google Settings</a>
                         <a href="#app-update" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">App Update</a>
                         <a href="#password" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Update Password</a>
+                        <a href="#two-factor" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Two-Factor Authentication</a>
                         <a href="#delete-account" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Delete Account</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
@@ -137,22 +141,64 @@
                         <!-- Payment Methods -->
                         <section id="payments" class="doc-section">
                             <h2 class="doc-heading">Payment Methods</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                To sell tickets, you need to connect a payment method. Event Schedule supports three options:
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">
+                                To sell tickets, you need to connect at least one payment method. Event Schedule supports three options, each available as a tab in your Settings page.
                             </p>
 
+                            <h3 id="stripe" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Stripe</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Stripe provides the most integrated payment experience with automatic ticket delivery and QR codes.
+                            </p>
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Stripe</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect your Stripe account using Stripe Connect. Payments go directly to your Stripe account with standard processing fees (2.9% + $0.30). Click "Link Stripe Account" to begin the connection process. <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="text-cyan-400 hover:text-cyan-300">Selfhosted users</a> configure Stripe at the server level via environment variables rather than through account settings.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Hosted Platform</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Click "Link Stripe Account" to connect via Stripe Connect. You'll be redirected to Stripe to authorize the connection. Payments go directly to your Stripe account with standard processing fees (2.9% + $0.30).</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Invoice Ninja</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect your Invoice Ninja account for payment processing. Provide your Invoice Ninja URL and API token to link the accounts. Supports two checkout modes: invoice mode (ticket selection in Event Schedule) and payment link mode (ticket selection on Invoice Ninja's purchase page with grouped invoices). See <a href="{{ route('marketing.docs.tickets') }}#invoiceninja-modes" class="text-cyan-400 hover:text-cyan-300">Invoice Ninja Modes</a> for details. This is especially useful for selfhosted deployments.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Selfhosted</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Stripe is configured at the server level via environment variables (<code class="text-xs bg-gray-200 dark:bg-white/10 px-1.5 py-0.5 rounded">STRIPE_PLATFORM_KEY</code> and <code class="text-xs bg-gray-200 dark:bg-white/10 px-1.5 py-0.5 rounded">STRIPE_PLATFORM_SECRET</code> in your <code class="text-xs bg-gray-200 dark:bg-white/10 px-1.5 py-0.5 rounded">.env</code> file) rather than through account settings. See the <x-link href="{{ route('marketing.docs.selfhost.stripe') }}">selfhosted Stripe setup guide</x-link> for details.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payment URL</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Provide a custom payment URL (e.g., your own checkout page, PayPal.me link, or any external payment system). Buyers will be redirected to this URL to complete payment.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Unlinking</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">To disconnect your Stripe account, click "Unlink Stripe Account" in the Stripe tab. This does not affect your Stripe account itself, only the connection to Event Schedule.</p>
+                                </div>
+                            </div>
+
+                            <h3 id="invoice-ninja" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Invoice Ninja</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Connect your <x-link href="https://invoiceninja.com" target="_blank">Invoice Ninja</x-link> account to process payments through Invoice Ninja's payment gateways. This is especially useful for selfhosted deployments.
+                            </p>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Connecting</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Provide your Invoice Ninja API Token and API URL to link the accounts. You can find your API token in your Invoice Ninja settings under Settings &rarr; Account Management.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Checkout Modes</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Invoice Ninja supports two checkout modes: invoice mode (ticket selection in Event Schedule) and payment link mode (ticket selection on Invoice Ninja's purchase page with grouped invoices). See <x-link href="{{ route('marketing.docs.tickets') }}#invoiceninja-modes">Invoice Ninja Modes</x-link> for a full comparison.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Unlinking</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">To disconnect Invoice Ninja, click "Unlink Invoice Ninja" in the Invoice Ninja tab.</p>
+                                </div>
+                            </div>
+                            <div class="doc-callout doc-callout-tip mb-6">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>First-time Invoice Ninja users may be eligible for a free 1-year Pro upgrade. Look for the special offer banner when connecting.</p>
+                            </div>
+
+                            <h3 id="payment-url" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Payment URL</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Use any external payment page by providing its URL. This works with PayPal.me links, custom checkout pages, or any other payment system.
+                            </p>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How It Works</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Enter the URL where buyers should complete payment. When a buyer purchases a ticket, they are redirected to this URL to pay.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Unlinking</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">To remove the payment URL, click "Unlink Payment URL" in the Payment URL tab.</p>
                                 </div>
                             </div>
 
@@ -200,7 +246,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Google Calendar</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect Google Calendar to enable two-way sync between Event Schedule and Google Calendar. This is a separate integration from the Google Account login above and can be connected or disconnected independently. Events created in either platform are automatically synced to the other. Once connected, configure sync per schedule in <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-integrations" class="text-cyan-400 hover:text-cyan-300">Calendar Integrations</a>.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect Google Calendar to enable two-way sync between Event Schedule and Google Calendar. This is a separate integration from the Google Account login above and can be connected or disconnected independently. Events created in either platform are automatically synced to the other. Once connected, configure sync per schedule in <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="text-cyan-400 hover:text-cyan-300">Integrations</a>.</p>
                                 </div>
                             </div>
 
@@ -231,6 +277,34 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 If you signed up using Google or Facebook login, you can set a password here to enable email/password login as an alternative.
                             </p>
+                        </section>
+
+                        <!-- Two-Factor Authentication -->
+                        <section id="two-factor" class="doc-section">
+                            <h2 class="doc-heading">Two-Factor Authentication</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Add an extra layer of security to your account with two-factor authentication (2FA). When enabled, you'll need to enter a code from your authenticator app each time you log in.
+                            </p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Enabling 2FA</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Click "Enable" and enter your password to begin setup. You'll be shown a QR code to scan with an authenticator app such as Google Authenticator, Authy, or 1Password. After scanning, enter the code displayed in your app to confirm setup.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Recovery Codes</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">After enabling 2FA, you'll be shown a set of recovery codes. Save these codes in a safe place - they allow you to access your account if you lose your authenticator device. Each recovery code can only be used once. You can regenerate recovery codes at any time from this section.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Disabling 2FA</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">To disable two-factor authentication, click "Disable" and enter your password. This removes the 2FA requirement from your account and invalidates any existing recovery codes.</p>
+                                </div>
+                            </div>
+
+                            <div class="doc-callout doc-callout-warning">
+                                <div class="doc-callout-title">Important</div>
+                                <p>Store your recovery codes securely. If you lose access to your authenticator app and don't have your recovery codes, you will not be able to log in to your account.</p>
+                            </div>
                         </section>
 
                         <!-- Delete Account -->

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Newsletter;
 use App\Models\NewsletterRecipient;
 use App\Models\NewsletterSegment;
+use App\Models\NewsletterSegmentUser;
+use App\Models\User;
 use App\Services\NewsletterService;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
@@ -372,7 +374,7 @@ class AdminNewsletterController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:all_users,plan_tier,signup_date',
+            'type' => 'required|in:all_users,plan_tier,signup_date,admins,manual',
             'filter_criteria' => 'nullable|array',
             'filter_criteria.plan_type' => 'nullable|string|in:free,pro,enterprise',
             'filter_criteria.date_from' => 'nullable|date',
@@ -407,5 +409,105 @@ class AdminNewsletterController extends Controller
         $segment->delete();
 
         return back()->with('status', __('messages.segment_deleted'));
+    }
+
+    public function updateSegment(Request $request, string $hash)
+    {
+        $segment = NewsletterSegment::whereNull('role_id')
+            ->where('id', UrlUtils::decodeId($hash))
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $segment->update(['name' => $validated['name']]);
+
+        return back()->with('status', __('messages.segment_updated'));
+    }
+
+    public function editSegment(string $hash)
+    {
+        $segment = NewsletterSegment::whereNull('role_id')
+            ->where('id', UrlUtils::decodeId($hash))
+            ->firstOrFail();
+
+        if ($segment->type === 'manual') {
+            $subscribers = $segment->segmentUsers()->orderBy('created_at', 'desc')->paginate(50);
+            $recipientCount = $segment->segmentUsers()->count();
+        } else {
+            $recipients = $segment->resolveRecipients();
+            $recipientCount = $recipients->unique('email')->count();
+            $subscribers = $recipients->take(50);
+        }
+
+        return view('admin.newsletters.segment-edit', compact('segment', 'subscribers', 'recipientCount'));
+    }
+
+    public function storeSegmentUser(Request $request, string $hash)
+    {
+        $segment = NewsletterSegment::whereNull('role_id')
+            ->where('id', UrlUtils::decodeId($hash))
+            ->where('type', 'manual')
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $user = User::findOrFail($validated['user_id']);
+
+        $exists = $segment->segmentUsers()
+            ->where('email', strtolower($user->email))
+            ->exists();
+
+        if ($exists) {
+            return back()->with('error', __('messages.email_already_in_segment'));
+        }
+
+        NewsletterSegmentUser::create([
+            'newsletter_segment_id' => $segment->id,
+            'email' => strtolower($user->email),
+            'name' => $user->name,
+            'user_id' => $user->id,
+            'created_at' => now(),
+        ]);
+
+        return back()->with('status', __('messages.subscriber_added'));
+    }
+
+    public function deleteSegmentUser(Request $request, string $hash, string $userHash)
+    {
+        $segment = NewsletterSegment::whereNull('role_id')
+            ->where('id', UrlUtils::decodeId($hash))
+            ->where('type', 'manual')
+            ->firstOrFail();
+
+        $segmentUser = $segment->segmentUsers()
+            ->where('id', UrlUtils::decodeId($userHash))
+            ->firstOrFail();
+
+        $segmentUser->delete();
+
+        return back()->with('status', __('messages.subscriber_removed'));
+    }
+
+    public function searchUsers(Request $request)
+    {
+        $request->validate([
+            'q' => 'required|string|min:2',
+        ]);
+
+        $q = str_replace(['%', '_'], ['\\%', '\\_'], $request->input('q'));
+
+        $users = User::where(function ($query) use ($q) {
+            $query->where('name', 'LIKE', "%{$q}%")
+                ->orWhere('email', 'LIKE', "%{$q}%");
+        })
+            ->select('id', 'name', 'email')
+            ->limit(10)
+            ->get();
+
+        return response()->json($users);
     }
 }

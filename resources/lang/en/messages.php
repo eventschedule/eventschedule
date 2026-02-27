@@ -1857,6 +1857,7 @@ return [
     'all_platform_users' => 'All Platform Users',
     'plan_tier' => 'Plan Tier',
     'signup_date' => 'Signup Date',
+    'admins' => 'Admins',
     'date_from' => 'Date From',
     'date_to' => 'Date To',
     'block_offer' => 'Offer',
@@ -1961,6 +1962,7 @@ return [
     'subscribers' => 'Subscribers',
     'no_subscribers' => 'No subscribers',
     'showing_first_of' => 'Showing first 50 of :count dynamically resolved recipients',
+    'search_users' => 'Search users...',
     'created' => 'Created',
 
     // Subscription payment failed email

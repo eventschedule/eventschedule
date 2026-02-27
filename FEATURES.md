@@ -74,6 +74,15 @@ Gated by `$role->isEnterprise()`.
 | 1,000 newsletters per month | `$role->newsletterLimit()` | Highest sending limit |
 | Priority support | Not code-gated | Service-level commitment |
 
+## Selfhost-Only Features
+
+Available only when `IS_HOSTED=false` (selfhosted deployments).
+
+| Feature | Gate location | Notes |
+|---------|--------------|-------|
+| Auto import from URLs/cities | `resources/views/role/edit.blade.php:830`, `!config('app.hosted')` | AI-powered event import from external URLs and city search |
+| App update | `app/Http/Controllers/AppController.php:19`, `!config('app.hosted')` | One-click application updates |
+
 ## Newsletter Limits
 
 Managed by `Role::newsletterLimit()` (`app/Models/Role.php`):

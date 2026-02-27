@@ -9,7 +9,6 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BoostController;
 use App\Http\Controllers\CalDAVController;
 use App\Http\Controllers\EventController;
-use App\Http\Controllers\PromoCodeController;
 use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\GoogleCalendarWebhookController;
 use App\Http\Controllers\GraphicController;
@@ -20,6 +19,7 @@ use App\Http\Controllers\MetaAdsWebhookController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\NewsletterTrackingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PromoCodeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\SubscriptionController;
@@ -45,8 +45,8 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::get('/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
         Route::post('/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import.store');
-        Route::post('/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse');
-        Route::post('/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image');
+        Route::post('/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse')->middleware('throttle:10,1');
+        Route::post('/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image')->middleware('throttle:20,1');
         Route::get('/guest-search-youtube', [RoleController::class, 'guestSearchYouTube'])->name('role.guest_search_youtube');
         Route::get('/curate-event/{hash}', [EventController::class, 'curate'])->name('event.curate');
         Route::post('/submit-video/{event_hash}', [EventController::class, 'submitVideo'])->name('event.submit_video')->middleware('throttle:10,60');
@@ -357,6 +357,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/newsletter-segments', [AdminNewsletterController::class, 'segments'])->name('admin.newsletters.segments');
         Route::post('/admin/newsletter-segments', [AdminNewsletterController::class, 'storeSegment'])->name('admin.newsletters.segment.store');
         Route::delete('/admin/newsletter-segments/{hash}', [AdminNewsletterController::class, 'deleteSegment'])->name('admin.newsletters.segment.delete');
+        Route::put('/admin/newsletter-segments/{hash}', [AdminNewsletterController::class, 'updateSegment'])->name('admin.newsletters.segment.update');
+        Route::get('/admin/newsletter-segments/{hash}/edit', [AdminNewsletterController::class, 'editSegment'])->name('admin.newsletters.segment.edit');
+        Route::post('/admin/newsletter-segments/{hash}/users', [AdminNewsletterController::class, 'storeSegmentUser'])->name('admin.newsletters.segment.user.store');
+        Route::delete('/admin/newsletter-segments/{hash}/users/{userHash}', [AdminNewsletterController::class, 'deleteSegmentUser'])->name('admin.newsletters.segment.user.delete');
+        Route::get('/admin/users/search', [AdminNewsletterController::class, 'searchUsers'])->name('admin.users.search');
 
         // Admin blog routes
         if (config('app.hosted')) {
@@ -477,7 +482,7 @@ if (config('app.is_nexus')) {
         // User Guide (at root level)
         Route::get('/docs/getting-started', [MarketingController::class, 'docsGettingStarted'])->name('marketing.docs.getting_started');
         Route::get('/docs/creating-schedules', [MarketingController::class, 'docsCreatingSchedules'])->name('marketing.docs.creating_schedules');
-        Route::get('/docs/schedule-basics', [MarketingController::class, 'docsScheduleBasics'])->name('marketing.docs.schedule_basics');
+        Route::redirect('/docs/schedule-basics', '/docs/creating-schedules', 301)->name('marketing.docs.schedule_basics');
         Route::get('/docs/schedule-styling', [MarketingController::class, 'docsScheduleStyling'])->name('marketing.docs.schedule_styling');
         Route::get('/docs/creating-events', [MarketingController::class, 'docsCreatingEvents'])->name('marketing.docs.creating_events');
         Route::get('/docs/sharing', [MarketingController::class, 'docsSharing'])->name('marketing.docs.sharing');
@@ -488,9 +493,10 @@ if (config('app.is_nexus')) {
         Route::get('/docs/account-settings', [MarketingController::class, 'docsAccountSettings'])->name('marketing.docs.account_settings');
         Route::get('/docs/availability', [MarketingController::class, 'docsAvailability'])->name('marketing.docs.availability');
         Route::get('/docs/boost', [MarketingController::class, 'docsBoost'])->name('marketing.docs.boost');
+        Route::get('/docs/ai-import', [MarketingController::class, 'docsAiImport'])->name('marketing.docs.ai_import');
         Route::get('/docs/scan-agenda', [MarketingController::class, 'docsScanAgenda'])->name('marketing.docs.scan_agenda');
-        Route::get('/docs/fan-content', [MarketingController::class, 'docsFanContent'])->name('marketing.docs.fan_content');
-        Route::get('/docs/polls', [MarketingController::class, 'docsPolls'])->name('marketing.docs.polls');
+        Route::get('/docs/fan-content', fn () => redirect('/docs/creating-events#fan-content', 301))->name('marketing.docs.fan_content');
+        Route::get('/docs/polls', fn () => redirect('/docs/creating-events#polls', 301))->name('marketing.docs.polls');
         // Selfhost section
         Route::get('/docs/selfhost', [MarketingController::class, 'docsSelfhostIndex'])->name('marketing.docs.selfhost');
         Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
@@ -500,6 +506,7 @@ if (config('app.is_nexus')) {
         // SaaS section
         Route::get('/docs/saas', [MarketingController::class, 'docsSaasSetup'])->name('marketing.docs.saas.setup');
         Route::get('/docs/saas/custom-domains', [MarketingController::class, 'docsSaasCustomDomains'])->name('marketing.docs.saas.custom_domains');
+        Route::get('/docs/saas/twilio', [MarketingController::class, 'docsSaasTwilio'])->name('marketing.docs.saas.twilio');
         // Developer section
         Route::get('/docs/developer/api', [MarketingController::class, 'docsDeveloperApi'])->name('marketing.docs.developer.api');
         // Redirects from old URLs to new URLs
@@ -616,7 +623,7 @@ if (config('app.is_nexus')) {
             // User Guide (at root level)
             Route::get('/docs/getting-started', [MarketingController::class, 'docsGettingStarted'])->name('marketing.docs.getting_started');
             Route::get('/docs/creating-schedules', [MarketingController::class, 'docsCreatingSchedules'])->name('marketing.docs.creating_schedules');
-            Route::get('/docs/schedule-basics', [MarketingController::class, 'docsScheduleBasics'])->name('marketing.docs.schedule_basics');
+            Route::redirect('/docs/schedule-basics', '/docs/creating-schedules', 301)->name('marketing.docs.schedule_basics');
             Route::get('/docs/schedule-styling', [MarketingController::class, 'docsScheduleStyling'])->name('marketing.docs.schedule_styling');
             Route::get('/docs/creating-events', [MarketingController::class, 'docsCreatingEvents'])->name('marketing.docs.creating_events');
             Route::get('/docs/sharing', [MarketingController::class, 'docsSharing'])->name('marketing.docs.sharing');
@@ -627,9 +634,10 @@ if (config('app.is_nexus')) {
             Route::get('/docs/account-settings', [MarketingController::class, 'docsAccountSettings'])->name('marketing.docs.account_settings');
             Route::get('/docs/availability', [MarketingController::class, 'docsAvailability'])->name('marketing.docs.availability');
             Route::get('/docs/boost', [MarketingController::class, 'docsBoost'])->name('marketing.docs.boost');
+            Route::get('/docs/ai-import', [MarketingController::class, 'docsAiImport'])->name('marketing.docs.ai_import');
             Route::get('/docs/scan-agenda', [MarketingController::class, 'docsScanAgenda'])->name('marketing.docs.scan_agenda');
-            Route::get('/docs/fan-content', [MarketingController::class, 'docsFanContent'])->name('marketing.docs.fan_content');
-            Route::get('/docs/polls', [MarketingController::class, 'docsPolls'])->name('marketing.docs.polls');
+            Route::get('/docs/fan-content', fn () => redirect('/docs/creating-events#fan-content', 301))->name('marketing.docs.fan_content');
+            Route::get('/docs/polls', fn () => redirect('/docs/creating-events#polls', 301))->name('marketing.docs.polls');
             // Selfhost section
             Route::get('/docs/selfhost', [MarketingController::class, 'docsSelfhostIndex'])->name('marketing.docs.selfhost');
             Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
@@ -639,6 +647,7 @@ if (config('app.is_nexus')) {
             // SaaS section
             Route::get('/docs/saas', [MarketingController::class, 'docsSaasSetup'])->name('marketing.docs.saas.setup');
             Route::get('/docs/saas/custom-domains', [MarketingController::class, 'docsSaasCustomDomains'])->name('marketing.docs.saas.custom_domains');
+            Route::get('/docs/saas/twilio', [MarketingController::class, 'docsSaasTwilio'])->name('marketing.docs.saas.twilio');
             // Developer section
             Route::get('/docs/developer/api', [MarketingController::class, 'docsDeveloperApi'])->name('marketing.docs.developer.api');
             // Redirects from old URLs to new URLs
@@ -753,7 +762,7 @@ if (config('app.is_nexus')) {
             // User Guide
             Route::get('/docs/getting-started', fn () => redirect('https://eventschedule.com/docs/getting-started', 301));
             Route::get('/docs/creating-schedules', fn () => redirect('https://eventschedule.com/docs/creating-schedules', 301));
-            Route::get('/docs/schedule-basics', fn () => redirect('https://eventschedule.com/docs/schedule-basics', 301));
+            Route::get('/docs/schedule-basics', fn () => redirect('https://eventschedule.com/docs/creating-schedules', 301));
             Route::get('/docs/schedule-styling', fn () => redirect('https://eventschedule.com/docs/schedule-styling', 301));
             Route::get('/docs/creating-events', fn () => redirect('https://eventschedule.com/docs/creating-events', 301));
             Route::get('/docs/sharing', fn () => redirect('https://eventschedule.com/docs/sharing', 301));
@@ -764,9 +773,10 @@ if (config('app.is_nexus')) {
             Route::get('/docs/account-settings', fn () => redirect('https://eventschedule.com/docs/account-settings', 301));
             Route::get('/docs/availability', fn () => redirect('https://eventschedule.com/docs/availability', 301));
             Route::get('/docs/boost', fn () => redirect('https://eventschedule.com/docs/boost', 301));
+            Route::get('/docs/ai-import', fn () => redirect('https://eventschedule.com/docs/ai-import', 301));
             Route::get('/docs/scan-agenda', fn () => redirect('https://eventschedule.com/docs/scan-agenda', 301));
-            Route::get('/docs/fan-content', fn () => redirect('https://eventschedule.com/docs/fan-content', 301));
-            Route::get('/docs/polls', fn () => redirect('https://eventschedule.com/docs/polls', 301));
+            Route::get('/docs/fan-content', fn () => redirect('https://eventschedule.com/docs/creating-events#fan-content', 301));
+            Route::get('/docs/polls', fn () => redirect('https://eventschedule.com/docs/creating-events#polls', 301));
             // Selfhost section
             Route::get('/docs/selfhost', fn () => redirect('https://eventschedule.com/docs/selfhost', 301));
             Route::get('/docs/selfhost/installation', fn () => redirect('https://eventschedule.com/docs/selfhost/installation', 301));
@@ -777,6 +787,7 @@ if (config('app.is_nexus')) {
             // SaaS section
             Route::get('/docs/saas', fn () => redirect('https://eventschedule.com/docs/saas', 301));
             Route::get('/docs/saas/custom-domains', fn () => redirect('https://eventschedule.com/docs/saas/custom-domains', 301));
+            Route::get('/docs/saas/twilio', fn () => redirect('https://eventschedule.com/docs/saas/twilio', 301));
             // Developer section
             Route::get('/docs/developer/api', fn () => redirect('https://eventschedule.com/docs/developer/api', 301));
             Route::get('/docs/developer', fn () => redirect('https://eventschedule.com/docs/developer/api', 301));
@@ -899,6 +910,7 @@ if (config('app.is_nexus')) {
     // SaaS section
     Route::get('/docs/saas', fn () => redirect()->route('home'))->name('marketing.docs.saas.setup');
     Route::get('/docs/saas/custom-domains', fn () => redirect()->route('home'))->name('marketing.docs.saas.custom_domains');
+    Route::get('/docs/saas/twilio', fn () => redirect()->route('home'))->name('marketing.docs.saas.twilio');
     // Developer section
     Route::get('/docs/developer', fn () => redirect()->route('home'));
     Route::get('/docs/developer/api', fn () => redirect()->route('home'))->name('marketing.docs.developer.api');
@@ -933,8 +945,8 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     Route::get('/{subdomain}/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
     Route::post('/{subdomain}/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import.store');
-    Route::post('/{subdomain}/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse');
-    Route::post('/{subdomain}/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image');
+    Route::post('/{subdomain}/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse')->middleware('throttle:10,1');
+    Route::post('/{subdomain}/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image')->middleware('throttle:20,1');
     Route::get('/{subdomain}/guest-search-youtube', [RoleController::class, 'guestSearchYouTube'])->name('role.guest_search_youtube');
     Route::get('/{subdomain}/curate-event/{hash}', [EventController::class, 'curate'])->name('event.curate');
     Route::post('/{subdomain}/submit-video/{event_hash}', [EventController::class, 'submitVideo'])->name('event.submit_video')->middleware('throttle:10,60');

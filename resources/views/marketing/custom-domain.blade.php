@@ -288,7 +288,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 <!-- Read the guide -->
-                <a href="{{ route('marketing.docs.creating_schedules') }}#custom-domain" class="group block">
+                <a href="{{ route('marketing.docs.creating_schedules') }}#settings-general" class="group block">
                     <div class="h-full bg-white dark:bg-white/5 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300 flex flex-col">
                         <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 mb-6">
                             <svg aria-hidden="true" class="w-6 h-6 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -375,7 +375,7 @@
                         </svg>
                     </button>
                     <div x-show="open === 1" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">Set up a free Cloudflare account, add your domain, configure DNS records and a page rule to redirect to your Event Schedule URL, then enter your custom domain in the schedule settings. See the <a href="{{ route('marketing.docs.creating_schedules') }}#custom-domain" class="text-emerald-600 dark:text-emerald-400 hover:underline">setup guide</a> for detailed instructions.</p>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">Set up a free Cloudflare account, add your domain, configure DNS records and a page rule to redirect to your Event Schedule URL, then enter your custom domain in the schedule settings. See the <a href="{{ route('marketing.docs.creating_schedules') }}#settings-general" class="text-emerald-600 dark:text-emerald-400 hover:underline">setup guide</a> for detailed instructions.</p>
                     </div>
                 </div>
 

@@ -299,7 +299,7 @@
     }
 
     .prose-dark {
-        padding-bottom: 50vh;
+        padding-bottom: 20vh;
     }
 
     .prose-dark a {

@@ -117,17 +117,15 @@ class GenerateDocScreenshots extends Command
             'getting-started' => [
                 ['id' => 'getting-started--dashboard', 'route' => '/events'],
             ],
-            'schedule-basics' => [
-                ['id' => 'schedule-basics--section-details', 'route' => '/simpsons/edit', 'section' => 'section-details'],
-                ['id' => 'schedule-basics--section-address', 'route' => $venueRole ? '/demo-moestavern/edit' : null, 'section' => 'section-address'],
-                ['id' => 'schedule-basics--section-contact-info', 'route' => '/simpsons/edit', 'section' => 'section-contact-info'],
-                ['id' => 'schedule-basics--section-settings', 'route' => '/simpsons/edit', 'section' => 'section-settings'],
-            ],
             'schedule-styling' => [
                 ['id' => 'schedule-styling--section-style', 'route' => '/simpsons/edit', 'section' => 'section-style'],
             ],
             'creating-schedules' => [
+                ['id' => 'creating-schedules--section-details', 'route' => '/simpsons/edit', 'section' => 'section-details'],
+                ['id' => 'creating-schedules--section-address', 'route' => $venueRole ? '/demo-moestavern/edit' : null, 'section' => 'section-address'],
+                ['id' => 'creating-schedules--section-contact-info', 'route' => '/simpsons/edit', 'section' => 'section-contact-info'],
                 ['id' => 'creating-schedules--section-subschedules', 'route' => '/simpsons/edit', 'section' => 'section-subschedules'],
+                ['id' => 'creating-schedules--section-settings', 'route' => '/simpsons/edit', 'section' => 'section-settings'],
                 ['id' => 'creating-schedules--section-auto-import', 'route' => '/simpsons/edit', 'section' => 'section-auto-import'],
                 ['id' => 'creating-schedules--section-integrations', 'route' => '/simpsons/edit', 'section' => 'section-integrations'],
             ],
@@ -174,9 +172,9 @@ class GenerateDocScreenshots extends Command
 
         // Remove address screenshot if no venue role
         if (! $venueRole) {
-            $pages['schedule-basics'] = array_values(array_filter(
-                $pages['schedule-basics'],
-                fn ($s) => $s['id'] !== 'schedule-basics--section-address'
+            $pages['creating-schedules'] = array_values(array_filter(
+                $pages['creating-schedules'],
+                fn ($s) => $s['id'] !== 'creating-schedules--section-address'
             ));
         }
 

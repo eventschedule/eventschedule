@@ -162,6 +162,7 @@ class HomeController extends Controller
             ->whereNotNull('starts_at')
             ->where('is_private', false)
             ->whereNull('event_password')
+            ->whereHas('roles', fn ($q) => $q->where('is_accepted', true))
             ->orderBy(request()->has('events') ? 'id' : 'starts_at', 'desc')
             ->get();
 
@@ -300,7 +301,7 @@ class HomeController extends Controller
                     'is_approved' => false,
                 ]);
                 $returnUrl = $event->getGuestUrl($pending['subdomain']);
-                session()->flash('scroll_to', 'pending-video-' . $video->id);
+                session()->flash('scroll_to', 'pending-video-'.$video->id);
             }
 
             session()->flash('message', __('messages.video_submitted'));
@@ -319,7 +320,7 @@ class HomeController extends Controller
                 'is_approved' => false,
             ]);
             $returnUrl = $event->getGuestUrl($pending['subdomain']);
-            session()->flash('scroll_to', 'pending-comment-' . $comment->id);
+            session()->flash('scroll_to', 'pending-comment-'.$comment->id);
 
             session()->flash('message', __('messages.comment_submitted'));
         } elseif ($pending['type'] === 'photo') {
@@ -329,15 +330,15 @@ class HomeController extends Controller
                 return $returnUrl;
             }
 
-            if (! \Illuminate\Support\Facades\Storage::exists('temp/' . $tempFilename)) {
+            if (! \Illuminate\Support\Facades\Storage::exists('temp/'.$tempFilename)) {
                 return $returnUrl;
             }
 
-            $filename = 'photo_' . \Illuminate\Support\Str::random(32) . '.' . $extension;
+            $filename = 'photo_'.\Illuminate\Support\Str::random(32).'.'.$extension;
             if (config('filesystems.default') == 'local') {
-                \Illuminate\Support\Facades\Storage::move('temp/' . $tempFilename, 'public/' . $filename);
+                \Illuminate\Support\Facades\Storage::move('temp/'.$tempFilename, 'public/'.$filename);
             } else {
-                \Illuminate\Support\Facades\Storage::move('temp/' . $tempFilename, $filename);
+                \Illuminate\Support\Facades\Storage::move('temp/'.$tempFilename, $filename);
             }
 
             $photo = EventPhoto::create([
@@ -349,7 +350,7 @@ class HomeController extends Controller
                 'is_approved' => false,
             ]);
             $returnUrl = $event->getGuestUrl($pending['subdomain']);
-            session()->flash('scroll_to', 'pending-photo-' . $photo->id);
+            session()->flash('scroll_to', 'pending-photo-'.$photo->id);
 
             session()->flash('message', __('messages.photo_submitted'));
         }

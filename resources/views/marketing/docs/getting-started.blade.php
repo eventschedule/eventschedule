@@ -177,7 +177,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Display Settings</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose your timezone, date format, and language preferences. See <a href="{{ route('marketing.docs.schedule_basics') }}#settings" class="text-cyan-400 hover:text-cyan-300">Schedule Basics</a> for all available settings.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose your timezone, date format, and language preferences. See <a href="{{ route('marketing.docs.creating_schedules') }}#settings" class="text-cyan-400 hover:text-cyan-300">Creating Schedules</a> for all available settings.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sub-schedules</h4>
@@ -202,7 +202,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How do I change my schedule URL?</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and update the URL/subdomain field. See <a href="{{ route('marketing.docs.schedule_basics') }}#settings" class="text-cyan-400 hover:text-cyan-300">Schedule Settings</a> for details. Note that changing your URL may break existing links.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and update the URL/subdomain field. See <a href="{{ route('marketing.docs.creating_schedules') }}#settings" class="text-cyan-400 hover:text-cyan-300">Schedule Settings</a> for details. Note that changing your URL may break existing links.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">What's the difference between schedule types?</h4>
@@ -210,7 +210,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Can I import events from my existing calendar?</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Yes! Event Schedule supports <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-integrations" class="text-cyan-400 hover:text-cyan-300">Google Calendar and CalDAV sync</a>. Connect your calendar in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> under Calendar Sync. You can also <a href="{{ route('marketing.docs.creating_events') }}#ai-import" class="text-cyan-400 hover:text-cyan-300">import events using AI</a> from text or images.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Yes! Event Schedule supports <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="text-cyan-400 hover:text-cyan-300">Google Calendar and CalDAV sync</a>. Connect your calendar in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> under Calendar Sync. You can also <a href="{{ route('marketing.docs.ai_import') }}" class="text-cyan-400 hover:text-cyan-300">import events using AI</a> from text or images.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Is Event Schedule free?</h4>
@@ -225,7 +225,7 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Now that your schedule is set up, here's what to do next:</p>
 
                             <ul class="doc-list">
-                                <li><a href="{{ route('marketing.docs.schedule_basics') }}" class="text-cyan-400 hover:text-cyan-300">Configure schedule basics</a> - Set up name, location, contact info, and settings</li>
+                                <li><a href="{{ route('marketing.docs.creating_schedules') }}" class="text-cyan-400 hover:text-cyan-300">Configure your schedule</a> - Set up details, settings, sub-schedules, and integrations</li>
                                 <li><a href="{{ route('marketing.docs.schedule_styling') }}" class="text-cyan-400 hover:text-cyan-300">Style your schedule</a> - Customize colors, fonts, and backgrounds</li>
                                 <li><a href="{{ route('marketing.docs.creating_events') }}" class="text-cyan-400 hover:text-cyan-300">Add your first events</a> - Learn how to create and import events</li>
                                 <li><a href="{{ route('marketing.docs.sharing') }}" class="text-cyan-400 hover:text-cyan-300">Share your schedule</a> - Embed on your website and share on social media</li>

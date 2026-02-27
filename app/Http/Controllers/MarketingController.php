@@ -700,14 +700,6 @@ class MarketingController extends Controller
      */
     public function docsCreatingSchedules()
     {
-        return view('marketing.docs.creating-schedules', $this->getDocNavigation('marketing.docs.creating_schedules'));
-    }
-
-    /**
-     * Schedule Basics documentation page
-     */
-    public function docsScheduleBasics()
-    {
         $customFieldsData = [];
 
         if (auth()->check()) {
@@ -727,9 +719,9 @@ class MarketingController extends Controller
             }
         }
 
-        return view('marketing.docs.schedule-basics', array_merge([
+        return view('marketing.docs.creating-schedules', array_merge([
             'customFieldsData' => $customFieldsData,
-        ], $this->getDocNavigation('marketing.docs.schedule_basics')));
+        ], $this->getDocNavigation('marketing.docs.creating_schedules')));
     }
 
     /**
@@ -835,24 +827,19 @@ class MarketingController extends Controller
     }
 
     /**
+     * AI Import documentation page
+     */
+    public function docsAiImport()
+    {
+        return view('marketing.docs.ai-import', $this->getDocNavigation('marketing.docs.ai_import'));
+    }
+
+    /**
      * Scan Agenda documentation page
      */
     public function docsScanAgenda()
     {
         return view('marketing.docs.scan-agenda', $this->getDocNavigation('marketing.docs.scan_agenda'));
-    }
-
-    /**
-     * Fan Content documentation page
-     */
-    public function docsFanContent()
-    {
-        return view('marketing.docs.fan-content', $this->getDocNavigation('marketing.docs.fan_content'));
-    }
-
-    public function docsPolls()
-    {
-        return view('marketing.docs.polls', $this->getDocNavigation('marketing.docs.polls'));
     }
 
     // ==========================================
@@ -889,6 +876,14 @@ class MarketingController extends Controller
     public function docsSaasCustomDomains()
     {
         return view('marketing.docs.saas.custom-domains');
+    }
+
+    /**
+     * SaaS Twilio integration documentation page
+     */
+    public function docsSaasTwilio()
+    {
+        return view('marketing.docs.saas.twilio');
     }
 
     /**
@@ -2006,10 +2001,10 @@ class MarketingController extends Controller
     {
         $pages = [
             ['route' => 'marketing.docs.getting_started', 'title' => 'Getting Started'],
-            ['route' => 'marketing.docs.schedule_basics', 'title' => 'Schedule Basics'],
+            ['route' => 'marketing.docs.creating_schedules', 'title' => 'Creating Schedules'],
             ['route' => 'marketing.docs.schedule_styling', 'title' => 'Schedule Styling'],
-            ['route' => 'marketing.docs.creating_schedules', 'title' => 'Advanced Schedule Settings'],
             ['route' => 'marketing.docs.creating_events', 'title' => 'Creating Events'],
+            ['route' => 'marketing.docs.ai_import', 'title' => 'AI Import'],
             ['route' => 'marketing.docs.sharing', 'title' => 'Sharing Your Schedule'],
             ['route' => 'marketing.docs.newsletters', 'title' => 'Newsletters'],
             ['route' => 'marketing.docs.tickets', 'title' => 'Selling Tickets'],
@@ -2018,8 +2013,6 @@ class MarketingController extends Controller
             ['route' => 'marketing.docs.availability', 'title' => 'Availability Calendar'],
             ['route' => 'marketing.docs.boost', 'title' => 'Boost'],
             ['route' => 'marketing.docs.scan_agenda', 'title' => 'Scan Agenda'],
-            ['route' => 'marketing.docs.fan_content', 'title' => 'Fan Content'],
-            ['route' => 'marketing.docs.polls', 'title' => 'Event Polls'],
         ];
 
         $currentIndex = null;

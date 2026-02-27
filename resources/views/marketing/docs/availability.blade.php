@@ -161,9 +161,8 @@
                         <section id="see-also" class="doc-section">
                             <h2 class="doc-heading">See Also</h2>
                             <ul class="doc-list">
-                                <li><a href="{{ route('marketing.docs.schedule_basics') }}" class="text-cyan-400 hover:text-cyan-300">Schedule Setup</a> - Configure your schedule type and settings</li>
+                                <li><a href="{{ route('marketing.docs.creating_schedules') }}" class="text-cyan-400 hover:text-cyan-300">Creating Schedules</a> - Configure your schedule type and settings</li>
                                 <li><a href="{{ route('marketing.docs.creating_events') }}" class="text-cyan-400 hover:text-cyan-300">Creating Events</a> - Add events to your schedule</li>
-                                <li><a href="{{ route('marketing.docs.creating_schedules') }}" class="text-cyan-400 hover:text-cyan-300">Advanced Schedule Settings</a> - Team members and collaboration features</li>
                             </ul>
                         </section>
 

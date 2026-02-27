@@ -19,32 +19,30 @@
         <div class="space-y-4 mb-8">
             @foreach ($segments as $segment)
             <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg p-6">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ $segment->name }}</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            {{ __('messages.type') }}: {{ $segment->type === 'all_followers' ? __('messages.all_followers') : ($segment->type === 'ticket_buyers' ? __('messages.ticket_buyers') : ($segment->type === 'manual' ? __('messages.manual') : __('messages.group'))) }}
-                        </p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            {{ __('messages.recipients') }}: {{ number_format($segment->recipient_count) }}
-                        </p>
-                        @if ($segment->type === 'manual')
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            {{ __('messages.manual_entries') }}: {{ $segment->segment_users_count }}
-                        </p>
-                        @endif
-                    </div>
-                    <div class="flex gap-3 items-start">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 min-w-0">{{ $segment->name }}</h3>
+                    <div class="shrink-0 space-x-3">
                         <a href="{{ route('newsletter.segment.edit', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
                             class="text-[#4E81FA] hover:text-blue-700 text-sm">{{ __('messages.edit') }}</a>
                         <form method="POST" action="{{ route('newsletter.segment.delete', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
-                            class="js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
+                            class="inline js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-red-500 hover:text-red-700 text-sm">{{ __('messages.delete') }}</button>
                         </form>
                     </div>
                 </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    {{ __('messages.type') }}: {{ $segment->type === 'all_followers' ? __('messages.all_followers') : ($segment->type === 'ticket_buyers' ? __('messages.ticket_buyers') : ($segment->type === 'manual' ? __('messages.manual') : __('messages.group'))) }}
+                </p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ __('messages.recipients') }}: {{ number_format($segment->recipient_count) }}
+                </p>
+                @if ($segment->type === 'manual')
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ __('messages.manual_entries') }}: {{ $segment->segment_users_count }}
+                </p>
+                @endif
             </div>
             @endforeach
         </div>

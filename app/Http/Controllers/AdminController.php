@@ -1270,6 +1270,7 @@ class AdminController extends Controller
 
         // Search filter
         if ($search = $request->input('search')) {
+            $search = str_replace(['%', '_'], ['\\%', '\\_'], $search);
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('subdomain', 'like', "%{$search}%")
@@ -1516,7 +1517,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to retry job', ['id' => $id, 'error' => $e->getMessage()]);
 
-            return redirect()->route('admin.queue')->with('error', 'Failed to retry job: '.$e->getMessage());
+            return redirect()->route('admin.queue')->with('error', 'Failed to retry job.');
         }
 
         return redirect()->route('admin.queue')->with('success', 'Job queued for retry.');
@@ -1536,7 +1537,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to delete job', ['id' => $id, 'error' => $e->getMessage()]);
 
-            return redirect()->route('admin.queue')->with('error', 'Failed to delete job: '.$e->getMessage());
+            return redirect()->route('admin.queue')->with('error', 'Failed to delete job.');
         }
 
         return redirect()->route('admin.queue')->with('success', 'Failed job deleted.');
@@ -1556,7 +1557,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to retry all jobs', ['error' => $e->getMessage()]);
 
-            return redirect()->route('admin.queue')->with('error', 'Failed to retry jobs: '.$e->getMessage());
+            return redirect()->route('admin.queue')->with('error', 'Failed to retry jobs.');
         }
 
         return redirect()->route('admin.queue')->with('success', 'All failed jobs queued for retry.');
@@ -1576,7 +1577,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to clear failed jobs', ['error' => $e->getMessage()]);
 
-            return redirect()->route('admin.queue')->with('error', 'Failed to clear failed jobs: '.$e->getMessage());
+            return redirect()->route('admin.queue')->with('error', 'Failed to clear failed jobs.');
         }
 
         return redirect()->route('admin.queue')->with('success', 'All failed jobs cleared.');
@@ -1596,7 +1597,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to flush pending jobs', ['error' => $e->getMessage()]);
 
-            return redirect()->route('admin.queue')->with('error', 'Failed to flush pending jobs: '.$e->getMessage());
+            return redirect()->route('admin.queue')->with('error', 'Failed to flush pending jobs.');
         }
 
         return redirect()->route('admin.queue')->with('success', 'All pending jobs flushed.');
@@ -1831,11 +1832,19 @@ class AdminController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        $request->validate([
+            'from' => 'nullable|date',
+            'to' => 'nullable|date',
+            'category' => 'nullable|string',
+            'search' => 'nullable|string|max:200',
+        ]);
+
         $query = AuditLog::with('user')->orderBy('created_at', 'desc');
 
         // Filter by action category
         if ($request->filled('category')) {
-            $query->where('action', 'like', $request->input('category').'.%');
+            $category = str_replace(['%', '_'], ['\\%', '\\_'], $request->input('category'));
+            $query->where('action', 'like', $category.'.%');
         }
 
         // Filter by specific user
@@ -1853,7 +1862,7 @@ class AdminController extends Controller
 
         // Search metadata/action
         if ($request->filled('search')) {
-            $search = $request->input('search');
+            $search = str_replace(['%', '_'], ['\\%', '\\_'], $request->input('search'));
             $query->where(function ($q) use ($search) {
                 $q->where('action', 'like', "%{$search}%")
                     ->orWhere('metadata', 'like', "%{$search}%")
@@ -2210,7 +2219,7 @@ class AdminController extends Controller
                     'error' => $e2->getMessage(),
                 ]);
 
-                return redirect()->back()->with('error', 'Refund failed: '.$e2->getMessage());
+                return redirect()->back()->with('error', 'Refund failed. Check logs for details.');
             }
         }
 
@@ -2283,6 +2292,7 @@ class AdminController extends Controller
         $query = Role::whereNotNull('custom_domain');
 
         if ($search = $request->input('search')) {
+            $search = str_replace(['%', '_'], ['\\%', '\\_'], $search);
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('subdomain', 'like', "%{$search}%")
@@ -2358,7 +2368,7 @@ class AdminController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return redirect()->back()->with('error', 'Re-provision failed: '.$e->getMessage());
+            return redirect()->back()->with('error', 'Re-provision failed. Check logs for details.');
         }
 
         AuditService::log(AuditService::ADMIN_UPDATE, auth()->id(), 'Role', $role->id, null, null, "Re-provisioned domain: {$role->custom_domain_host}");

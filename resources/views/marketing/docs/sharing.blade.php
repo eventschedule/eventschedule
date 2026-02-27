@@ -104,7 +104,7 @@
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Enterprise Feature: Custom Domain</div>
-                                <p>With an Enterprise plan, you can use your own domain (e.g., <code class="doc-inline-code">events.yourdomain.com</code>) for a more professional look. Configure this in <a href="{{ route('marketing.docs.schedule_basics') }}#settings" class="text-cyan-400 hover:text-cyan-300">Schedule Settings</a>.</p>
+                                <p>With an Enterprise plan, you can use your own domain (e.g., <code class="doc-inline-code">events.yourdomain.com</code>) for a more professional look. Configure this in <a href="{{ route('marketing.docs.creating_schedules') }}#settings-general" class="text-cyan-400 hover:text-cyan-300">Schedule Settings</a>.</p>
                             </div>
                         </section>
 

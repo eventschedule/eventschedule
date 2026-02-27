@@ -1534,7 +1534,7 @@ class Event extends Model
     public function getSchemaOffers()
     {
         $url = $this->getGuestUrl();
-        $validFrom = $this->getSchemaStartDate(); // Use event start date as validFrom
+        $validFrom = $this->created_at ? $this->created_at->toIso8601String() : $this->getSchemaStartDate();
 
         if ($this->tickets_enabled && $this->isPro() && ! $this->tickets->isEmpty()) {
             $offers = [];

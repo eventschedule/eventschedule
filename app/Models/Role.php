@@ -947,7 +947,7 @@ class Role extends Model implements MustVerifyEmail
     public function showBranding()
     {
         if (config('app.hosted')) {
-            return ! $this->isPro();
+            return $this->actualPlanTier() === 'free';
         } else {
             return ! $this->isWhiteLabeled();
         }

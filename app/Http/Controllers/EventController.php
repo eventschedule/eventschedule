@@ -38,6 +38,7 @@ use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
@@ -1987,7 +1988,8 @@ class EventController extends Controller
 
     public function downloadIcal($subdomain, $slug, $id, $date = null)
     {
-        $event = Event::find(UrlUtils::decodeId($id));
+        $event = Event::whereHas('roles', fn ($q) => $q->where('subdomain', $subdomain))
+            ->find(UrlUtils::decodeId($id));
 
         if (! $event) {
             abort(404);
@@ -2013,17 +2015,26 @@ class EventController extends Controller
         $endDate = $startAt->addSeconds($duration * 3600)->format('Ymd\THis\Z');
 
         $ical = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\n";
-        $ical .= 'SUMMARY:'.$title."\r\n";
-        $ical .= 'DESCRIPTION:'.$description."\r\n";
+        $ical .= 'SUMMARY:'.$this->escapeIcalText($title)."\r\n";
+        $ical .= 'DESCRIPTION:'.$this->escapeIcalText($description)."\r\n";
         $ical .= 'DTSTART:'.$startDate."\r\n";
         $ical .= 'DTEND:'.$endDate."\r\n";
-        $ical .= 'LOCATION:'.$location."\r\n";
+        $ical .= 'LOCATION:'.$this->escapeIcalText($location)."\r\n";
         $ical .= "END:VEVENT\r\nEND:VCALENDAR";
 
         return response($ical, 200, [
             'Content-Type' => 'text/calendar; charset=utf-8',
             'Content-Disposition' => 'inline; filename="event.ics"',
         ]);
+    }
+
+    private function escapeIcalText(string $text): string
+    {
+        return str_replace(
+            ['\\', ';', ',', "\r\n", "\r", "\n"],
+            ['\\\\', '\\;', '\\,', '\\n', '\\n', '\\n'],
+            $text
+        );
     }
 
     public function storePoll(EventPollStoreRequest $request, $subdomain, $eventHash)
@@ -2103,14 +2114,22 @@ class EventController extends Controller
 
         $poll = EventPoll::where('event_id', $event->id)->findOrFail(UrlUtils::decodeId($pollHash));
 
-        if ($poll->votes()->exists()) {
-            $poll->update(['question' => $request->input('question')]);
-        } else {
-            $poll->update([
-                'question' => $request->input('question'),
-                'options' => $request->input('options'),
-            ]);
-        }
+        DB::transaction(function () use ($poll, $request) {
+            $poll = EventPoll::lockForUpdate()->find($poll->id);
+
+            if (! $poll) {
+                return;
+            }
+
+            if ($poll->votes()->exists()) {
+                $poll->update(['question' => $request->input('question')]);
+            } else {
+                $poll->update([
+                    'question' => $request->input('question'),
+                    'options' => $request->input('options'),
+                ]);
+            }
+        });
 
         return redirect()->to(url()->previous().'#section-polls')->with('message', __('messages.poll_updated'));
     }
@@ -2231,21 +2250,36 @@ class EventController extends Controller
             ->findOrFail(UrlUtils::decodeId($pollHash));
 
         $optionIndex = $request->input('option_index');
-        if ($optionIndex >= count($poll->options)) {
-            return response()->json(['error' => __('messages.invalid_option')], 422);
-        }
 
-        try {
-            EventPollVote::create([
-                'event_poll_id' => $poll->id,
-                'user_id' => auth()->id(),
-                'option_index' => $optionIndex,
-            ]);
-        } catch (\Illuminate\Database\QueryException $e) {
-            if ($e->errorInfo[1] !== 1062) {
-                throw $e;
+        $result = DB::transaction(function () use ($poll, $optionIndex) {
+            $poll = EventPoll::lockForUpdate()->find($poll->id);
+
+            if (! $poll || ! $poll->is_active) {
+                return ['error' => __('messages.poll_closed'), 'status' => 422];
             }
-            // Duplicate vote - return current results
+
+            if ($optionIndex >= count($poll->options)) {
+                return ['error' => __('messages.invalid_option'), 'status' => 422];
+            }
+
+            try {
+                EventPollVote::create([
+                    'event_poll_id' => $poll->id,
+                    'user_id' => auth()->id(),
+                    'option_index' => $optionIndex,
+                ]);
+            } catch (\Illuminate\Database\QueryException $e) {
+                if ($e->errorInfo[1] !== 1062) {
+                    throw $e;
+                }
+                // Duplicate vote - return current results
+            }
+
+            return null;
+        });
+
+        if ($result) {
+            return response()->json(['error' => $result['error']], $result['status']);
         }
 
         $results = $poll->getResults();

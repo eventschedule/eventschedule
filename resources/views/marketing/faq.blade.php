@@ -713,7 +713,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. Enable "Accept Event Requests" in your schedule settings to let others submit events. You can optionally require approval before submitted events appear on your schedule. See <a href="{{ marketing_url('/docs/schedule-basics') }}" class="text-blue-600 hover:text-blue-700 underline">schedule basics</a> for setup details.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. Enable "Accept Event Requests" in your schedule settings to let others submit events. You can optionally require approval before submitted events appear on your schedule. See <a href="{{ marketing_url('/docs/creating-schedules#settings-requests') }}" class="text-blue-600 hover:text-blue-700 underline">creating schedules</a> for setup details.</p>
                         </div>
                     </div>
                 </div>

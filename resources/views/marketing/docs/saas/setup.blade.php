@@ -639,6 +639,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                             <h2 class="doc-heading">Related Documentation</h2>
                             <ul class="doc-list">
                                 <li><x-link href="/docs/saas/custom-domains">Custom Domains</x-link> - Allow your customers to use their own domain names with their schedules, including DigitalOcean App Platform setup</li>
+                                <li><x-link href="/docs/saas/twilio">Twilio Integration</x-link> - Set up phone number verification and WhatsApp messaging</li>
                             </ul>
                         </section>
 

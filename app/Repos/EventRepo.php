@@ -41,8 +41,8 @@ class EventRepo
         [$startOfDay, $endOfDay] = $this->getUtcDateRange($eventDate);
 
         return Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
-            ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id))
-            ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id))
+            ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id)->where('is_accepted', true))
+            ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id)->where('is_accepted', true))
             ->where(function ($query) use ($startOfDay, $endOfDay, $eventDate) {
                 $query->whereBetween('starts_at', [$startOfDay, $endOfDay])
                     ->orWhere(function ($query) use ($eventDate, $endOfDay) {
@@ -73,7 +73,7 @@ class EventRepo
             })
             ->where(function ($query) use ($subdomain) {
                 $query->whereHas('roles', function ($q) use ($subdomain) {
-                    $q->where('subdomain', $subdomain);
+                    $q->where('subdomain', $subdomain)->where('is_accepted', true);
                 });
             })
             ->orderBy('starts_at')
@@ -91,7 +91,7 @@ class EventRepo
             ->whereBetween('starts_at', [$startOfDay, $endOfDay])
             ->where(function ($query) use ($subdomain) {
                 $query->whereHas('roles', function ($q) use ($subdomain) {
-                    $q->where('subdomain', $subdomain);
+                    $q->where('subdomain', $subdomain)->where('is_accepted', true);
                 });
             })
             ->first();
@@ -856,16 +856,16 @@ class EventRepo
             // No date provided - find most recent/upcoming
             if (! $event && ! $date) {
                 $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
-                    ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id))
-                    ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id))
+                    ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id)->where('is_accepted', true))
+                    ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id)->where('is_accepted', true))
                     ->where('starts_at', '>=', now()->subDay())
                     ->orderBy('starts_at')
                     ->first();
 
                 if (! $event) {
                     $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
-                        ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id))
-                        ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id))
+                        ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id)->where('is_accepted', true))
+                        ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id)->where('is_accepted', true))
                         ->where('starts_at', '<', now())
                         ->orderBy('starts_at', 'desc')
                         ->first();
@@ -891,7 +891,7 @@ class EventRepo
                 ->where('starts_at', '>=', now()->subDay())
                 ->where(function ($query) use ($subdomain) {
                     $query->whereHas('roles', function ($q) use ($subdomain) {
-                        $q->where('subdomain', $subdomain);
+                        $q->where('subdomain', $subdomain)->where('is_accepted', true);
                     });
                 })
                 ->orderBy('starts_at', 'desc')
@@ -903,7 +903,7 @@ class EventRepo
                     ->where('starts_at', '<', now())
                     ->where(function ($query) use ($subdomain) {
                         $query->whereHas('roles', function ($q) use ($subdomain) {
-                            $q->where('subdomain', $subdomain);
+                            $q->where('subdomain', $subdomain)->where('is_accepted', true);
                         });
                     })
                     ->orderBy('starts_at', 'desc')
