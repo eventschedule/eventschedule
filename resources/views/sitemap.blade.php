@@ -550,7 +550,7 @@
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>{{ url('/docs/availability') }}</loc>
+        <loc>{{ url('/docs/managing-schedules') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>

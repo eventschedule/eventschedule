@@ -2003,16 +2003,17 @@ class MarketingController extends Controller
             ['route' => 'marketing.docs.getting_started', 'title' => 'Getting Started'],
             ['route' => 'marketing.docs.creating_schedules', 'title' => 'Creating Schedules'],
             ['route' => 'marketing.docs.schedule_styling', 'title' => 'Schedule Styling'],
+            ['route' => 'marketing.docs.managing_schedules', 'title' => 'Managing Schedules'],
             ['route' => 'marketing.docs.creating_events', 'title' => 'Creating Events'],
             ['route' => 'marketing.docs.ai_import', 'title' => 'AI Import'],
             ['route' => 'marketing.docs.sharing', 'title' => 'Sharing Your Schedule'],
             ['route' => 'marketing.docs.newsletters', 'title' => 'Newsletters'],
             ['route' => 'marketing.docs.tickets', 'title' => 'Selling Tickets'],
+            ['route' => 'marketing.docs.event_graphics', 'title' => 'Event Graphics'],
             ['route' => 'marketing.docs.analytics', 'title' => 'Analytics'],
             ['route' => 'marketing.docs.account_settings', 'title' => 'Account Settings'],
-            ['route' => 'marketing.docs.availability', 'title' => 'Availability Calendar'],
-            ['route' => 'marketing.docs.boost', 'title' => 'Boost'],
             ['route' => 'marketing.docs.scan_agenda', 'title' => 'Scan Agenda'],
+            ['route' => 'marketing.docs.boost', 'title' => 'Boost'],
         ];
 
         $currentIndex = null;

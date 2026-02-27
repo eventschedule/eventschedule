@@ -154,8 +154,13 @@ class GenerateDocScreenshots extends Command
             'account-settings' => [
                 ['id' => 'account-settings--settings', 'route' => '/settings'],
             ],
-            'availability' => [
-                ['id' => 'availability--calendar', 'route' => '/simpsons/availability', 'pause' => 2000],
+            'managing-schedules' => [
+                ['id' => 'managing-schedules--schedule-tab', 'route' => '/simpsons/schedule'],
+                ['id' => 'managing-schedules--videos-tab', 'route' => '/simpsons/videos'],
+                ['id' => 'managing-schedules--availability', 'route' => '/simpsons/availability', 'pause' => 2000],
+                ['id' => 'managing-schedules--requests-tab', 'route' => '/simpsons/requests'],
+                ['id' => 'managing-schedules--profile-tab', 'route' => '/simpsons/profile'],
+                ['id' => 'managing-schedules--team-tab', 'route' => '/simpsons/team'],
             ],
             'scan-agenda' => [
                 ['id' => 'scan-agenda--page', 'route' => '/simpsons/scan-agenda'],
@@ -164,9 +169,6 @@ class GenerateDocScreenshots extends Command
                 ['id' => 'boost--page', 'route' => $demoEvent
                     ? '/boost/create?event_id='.UrlUtils::encodeId($demoEvent->id).'&role_id='.$encodedRoleId
                     : '/boost'],
-            ],
-            'fan-content' => [
-                ['id' => 'fan-content--videos-tab', 'route' => '/simpsons/videos'],
             ],
         ];
 

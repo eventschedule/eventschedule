@@ -650,7 +650,7 @@ class TicketController extends Controller
 
         // Validate session_id parameter exists
         if (! request()->has('session_id')) {
-            return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+            abort(404);
         }
 
         $isDirect = request()->query('direct') === '1';
