@@ -811,11 +811,11 @@ class MarketingController extends Controller
     }
 
     /**
-     * Availability Calendar documentation page
+     * Managing Schedules documentation page
      */
-    public function docsAvailability()
+    public function docsManagingSchedules()
     {
-        return view('marketing.docs.availability', $this->getDocNavigation('marketing.docs.availability'));
+        return view('marketing.docs.managing-schedules', $this->getDocNavigation('marketing.docs.managing_schedules'));
     }
 
     /**

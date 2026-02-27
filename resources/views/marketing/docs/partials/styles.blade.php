@@ -32,6 +32,9 @@
         border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         scroll-margin-top: 5rem;
     }
+    .doc-section h3[id] {
+        scroll-margin-top: 5rem;
+    }
     .dark .doc-section {
         border-bottom-color: rgba(255, 255, 255, 0.1);
     }

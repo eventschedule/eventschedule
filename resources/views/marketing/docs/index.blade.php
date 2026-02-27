@@ -141,6 +141,18 @@
                     </div>
                 </a>
 
+                <a href="{{ route('marketing.docs.managing_schedules') }}" class="doc-card block">
+                    <div class="rounded-xl border border-sky-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-sky-900 dark:to-cyan-900 hover:border-sky-500/30 transition-colors">
+                        <div class="flex items-center gap-3 mb-3">
+                            <svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Managing Schedules</h3>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Manage events, team, availability, requests, and more.</p>
+                    </div>
+                </a>
+
                 <a href="{{ route('marketing.docs.creating_events') }}" class="doc-card block">
                     <div class="rounded-xl border border-sky-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-sky-900 dark:to-cyan-900 hover:border-sky-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
@@ -201,7 +213,7 @@
                     </div>
                 </a>
 
-                <a href="{{ marketing_url('/features/event-graphics') }}" class="doc-card block">
+                <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-card block">
                     <div class="rounded-xl border border-teal-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900 dark:to-cyan-900 hover:border-teal-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
                             <svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -238,18 +250,6 @@
                     </div>
                 </a>
 
-                <a href="{{ route('marketing.docs.availability') }}" class="doc-card block">
-                    <div class="rounded-xl border border-teal-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-teal-50 to-sky-50 dark:from-teal-900 dark:to-sky-900 hover:border-teal-500/30 transition-colors">
-                        <div class="flex items-center gap-3 mb-3">
-                            <svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <h3 class="font-semibold text-gray-900 dark:text-white">Availability Calendar</h3>
-                        </div>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Mark your available and unavailable dates.</p>
-                    </div>
-                </a>
-
                 <a href="{{ route('marketing.docs.scan_agenda') }}" class="doc-card block">
                     <div class="rounded-xl border border-cyan-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900 dark:to-teal-900 hover:border-cyan-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
@@ -272,18 +272,6 @@
                             <h3 class="font-semibold text-gray-900 dark:text-white">Boost</h3>
                         </div>
                         <p class="text-gray-500 dark:text-gray-400 text-sm">Promote events with automated Facebook and Instagram ads.</p>
-                    </div>
-                </a>
-
-                <a href="{{ route('marketing.docs.creating_events') }}#fan-content" class="doc-card block">
-                    <div class="rounded-xl border border-cyan-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900 dark:to-teal-900 hover:border-cyan-500/30 transition-colors">
-                        <div class="flex items-center gap-3 mb-3">
-                            <svg aria-hidden="true" class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                            </svg>
-                            <h3 class="font-semibold text-gray-900 dark:text-white">Fan Content</h3>
-                        </div>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Let fans submit videos and comments on your events.</p>
                     </div>
                 </a>
 

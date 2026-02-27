@@ -767,10 +767,10 @@
           </template>
         </button>
         </div>
-        </div>
 
         {{-- Sentinel for sticky mobile CTA visibility --}}
         <div id="mobile-cta-sentinel" class="h-px w-full" aria-hidden="true"></div>
+        </div>
 
         {{-- Mobile calendar bottom sheet (outside hidden sm:block container so it's visible on mobile) --}}
         @if (!($event->canSellTickets($date) || $event->registration_url))
