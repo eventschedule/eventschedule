@@ -242,7 +242,7 @@
                                     @if ($role->trial_ends_at && $role->onGenericTrial())
                                         {{ \Carbon\Carbon::parse($role->trial_ends_at)->format('M d, Y') }}
                                         <div class="text-xs text-yellow-600 dark:text-yellow-400">
-                                            {{ now()->diffInDays($role->trial_ends_at) }} days left
+                                            @lang('messages.n_days_left', ['count' => now()->diffInDays($role->trial_ends_at)])
                                         </div>
                                     @elseif ($role->plan_expires)
                                         {{ \Carbon\Carbon::parse($role->plan_expires)->format('M d, Y') }}

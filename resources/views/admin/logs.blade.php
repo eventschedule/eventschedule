@@ -294,7 +294,7 @@
                     </svg>
                     @lang('messages.download_log')
                 </a>
-                <form method="POST" action="{{ route('admin.logs.clear') }}" class="js-confirm-form" data-confirm="Clear the entire log file? This cannot be undone.">
+                <form method="POST" action="{{ route('admin.logs.clear') }}" class="js-confirm-form" data-confirm="{{ __('messages.confirm_clear_log') }}">
                     @csrf
                     <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md">
                         <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

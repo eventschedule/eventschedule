@@ -287,6 +287,8 @@ class GeminiUtils
                 $typeHint = 'YYYY-MM-DD format';
             } elseif ($fieldType === 'dropdown' && ! empty($fieldConfig['options'])) {
                 $typeHint = 'Choose from: '.($fieldConfig['options_en'] ?? $fieldConfig['options']);
+            } elseif ($fieldType === 'multiselect' && ! empty($fieldConfig['options'])) {
+                $typeHint = 'Choose one or more from: '.($fieldConfig['options_en'] ?? $fieldConfig['options']);
             }
 
             $hint = $fieldName;
@@ -555,6 +557,7 @@ class GeminiUtils
                                 }
                             }
 
+                            $matchedValues = array_unique($matchedValues);
                             $value = ! empty($matchedValues) ? implode(', ', $matchedValues) : null;
                         }
 

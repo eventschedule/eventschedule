@@ -153,6 +153,13 @@ class SendSubscriptionReminders extends Command
                 $amount = $this->getAmountForSubscription($subscription);
                 $renewalDate = $periodEnd->format('F j, Y');
 
+                if (! $amount) {
+                    $this->warn("Skipping {$role->subdomain}: unable to determine renewal amount for price ID {$subscription->stripe_price}.");
+                    $skipped++;
+
+                    continue;
+                }
+
                 $hasCard = $role->hasDefaultPaymentMethod();
 
                 Mail::to($role->user->email)->send(

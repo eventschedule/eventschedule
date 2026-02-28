@@ -89,7 +89,7 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead>
                         <tr>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Schedule</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.schedule')</th>
                             <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.total')</th>
                             @foreach ($categories as $key => $cat)
                             <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $cat['label'] }}</th>
@@ -151,7 +151,7 @@
                             if (!empty($record->request_terms) && is_null($record->request_terms_en)) $missingFields[] = 'request_terms_en';
                         @endphp
                         <tr>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Schedule</td>
+                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">@lang('messages.schedule')</td>
                             <td class="px-4 py-3 text-sm">
                                 <a href="{{ route('role.view_guest', ['subdomain' => $record->subdomain]) }}" class="text-[#4E81FA] hover:underline" target="_blank">{{ $record->name ?: $record->subdomain }}</a>
                                 <span class="text-gray-400">#{{ $record->id }}</span>

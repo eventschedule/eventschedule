@@ -82,7 +82,7 @@ trait AccountSetupTrait
         $browser->pause(500)
             ->click('button.settings-tab[data-tab="requests"]')
             ->waitFor('#accept_requests', 5)
-            ->check('accept_requests')
+            ->click('label[for="accept_requests"]')
             ->scrollIntoView('button[type="submit"]')
             ->click('button[type="submit"]')
             ->waitForLocation('/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 15)
@@ -101,7 +101,7 @@ trait AccountSetupTrait
             ->select('#selected_venue')
             ->click('a[data-section="section-tickets"]')
             ->waitFor('#tickets_enabled', 5)
-            ->check('tickets_enabled')
+            ->click('label[for="tickets_enabled"]')
             ->pause(1000); // Wait for Vue to render the ticket tabs
 
         // Use JavaScript to scroll the price input into view and ensure it's visible
@@ -132,8 +132,8 @@ trait AccountSetupTrait
         // Check if already enabled, if not enable it
         $isChecked = $browser->script("return document.getElementById('enable_api').checked;");
         if (! $isChecked[0]) {
-            // Use Dusk's check method instead of JavaScript for better reliability
-            $browser->check('enable_api');
+            // Click the label to toggle the switch (sr-only inputs can't be clicked directly)
+            $browser->click('label[for="enable_api"]');
             // Wait a moment for any UI updates
             $browser->pause(500);
         }

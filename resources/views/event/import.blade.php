@@ -688,8 +688,8 @@
                                         <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                                             <input type="checkbox"
                                                 value="{{ $option }}"
-                                                :checked="(preview.parsed[idx].custom_field_values.{{ $fieldKey }} || '').split(', ').map(s => s.trim()).includes('{{ $option }}')"
-                                                @change="toggleImportMultiselect(idx, '{{ $fieldKey }}', '{{ $option }}', $event)"
+                                                :checked="(preview.parsed[idx].custom_field_values.{{ $fieldKey }} || '').split(', ').map(s => s.trim()).includes(@js($option))"
+                                                @change="toggleImportMultiselect(idx, '{{ $fieldKey }}', @js($option), $event)"
                                                 :disabled="savedEvents[idx]"
                                                 class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded" />
                                             {{ $option }}

@@ -51,7 +51,7 @@ class ProfileTest extends DuskTestCase
             // -----------------------------------------------
             // 2. Toggle 24-hour time
             // -----------------------------------------------
-            $browser->check('use_24_hour_time')
+            $browser->click('label[for="use_24_hour_time"]')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
                 ->waitForLocation('/settings', 15);
