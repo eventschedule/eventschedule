@@ -128,9 +128,8 @@
         </div>
 
         <div>
-            <x-checkbox name="use_24_hour_time" label="{{ __('messages.use_24_hour_time_format') }}"
-                checked="{{ old('use_24_hour_time', $user->use_24_hour_time) }}"
-                data-custom-attribute="value" />
+            <x-toggle name="use_24_hour_time" label="{{ __('messages.use_24_hour_time_format') }}"
+                checked="{{ old('use_24_hour_time', $user->use_24_hour_time) }}" />
         </div>
 
         @if (isset($editorRoles) && $editorRoles->count() > 1)

@@ -65,7 +65,7 @@
         {{-- Import Method Tabs --}}
         <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden">
             <div class="border-b border-gray-200 dark:border-gray-700">
-                <nav class="flex -mb-px">
+                <nav class="flex -mb-px overflow-x-auto scrollbar-hide">
                     <button @click="tab = 'form'" :class="tab === 'form' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="px-6 py-3 border-b-2 font-medium text-sm transition-colors">
                         {{ __('messages.form_entry') }}
                     </button>

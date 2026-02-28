@@ -53,17 +53,19 @@ class NotifyFanContentChanges extends Command
                     continue;
                 }
 
-                // Skip if user has unsubscribed
-                if ($event->user->is_subscribed === false) {
-                    continue;
-                }
-
                 // Skip if event has no associated roles (no valid URL)
                 if ($event->roles->isEmpty()) {
                     continue;
                 }
 
-                $subdomain = $event->roles->first()->subdomain;
+                $role = $event->roles->first();
+                $subdomain = $role->subdomain;
+
+                // Check if event creator has opted in to fan content notifications
+                $editors = $role->getEditorsWantingNotification('new_fan_content');
+                if (! $editors->contains('id', $event->user->id)) {
+                    continue;
+                }
 
                 $event->user->notify(new NewFanContentNotification($event, $currentCount, $subdomain));
 

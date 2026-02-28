@@ -14,16 +14,13 @@ class NewRequestsNotification extends Notification
 
     protected $requestCount;
 
-    protected $ccEmails;
-
     /**
      * Create a new notification instance.
      */
-    public function __construct($role, $requestCount, $ccEmails)
+    public function __construct($role, $requestCount)
     {
         $this->role = $role;
         $this->requestCount = $requestCount;
-        $this->ccEmails = $ccEmails;
     }
 
     /**
@@ -47,7 +44,6 @@ class NewRequestsNotification extends Notification
 
         return (new MailMessage)
             ->subject($subject)
-            ->cc($this->ccEmails)
             ->view('emails.new_requests', [
                 'role' => $this->role,
                 'requestCount' => $this->requestCount,

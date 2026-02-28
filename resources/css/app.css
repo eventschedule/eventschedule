@@ -16,6 +16,14 @@
   display: none !important;
 }
 
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
 /* Flatpickr date picker overrides - reduce excessive padding */
 .flatpickr-months .flatpickr-month {
     overflow: visible;

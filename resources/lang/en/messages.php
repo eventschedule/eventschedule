@@ -1988,6 +1988,13 @@ return [
     'subscription_trial_ending_help' => 'If you have any questions, just reply to this email. We\'re happy to help!',
     'subscription_trial_ending_manage' => 'Manage Your Plan',
 
+    // Subscription trial ending email (no card on file)
+    'subscription_trial_ending_subject_no_card' => 'Action Required: Your Free Trial Ends Tomorrow',
+    'subscription_trial_ending_body_no_card' => 'Your free trial for the ":schedule" schedule (:plan plan) ends on :date. To continue on the :plan plan, please add a payment method before your trial ends.',
+    'subscription_trial_ending_continue_no_card' => 'Without a payment method on file, your schedule will be downgraded to the free plan when the trial ends.',
+    'subscription_trial_ending_cancel_no_card' => 'Add a payment method from your plan settings to keep your :plan features.',
+    'subscription_trial_ending_manage_no_card' => 'Add Payment Method',
+
     // Subscription annual renewal email
     'subscription_renewal_subject' => 'Your Annual Plan Renews Soon',
     'subscription_renewal_body' => 'Your annual :plan plan for the ":schedule" schedule will renew on :date. Your card on file will be charged :amount for the next year.',
@@ -1995,6 +2002,13 @@ return [
     'subscription_renewal_cancel' => 'If you\'d prefer not to renew, you can cancel from your plan settings before :date. You\'ll keep access to your :plan features until the end of your current billing period.',
     'subscription_renewal_help' => 'If you have any questions, just reply to this email. We\'re happy to help!',
     'subscription_renewal_manage' => 'Manage Your Plan',
+
+    // Subscription annual renewal email (no card on file)
+    'subscription_renewal_subject_no_card' => 'Action Required: Your Annual Plan Renews Soon',
+    'subscription_renewal_body_no_card' => 'Your annual :plan plan for the ":schedule" schedule is set to renew on :date. To continue on the :plan plan, please add a payment method before :date.',
+    'subscription_renewal_continue_no_card' => 'Without a payment method on file, your subscription cannot renew and your schedule will be downgraded to the free plan.',
+    'subscription_renewal_cancel_no_card' => 'Add a payment method from your plan settings to keep your :plan features.',
+    'subscription_renewal_manage_no_card' => 'Add Payment Method',
 
     // Admin amount mismatch
     'amount_mismatch_sales' => 'Amount Mismatch Sales',
@@ -2249,6 +2263,10 @@ return [
     'configure_email_settings' => 'Configure email settings',
     'notify_new_sale' => 'New ticket sale',
     'notify_new_sale_help' => 'Receive an email when a ticket is purchased for one of your events.',
+    'notify_new_request' => 'New event requests',
+    'notify_new_request_help' => 'Receive an email when new event requests are pending approval.',
+    'notify_new_fan_content' => 'New fan content',
+    'notify_new_fan_content_help' => 'Receive an email when fans submit new videos, comments, or photos for your events.',
     'new_sale' => 'New Sale',
     'new_sale_notification_subject' => 'New sale - :event',
     'new_sale_notification_greeting' => 'Hi :name',

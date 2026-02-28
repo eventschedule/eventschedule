@@ -21,18 +21,23 @@ class SubscriptionTrialEnding extends Mailable
 
     protected string $trialEndDate;
 
-    public function __construct(Role $role, string $amount, string $planLabel, string $trialEndDate)
+    protected bool $hasCard;
+
+    public function __construct(Role $role, string $amount, string $planLabel, string $trialEndDate, bool $hasCard = true)
     {
         $this->role = $role;
         $this->amount = $amount;
         $this->planLabel = $planLabel;
         $this->trialEndDate = $trialEndDate;
+        $this->hasCard = $hasCard;
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('messages.subscription_trial_ending_subject'),
+            subject: $this->hasCard
+                ? __('messages.subscription_trial_ending_subject')
+                : __('messages.subscription_trial_ending_subject_no_card'),
         );
     }
 
@@ -51,6 +56,7 @@ class SubscriptionTrialEnding extends Mailable
                 'planLabel' => $this->planLabel,
                 'trialEndDate' => $this->trialEndDate,
                 'portalUrl' => $portalUrl,
+                'hasCard' => $this->hasCard,
             ]
         );
     }

@@ -21,18 +21,23 @@ class SubscriptionRenewal extends Mailable
 
     protected string $renewalDate;
 
-    public function __construct(Role $role, string $amount, string $planLabel, string $renewalDate)
+    protected bool $hasCard;
+
+    public function __construct(Role $role, string $amount, string $planLabel, string $renewalDate, bool $hasCard = true)
     {
         $this->role = $role;
         $this->amount = $amount;
         $this->planLabel = $planLabel;
         $this->renewalDate = $renewalDate;
+        $this->hasCard = $hasCard;
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('messages.subscription_renewal_subject'),
+            subject: $this->hasCard
+                ? __('messages.subscription_renewal_subject')
+                : __('messages.subscription_renewal_subject_no_card'),
         );
     }
 
@@ -51,6 +56,7 @@ class SubscriptionRenewal extends Mailable
                 'planLabel' => $this->planLabel,
                 'renewalDate' => $this->renewalDate,
                 'portalUrl' => $portalUrl,
+                'hasCard' => $this->hasCard,
             ]
         );
     }

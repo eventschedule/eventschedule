@@ -24,16 +24,9 @@
         @method('patch')
 
         <div>
-            <div class="flex items-center">
-                <input type="checkbox" name="enable_api" value="1" id="enable_api" class="rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:ring-offset-gray-900" 
-                       {{ auth()->user()->api_key ? 'checked' : '' }}>
-                <label for="enable_api" class="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                    {{ __('Enable API Access') }}
-                </label>
-            </div>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {{ __('Disabling and re-enabling will generate a new API key.') }}
-            </p>
+            <x-toggle name="enable_api" label="{{ __('Enable API Access') }}"
+                checked="{{ auth()->user()->api_key ? true : false }}"
+                help="{{ __('Disabling and re-enabling will generate a new API key.') }}" />
         </div>
 
         @if(auth()->user()->api_key)

@@ -1988,6 +1988,13 @@ return [
     'subscription_trial_ending_help' => 'Dacă ai întrebări, pur și simplu răspunde la acest email. Suntem bucuroși să te ajutăm!',
     'subscription_trial_ending_manage' => 'Administrează Planul',
 
+    // Subscription trial ending email (no card on file)
+    'subscription_trial_ending_subject_no_card' => 'Action Required: Your Free Trial Ends Tomorrow',
+    'subscription_trial_ending_body_no_card' => 'Your free trial for the ":schedule" schedule (:plan plan) ends on :date. To continue on the :plan plan, please add a payment method before your trial ends.',
+    'subscription_trial_ending_continue_no_card' => 'Without a payment method on file, your schedule will be downgraded to the free plan when the trial ends.',
+    'subscription_trial_ending_cancel_no_card' => 'Add a payment method from your plan settings to keep your :plan features.',
+    'subscription_trial_ending_manage_no_card' => 'Add Payment Method',
+
     // Subscription annual renewal email
     'subscription_renewal_subject' => 'Planul Tău Anual Se Reînnoiește Curând',
     'subscription_renewal_body' => 'Planul anual :plan pentru programul ":schedule" se va reînnoi pe :date. Cardul salvat va fi taxat :amount pentru anul următor.',
@@ -1995,6 +2002,13 @@ return [
     'subscription_renewal_cancel' => 'Dacă preferi să nu reînnoiești, poți anula din setările planului înainte de :date. Vei păstra accesul la funcționalitățile :plan până la sfârșitul perioadei curente de facturare.',
     'subscription_renewal_help' => 'Dacă ai întrebări, pur și simplu răspunde la acest email. Suntem bucuroși să te ajutăm!',
     'subscription_renewal_manage' => 'Administrează Planul',
+
+    // Subscription annual renewal email (no card on file)
+    'subscription_renewal_subject_no_card' => 'Action Required: Your Annual Plan Renews Soon',
+    'subscription_renewal_body_no_card' => 'Your annual :plan plan for the ":schedule" schedule is set to renew on :date. To continue on the :plan plan, please add a payment method before :date.',
+    'subscription_renewal_continue_no_card' => 'Without a payment method on file, your subscription cannot renew and your schedule will be downgraded to the free plan.',
+    'subscription_renewal_cancel_no_card' => 'Add a payment method from your plan settings to keep your :plan features.',
+    'subscription_renewal_manage_no_card' => 'Add Payment Method',
 
     // Admin amount mismatch
     'amount_mismatch_sales' => 'Vânzări cu Diferență de Sumă',

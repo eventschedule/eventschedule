@@ -1198,10 +1198,10 @@
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                             @if ($event->exists)
                             <div id="event-url-display" class="text-sm text-gray-500 flex items-center gap-2">
-                                <x-link href="{{ $eventEditUrl }}" target="_blank">
+                                <x-link href="{{ $eventEditUrl }}" target="_blank" class="min-w-0 break-all">
                                     {{ \App\Utils\UrlUtils::clean($eventEditUrl) }}
                                 </x-link>
-                                <button type="button" id="copy-event-url-btn" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
+                                <button type="button" id="copy-event-url-btn" class="flex-shrink-0 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
                                     </svg>
@@ -2346,12 +2346,16 @@
                             </h2>
 
                             <div class="mb-6">
-                                <div class="flex items-center">
-                                    <input id="tickets_enabled" name="tickets_enabled" type="checkbox" v-model="event.tickets_enabled" :value="1"
-                                        class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
-                                        {{ ! $role->isPro() ? 'disabled' : '' }}>
-                                    <input type="hidden" name="tickets_enabled" :value="event.tickets_enabled ? 1 : 0" >
-                                    <label for="tickets_enabled" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                <div class="flex items-center gap-3">
+                                    <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                        <input type="hidden" name="tickets_enabled" :value="event.tickets_enabled ? 1 : 0">
+                                        <input id="tickets_enabled" name="tickets_enabled" type="checkbox" v-model="event.tickets_enabled" :value="1"
+                                            class="sr-only peer"
+                                            {{ ! $role->isPro() ? 'disabled' : '' }}>
+                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors{{ ! $role->isPro() ? ' opacity-50' : '' }}"></div>
+                                        <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                    </label>
+                                    <label for="tickets_enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                                         {{ __('messages.enable_tickets') }}
                                         @if (! $role->isPro() && config('app.hosted'))
                                         <div class="text-xs pt-1">
@@ -2368,10 +2372,14 @@
                             </div>
 
                             @if ($role->isPro() && $user->isMember($subdomain))
-                            <div class="flex items-center mt-3" v-show="event.tickets_enabled">
-                                <input id="save_default_tickets" name="save_default_tickets" type="checkbox"
-                                    class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                                <label for="save_default_tickets" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                            <div class="flex items-center gap-3 mt-3" v-show="event.tickets_enabled">
+                                <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                    <input id="save_default_tickets" name="save_default_tickets" type="checkbox"
+                                        class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
+                                    <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                </label>
+                                <label for="save_default_tickets" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                                     {{ __('messages.save_as_default') }}
                                 </label>
                             </div>
@@ -2388,9 +2396,9 @@
                             <!-- External Event Price (only visible when tickets are disabled) -->
                             <div class="mb-6" v-show="!event.tickets_enabled">
                                 <x-input-label :value="__('messages.price')" />
-                                <div class="mt-1 flex gap-3">
+                                <div class="mt-1 flex flex-col sm:flex-row gap-3">
                                     <select name="ticket_currency_code" v-model="event.ticket_currency_code" data-searchable
-                                        class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        class="w-full sm:w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                         @foreach ($currencies as $currency)
                                         @if ($loop->index == 2)
                                         <option disabled>──────</option>
@@ -2415,25 +2423,25 @@
 
                                 <!-- Ticket Section Tabs -->
                                 <div class="mt-6 mb-6 border-b border-gray-200 dark:border-gray-700">
-                                    <nav class="-mb-px flex space-x-2 sm:space-x-6">
+                                    <nav class="-mb-px flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide">
                                         <button type="button" @click="activeTicketTab = 'tickets'"
                                             :class="activeTicketTab === 'tickets' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            class="text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
                                             {{ __('messages.general') }}
                                         </button>
                                         <button type="button" @click="activeTicketTab = 'payment'"
                                             :class="activeTicketTab === 'payment' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            class="text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
                                             {{ __('messages.payment') }}
                                         </button>
                                         <button type="button" @click="activeTicketTab = 'options'"
                                             :class="activeTicketTab === 'options' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            class="text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
                                             {{ __('messages.options') }}
                                         </button>
                                         <button type="button" @click="activeTicketTab = 'promo_codes'"
                                             :class="activeTicketTab === 'promo_codes' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            class="text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
                                             {{ __('messages.promo_codes') }}
                                         </button>
                                     </nav>
@@ -2504,7 +2512,7 @@
 
                                     <div v-if="eventCustomFields && Object.keys(eventCustomFields).length > 0">
                                         <div v-for="(field, fieldKey) in eventCustomFields" :key="fieldKey" class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md">
-                                            <div class="grid grid-cols-2 gap-2">
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                 <div>
                                                     <x-input-label :value="__('messages.field_name') . ' *'" class="text-xs" />
                                                     <x-text-input type="text" v-model="field.name" class="mt-1 block w-full text-sm" v-bind:required="event.tickets_enabled" v-bind:class="{ 'border-red-500': formSubmitAttempted && !field.name }" />
@@ -2556,7 +2564,7 @@
                                     <div v-for="(ticket, index) in tickets" :key="index" 
                                         :class="{'mt-4 p-4 border border-gray-300 dark:border-gray-700 rounded-lg': tickets.length > 1, 'mt-4': tickets.length === 1}">
                                         <input type="hidden" v-bind:name="`tickets[${index}][id]`" v-model="ticket.id">
-                                        <div class="grid grid-cols-2 gap-4">
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <x-input-label :value="__('messages.price')" />
                                                 <x-text-input type="number" step="0.01" v-bind:name="`tickets[${index}][price]`" 
@@ -2582,17 +2590,11 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        <div class="mt-4">
-                                            <x-input-label :value="__('messages.description')" />
-                                            <textarea v-bind:name="`tickets[${index}][description]`" v-model="ticket.description" rows="4"
-                                                class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
-                                        </div>
-
                                         <!-- Ticket-level Custom Fields -->
                                         <div class="mt-4" v-if="ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0">
                                             <x-input-label :value="__('messages.custom_fields') . ' (' . __('messages.per_ticket') . ')'" />
                                             <div v-for="(field, fieldKey) in ticket.custom_fields" :key="fieldKey" class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md">
-                                                <div class="grid grid-cols-2 gap-2">
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                     <div>
                                                         <x-input-label :value="__('messages.field_name') . ' *'" class="text-xs" />
                                                         <x-text-input type="text" v-model="field.name" class="mt-1 block w-full text-sm" v-bind:required="event.tickets_enabled" v-bind:class="{ 'border-red-500': formSubmitAttempted && !field.name }" />
@@ -2632,6 +2634,12 @@
                                             </div>
                                         </div>
                                         <input type="hidden" v-bind:name="`tickets[${index}][custom_fields]`" :value="JSON.stringify(ticket.custom_fields || {})">
+
+                                        <div class="mt-4">
+                                            <x-input-label :value="__('messages.description')" />
+                                            <textarea v-bind:name="`tickets[${index}][description]`" v-model="ticket.description" rows="4"
+                                                class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                                        </div>
                                     </div>
 
                                     <!-- Total Tickets Mode Selection -->
@@ -2713,12 +2721,16 @@
 
                                 <div v-if="hasLimitedPaidTickets">
                                     <div class="mb-6">
-                                        <div class="flex items-center">
-                                            <input id="expire_unpaid_tickets_checkbox" name="expire_unpaid_tickets_checkbox" type="checkbox"
-                                                v-model="showExpireUnpaid"
-                                                class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
-                                                @change="toggleExpireUnpaid">
-                                            <label for="expire_unpaid_tickets_checkbox" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                        <div class="flex items-center gap-3">
+                                            <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                                <input id="expire_unpaid_tickets_checkbox" name="expire_unpaid_tickets_checkbox" type="checkbox"
+                                                    v-model="showExpireUnpaid"
+                                                    class="sr-only peer"
+                                                    @change="toggleExpireUnpaid">
+                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
+                                                <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                            </label>
+                                            <label for="expire_unpaid_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                                                 {{ __('messages.expire_unpaid_tickets') }}
                                             </label>
                                         </div>
@@ -2795,10 +2807,16 @@
                                                 <input type="hidden" v-bind:name="`promo_codes[${pcIndex}][expires_at]`" :value="promoCode.expires_at_date && promoCode.expires_at_time ? promoCode.expires_at_date + ' ' + promoCode.expires_at_time + ':00' : (promoCode.expires_at_date ? promoCode.expires_at_date + ' 23:59:00' : '')" />
                                             </div>
                                             <div class="flex items-end pb-1 gap-4">
-                                                <label class="flex items-center gap-2 cursor-pointer">
-                                                    <input type="checkbox" :checked="promoCode.is_active" @change="promoCode.is_active = $event.target.checked" class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.active') }}</span>
-                                                </label>
+                                                <div class="flex items-center gap-3">
+                                                    <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                                        <input type="checkbox" :checked="promoCode.is_active"
+                                                            @change="promoCode.is_active = $event.target.checked"
+                                                            class="sr-only peer">
+                                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
+                                                        <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                                    </label>
+                                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.active') }}</span>
+                                                </div>
                                                 <input type="hidden" v-bind:name="`promo_codes[${pcIndex}][is_active]`" :value="promoCode.is_active ? 1 : 0">
                                                 <span v-if="promoCode.times_used > 0" class="text-xs text-gray-500 dark:text-gray-400">
                                                     {{ __('messages.times_used') }}: @{{ promoCode.times_used }}
@@ -2827,13 +2845,13 @@
                                             <input type="hidden" v-bind:name="`promo_codes[${pcIndex}][ticket_ids]`" :value="JSON.stringify(promoCode.ticket_ids || [])">
                                         </div>
 
-                                        <div class="mt-3 flex items-center justify-between">
-                                            <div v-if="promoCode.code && promoLinkBaseUrl" class="flex items-center gap-1.5 min-w-0 flex-1 me-3">
+                                        <div class="mt-3 flex items-center justify-between gap-1">
+                                            <div v-if="promoCode.code && promoLinkBaseUrl" class="flex items-center gap-1.5 min-w-0 flex-1 me-1">
                                                 <a :href="promoLinkBaseUrl + '?promo=' + promoCode.code.trim().toUpperCase()"
                                                    target="_blank"
-                                                   class="text-xs text-gray-500 dark:text-gray-400 hover:text-[#4E81FA] dark:hover:text-[#4E81FA] truncate min-w-0 flex-1"
+                                                   class="text-xs text-gray-500 dark:text-gray-400 hover:text-[#4E81FA] dark:hover:text-[#4E81FA] min-w-0 flex-1 truncate"
                                                    :title="promoLinkBaseUrl + '?promo=' + promoCode.code.trim().toUpperCase()">@{{ (promoLinkBaseUrl + '?promo=' + promoCode.code.trim().toUpperCase()).replace(/^https?:\/\//, '') }}</a>
-                                                <button type="button" @click="copyPromoLink(promoCode)" class="flex-shrink-0 text-gray-400 hover:text-[#4E81FA] transition-colors" :title="promoCode._copied ? '{{ __('messages.copied') }}' : '{{ __('messages.copy_link') }}'">
+                                                <button type="button" @click="copyPromoLink(promoCode)" class="flex-shrink-0 p-0 text-gray-400 hover:text-[#4E81FA] transition-colors" :title="promoCode._copied ? '{{ __('messages.copied') }}' : '{{ __('messages.copy_link') }}'">
                                                     <svg v-if="!promoCode._copied" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9.75a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
                                                     </svg>
@@ -2885,12 +2903,16 @@
                             </h2>
 
                             <div class="mb-6">
-                                <div class="flex items-center">
-                                    <input id="is_private" name="is_private" type="checkbox" v-model="event.is_private" :value="1"
-                                        class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
-                                        {{ ! $role->isEnterprise() ? 'disabled' : '' }}>
-                                    <input type="hidden" name="is_private" :value="event.is_private ? 1 : 0">
-                                    <label for="is_private" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                <div class="flex items-center gap-3">
+                                    <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                        <input type="hidden" name="is_private" :value="event.is_private ? 1 : 0">
+                                        <input id="is_private" name="is_private" type="checkbox" v-model="event.is_private" :value="1"
+                                            class="sr-only peer"
+                                            {{ ! $role->isEnterprise() ? 'disabled' : '' }}>
+                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors{{ ! $role->isEnterprise() ? ' opacity-50' : '' }}"></div>
+                                        <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                    </label>
+                                    <label for="is_private" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                                         {{ __('messages.private_event') }}
                                         @if (! $role->isEnterprise() && config('app.hosted'))
                                         <div class="text-xs pt-1">
@@ -2904,7 +2926,7 @@
                                         @endif
                                     </label>
                                 </div>
-                                <p class="mt-1 ms-7 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.private_event_help') }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 ms-14">{{ __('messages.private_event_help') }}</p>
                             </div>
 
                             <div class="mb-6" v-show="event.is_private">

@@ -976,9 +976,8 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-checkbox name="use_24_hour_time" label="{{ __('messages.use_24_hour_time_format') }}"
-                                checked="{{ old('use_24_hour_time', $role->use_24_hour_time) }}"
-                                data-custom-attribute="value" />
+                            <x-toggle name="use_24_hour_time" label="{{ __('messages.use_24_hour_time_format') }}"
+                                checked="{{ old('use_24_hour_time', $role->use_24_hour_time) }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('use_24_hour_time')" />
                         </div>
                     </div>
@@ -1087,9 +1086,8 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-checkbox name="show_email" label="{{ __('messages.show_email_address') }}"
-                                checked="{{ old('show_email', $role->show_email) }}"
-                                data-custom-attribute="value" />
+                            <x-toggle name="show_email" label="{{ __('messages.show_email_address') }}"
+                                checked="{{ old('show_email', $role->show_email) }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('show_email')" />
                         </div>
 
@@ -1128,9 +1126,8 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-checkbox name="show_phone" label="{{ __('messages.show_phone_number') }}"
-                                checked="{{ old('show_phone', $role->show_phone) }}"
-                                data-custom-attribute="value" />
+                            <x-toggle name="show_phone" label="{{ __('messages.show_phone_number') }}"
+                                checked="{{ old('show_phone', $role->show_phone) }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('show_phone')" />
                         </div>
 
@@ -1188,17 +1185,17 @@
 
                     <!-- Sub-Tab Navigation -->
                     <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
-                        <nav class="-mb-px flex space-x-2 sm:space-x-6">
+                        <nav class="-mb-px flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide">
                             <button type="button" data-style-tab="branding" id="style-tab-branding"
-                                class="style-tab-button flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-[#4E81FA] text-[#4E81FA]">
+                                class="style-tab-button text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-[#4E81FA] text-[#4E81FA]">
                                 {{ __('messages.branding') }}
                             </button>
                             <button type="button" data-style-tab="background" id="style-tab-background"
-                                class="style-tab-button flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
+                                class="style-tab-button text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
                                 {{ __('messages.background') }}
                             </button>
                             <button type="button" data-style-tab="advanced" id="style-tab-advanced"
-                                class="style-tab-button flex-1 sm:flex-initial text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
+                                class="style-tab-button text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
                                 {{ __('messages.advanced') }}
                             </button>
                         </nav>
@@ -1687,10 +1684,10 @@
                                             @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
                                             <div class="mb-4" id="group-url-display-{{ is_object($group) ? $group->id : $i }}">
                                                 <p class="text-sm text-gray-500 flex items-center gap-2">
-                                                    <x-link href="{{ $role->getGuestUrl(true) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank">
+                                                    <x-link href="{{ $role->getGuestUrl(true) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank" class="min-w-0 break-all">
                                                         {{ \App\Utils\UrlUtils::clean($role->getGuestUrl(true)) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}
                                                     </x-link>
-                                                    <button type="button" data-action="copy-group-url" data-copy-url="{{ $role->getGuestUrl(true) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
+                                                    <button type="button" data-action="copy-group-url" data-copy-url="{{ $role->getGuestUrl(true) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" class="flex-shrink-0 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
                                                         </svg>
@@ -1767,22 +1764,22 @@
 
                         <!-- Tab Navigation -->
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
-                            <nav class="flex space-x-2 sm:space-x-6" aria-label="Tabs">
-                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="general">
+                            <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
+                                <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="general">
                                     {{ __('messages.general') }}
                                 </button>
-                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
+                                <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
                                     {{ __('messages.custom_fields') }}
                                 </button>
                                 @if ($role->isCurator() || ((config('app.hosted') || config('app.is_testing')) && $role->isVenue()))
-                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="requests">
+                                <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="requests">
                                     {{ __('messages.requests') }}
                                 </button>
                                 @endif
-                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="notifications">
+                                <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="notifications">
                                     {{ __('messages.notifications') }}
                                 </button>
-                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="advanced">
+                                <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="advanced">
                                     {{ __('messages.advanced') }}
                                 </button>
                             </nav>
@@ -1795,10 +1792,10 @@
                         <div class="mb-6" id="url-display">
                             <x-input-label :value="__('messages.schedule_url')" />
                             <p class="text-sm text-gray-500 flex items-center gap-2 mt-1">
-                                <x-link href="{{ $role->getGuestUrl(true) }}" target="_blank">
+                                <x-link href="{{ $role->getGuestUrl(true) }}" target="_blank" class="min-w-0 break-all">
                                     {{ \App\Utils\UrlUtils::clean($role->getGuestUrl(true)) }}
                                 </x-link>
-                                <button type="button" data-action="copy-role-url" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
+                                <button type="button" data-action="copy-role-url" class="flex-shrink-0 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
                                     </svg>
@@ -2057,27 +2054,24 @@
 
                         @if ((config('app.hosted') || config('app.is_testing')) && ($role->isVenue() || $role->isCurator()))
                         <div class="mb-6">
-                            <x-checkbox name="accept_requests"
+                            <x-toggle name="accept_requests"
                                 label="{{ __('messages.accept_requests') }}"
                                 checked="{{ old('accept_requests', $role->accept_requests) }}"
-                                data-custom-attribute="value" />
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.accept_requests_help') }}</p>
+                                help="{{ __('messages.accept_requests_help') }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('accept_requests')" />
                         </div>
                         <div class="mb-6" id="require_account_section">
-                            <x-checkbox name="require_account"
+                            <x-toggle name="require_account"
                                 label="{{ __('messages.require_account') }}"
                                 checked="{{ old('require_account', $role->exists ? $role->require_account : true) }}"
-                                data-custom-attribute="value" />
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.require_account_help') }}</p>
+                                help="{{ __('messages.require_account_help') }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('require_account')" />
                         </div>
                         <div class="mb-6" id="require_approval_section">
-                            <x-checkbox name="require_approval"
+                            <x-toggle name="require_approval"
                                 label="{{ __('messages.require_approval') }}"
                                 checked="{{ old('require_approval', $role->exists ? $role->require_approval : true) }}"
-                                data-custom-attribute="value" />
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.require_approval_help') }}</p>
+                                help="{{ __('messages.require_approval_help') }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('require_approval')" />
                         </div>
                         <div class="mb-6" id="approved_subdomains_section">
@@ -2130,18 +2124,24 @@
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.notification_settings_help') }}</p>
 
                         <div class="mb-6">
-                            <div class="flex items-center gap-3">
-                                <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                    <input type="hidden" name="notification_new_sale" value="0">
-                                    <input type="checkbox" id="notification_new_sale" name="notification_new_sale" value="1"
-                                        {{ old('notification_new_sale', $notificationSettings['new_sale'] ?? false) ? 'checked' : '' }}
-                                        class="sr-only peer">
-                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
-                                    <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                </label>
-                                <label for="notification_new_sale" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.notify_new_sale') }}</label>
-                            </div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 ms-14">{{ __('messages.notify_new_sale_help') }}</p>
+                            <x-toggle name="notification_new_sale"
+                                label="{{ __('messages.notify_new_sale') }}"
+                                checked="{{ old('notification_new_sale', $notificationSettings['new_sale'] ?? false) }}"
+                                help="{{ __('messages.notify_new_sale_help') }}" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-toggle name="notification_new_request"
+                                label="{{ __('messages.notify_new_request') }}"
+                                checked="{{ old('notification_new_request', $notificationSettings['new_request'] ?? false) }}"
+                                help="{{ __('messages.notify_new_request_help') }}" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-toggle name="notification_new_fan_content"
+                                label="{{ __('messages.notify_new_fan_content') }}"
+                                checked="{{ old('notification_new_fan_content', $notificationSettings['new_fan_content'] ?? false) }}"
+                                help="{{ __('messages.notify_new_fan_content_help') }}" />
                         </div>
 
                         </div>
@@ -2227,11 +2227,10 @@
                         @endif
 
                         <div class="mb-6">
-                            <x-checkbox name="direct_registration"
+                            <x-toggle name="direct_registration"
                                 label="{{ __('messages.direct_registration') }}"
                                 checked="{{ old('direct_registration', $role->direct_registration) }}"
-                                data-custom-attribute="value" />
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.direct_registration_help') }}</p>
+                                help="{{ __('messages.direct_registration_help') }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('direct_registration')" />
                         </div>
 
@@ -2363,7 +2362,7 @@
 
                         <!-- Tab Navigation -->
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
-                            <nav class="flex space-x-2 sm:space-x-6" aria-label="Tabs">
+                            <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                                 <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="google">
                                     Google Calendar
                                 </button>

@@ -1768,7 +1768,7 @@ class RoleController extends Controller
 
         $pivot = $role->users()->where('user_id', auth()->id())->first()?->pivot;
         $notificationSettings = array_merge(
-            ['new_sale' => false],
+            ['new_sale' => false, 'new_request' => false, 'new_fan_content' => false],
             json_decode($pivot?->notification_settings ?? '{}', true)
         );
 
@@ -2078,6 +2078,8 @@ class RoleController extends Controller
         // Save notification preferences for the current user
         $notificationSettings = [
             'new_sale' => (bool) $request->input('notification_new_sale'),
+            'new_request' => (bool) $request->input('notification_new_request'),
+            'new_fan_content' => (bool) $request->input('notification_new_fan_content'),
         ];
         $role->users()->updateExistingPivot(auth()->id(), [
             'notification_settings' => json_encode($notificationSettings),

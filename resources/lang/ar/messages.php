@@ -1953,6 +1953,36 @@ return [
     'subscription_payment_failed_warning' => 'إذا لم يتم حل مشكلة الدفع، سيتم إلغاء اشتراكك وتخفيض جدولك إلى الخطة المجانية.',
     'subscription_payment_failed_update' => 'تحديث طريقة الدفع',
 
+    // Subscription trial ending email
+    'subscription_trial_ending_subject' => 'Your Free Trial Ends Tomorrow',
+    'subscription_trial_ending_body' => 'Your free trial for the ":schedule" schedule (:plan plan) ends on :date. After your trial, your card on file will be charged :amount.',
+    'subscription_trial_ending_continue' => 'You don\'t need to do anything to continue. Your :plan subscription will start automatically when the trial ends.',
+    'subscription_trial_ending_cancel' => 'If you\'d rather not continue, simply cancel from your plan settings before the trial ends. You won\'t be charged.',
+    'subscription_trial_ending_help' => 'If you have any questions, just reply to this email. We\'re happy to help!',
+    'subscription_trial_ending_manage' => 'Manage Your Plan',
+
+    // Subscription trial ending email (no card on file)
+    'subscription_trial_ending_subject_no_card' => 'Action Required: Your Free Trial Ends Tomorrow',
+    'subscription_trial_ending_body_no_card' => 'Your free trial for the ":schedule" schedule (:plan plan) ends on :date. To continue on the :plan plan, please add a payment method before your trial ends.',
+    'subscription_trial_ending_continue_no_card' => 'Without a payment method on file, your schedule will be downgraded to the free plan when the trial ends.',
+    'subscription_trial_ending_cancel_no_card' => 'Add a payment method from your plan settings to keep your :plan features.',
+    'subscription_trial_ending_manage_no_card' => 'Add Payment Method',
+
+    // Subscription annual renewal email
+    'subscription_renewal_subject' => 'Your Annual Plan Renews Soon',
+    'subscription_renewal_body' => 'Your annual :plan plan for the ":schedule" schedule will renew on :date. Your card on file will be charged :amount for the next year.',
+    'subscription_renewal_continue' => 'No action is needed to keep your plan. Your subscription will renew automatically.',
+    'subscription_renewal_cancel' => 'If you\'d prefer not to renew, you can cancel from your plan settings before :date. You\'ll keep access to your :plan features until the end of your current billing period.',
+    'subscription_renewal_help' => 'If you have any questions, just reply to this email. We\'re happy to help!',
+    'subscription_renewal_manage' => 'Manage Your Plan',
+
+    // Subscription annual renewal email (no card on file)
+    'subscription_renewal_subject_no_card' => 'Action Required: Your Annual Plan Renews Soon',
+    'subscription_renewal_body_no_card' => 'Your annual :plan plan for the ":schedule" schedule is set to renew on :date. To continue on the :plan plan, please add a payment method before :date.',
+    'subscription_renewal_continue_no_card' => 'Without a payment method on file, your subscription cannot renew and your schedule will be downgraded to the free plan.',
+    'subscription_renewal_cancel_no_card' => 'Add a payment method from your plan settings to keep your :plan features.',
+    'subscription_renewal_manage_no_card' => 'Add Payment Method',
+
     // Admin amount mismatch
     'amount_mismatch_sales' => 'مبيعات عدم تطابق المبلغ',
     'amount_mismatch_boosts' => 'تعزيزات عدم تطابق المبلغ',

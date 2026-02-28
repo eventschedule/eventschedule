@@ -82,8 +82,10 @@ class SendSubscriptionReminders extends Command
                 $amount = $this->getAmountForSubscription($subscription);
                 $trialEndDate = Carbon::parse($subscription->trial_ends_at)->format('F j, Y');
 
+                $hasCard = $role->hasDefaultPaymentMethod();
+
                 Mail::to($role->user->email)->send(
-                    new SubscriptionTrialEnding($role, $amount, $planLabel, $trialEndDate)
+                    new SubscriptionTrialEnding($role, $amount, $planLabel, $trialEndDate, $hasCard)
                 );
 
                 $role->trial_reminder_sent_at = now();
@@ -151,8 +153,10 @@ class SendSubscriptionReminders extends Command
                 $amount = $this->getAmountForSubscription($subscription);
                 $renewalDate = $periodEnd->format('F j, Y');
 
+                $hasCard = $role->hasDefaultPaymentMethod();
+
                 Mail::to($role->user->email)->send(
-                    new SubscriptionRenewal($role, $amount, $planLabel, $renewalDate)
+                    new SubscriptionRenewal($role, $amount, $planLabel, $renewalDate, $hasCard)
                 );
 
                 $role->renewal_reminder_sent_at = now();

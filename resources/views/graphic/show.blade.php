@@ -1345,7 +1345,7 @@
 
                     <!-- Settings Tab Navigation -->
                     <div class="border-b border-gray-200 dark:border-gray-700 mb-4">
-                        <nav class="flex space-x-4" aria-label="Settings Tabs">
+                        <nav class="flex space-x-4 overflow-x-auto scrollbar-hide" aria-label="Settings Tabs">
                             <button type="button"
                                 @click="setSettingsTab('graphic')"
                                 :class="settingsTab === 'graphic' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
@@ -1536,11 +1536,8 @@
 
                             <div>
                                 <!-- Enable Toggle -->
-                                <div class="flex items-center gap-3 mb-4">
-                                    <label class="flex items-center cursor-pointer">
-                                        <input type="checkbox" id="email_enabled_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_scheduled_emails') }}</span>
-                                    </label>
+                                <div class="mb-4">
+                                    <x-toggle name="email_enabled_mobile" label="{{ __('messages.enable_scheduled_emails') }}" />
                                 </div>
 
                                 <!-- Schedule Row (shown/hidden based on checkbox) -->
@@ -1666,7 +1663,7 @@
                     <div class="p-4 bg-gray-50 dark:bg-gray-900/50">
                         <!-- Settings Tab Navigation -->
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-4">
-                            <nav class="flex space-x-4" aria-label="Settings Tabs">
+                            <nav class="flex space-x-4 overflow-x-auto scrollbar-hide" aria-label="Settings Tabs">
                                 <button type="button"
                                     @click="setSettingsTab('graphic')"
                                     :class="settingsTab === 'graphic' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
@@ -1857,11 +1854,8 @@
 
                                 <div>
                                     <!-- Enable Toggle -->
-                                    <div class="flex items-center gap-3 mb-4">
-                                        <label class="flex items-center cursor-pointer">
-                                            <input type="checkbox" id="email_enabled" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
-                                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.enable_scheduled_emails') }}</span>
-                                        </label>
+                                    <div class="mb-4">
+                                        <x-toggle name="email_enabled" label="{{ __('messages.enable_scheduled_emails') }}" />
                                     </div>
 
                                     <!-- Schedule Row (shown/hidden based on checkbox) -->
@@ -1963,7 +1957,7 @@
                         <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-end gap-2">
                             <button
                                 id="shareBtn"
-                                class="hidden inline-flex items-center justify-center w-[8.5rem] px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-md transition-colors"
+                                class="hidden inline-flex items-center justify-center flex-1 sm:flex-none sm:w-[8.5rem] px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-md transition-colors"
                             >
                                 <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
@@ -1972,7 +1966,7 @@
                             </button>
                             <button
                                 id="copyTextBtn"
-                                class="inline-flex items-center justify-center w-[8.5rem] px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors"
+                                class="inline-flex items-center justify-center flex-1 sm:flex-none sm:w-[8.5rem] px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors"
                             >
                                 <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
@@ -1999,7 +1993,7 @@
                         <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-end gap-2">
                             <button
                                 id="downloadBtn"
-                                class="inline-flex items-center justify-center w-[8.5rem] px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-md transition-colors"
+                                class="inline-flex items-center justify-center flex-1 sm:flex-none sm:w-[8.5rem] px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-md transition-colors"
                             >
                                 <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -2008,7 +2002,7 @@
                             </button>
                             <button
                                 id="copyImageBtn"
-                                class="inline-flex items-center justify-center w-[8.5rem] px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors"
+                                class="inline-flex items-center justify-center flex-1 sm:flex-none sm:w-[8.5rem] px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors"
                             >
                                 <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
