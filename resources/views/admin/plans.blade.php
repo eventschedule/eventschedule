@@ -3,8 +3,8 @@
     <div class="space-y-6">
         @include('admin.partials._navigation', ['active' => 'plans'])
 
-        {{-- Statistics Cards --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        {{-- Row 1: Plan Breakdown --}}
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {{-- Free Count --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div class="flex items-center">
@@ -55,20 +55,57 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            {{-- Active Subscriptions --}}
+        {{-- Row 2: Payment/Status Breakdown --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {{-- Stripe Paid --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-green-100 dark:bg-green-900 rounded-full">
                             <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                             </svg>
                         </div>
                     </div>
                     <div class="ms-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_subs')</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeSubscriptions) }}</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.stripe_paid')</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($stripePaidCount) }}</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Manual --}}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 bg-indigo-100 dark:bg-indigo-900 rounded-full">
+                            <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ms-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.manual')</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($manualPlanCount) }}</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- On Trial --}}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-full">
+                            <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ms-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.on_free_trial')</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($trialCount) }}</p>
                     </div>
                 </div>
             </div>
@@ -77,9 +114,9 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-full">
-                            <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <div class="p-3 bg-amber-100 dark:bg-amber-900 rounded-full">
+                            <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
                         </div>
                     </div>
@@ -115,11 +152,19 @@
                         <option value="trial" {{ request('status') === 'trial' ? 'selected' : '' }}>@lang('messages.trial')</option>
                     </select>
                 </div>
+                <div class="w-full sm:w-40">
+                    <select name="source" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">@lang('messages.all_sources')</option>
+                        <option value="stripe" {{ request('source') === 'stripe' ? 'selected' : '' }}>@lang('messages.stripe')</option>
+                        <option value="manual" {{ request('source') === 'manual' ? 'selected' : '' }}>@lang('messages.manual')</option>
+                        <option value="trial" {{ request('source') === 'trial' ? 'selected' : '' }}>@lang('messages.trial')</option>
+                    </select>
+                </div>
                 <div class="flex gap-2">
                     <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                         @lang('messages.filter')
                     </button>
-                    @if(request('search') || request('plan_type') || request('status'))
+                    @if(request('search') || request('plan_type') || request('status') || request('source'))
                         <a href="{{ route('admin.plans') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-gray-700 dark:text-gray-200 uppercase tracking-widest hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                             @lang('messages.clear')
                         </a>
@@ -151,6 +196,9 @@
                             </th>
                             <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 @lang('messages.status')
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                @lang('messages.source')
                             </th>
                             <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 @lang('messages.actions')
@@ -209,6 +257,23 @@
                                         {{ ucfirst(str_replace('_', ' ', $status)) }}
                                     </span>
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @if ($role->hasActiveSubscription())
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                            @lang('messages.stripe')
+                                        </span>
+                                    @elseif ($role->onGenericTrial())
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                                            @lang('messages.trial')
+                                        </span>
+                                    @elseif (($role->plan_type ?? 'free') !== 'free' && $role->plan_expires)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300">
+                                            @lang('messages.manual')
+                                        </span>
+                                    @else
+                                        <span class="text-sm text-gray-400 dark:text-gray-500">-</span>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
                                     <a href="{{ route('admin.plans.edit', ['role' => $role->encodeId()]) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
                                         @lang('messages.edit')
@@ -217,7 +282,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="8" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                                     @lang('messages.no_schedules_found')
                                 </td>
                             </tr>

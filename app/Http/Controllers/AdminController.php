@@ -1243,9 +1243,28 @@ class AdminController extends Controller
         $enterpriseCount = $planCounts['enterprise'] ?? 0;
 
         // Active Stripe subscriptions (excluding demo roles)
-        $activeSubscriptions = Role::whereHas('subscriptions', function ($query) {
+        $stripePaidCount = Role::whereHas('subscriptions', function ($query) {
             $query->where('stripe_status', 'active');
         })
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
+            ->count();
+
+        // Manually assigned paid plans (have plan_expires, not free, no active Stripe subscription)
+        $manualPlanCount = Role::where('plan_type', '!=', 'free')
+            ->whereNotNull('plan_expires')
+            ->where('plan_expires', '>=', now()->format('Y-m-d'))
+            ->whereDoesntHave('subscriptions', function ($query) {
+                $query->where('stripe_status', 'active');
+            })
+            ->whereNull('trial_ends_at')
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
+            ->count();
+
+        // Schedules currently on trial (excluding demo roles)
+        $trialCount = Role::whereNotNull('trial_ends_at')
+            ->where('trial_ends_at', '>', now())
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
             ->where('subdomain', 'not like', 'demo-%')
             ->count();
@@ -1266,7 +1285,7 @@ class AdminController extends Controller
             })
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
             ->where('subdomain', 'not like', 'demo-%')
-            ->with('user');
+            ->with(['user', 'subscriptions']);
 
         // Search filter
         if ($search = $request->input('search')) {
@@ -1305,6 +1324,26 @@ class AdminController extends Controller
             }
         }
 
+        // Source filter
+        if ($source = $request->input('source')) {
+            if ($source === 'stripe') {
+                $query->whereHas('subscriptions', function ($sq) {
+                    $sq->where('stripe_status', 'active');
+                });
+            } elseif ($source === 'manual') {
+                $query->where('plan_type', '!=', 'free')
+                    ->whereNotNull('plan_expires')
+                    ->where('plan_expires', '>=', now()->format('Y-m-d'))
+                    ->whereDoesntHave('subscriptions', function ($sq) {
+                        $sq->where('stripe_status', 'active');
+                    })
+                    ->whereNull('trial_ends_at');
+            } elseif ($source === 'trial') {
+                $query->whereNotNull('trial_ends_at')
+                    ->where('trial_ends_at', '>', now());
+            }
+        }
+
         $roles = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
 
         return view('admin.plans', compact(
@@ -1312,7 +1351,9 @@ class AdminController extends Controller
             'freeCount',
             'proCount',
             'enterpriseCount',
-            'activeSubscriptions',
+            'stripePaidCount',
+            'manualPlanCount',
+            'trialCount',
             'expiringSoon'
         ));
     }

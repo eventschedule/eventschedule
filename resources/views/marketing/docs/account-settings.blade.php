@@ -70,10 +70,14 @@
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
                         <a href="#profile" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Profile Information</a>
-                        <a href="#payments" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Payment Methods</a>
-                        <a href="#stripe" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Stripe</a>
-                        <a href="#invoice-ninja" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Invoice Ninja</a>
-                        <a href="#payment-url" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Payment URL</a>
+                        <div class="doc-nav-group">
+                            <a href="#payments" class="doc-nav-group-header doc-nav-link">Payment Methods <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
+                            <div class="doc-nav-group-items">
+                                <a href="#stripe" class="doc-nav-link">Stripe</a>
+                                <a href="#invoice-ninja" class="doc-nav-link">Invoice Ninja</a>
+                                <a href="#payment-url" class="doc-nav-link">Payment URL</a>
+                            </div>
+                        </div>
                         <a href="#api" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">API Settings</a>
                         <a href="#google" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Google Settings</a>
                         <a href="#app-update" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">App Update</a>

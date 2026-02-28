@@ -75,15 +75,23 @@
                         <a href="#contact-info" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Contact Info</a>
                         <a href="#style" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Style</a>
                         <a href="#subschedules" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Sub-schedules</a>
-                        <a href="#settings" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Settings</a>
-                        <a href="#settings-general" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">General</a>
-                        <a href="#settings-custom-fields" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Custom Fields</a>
-                        <a href="#settings-requests" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Requests</a>
-                        <a href="#settings-advanced" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Advanced</a>
+                        <div class="doc-nav-group">
+                            <a href="#settings" class="doc-nav-group-header doc-nav-link">Settings <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
+                            <div class="doc-nav-group-items">
+                                <a href="#settings-general" class="doc-nav-link">General</a>
+                                <a href="#settings-custom-fields" class="doc-nav-link">Custom Fields</a>
+                                <a href="#settings-requests" class="doc-nav-link">Requests</a>
+                                <a href="#settings-advanced" class="doc-nav-link">Advanced</a>
+                            </div>
+                        </div>
                         <a href="#auto-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Auto Import</a>
-                        <a href="#integrations" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Integrations</a>
-                        <a href="#integrations-google" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Google Calendar</a>
-                        <a href="#integrations-caldav" class="doc-nav-link block px-3 py-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">CalDAV</a>
+                        <div class="doc-nav-group">
+                            <a href="#integrations" class="doc-nav-group-header doc-nav-link">Integrations <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
+                            <div class="doc-nav-group-items">
+                                <a href="#integrations-google" class="doc-nav-link">Google Calendar</a>
+                                <a href="#integrations-caldav" class="doc-nav-link">CalDAV</a>
+                            </div>
+                        </div>
                         <a href="#email-settings" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Email Settings</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>

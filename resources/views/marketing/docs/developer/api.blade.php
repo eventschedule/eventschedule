@@ -76,20 +76,6 @@
     .api-search-clear.visible { display: block; }
     .api-search-shortcut { position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); font-size: 0.6875rem; color: #9ca3af; border: 1px solid rgba(0,0,0,0.15); border-radius: 0.25rem; padding: 0 0.375rem; line-height: 1.5; pointer-events: none; }
     .dark .api-search-shortcut { border-color: rgba(255,255,255,0.15); }
-    /* Accordion */
-    .api-nav-group-header { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0.375rem 0.5rem; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; background: none; border: none; cursor: pointer; margin-top: 0.75rem; }
-    .api-nav-group:first-child .api-nav-group-header { margin-top: 0; }
-    .api-nav-group-header:hover { color: #111827; }
-    .dark .api-nav-group-header { color: #9ca3af; }
-    .dark .api-nav-group-header:hover { color: white; }
-    .api-nav-chevron { width: 14px; height: 14px; transition: transform 0.2s; flex-shrink: 0; }
-    .api-nav-group.expanded .api-nav-chevron { transform: rotate(90deg); }
-    .api-nav-group-items { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
-    .api-nav-group.expanded .api-nav-group-items { max-height: 600px; }
-    .api-nav-group-items .doc-nav-link { display: flex; align-items: center; padding: 0.375rem 0.5rem; font-size: 0.8125rem; border-radius: 0.375rem; color: #6b7280; transition: color 0.15s, background 0.15s; }
-    .api-nav-group-items .doc-nav-link:hover { color: #111827; background: rgba(0,0,0,0.04); }
-    .dark .api-nav-group-items .doc-nav-link { color: #9ca3af; }
-    .dark .api-nav-group-items .doc-nav-link:hover { color: white; background: rgba(255,255,255,0.05); }
     /* Method dots */
     .api-method-dot { width: 6px; height: 6px; border-radius: 50%; margin-right: 0.5rem; flex-shrink: 0; display: inline-block; }
     .api-method-get { background: #3b82f6; }
@@ -167,25 +153,25 @@
                         <button class="api-search-clear" id="apiSearchClear">&times;</button>
                     </div>
                     <nav>
-                        <div class="api-nav-group expanded" data-group="getting-started">
-                            <button class="api-nav-group-header">Getting Started <svg class="api-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
-                            <div class="api-nav-group-items">
+                        <div class="doc-nav-group expanded" data-group="getting-started">
+                            <button class="doc-nav-group-header">Getting Started <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
+                            <div class="doc-nav-group-items">
                                 <a href="#authentication" class="doc-nav-link" data-search="authentication api key header x-api-key">Authentication</a>
                                 <a href="#rate-limits" class="doc-nav-link" data-search="rate limits throttle 429">Rate Limits</a>
                                 <a href="#response-format" class="doc-nav-link" data-search="response format json data meta error">Response Format</a>
                                 <a href="#pagination" class="doc-nav-link" data-search="pagination page per_page">Pagination</a>
                             </div>
                         </div>
-                        <div class="api-nav-group" data-group="auth">
-                            <button class="api-nav-group-header">Auth <svg class="api-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
-                            <div class="api-nav-group-items">
+                        <div class="doc-nav-group" data-group="auth">
+                            <button class="doc-nav-group-header">Auth <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
+                            <div class="doc-nav-group-items">
                                 <a href="#register" class="doc-nav-link" data-search="register post /api/register account create"><span class="api-method-dot api-method-post"></span>Register</a>
                                 <a href="#login" class="doc-nav-link" data-search="login post /api/login authenticate"><span class="api-method-dot api-method-post"></span>Login</a>
                             </div>
                         </div>
-                        <div class="api-nav-group" data-group="schedules">
-                            <button class="api-nav-group-header">Schedules <svg class="api-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
-                            <div class="api-nav-group-items">
+                        <div class="doc-nav-group" data-group="schedules">
+                            <button class="doc-nav-group-header">Schedules <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
+                            <div class="doc-nav-group-items">
                                 <a href="#list-schedules" class="doc-nav-link" data-search="list schedules get /api/schedules filter name type"><span class="api-method-dot api-method-get"></span>List Schedules</a>
                                 <a href="#show-schedule" class="doc-nav-link" data-search="show schedule get /api/schedules subdomain"><span class="api-method-dot api-method-get"></span>Show Schedule</a>
                                 <a href="#create-schedule" class="doc-nav-link" data-search="create schedule post /api/schedules venue talent curator"><span class="api-method-dot api-method-post"></span>Create Schedule</a>
@@ -193,18 +179,18 @@
                                 <a href="#delete-schedule" class="doc-nav-link" data-search="delete schedule /api/schedules"><span class="api-method-dot api-method-delete"></span>Delete Schedule</a>
                             </div>
                         </div>
-                        <div class="api-nav-group" data-group="sub-schedules">
-                            <button class="api-nav-group-header">Sub-Schedules <svg class="api-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
-                            <div class="api-nav-group-items">
+                        <div class="doc-nav-group" data-group="sub-schedules">
+                            <button class="doc-nav-group-header">Sub-Schedules <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
+                            <div class="doc-nav-group-items">
                                 <a href="#list-groups" class="doc-nav-link" data-search="list sub-schedules groups get /api/schedules/groups"><span class="api-method-dot api-method-get"></span>List Sub-Schedules</a>
                                 <a href="#create-group" class="doc-nav-link" data-search="create sub-schedule group post /api/schedules/groups"><span class="api-method-dot api-method-post"></span>Create Sub-Schedule</a>
                                 <a href="#update-group" class="doc-nav-link" data-search="update sub-schedule group put /api/schedules/groups"><span class="api-method-dot api-method-put"></span>Update Sub-Schedule</a>
                                 <a href="#delete-group" class="doc-nav-link" data-search="delete sub-schedule group /api/schedules/groups"><span class="api-method-dot api-method-delete"></span>Delete Sub-Schedule</a>
                             </div>
                         </div>
-                        <div class="api-nav-group" data-group="events">
-                            <button class="api-nav-group-header">Events <svg class="api-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
-                            <div class="api-nav-group-items">
+                        <div class="doc-nav-group" data-group="events">
+                            <button class="doc-nav-group-header">Events <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
+                            <div class="doc-nav-group-items">
                                 <a href="#list-events" class="doc-nav-link" data-search="list events get /api/events filter subdomain date"><span class="api-method-dot api-method-get"></span>List Events</a>
                                 <a href="#show-event" class="doc-nav-link" data-search="show event get /api/events detail"><span class="api-method-dot api-method-get"></span>Show Event</a>
                                 <a href="#create-event" class="doc-nav-link" data-search="create event post /api/events tickets agenda"><span class="api-method-dot api-method-post"></span>Create Event</a>
@@ -214,9 +200,9 @@
                                 <a href="#list-categories" class="doc-nav-link" data-search="list categories get /api/categories"><span class="api-method-dot api-method-get"></span>List Categories</a>
                             </div>
                         </div>
-                        <div class="api-nav-group" data-group="sales">
-                            <button class="api-nav-group-header">Sales <svg class="api-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
-                            <div class="api-nav-group-items">
+                        <div class="doc-nav-group" data-group="sales">
+                            <button class="doc-nav-group-header">Sales <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
+                            <div class="doc-nav-group-items">
                                 <a href="#list-sales" class="doc-nav-link" data-search="list sales get /api/sales filter status email"><span class="api-method-dot api-method-get"></span>List Sales</a>
                                 <a href="#show-sale" class="doc-nav-link" data-search="show sale get /api/sales detail"><span class="api-method-dot api-method-get"></span>Show Sale</a>
                                 <a href="#create-sale" class="doc-nav-link" data-search="create sale post /api/sales tickets"><span class="api-method-dot api-method-post"></span>Create Sale</a>
@@ -224,9 +210,9 @@
                                 <a href="#delete-sale" class="doc-nav-link" data-search="delete sale /api/sales"><span class="api-method-dot api-method-delete"></span>Delete Sale</a>
                             </div>
                         </div>
-                        <div class="api-nav-group" data-group="reference">
-                            <button class="api-nav-group-header">Reference <svg class="api-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
-                            <div class="api-nav-group-items">
+                        <div class="doc-nav-group" data-group="reference">
+                            <button class="doc-nav-group-header">Reference <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
+                            <div class="doc-nav-group-items">
                                 <a href="#error-handling" class="doc-nav-link" data-search="error handling status codes 401 403 404 422 429 500">Error Handling</a>
                                 <a href="#see-also" class="doc-nav-link" data-search="see also resources links openapi">See Also</a>
                             </div>
@@ -1293,18 +1279,11 @@
 
     <script {!! nonce_attr() !!}>
     (function() {
-        // Accordion toggle
-        document.querySelectorAll('.api-nav-group-header').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                this.closest('.api-nav-group').classList.toggle('expanded');
-            });
-        });
-
         // Search
         var searchInput = document.getElementById('apiSearch');
         var searchClear = document.getElementById('apiSearchClear');
         var searchShortcut = document.getElementById('apiSearchShortcut');
-        var navGroups = document.querySelectorAll('.api-nav-group');
+        var navGroups = document.querySelectorAll('.doc-nav-group');
 
         searchInput.addEventListener('input', function() {
             var query = this.value.toLowerCase().trim();
@@ -1326,7 +1305,7 @@
 
         searchInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                var visible = document.querySelectorAll('.api-nav-group-items .doc-nav-link:not([style*="display: none"])');
+                var visible = document.querySelectorAll('.doc-nav-group-items .doc-nav-link:not([style*="display: none"])');
                 if (visible.length === 1) { visible[0].click(); searchInput.value = ''; searchInput.dispatchEvent(new Event('input')); }
             }
             if (e.key === 'Escape') { searchInput.value = ''; searchInput.dispatchEvent(new Event('input')); searchInput.blur(); }

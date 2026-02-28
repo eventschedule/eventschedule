@@ -292,6 +292,21 @@
         color: #60a5fa;
     }
 
+    /* Accordion sidebar groups */
+    .doc-nav-group-header { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0.375rem 0.5rem; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; background: none; border: none; cursor: pointer; margin-top: 0.75rem; text-decoration: none; }
+    .doc-nav-group:first-child .doc-nav-group-header { margin-top: 0; }
+    .doc-nav-group-header:hover { color: #111827; }
+    .dark .doc-nav-group-header { color: #9ca3af; }
+    .dark .doc-nav-group-header:hover { color: white; }
+    .doc-nav-chevron { width: 14px; height: 14px; transition: transform 0.2s; flex-shrink: 0; }
+    .doc-nav-group.expanded .doc-nav-chevron { transform: rotate(90deg); }
+    .doc-nav-group-items { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
+    .doc-nav-group.expanded .doc-nav-group-items { max-height: 600px; }
+    .doc-nav-group-items .doc-nav-link { display: flex; align-items: center; padding: 0.375rem 0.5rem; font-size: 0.8125rem; border-radius: 0.375rem; color: #6b7280; transition: color 0.15s, background 0.15s; }
+    .doc-nav-group-items .doc-nav-link:hover { color: #111827; background: rgba(0,0,0,0.04); }
+    .dark .doc-nav-group-items .doc-nav-link { color: #9ca3af; }
+    .dark .doc-nav-group-items .doc-nav-link:hover { color: white; background: rgba(255,255,255,0.05); }
+
     .doc-nav-link.active {
         color: #111827;
         background: rgba(0, 0, 0, 0.05);

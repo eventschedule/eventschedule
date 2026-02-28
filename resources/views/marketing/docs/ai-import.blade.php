@@ -68,10 +68,14 @@
                 <aside class="lg:w-64 flex-shrink-0">
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
-                        <a href="#ai-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">AI Import</a>
-                        <a href="#text-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">From Text</a>
-                        <a href="#image-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">From Images/Flyers</a>
-                        <a href="#custom-prompts" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">Custom AI Prompts</a>
+                        <div class="doc-nav-group expanded">
+                            <a href="#ai-import" class="doc-nav-group-header doc-nav-link">AI Import <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
+                            <div class="doc-nav-group-items">
+                                <a href="#text-import" class="doc-nav-link">From Text</a>
+                                <a href="#image-import" class="doc-nav-link">From Images/Flyers</a>
+                                <a href="#custom-prompts" class="doc-nav-link">Custom AI Prompts</a>
+                            </div>
+                        </div>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
                 </aside>

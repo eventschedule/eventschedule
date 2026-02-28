@@ -68,15 +68,27 @@
                 <aside class="lg:w-64 flex-shrink-0">
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
-                        <a href="#general" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">General</a>
-                        <a href="#ticket-types" class="doc-nav-link block px-3 py-2 ps-6 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Ticket Types</a>
-                        <a href="#free-events" class="doc-nav-link block px-3 py-2 ps-6 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Free Events & RSVPs</a>
-                        <a href="#payment" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Payment</a>
-                        <a href="#invoiceninja-modes" class="doc-nav-link block px-3 py-2 ps-6 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Invoice Ninja Modes</a>
+                        <div class="doc-nav-group expanded">
+                            <a href="#general" class="doc-nav-group-header doc-nav-link">General <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
+                            <div class="doc-nav-group-items">
+                                <a href="#ticket-types" class="doc-nav-link">Ticket Types</a>
+                                <a href="#free-events" class="doc-nav-link">Free Events & RSVPs</a>
+                            </div>
+                        </div>
+                        <div class="doc-nav-group">
+                            <a href="#payment" class="doc-nav-group-header doc-nav-link">Payment <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
+                            <div class="doc-nav-group-items">
+                                <a href="#invoiceninja-modes" class="doc-nav-link">Invoice Ninja Modes</a>
+                            </div>
+                        </div>
                         <a href="#options" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Options</a>
                         <a href="#promo-codes" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Promo Codes</a>
-                        <a href="#managing-sales" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Managing Sales</a>
-                        <a href="#export" class="doc-nav-link block px-3 py-2 ps-6 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Exporting Sales Data</a>
+                        <div class="doc-nav-group">
+                            <a href="#managing-sales" class="doc-nav-group-header doc-nav-link">Managing Sales <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
+                            <div class="doc-nav-group-items">
+                                <a href="#export" class="doc-nav-link">Exporting Sales Data</a>
+                            </div>
+                        </div>
                         <a href="#check-in" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Check-in at the Door</a>
                         <a href="#financial" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Financial Information</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>

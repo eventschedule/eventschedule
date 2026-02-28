@@ -51,6 +51,22 @@
         window.scrollTo({ top: top, behavior: behavior || 'smooth' });
     }
 
+    // Accordion toggle for button headers (non-navigable, e.g. API docs)
+    document.querySelectorAll('button.doc-nav-group-header').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            this.closest('.doc-nav-group').classList.toggle('expanded');
+        });
+    });
+
+    // Chevron-only toggle for <a> headers (navigable, e.g. doc pages)
+    document.querySelectorAll('a.doc-nav-group-header .doc-nav-chevron').forEach(function(chevron) {
+        chevron.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.closest('.doc-nav-group').classList.toggle('expanded');
+        });
+    });
+
     // Smooth scroll for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
@@ -84,12 +100,12 @@
             }
         });
 
-        // Auto-expand accordion group for active nav link (API docs)
+        // Auto-expand accordion group for active nav link
         var activeNavLink = document.querySelector('.doc-nav-link.active');
         if (activeNavLink) {
-            var navGroup = activeNavLink.closest('.api-nav-group');
+            var navGroup = activeNavLink.closest('.doc-nav-group');
             if (navGroup) {
-                document.querySelectorAll('.api-nav-group.expanded').forEach(function(g) {
+                document.querySelectorAll('.doc-nav-group.expanded').forEach(function(g) {
                     if (g !== navGroup) g.classList.remove('expanded');
                 });
                 navGroup.classList.add('expanded');
@@ -104,8 +120,8 @@
             link.classList.remove('active');
             if (link.getAttribute('href') === window.location.hash) {
                 link.classList.add('active');
-                // Expand accordion group if applicable (API docs)
-                var navGroup = link.closest('.api-nav-group');
+                // Expand accordion group if applicable
+                var navGroup = link.closest('.doc-nav-group');
                 if (navGroup) navGroup.classList.add('expanded');
             }
         });
