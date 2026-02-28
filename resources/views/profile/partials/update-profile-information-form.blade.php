@@ -117,6 +117,7 @@
                 'pt' => 'portuguese',
                 'es' => 'spanish',
                 'et' => 'estonian',
+                'ro' => 'romanian',
                 'ru' => 'russian',
                 ] as $key => $value)
                 <option value="{{ $key }}" {{ $user->language_code == $key ? 'SELECTED' : '' }}>{{ __('messages.' . $value) }}

@@ -45,6 +45,10 @@ class GenerateSocialImages extends Command
         'features-boost' => '/features/boost',
         'features-private-events' => '/features/private-events',
         'features-event-graphics' => '/features/event-graphics',
+        'features-polls' => '/features/polls',
+        'features-white-label' => '/features/white-label',
+        'features-custom-css' => '/features/custom-css',
+        'features-custom-domain' => '/features/custom-domain',
 
         // Integration pages
         'google-calendar' => '/google-calendar',
@@ -109,6 +113,10 @@ class GenerateSocialImages extends Command
         'contact' => '/contact',
         'docs' => '/docs',
         'search' => '/search',
+        'privacy' => '/privacy',
+        'terms-of-service' => '/terms-of-service',
+        'self-hosting-terms-of-service' => '/self-hosting-terms-of-service',
+        'blog' => '/blog',
     ];
 
     public function handle(): int
@@ -233,7 +241,7 @@ class GenerateSocialImages extends Command
                 // Inject all screenshot overrides: disable animations, hide header/footer, center hero content
                 $browser->script("
                     var style = document.createElement('style');
-                    style.textContent = '*, *::before, *::after { animation: none !important; transition: none !important; } .animate-reveal { opacity: 1 !important; } header { display: none !important; } footer { display: none !important; } main > section:first-of-type { height: 630px !important; min-height: unset !important; padding: 0 !important; overflow: hidden !important; } main > section:first-of-type .flex.justify-center.gap-4 { display: none !important; } main > section:first-of-type .relative.z-10 > .mb-6:first-child { display: none !important; } main > section:first-of-type nav[aria-label=\"Breadcrumb\"] { display: none !important; } main > section:first-of-type > .relative.z-10 { position: absolute !important; top: 40% !important; left: 0 !important; right: 0 !important; transform: translateY(-50%) !important; padding: 0 !important; margin: 0 auto !important; } main > section:first-of-type .relative.z-10.text-center { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 2rem !important; } main > section:first-of-type .relative.z-10.text-center > * { margin-top: 0 !important; margin-bottom: 0 !important; }';
+                    style.textContent = '*, *::before, *::after { animation: none !important; transition: none !important; } .animate-reveal { opacity: 1 !important; } header { display: none !important; } footer { display: none !important; } main > section:first-of-type { height: 630px !important; min-height: unset !important; padding: 0 !important; overflow: hidden !important; } main > section:first-of-type .flex.justify-center.gap-4 { display: none !important; } main > section:first-of-type .relative.z-10 > .mb-6:first-child { display: none !important; } main > section:first-of-type nav[aria-label=\"Breadcrumb\"] { display: none !important; } main > section:first-of-type > .relative.z-10 { position: absolute !important; top: 40% !important; left: 0 !important; right: 0 !important; transform: translateY(-50%) !important; padding: 0 !important; margin: 0 auto !important; } main > section:first-of-type .relative.z-10.text-center { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 2rem !important; } main > section:first-of-type .relative.z-10.text-center > * { margin-top: 0 !important; margin-bottom: 0 !important; } .fixed.bottom-4.right-4.z-50 { display: none !important; }';
                     document.head.appendChild(style);
                 ");
 
@@ -278,7 +286,7 @@ class GenerateSocialImages extends Command
     {
         $artisan = base_path('artisan');
         $cmd = sprintf(
-            'IS_NEXUS=true APP_TESTING=true DEBUGBAR_ENABLED=false PHP_CLI_SERVER_WORKERS=4 php %s serve --port=%d --host=127.0.0.1 --no-reload 2>/dev/null',
+            'IS_NEXUS=true IS_HOSTED=false APP_TESTING=true DEBUGBAR_ENABLED=false PHP_CLI_SERVER_WORKERS=4 php %s serve --port=%d --host=127.0.0.1 --no-reload 2>/dev/null',
             escapeshellarg($artisan),
             $port
         );

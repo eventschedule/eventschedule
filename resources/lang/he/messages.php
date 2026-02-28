@@ -573,6 +573,7 @@ return [
     'portuguese' => 'פורטוגזית',
     'spanish' => 'ספרדית',
     'estonian' => 'אסטונית',
+    'romanian' => 'רומנית',
     'russian' => 'רוּסִי',
     'sun' => 'א',
     'mon' => 'ב',
@@ -598,6 +599,7 @@ return [
     'is_unlisted' => 'לא רשום',
     'create_your_first_schedule' => 'בחר את סוג לוח הזמנים המתאים ביותר לצרכים שלך',
     'event' => 'אירוע',
+    'export' => 'ייצוא',
     'status' => 'סטטוס',
     'unpaid' => 'לא שולם',
     'paid' => 'שולם',
@@ -2096,4 +2098,17 @@ return [
     'boost_not_configured' => 'Boost requires Meta Ads to be configured.',
     'boost_requires_name_and_date' => 'Please add an event name and start date before boosting.',
     'boost_past_event' => 'Boost is only available for upcoming events.',
+
+    // Notifications
+    'notifications' => 'Notifications',
+    'notification_settings_help' => 'Choose which email notifications you want to receive for this schedule.',
+    'notification_requires_email_settings' => 'Email notifications require email settings to be configured.',
+    'configure_email_settings' => 'Configure email settings',
+    'notify_new_sale' => 'New ticket sale',
+    'notify_new_sale_help' => 'Receive an email when a ticket is purchased for one of your events.',
+    'new_sale' => 'New Sale',
+    'new_sale_notification_subject' => 'New sale - :event',
+    'new_sale_notification_greeting' => 'Hi :name',
+    'buyer' => 'Buyer',
+    'view_sales' => 'View Sales',
 ];

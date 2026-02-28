@@ -1779,6 +1779,9 @@
                                     {{ __('messages.requests') }}
                                 </button>
                                 @endif
+                                <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="notifications">
+                                    {{ __('messages.notifications') }}
+                                </button>
                                 <button type="button" class="settings-tab flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="advanced">
                                     {{ __('messages.advanced') }}
                                 </button>
@@ -2111,6 +2114,38 @@
                         </div>
                         @endif
                         <!-- End Tab Content: Requests -->
+
+                        <!-- Tab Content: Notifications -->
+                        <div id="settings-tab-notifications" class="settings-tab-content hidden">
+
+                        @if (config('app.hosted') && ! $role->hasEmailSettings())
+                            <div class="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                                <p class="text-sm text-amber-800 dark:text-amber-200">
+                                    {{ __('messages.notification_requires_email_settings') }}
+                                    <a href="#section-email-settings" class="text-[#4E81FA] hover:underline font-medium">{{ __('messages.configure_email_settings') }}</a>
+                                </p>
+                            </div>
+                        @endif
+
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.notification_settings_help') }}</p>
+
+                        <div class="mb-6">
+                            <div class="flex items-center gap-3">
+                                <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                    <input type="hidden" name="notification_new_sale" value="0">
+                                    <input type="checkbox" id="notification_new_sale" name="notification_new_sale" value="1"
+                                        {{ old('notification_new_sale', $notificationSettings['new_sale'] ?? false) ? 'checked' : '' }}
+                                        class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
+                                    <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                </label>
+                                <label for="notification_new_sale" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.notify_new_sale') }}</label>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 ms-14">{{ __('messages.notify_new_sale_help') }}</p>
+                        </div>
+
+                        </div>
+                        <!-- End Tab Content: Notifications -->
 
                         <!-- Tab Content: Advanced -->
                         <div id="settings-tab-advanced" class="settings-tab-content hidden">

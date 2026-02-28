@@ -69,3 +69,14 @@ Schedule::call(function () {
         Artisan::call('app:send-subscription-reminders');
     }
 })->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
+    Artisan::call('app:notify-request-changes');
+    Artisan::call('app:notify-fan-content-changes');
+})->daily()->at('12:00')->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
+    if (config('app.hosted')) {
+        Artisan::call('app:generate-daily-blog-post');
+    }
+})->daily()->appendOutputTo(storage_path('logs/scheduler.log'));

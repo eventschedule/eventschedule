@@ -21,6 +21,7 @@ class HelpUtils
                 'settings-tab-general' => '/docs/creating-schedules#settings-general',
                 'settings-tab-custom-fields' => '/docs/creating-schedules#settings-custom-fields',
                 'settings-tab-requests' => '/docs/creating-schedules#settings-requests',
+                'settings-tab-notifications' => '/docs/creating-schedules#settings-notifications',
                 'settings-tab-advanced' => '/docs/creating-schedules#settings-advanced',
                 'integration-tab-google' => '/docs/creating-schedules#integrations-google',
                 'integration-tab-caldav' => '/docs/creating-schedules#integrations-caldav',

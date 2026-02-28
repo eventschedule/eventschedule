@@ -305,7 +305,7 @@ class Role extends Model implements MustVerifyEmail
     {
         return $this->belongsToMany(User::class)
             ->withTimestamps()
-            ->withPivot('level', 'dates_unavailable')
+            ->withPivot('level', 'dates_unavailable', 'notification_settings')
             ->orderBy('name');
     }
 
@@ -320,7 +320,7 @@ class Role extends Model implements MustVerifyEmail
     {
         return $this->belongsToMany(User::class)
             ->withTimestamps()
-            ->withPivot('level', 'dates_unavailable')
+            ->withPivot('level', 'dates_unavailable', 'notification_settings')
             ->where('level', '!=', 'follower')
             ->orderBy('name');
     }
@@ -332,6 +332,19 @@ class Role extends Model implements MustVerifyEmail
             ->withPivot('level')
             ->where('level', 'follower')
             ->orderBy('pivot_created_at', 'desc');
+    }
+
+    public function getEditorsWantingNotification(string $type): \Illuminate\Support\Collection
+    {
+        return $this->belongsToMany(User::class)
+            ->withPivot('level', 'notification_settings')
+            ->whereIn('level', ['owner', 'admin'])
+            ->get()
+            ->filter(function ($user) use ($type) {
+                $settings = json_decode($user->pivot->notification_settings ?? '{}', true);
+
+                return ! empty($settings[$type]);
+            });
     }
 
     public function venueEvents()

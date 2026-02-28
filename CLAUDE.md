@@ -28,6 +28,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Use `config('app.supported_languages')` for language lists** - Never hardcode language code arrays. Always reference the centralized list in `config/app.php`.
 - **Keep Help button mappings up-to-date** - When adding, removing, or moving doc pages, update the anchor map in `app/Utils/HelpUtils.php` so the admin panel Help button links to the correct docs for each section/tab
 - **Match docs structure to app layout** - Documentation sections and sub-sections should mirror the app's UI structure (sections, tabs, sidebar items) where it makes sense. This keeps the Help button deep links aligned and makes docs intuitive for users navigating between the app and docs.
+- **Keep `translateData` and `console.php` in sync** - Scheduled commands must be registered in both `AppController::translateData()` (hosted cron) and `routes/console.php` (selfhosted scheduler). When adding a new scheduled command, add it to both places with matching frequency.
 
 ## Terminology
 

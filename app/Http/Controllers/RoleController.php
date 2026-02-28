@@ -1766,6 +1766,12 @@ class RoleController extends Controller
             $availableCurators = auth()->user()->allCurators();
         }
 
+        $pivot = $role->users()->where('user_id', auth()->id())->first()?->pivot;
+        $notificationSettings = array_merge(
+            ['new_sale' => false],
+            json_decode($pivot?->notification_settings ?? '{}', true)
+        );
+
         $data = [
             'user' => auth()->user(),
             'role' => $role,
@@ -1776,6 +1782,7 @@ class RoleController extends Controller
             'fonts' => $fonts,
             'approvedSubdomainNames' => $approvedSubdomainNames,
             'availableCurators' => $availableCurators,
+            'notificationSettings' => $notificationSettings,
         ];
 
         return view('role/edit', $data);
@@ -2067,6 +2074,14 @@ class RoleController extends Controller
         }
 
         $role->save();
+
+        // Save notification preferences for the current user
+        $notificationSettings = [
+            'new_sale' => (bool) $request->input('notification_new_sale'),
+        ];
+        $role->users()->updateExistingPivot(auth()->id(), [
+            'notification_settings' => json_encode($notificationSettings),
+        ]);
 
         // Handle DigitalOcean custom domain provisioning
         $newCustomDomainHost = $role->custom_domain_host;

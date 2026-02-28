@@ -97,7 +97,7 @@
         $ogLocaleMap = [
             'en' => 'en_US', 'es' => 'es_ES', 'de' => 'de_DE',
             'fr' => 'fr_FR', 'it' => 'it_IT', 'pt' => 'pt_PT',
-            'he' => 'he_IL', 'nl' => 'nl_NL', 'ar' => 'ar_SA', 'et' => 'et_EE', 'ru' => 'ru_RU',
+            'he' => 'he_IL', 'nl' => 'nl_NL', 'ar' => 'ar_SA', 'et' => 'et_EE', 'ru' => 'ru_RU', 'ro' => 'ro_RO',
         ];
         $currentOgLocale = $ogLocaleMap[app()->getLocale()] ?? 'en_US';
     @endphp
@@ -210,6 +210,9 @@
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
         } elseif ($path === 'blog') {
             $breadcrumbs[] = ['name' => 'Blog', 'url' => url()->current()];
+        } elseif (in_array($path, ['stripe', 'google-calendar', 'caldav', 'invoiceninja'])) {
+            $breadcrumbs[] = ['name' => 'Integrations', 'url' => url('/features/integrations')];
+            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
         } else {
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
         }

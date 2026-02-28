@@ -174,6 +174,7 @@ return [
         'pt', // Portuguese
         'et', // Estonian
         'ru', // Russian
+        'ro', // Romanian
     ],
 
 ];

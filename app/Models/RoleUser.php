@@ -12,5 +12,6 @@ class RoleUser extends Pivot
         'user_id',
         'role_id',
         'level',
+        'notification_settings',
     ];
 }

@@ -66,10 +66,25 @@ class TicketController extends Controller
 
     public function sales()
     {
-        $user = auth()->user();
-        $filter = strtolower(request()->filter);
+        $filter = strtolower(request()->filter ?? '');
+        $query = $this->salesQuery($filter);
 
-        $query = Sale::with('event', 'saleTickets', 'promoCode')
+        $count = $query->count();
+        $sales = $query->orderBy('created_at', 'DESC')
+            ->paginate(50, ['*'], 'page');
+
+        if (request()->ajax()) {
+            return view('ticket.sales_table', compact('sales'));
+        } else {
+            return view('ticket.sales', compact('sales', 'count'));
+        }
+    }
+
+    private function salesQuery(?string $filter)
+    {
+        $user = auth()->user();
+
+        $query = Sale::with('event', 'saleTickets.ticket', 'promoCode')
             ->where('is_deleted', false)
             ->whereHas('event', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
@@ -87,15 +102,131 @@ class TicketController extends Controller
             });
         }
 
-        $count = $query->count();
-        $sales = $query->orderBy('created_at', 'DESC')
-            ->paginate(50, ['*'], 'page');
+        return $query;
+    }
 
-        if (request()->ajax()) {
-            return view('ticket.sales_table', compact('sales'));
-        } else {
-            return view('ticket.sales', compact('sales', 'count'));
+    public function exportSales()
+    {
+        $filter = strtolower(request()->filter ?? '');
+        $sales = $this->salesQuery($filter)->orderBy('created_at', 'DESC')->get();
+
+        // First pass: collect unique custom field names
+        $customFieldNames = [];
+        foreach ($sales as $sale) {
+            if ($sale->event->custom_fields && count($sale->event->custom_fields) > 0) {
+                $fallbackIdx = 1;
+                foreach ($sale->event->custom_fields as $fieldConfig) {
+                    $idx = $fieldConfig['index'] ?? $fallbackIdx;
+                    $fallbackIdx++;
+                    if ($idx >= 1 && $idx <= 10 && ! in_array($fieldConfig['name'], $customFieldNames)) {
+                        $customFieldNames[] = $fieldConfig['name'];
+                    }
+                }
+            }
+            foreach ($sale->saleTickets as $saleTicket) {
+                if ($saleTicket->ticket && $saleTicket->ticket->custom_fields && count($saleTicket->ticket->custom_fields) > 0) {
+                    $fallbackIdx = 1;
+                    foreach ($saleTicket->ticket->custom_fields as $fieldConfig) {
+                        $idx = $fieldConfig['index'] ?? $fallbackIdx;
+                        $fallbackIdx++;
+                        if ($idx >= 1 && $idx <= 10 && ! in_array($fieldConfig['name'], $customFieldNames)) {
+                            $customFieldNames[] = $fieldConfig['name'];
+                        }
+                    }
+                }
+            }
         }
+
+        $filename = 'sales-'.now()->format('Y-m-d').'.csv';
+
+        return response()->streamDownload(function () use ($sales, $customFieldNames) {
+            $handle = fopen('php://output', 'w');
+
+            // UTF-8 BOM for Excel compatibility
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            // Header row
+            $headers = ['Name', 'Email', 'Event', 'Event Date', 'Tickets', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Transaction Reference', 'Payment Method', 'Status', 'Date'];
+            $headers = array_merge($headers, $customFieldNames);
+            fputcsv($handle, $headers);
+
+            // Second pass: write data rows
+            foreach ($sales as $sale) {
+                $tickets = $sale->saleTickets->map(function ($st) {
+                    return ($st->ticket ? $st->ticket->type : '').' x'.$st->quantity;
+                })->implode(', ');
+
+                $row = [
+                    $sale->name,
+                    $sale->email,
+                    $sale->event->name,
+                    $sale->event_date,
+                    $tickets,
+                    $sale->quantity(),
+                    number_format($sale->payment_amount, 2, '.', ''),
+                    $sale->event->ticket_currency_code,
+                    $sale->promoCode ? $sale->promoCode->code : '',
+                    $sale->discount_amount ? number_format($sale->discount_amount, 2, '.', '') : '',
+                    $sale->transaction_reference,
+                    $sale->payment_method,
+                    $sale->status,
+                    $sale->created_at->format('Y-m-d H:i'),
+                ];
+
+                // Build custom field values
+                $customValues = array_fill(0, count($customFieldNames), '');
+
+                // Event-level custom fields
+                if ($sale->event->custom_fields && count($sale->event->custom_fields) > 0) {
+                    $fallbackIdx = 1;
+                    foreach ($sale->event->custom_fields as $fieldConfig) {
+                        $idx = $fieldConfig['index'] ?? $fallbackIdx;
+                        $fallbackIdx++;
+                        if ($idx >= 1 && $idx <= 10) {
+                            $value = $sale->{"custom_value{$idx}"};
+                            if ($value) {
+                                $colIndex = array_search($fieldConfig['name'], $customFieldNames);
+                                if ($colIndex !== false) {
+                                    $customValues[$colIndex] = $value;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Ticket-level custom fields
+                foreach ($sale->saleTickets as $saleTicket) {
+                    if (! $saleTicket->ticket || ! $saleTicket->ticket->custom_fields) {
+                        continue;
+                    }
+                    $fallbackIdx = 1;
+                    foreach ($saleTicket->ticket->custom_fields as $fieldConfig) {
+                        $idx = $fieldConfig['index'] ?? $fallbackIdx;
+                        $fallbackIdx++;
+                        if ($idx >= 1 && $idx <= 10) {
+                            $value = $saleTicket->{"custom_value{$idx}"};
+                            if ($value) {
+                                $colIndex = array_search($fieldConfig['name'], $customFieldNames);
+                                if ($colIndex !== false) {
+                                    if ($customValues[$colIndex] !== '') {
+                                        $customValues[$colIndex] .= '; '.$value;
+                                    } else {
+                                        $customValues[$colIndex] = $value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                $row = array_merge($row, $customValues);
+                fputcsv($handle, $row);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv',
+        ]);
     }
 
     public function checkout(TicketCheckoutRequest $request, $subdomain)
@@ -329,6 +460,7 @@ class TicketController extends Controller
 
         // Send email when sale is created
         $this->sendTicketPurchaseEmail($sale, $event);
+        $this->sendNewSaleNotification($sale, $event);
 
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'event_id:'.$event->id);
 
@@ -1058,6 +1190,32 @@ class TicketController extends Controller
         } catch (\Exception $e) {
             // Log error but don't fail the sale creation
             \Log::error('Failed to send ticket purchase email: '.$e->getMessage(), [
+                'sale_id' => $sale->id,
+                'event_id' => $event->id,
+            ]);
+        }
+    }
+
+    /**
+     * Send new sale notification to opted-in editors
+     */
+    private function sendNewSaleNotification(Sale $sale, Event $event): void
+    {
+        try {
+            if (! $event->relationLoaded('roles')) {
+                $event->load('roles');
+            }
+
+            $role = $event->venue ?: $event->roles->first();
+
+            if (! $role) {
+                return;
+            }
+
+            $emailService = new EmailService;
+            $emailService->sendNewSaleNotification($sale, $event, $role);
+        } catch (\Exception $e) {
+            \Log::error('Failed to send sale notification: '.$e->getMessage(), [
                 'sale_id' => $sale->id,
                 'event_id' => $event->id,
             ]);

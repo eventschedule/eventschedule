@@ -183,6 +183,7 @@ return [
     'portuguese' => 'Portuguese',
     'spanish' => 'Spanish',
     'estonian' => 'Estonian',
+    'romanian' => 'Romanian',
     'russian' => 'Russian',
     'sun' => 'Sun',
     'mon' => 'Mon',
@@ -439,6 +440,7 @@ return [
     'sold' => 'Sold',
     'sold_out' => 'Sold Out',
     'event' => 'Event',
+    'export' => 'Export',
     'status' => 'Status',
     'unpaid' => 'Unpaid',
     'paid' => 'Paid',
@@ -2239,4 +2241,17 @@ return [
     // Domains
     'search_domains' => 'Schedule name, subdomain, or domain...',
     'do_status' => 'DO Status',
+
+    // Notifications
+    'notifications' => 'Notifications',
+    'notification_settings_help' => 'Choose which email notifications you want to receive for this schedule.',
+    'notification_requires_email_settings' => 'Email notifications require email settings to be configured.',
+    'configure_email_settings' => 'Configure email settings',
+    'notify_new_sale' => 'New ticket sale',
+    'notify_new_sale_help' => 'Receive an email when a ticket is purchased for one of your events.',
+    'new_sale' => 'New Sale',
+    'new_sale_notification_subject' => 'New sale - :event',
+    'new_sale_notification_greeting' => 'Hi :name',
+    'buyer' => 'Buyer',
+    'view_sales' => 'View Sales',
 ];

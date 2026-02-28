@@ -2,15 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\BlogPostReview;
-use App\Models\BlogPost;
-use App\Utils\GeminiUtils;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 
 class AppController extends Controller
 {
@@ -120,8 +116,13 @@ class AppController extends Controller
         }
 
         try {
+            $startTime = microtime(true);
+            \Log::info('translateData started');
+
+            // === EVERY CALL (every minute) ===
+
+            // Process queued jobs (emails, etc.)
             try {
-                // Process queued jobs (emails, etc.)
                 \Artisan::call('queue:work', [
                     '--stop-when-empty' => true,
                     '--max-time' => 120,
@@ -148,27 +149,69 @@ class AppController extends Controller
                 \Log::warning('Queue processing failed: '.$e->getMessage());
             }
 
-            \Artisan::call('app:translate');
+            (new \App\Jobs\ProcessScheduledNewsletters)();
 
-            // Generate blog posts early (before slower operations) to avoid timeout issues
-            if (config('app.hosted')) {
-                \Artisan::call('app:generate-sub-audience-blog');
-                $this->generateDailyBlogPost();
+            // === EVERY 5 MINUTES ===
+            if (! Cache::has('td_5min')) {
+                Cache::put('td_5min', true, now()->addMinutes(5));
+
+                if (config('app.hosted')) {
+                    \Artisan::call('app:sync-domain-statuses');
+                }
             }
 
-            \Artisan::call('app:send-graphic-emails');
-            \Artisan::call('google:refresh-webhooks');
+            // === EVERY 15 MINUTES ===
+            if (! Cache::has('td_15min')) {
+                Cache::put('td_15min', true, now()->addMinutes(15));
 
-            // Send pending notification emails (once per day at 12:00 PM UTC)
+                \Artisan::call('caldav:sync');
+
+                if (\App\Services\MetaAdsService::isBoostConfigured()) {
+                    \Artisan::call('boost:sync');
+                }
+                \Artisan::call('boost:expire-pending');
+            }
+
+            // === HOURLY ===
+            if (! Cache::has('td_hourly')) {
+                Cache::put('td_hourly', true, now()->addHour());
+
+                \Artisan::call('app:release-tickets');
+                \Artisan::call('app:translate');
+                \Artisan::call('app:send-graphic-emails');
+
+                if (config('app.hosted')) {
+                    \Artisan::call('app:setup-demo');
+                }
+            }
+
+            // === DAILY ===
+            if (! Cache::has('td_daily')) {
+                Cache::put('td_daily', true, now()->endOfDay());
+
+                \Artisan::call('google:refresh-webhooks');
+                \Artisan::call('audit:prune');
+
+                if (config('app.hosted')) {
+                    \Artisan::call('app:generate-sub-audience-blog');
+                    \Artisan::call('app:generate-daily-blog-post');
+                    \Artisan::call('app:send-subscription-reminders');
+                }
+
+                if (! config('app.hosted')) {
+                    \Artisan::call('app:import-curator-events');
+                }
+            }
+
+            // === DAILY AT 12:00 PM UTC ===
             if (now()->hour >= 12 && ! Cache::has('notified_pending_today')) {
                 \Artisan::call('app:notify-request-changes');
                 \Artisan::call('app:notify-fan-content-changes');
                 Cache::put('notified_pending_today', true, now()->endOfDay());
             }
 
-            if (! config('app.hosted')) {
-                \Artisan::call('app:import-curator-events');
-            }
+            $duration = round(microtime(true) - $startTime, 2);
+            \Log::info("translateData finished in {$duration}s");
         } finally {
             $lock->release();
         }
@@ -213,63 +256,4 @@ class AppController extends Controller
         abort(404);
     }
 
-    private function generateDailyBlogPost()
-    {
-        // Check if we already created a post today
-        $todayStart = now()->startOfDay();
-        $existsToday = BlogPost::where('created_at', '>=', $todayStart)->exists();
-
-        if ($existsToday) {
-            return; // Already created today's post
-        }
-
-        // Only create posts ~70% of days for more natural posting pattern
-        if (rand(1, 100) > 70) {
-            return;
-        }
-
-        // Get recent titles for context
-        $recentTitles = BlogPost::orderBy('created_at', 'desc')
-            ->limit(15)
-            ->pluck('title')
-            ->toArray();
-
-        // Generate topic based on recent posts
-        $topic = GeminiUtils::generateBlogTopic($recentTitles);
-
-        if (! $topic) {
-            return; // API error, will retry next cron run
-        }
-
-        // Generate full blog post
-        $postData = GeminiUtils::generateBlogPost($topic);
-
-        if (! $postData) {
-            return;
-        }
-
-        // Create the blog post with randomized timestamp (up to 6 hours earlier)
-        $randomSeconds = rand(0, 6 * 60 * 60);
-        $blogPost = BlogPost::create([
-            'title' => $postData['title'],
-            'content' => $postData['content'],
-            'excerpt' => $postData['excerpt'] ?? null,
-            'tags' => $postData['tags'] ?? [],
-            'meta_title' => $postData['meta_title'] ?? null,
-            'meta_description' => $postData['meta_description'] ?? null,
-            'featured_image' => $postData['featured_image'] ?? null,
-            'is_published' => true,
-            'published_at' => now()->subSeconds($randomSeconds),
-        ]);
-
-        // Send email notification to admin for review
-        try {
-            $supportEmail = config('app.support_email');
-            if ($supportEmail) {
-                Mail::to($supportEmail)->send(new BlogPostReview($blogPost));
-            }
-        } catch (\Throwable $e) {
-            \Log::error('Failed to send blog post review email: '.$e->getMessage(), ['exception' => $e]);
-        }
-    }
 }

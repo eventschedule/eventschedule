@@ -755,6 +755,7 @@
 
         @endif
         {{-- Share button --}}
+        @if (request()->get('tickets') !== 'true')
         <button type="button"
                 data-share-title="{{ $event->translatedName() }}"
                 @click="
@@ -777,6 +778,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-600 dark:text-green-400" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
           </template>
         </button>
+        @endif
         </div>
 
         {{-- Sentinel for sticky mobile CTA visibility --}}
@@ -1613,6 +1615,7 @@
        class="fixed bottom-0 inset-x-0 z-40 sm:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 shadow-lg" style="font-family: sans-serif; padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
     <div class="flex items-center gap-3 {{ $role->isRtl() ? 'rtl' : '' }}">
       {{-- Mobile share button --}}
+      @if (request()->get('tickets') !== 'true')
       <button type="button"
               data-share-title="{{ $event->translatedName() }}"
               @click="
@@ -1634,6 +1637,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-600 dark:text-green-400" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
         </template>
       </button>
+      @endif
       {{-- Main CTA --}}
       @if ($event->canSellTickets($date) || ($event->registration_url && !$event->tickets_enabled))
         @if (request()->get('tickets') !== 'true')

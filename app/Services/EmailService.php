@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Jobs\SendQueuedEmail;
+use App\Mail\NewSaleNotification;
 use App\Mail\TicketPurchase;
+use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
 use Illuminate\Support\Facades\Config;
@@ -92,6 +94,48 @@ class EmailService
             ]);
 
             return self::ERROR_SEND_FAILED;
+        }
+    }
+
+    /**
+     * Send new sale notification to opted-in editors
+     */
+    public function sendNewSaleNotification(Sale $sale, Event $event, Role $role): void
+    {
+        if (is_demo_role($role)) {
+            return;
+        }
+
+        // Check if email sending is possible
+        if (config('app.hosted')) {
+            if (! $role->hasEmailSettings()) {
+                return;
+            }
+        } else {
+            $mailer = config('mail.default');
+            if (in_array($mailer, ['log', 'array'])) {
+                return;
+            }
+        }
+
+        $editors = $role->getEditorsWantingNotification('new_sale');
+
+        foreach ($editors as $editor) {
+            try {
+                $mailable = new NewSaleNotification($sale, $event, $role, $editor);
+
+                SendQueuedEmail::dispatch(
+                    $mailable,
+                    $editor->email,
+                    $role->id,
+                    $editor->language_code ?? app()->getLocale()
+                );
+            } catch (\Exception $e) {
+                Log::error('Failed to send sale notification: '.$e->getMessage(), [
+                    'sale_id' => $sale->id,
+                    'editor_id' => $editor->id,
+                ]);
+            }
         }
     }
 

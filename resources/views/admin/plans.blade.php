@@ -239,7 +239,16 @@
                                     {{ $role->plan_term ? ucfirst($role->plan_term) : '-' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $role->plan_expires ? \Carbon\Carbon::parse($role->plan_expires)->format('M d, Y') : '-' }}
+                                    @if ($role->trial_ends_at && $role->onGenericTrial())
+                                        {{ \Carbon\Carbon::parse($role->trial_ends_at)->format('M d, Y') }}
+                                        <div class="text-xs text-yellow-600 dark:text-yellow-400">
+                                            {{ now()->diffInDays($role->trial_ends_at) }} days left
+                                        </div>
+                                    @elseif ($role->plan_expires)
+                                        {{ \Carbon\Carbon::parse($role->plan_expires)->format('M d, Y') }}
+                                    @else
+                                        -
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @php

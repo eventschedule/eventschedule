@@ -33,10 +33,55 @@
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                             @foreach ($sales as $sale)
                             <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                @php
+                                    $hasEventCustomFields = $sale->event->custom_fields && count($sale->event->custom_fields) > 0;
+                                    $hasTicketCustomFields = false;
+                                    foreach ($sale->saleTickets as $st) {
+                                        if ($st->ticket && $st->ticket->custom_fields && count($st->ticket->custom_fields) > 0) {
+                                            $hasTicketCustomFields = true;
+                                            break;
+                                        }
+                                    }
+                                    $hasAnyCustomValues = false;
+                                    if ($hasEventCustomFields) {
+                                        $eventFallbackIdx = 1;
+                                        foreach ($sale->event->custom_fields as $fk => $fc) {
+                                            $idx = $fc['index'] ?? $eventFallbackIdx;
+                                            $eventFallbackIdx++;
+                                            if ($idx >= 1 && $idx <= 10 && $sale->{"custom_value{$idx}"}) {
+                                                $hasAnyCustomValues = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if (!$hasAnyCustomValues && $hasTicketCustomFields) {
+                                        foreach ($sale->saleTickets as $st) {
+                                            if (!$st->ticket || !$st->ticket->custom_fields) continue;
+                                            $ticketFallbackIdx = 1;
+                                            foreach ($st->ticket->custom_fields as $fk => $fc) {
+                                                $idx = $fc['index'] ?? $ticketFallbackIdx;
+                                                $ticketFallbackIdx++;
+                                                if ($idx >= 1 && $idx <= 10 && $st->{"custom_value{$idx}"}) {
+                                                    $hasAnyCustomValues = true;
+                                                    break 2;
+                                                }
+                                            }
+                                        }
+                                    }
+                                @endphp
                                 <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
-                                    <div class="flex flex-col">
-                                        <span class="font-semibold">{{ $sale->name }}</span>
-                                        <a href="mailto:{{ $sale->email }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline text-xs">{{ $sale->email }}</a>
+                                    <div class="flex items-center gap-2">
+                                        @if ($hasAnyCustomValues)
+                                            <button type="button" data-toggle-custom-fields class="flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                                                <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                </svg>
+                                            </button>
+                                        @endif
+                                        <div class="flex flex-col">
+                                            <span class="font-semibold">{{ $sale->name }}</span>
+                                            <a href="mailto:{{ $sale->email }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline text-xs">{{ $sale->email }}</a>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
@@ -182,6 +227,52 @@
                                     </div>
                                 </td>
                             </tr>
+                            @if ($hasAnyCustomValues)
+                            <tr class="custom-fields-row hidden bg-gray-50 dark:bg-gray-900/50" style="border-top: none;">
+                                <td colspan="6" class="px-6 py-3">
+                                    <div class="text-sm space-y-2">
+                                        {{-- Event-level Custom Fields --}}
+                                        @if ($hasEventCustomFields)
+                                            @php $eventFallbackIndex = 1; @endphp
+                                            @foreach ($sale->event->custom_fields as $fieldKey => $fieldConfig)
+                                                @php
+                                                    $index = $fieldConfig['index'] ?? $eventFallbackIndex;
+                                                    $eventFallbackIndex++;
+                                                @endphp
+                                                @if ($index >= 1 && $index <= 10 && $sale->{"custom_value{$index}"})
+                                                    <div class="flex gap-2 items-baseline">
+                                                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ $fieldConfig['name'] }}:</span>
+                                                        <span class="text-xs text-gray-900 dark:text-gray-100">{{ $sale->{"custom_value{$index}"} }}</span>
+                                                    </div>
+                                                @endif
+                                            @endforeach
+                                        @endif
+
+                                        {{-- Ticket-level Custom Fields --}}
+                                        @foreach ($sale->saleTickets as $saleTicket)
+                                            @if ($saleTicket->ticket && $saleTicket->ticket->custom_fields && count($saleTicket->ticket->custom_fields) > 0)
+                                                <div class="mt-1 pt-1 border-t border-gray-200 dark:border-gray-700">
+                                                    <p class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</p>
+                                                    @php $ticketFallbackIndex = 1; @endphp
+                                                    @foreach ($saleTicket->ticket->custom_fields as $fieldKey => $fieldConfig)
+                                                        @php
+                                                            $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
+                                                            $ticketFallbackIndex++;
+                                                        @endphp
+                                                        @if ($index >= 1 && $index <= 10 && $saleTicket->{"custom_value{$index}"})
+                                                            <div class="flex gap-2 items-baseline ms-3">
+                                                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ $fieldConfig['name'] }}:</span>
+                                                                <span class="text-xs text-gray-900 dark:text-gray-100">{{ $saleTicket->{"custom_value{$index}"} }}</span>
+                                                            </div>
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </td>
+                            </tr>
+                            @endif
                             @endforeach
                         </tbody>
                     </table>
@@ -278,9 +369,92 @@
                         </div>
                     </div>                </div>
 
+                <!-- Custom Fields -->
+                @php
+                    $mobileHasEventCustomFields = $sale->event->custom_fields && count($sale->event->custom_fields) > 0;
+                    $mobileHasTicketCustomFields = false;
+                    foreach ($sale->saleTickets as $st) {
+                        if ($st->ticket && $st->ticket->custom_fields && count($st->ticket->custom_fields) > 0) {
+                            $mobileHasTicketCustomFields = true;
+                            break;
+                        }
+                    }
+                    $mobileHasAnyCustomValues = false;
+                    if ($mobileHasEventCustomFields) {
+                        $mobileEventFallbackIdx = 1;
+                        foreach ($sale->event->custom_fields as $fk => $fc) {
+                            $idx = $fc['index'] ?? $mobileEventFallbackIdx;
+                            $mobileEventFallbackIdx++;
+                            if ($idx >= 1 && $idx <= 10 && $sale->{"custom_value{$idx}"}) {
+                                $mobileHasAnyCustomValues = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!$mobileHasAnyCustomValues && $mobileHasTicketCustomFields) {
+                        foreach ($sale->saleTickets as $st) {
+                            if (!$st->ticket || !$st->ticket->custom_fields) continue;
+                            $mobileTicketFallbackIdx = 1;
+                            foreach ($st->ticket->custom_fields as $fk => $fc) {
+                                $idx = $fc['index'] ?? $mobileTicketFallbackIdx;
+                                $mobileTicketFallbackIdx++;
+                                if ($idx >= 1 && $idx <= 10 && $st->{"custom_value{$idx}"}) {
+                                    $mobileHasAnyCustomValues = true;
+                                    break 2;
+                                }
+                            }
+                        }
+                    }
+                @endphp
+                @if ($mobileHasAnyCustomValues)
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                    <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.details') }}</div>
+                    <div class="space-y-1.5">
+                        {{-- Event-level Custom Fields --}}
+                        @if ($mobileHasEventCustomFields)
+                            @php $mobileEventFallbackIndex = 1; @endphp
+                            @foreach ($sale->event->custom_fields as $fieldKey => $fieldConfig)
+                                @php
+                                    $index = $fieldConfig['index'] ?? $mobileEventFallbackIndex;
+                                    $mobileEventFallbackIndex++;
+                                @endphp
+                                @if ($index >= 1 && $index <= 10 && $sale->{"custom_value{$index}"})
+                                    <div class="flex gap-2 items-baseline">
+                                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ $fieldConfig['name'] }}:</span>
+                                        <span class="text-sm text-gray-900 dark:text-gray-100">{{ $sale->{"custom_value{$index}"} }}</span>
+                                    </div>
+                                @endif
+                            @endforeach
+                        @endif
+
+                        {{-- Ticket-level Custom Fields --}}
+                        @foreach ($sale->saleTickets as $saleTicket)
+                            @if ($saleTicket->ticket && $saleTicket->ticket->custom_fields && count($saleTicket->ticket->custom_fields) > 0)
+                                <div class="mt-1.5 pt-1.5 border-t border-gray-200 dark:border-gray-600">
+                                    <p class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</p>
+                                    @php $mobileTicketFallbackIndex = 1; @endphp
+                                    @foreach ($saleTicket->ticket->custom_fields as $fieldKey => $fieldConfig)
+                                        @php
+                                            $index = $fieldConfig['index'] ?? $mobileTicketFallbackIndex;
+                                            $mobileTicketFallbackIndex++;
+                                        @endphp
+                                        @if ($index >= 1 && $index <= 10 && $saleTicket->{"custom_value{$index}"})
+                                            <div class="flex gap-2 items-baseline ms-3">
+                                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ $fieldConfig['name'] }}:</span>
+                                                <span class="text-sm text-gray-900 dark:text-gray-100">{{ $saleTicket->{"custom_value{$index}"} }}</span>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
                 <!-- Actions -->
                 <div class="pt-2">
-                    <div class="relative" x-data="{ 
+                    <div class="relative" x-data="{
                         open: false,
                         positionDropdown() {
                             if (!this.open) return;
@@ -378,25 +552,3 @@
     </div>
     @endif
 </div>
-
-<script {!! nonce_attr() !!}>
-document.addEventListener('DOMContentLoaded', function() {
-    // Event delegation for popup toggle buttons
-    $(document).on('click', '[data-popup-toggle]', function(e) {
-        var popupId = $(this).attr('data-popup-toggle');
-        onPopUpClick(popupId, e);
-
-        // Handle resend email action
-        var resendId = $(this).attr('data-resend-email');
-        if (resendId) {
-            resendEmail(resendId);
-        }
-
-        // Handle sale actions (mark_paid, refund, cancel, delete)
-        var saleAction = $(this).attr('data-sale-action');
-        if (saleAction) {
-            handleAction($(this).attr('data-sale-id'), saleAction);
-        }
-    });
-});
-</script>

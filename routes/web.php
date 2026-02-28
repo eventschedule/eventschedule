@@ -137,6 +137,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/following/bulk-unfollow', [RoleController::class, 'bulkUnfollow'])->name('following.bulk-unfollow');
     Route::get('/tickets', [TicketController::class, 'tickets'])->name('tickets');
     Route::get('/sales', [TicketController::class, 'sales'])->name('sales');
+    Route::get('/sales/export', [TicketController::class, 'exportSales'])->name('sales.export');
     Route::post('/sales/action/{sale_id}', [TicketController::class, 'handleAction'])->name('sales.action');
     Route::post('/sales/resend-email/{sale_id}', [TicketController::class, 'resendEmail'])->name('sales.resend_email');
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
