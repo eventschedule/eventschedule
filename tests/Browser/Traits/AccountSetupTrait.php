@@ -181,12 +181,10 @@ trait AccountSetupTrait
             ->pause(500)
             ->type('email', $email)
             ->type('password', $password)
-            ->pause(500);
-
-        // Use JavaScript to submit form (more reliable than press() in headless Chrome)
-        $browser->script("document.querySelector('form[method=\"POST\"]').requestSubmit()");
-
-        $browser->waitForLocation('/events', 15)
+            ->pause(500)
+            ->scrollIntoView('button[type="submit"]')
+            ->click('button[type="submit"]')
+            ->waitForLocation('/events', 15)
             ->assertPathIs('/events');
     }
 
