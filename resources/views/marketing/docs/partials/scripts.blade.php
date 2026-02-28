@@ -83,6 +83,18 @@
                 link.classList.add('active');
             }
         });
+
+        // Auto-expand accordion group for active nav link (API docs)
+        var activeNavLink = document.querySelector('.doc-nav-link.active');
+        if (activeNavLink) {
+            var navGroup = activeNavLink.closest('.api-nav-group');
+            if (navGroup) {
+                document.querySelectorAll('.api-nav-group.expanded').forEach(function(g) {
+                    if (g !== navGroup) g.classList.remove('expanded');
+                });
+                navGroup.classList.add('expanded');
+            }
+        }
     }
 
     // Scroll to hash on page load
@@ -92,6 +104,9 @@
             link.classList.remove('active');
             if (link.getAttribute('href') === window.location.hash) {
                 link.classList.add('active');
+                // Expand accordion group if applicable (API docs)
+                var navGroup = link.closest('.api-nav-group');
+                if (navGroup) navGroup.classList.add('expanded');
             }
         });
         const target = document.querySelector(window.location.hash);
