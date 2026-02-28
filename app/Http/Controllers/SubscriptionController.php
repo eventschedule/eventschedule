@@ -83,6 +83,7 @@ class SubscriptionController extends Controller
 
             try {
                 $subscription = $role->subscription('default');
+                $role->createOrGetStripeCustomer();
                 $role->updateDefaultPaymentMethod($request->payment_method);
                 $subscription->swap($priceId);
 
@@ -126,9 +127,6 @@ class SubscriptionController extends Controller
         }
 
         try {
-            // Set the payment method
-            $role->updateDefaultPaymentMethod($request->payment_method);
-
             // Calculate trial days
             $trialDays = 0;
 
@@ -186,6 +184,10 @@ class SubscriptionController extends Controller
 
         if (auth()->user()->id != $role->user_id) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        if (! $role->hasStripeId()) {
+            return redirect()->back()->with('error', __('messages.no_active_subscription'));
         }
 
         return $role->redirectToBillingPortal(

@@ -27,6 +27,7 @@ class ProfileUpdateRequest extends FormRequest
             'language_code' => ['required', 'string', 'in:'.implode(',', config('app.supported_languages', ['en']))],
             'profile_image' => ['image', 'max:2500'],
             'use_24_hour_time' => ['nullable', 'boolean'],
+            'default_role_id' => ['nullable', 'integer', 'exists:roles,id'],
         ];
     }
 }

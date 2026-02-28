@@ -834,6 +834,26 @@ class EventController extends Controller
             ->with('message', __('messages.all_requests_accepted', ['count' => $acceptedCount]));
     }
 
+    public function createDefault()
+    {
+        $user = auth()->user();
+
+        if ($user->default_role_id) {
+            $role = Role::where('id', $user->default_role_id)->where('is_deleted', false)->first();
+            if ($role && $user->isEditor($role->subdomain)) {
+                return redirect()->route('event.create', ['subdomain' => $role->subdomain]);
+            }
+        }
+
+        // Fall back to single editor role
+        $editorRoles = $user->editor()->get();
+        if ($editorRoles->count() === 1) {
+            return redirect()->route('event.create', ['subdomain' => $editorRoles->first()->subdomain]);
+        }
+
+        return redirect()->route('home')->with('error', __('messages.set_default_schedule'));
+    }
+
     public function store(EventCreateRequest $request, $subdomain)
     {
         if (! auth()->user()->isEditor($subdomain)) {
@@ -917,6 +937,8 @@ class EventController extends Controller
             $role->agenda_ai_prompt = $request->input('agenda_ai_prompt');
             $role->save();
         }
+
+        $role->autoCurateEvent($event);
 
         session()->forget('pending_request');
         session()->forget('pending_request_allow_guest');
@@ -1280,6 +1302,8 @@ class EventController extends Controller
             }
         }
 
+        $role->autoCurateEvent($event);
+
         // Get venue data to return to client for future imports
         $venueData = null;
         $venue = $event->venue;
@@ -1325,6 +1349,8 @@ class EventController extends Controller
                 $event->save();
             }
         }
+
+        $role->autoCurateEvent($event);
 
         // Clear the pending request session
         session()->forget('pending_request');

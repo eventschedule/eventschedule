@@ -103,14 +103,14 @@ class GoogleCalendarService
             }
 
             // Only refresh if token expires in the next 1 minute (reduced from 5 minutes)
-            $minutesUntilExpiry = $expiresAt->diffInMinutes(now());
+            $minutesUntilExpiry = now()->diffInMinutes($expiresAt);
 
             if ($minutesUntilExpiry > 1) {
                 // Token is still valid for more than 1 minute, no need to refresh
                 $this->setAccessToken([
                     'access_token' => $user->google_token,
                     'refresh_token' => $user->google_refresh_token,
-                    'expires_in' => $expiresAt->diffInSeconds(now()),
+                    'expires_in' => now()->diffInSeconds($expiresAt),
                 ]);
 
                 return true;
@@ -120,7 +120,7 @@ class GoogleCalendarService
         Log::info('Refreshing Google Calendar token', [
             'user_id' => $user->id,
             'expires_at' => $expiresAt,
-            'minutes_until_expiry' => $expiresAt ? $expiresAt->diffInMinutes(now()) : 'unknown',
+            'minutes_until_expiry' => $expiresAt ? now()->diffInMinutes($expiresAt) : 'unknown',
         ]);
 
         $refreshToken = $user->google_refresh_token;
@@ -201,7 +201,7 @@ class GoogleCalendarService
             $googleEvent->setStart($startDateTime);
 
             $endDateTime = new EventDateTime;
-            $endTime = $event->getStartDateTime()->copy()->addHours($event->duration ?: 2);
+            $endTime = $event->getStartDateTime()->copy()->addHours($event->duration ?? 2);
             $endDateTime->setDateTime($endTime->toRfc3339String());
             $endDateTime->setTimeZone($role->timezone ?? 'UTC');
             $googleEvent->setEnd($endDateTime);
@@ -269,7 +269,7 @@ class GoogleCalendarService
             $googleEvent->setStart($startDateTime);
 
             $endDateTime = new EventDateTime;
-            $endTime = $event->getStartDateTime()->copy()->addHours($event->duration ?: 2);
+            $endTime = $event->getStartDateTime()->copy()->addHours($event->duration ?? 2);
             $endDateTime->setDateTime($endTime->toRfc3339String());
             $endDateTime->setTimeZone($role->timezone ?? 'UTC');
             $googleEvent->setEnd($endDateTime);

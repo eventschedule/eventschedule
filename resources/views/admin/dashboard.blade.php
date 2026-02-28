@@ -303,8 +303,8 @@
             const isDarkMode = document.documentElement.classList.contains('dark') ||
                 (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.classList.contains('light'));
 
-            const textColor = isDarkMode ? '#9CA3AF' : '#6B7280';
-            const gridColor = isDarkMode ? '#374151' : '#E5E7EB';
+            const textColor = isDarkMode ? '#9ca3af' : '#6B7280';
+            const gridColor = isDarkMode ? '#2d2d30' : '#E5E7EB';
 
             // Growth Trends Chart
             const trendsCtx = document.getElementById('trendsChart').getContext('2d');

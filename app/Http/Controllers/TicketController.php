@@ -705,11 +705,11 @@ class TicketController extends Controller
             abort(403);
         }
 
-        if ($sale->status !== 'unpaid') {
-            return redirect($sale->event->getGuestUrl($subdomain, $sale->event_date).'&tickets=true');
-        }
-
         DB::transaction(function () use ($sale) {
+            $sale = Sale::lockForUpdate()->find($sale->id);
+            if ($sale->status !== 'unpaid') {
+                return;
+            }
             $sale->status = 'cancelled';
             $sale->save();
         });

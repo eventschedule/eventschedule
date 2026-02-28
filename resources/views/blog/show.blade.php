@@ -277,7 +277,7 @@
                         .prose-lg li { margin-bottom: 0.5rem !important; }
                         .prose-lg ul { list-style-type: disc !important; padding-left: 2rem !important; }
                         .prose-lg ul li { display: list-item !important; }
-                        .dark .prose-lg { color: #e5e7eb; }
+                        .dark .prose-lg { color: #d1d5db; }
                         .dark .prose-lg h1, .dark .prose-lg h2, .dark .prose-lg h3, .dark .prose-lg h4 { color: #fff; }
                         .dark .prose-lg a { color: #a78bfa; }
                         .dark .prose-lg strong { color: #fff; }

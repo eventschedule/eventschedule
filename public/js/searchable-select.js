@@ -242,7 +242,7 @@
                     item.style.cssText = 'border-bottom:1px solid ' + (isDark ? '#2d2d30' : '#e5e7eb') + ';height:1px;margin:4px 0;pointer-events:none;';
                     item.setAttribute('aria-disabled', 'true');
                 } else if (opt.disabled) {
-                    item.style.cssText = 'padding:0.5rem 0.75rem;min-height:44px;display:flex;align-items:center;font-size:0.875rem;color:' + (isDark ? '#6b7280' : '#9ca3af') + ';cursor:default;';
+                    item.style.cssText = 'padding:0.5rem 0.75rem;min-height:44px;display:flex;align-items:center;font-size:0.875rem;color:' + (isDark ? '#9ca3af' : '#9ca3af') + ';cursor:default;';
                     item.setAttribute('aria-disabled', 'true');
                     item.innerHTML = escapeHtml(opt.text);
                 } else {
@@ -259,7 +259,7 @@
 
             if (count === 0) {
                 var noResults = document.createElement('div');
-                noResults.style.cssText = 'padding:0.75rem;text-align:center;font-size:0.875rem;color:' + (isDark ? '#6b7280' : '#9ca3af') + ';';
+                noResults.style.cssText = 'padding:0.75rem;text-align:center;font-size:0.875rem;color:' + (isDark ? '#9ca3af' : '#9ca3af') + ';';
                 noResults.textContent = noResultsText;
                 dropdown.appendChild(noResults);
                 liveRegion.textContent = noResultsText;

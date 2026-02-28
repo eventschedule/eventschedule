@@ -229,7 +229,7 @@
 
         const style = {
             base: {
-                color: document.documentElement.classList.contains('dark') ? '#f3f4f6' : '#1f2937',
+                color: document.documentElement.classList.contains('dark') ? '#d1d5db' : '#1f2937',
                 fontFamily: 'ui-sans-serif, system-ui, sans-serif',
                 fontSmoothing: 'antialiased',
                 fontSize: '16px',

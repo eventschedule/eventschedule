@@ -132,6 +132,23 @@
                 data-custom-attribute="value" />
         </div>
 
+        @if (isset($editorRoles) && $editorRoles->count() > 1)
+        <div>
+            <x-input-label for="default_role_id" :value="__('messages.default_schedule')" />
+            <select name="default_role_id" id="default_role_id" {{ is_demo_mode() ? 'disabled' : '' }}
+                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                <option value="">{{ __('messages.none') }}</option>
+                @foreach ($editorRoles as $editorRole)
+                <option value="{{ $editorRole->id }}" {{ old('default_role_id', $user->default_role_id) == $editorRole->id ? 'selected' : '' }}>
+                    {{ $editorRole->name }} ({{ $editorRole->subdomain }})
+                </option>
+                @endforeach
+            </select>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.default_schedule_help') }}</p>
+            <x-input-error class="mt-2" :messages="$errors->get('default_role_id')" />
+        </div>
+        @endif
+
         <div>
             <x-input-label :value="__('messages.square_profile_image')" />
             <input id="profile_image" name="profile_image" type="file" class="hidden"

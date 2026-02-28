@@ -114,10 +114,10 @@
         color: #374151;
     }
     .dark .doc-code-block code {
-        color: #e5e7eb;
+        color: #d1d5db;
     }
     .code-comment { color: #9ca3af; }
-    .dark .code-comment { color: #6b7280; }
+    .dark .code-comment { color: #9ca3af; }
     .code-keyword { color: #7c3aed; }
     .dark .code-keyword { color: #c084fc; }
     .code-string { color: #059669; }
@@ -198,7 +198,7 @@
         border-radius: 50%;
     }
     .dark .doc-list li::before {
-        background: #6b7280;
+        background: #9ca3af;
     }
     .doc-list.doc-list-numbered {
         counter-reset: list-counter;

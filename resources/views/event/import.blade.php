@@ -25,7 +25,7 @@
     }
     .dark .time-dropdown-import {
         background: #1e1e1e;
-        border-color: #374151;
+        border-color: #2d2d30;
     }
     .time-dropdown-import.open {
         display: block;
@@ -46,7 +46,7 @@
     }
     .dark .time-dropdown-item-import:hover,
     .dark .time-dropdown-item-import.highlighted {
-        background: #374151;
+        background: #2d2d30;
         color: #fff;
     }
     .time-input-wrapper {

@@ -44,7 +44,7 @@ class SyncEventToGoogleCalendar implements ShouldQueue
             $expiresAt = \Carbon\Carbon::parse($expiresAt);
         }
 
-        return $expiresAt->diffInSeconds(now());
+        return now()->diffInSeconds($expiresAt);
     }
 
     /**

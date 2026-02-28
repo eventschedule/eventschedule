@@ -30,6 +30,7 @@ class ProfileController extends Controller
     {
         $data = [
             'user' => $request->user(),
+            'editorRoles' => $request->user()->editor()->get(),
         ];
 
         if (! config('app.hosted') && ! config('app.is_testing')) {
@@ -66,6 +67,15 @@ class ProfileController extends Controller
 
         $validated = $request->validated();
         $validated['use_24_hour_time'] = $request->input('use_24_hour_time') ? true : null;
+
+        // Validate default_role_id - user must be editor of the selected role
+        if (! empty($validated['default_role_id'])) {
+            $role = \App\Models\Role::where('id', $validated['default_role_id'])->where('is_deleted', false)->first();
+            if (! $role || ! $request->user()->isEditor($role->subdomain)) {
+                unset($validated['default_role_id']);
+            }
+        }
+
         $request->user()->fill($validated);
 
         if ($request->user()->isDirty('email')) {

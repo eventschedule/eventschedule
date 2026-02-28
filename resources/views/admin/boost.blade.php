@@ -398,7 +398,7 @@
         const isDarkMode = document.documentElement.classList.contains('dark') ||
             (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.classList.contains('light'));
         const textColor = isDarkMode ? '#9CA3AF' : '#6B7280';
-        const gridColor = isDarkMode ? '#374151' : '#E5E7EB';
+        const gridColor = isDarkMode ? '#2d2d30' : '#E5E7EB';
 
         // Status filter auto-submit
         document.getElementById('status-filter').addEventListener('change', function() {

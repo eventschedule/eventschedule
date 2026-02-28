@@ -72,6 +72,7 @@
                         <a href="#choose-setup" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Choose Your Setup</a>
                         <a href="#selfhosted-users" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">→ Selfhosted Users</a>
                         <a href="#saas-operators" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">→ SaaS Operators</a>
+                        <a href="#invoice-ninja" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Invoice Ninja</a>
                         <a href="#testing" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Testing</a>
                         <a href="#troubleshooting" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Troubleshooting</a>
                         <a href="#security" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Security</a>
@@ -435,6 +436,46 @@
                                         <p class="text-gray-600 dark:text-gray-400 text-sm">Laravel Cashier uses the <code class="doc-inline-code">Role</code> model (schedule/calendar) as the billable entity, not <code class="doc-inline-code">User</code>. This means each schedule has its own subscription, and users can have multiple schedules with different plans.</p>
                                     </div>
                                 </div>
+                            </div>
+                        </section>
+
+                        <!-- Invoice Ninja -->
+                        <section id="invoice-ninja" class="doc-section">
+                            <h2 class="doc-heading">Invoice Ninja (Alternative Payment Method)</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">In addition to Stripe, Event Schedule supports <a href="https://invoiceninja.com" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300">Invoice Ninja</a> as an alternative payment method for ticket sales. Invoice Ninja is an open-source invoicing and payments platform that supports multiple payment gateways.</p>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">No Server Configuration Required</div>
+                                <p>Unlike Stripe, Invoice Ninja does not require any <code class="doc-inline-code">.env</code> configuration on your server. Each user connects their own Invoice Ninja instance through the <strong>Profile > Payment Methods > Invoice Ninja</strong> tab in the admin panel.</p>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-6">Prerequisites</h3>
+                            <ul class="doc-list mb-6">
+                                <li>A running <a href="https://invoiceninja.com" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300">Invoice Ninja</a> instance (selfhosted or hosted)</li>
+                                <li>An API key from your Invoice Ninja instance</li>
+                                <li>At least one payment gateway configured in Invoice Ninja</li>
+                            </ul>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Setup Steps</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>In your Invoice Ninja instance, go to <strong class="text-gray-900 dark:text-white">Settings > Account Management > API Tokens</strong> and create a new API token</li>
+                                <li>In Event Schedule, go to <strong class="text-gray-900 dark:text-white">Profile > Payment Methods > Invoice Ninja</strong></li>
+                                <li>Enter your Invoice Ninja API URL (e.g. <code class="doc-inline-code">https://invoicing.yourdomain.com</code>)</li>
+                                <li>Enter your API token</li>
+                                <li>Save - Event Schedule will automatically create a webhook in your Invoice Ninja instance</li>
+                            </ol>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">How It Works</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>When creating an event with tickets, select "Invoice Ninja" as the payment method</li>
+                                <li>Event Schedule creates corresponding products in your Invoice Ninja instance for each ticket type</li>
+                                <li>When a customer purchases tickets, they are redirected to an Invoice Ninja payment page</li>
+                                <li>After payment, Invoice Ninja sends a webhook to Event Schedule to confirm the sale</li>
+                            </ol>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Invoice Ninja Modes</div>
+                                <p>Invoice Ninja can operate in two modes: <strong>Invoice mode</strong> (sends a full invoice to the buyer) or <strong>Payment link mode</strong> (directs to a simple payment page). You can choose the mode in the Invoice Ninja tab of your payment settings.</p>
                             </div>
                         </section>
 

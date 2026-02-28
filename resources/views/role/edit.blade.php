@@ -34,7 +34,7 @@
         }
 
         .dark #preview {
-            border-color: #374151;
+            border-color: #2d2d30;
         }
 
         .color-nav-button {
@@ -473,14 +473,14 @@
             var profileSrc = profileImagePreview && profileImagePreview !== '#' ? profileImagePreview : existingProfileImage;
             if (profileSrc) {
                 var marginTop = headerHtml ? '-mt-6' : '-mt-8';
-                var profileBg = isDark ? '#111827' : '#F5F9FE';
+                var profileBg = isDark ? '#1e1e1e' : '#F5F9FE';
                 var profileAlign = isRtl ? ' ml-auto' : '';
                 profileHtml = '<div class="' + marginTop + ' mb-2' + profileAlign + '"><div class="w-12 h-12 rounded-lg p-0.5 shadow-sm" style="background-color: ' + profileBg + '"><img src="' + profileSrc + '" class="w-full h-full object-cover rounded-lg" /></div></div>';
             }
 
             // Build content HTML with accent color elements
             var contentTopPadding = !profileSrc && !headerHtml ? 'pt-3' : '';
-            var cardBg = isDark ? '#111827' : '#F5F9FE';
+            var cardBg = isDark ? '#1e1e1e' : '#F5F9FE';
             var contentHtml =
                 '<div dir="' + (isRtl ? 'rtl' : 'ltr') + '" class="rounded-lg flex flex-col ' + (profileSrc && !headerHtml ? 'mt-8' : '') + '" style="background-color: ' + cardBg + '">' +
                     headerHtml +
@@ -2125,6 +2125,22 @@
                                 </select>
                                 <x-input-error class="mt-2" :messages="$errors->get('first_day_of_week')" />
                             </div>
+
+                        @if (isset($availableCurators) && $availableCurators->count() > 0 && !$role->isCurator())
+                            <div class="mb-6">
+                                <x-input-label :value="__('messages.default_curator_schedules')" />
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.default_curator_schedules_help') }}</p>
+                                @php $selectedCuratorIds = old('default_curator_ids', $role->default_curator_ids ?? []); @endphp
+                                @foreach ($availableCurators as $curator)
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" name="default_curator_ids[]" value="{{ $curator->id }}"
+                                        {{ in_array($curator->id, $selectedCuratorIds ?: []) ? 'checked' : '' }}
+                                        class="rounded border-gray-300 dark:border-gray-700 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA] dark:bg-gray-900" />
+                                    <span class="ms-2 text-sm text-gray-700 dark:text-gray-300">{{ $curator->name }}</span>
+                                </label>
+                                @endforeach
+                            </div>
+                        @endif
 
                         @if ((config('app.hosted') || config('app.is_testing')) && ($role->isVenue() || $role->isCurator()))
                         <div class="mb-6" id="import_form_fields_section">

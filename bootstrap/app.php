@@ -38,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'test_database',
             'nl/u/*',
             'webhooks/meta',
+            'api/whatsapp/webhook',
         ]);
 
         // Resolve custom domains before routing (must be first)

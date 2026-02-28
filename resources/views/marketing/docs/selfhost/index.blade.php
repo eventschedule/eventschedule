@@ -1,14 +1,14 @@
 <x-marketing-layout>
     <x-slot name="title">Selfhost Documentation - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Selfhost</x-slot>
-    <x-slot name="description">Technical documentation for selfhosting Event Schedule. Learn how to install, configure SaaS mode, set up Stripe payments, and enable Google Calendar sync.</x-slot>
+    <x-slot name="description">Technical documentation for selfhosting Event Schedule. Learn how to install, configure email, set up Stripe payments, enable Google Calendar sync, and connect AI features.</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "TechArticle",
         "headline": "Selfhost Documentation - Event Schedule",
-        "description": "Technical documentation for selfhosting Event Schedule. Learn how to install, configure SaaS mode, set up Stripe payments, and enable Google Calendar sync.",
+        "description": "Technical documentation for selfhosting Event Schedule. Learn how to install, configure email, set up Stripe payments, enable Google Calendar sync, and connect AI features.",
         "author": {
             "@type": "Organization",
             "name": "Event Schedule"
@@ -164,6 +164,44 @@
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Boost Setup</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Configure Meta/Facebook ads integration to let users promote events through paid social media campaigns.</p>
                         <div class="mt-auto inline-flex items-center text-sm font-medium text-amber-600 dark:text-amber-400">
+                            Read Guide
+                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Email Setup -->
+                <a href="{{ route('marketing.docs.selfhost.email') }}" class="doc-card block">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900 dark:to-pink-900">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-rose-100 dark:bg-rose-500/20">
+                            <svg aria-hidden="true" class="w-6 h-6 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Email Setup</h2>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Configure SMTP or other mail drivers for ticket confirmations, newsletters, and notifications.</p>
+                        <div class="mt-auto inline-flex items-center text-sm font-medium text-rose-600 dark:text-rose-400">
+                            Read Guide
+                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- AI Setup -->
+                <a href="{{ route('marketing.docs.selfhost.ai') }}" class="doc-card block">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-violet-100 dark:bg-violet-500/20">
+                            <svg aria-hidden="true" class="w-6 h-6 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">AI Setup</h2>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Connect Google Gemini to enable AI-powered event importing, agenda scanning, and translations.</p>
+                        <div class="mt-auto inline-flex items-center text-sm font-medium text-violet-600 dark:text-violet-400">
                             Read Guide
                             <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

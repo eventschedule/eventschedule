@@ -120,7 +120,7 @@
                                     <button type="submit" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">{{ __('messages.clone') }}</button>
                                 </form>
                                 @if ($newsletter->status !== 'sending')
-                                <form method="POST" action="{{ route('newsletter.delete', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="inline js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}"
+                                <form method="POST" action="{{ route('newsletter.delete', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="inline js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-500 hover:text-red-700">{{ __('messages.delete') }}</button>

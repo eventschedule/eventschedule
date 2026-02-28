@@ -1240,7 +1240,7 @@ class Role extends Model implements MustVerifyEmail
             $value = preg_replace('/^http:\/\//', 'https://', rtrim($value, '/'));
             $parsed = parse_url($value);
             if ($parsed && isset($parsed['host'])) {
-                $value = ($parsed['scheme'] ?? 'https') . '://' . $parsed['host'];
+                $value = ($parsed['scheme'] ?? 'https').'://'.$parsed['host'];
             }
         }
         $this->attributes['custom_domain'] = $value;

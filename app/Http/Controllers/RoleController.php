@@ -1761,6 +1761,11 @@ class RoleController extends Controller
                 ->toArray();
         }
 
+        $availableCurators = collect();
+        if (! $role->isCurator()) {
+            $availableCurators = auth()->user()->allCurators();
+        }
+
         $data = [
             'user' => auth()->user(),
             'role' => $role,
@@ -1770,6 +1775,7 @@ class RoleController extends Controller
             'headers' => $headerOptions,
             'fonts' => $fonts,
             'approvedSubdomainNames' => $approvedSubdomainNames,
+            'availableCurators' => $availableCurators,
         ];
 
         return view('role/edit', $data);
@@ -2014,6 +2020,19 @@ class RoleController extends Controller
 
         $approvedSubdomains = array_filter(array_map('trim', $request->input('approved_subdomains', [])));
         $role->approved_subdomains = ! empty($approvedSubdomains) ? array_values($approvedSubdomains) : null;
+
+        // Handle default curator schedules
+        if ($request->has('default_curator_ids') && ! $role->isCurator()) {
+            $curatorIds = array_filter(array_map('intval', $request->input('default_curator_ids', [])));
+            $validCuratorIds = [];
+            $allowedCuratorIds = auth()->user()->allCurators()->pluck('id')->toArray();
+            foreach ($curatorIds as $curatorId) {
+                if (in_array($curatorId, $allowedCuratorIds)) {
+                    $validCuratorIds[] = $curatorId;
+                }
+            }
+            $role->default_curator_ids = ! empty($validCuratorIds) ? $validCuratorIds : null;
+        }
 
         // Auto-verify phone for selfhost, or if it matches the user's verified phone
         if (! config('app.hosted') && $role->phone && $role->isDirty('phone')) {
@@ -3260,7 +3279,7 @@ class RoleController extends Controller
             $expiresAt = \Carbon\Carbon::parse($expiresAt);
         }
 
-        return $expiresAt->diffInSeconds(now());
+        return now()->diffInSeconds($expiresAt);
     }
 
     /**

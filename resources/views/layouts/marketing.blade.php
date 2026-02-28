@@ -24,6 +24,20 @@
 
     @if (config('app.hosted') || config('app.report_errors'))
     <script {!! nonce_attr() !!}>
+        window.sentryOnLoad = function () {
+            Sentry.init({
+                beforeSend: function (event) {
+                    if (event.exception && event.exception.values) {
+                        for (var i = 0; i < event.exception.values.length; i++) {
+                            if (event.exception.values[i].value === 'Script error.') {
+                                return null;
+                            }
+                        }
+                    }
+                    return event;
+                }
+            });
+        };
         window.addEventListener('load', function() {
             var s = document.createElement('script');
             s.src = "{{ config('app.sentry_js_dsn') }}";

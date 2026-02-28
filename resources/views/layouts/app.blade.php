@@ -11,6 +11,22 @@
     <link rel="sitemap" type="application/xml" href="{{ config('app.url') . route('sitemap', [], false) }}">    
     
     @if (config('app.hosted') || config('app.report_errors'))
+        <script {!! nonce_attr() !!}>
+            window.sentryOnLoad = function () {
+                Sentry.init({
+                    beforeSend: function (event) {
+                        if (event.exception && event.exception.values) {
+                            for (var i = 0; i < event.exception.values.length; i++) {
+                                if (event.exception.values[i].value === 'Script error.') {
+                                    return null;
+                                }
+                            }
+                        }
+                        return event;
+                    }
+                });
+            };
+        </script>
         <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous" {!! nonce_attr() !!}></script>
     @endif
 
@@ -252,7 +268,7 @@
         }
 
         .dark .event-popup-title {
-            color: #f9fafb;
+            color: #fff;
         }
 
         .event-popup-details {
@@ -282,7 +298,7 @@
         }
 
         .dark .event-popup-icon {
-            color: #6b7280;
+            color: #9ca3af;
         }
 
         .event-popup-description {

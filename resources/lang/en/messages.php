@@ -2125,4 +2125,20 @@ return [
     'boost_not_configured' => 'Boost requires Meta Ads to be configured.',
     'boost_requires_name_and_date' => 'Please add an event name and start date before boosting.',
     'boost_past_event' => 'Boost is only available for upcoming events.',
+
+    // WhatsApp import
+    'whatsapp_user_not_found' => 'Your phone number is not linked to an account. Verify your phone in your account settings first.',
+    'whatsapp_no_default_schedule' => 'No default schedule set. Set one in your account settings.',
+    'whatsapp_empty_message' => 'Send event details as text or image to create an event.',
+    'whatsapp_parse_failed' => 'Could not create event. Please try again.',
+    'whatsapp_event_created' => "Event created: :name\n:url",
+    'whatsapp_duplicate_event' => 'This event already exists: :url',
+    'whatsapp_error' => 'Could not create event. Please try again.',
+
+    // Default schedule
+    'default_schedule' => 'Default schedule',
+    'default_schedule_help' => 'Used as the default when adding events.',
+    'set_default_schedule' => 'Set a default schedule in your profile settings to use this shortcut.',
+    'default_curator_schedules' => 'Default curator schedules',
+    'default_curator_schedules_help' => 'Events created on this schedule will be automatically added to the selected curator schedules.',
 ];

@@ -918,6 +918,22 @@ class MarketingController extends Controller
         return view('marketing.docs.selfhost.google-calendar');
     }
 
+    /**
+     * Email setup documentation page
+     */
+    public function docsSelfhostEmail()
+    {
+        return view('marketing.docs.selfhost.email');
+    }
+
+    /**
+     * AI setup documentation page
+     */
+    public function docsSelfhostAi()
+    {
+        return view('marketing.docs.selfhost.ai');
+    }
+
     // ==========================================
     // Developer Section
     // ==========================================
