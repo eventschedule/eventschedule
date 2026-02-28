@@ -6,7 +6,7 @@
         @include('admin.partials._date-range-filter', ['range' => $range])
 
         {{-- Summary Metric Cards --}}
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
                 <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.total_campaigns')</p>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalCampaignsAllTime) }}</p>
@@ -20,6 +20,8 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.markup_revenue')</p>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">${{ number_format($markupRevenue, 2) }}</p>
             </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
                 <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.total_ad_spend')</p>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">${{ number_format($totalAdSpend, 2) }}</p>

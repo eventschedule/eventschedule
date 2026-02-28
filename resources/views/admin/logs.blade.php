@@ -20,8 +20,8 @@
                 <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">No log file found</h3>
-                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No log file found at <code class="text-xs bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">storage/logs/laravel.log</code></p>
+                <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">@lang('messages.no_log_file_found')</h3>
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_log_file_found_at') <code class="text-xs bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">storage/logs/laravel.log</code></p>
             </div>
         @else
             @php
@@ -36,14 +36,14 @@
                         <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                     </svg>
                     <div class="ms-3">
-                        <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Log Health Issues</h3>
+                        <h3 class="text-sm font-medium text-red-800 dark:text-red-200">@lang('messages.log_health_issues')</h3>
                         <div class="mt-2 text-sm text-red-700 dark:text-red-300">
                             <ul class="list-disc ps-5 space-y-1">
                                 @if ($errorCount > 0)
-                                <li>{{ number_format($errorCount) }} error-level {{ Str::plural('entry', $errorCount) }} in the log</li>
+                                <li>@lang('messages.error_level_entries', ['count' => number_format($errorCount)])</li>
                                 @endif
                                 @if ($fileSize > 100 * 1024 * 1024)
-                                <li>Log file is over 100 MB ({{ number_format($fileSize / 1024 / 1024, 0) }} MB)</li>
+                                <li>@lang('messages.log_file_over_size', ['size' => number_format($fileSize / 1024 / 1024, 0)])</li>
                                 @endif
                             </ul>
                         </div>
@@ -59,7 +59,7 @@
                         <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
-                        <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">File Size</h4>
+                        <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.file_size')</h4>
                     </div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">
                         {{ number_format($fileSize / 1024 / 1024, 2) }} MB
@@ -71,11 +71,11 @@
                         <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                         </svg>
-                        <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Entries</h4>
+                        <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_entries')</h4>
                     </div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalCount) }}</p>
                     @if ($fileSize > 5 * 1024 * 1024)
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">From last 5 MB</p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.from_last_5_mb')</p>
                     @endif
                 </div>
 
@@ -84,7 +84,7 @@
                         <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Errors</h4>
+                        <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.errors')</h4>
                     </div>
                     <p class="text-2xl font-bold {{ $errorCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">{{ number_format($errorCount) }}</p>
                 </div>
@@ -94,7 +94,7 @@
                         <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                         </svg>
-                        <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Warnings</h4>
+                        <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.warnings')</h4>
                     </div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($levelCounts['WARNING'] ?? 0) }}</p>
                 </div>
@@ -103,7 +103,7 @@
             {{-- Repeated Errors --}}
             @if ($repeatedErrors->count() > 0)
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Repeated Errors</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.repeated_errors')</h3>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead>
@@ -171,26 +171,26 @@
 
             {{-- Filters + Recent Log Entries --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Recent Log Entries</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.recent_log_entries')</h3>
 
                 {{-- Filter Bar --}}
                 <form method="GET" action="{{ route('admin.logs') }}" class="flex flex-wrap gap-3 mb-4">
                     <select name="level" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm">
-                        <option value="">All Levels</option>
+                        <option value="">@lang('messages.all_levels')</option>
                         @foreach ($levels as $level)
                         <option value="{{ $level }}" {{ request('level') === $level ? 'selected' : '' }}>{{ $level }}</option>
                         @endforeach
                     </select>
 
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search messages..." class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm flex-1 min-w-[200px]">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search_messages') }}" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm flex-1 min-w-[200px]">
 
                     <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-600 hover:bg-gray-700 dark:hover:bg-gray-500 text-white text-sm font-medium rounded-md">
-                        Filter
+                        @lang('messages.filter')
                     </button>
 
                     @if (request('level') || request('search'))
                     <a href="{{ route('admin.logs') }}" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-600">
-                        Clear
+                        @lang('messages.clear')
                     </a>
                     @endif
                 </form>

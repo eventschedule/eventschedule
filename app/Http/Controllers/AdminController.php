@@ -210,7 +210,8 @@ class AdminController extends Controller
             ->get();
 
         // Recent schedules (only claimed, excluding demo roles)
-        $recentSchedules = Role::whereNotNull('user_id')
+        $recentSchedules = Role::with('users')
+            ->whereNotNull('user_id')
             ->where(function ($query) {
                 $query->whereNotNull('email_verified_at')
                     ->orWhereNotNull('phone_verified_at');
@@ -1880,6 +1881,12 @@ class AdminController extends Controller
             'search' => 'nullable|string|max:200',
         ]);
 
+        // Summary stats
+        $totalEntries = AuditLog::count();
+        $entriesToday = AuditLog::whereDate('created_at', today())->count();
+        $failedAuthToday = AuditLog::where('action', 'like', 'auth.%fail%')->whereDate('created_at', today())->count();
+        $uniqueIpsToday = AuditLog::whereDate('created_at', today())->distinct('ip_address')->count('ip_address');
+
         $query = AuditLog::with('user')->orderBy('created_at', 'desc');
 
         // Filter by action category
@@ -1915,7 +1922,7 @@ class AdminController extends Controller
 
         $categories = ['auth', 'profile', 'api', 'schedule', 'event', 'sale', 'admin', 'stripe'];
 
-        return view('admin.audit-log', compact('logs', 'categories'));
+        return view('admin.audit-log', compact('logs', 'categories', 'totalEntries', 'entriesToday', 'failedAuthToday', 'uniqueIpsToday'));
     }
 
     /**

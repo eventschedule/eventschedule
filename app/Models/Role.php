@@ -111,6 +111,8 @@ class Role extends Model implements MustVerifyEmail
         'agenda_show_description' => 'boolean',
         'agenda_save_image' => 'boolean',
         'default_curator_ids' => 'array',
+        'trial_reminder_sent_at' => 'datetime',
+        'renewal_reminder_sent_at' => 'datetime',
     ];
 
     /**

@@ -67,6 +67,19 @@ class GenerateDocScreenshots extends Command
             $pages = [$singlePage => $pages[$singlePage]];
         }
 
+        // Guard selfhost-admin pages behind APP_TESTING (they require granting admin privileges)
+        if (! config('app.is_testing')) {
+            $adminPages = array_filter(array_keys($pages), fn ($key) => str_starts_with($key, 'selfhost-admin'));
+            if (! empty($adminPages)) {
+                $this->warn('Skipping selfhost-admin pages: APP_TESTING is not enabled.');
+                $this->warn('Set APP_TESTING=true in .env to generate admin screenshots.');
+                $pages = array_diff_key($pages, array_flip($adminPages));
+                if (empty($pages)) {
+                    return 0;
+                }
+            }
+        }
+
         $force = $this->option('force');
         $outputDir = public_path('images/docs');
 
@@ -86,13 +99,27 @@ class GenerateDocScreenshots extends Command
         // Save original credentials and set temp ones (temp email avoids demo mode warnings)
         $originalPasswordHash = $user->password;
         $originalEmail = $user->email;
+        $originalIsAdmin = $user->is_admin;
         $user->password = Hash::make(self::TEMP_PASSWORD);
         $user->email = self::TEMP_EMAIL;
+        if (config('app.is_testing')) {
+            $user->is_admin = true;
+        }
         $user->save();
 
         // Re-verify email (the User model clears email_verified_at on email change)
         $user->email_verified_at = now();
         $user->saveQuietly();
+
+        // Clear log file so local errors don't appear in screenshots
+        $logFile = storage_path('logs/laravel.log');
+        $logBackup = null;
+        if (file_exists($logFile)) {
+            $logBackup = $logFile . '.bak';
+            copy($logFile, $logBackup);
+            file_put_contents($logFile, '');
+            $this->line('Cleared laravel.log for clean screenshots.');
+        }
 
         try {
             return $this->generate($user, $pages, $force, $outputDir);
@@ -100,7 +127,14 @@ class GenerateDocScreenshots extends Command
             // Restore original credentials
             $user->password = $originalPasswordHash;
             $user->email = $originalEmail;
+            $user->is_admin = $originalIsAdmin;
             $user->save();
+
+            // Restore log file
+            if ($logBackup && file_exists($logBackup)) {
+                copy($logBackup, $logFile);
+                unlink($logBackup);
+            }
 
             // Restore hot file
             if ($hotFileBackup && file_exists($hotFileBackup)) {
@@ -267,6 +301,18 @@ class GenerateDocScreenshots extends Command
             $browser->script("document.querySelector('form[method=\"POST\"]').requestSubmit()");
             $browser->waitForLocation('/events', 15);
             $this->info('Logged in.');
+
+            // Complete admin password confirmation so admin pages are accessible
+            if (isset($pages['selfhost-admin']) && config('app.is_testing')) {
+                $this->info('Confirming admin password...');
+                $browser->visit('/admin/confirm-password')
+                    ->waitFor('#password', 10)
+                    ->pause(500)
+                    ->type('password', self::TEMP_PASSWORD);
+                $browser->script("document.querySelector('form[method=\"POST\"]').requestSubmit()");
+                $browser->waitForLocation('/admin/dashboard', 15);
+                $this->info('Admin password confirmed.');
+            }
 
             // Force light mode for consistent screenshots
             $browser->script("localStorage.setItem('theme', 'light')");
