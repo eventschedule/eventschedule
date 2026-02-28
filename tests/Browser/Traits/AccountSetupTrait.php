@@ -180,7 +180,8 @@ trait AccountSetupTrait
             ->waitFor('#email', 5)
             ->pause(500)
             ->type('email', $email)
-            ->type('password', $password);
+            ->type('password', $password)
+            ->pause(500);
 
         // Use JavaScript to submit form (more reliable than press() in headless Chrome)
         $browser->script("document.querySelector('form[method=\"POST\"]').requestSubmit()");
