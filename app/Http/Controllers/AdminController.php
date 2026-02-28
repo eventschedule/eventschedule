@@ -262,13 +262,6 @@ class AdminController extends Controller
             ->whereNull('admin_newsletter_unsubscribed_at')
             ->count();
 
-        // Recent admin newsletters
-        $recentNewsletters = Newsletter::admin()
-            ->where('status', 'sent')
-            ->orderByDesc('sent_at')
-            ->limit(5)
-            ->get();
-
         return view('admin.dashboard', compact(
             'totalUsers',
             'totalSchedules',
@@ -294,7 +287,6 @@ class AdminController extends Controller
             'boostMarkupRevenue',
             'adminNewslettersSent',
             'newsletterSubscribers',
-            'recentNewsletters',
         ));
     }
 

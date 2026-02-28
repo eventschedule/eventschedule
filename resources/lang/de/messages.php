@@ -828,6 +828,7 @@ return [
     'type_switch' => 'Ja/Nein',
     'type_date' => 'Datum',
     'type_dropdown' => 'Dropdown',
+    'type_multiselect' => 'Multi-select',
     'options_placeholder' => 'Optionen durch Kommas getrennt eingeben',
     'per_order' => 'Pro Bestellung',
     'per_ticket' => 'Pro Ticket',

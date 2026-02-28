@@ -205,7 +205,7 @@
                       @endif
                       <a href="{{ $talentUrl }}" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}">
                         <span class="inline text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ str_replace('_', ' ', $each->font_family) }}', sans-serif;">
-                          {{ $each->translatedName() }}
+                          {!! str_replace(' , ', '<br>', e($each->translatedName())) !!}
                           <svg class="inline-block w-5 h-5 {{ $role->isRtl() ? 'ms-1 scale-x-[-1]' : 'ms-1' }} align-text-bottom fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                           </svg>
@@ -213,7 +213,7 @@
                       </a>
                     @else
                       <p class="text-lg font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $otherRole->font_family ?? 'sans-serif') }}', sans-serif;">
-                        {{ $each->translatedName() }}
+                        {!! str_replace(' , ', '<br>', e($each->translatedName())) !!}
                       </p>
                     @endif
                   </div>
@@ -558,7 +558,7 @@
         <h1
           class="text-gray-900 dark:text-gray-100 text-[28px] sm:text-[36px] lg:text-[44px] leading-snug font-bold {{ $role->isRtl() ? 'rtl text-right' : '' }}"
         >
-          {{ $translation ? $translation->name_translated : $event->translatedName() }}
+          {!! str_replace(' , ', '<br>', e($translation ? $translation->name_translated : $event->translatedName())) !!}
           @if ($event->isPasswordProtected())
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-8 h-8 text-gray-400 ms-2 align-[-0.15em]"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
           @endif
@@ -641,13 +641,13 @@
                     }
                   @endphp
                   <a href="{{ $venueUrl }}" class="group inline-flex items-center gap-1 w-fit">
-                    <span class="text-lg font-semibold text-gray-900 dark:text-white group-hover:underline">{{ $event->venue->translatedName() }}</span>
+                    <span class="text-lg font-semibold text-gray-900 dark:text-white group-hover:underline">{!! str_replace(' , ', '<br>', e($event->venue->translatedName())) !!}</span>
                     <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                     </svg>
                   </a>
                 @else
-                  <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $event->venue->translatedName() }}</span>
+                  <span class="text-lg font-semibold text-gray-900 dark:text-white">{!! str_replace(' , ', '<br>', e($event->venue->translatedName())) !!}</span>
                 @endif
               @else
                 <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $event->getEventUrlDomain() }}</span>
@@ -665,7 +665,7 @@
         @endif
 
         {{-- Ticket price --}}
-        @if ($event->registration_url && $event->ticket_price !== null)
+        @if ($event->registration_url && $event->ticket_price !== null && !$event->tickets_enabled)
         <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
           <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
@@ -692,10 +692,10 @@
 
         {{-- CTA buttons --}}
         <div style="font-family: sans-serif" x-data="{ shareState: 'idle' }" class="relative items-center gap-3 text-left hidden sm:inline-flex self-start {{ $role->isRtl() ? 'rtl' : '' }}">
-        @if ($event->canSellTickets($date) || $event->registration_url)
+        @if ($event->canSellTickets($date) || ($event->registration_url && !$event->tickets_enabled))
           @if (request()->get('tickets') !== 'true')
-            <a href="{{ $event->registration_url ? $event->registration_url : request()->fullUrlWithQuery(['tickets' => 'true']) }}" {{ $event->registration_url ? 'target="_blank" rel="noopener noreferrer nofollow"' : '' }}
-              @if ($event->payment_method === 'payment_url' && $event->user && $event->user->paymentUrlMobileOnly() && ! is_mobile())
+            <a href="{{ $event->canSellTickets($date) ? request()->fullUrlWithQuery(['tickets' => 'true']) : $event->registration_url }}" {{ !$event->canSellTickets($date) && $event->registration_url ? 'target="_blank" rel="noopener noreferrer nofollow"' : '' }}
+              @if (!$event->canSellTickets($date) && $event->payment_method === 'payment_url' && $event->user && $event->user->paymentUrlMobileOnly() && ! is_mobile())
                 class="payment-mobile-only-link"
                 data-mobile-msg="{{ __('messages.payment_url_mobile_only') }}"
               @endif
@@ -703,10 +703,21 @@
                 <button type="button"
                       class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                       style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
-                  {{ $event->registration_url ? __('messages.view_event') : ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets')) }}
+                  {{ $event->canSellTickets($date) ? ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets')) : __('messages.view_event') }}
               </button>
             </a>
           @endif
+        @elseif ($event->ticket_sales_end_at && $event->ticket_sales_end_at->isPast() && $event->tickets_enabled)
+              <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_sales_ended') }}</span>
+              <button type="button"
+                  class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                  style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
+                  id="menu-button" aria-expanded="true" aria-haspopup="true">
+              {{ __('messages.add_to_calendar') }}
+              <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+              </svg>
+              </button>
         @else
               <button type="button"
                   class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
@@ -874,7 +885,7 @@
                     {{ $part->start_time }}@if ($part->end_time) - {{ $part->end_time }}@endif
                   </span>
                   @endif
-                  <span class="text-gray-900 dark:text-gray-100 font-medium">{{ $part->translatedName() }}</span>
+                  <span class="text-gray-900 dark:text-gray-100 font-medium">{!! str_replace(' , ', '<br>', e($part->translatedName())) !!}</span>
                   @if ($part->translatedDescription())
                   <div class="text-sm text-gray-500 dark:text-gray-400 mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! $part->translatedDescription() !!}</div>
                   @endif
@@ -1047,7 +1058,7 @@
               <div class="flex items-start gap-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 {{ $role->isRtl() ? 'rtl' : '' }}">
                 <span class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background-color: {{ $accentColor }};">{{ $index + 1 }}</span>
                 <div class="flex-1">
-                  <span class="text-gray-900 dark:text-gray-100 font-medium">{{ $part->translatedName() }}</span>
+                  <span class="text-gray-900 dark:text-gray-100 font-medium">{!! str_replace(' , ', '<br>', e($part->translatedName())) !!}</span>
                   @if ($part->translatedDescription())
                   <div class="text-sm text-gray-500 dark:text-gray-400 block mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! $part->translatedDescription() !!}</div>
                   @endif
@@ -1624,10 +1635,10 @@
         </template>
       </button>
       {{-- Main CTA --}}
-      @if ($event->canSellTickets($date) || $event->registration_url)
+      @if ($event->canSellTickets($date) || ($event->registration_url && !$event->tickets_enabled))
         @if (request()->get('tickets') !== 'true')
-          <a href="{{ $event->registration_url ? $event->registration_url : request()->fullUrlWithQuery(['tickets' => 'true']) }}" {{ $event->registration_url ? 'target="_blank" rel="noopener noreferrer nofollow"' : '' }}
-            @if ($event->payment_method === 'payment_url' && $event->user && $event->user->paymentUrlMobileOnly() && ! is_mobile())
+          <a href="{{ $event->canSellTickets($date) ? request()->fullUrlWithQuery(['tickets' => 'true']) : $event->registration_url }}" {{ !$event->canSellTickets($date) && $event->registration_url ? 'target="_blank" rel="noopener noreferrer nofollow"' : '' }}
+            @if (!$event->canSellTickets($date) && $event->payment_method === 'payment_url' && $event->user && $event->user->paymentUrlMobileOnly() && ! is_mobile())
               class="payment-mobile-only-link flex-1"
               data-mobile-msg="{{ __('messages.payment_url_mobile_only') }}"
             @else
@@ -1637,10 +1648,12 @@
             <button type="button"
                   class="w-full justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
-              {{ $event->registration_url ? __('messages.view_event') : ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets')) }}
+              {{ $event->canSellTickets($date) ? ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets')) : __('messages.view_event') }}
             </button>
           </a>
         @endif
+      @elseif ($event->ticket_sales_end_at && $event->ticket_sales_end_at->isPast() && $event->tickets_enabled)
+        <span class="flex-1 text-center text-sm text-gray-500 dark:text-gray-400 py-3">{{ __('messages.ticket_sales_ended') }}</span>
       @else
         <button type="button"
             id="mobile-calendar-cta"

@@ -819,6 +819,7 @@ return [
     'type_switch' => 'כן/לא',
     'type_date' => 'תאריך',
     'type_dropdown' => 'רשימה נפתחת',
+    'type_multiselect' => 'Multi-select',
     'options_placeholder' => 'הזן אפשרויות מופרדות בפסיקים',
     'per_order' => 'לכל הזמנה',
     'per_ticket' => 'לכל כרטיס',

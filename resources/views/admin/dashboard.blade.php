@@ -243,37 +243,6 @@
                     @endforelse
                 </div>
             </div>
-
-            {{-- Recent Newsletters --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
-                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">@lang('messages.recent_newsletters')</h3>
-                </div>
-                <div class="divide-y divide-gray-200 dark:divide-gray-700">
-                    @forelse ($recentNewsletters as $newsletter)
-                        <div class="px-6 py-4">
-                            <div class="flex items-center justify-between">
-                                <div class="min-w-0 flex-1">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                        {{ $newsletter->subject }}
-                                    </p>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ number_format($newsletter->sent_count) }} @lang('messages.recipients')
-                                        &bull; {{ number_format($newsletter->open_count) }} @lang('messages.opens')
-                                    </p>
-                                </div>
-                                <div class="text-end text-sm text-gray-500 dark:text-gray-400">
-                                    <p>{{ $newsletter->sent_at?->diffForHumans() }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                            @lang('messages.no_newsletters_sent')
-                        </div>
-                    @endforelse
-                </div>
-            </div>
         </div>
     </div>
 

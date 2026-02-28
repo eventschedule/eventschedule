@@ -1914,20 +1914,20 @@ class RoleController extends Controller
                     continue;
                 }
 
-                // Preserve existing index or assign next available (1-8)
+                // Preserve existing index or assign next available (1-10)
                 $fieldIndex = $existingCustomFields[$fieldKey]['index'] ?? null;
                 if (! $fieldIndex) {
                     // Try client-submitted index
                     if (! empty($fieldData['index'])) {
                         $submittedIndex = (int) $fieldData['index'];
-                        if ($submittedIndex >= 1 && $submittedIndex <= 8 && ! in_array($submittedIndex, $usedIndices)) {
+                        if ($submittedIndex >= 1 && $submittedIndex <= 10 && ! in_array($submittedIndex, $usedIndices)) {
                             $fieldIndex = $submittedIndex;
                             $usedIndices[] = $submittedIndex;
                         }
                     }
                     // Fall back to next available
                     if (! $fieldIndex) {
-                        for ($i = 1; $i <= 8; $i++) {
+                        for ($i = 1; $i <= 10; $i++) {
                             if (! in_array($i, $usedIndices)) {
                                 $fieldIndex = $i;
                                 $usedIndices[] = $i;
@@ -2005,7 +2005,7 @@ class RoleController extends Controller
                 if ($index && ! in_array($index, $usedIndices)) {
                     $usedIndices[] = $index;
                 } elseif ($index) {
-                    for ($i = 1; $i <= 8; $i++) {
+                    for ($i = 1; $i <= 10; $i++) {
                         if (! in_array($i, $usedIndices)) {
                             $eventCustomFields[$fieldKey]['index'] = $i;
                             $usedIndices[] = $i;

@@ -334,7 +334,7 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Configure additional checkout settings for your event's tickets.</p>
 
                             <h3 id="checkout-fields" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Custom Checkout Fields</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Collect additional information from attendees during checkout. You can add up to 8 custom fields per event.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Collect additional information from attendees during checkout. You can add up to 10 custom fields per event.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Edit your event</li>
@@ -361,6 +361,7 @@
                             <ul class="doc-list">
                                 <li><strong class="text-gray-900 dark:text-white">Ticket notes:</strong> Add notes that appear on the ticket (e.g., parking instructions, what to bring)</li>
                                 <li><strong class="text-gray-900 dark:text-white">Terms URL:</strong> Link to your terms and conditions. Buyers must agree before purchasing.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Ticket sales end:</strong> Set a date and time when ticket sales automatically stop</li>
                                 <li><strong class="text-gray-900 dark:text-white">Expire unpaid tickets:</strong> Automatically release unpaid tickets after a set number of hours, making them available for other buyers</li>
                             </ul>
                         </section>

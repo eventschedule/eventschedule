@@ -16,10 +16,12 @@
                         $data['selectedQty'] = old('tickets')[$data['id']] ?? 0;
                         $data['custom_fields'] = $ticket->custom_fields ?? [];
                         $data['custom_values'] = (object) [];
+                        $data['multiselect_values'] = (object) [];
                         return $data;
                     })),
                     eventCustomFields: @json($event->custom_fields ?? []),
                     eventCustomValues: @json(old('event_custom_values', [])),
+                    eventMultiselectValues: {},
                     name: @json(old('name', auth()->check() ? auth()->user()->name : '')),
                     email: @json(old('email', auth()->check() ? auth()->user()->email : '')),
                     password: @json(old('password', '')),
@@ -39,9 +41,23 @@
                 };
             },
             created() {
+                // Initialize multiselect arrays for event-level fields
+                Object.entries(this.eventCustomFields).forEach(([key, field]) => {
+                    if (field.type === 'multiselect') {
+                        this.eventMultiselectValues[key] = [];
+                    }
+                });
                 this.tickets.forEach(ticket => {
                     if (! ticket.selectedQty) {
                         ticket.selectedQty = 0;
+                    }
+                    // Initialize multiselect arrays for ticket-level fields
+                    if (ticket.custom_fields) {
+                        Object.entries(ticket.custom_fields).forEach(([key, field]) => {
+                            if (field.type === 'multiselect') {
+                                ticket.multiselect_values[key] = [];
+                            }
+                        });
                     }
                 });
                 if (this.tickets.length === 1 && this.tickets[0].quantity > 0) {
@@ -357,6 +373,16 @@
                     <option value="">{{ __('messages.please_select') }}</option>
                     <option v-for="option in (field.options || '').split(',')" :key="option.trim()" :value="option.trim()">@{{ option.trim() }}</option>
                 </select>
+                <!-- Multi-select -->
+                <div v-else-if="field.type === 'multiselect'" class="mt-1 space-y-1">
+                    <input type="hidden" :name="`event_custom_values[${fieldKey}]`" :value="(eventMultiselectValues[fieldKey] || []).join(', ')">
+                    <label v-for="option in (field.options || '').split(',')" :key="option.trim()" class="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                        <input type="checkbox" :value="option.trim()"
+                            v-model="eventMultiselectValues[fieldKey]"
+                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded" />
+                        @{{ option.trim() }}
+                    </label>
+                </div>
             </div>
         </div>
 
@@ -436,6 +462,16 @@
                         <option value="">{{ __('messages.please_select') }}</option>
                         <option v-for="option in (field.options || '').split(',')" :key="option.trim()" :value="option.trim()">@{{ option.trim() }}</option>
                     </select>
+                    <!-- Multi-select -->
+                    <div v-else-if="field.type === 'multiselect'" class="mt-1 space-y-1">
+                        <input type="hidden" :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`" :value="(ticket.multiselect_values && ticket.multiselect_values[fieldKey] || []).join(', ')">
+                        <label v-for="option in (field.options || '').split(',')" :key="option.trim()" class="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100">
+                            <input type="checkbox" :value="option.trim()"
+                                v-model="ticket.multiselect_values[fieldKey]"
+                                class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded" />
+                            @{{ option.trim() }}
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>

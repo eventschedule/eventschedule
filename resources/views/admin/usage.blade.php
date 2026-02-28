@@ -13,7 +13,7 @@
                     <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
                 <div class="ms-3">
-                    <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Usage Anomalies Detected Today</h3>
+                    <h3 class="text-sm font-medium text-red-800 dark:text-red-200">@lang('messages.usage_anomalies_detected')</h3>
                     <div class="mt-2 text-sm text-red-700 dark:text-red-300">
                         <ul class="list-disc ps-5 space-y-1">
                             @foreach ($anomalies as $anomaly)
@@ -33,18 +33,18 @@
                 <div class="flex items-center justify-between mb-2">
                     <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ $cat['label'] }}</h4>
                     @if ($cat['limit'] && $cat['today_total'] > $cat['limit'])
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">Over limit</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">@lang('messages.over_limit')</span>
                     @endif
                 </div>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($cat['period_total']) }}</p>
                 <div class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Today: {{ number_format($cat['today_total']) }}
+                    @lang('messages.today'): {{ number_format($cat['today_total']) }}
                     @if ($cat['limit'])
                     / {{ number_format($cat['limit']) }}
                     @endif
                 </div>
                 <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                    Avg: {{ $cat['daily_avg'] }}/day
+                    @lang('messages.avg_per_day', ['avg' => $cat['daily_avg']])
                 </div>
             </div>
             @endforeach
@@ -52,16 +52,16 @@
 
         {{-- Operation Breakdown Table --}}
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Operation Breakdown</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.operation_breakdown')</h3>
             @if (count($operationBreakdown) > 0)
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead>
                         <tr>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Operation</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Today</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Period Total</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Daily Avg</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.operation')</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.today')</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.period_total')</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.daily_avg')</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -77,20 +77,20 @@
                 </table>
             </div>
             @else
-            <p class="text-sm text-gray-500 dark:text-gray-400">No usage data for this period.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_usage_data')</p>
             @endif
         </div>
 
         {{-- Top Roles by Usage --}}
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Top Schedules by Usage</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.top_schedules_by_usage')</h3>
             @if ($topRolesData->count() > 0)
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead>
                         <tr>
                             <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Schedule</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.total')</th>
                             @foreach ($categories as $key => $cat)
                             <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $cat['label'] }}</th>
                             @endforeach
@@ -112,7 +112,7 @@
                 </table>
             </div>
             @else
-            <p class="text-sm text-gray-500 dark:text-gray-400">No per-schedule usage data for this period.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_schedule_usage_data')</p>
             @endif
         </div>
 
@@ -121,8 +121,8 @@
             $hasStuckRecords = $stuckRoles->count() > 0 || $stuckEvents->count() > 0 || $stuckEventParts->count() > 0 || $stuckEventRoles->count() > 0;
         @endphp
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Stuck Translation Records</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Records with {{ $stuckThreshold }}+ translation attempts that still have untranslated fields.</p>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.stuck_translation_records')</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">@lang('messages.stuck_translation_description', ['threshold' => $stuckThreshold])</p>
 
             @if ($hasStuckRecords)
             <div class="overflow-x-auto">
@@ -327,7 +327,7 @@
                 }
             </script>
             @else
-            <p class="text-sm text-gray-500 dark:text-gray-400">No stuck translation records found.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_stuck_translations')</p>
             @endif
         </div>
     </div>

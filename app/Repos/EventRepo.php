@@ -319,7 +319,7 @@ class EventRepo
                         $usedIndices[] = $index;
                     } elseif ($index) {
                         // Duplicate index - reassign
-                        for ($i = 1; $i <= 8; $i++) {
+                        for ($i = 1; $i <= 10; $i++) {
                             if (! in_array($i, $usedIndices)) {
                                 $customFields[$fieldKey]['index'] = $i;
                                 $usedIndices[] = $i;
@@ -342,14 +342,24 @@ class EventRepo
             $customFieldValues = array_filter($customFieldValues, function ($value) {
                 return $value !== null && $value !== '';
             });
-            // Validate dropdown custom field values against allowed options
+            // Validate dropdown and multiselect custom field values against allowed options
             $eventCustomFields = $currentRole->getEventCustomFields();
             foreach ($eventCustomFields as $fieldKey => $fieldConfig) {
-                if (($fieldConfig['type'] ?? '') === 'dropdown' && isset($customFieldValues[$fieldKey])) {
+                $fieldType = $fieldConfig['type'] ?? '';
+                if ($fieldType === 'dropdown' && isset($customFieldValues[$fieldKey])) {
                     $allowedOptions = array_map('trim', explode(',', $fieldConfig['options'] ?? ''));
                     if (! in_array($customFieldValues[$fieldKey], $allowedOptions, true)) {
                         unset($customFieldValues[$fieldKey]);
                     }
+                } elseif ($fieldType === 'multiselect' && isset($customFieldValues[$fieldKey])) {
+                    $allowedOptions = array_map('trim', explode(',', $fieldConfig['options'] ?? ''));
+                    $selectedValues = is_array($customFieldValues[$fieldKey])
+                        ? array_map('trim', $customFieldValues[$fieldKey])
+                        : array_map('trim', explode(',', $customFieldValues[$fieldKey]));
+                    $validValues = array_filter($selectedValues, function ($v) use ($allowedOptions) {
+                        return in_array($v, $allowedOptions, true);
+                    });
+                    $customFieldValues[$fieldKey] = ! empty($validValues) ? implode(', ', $validValues) : null;
                 }
             }
             $request->merge([
@@ -663,7 +673,7 @@ class EventRepo
                         if ($index && ! in_array($index, $usedIndices)) {
                             $usedIndices[] = $index;
                         } elseif ($index) {
-                            for ($i = 1; $i <= 8; $i++) {
+                            for ($i = 1; $i <= 10; $i++) {
                                 if (! in_array($i, $usedIndices)) {
                                     $ticketCustomFields[$fieldKey]['index'] = $i;
                                     $usedIndices[] = $i;

@@ -496,6 +496,68 @@ class GeminiUtils
                                 : null;
                         }
 
+                        // Fuzzy match multiselect values against allowed options
+                        if (($fieldConfig['type'] ?? '') === 'multiselect' && ! empty($fieldConfig['options'])) {
+                            $options = array_map('trim', explode(',', $fieldConfig['options']));
+                            $matchOptions = $options;
+                            if (! empty($fieldConfig['options_en'])) {
+                                $matchOptions = array_map('trim', explode(',', $fieldConfig['options_en']));
+                            }
+
+                            $inputValues = array_map('trim', explode(',', $value));
+                            $matchedValues = [];
+
+                            foreach ($inputValues as $inputVal) {
+                                if (empty($inputVal)) {
+                                    continue;
+                                }
+
+                                $matchedIndex = null;
+
+                                // Try exact match first (case-insensitive)
+                                foreach ($matchOptions as $i => $option) {
+                                    if (strcasecmp($option, $inputVal) === 0) {
+                                        $matchedIndex = $i;
+                                        break;
+                                    }
+                                }
+
+                                // If no exact match, try partial match
+                                if ($matchedIndex === null) {
+                                    foreach ($matchOptions as $i => $option) {
+                                        if (stripos($option, $inputVal) !== false || stripos($inputVal, $option) !== false) {
+                                            $matchedIndex = $i;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // If still no match, try fuzzy matching
+                                if ($matchedIndex === null) {
+                                    $bestIndex = null;
+                                    $bestScore = 0;
+
+                                    foreach ($matchOptions as $i => $option) {
+                                        similar_text(strtolower($option), strtolower($inputVal), $percent);
+                                        if ($percent > $bestScore) {
+                                            $bestScore = $percent;
+                                            $bestIndex = $i;
+                                        }
+                                    }
+
+                                    if ($bestScore > 70) {
+                                        $matchedIndex = $bestIndex;
+                                    }
+                                }
+
+                                if ($matchedIndex !== null && isset($options[$matchedIndex])) {
+                                    $matchedValues[] = $options[$matchedIndex];
+                                }
+                            }
+
+                            $value = ! empty($matchedValues) ? implode(', ', $matchedValues) : null;
+                        }
+
                         if ($value !== null) {
                             $customFieldValues[$originalKey] = $value;
                         }

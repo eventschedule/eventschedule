@@ -27,6 +27,8 @@ class Sale extends Model
         'custom_value6',
         'custom_value7',
         'custom_value8',
+        'custom_value9',
+        'custom_value10',
         'utm_source',
         'utm_medium',
         'utm_campaign',

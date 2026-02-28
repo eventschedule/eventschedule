@@ -824,6 +824,7 @@ return [
     'type_switch' => 'Sí/No',
     'type_date' => 'Fecha',
     'type_dropdown' => 'Lista Desplegable',
+    'type_multiselect' => 'Multi-select',
     'options_placeholder' => 'Ingrese opciones separadas por comas',
     'per_order' => 'Por Pedido',
     'per_ticket' => 'Por Entrada',

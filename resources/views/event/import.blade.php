@@ -680,6 +680,23 @@
                                         @endif
                                     @endforeach
                                 </select>
+                                @elseif(($field['type'] ?? '') === 'multiselect')
+                                <div class="mt-1 space-y-1">
+                                    @foreach(explode(',', $field['options'] ?? '') as $option)
+                                        @php $option = trim($option); @endphp
+                                        @if($option)
+                                        <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                                            <input type="checkbox"
+                                                value="{{ $option }}"
+                                                :checked="(preview.parsed[idx].custom_field_values.{{ $fieldKey }} || '').split(', ').map(s => s.trim()).includes('{{ $option }}')"
+                                                @change="toggleImportMultiselect(idx, '{{ $fieldKey }}', '{{ $option }}', $event)"
+                                                :disabled="savedEvents[idx]"
+                                                class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded" />
+                                            {{ $option }}
+                                        </label>
+                                        @endif
+                                    @endforeach
+                                </div>
                                 @endif
                             </div>
                             @endforeach
@@ -1129,6 +1146,16 @@
         },
 
         methods: {
+            toggleImportMultiselect(idx, fieldKey, option, event) {
+                const current = (this.preview.parsed[idx].custom_field_values[fieldKey] || '').split(', ').map(s => s.trim()).filter(s => s);
+                if (event.target.checked) {
+                    if (!current.includes(option)) current.push(option);
+                } else {
+                    const i = current.indexOf(option);
+                    if (i > -1) current.splice(i, 1);
+                }
+                this.preview.parsed[idx].custom_field_values[fieldKey] = current.join(', ');
+            },
             // Time picker dropdown methods
             generateTimeOptions() {
                 var options = [];

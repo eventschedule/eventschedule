@@ -530,7 +530,7 @@
                                                 <td>workshop</td>
                                             </tr>
                                             <tr>
-                                                <td colspan="3" class="text-gray-400 text-sm">...up to {custom_8}</td>
+                                                <td colspan="3" class="text-gray-400 text-sm">...up to {custom_10}</td>
                                             </tr>
                                         </tbody>
                                     </table>

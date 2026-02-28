@@ -77,23 +77,24 @@
         {{-- Search and Filters --}}
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <form method="GET" action="{{ route('admin.domains') }}" class="flex flex-wrap items-end gap-4">
-                <div class="flex-1 min-w-[200px]">
-                    <x-input-label for="search" value="Search" />
+                <div class="flex-1 min-w-[200px] relative">
+                    <x-input-label for="search" :value="__('messages.search')" />
                     <x-text-input id="search" name="search" type="text" class="mt-1 block w-full"
-                        :value="request('search')" placeholder="Schedule name, subdomain, or domain..." />
+                        :value="request('search')" :placeholder="__('messages.search_domains')" autocomplete="off" data-subdomain-autocomplete />
+                    <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50"></div>
                 </div>
                 <div>
                     <x-input-label for="mode" :value="__('messages.custom_domain_mode')" />
                     <select id="mode" name="mode" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
-                        <option value="">All</option>
+                        <option value="">@lang('messages.all')</option>
                         <option value="redirect" {{ request('mode') === 'redirect' ? 'selected' : '' }}>@lang('messages.custom_domain_mode_redirect')</option>
                         <option value="direct" {{ request('mode') === 'direct' ? 'selected' : '' }}>@lang('messages.custom_domain_mode_direct')</option>
                     </select>
                 </div>
                 <div>
-                    <x-input-label for="status" value="Status" />
+                    <x-input-label for="status" :value="__('messages.status')" />
                     <select id="status" name="status" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
-                        <option value="">All</option>
+                        <option value="">@lang('messages.all')</option>
                         <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>@lang('messages.domain_pending')</option>
                         <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>@lang('messages.domain_active')</option>
                         <option value="failed" {{ request('status') === 'failed' ? 'selected' : '' }}>@lang('messages.domain_failed')</option>
@@ -114,8 +115,8 @@
                             <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">@lang('messages.schedule')</th>
                             <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">@lang('messages.custom_domain')</th>
                             <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">@lang('messages.custom_domain_mode')</th>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">DO Status</th>
+                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">@lang('messages.status')</th>
+                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">@lang('messages.do_status')</th>
                             <th class="px-6 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">@lang('messages.actions')</th>
                         </tr>
                     </thead>
@@ -214,4 +215,5 @@
         </div>
     </div>
 
+    @include('admin.partials._subdomain-autocomplete')
 </x-app-admin-layout>

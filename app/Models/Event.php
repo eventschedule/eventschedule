@@ -35,6 +35,7 @@ class Event extends Model
         'payment_method',
         'payment_instructions',
         'expire_unpaid_tickets',
+        'ticket_sales_end_at',
         'registration_url',
         'category_id',
         'creator_role_id',
@@ -58,6 +59,7 @@ class Event extends Model
         'custom_fields' => 'array',
         'custom_field_values' => 'array',
         'last_translated_at' => 'datetime',
+        'ticket_sales_end_at' => 'datetime',
         'ticket_price' => 'decimal:2',
         'recurring_include_dates' => 'array',
         'recurring_exclude_dates' => 'array',
@@ -721,6 +723,10 @@ class Event extends Model
             if (Carbon::parse($this->starts_at)->isPast()) {
                 return false;
             }
+        }
+
+        if ($this->ticket_sales_end_at && $this->ticket_sales_end_at->isPast()) {
+            return false;
         }
 
         return $this->tickets_enabled && $this->isPro();

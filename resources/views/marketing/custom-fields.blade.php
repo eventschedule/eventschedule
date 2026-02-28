@@ -251,7 +251,7 @@
                                 Validation
                             </div>
                             <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Required or optional</h2>
-                            <p class="text-gray-600 dark:text-white/80 text-lg">Mark fields as required to ensure you get the information you need, or leave them optional for flexibility. Up to 8 fields per level.</p>
+                            <p class="text-gray-600 dark:text-white/80 text-lg">Mark fields as required to ensure you get the information you need, or leave them optional for flexibility. Up to 10 fields per level.</p>
                         </div>
                         <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-6 border border-gray-200 dark:border-white/10">
                             <div class="space-y-4">
@@ -317,7 +317,7 @@
                             <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold">1</div>
                             <div>
                                 <h4 class="text-gray-900 dark:text-white font-medium mb-1">Define fields in schedule settings</h4>
-                                <p class="text-gray-500 dark:text-gray-400 text-sm">Add up to 8 custom fields with names, types, and validation rules.</p>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm">Add up to 10 custom fields with names, types, and validation rules.</p>
                             </div>
                         </div>
                         <div class="flex gap-4">

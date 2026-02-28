@@ -64,7 +64,7 @@ class BackfillCustomFieldIndices extends Command
 
             // First pass: collect existing indices
             foreach ($fields as $fieldKey => $fieldConfig) {
-                if (isset($fieldConfig['index']) && $fieldConfig['index'] >= 1 && $fieldConfig['index'] <= 8) {
+                if (isset($fieldConfig['index']) && $fieldConfig['index'] >= 1 && $fieldConfig['index'] <= 10) {
                     $usedIndices[] = $fieldConfig['index'];
                 }
             }
@@ -72,12 +72,12 @@ class BackfillCustomFieldIndices extends Command
             // Second pass: assign indices to fields without one
             $nextIndex = 1;
             foreach ($fields as $fieldKey => $fieldConfig) {
-                if (! isset($fieldConfig['index']) || $fieldConfig['index'] < 1 || $fieldConfig['index'] > 8) {
+                if (! isset($fieldConfig['index']) || $fieldConfig['index'] < 1 || $fieldConfig['index'] > 10) {
                     // Find next available index
-                    while (in_array($nextIndex, $usedIndices) && $nextIndex <= 8) {
+                    while (in_array($nextIndex, $usedIndices) && $nextIndex <= 10) {
                         $nextIndex++;
                     }
-                    if ($nextIndex <= 8) {
+                    if ($nextIndex <= 10) {
                         $fields[$fieldKey]['index'] = $nextIndex;
                         $usedIndices[] = $nextIndex;
                         $nextIndex++;
@@ -122,7 +122,7 @@ class BackfillCustomFieldIndices extends Command
 
             // First pass: collect existing indices
             foreach ($fields as $fieldKey => $fieldConfig) {
-                if (isset($fieldConfig['index']) && $fieldConfig['index'] >= 1 && $fieldConfig['index'] <= 8) {
+                if (isset($fieldConfig['index']) && $fieldConfig['index'] >= 1 && $fieldConfig['index'] <= 10) {
                     $usedIndices[] = $fieldConfig['index'];
                 }
             }
@@ -130,12 +130,12 @@ class BackfillCustomFieldIndices extends Command
             // Second pass: assign indices to fields without one
             $nextIndex = 1;
             foreach ($fields as $fieldKey => $fieldConfig) {
-                if (! isset($fieldConfig['index']) || $fieldConfig['index'] < 1 || $fieldConfig['index'] > 8) {
+                if (! isset($fieldConfig['index']) || $fieldConfig['index'] < 1 || $fieldConfig['index'] > 10) {
                     // Find next available index
-                    while (in_array($nextIndex, $usedIndices) && $nextIndex <= 8) {
+                    while (in_array($nextIndex, $usedIndices) && $nextIndex <= 10) {
                         $nextIndex++;
                     }
-                    if ($nextIndex <= 8) {
+                    if ($nextIndex <= 10) {
                         $fields[$fieldKey]['index'] = $nextIndex;
                         $usedIndices[] = $nextIndex;
                         $nextIndex++;
@@ -180,7 +180,7 @@ class BackfillCustomFieldIndices extends Command
 
             // First pass: collect existing indices
             foreach ($fields as $fieldKey => $fieldConfig) {
-                if (isset($fieldConfig['index']) && $fieldConfig['index'] >= 1 && $fieldConfig['index'] <= 8) {
+                if (isset($fieldConfig['index']) && $fieldConfig['index'] >= 1 && $fieldConfig['index'] <= 10) {
                     $usedIndices[] = $fieldConfig['index'];
                 }
             }
@@ -188,12 +188,12 @@ class BackfillCustomFieldIndices extends Command
             // Second pass: assign indices to fields without one
             $nextIndex = 1;
             foreach ($fields as $fieldKey => $fieldConfig) {
-                if (! isset($fieldConfig['index']) || $fieldConfig['index'] < 1 || $fieldConfig['index'] > 8) {
+                if (! isset($fieldConfig['index']) || $fieldConfig['index'] < 1 || $fieldConfig['index'] > 10) {
                     // Find next available index
-                    while (in_array($nextIndex, $usedIndices) && $nextIndex <= 8) {
+                    while (in_array($nextIndex, $usedIndices) && $nextIndex <= 10) {
                         $nextIndex++;
                     }
-                    if ($nextIndex <= 8) {
+                    if ($nextIndex <= 10) {
                         $fields[$fieldKey]['index'] = $nextIndex;
                         $usedIndices[] = $nextIndex;
                         $nextIndex++;

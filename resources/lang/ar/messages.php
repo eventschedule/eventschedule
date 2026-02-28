@@ -825,6 +825,7 @@ return [
     'type_switch' => 'نعم/لا',
     'type_date' => 'تاريخ',
     'type_dropdown' => 'قائمة منسدلة',
+    'type_multiselect' => 'Multi-select',
     'options_placeholder' => 'أدخل الخيارات مفصولة بفواصل',
     'per_order' => 'لكل طلب',
     'per_ticket' => 'لكل تذكرة',

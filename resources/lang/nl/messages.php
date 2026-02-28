@@ -824,6 +824,7 @@ return [
     'type_switch' => 'Ja/Nee',
     'type_date' => 'Datum',
     'type_dropdown' => 'Dropdown',
+    'type_multiselect' => 'Multi-select',
     'options_placeholder' => 'Voer opties in, gescheiden door komma\'s',
     'per_order' => 'Per Bestelling',
     'per_ticket' => 'Per Ticket',

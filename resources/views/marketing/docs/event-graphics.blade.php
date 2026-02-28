@@ -437,7 +437,7 @@ https://example.com/event/summer-concert</code></pre>
                                                 <td>Workshop</td>
                                             </tr>
                                             <tr>
-                                                <td colspan="3" class="text-gray-400 text-sm">...up to {custom_8}</td>
+                                                <td colspan="3" class="text-gray-400 text-sm">...up to {custom_10}</td>
                                             </tr>
                                         </tbody>
                                     </table>

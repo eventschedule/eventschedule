@@ -155,7 +155,7 @@ class SlugPatternUtils
         $customFieldValues = $event?->custom_field_values ?? [];
         $roleCustomFields = $role?->event_custom_fields ?? [];
         // Initialize all custom fields to empty
-        for ($i = 1; $i <= 8; $i++) {
+        for ($i = 1; $i <= 10; $i++) {
             $replacements['{custom_'.$i.'}'] = '';
         }
         // Fill in values using stored index, or fallback to iteration order for backward compatibility
@@ -163,7 +163,7 @@ class SlugPatternUtils
         foreach ($roleCustomFields as $fieldKey => $fieldConfig) {
             $index = $fieldConfig['index'] ?? $fallbackIndex;
             $fallbackIndex++;
-            if ($index >= 1 && $index <= 8) {
+            if ($index >= 1 && $index <= 10) {
                 $value = $customFieldValues[$fieldKey] ?? '';
                 // Convert boolean values to Yes/No for switch type
                 if (($fieldConfig['type'] ?? '') === 'switch') {

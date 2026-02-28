@@ -1700,14 +1700,14 @@ abstract class AbstractEventDesign
             // Add custom field replacements using stable indices
             $customFieldValues = $event->custom_field_values ?? [];
             $roleCustomFields = $this->role->event_custom_fields ?? [];
-            for ($i = 1; $i <= 8; $i++) {
+            for ($i = 1; $i <= 10; $i++) {
                 $replacements['{custom_'.$i.'}'] = '';
             }
             $fallbackIndex = 1;
             foreach ($roleCustomFields as $fieldKey => $fieldConfig) {
                 $index = $fieldConfig['index'] ?? $fallbackIndex;
                 $fallbackIndex++;
-                if ($index >= 1 && $index <= 8) {
+                if ($index >= 1 && $index <= 10) {
                     $value = $customFieldValues[$fieldKey] ?? '';
                     if (($fieldConfig['type'] ?? '') === 'switch') {
                         $value = ($value === '1' || $value === 1 || $value === true) ? __('messages.yes') : __('messages.no');

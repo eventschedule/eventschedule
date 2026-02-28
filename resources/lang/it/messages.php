@@ -827,6 +827,7 @@ return [
     'type_switch' => 'Sì/No',
     'type_date' => 'Data',
     'type_dropdown' => 'Menu a Tendina',
+    'type_multiselect' => 'Multi-select',
     'options_placeholder' => 'Inserisci opzioni separate da virgole',
     'per_order' => 'Per Ordine',
     'per_ticket' => 'Per Biglietto',

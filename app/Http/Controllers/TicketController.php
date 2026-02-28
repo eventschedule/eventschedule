@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\AuditService;
 use App\Services\EmailService;
 use App\Utils\InvoiceNinja;
+use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Endroid\QrCode\QrCode;
@@ -235,8 +236,12 @@ class TicketController extends Controller
                 foreach ($eventCustomFields as $fieldKey => $fieldConfig) {
                     $index = $fieldConfig['index'] ?? $fallbackIndex;
                     $fallbackIndex++;
-                    if ($index >= 1 && $index <= 8) {
+                    if ($index >= 1 && $index <= 10) {
                         $value = $eventCustomValues[$fieldKey] ?? null;
+                        // Handle multiselect values (submitted as array)
+                        if (is_array($value)) {
+                            $value = implode(', ', array_map('trim', $value));
+                        }
                         // Sanitize custom field values to prevent stored XSS
                         if ($value !== null) {
                             $value = trim(strip_tags($value));
@@ -272,8 +277,12 @@ class TicketController extends Controller
                             foreach ($ticketCustomFields as $fieldKey => $fieldConfig) {
                                 $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
                                 $ticketFallbackIndex++;
-                                if ($index >= 1 && $index <= 8) {
+                                if ($index >= 1 && $index <= 10) {
                                     $value = $ticketCustomValues[$ticketId][$fieldKey] ?? null;
+                                    // Handle multiselect values (submitted as array)
+                                    if (is_array($value)) {
+                                        $value = implode(', ', array_map('trim', $value));
+                                    }
                                     // Sanitize custom field values to prevent stored XSS
                                     if ($value !== null) {
                                         $value = trim(strip_tags($value));
@@ -376,7 +385,7 @@ class TicketController extends Controller
                 $unitPrice = $unitPrice * $discountRatio;
                 $lastEligibleIndex = count($lineItems);
             }
-            $unitAmountCents = (int) round($unitPrice * 100);
+            $unitAmountCents = (int) round($unitPrice * MoneyUtils::getSmallestUnitMultiplier($event->ticket_currency_code));
             $totalCents += $unitAmountCents * $saleTicket->quantity;
 
             $lineItems[] = [
@@ -393,7 +402,7 @@ class TicketController extends Controller
         }
 
         // Fix rounding difference to match payment_amount exactly
-        $expectedCents = (int) round($sale->payment_amount * 100);
+        $expectedCents = (int) round($sale->payment_amount * MoneyUtils::getSmallestUnitMultiplier($event->ticket_currency_code));
         if ($totalCents !== $expectedCents && $lastEligibleIndex !== null) {
             $diff = $expectedCents - $totalCents;
             $lastItem = &$lineItems[$lastEligibleIndex];

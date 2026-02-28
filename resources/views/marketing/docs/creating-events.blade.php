@@ -373,7 +373,7 @@
                                 <li>Save your settings</li>
                             </ol>
 
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">Once configured, custom fields appear on the event creation and edit forms. You can define up to 8 custom fields per schedule.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Once configured, custom fields appear on the event creation and edit forms. You can define up to 10 custom fields per schedule.</p>
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">

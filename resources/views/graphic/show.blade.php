@@ -33,7 +33,7 @@
             }
 
             function downloadImage() {
-                if (!graphicData) return;
+                if (!graphicData || !graphicData.image) return;
 
                 const img = document.getElementById('graphicImage');
                 const canvas = document.createElement('canvas');
@@ -56,7 +56,7 @@
             }
 
             function copyImage() {
-                if (!graphicData) return;
+                if (!graphicData || !graphicData.image) return;
 
                 const img = document.getElementById('graphicImage');
                 const canvas = document.createElement('canvas');
@@ -95,7 +95,7 @@
             }
 
             function shareGraphic() {
-                if (!graphicData) return;
+                if (!graphicData || !graphicData.image) return;
 
                 const img = document.getElementById('graphicImage');
                 const canvas = document.createElement('canvas');
@@ -289,6 +289,9 @@
                 const graphicSpinner = document.getElementById('graphicLoadingSpinner');
                 const graphicImage = document.getElementById('graphicImage');
 
+                // Reset state
+                graphicData = null;
+
                 // Show spinners, hide content
                 textSpinner.classList.remove('hidden');
                 textContent.classList.add('hidden');
@@ -310,43 +313,61 @@
                 const urlIncludeHttpsParam = formSettings.url_include_https ? '&url_include_https=1' : '';
                 const urlIncludeIdParam = formSettings.url_include_id ? '&url_include_id=1' : '';
 
-                fetch('{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam + urlIncludeHttpsParam + urlIncludeIdParam)
+                const baseUrl = '{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam + urlIncludeHttpsParam + urlIncludeIdParam;
+
+                let hasError = false;
+
+                function showError(message) {
+                    if (hasError) return;
+                    hasError = true;
+                    const errorTextDiv = document.getElementById('errorMessageText');
+                    if (errorTextDiv) {
+                        errorTextDiv.textContent = message || @json(__("messages.error_loading_graphic"));
+                    }
+                    errorDiv.classList.remove('hidden');
+                }
+
+                // Fetch text (fast)
+                fetch(baseUrl + '&type=text')
                     .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
+                        if (!response.ok) throw new Error('Network response was not ok');
                         return response.json();
                     })
                     .then(data => {
-                        if (data.error) {
-                            throw new Error(data.error);
-                        }
-
-                        graphicData = data;
-
-                        // Hide spinners, show content
+                        if (data.error) throw new Error(data.error);
                         textSpinner.classList.add('hidden');
                         textContent.classList.remove('hidden');
+                        textContent.value = data.text;
+                        graphicData = graphicData || {};
+                        graphicData.text = data.text;
+                        graphicData.download_url = data.download_url;
+                    })
+                    .catch(error => {
+                        console.warn('Error loading text:', error);
+                        textSpinner.classList.add('hidden');
+                        textContent.classList.remove('hidden');
+                        showError(error.message);
+                    });
+
+                // Fetch image (slow)
+                fetch(baseUrl + '&type=image')
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.error) throw new Error(data.error);
                         graphicSpinner.classList.add('hidden');
                         graphicImage.classList.remove('hidden');
-
                         graphicImage.src = 'data:image/png;base64,' + data.image;
-                        textContent.value = data.text;
+                        graphicData = graphicData || {};
+                        graphicData.image = data.image;
                     })
                     .catch(error => {
                         console.warn('Error loading graphic:', error);
-
-                        // Hide spinners on error too
-                        textSpinner.classList.add('hidden');
-                        textContent.classList.remove('hidden');
                         graphicSpinner.classList.add('hidden');
                         graphicImage.classList.remove('hidden');
-
-                        const errorTextDiv = document.getElementById('errorMessageText');
-                        if (errorTextDiv) {
-                            errorTextDiv.textContent = error.message || @json(__("messages.error_loading_graphic"));
-                        }
-                        errorDiv.classList.remove('hidden');
+                        showError(error.message);
                     });
             }
 

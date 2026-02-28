@@ -825,6 +825,7 @@ return [
     'type_switch' => 'Sim/Não',
     'type_date' => 'Data',
     'type_dropdown' => 'Lista Suspensa',
+    'type_multiselect' => 'Multi-select',
     'options_placeholder' => 'Digite opções separadas por vírgulas',
     'per_order' => 'Por Pedido',
     'per_ticket' => 'Por Ingresso',

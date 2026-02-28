@@ -23,6 +23,8 @@ class EventUpdateRequest extends FormRequest
             'promo_codes.*.value' => ['required', 'numeric', 'min:0.01'],
             'promo_codes.*.max_uses' => ['nullable', 'integer', 'min:1'],
             'promo_codes.*.expires_at' => ['nullable', 'date'],
+
+            'ticket_sales_end_at' => ['nullable', 'date'],
         ];
     }
 }

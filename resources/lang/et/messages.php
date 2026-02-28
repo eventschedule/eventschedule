@@ -848,6 +848,7 @@ return [
     'type_switch' => 'Jah/ei',
     'type_date' => 'Kuupäev',
     'type_dropdown' => 'Rippmenüü',
+    'type_multiselect' => 'Multi-select',
     'options_placeholder' => 'Sisestage komadega eraldatud valikud',
     'per_order' => 'Tellimuse järgi',
     'per_ticket' => 'Pileti kohta',

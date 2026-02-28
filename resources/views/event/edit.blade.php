@@ -2518,6 +2518,7 @@
                                                         <option value="switch">{{ __('messages.type_switch') }}</option>
                                                         <option value="date">{{ __('messages.type_date') }}</option>
                                                         <option value="dropdown">{{ __('messages.type_dropdown') }}</option>
+                                                        <option value="multiselect">{{ __('messages.type_multiselect') }}</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -2527,7 +2528,7 @@
                                                 <x-text-input type="text" v-model="field.name_en" class="mt-1 block w-full text-sm" placeholder="{{ __('messages.auto_translated_placeholder') }}" />
                                             </div>
                                             @endif
-                                            <div class="mt-2" v-if="field.type === 'dropdown'">
+                                            <div class="mt-2" v-if="field.type === 'dropdown' || field.type === 'multiselect'">
                                                 <x-input-label :value="__('messages.field_options')" class="text-xs" />
                                                 <x-text-input type="text" v-model="field.options" class="mt-1 block w-full text-sm" placeholder="{{ __('messages.options_placeholder') }}" />
                                             </div>
@@ -2543,7 +2544,7 @@
                                         </div>
                                     </div>
                                     <input type="hidden" name="custom_fields" :value="JSON.stringify(eventCustomFields || {})">
-                                    <button type="button" @click="addEventCustomField" class="mt-2 text-sm text-[#4E81FA] hover:text-blue-700" v-if="getEventCustomFieldCount() < 8">
+                                    <button type="button" @click="addEventCustomField" class="mt-2 text-sm text-[#4E81FA] hover:text-blue-700" v-if="getEventCustomFieldCount() < 10">
                                         + {{ __('messages.add_field') }}
                                     </button>
                                 </div>
@@ -2573,7 +2574,7 @@
                                                 <p v-if="formSubmitAttempted && tickets.length > 1 && !ticket.type" class="mt-1 text-xs text-red-600">{{ __('messages.ticket_type_required') }}</p>
                                             </div>
                                             <div v-if="tickets.length > 1" class="flex items-end gap-3">
-                                                <button type="button" @click="addTicketCustomField(index)" class="mt-1 text-sm text-[#4E81FA] hover:text-blue-700" v-if="getTicketCustomFieldCount(index) < 8">
+                                                <button type="button" @click="addTicketCustomField(index)" class="mt-1 text-sm text-[#4E81FA] hover:text-blue-700" v-if="getTicketCustomFieldCount(index) < 10">
                                                     + {{ __('messages.add_field') }}
                                                 </button>
                                                 <button type="button" @click="removeTicket(index)" class="mt-1 text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
@@ -2605,6 +2606,7 @@
                                                             <option value="switch">{{ __('messages.type_switch') }}</option>
                                                             <option value="date">{{ __('messages.type_date') }}</option>
                                                             <option value="dropdown">{{ __('messages.type_dropdown') }}</option>
+                                                            <option value="multiselect">{{ __('messages.type_multiselect') }}</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -2614,7 +2616,7 @@
                                                     <x-text-input type="text" v-model="field.name_en" class="mt-1 block w-full text-sm" placeholder="{{ __('messages.auto_translated_placeholder') }}" />
                                                 </div>
                                                 @endif
-                                                <div class="mt-2" v-if="field.type === 'dropdown'">
+                                                <div class="mt-2" v-if="field.type === 'dropdown' || field.type === 'multiselect'">
                                                     <x-input-label :value="__('messages.field_options')" class="text-xs" />
                                                     <x-text-input type="text" v-model="field.options" class="mt-1 block w-full text-sm" placeholder="{{ __('messages.options_placeholder') }}" />
                                                 </div>
@@ -2683,6 +2685,29 @@
                                         v-model="event.terms_url" />
                                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                         {{ __('messages.terms_url_help') }}
+                                    </p>
+                                </div>
+
+                                <div class="mb-6">
+                                    <x-input-label :value="__('messages.ticket_sales_end_at')" />
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <input type="text"
+                                            class="datepicker-sales-end-date flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm"
+                                            :value="ticketSalesEndDate"
+                                            autocomplete="off" />
+                                        <div class="relative w-28">
+                                            <input type="text"
+                                                class="sales-end-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm"
+                                                :value="formatPartTime(ticketSalesEndTime)"
+                                                @focus="initSalesEndTimePickerOnFocus($event)"
+                                                @change="onSalesEndTimeChange($event)"
+                                                autocomplete="off" placeholder="{{ __('messages.time') }}" />
+                                            <div class="time-dropdown" ref="sales_end_time_dropdown"></div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="ticket_sales_end_at" :value="ticketSalesEndDate && ticketSalesEndTime ? ticketSalesEndDate + ' ' + ticketSalesEndTime + ':00' : (ticketSalesEndDate ? ticketSalesEndDate + ' 23:59:00' : '')" />
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                        {{ __('messages.ticket_sales_end_at_help') }}
                                     </p>
                                 </div>
 
@@ -2985,6 +3010,26 @@
                                     @endif
                                 @endforeach
                             </select>
+                            @elseif(($field['type'] ?? '') === 'multiselect')
+                            @php
+                                $oldValue = old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '');
+                                $selectedValues = is_array($oldValue) ? $oldValue : array_map('trim', explode(',', $oldValue));
+                            @endphp
+                            <div class="mt-1 space-y-1">
+                                @foreach(explode(',', $field['options'] ?? '') as $option)
+                                    @php $option = trim($option); @endphp
+                                    @if($option)
+                                    <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                                        <input type="checkbox"
+                                            name="custom_field_values[{{ $fieldKey }}][]"
+                                            value="{{ $option }}"
+                                            {{ in_array($option, $selectedValues) ? 'checked' : '' }}
+                                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded" />
+                                        {{ $option }}
+                                    </label>
+                                    @endif
+                                @endforeach
+                            </div>
                             @endif
 
                             <x-input-error class="mt-2" :messages="$errors->get('custom_field_values.' . $fieldKey)" />
@@ -3386,6 +3431,8 @@
         })),
         eventCustomFields: @json($event->custom_fields ?? []),
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
+        ticketSalesEndDate: @json($event->ticket_sales_end_at ? $event->ticket_sales_end_at->format('Y-m-d') : ''),
+        ticketSalesEndTime: @json($event->ticket_sales_end_at ? $event->ticket_sales_end_at->format('H:i') : ''),
         isInvoiceNinjaPaymentLink: @json($user->invoiceninja_api_key && $user->invoiceninja_mode === 'payment_link'),
         activeTicketTab: 'tickets',
         promoCodes: (() => {
@@ -4164,6 +4211,48 @@
           this.promoCodes[pcIndex].expires_at_time = '';
         }
       },
+      initSalesEndDatePicker() {
+        this.$nextTick(() => {
+          var input = document.querySelector('.datepicker-sales-end-date');
+          if (!input || input._flatpickr) return;
+          var defaultDate = this.ticketSalesEndDate || null;
+          if (defaultDate) input.removeAttribute('value');
+          var fpLocale = window.flatpickrLocales ? window.flatpickrLocales[window.appLocale] : null;
+          var localeConfig = fpLocale ? { locale: fpLocale } : {};
+          var self = this;
+          var f = flatpickr(input, Object.assign({
+            allowInput: true,
+            enableTime: false,
+            altInput: true,
+            altFormat: "M j, Y",
+            dateFormat: "Y-m-d",
+            defaultDate: defaultDate,
+            onChange: function(selectedDates, dateStr) {
+              self.ticketSalesEndDate = dateStr;
+            },
+          }, localeConfig));
+          if (f._input) f._input.onkeydown = () => false;
+        });
+      },
+      initSalesEndTimePickerOnFocus(event) {
+        var inputEl = event.target;
+        var dropdownEl = this.$refs['sales_end_time_dropdown'];
+        if (Array.isArray(dropdownEl)) dropdownEl = dropdownEl[0];
+        if (dropdownEl && !inputEl._timepickerInit) {
+          initPartTimePicker(inputEl, dropdownEl);
+        }
+      },
+      onSalesEndTimeChange(event) {
+        var minutes = parseTimeToMinutes(event.target.value);
+        if (minutes !== null) {
+          var h = Math.floor(minutes / 60);
+          var m = minutes % 60;
+          this.ticketSalesEndTime = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+          event.target.value = formatMinutesToTime(minutes);
+        } else {
+          this.ticketSalesEndTime = '';
+        }
+      },
       togglePoll(poll) {
         this.pollSubmitting = true;
         this.pollMessage = '';
@@ -4243,7 +4332,7 @@
       },
       getNextAvailableEventFieldIndex() {
         const usedIndices = Object.values(this.eventCustomFields || {}).map(f => f.index).filter(i => i);
-        for (let i = 1; i <= 8; i++) {
+        for (let i = 1; i <= 10; i++) {
           if (!usedIndices.includes(i)) {
             return i;
           }
@@ -4252,7 +4341,7 @@
       },
       addEventCustomField() {
         const fieldCount = Object.keys(this.eventCustomFields || {}).length;
-        if (fieldCount >= 8) return;
+        if (fieldCount >= 10) return;
         const fieldKey = 'field' + Date.now();
         const fieldIndex = this.getNextAvailableEventFieldIndex();
         this.eventCustomFields = {
@@ -4270,7 +4359,7 @@
       },
       getNextAvailableTicketFieldIndex(ticket) {
         const usedIndices = Object.values(ticket.custom_fields || {}).map(f => f.index).filter(i => i);
-        for (let i = 1; i <= 8; i++) {
+        for (let i = 1; i <= 10; i++) {
           if (!usedIndices.includes(i)) {
             return i;
           }
@@ -4283,7 +4372,7 @@
           ticket.custom_fields = {};
         }
         const fieldCount = Object.keys(ticket.custom_fields).length;
-        if (fieldCount >= 8) return;
+        if (fieldCount >= 10) return;
         const fieldKey = 'field' + Date.now();
         const fieldIndex = this.getNextAvailableTicketFieldIndex(ticket);
         ticket.custom_fields = {
@@ -4657,6 +4746,7 @@
         if (self.promoCodes.length > 0) {
           self.initAllPromoDatePickers();
         }
+        self.initSalesEndDatePicker();
       });
       
       // Initialize sendEmailToMembers for existing selectedMembers

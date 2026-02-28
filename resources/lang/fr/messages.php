@@ -824,6 +824,7 @@ return [
     'type_switch' => 'Oui/Non',
     'type_date' => 'Date',
     'type_dropdown' => 'Liste déroulante',
+    'type_multiselect' => 'Multi-select',
     'options_placeholder' => 'Entrez les options séparées par des virgules',
     'per_order' => 'Par commande',
     'per_ticket' => 'Par billet',

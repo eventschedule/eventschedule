@@ -162,11 +162,12 @@
 
             <form action="{{ route('admin.boost.grant_credit') }}" method="POST" class="flex flex-wrap gap-4 items-end mb-6">
                 @csrf
-                <div>
+                <div class="relative">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.schedule_subdomain')</label>
-                    <input type="text" name="subdomain" required
+                    <input type="text" name="subdomain" required autocomplete="off" data-subdomain-autocomplete
                         class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         placeholder="subdomain">
+                    <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50"></div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.amount') ($)</label>
@@ -225,11 +226,12 @@
 
             <form action="{{ route('admin.boost.set_limit') }}" method="POST" class="flex flex-wrap gap-4 items-end mb-6">
                 @csrf
-                <div>
+                <div class="relative">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.schedule_subdomain')</label>
-                    <input type="text" name="subdomain" required
+                    <input type="text" name="subdomain" required autocomplete="off" data-subdomain-autocomplete
                         class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         placeholder="subdomain">
+                    <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50"></div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.max_budget_per_campaign')</label>
@@ -505,4 +507,6 @@
         });
         @endif
     </script>
+
+    @include('admin.partials._subdomain-autocomplete')
 </x-app-admin-layout>

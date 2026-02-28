@@ -7,6 +7,7 @@ use App\Models\Sale;
 use App\Services\AuditService;
 use App\Services\MetaAdsService;
 use App\Services\UsageTrackingService;
+use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Stripe\Account;
@@ -150,7 +151,8 @@ class StripeController extends Controller
                             return;
                         }
 
-                        $webhookAmount = $paymentIntent->amount / 100;
+                        $currencyCode = $sale->event?->ticket_currency_code ?? 'USD';
+                        $webhookAmount = $paymentIntent->amount / MoneyUtils::getSmallestUnitMultiplier($currencyCode);
 
                         // Validate that the webhook amount matches the expected sale amount
                         $expectedAmount = $sale->payment_amount;
@@ -215,7 +217,8 @@ class StripeController extends Controller
                                 return;
                             }
 
-                            $webhookAmount = $session->amount_total / 100;
+                            $currencyCode = $sale->event?->ticket_currency_code ?? 'USD';
+                            $webhookAmount = $session->amount_total / MoneyUtils::getSmallestUnitMultiplier($currencyCode);
 
                             // Validate that the webhook amount matches the expected sale amount
                             $expectedAmount = $sale->payment_amount;

@@ -265,48 +265,55 @@ class GraphicController extends Controller
             'header_image_url' => $graphicSettings['header_image_url'] ?? null,
         ];
 
-        // Use the service to generate the graphic with the specified layout and options
-        $generator = new EventGraphicGenerator($role, $events, $layout, $directRegistration, $options);
-        $imageData = $generator->generate();
+        // Allow fetching text and image independently to avoid timeouts
+        $type = $request->get('type'); // 'text', 'image', or null (both)
 
-        // Convert image data to base64 for display
-        $imageBase64 = base64_encode($imageData);
+        $response = [];
 
-        // Get text template - use request parameter if provided, otherwise fall back to saved settings
-        $textTemplate = $request->has('text_template')
-            ? $request->get('text_template', '')
-            : ($graphicSettings['text_template'] ?? '');
-
-        // Get URL formatting settings
-        $urlSettings = [
-            'url_include_https' => $request->has('url_include_https')
-                ? $request->boolean('url_include_https')
-                : ($graphicSettings['url_include_https'] ?? false),
-            'url_include_id' => $request->has('url_include_id')
-                ? $request->boolean('url_include_id')
-                : ($graphicSettings['url_include_id'] ?? false),
-        ];
-
-        // Generate event text content
-        $eventText = EventTextGenerator::generate($role, $events, $directRegistration, $textTemplate, $urlSettings);
-
-        // Process text through AI if ai_prompt is set (Enterprise feature)
-        // Use request parameter if provided, otherwise fall back to saved settings
-        $aiPrompt = $request->has('ai_prompt')
-            ? trim($request->get('ai_prompt', ''))
-            : trim($graphicSettings['ai_prompt'] ?? '');
-        if ($role->isEnterprise() && ! empty($aiPrompt) && config('services.google.gemini_key')) {
-            $aiProcessedText = $this->processTextWithAI($eventText, $aiPrompt);
-            if ($aiProcessedText) {
-                $eventText = $aiProcessedText;
-            }
+        // Generate image unless type=text
+        if ($type !== 'text') {
+            $generator = new EventGraphicGenerator($role, $events, $layout, $directRegistration, $options);
+            $imageData = $generator->generate();
+            $response['image'] = base64_encode($imageData);
         }
 
-        return response()->json([
-            'image' => $imageBase64,
-            'text' => $eventText,
-            'download_url' => route('event.download_graphic', ['subdomain' => $role->subdomain, 'layout' => $layout]),
-        ]);
+        // Generate text unless type=image
+        if ($type !== 'image') {
+            // Get text template - use request parameter if provided, otherwise fall back to saved settings
+            $textTemplate = $request->has('text_template')
+                ? $request->get('text_template', '')
+                : ($graphicSettings['text_template'] ?? '');
+
+            // Get URL formatting settings
+            $urlSettings = [
+                'url_include_https' => $request->has('url_include_https')
+                    ? $request->boolean('url_include_https')
+                    : ($graphicSettings['url_include_https'] ?? false),
+                'url_include_id' => $request->has('url_include_id')
+                    ? $request->boolean('url_include_id')
+                    : ($graphicSettings['url_include_id'] ?? false),
+            ];
+
+            // Generate event text content
+            $eventText = EventTextGenerator::generate($role, $events, $directRegistration, $textTemplate, $urlSettings);
+
+            // Process text through AI if ai_prompt is set (Enterprise feature)
+            // Use request parameter if provided, otherwise fall back to saved settings
+            $aiPrompt = $request->has('ai_prompt')
+                ? trim($request->get('ai_prompt', ''))
+                : trim($graphicSettings['ai_prompt'] ?? '');
+            if ($role->isEnterprise() && ! empty($aiPrompt) && config('services.google.gemini_key')) {
+                $aiProcessedText = $this->processTextWithAI($eventText, $aiPrompt);
+                if ($aiProcessedText) {
+                    $eventText = $aiProcessedText;
+                }
+            }
+
+            $response['text'] = $eventText;
+            $response['download_url'] = route('event.download_graphic', ['subdomain' => $role->subdomain, 'layout' => $layout]);
+        }
+
+        return response()->json($response);
     }
 
     public function downloadGraphic(Request $request, $subdomain)

@@ -131,10 +131,11 @@
         {{-- Filters --}}
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <form method="GET" action="{{ route('admin.plans') }}" class="flex flex-col sm:flex-row gap-4">
-                <div class="flex-1">
+                <div class="flex-1 relative">
                     <input type="text" name="search" value="{{ request('search') }}"
-                        placeholder="{{ __('messages.search_schedules') }}"
+                        placeholder="{{ __('messages.search_schedules') }}" autocomplete="off" data-subdomain-autocomplete
                         class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50"></div>
                 </div>
                 <div class="w-full sm:w-40">
                     <select name="plan_type" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
@@ -300,4 +301,5 @@
         </div>
     </div>
 
+    @include('admin.partials._subdomain-autocomplete')
 </x-app-admin-layout>

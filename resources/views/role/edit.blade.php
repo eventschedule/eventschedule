@@ -1976,6 +1976,7 @@
                                             <option value="switch" {{ ($field['type'] ?? '') === 'switch' ? 'selected' : '' }}>{{ __('messages.type_switch') }}</option>
                                             <option value="date" {{ ($field['type'] ?? '') === 'date' ? 'selected' : '' }}>{{ __('messages.type_date') }}</option>
                                             <option value="dropdown" {{ ($field['type'] ?? '') === 'dropdown' ? 'selected' : '' }}>{{ __('messages.type_dropdown') }}</option>
+                                            <option value="multiselect" {{ ($field['type'] ?? '') === 'multiselect' ? 'selected' : '' }}>{{ __('messages.type_multiselect') }}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1988,7 +1989,7 @@
                                         :placeholder="__('messages.auto_translated_placeholder')" />
                                 </div>
                                 @endif
-                                <div class="mt-3 event-field-options-container" style="{{ ($field['type'] ?? '') === 'dropdown' ? '' : 'display: none;' }}">
+                                <div class="mt-3 event-field-options-container" style="{{ in_array($field['type'] ?? '', ['dropdown', 'multiselect']) ? '' : 'display: none;' }}">
                                     <x-input-label :value="__('messages.field_options')" class="text-sm" />
                                     <x-text-input type="text" name="event_custom_fields[{{ $fieldKey }}][options]"
                                         value="{{ $field['options'] ?? '' }}"
@@ -2026,7 +2027,7 @@
                             @endforeach
                         </div>
 
-                        <button type="button" data-action="add-custom-field" id="add-event-custom-field-btn" class="text-sm text-[#4E81FA] hover:text-blue-700 {{ count($eventCustomFields) >= 8 ? 'hidden' : '' }}">
+                        <button type="button" data-action="add-custom-field" id="add-event-custom-field-btn" class="text-sm text-[#4E81FA] hover:text-blue-700 {{ count($eventCustomFields) >= 10 ? 'hidden' : '' }}">
                             + {{ __('messages.add_field') }}
                         </button>
 
@@ -4021,7 +4022,7 @@ document.querySelectorAll('.ai-prompt-textarea').forEach(function(textarea) {
 });
 
 function getNextAvailableFieldIndex() {
-    for (let i = 1; i <= 8; i++) {
+    for (let i = 1; i <= 10; i++) {
         if (!usedEventFieldIndices.includes(i)) {
             return i;
         }
@@ -4033,7 +4034,7 @@ function addEventCustomField() {
     const container = document.getElementById('event-custom-fields-container');
     const currentCount = container.querySelectorAll('.event-custom-field-item').length;
 
-    if (currentCount >= 8) {
+    if (currentCount >= 10) {
         return;
     }
 
@@ -4064,6 +4065,7 @@ function addEventCustomField() {
                         <option value="switch">{!! __('messages.type_switch') !!}</option>
                         <option value="date">{!! __('messages.type_date') !!}</option>
                         <option value="dropdown">{!! __('messages.type_dropdown') !!}</option>
+                        <option value="multiselect">{!! __('messages.type_multiselect') !!}</option>
                     </select>
                 </div>
             </div>
@@ -4132,7 +4134,7 @@ function removeEventCustomField(button) {
 function toggleEventFieldOptions(selectElement) {
     const fieldItem = selectElement.closest('.event-custom-field-item');
     const optionsContainer = fieldItem.querySelector('.event-field-options-container');
-    if (selectElement.value === 'dropdown') {
+    if (selectElement.value === 'dropdown' || selectElement.value === 'multiselect') {
         optionsContainer.style.display = 'block';
     } else {
         optionsContainer.style.display = 'none';
@@ -4143,7 +4145,7 @@ function updateEventCustomFieldButton() {
     const container = document.getElementById('event-custom-fields-container');
     const currentCount = container.querySelectorAll('.event-custom-field-item').length;
     const addButton = document.getElementById('add-event-custom-field-btn');
-    if (currentCount >= 8) {
+    if (currentCount >= 10) {
         addButton.classList.add('hidden');
     } else {
         addButton.classList.remove('hidden');

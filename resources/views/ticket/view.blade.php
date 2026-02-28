@@ -297,7 +297,7 @@
                   $index = $fieldConfig['index'] ?? $eventFallbackIndex;
                   $eventFallbackIndex++;
                 @endphp
-                @if ($index >= 1 && $index <= 8 && $sale->{"custom_value{$index}"})
+                @if ($index >= 1 && $index <= 10 && $sale->{"custom_value{$index}"})
                   <div class="flex gap-[8px] items-start mb-[8px]">
                     <span class="text-[12px] text-white/60 print-text-gray font-medium">{{ $fieldConfig['name'] }}:</span>
                     <span class="text-[12px] text-white print-text-dark">{{ $sale->{"custom_value{$index}"} }}</span>
@@ -317,7 +317,7 @@
                       $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
                       $ticketFallbackIndex++;
                     @endphp
-                    @if ($index >= 1 && $index <= 8 && $saleTicket->{"custom_value{$index}"})
+                    @if ($index >= 1 && $index <= 10 && $saleTicket->{"custom_value{$index}"})
                       <div class="flex gap-[8px] items-start mb-[4px] ml-[12px]">
                         <span class="text-[12px] text-white/60 print-text-gray font-medium">{{ $fieldConfig['name'] }}:</span>
                         <span class="text-[12px] text-white print-text-dark">{{ $saleTicket->{"custom_value{$index}"} }}</span>

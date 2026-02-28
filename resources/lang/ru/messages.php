@@ -849,6 +849,7 @@ return [
     'type_switch' => 'Да/Нет',
     'type_date' => 'Дата',
     'type_dropdown' => 'Падать',
+    'type_multiselect' => 'Multi-select',
     'options_placeholder' => 'Введите параметры через запятую',
     'per_order' => 'За заказ',
     'per_ticket' => 'За билет',

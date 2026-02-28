@@ -295,7 +295,7 @@ class Translate extends Command
                 $allOptionValues = [];
                 $dropdownFieldKeys = [];
                 foreach ($customFields as $fieldKey => $fieldConfig) {
-                    if (($fieldConfig['type'] ?? '') === 'dropdown' && ! empty($fieldConfig['options']) && empty($fieldConfig['options_en'])) {
+                    if (in_array($fieldConfig['type'] ?? '', ['dropdown', 'multiselect']) && ! empty($fieldConfig['options']) && empty($fieldConfig['options_en'])) {
                         $options = array_filter(array_map('trim', explode(',', $fieldConfig['options'])));
                         foreach ($options as $opt) {
                             $allOptionValues[$opt] = $opt;

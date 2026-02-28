@@ -17,14 +17,14 @@
                     <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
                 <div class="ms-3">
-                    <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Queue Health Issues</h3>
+                    <h3 class="text-sm font-medium text-red-800 dark:text-red-200">@lang('messages.queue_health_issues')</h3>
                     <div class="mt-2 text-sm text-red-700 dark:text-red-300">
                         <ul class="list-disc ps-5 space-y-1">
                             @if ($failedJobsCount > 0)
-                            <li>{{ number_format($failedJobsCount) }} failed {{ Str::plural('job', $failedJobsCount) }}</li>
+                            <li>@lang('messages.n_failed_jobs', ['count' => number_format($failedJobsCount)])</li>
                             @endif
                             @if ($oldestJobAge && $oldestJobAge->diffInMinutes(now()) > 60)
-                            <li>Oldest pending job is {{ $oldestJobAge->diffForHumans(null, true, true) }} old - worker may be stuck.</li>
+                            <li>@lang('messages.oldest_job_stuck', ['age' => $oldestJobAge->diffForHumans(null, true, true)])</li>
                             @endif
                         </ul>
                     </div>
@@ -40,7 +40,7 @@
                     <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                     </svg>
-                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Pending Jobs</h4>
+                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.pending_jobs')</h4>
                 </div>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($pendingJobsCount) }}</p>
                 @if ($pendingByQueue->count() > 0)
@@ -57,7 +57,7 @@
                     <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Failed Jobs</h4>
+                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.failed_jobs')</h4>
                 </div>
                 <p class="text-2xl font-bold {{ $failedJobsCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">{{ number_format($failedJobsCount) }}</p>
             </div>
@@ -67,7 +67,7 @@
                     <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
-                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Job Batches</h4>
+                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.job_batches')</h4>
                 </div>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($jobBatchesCount) }}</p>
             </div>
@@ -77,12 +77,12 @@
                     <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Oldest Pending Job</h4>
+                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.oldest_pending_job')</h4>
                 </div>
                 @if ($oldestJobAge)
                 <p class="text-2xl font-bold {{ $oldestJobAge->diffInMinutes(now()) > 60 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">{{ $oldestJobAge->diffForHumans(null, false, true) }}</p>
                 @else
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">None</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">@lang('messages.none')</p>
                 @endif
             </div>
         </div>
@@ -90,7 +90,7 @@
         {{-- Pending Jobs Breakdown --}}
         @if ($pendingByClass->count() > 0)
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Pending Jobs by Class</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.pending_jobs_by_class')</h3>
             <div class="space-y-3">
                 @foreach ($pendingByClass as $className => $count)
                 <div class="flex items-center">
@@ -118,13 +118,13 @@
             <form method="POST" action="{{ route('admin.queue.retry-all') }}" class="js-confirm-form" data-confirm="Retry all {{ number_format($failedJobsCount) }} failed jobs?">
                 @csrf
                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md">
-                    Retry All Failed
+                    @lang('messages.retry_all_failed')
                 </button>
             </form>
             <form method="POST" action="{{ route('admin.queue.clear-failed') }}" class="js-confirm-form" data-confirm="Permanently delete all {{ number_format($failedJobsCount) }} failed jobs?">
                 @csrf
                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md">
-                    Clear All Failed
+                    @lang('messages.clear_all_failed')
                 </button>
             </form>
             @endif
@@ -132,7 +132,7 @@
             <form method="POST" action="{{ route('admin.queue.flush-pending') }}" class="js-confirm-form" data-confirm="Permanently delete all {{ number_format($pendingJobsCount) }} pending jobs? This cannot be undone.">
                 @csrf
                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md">
-                    Flush Pending
+                    @lang('messages.flush_pending')
                 </button>
             </form>
             @endif
@@ -141,17 +141,17 @@
 
         {{-- Failed Jobs Table --}}
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Failed Jobs</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.failed_jobs')</h3>
             @if ($failedJobs->count() > 0)
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead>
                         <tr>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Job Class</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Queue</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Exception</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Failed At</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.job_class')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.queue')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.exception')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.failed_at')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.actions')</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -170,11 +170,11 @@
                                 <div class="flex gap-3">
                                     <form method="POST" action="{{ route('admin.queue.retry', $job->uuid) }}">
                                         @csrf
-                                        <button type="submit" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">Retry</button>
+                                        <button type="submit" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">@lang('messages.retry')</button>
                                     </form>
                                     <form method="POST" action="{{ route('admin.queue.delete', $job->uuid) }}">
                                         @csrf
-                                        <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium">Delete</button>
+                                        <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium">@lang('messages.delete')</button>
                                     </form>
                                 </div>
                             </td>
@@ -184,23 +184,23 @@
                 </table>
             </div>
             @else
-            <p class="text-sm text-gray-500 dark:text-gray-400">No failed jobs.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_failed_jobs')</p>
             @endif
         </div>
 
         {{-- Pending Jobs Table --}}
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Pending Jobs</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.pending_jobs')</h3>
             @if ($pendingJobsTable->count() > 0)
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead>
                         <tr>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Job Class</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Queue</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Attempts</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created At</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Available At</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.job_class')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.queue')</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.attempts')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.created_at')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.available_at')</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -217,25 +217,25 @@
                 </table>
             </div>
             @else
-            <p class="text-sm text-gray-500 dark:text-gray-400">No pending jobs.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_pending_jobs')</p>
             @endif
         </div>
 
         {{-- Job Batches Table --}}
         @if ($jobBatches->count() > 0)
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Job Batches</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.job_batches')</h3>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead>
                         <tr>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pending</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Failed</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Progress</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Finished</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.name')</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.total')</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.pending')</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.failed')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.progress')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.created')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.finished')</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
