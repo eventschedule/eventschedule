@@ -1204,7 +1204,7 @@ class Role extends Model implements MustVerifyEmail
     public function photoCount(): int
     {
         return \App\Models\EventPhoto::whereIn('event_id',
-            $this->events()->pluck('events.id')
+            $this->events()->select('events.id')
         )->count();
     }
 

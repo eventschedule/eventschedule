@@ -2334,4 +2334,11 @@ return [
     'embed_registration_description' => 'Embed a registration form for this event on your website using the iframe code below.',
     'tickets_not_available_embed' => 'Tickets are no longer available for this event.',
     'registration_not_available_embed' => 'Registration is not available for this event.',
+    'photo_limit_reached' => 'Достигнут лимит фотографий для этого расписания. Организатор может обновить план для неограниченного количества фотографий.',
+    'photo_usage' => 'Использование фотографий',
+    'photos_used' => ':used из :limit фотографий использовано',
+    'photos_remaining' => ':count осталось',
+    'photo_upgrade_plan' => 'Обновите для неограниченного количества фотографий',
+    'download_all_photos' => 'Скачать все фотографии',
+    'no_photos_to_download' => 'Нет фотографий для скачивания.',
 ];

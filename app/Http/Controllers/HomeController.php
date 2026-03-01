@@ -324,9 +324,24 @@ class HomeController extends Controller
 
             session()->flash('message', __('messages.comment_submitted'));
         } elseif ($pending['type'] === 'photo') {
+            $role = Role::where('subdomain', $pending['subdomain'] ?? '')->first();
+            if ($role && ! $role->canUploadPhoto()) {
+                $tempFilename = $pending['temp_filename'] ?? '';
+                if ($tempFilename) {
+                    \Illuminate\Support\Facades\Storage::delete('temp/'.$tempFilename);
+                }
+                session()->flash('error', __('messages.photo_limit_reached'));
+
+                return $returnUrl;
+            }
+
             $tempFilename = $pending['temp_filename'] ?? '';
             $extension = $pending['extension'] ?? '';
             if (! $tempFilename || ! $extension) {
+                if ($tempFilename) {
+                    \Illuminate\Support\Facades\Storage::delete('temp/'.$tempFilename);
+                }
+
                 return $returnUrl;
             }
 

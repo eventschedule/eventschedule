@@ -2331,4 +2331,11 @@ return [
     'embed_registration_description' => 'Embed a registration form for this event on your website using the iframe code below.',
     'tickets_not_available_embed' => 'Tickets are no longer available for this event.',
     'registration_not_available_embed' => 'Registration is not available for this event.',
+    'photo_limit_reached' => 'Selle kalendri fotode limiit on täis. Korraldaja saab piiramatute fotode jaoks versiooni uuendada.',
+    'photo_usage' => 'Fotode kasutus',
+    'photos_used' => ':used / :limit fotot kasutatud',
+    'photos_remaining' => ':count järelejäänud',
+    'photo_upgrade_plan' => 'Uuenda piiramatute fotode jaoks',
+    'download_all_photos' => 'Laadi kõik fotod alla',
+    'no_photos_to_download' => 'Pole fotosid allalaadimiseks.',
 ];

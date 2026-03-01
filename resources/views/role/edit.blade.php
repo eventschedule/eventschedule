@@ -1849,15 +1849,6 @@
                                     <input type="hidden" name="custom_domain_mode" value="">
                                     @endif
 
-                                    {{-- Redirect mode: Cloudflare guide link --}}
-                                    <div x-show="mode === 'redirect'" x-cloak class="mt-3">
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                                            <x-link href="{{ marketing_url('/docs/creating-schedules#custom-domain') }}" target="_blank" class="text-sm">
-                                                {{ __('messages.custom_domain_setup_guide') }}
-                                            </x-link>
-                                        </p>
-                                    </div>
-
                                     {{-- Direct mode: CNAME instructions and status --}}
                                     <div x-show="mode === 'direct'" x-cloak class="mt-3">
                                         @if (config('services.digitalocean.app_hostname'))
@@ -1903,6 +1894,13 @@
                                         </div>
                                         @endif
                                     </div>
+                                </div>
+                                <div class="mt-3">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        <x-link href="{{ marketing_url('/docs/creating-schedules#custom-domain') }}" target="_blank" class="text-sm">
+                                            {{ __('messages.custom_domain_setup_guide') }}
+                                        </x-link>
+                                    </p>
                                 </div>
                                 @else
                                 <x-text-input id="custom_domain" name="custom_domain" type="url" class="mt-1 block w-full"

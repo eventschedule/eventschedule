@@ -1047,10 +1047,12 @@
                   </div>
                   @endif
                   <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
+                    @if (! $photoLimitReached)
                     <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
                       {{ __('messages.add_photo') }}
                     </button>
+                    @endif
                     <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                       {{ __('messages.add_video') }}
@@ -1070,6 +1072,7 @@
                         <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
+                    @if (! $photoLimitReached)
                     <div x-show="showPhoto" x-cloak class="mt-2 w-full">
                       <form method="POST" action="{{ route('event.submit_photo', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" enctype="multipart/form-data" class="flex flex-col gap-2">
                         @csrf
@@ -1107,6 +1110,7 @@
                         <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.upload_photo') }}</button>
                       </form>
                     </div>
+                    @endif
                     <div x-show="showComment" x-cloak class="mt-2 w-full">
                       <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex flex-col gap-2">
                         @csrf
@@ -1220,10 +1224,12 @@
                   </div>
                   @endif
                   <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
+                    @if (! $photoLimitReached)
                     <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
                       {{ __('messages.add_photo') }}
                     </button>
+                    @endif
                     <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                       {{ __('messages.add_video') }}
@@ -1243,6 +1249,7 @@
                         <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
+                    @if (! $photoLimitReached)
                     <div x-show="showPhoto" x-cloak class="mt-2 w-full">
                       <form method="POST" action="{{ route('event.submit_photo', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" enctype="multipart/form-data" class="flex flex-col gap-2">
                         @csrf
@@ -1280,6 +1287,7 @@
                         <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.upload_photo') }}</button>
                       </form>
                     </div>
+                    @endif
                     <div x-show="showComment" x-cloak class="mt-2 w-full">
                       <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex flex-col gap-2">
                         @csrf
@@ -1518,10 +1526,12 @@
           @endif
           @if ($event->parts->count() == 0)
           <div class="flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
+            @if (! $photoLimitReached)
             <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
               {{ __('messages.add_photo') }}
             </button>
+            @endif
             <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
               {{ __('messages.add_video') }}
@@ -1540,6 +1550,7 @@
                 <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
               </form>
             </div>
+            @if (! $photoLimitReached)
             <div x-show="showPhoto" x-cloak class="w-full mt-2">
               <form method="POST" action="{{ route('event.submit_photo', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" enctype="multipart/form-data" class="flex flex-col gap-2">
                 @csrf
@@ -1576,6 +1587,7 @@
                 <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.upload_photo') }}</button>
               </form>
             </div>
+            @endif
             <div x-show="showComment" x-cloak class="w-full mt-2">
               <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex flex-col gap-2">
                 @csrf

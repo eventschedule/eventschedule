@@ -284,7 +284,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{subdomain}/import', [EventController::class, 'showImport'])->name('event.show_import');
     Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse');
     Route::post('/{subdomain}/parse-event-parts', [EventController::class, 'parseEventParts'])->name('event.parse_parts');
-    Route::post('/{subdomain}/generate-flyer', [EventController::class, 'generateFlyer'])->name('event.generate_flyer');
+    Route::post('/{subdomain}/generate-flyer', [EventController::class, 'generateFlyer'])->name('event.generate_flyer')->middleware('throttle:5,1');
     Route::post('/{subdomain}/import', [EventController::class, 'import'])->name('event.import');
     Route::post('/{subdomain}/test-import', [RoleController::class, 'testImport'])->name('role.test_import');
     Route::get('/{subdomain}/search-youtube', [RoleController::class, 'searchYouTube'])->name('role.search_youtube');
@@ -298,6 +298,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/{subdomain}/reject-comment/{hash}', [EventController::class, 'rejectComment'])->name('event.reject_comment');
     Route::post('/{subdomain}/approve-photo/{hash}', [EventController::class, 'approvePhoto'])->name('event.approve_photo');
     Route::delete('/{subdomain}/reject-photo/{hash}', [EventController::class, 'rejectPhoto'])->name('event.reject_photo');
+    Route::get('/{subdomain}/download-photos/{event_hash}', [EventController::class, 'downloadPhotos'])->name('event.download_photos')->middleware('throttle:5,1');
 
     Route::post('/{subdomain}/polls/{event_hash}', [EventController::class, 'storePoll'])->name('event.store_poll');
     Route::put('/{subdomain}/polls/{event_hash}/{poll_hash}', [EventController::class, 'updatePoll'])->name('event.update_poll');

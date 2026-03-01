@@ -2309,4 +2309,11 @@ return [
     'embed_registration_description' => 'Embed a registration form for this event on your website using the iframe code below.',
     'tickets_not_available_embed' => 'Tickets are no longer available for this event.',
     'registration_not_available_embed' => 'Registration is not available for this event.',
+    'photo_limit_reached' => 'מגבלת התמונות ללוח זמנים זה הושגה. המארגן יכול לשדרג לתמונות ללא הגבלה.',
+    'photo_usage' => 'שימוש בתמונות',
+    'photos_used' => ':used מתוך :limit תמונות בשימוש',
+    'photos_remaining' => ':count נותרו',
+    'photo_upgrade_plan' => 'שדרג לתמונות ללא הגבלה',
+    'download_all_photos' => 'הורד את כל התמונות',
+    'no_photos_to_download' => 'אין תמונות להורדה.',
 ];

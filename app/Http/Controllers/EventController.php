@@ -1280,7 +1280,7 @@ class EventController extends Controller
         ]);
 
         $eventId = UrlUtils::decodeId($request->input('event_id'));
-        $event = Event::with(['roles', 'venue', 'tickets'])->findOrFail($eventId);
+        $event = Event::with(['roles', 'tickets'])->findOrFail($eventId);
 
         if ($request->user()->cannot('update', $event)) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
@@ -1875,6 +1875,10 @@ class EventController extends Controller
             abort(404);
         }
 
+        if (! $role->canUploadPhoto()) {
+            return redirect()->back()->with('error', __('messages.photo_limit_reached'));
+        }
+
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
         if ($event->is_private && ! $isMemberOrAdmin) {
@@ -1990,6 +1994,71 @@ class EventController extends Controller
         $photo->delete();
 
         return redirect()->to(url()->previous().'#section-fan-content')->with('message', __('messages.photo_rejected'));
+    }
+
+    public function downloadPhotos(Request $request, $subdomain, $event_hash)
+    {
+        $role = Role::where('subdomain', $subdomain)->firstOrFail();
+
+        if (! $role->isPro() && ! $request->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $event_id = UrlUtils::decodeId($event_hash);
+        $event = Event::findOrFail($event_id);
+
+        if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
+            abort(404);
+        }
+
+        if (! $request->user()->canEditEvent($event)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $photos = EventPhoto::where('event_id', $event->id)
+            ->where('is_approved', true)
+            ->get();
+
+        if ($photos->isEmpty()) {
+            return redirect()->back()->with('error', __('messages.no_photos_to_download'));
+        }
+
+        $zipFilename = 'photos-'.Str::slug($event->name).'-'.now()->format('Y-m-d').'.zip';
+        $zipPath = storage_path('app/temp/'.$zipFilename);
+
+        if (! is_dir(storage_path('app/temp'))) {
+            mkdir(storage_path('app/temp'), 0755, true);
+        }
+
+        $zip = new \ZipArchive;
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            return redirect()->back()->with('error', __('messages.something_went_wrong'));
+        }
+
+        foreach ($photos as $index => $photo) {
+            $rawPath = $photo->getAttributes()['photo_url'];
+            if (! $rawPath) {
+                continue;
+            }
+
+            $storagePath = config('filesystems.default') == 'local' ? 'public/'.$rawPath : $rawPath;
+
+            try {
+                $contents = Storage::get($storagePath);
+                if ($contents) {
+                    $extension = pathinfo($rawPath, PATHINFO_EXTENSION) ?: 'jpg';
+                    $zip->addFromString(($index + 1).'-'.Str::slug($event->name).'.'.$extension, $contents);
+                }
+            } catch (\Exception $e) {
+                report($e);
+
+                continue;
+            }
+        }
+
+        $zip->close();
+
+        return response()->download($zipPath, $zipFilename)->deleteFileAfterSend(true);
     }
 
     public function scanAgenda(Request $request, $subdomain)

@@ -17,12 +17,15 @@
             "AI Event Parsing",
             "Email Newsletters",
             "Google Calendar Sync",
+            "CalDAV Sync",
+            "iCal Download",
             "Analytics Dashboard",
             "Recurring Events",
             "Team Scheduling",
             "Private Events",
             "Custom Fields",
             "Event Graphics",
+            "AI Flyer Generation",
             "Event Boost Ad Campaigns",
             "Fan Videos & Comments",
             "Event Polls",
@@ -32,10 +35,16 @@
             "Open Source & REST API",
             "Check-in Dashboard",
             "Ticket Waitlist",
+            "Promo/Discount Codes",
+            "Embed Calendar",
+            "Embed Ticket Widget",
+            "Free Event Registration",
             "WhatsApp Event Creation",
             "Sale Notification Emails",
             "Sales CSV Export",
-            "Post-Event Feedback"
+            "Post-Event Feedback",
+            "Availability Management",
+            "Email Scheduling"
         ],
         "offers": {
             "@type": "Offer",
@@ -148,6 +157,7 @@
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Stripe payments</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Check-in dashboard</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Waitlist</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Promo codes</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Sales export</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Free event RSVP</span>
                             </div>

@@ -2317,4 +2317,11 @@ return [
     'embed_registration_description' => 'Embed a registration form for this event on your website using the iframe code below.',
     'tickets_not_available_embed' => 'Tickets are no longer available for this event.',
     'registration_not_available_embed' => 'Registration is not available for this event.',
+    'photo_limit_reached' => 'تم الوصول إلى الحد الأقصى للصور في هذا الجدول. يمكن للمنظم الترقية للحصول على صور غير محدودة.',
+    'photo_usage' => 'استخدام الصور',
+    'photos_used' => ':used من :limit صورة مستخدمة',
+    'photos_remaining' => ':count متبقية',
+    'photo_upgrade_plan' => 'الترقية للحصول على صور غير محدودة',
+    'download_all_photos' => 'تحميل جميع الصور',
+    'no_photos_to_download' => 'لا توجد صور للتحميل.',
 ];

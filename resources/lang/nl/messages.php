@@ -2314,4 +2314,11 @@ return [
     'embed_registration_description' => 'Embed a registration form for this event on your website using the iframe code below.',
     'tickets_not_available_embed' => 'Tickets are no longer available for this event.',
     'registration_not_available_embed' => 'Registration is not available for this event.',
+    'photo_limit_reached' => 'De fotolimiet voor dit schema is bereikt. De organisator kan upgraden voor onbeperkte foto\'s.',
+    'photo_usage' => 'Fotogebruik',
+    'photos_used' => ':used van :limit foto\'s gebruikt',
+    'photos_remaining' => ':count resterend',
+    'photo_upgrade_plan' => 'Upgraden voor onbeperkte foto\'s',
+    'download_all_photos' => 'Alle foto\'s downloaden',
+    'no_photos_to_download' => 'Geen foto\'s om te downloaden.',
 ];

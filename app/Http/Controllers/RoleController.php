@@ -643,6 +643,7 @@ class RoleController extends Controller
         $myPendingVideos = collect();
         $myPendingComments = collect();
         $myPendingPhotos = collect();
+        $photoLimitReached = false;
 
         $embed = request()->embed;
         $view = 'role/show-guest';
@@ -684,6 +685,7 @@ class RoleController extends Controller
 
             $view = 'event/show-guest';
             $event->loadMissing(['approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')]);
+            $photoLimitReached = ! $role->canUploadPhoto();
 
             if (auth()->check()) {
                 $myPendingVideos = \App\Models\EventVideo::where('event_id', $event->id)
@@ -740,6 +742,7 @@ class RoleController extends Controller
                 'myPendingVideos',
                 'myPendingComments',
                 'myPendingPhotos',
+                'photoLimitReached',
             ));
 
         return $response;

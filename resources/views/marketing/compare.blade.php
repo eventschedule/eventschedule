@@ -162,11 +162,15 @@
                                     ['Free event RSVP', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
                                     ['Recurring events', 'Yes (Free)', 'Yes', 'Yes', 'No', 'Yes'],
                                     ['Event polls', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
+                                    ['Promo/discount codes', 'Yes (Pro)', 'Yes', 'No', 'No', 'No'],
+                                    ['Post-event feedback', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
+                                    ['Embed ticket widget', 'Yes (Pro)', 'Yes', 'No', 'Yes', 'No'],
                                 ],
                                 'Integrations' => [
                                     ['Google Calendar sync', 'Yes (Free)', 'No native 2-way sync', 'Yes', 'No', 'N/A'],
                                     ['CalDAV sync', 'Yes (Free)', 'No', 'No', 'No', 'No'],
                                     ['Newsletters', 'Yes (Free)', 'Yes', 'Yes', 'No', 'No'],
+                                    ['Embed calendar on website', 'Yes (Free)', 'Yes', 'No', 'Yes', 'No'],
                                 ],
                                 'Customization' => [
                                     ['Custom domains', 'Yes (Enterprise)', 'No', 'Yes (Plus)', 'Yes (paid)', 'No'],
@@ -183,6 +187,8 @@
                                     ['Team collaboration', '1 member (Free), multiple (Enterprise)', 'Yes', '3 admins (free), 5 (Plus)', 'Yes', 'Yes'],
                                     ['Private/password-protected events', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
                                     ['Availability management', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
+                                    ['WhatsApp event creation', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
+                                    ['Email scheduling', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
                                 ],
                                 'Platform' => [
                                     ['REST API', 'Yes (Pro)', 'Yes', 'Yes (Plus)', 'Yes', 'Yes'],

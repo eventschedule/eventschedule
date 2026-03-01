@@ -2315,4 +2315,11 @@ return [
     'embed_registration_description' => 'Embed a registration form for this event on your website using the iframe code below.',
     'tickets_not_available_embed' => 'Tickets are no longer available for this event.',
     'registration_not_available_embed' => 'Registration is not available for this event.',
+    'photo_limit_reached' => 'Se ha alcanzado el límite de fotos para este calendario. El organizador puede actualizar para obtener fotos ilimitadas.',
+    'photo_usage' => 'Uso de fotos',
+    'photos_used' => ':used de :limit fotos utilizadas',
+    'photos_remaining' => ':count restantes',
+    'photo_upgrade_plan' => 'Actualizar para fotos ilimitadas',
+    'download_all_photos' => 'Descargar todas las fotos',
+    'no_photos_to_download' => 'No hay fotos para descargar.',
 ];

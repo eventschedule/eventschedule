@@ -1327,7 +1327,7 @@
 
                             @if ($event->flyer_image_url)
                             <div id="flyer_image_existing" class="relative inline-block mt-4 pt-1">
-                                <img src="{{ $event->flyer_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" id="flyer_preview" />
+                                <img src="{{ $event->flyer_image_url }}" alt="{{ __('messages.flyer_image') }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" id="flyer_preview" />
                                 <button type="button"
                                     id="delete-flyer-btn"
                                     data-url="{{ route('event.delete_image', ['subdomain' => $subdomain]) }}"
@@ -3356,7 +3356,15 @@
                         {{-- Approved Section --}}
                         @if ($approvedVideos->count() > 0 || $approvedComments->count() > 0 || $approvedPhotos->count() > 0)
                         <div>
-                            <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-4">{{ __('messages.approved_content') }}</h3>
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200">{{ __('messages.approved_content') }}</h3>
+                                @if ($role->isPro() && $approvedPhotos->count() > 0)
+                                <a href="{{ route('event.download_photos', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="inline-flex items-center gap-1.5 text-sm text-[#4E81FA] hover:underline font-medium">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                                    {{ __('messages.download_all_photos') }}
+                                </a>
+                                @endif
+                            </div>
                             <div class="space-y-4">
                                 @foreach ($approvedVideos as $video)
                                 <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">

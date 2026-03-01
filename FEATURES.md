@@ -30,7 +30,7 @@ All users get these features with no subscription required.
 | Venue location maps | Google Maps integration |
 | Google Calendar sync | Bidirectional sync |
 | CalDAV sync | Standard calendar protocol |
-| Fan videos, photos & comments on events | User-generated content on events |
+| Fan videos, photos & comments on events | User-generated content on events (25 photo limit on free tier) |
 | Built-in analytics | Schedule analytics dashboard |
 | Sub-schedules | Group events into sub-schedules |
 | Online events | Virtual event support |
@@ -39,7 +39,7 @@ All users get these features with no subscription required.
 | Embed calendar on website | iframe embed with X-Frame-Options |
 | Free event registration / RSVP | Native sign-up for free events with optional capacity limits |
 | iCal download | Download .ics files for individual events and recurring event dates |
-| Fan photos on events | User-submitted photos with approval workflow |
+| Fan photos on events (25 per schedule) | User-submitted photos with approval workflow; upgrade prompt at limit |
 | Event cloning | Duplicate an existing event as a starting point for a new one |
 | 10 newsletters per month | Basic newsletter sending limit |
 
@@ -68,6 +68,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Promo/discount codes | `PromoCodeController`, tied to ticketing gate | Percentage or fixed discounts with usage limits and expiration dates |
 | Invoice Ninja integration | `InvoiceNinjaController` | Alternative payment processing via Invoice Ninja |
 | 100 newsletters per month | `$role->newsletterLimit()` | Increased sending limit |
+| Unlimited fan photos + bulk download | `EventController`, `$role->isPro()` | No per-schedule photo cap; download all event photos as zip |
 
 ## Enterprise Features
 
