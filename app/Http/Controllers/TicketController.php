@@ -575,7 +575,7 @@ class TicketController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'event_id' => 'required|string',
-            'event_date' => 'required|date',
+            'event_date' => 'required|date_format:Y-m-d',
         ]);
 
         // Turnstile CAPTCHA validation
@@ -1371,10 +1371,13 @@ class TicketController extends Controller
                         $sale->status = 'refunded';
                         $sale->save();
 
-                        AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+                        // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
+                        if ($sale->payment_method !== 'rsvp') {
+                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
 
-                        if ($sale->discount_amount > 0) {
-                            AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                            if ($sale->discount_amount > 0) {
+                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                            }
                         }
                     });
                     $actionPerformed = true;
@@ -1391,7 +1394,8 @@ class TicketController extends Controller
                     });
                     $actionPerformed = true;
 
-                    if ($wasPaid) {
+                    // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
+                    if ($wasPaid && $sale->payment_method !== 'rsvp') {
                         AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
 
                         if ($sale->discount_amount > 0) {
@@ -1409,10 +1413,13 @@ class TicketController extends Controller
                         $sale->status = 'cancelled';
                         $sale->save();
 
-                        AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+                        // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
+                        if ($sale->payment_method !== 'rsvp') {
+                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
 
-                        if ($sale->discount_amount > 0) {
-                            AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                            if ($sale->discount_amount > 0) {
+                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                            }
                         }
                     }
 

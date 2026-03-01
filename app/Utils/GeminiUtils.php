@@ -1362,7 +1362,7 @@ class GeminiUtils
 
         $ticket = $event->tickets->first();
         if ($ticket && $ticket->price > 0) {
-            $prompt .= "Ticket price: {$ticket->price} {$ticket->currency_code}\n";
+            $prompt .= 'Ticket price: ' . MoneyUtils::format($ticket->price, $event->ticket_currency_code) . "\n";
         }
 
         $prompt .= "\nDesign directives:\n";

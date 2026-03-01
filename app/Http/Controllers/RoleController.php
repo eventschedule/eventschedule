@@ -1963,7 +1963,7 @@ class RoleController extends Controller
                 // Preserve options_en if dropdown options haven't changed
                 $existingField = $existingCustomFields[$fieldKey] ?? null;
                 if ($existingField && ! empty($existingField['options_en'])
-                    && ($existingField['options'] ?? '') === $eventCustomFields[$fieldKey]['options']) {
+                    && implode(',', array_map('trim', explode(',', $existingField['options'] ?? ''))) === $eventCustomFields[$fieldKey]['options']) {
                     $eventCustomFields[$fieldKey]['options_en'] = $existingField['options_en'];
                 }
 

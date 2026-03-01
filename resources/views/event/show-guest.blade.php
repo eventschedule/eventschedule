@@ -866,8 +866,19 @@
 
         {{-- Flyer image --}}
         @if ($event->flyer_image_url && request()->get('tickets') !== 'true')
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
-          <img src="{{ $event->flyer_image_url }}" alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.flyer') }}" class="w-full" loading="lazy" decoding="async"/>
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden"
+             x-data="{ flyerOpen: false }"
+             @keydown.escape.window="if (flyerOpen) { flyerOpen = false; document.body.style.overflow = ''; }">
+          <img src="{{ $event->flyer_image_url }}" alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.flyer') }}" class="w-full cursor-pointer" loading="lazy" decoding="async" @click="flyerOpen = true; document.body.style.overflow = 'hidden'"/>
+          <template x-teleport="body">
+            <div x-show="flyerOpen" x-cloak
+                 @click.self="flyerOpen = false; document.body.style.overflow = ''"
+                 class="fixed inset-0 z-[70] flex items-center justify-center bg-black/90"
+                 style="font-family: sans-serif">
+              <button @click="flyerOpen = false; document.body.style.overflow = ''" class="absolute top-3 {{ $role->isRtl() ? 'left-3' : 'right-3' }} text-white/80 hover:text-white text-4xl leading-none z-10 w-10 h-10 flex items-center justify-center">&times;</button>
+              <img src="{{ $event->flyer_image_url }}" class="max-w-[96vw] max-h-[90vh] object-contain pointer-events-none" alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.flyer') }}">
+            </div>
+          </template>
         </div>
         @endif
 

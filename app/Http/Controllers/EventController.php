@@ -1286,6 +1286,10 @@ class EventController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
+        if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
+            return response()->json(['error' => __('messages.not_authorized')], 404);
+        }
+
         try {
             $imageData = GeminiUtils::generateEventFlyer($event, $request->input('style_instructions'));
 

@@ -358,6 +358,27 @@
         // Set initial state based on URL hash
         resolveUrl();
 
+        // On page load, check localStorage for active tabs to restore the correct help URL
+        document.addEventListener('DOMContentLoaded', function() {
+            var tabSources = [
+                { key: 'settingsActiveTab', prefix: 'settings-tab-' },
+                { key: 'integrationActiveTab', prefix: 'integration-tab-' },
+                { key: 'paymentActiveTab', prefix: 'payment-tab-' },
+            ];
+            for (var i = 0; i < tabSources.length; i++) {
+                try {
+                    var value = localStorage.getItem(tabSources[i].key);
+                    if (value) {
+                        var tabKey = tabSources[i].prefix + value;
+                        if (anchorMap[tabKey]) {
+                            updateHelpLinks(anchorMap[tabKey]);
+                            return;
+                        }
+                    }
+                } catch (e) {}
+            }
+        });
+
         // Listen for section nav clicks (pushState doesn't fire hashchange)
         document.addEventListener('click', function(e) {
             var target = e.target.closest('.section-nav-link, .mobile-section-header');

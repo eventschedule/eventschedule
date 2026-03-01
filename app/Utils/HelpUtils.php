@@ -19,6 +19,7 @@ class HelpUtils
                 'section-integrations' => '/docs/creating-schedules#integrations',
                 'section-email-settings' => '/docs/creating-schedules#email-settings',
                 'settings-tab-general' => '/docs/creating-schedules#settings-general',
+                'settings-tab-custom-domain' => '/docs/creating-schedules#custom-domain',
                 'settings-tab-custom-fields' => '/docs/creating-schedules#settings-custom-fields',
                 'settings-tab-requests' => '/docs/creating-schedules#settings-requests',
                 'settings-tab-notifications' => '/docs/creating-schedules#settings-notifications',

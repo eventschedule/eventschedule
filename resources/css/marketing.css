@@ -50,17 +50,14 @@ html {
 
 .animate-pulse-slow {
     animation: pulse-slow 3s ease-in-out infinite;
-    will-change: opacity;
 }
 
 .animate-float {
     animation: float 6s ease-in-out infinite;
-    will-change: transform;
 }
 
 .animate-sync {
     animation: sync-pulse 2s ease-in-out infinite;
-    will-change: opacity, transform;
 }
 
 .animate-reveal {

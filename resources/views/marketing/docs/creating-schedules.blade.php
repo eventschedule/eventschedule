@@ -79,6 +79,7 @@
                             <a href="#settings" class="doc-nav-group-header doc-nav-link">Settings <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
                             <div class="doc-nav-group-items">
                                 <a href="#settings-general" class="doc-nav-link">General</a>
+                                <a href="#custom-domain" class="doc-nav-link">Custom Domain</a>
                                 <a href="#settings-custom-fields" class="doc-nav-link">Custom Fields</a>
                                 <a href="#settings-requests" class="doc-nav-link">Requests</a>
                                 <a href="#settings-advanced" class="doc-nav-link">Advanced</a>
@@ -269,7 +270,7 @@
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Custom Domain <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-1">Enterprise</span></h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Use your own domain (e.g., <code class="doc-inline-code">events.yourbrand.com</code>) instead of a subdomain. A custom domain gives your <a href="{{ route('marketing.docs.sharing') }}#schedule-url" class="text-cyan-400 hover:text-cyan-300">shared schedule URL</a> a more professional look.</p>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">There are two modes: <strong class="text-gray-900 dark:text-white">Direct mode</strong> (CNAME - your schedule is served on your domain with automatic SSL) and <strong class="text-gray-900 dark:text-white">Redirect mode</strong> (Cloudflare - your domain redirects to your eventschedule.com URL).</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">There are two modes: <strong class="text-gray-900 dark:text-white">Direct mode</strong> and <strong class="text-gray-900 dark:text-white">Redirect mode</strong>. See <a href="#custom-domain" class="text-cyan-400 hover:text-cyan-300">setup instructions</a> below.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Language</h4>
@@ -470,6 +471,34 @@
                                     </tbody>
                                 </table>
                             </div>
+
+                            <!-- Custom Domain -->
+                            <h3 id="custom-domain" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Custom Domain Setup <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-1">Enterprise</span></h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                There are two ways to connect a custom domain to your schedule. Choose the mode that best fits your needs.
+                            </p>
+
+                            <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Direct Mode (CNAME)</h4>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Your schedule is served directly on your custom domain with automatic SSL. This is the recommended option for most users.
+                            </p>
+                            <ol class="doc-list list-decimal mb-6">
+                                <li>In your schedule settings, enter your domain (e.g., <code class="doc-inline-code">events.yourbrand.com</code>) and select <strong class="text-gray-900 dark:text-white">Direct</strong>.</li>
+                                <li>Go to your domain registrar (e.g., GoDaddy, Namecheap, Cloudflare) and create a <strong class="text-gray-900 dark:text-white">CNAME record</strong> pointing your domain to <code class="doc-inline-code">eventschedule.com</code>.</li>
+                                <li>Wait for DNS propagation (usually a few minutes, but can take up to 48 hours).</li>
+                                <li>SSL is provisioned automatically. Once DNS has propagated, your schedule will be accessible at your custom domain over HTTPS.</li>
+                            </ol>
+
+                            <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Redirect Mode (Cloudflare)</h4>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Your custom domain redirects visitors to your <code class="doc-inline-code">eventschedule.com</code> URL. Use this if your domain's DNS is managed by Cloudflare.
+                            </p>
+                            <ol class="doc-list list-decimal mb-6">
+                                <li>In your schedule settings, enter your domain and select <strong class="text-gray-900 dark:text-white">Redirect</strong>.</li>
+                                <li>In your Cloudflare dashboard, go to <strong class="text-gray-900 dark:text-white">Rules > Redirect Rules</strong>.</li>
+                                <li>Create a redirect rule that matches your custom domain and redirects to your eventschedule.com schedule URL (e.g., <code class="doc-inline-code">https://yourname.eventschedule.com</code>).</li>
+                                <li>Visitors who go to your custom domain will be seamlessly redirected to your schedule.</li>
+                            </ol>
 
                             <!-- Custom Fields Tab -->
                             <h3 id="settings-custom-fields" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Custom Fields</h3>

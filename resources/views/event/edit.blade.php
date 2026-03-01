@@ -1340,6 +1340,11 @@
                                     </svg>
                                 </button>
                                 @if (config('services.google.gemini_key') && $role->isEnterprise())
+                                    <div class="mt-2">
+                                        <input type="text" maxlength="500" v-model="flyerStyleInstructions"
+                                            placeholder="{{ __('messages.flyer_style_placeholder') }}"
+                                            class="w-full max-w-md text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]" />
+                                    </div>
                                     <button type="button" @click="generateFlyer"
                                         v-bind:disabled="generatingFlyer"
                                         class="mt-2 inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600 disabled:opacity-50">
@@ -3646,6 +3651,7 @@
     },
     methods: {
       generateFlyer() {
+        var vm = this;
         this.generatingFlyer = true;
         fetch('{{ url('/' . $subdomain . '/generate-flyer') }}', {
           method: 'POST',
@@ -3669,7 +3675,62 @@
                 img.src = data.flyer_image_url;
               }
             } else {
-              window.location.reload();
+              var container = document.createElement('div');
+              container.id = 'flyer_image_existing';
+              container.className = 'relative inline-block mt-4 pt-1';
+
+              var img = document.createElement('img');
+              img.src = data.flyer_image_url;
+              img.alt = @json(__('messages.flyer_image'));
+              img.style.maxHeight = '120px';
+              img.className = 'rounded-md border border-gray-200 dark:border-gray-600';
+              img.id = 'flyer_preview';
+              container.appendChild(img);
+
+              var deleteBtn = document.createElement('button');
+              deleteBtn.type = 'button';
+              deleteBtn.id = 'delete-flyer-btn';
+              deleteBtn.dataset.url = data.delete_url;
+              deleteBtn.dataset.hash = '{{ $event->exists ? \App\Utils\UrlUtils::encodeId($event->id) : '' }}';
+              deleteBtn.dataset.token = '{{ csrf_token() }}';
+              deleteBtn.style.cssText = 'width: 20px; height: 20px; min-width: 20px; min-height: 20px;';
+              deleteBtn.className = 'absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center';
+              deleteBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+              deleteBtn.addEventListener('click', function() {
+                deleteFlyer(this.dataset.url, this.dataset.hash, this.dataset.token, this.parentElement);
+              });
+              container.appendChild(deleteBtn);
+
+              @if (config('services.google.gemini_key') && $role->isEnterprise())
+              var styleDiv = document.createElement('div');
+              styleDiv.className = 'mt-2';
+              var styleInput = document.createElement('input');
+              styleInput.type = 'text';
+              styleInput.maxLength = 500;
+              styleInput.placeholder = @json(__('messages.flyer_style_placeholder'));
+              styleInput.className = 'w-full max-w-md text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]';
+              styleInput.value = vm.flyerStyleInstructions;
+              styleInput.addEventListener('input', function(e) {
+                vm.flyerStyleInstructions = e.target.value;
+              });
+              styleDiv.appendChild(styleInput);
+              container.appendChild(styleDiv);
+
+              var regenBtn = document.createElement('button');
+              regenBtn.type = 'button';
+              regenBtn.className = 'mt-2 inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600 disabled:opacity-50';
+              regenBtn.innerHTML = '<svg class="w-3 h-3 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"></path></svg>' +
+                '<span>' + @json(__('messages.regenerate_ai_flyer')) + '</span>';
+              regenBtn.addEventListener('click', function() {
+                if (!vm.generatingFlyer) vm.generateFlyer();
+              });
+              container.appendChild(regenBtn);
+              @endif
+
+              var flyerSection = document.getElementById('flyer_image_choose');
+              if (flyerSection) {
+                flyerSection.parentNode.insertBefore(container, flyerSection.nextSibling);
+              }
             }
             var chooseDiv = document.getElementById('flyer_image_choose');
             if (chooseDiv) {
@@ -4179,7 +4240,7 @@
             this.agendaImageUrl = '';
             this.agendaImageFullUrl = '';
           } else {
-            alert('Failed to delete image');
+            alert(@json(__('messages.failed_to_delete_image')));
           }
         });
         @else
@@ -5465,7 +5526,7 @@ function deleteFlyer(url, hash, token, element) {
             var chooseSection = document.getElementById('flyer_image_choose');
             if (chooseSection) chooseSection.style.display = '';
         } else {
-            alert('Failed to delete image');
+            alert(@json(__('messages.failed_to_delete_image')));
         }
     });
 }
