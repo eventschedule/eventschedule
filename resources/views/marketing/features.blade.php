@@ -28,6 +28,7 @@
             "Event Polls",
             "Online Events",
             "Sub-schedules",
+            "Custom Domains",
             "Open Source & REST API"
         ],
         "offers": {
@@ -1184,7 +1185,69 @@
             </div>
         </section>
 
-        <!-- Banner 16: Open Source (Visual Left, Text Right) -->
+        <!-- Banner 16: Custom Domains (Visual Left, Text Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-10 left-1/3 w-[400px] h-[400px] bg-emerald-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
+                <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-teal-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.2s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ route('marketing.custom_domain') }}" class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                                </svg>
+                                Custom Domains
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">Your domain, your brand</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Use your own domain name for your schedule. Automatic SSL included, no technical setup required.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Automatic SSL</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Branded URLs</span>
+                            </div>
+                            <span class="inline-flex items-center text-emerald-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float" style="animation-delay: 0.5s;">
+                                <div class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900 dark:to-teal-900 rounded-xl border border-emerald-200 dark:border-emerald-500/30 p-4 w-56">
+                                    <!-- Before -->
+                                    <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">Before</div>
+                                    <div class="bg-gray-100 dark:bg-white/5 rounded-lg px-3 py-2 text-sm text-gray-400 dark:text-gray-500 font-mono mb-3 border border-gray-200 dark:border-white/10">
+                                        myband.eventschedule.com
+                                    </div>
+                                    <!-- After -->
+                                    <div class="text-[10px] text-gray-500 dark:text-white/70 mb-1">After</div>
+                                    <div class="bg-emerald-50 dark:bg-emerald-500/10 rounded-lg px-3 py-2 text-sm text-emerald-600 dark:text-emerald-400 font-mono font-medium border border-emerald-200 dark:border-emerald-500/30">
+                                        events.myband.com
+                                    </div>
+                                    <!-- SSL badge -->
+                                    <div class="flex items-center gap-1.5 mt-3 text-[10px] text-emerald-600 dark:text-emerald-400">
+                                        <svg aria-hidden="true" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                        </svg>
+                                        SSL certificate included
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Banner 17: Open Source (Visual Left, Text Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">

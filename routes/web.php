@@ -8,6 +8,7 @@ use App\Http\Controllers\AppController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BoostController;
 use App\Http\Controllers\CalDAVController;
+use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\GoogleCalendarWebhookController;
@@ -25,6 +26,7 @@ use App\Http\Controllers\StripeController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SubscriptionWebhookController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\WaitlistController;
 use App\Http\Controllers\WhatsAppWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -57,6 +59,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::post('/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
         Route::post('/promo-code/validate', [PromoCodeController::class, 'validate'])->name('promo_code.validate')->middleware('throttle:20,1');
         Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
+        Route::post('/waitlist/join', [WaitlistController::class, 'join'])->name('waitlist.join')->middleware('throttle:10,1');
         Route::get('/checkout/success/{sale_id}/{date}', [TicketController::class, 'success'])->name('checkout.success');
         Route::get('/checkout/cancel/{sale_id}/{date}', [TicketController::class, 'cancel'])->name('checkout.cancel');
         Route::get('/payment/success/{sale_id}', [TicketController::class, 'paymentUrlSuccess'])->name('payment_url.success');
@@ -140,6 +143,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales/export', [TicketController::class, 'exportSales'])->name('sales.export');
     Route::post('/sales/action/{sale_id}', [TicketController::class, 'handleAction'])->name('sales.action');
     Route::post('/sales/resend-email/{sale_id}', [TicketController::class, 'resendEmail'])->name('sales.resend_email');
+    Route::get('/waitlist', [WaitlistController::class, 'index'])->name('waitlist.index');
+    Route::post('/waitlist/remove/{id}', [WaitlistController::class, 'remove'])->name('waitlist.remove');
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
 
     // Newsletter routes (flat, like analytics - schedule selected via ?role_id= query param)
@@ -217,6 +222,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/scan', [TicketController::class, 'scan'])->name('ticket.scan');
     Route::post('/ticket/view/{event_id}/{secret}', [TicketController::class, 'scanned'])->name('ticket.scanned');
+
+    Route::get('/checkin', [CheckInController::class, 'index'])->name('checkin.index');
+    Route::get('/checkin/{event_id}/stats', [CheckInController::class, 'stats'])->name('checkin.stats');
 
     Route::get('/{subdomain}/api/admin-calendar-events', [RoleController::class, 'adminCalendarEvents'])->name('role.admin_calendar_events');
     Route::post('/{subdomain}/change-plan/{plan_type}', [RoleController::class, 'changePlan'])->name('role.change_plan');
@@ -977,6 +985,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     Route::post('/{subdomain}/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
     Route::post('/{subdomain}/promo-code/validate', [PromoCodeController::class, 'validate'])->name('promo_code.validate')->middleware('throttle:20,1');
     Route::post('/{subdomain}/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
+    Route::post('/{subdomain}/waitlist/join', [WaitlistController::class, 'join'])->name('waitlist.join')->middleware('throttle:10,1');
     Route::get('/{subdomain}/checkout/success/{sale_id}', [TicketController::class, 'success'])->name('checkout.success');
     Route::get('/{subdomain}/checkout/cancel/{sale_id}', [TicketController::class, 'cancel'])->name('checkout.cancel');
     Route::get('/{subdomain}/payment/success/{sale_id}', [TicketController::class, 'paymentUrlSuccess'])->name('payment_url.success');

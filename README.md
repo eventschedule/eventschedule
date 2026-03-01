@@ -42,6 +42,9 @@
 - 🔍 **Search:** Powerful search functionality to help users find specific events or content across your schedule.
 - 📥 **Guest Event Submissions:** Allow community members to propose events directly to your schedule for review.
 - 📋 **Event Cloning:** Duplicate events with all ticket configurations preserved.
+- 📊 **Event Polls:** Add multiple choice polls to events. Guests vote and see real-time results.
+- 🔒 **Private Events:** Password-protect events or hide them from the public schedule for invite-only gatherings.
+- 📑 **Event Agenda:** Break events into timed segments with names, descriptions, and individual start and end times.
 
 ### Ticketing & Payments
 - 🎟️ **Sell Tickets Online:** Offer ticket sales directly through the platform with a seamless checkout process.
@@ -51,6 +54,7 @@
 - 📲 **QR Code Ticketing:** Generate and scan QR codes for easy and secure event check-ins.
 - 💻 **Online Events:** Use the platform to sell tickets to online events.
 - 💳 **Online Payments:** Accept secure online payments via [Stripe](https://stripe.com), [Invoice Ninja](https://www.invoiceninja.com), or payment links.
+- 🏷️ **Promo Codes:** Create discount codes with percentage or fixed amounts, usage limits, and ticket-specific targeting.
 
 ### Integrations
 - 📅 **Calendar Integration:** Enable attendees to add events directly to Google, Apple, or Microsoft calendars.
@@ -71,12 +75,15 @@
 - 👁️ **Follow Schedules:** Users can follow schedules to stay updated on new events.
 - 📧 **Email Notifications:** Automatic ticket confirmation emails sent to buyers.
 - 📧 **Newsletters:** Send newsletters to followers and ticket buyers with a drag-and-drop block editor, five professional templates, audience segments, A/B testing, and real-time delivery analytics.
+- 📸 **Fan Videos & Comments:** Let attendees submit videos, photos, and comments on events with built-in moderation.
 
 ### Customization
 - 📝 **Custom Fields:** Collect additional information from ticket buyers with customizable form fields at both event and ticket levels. Supports text, dropdown, date, and yes/no field types.
 - 🎨 **Custom CSS Styling:** Personalize your schedule's appearance with custom CSS to match your brand identity.
 - 🌐 **Multi-Language Interface:** App available in 11 languages (English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, Russian).
 - 🎨 **Profile Themes:** Customize header images, background gradients, and fonts.
+- 🏷️ **White-label Branding:** Remove Event Schedule branding for a fully branded experience.
+- 🌐 **Custom Domains:** Use your own domain name for your schedule with automatic SSL support.
 
 ### Developer Tools
 - 🤖 **AI Agent Support:** Manage events programmatically with [AI agent workflows](https://eventschedule.com/.well-known/agents.json), an [OpenAPI 3.0 spec](https://eventschedule.com/api/openapi.json), [llms.txt](https://eventschedule.com/llms.txt), and [llms-full.txt](https://eventschedule.com/llms-full.txt) for seamless integration with AI agents and developer tools.

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Jobs\NotifyWaitlist;
+use App\Models\TicketWaitlist;
 use App\Utils\UrlUtils;
 use Illuminate\Database\Eloquent\Model;
 
@@ -41,6 +43,14 @@ class Sale extends Model
     protected static function booted()
     {
         static::updated(function ($sale) {
+            if ($sale->isDirty('status') && $sale->status === 'paid') {
+                TicketWaitlist::where('event_id', $sale->event_id)
+                    ->where('event_date', $sale->event_date)
+                    ->where('email', $sale->email)
+                    ->whereIn('status', ['waiting', 'notified'])
+                    ->update(['status' => 'purchased']);
+            }
+
             if ($sale->isDirty('status') && in_array($sale->status, ['cancelled', 'refunded', 'expired'])) {
                 foreach ($sale->saleTickets as $saleTicket) {
                     $saleTicket->ticket->updateSold($sale->event_date, -$saleTicket->quantity);
@@ -51,6 +61,8 @@ class Sale extends Model
                         ->lockForUpdate()
                         ->decrement('times_used');
                 }
+
+                NotifyWaitlist::dispatch($sale->event_id, $sale->event_date);
             }
         });
     }

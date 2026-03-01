@@ -371,6 +371,11 @@ class Event extends Model
         return $this->hasMany(Sale::class)->where('is_deleted', false);
     }
 
+    public function ticketWaitlists()
+    {
+        return $this->hasMany(TicketWaitlist::class);
+    }
+
     public function members()
     {
         return $this->roles->filter(function ($role) {
@@ -1247,6 +1252,38 @@ class Event extends Model
         $data->updated_at = $this->updated_at ? $this->updated_at->toIso8601String() : null;
 
         return $data;
+    }
+
+    public function allTicketsSoldOut($date)
+    {
+        $tickets = $this->tickets;
+
+        if ($tickets->isEmpty()) {
+            return false;
+        }
+
+        // If any ticket has unlimited quantity (qty <= 0), never sold out
+        if ($tickets->contains(fn ($ticket) => $ticket->quantity <= 0)) {
+            return false;
+        }
+
+        if ($this->total_tickets_mode === 'combined' && $this->hasSameTicketQuantities()) {
+            $totalSold = $tickets->sum(function ($ticket) use ($date) {
+                $sold = $ticket->sold ? json_decode($ticket->sold, true) : [];
+
+                return $sold[$date] ?? 0;
+            });
+
+            return $totalSold >= $this->getSameTicketQuantity();
+        }
+
+        // Individual mode: every ticket must be sold out
+        return $tickets->every(function ($ticket) use ($date) {
+            $sold = $ticket->sold ? json_decode($ticket->sold, true) : [];
+            $soldCount = $sold[$date] ?? 0;
+
+            return $soldCount >= $ticket->quantity;
+        });
     }
 
     public function hasSameTicketQuantities()

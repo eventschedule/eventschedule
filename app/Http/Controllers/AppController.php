@@ -177,6 +177,7 @@ class AppController extends Controller
                 Cache::put('td_hourly', true, now()->addHour());
 
                 \Artisan::call('app:release-tickets');
+                \Artisan::call('app:expire-waitlist');
                 \Artisan::call('app:translate');
                 \Artisan::call('app:send-graphic-emails');
 

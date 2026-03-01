@@ -703,7 +703,11 @@
                 <button type="button"
                       class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                       style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
-                  {{ $event->canSellTickets($date) ? ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets')) : __('messages.view_event') }}
+                  @if ($event->canSellTickets($date) && $event->allTicketsSoldOut($date))
+                    {{ __('messages.join_waitlist') }}
+                  @else
+                    {{ $event->canSellTickets($date) ? ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets')) : __('messages.view_event') }}
+                  @endif
               </button>
             </a>
           @endif
@@ -830,7 +834,11 @@
           <div class="flex-1">
             <div class="flex flex-col gap-4">
               <h2 class="text-[28px] leading-snug text-gray-900 dark:text-gray-100">
-                {{ $event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets') }}
+                @if ($event->allTicketsSoldOut($date))
+                  {{ __('messages.join_waitlist') }}
+                @else
+                  {{ $event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets') }}
+                @endif
               </h2>
               <p class="text-base text-gray-700 dark:text-gray-300">
                 @include('event.tickets', ['event' => $event, 'subdomain' => $subdomain])
@@ -1652,7 +1660,11 @@
             <button type="button"
                   class="w-full justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
-              {{ $event->canSellTickets($date) ? ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets')) : __('messages.view_event') }}
+              @if ($event->canSellTickets($date) && $event->allTicketsSoldOut($date))
+                {{ __('messages.join_waitlist') }}
+              @else
+                {{ $event->canSellTickets($date) ? ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets')) : __('messages.view_event') }}
+              @endif
             </button>
           </a>
         @endif

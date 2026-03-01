@@ -38,6 +38,10 @@
                     promoCodeExpanded: false,
                     isPaymentLinkMode: @json($event->payment_method === 'invoiceninja' && $event->user->invoiceninja_mode === 'payment_link'),
                     isSubmitting: false,
+                    allSoldOut: @json($event->allTicketsSoldOut($date ?? request()->date)),
+                    waitlistSubmitting: false,
+                    waitlistMessage: '',
+                    waitlistSuccess: false,
                 };
             },
             created() {
@@ -134,6 +138,10 @@
                 },
                 ticketSelectionKey() {
                     return this.tickets.map(t => t.id + ':' + t.selectedQty).join(',');
+                },
+                isAllSoldOut() {
+                    if (this.allSoldOut) return true;
+                    return this.tickets.length > 0 && this.tickets.every(t => this.getAvailableQuantity(t) === 0);
                 }
             },
             methods: {
@@ -238,6 +246,37 @@
                     this.promoCodeValid = false;
                     this.promoCodeMessage = '';
                     this.discountAmount = 0;
+                },
+                joinWaitlist() {
+                    if (!this.name.trim() || !this.email.trim() || this.waitlistSubmitting) return;
+                    this.waitlistSubmitting = true;
+                    this.waitlistMessage = '';
+
+                    fetch(@json(route('waitlist.join', ['subdomain' => $subdomain])), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            event_id: @json(\App\Utils\UrlUtils::encodeId($event->id)),
+                            event_date: @json($date ?? request()->date),
+                            name: this.name.trim(),
+                            email: this.email.trim(),
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.waitlistSubmitting = false;
+                        this.waitlistMessage = data.message;
+                        this.waitlistSuccess = data.success;
+                    })
+                    .catch(() => {
+                        this.waitlistSubmitting = false;
+                        this.waitlistMessage = @json(__('messages.error'));
+                        this.waitlistSuccess = false;
+                    });
                 }
             },
             watch: {
@@ -386,7 +425,7 @@
             </div>
         </div>
 
-        <div v-if="!isPaymentLinkMode" v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-6 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4 border-[#4E81FA]">
+        <div v-if="!isPaymentLinkMode && !isAllSoldOut" v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-6 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4 border-[#4E81FA]">
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ ticket.type }}</h3>
@@ -478,7 +517,7 @@
 
         <!-- Promo Code -->
         @if($event->hasActivePromoCodes())
-        <div v-if="!isPaymentLinkMode" class="mb-6">
+        <div v-if="!isPaymentLinkMode && !isAllSoldOut" class="mb-6">
             <button type="button" v-if="!promoCodeExpanded" @click="promoCodeExpanded = true" class="text-sm text-[#4E81FA] hover:text-blue-700 dark:hover:text-blue-300 font-medium">
                 {{ __('messages.have_a_promo_code') }}
             </button>
@@ -508,7 +547,7 @@
         @endif
 
         <!-- Total -->
-        <div v-if="!isPaymentLinkMode" class="mb-6 bg-white dark:bg-gray-700/50 rounded-lg p-4">
+        <div v-if="!isPaymentLinkMode && !isAllSoldOut" class="mb-6 bg-white dark:bg-gray-700/50 rounded-lg p-4">
             <div v-if="discountAmount > 0">
                 <div class="flex justify-between items-center mb-1">
                     <span class="text-gray-600 dark:text-gray-400 text-sm">@lang('messages.subtotal')</span>
@@ -526,13 +565,36 @@
         </div>
 
         <!-- Turnstile widget -->
-        <div v-if="turnstileEnabled" class="mt-4">
+        <div v-if="turnstileEnabled && !isAllSoldOut" class="mt-4">
             <div id="turnstile-checkout-widget"></div>
             <input type="hidden" name="cf-turnstile-response" :value="turnstileToken">
             <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2" />
         </div>
 
-        <div class="flex justify-end items-center pt-2 gap-8">
+        <div v-if="isAllSoldOut" class="mt-6">
+            <div v-if="waitlistMessage" class="mb-4 p-4 rounded-lg text-sm" :class="waitlistSuccess ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300'">
+                @{{ waitlistMessage }}
+            </div>
+            <div v-if="!waitlistSuccess" class="flex justify-end items-center pt-2 gap-8">
+                <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+                    {{ strtoupper(__('messages.cancel')) }}
+                </a>
+                <button type="button" @click="joinWaitlist"
+                    :disabled="!name.trim() || !email.trim() || waitlistSubmitting"
+                    class="mt-4 text-lg px-6 inline-flex items-center rounded-md border border-transparent py-3 font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
+                    style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                    <span v-if="waitlistSubmitting">{{ strtoupper(__('messages.processing')) }}</span>
+                    <span v-else>{{ strtoupper(__('messages.join_waitlist')) }}</span>
+                </button>
+            </div>
+            <div v-else class="flex justify-end pt-2">
+                <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+                    {{ strtoupper(__('messages.back')) }}
+                </a>
+            </div>
+        </div>
+
+        <div v-if="!isAllSoldOut" class="flex justify-end items-center pt-2 gap-8">
             <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
                 {{ strtoupper(__('messages.cancel')) }}
             </a>

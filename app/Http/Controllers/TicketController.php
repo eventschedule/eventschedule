@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\PromoCode;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Models\TicketWaitlist;
 use App\Models\User;
 use App\Services\AuditService;
 use App\Services\EmailService;
@@ -76,7 +77,14 @@ class TicketController extends Controller
         if (request()->ajax()) {
             return view('ticket.sales_table', compact('sales'));
         } else {
-            return view('ticket.sales', compact('sales', 'count'));
+            $user = auth()->user();
+            $waitlistCount = TicketWaitlist::whereHas('event', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })->whereIn('status', ['waiting', 'notified'])->count();
+
+            $waitlistEntries = collect();
+
+            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries'));
         }
     }
 

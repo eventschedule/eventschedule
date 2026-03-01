@@ -9,6 +9,10 @@ Schedule::call(function () {
 })->hourly()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
+    Artisan::call('app:expire-waitlist');
+})->hourly()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
     Artisan::call('app:translate');
 })->hourly()->appendOutputTo(storage_path('logs/scheduler.log'));
 
