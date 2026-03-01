@@ -1740,6 +1740,7 @@ return [
     'advanced_boost' => 'Advanced Boost',
     'no_boost_campaigns' => 'No boost campaigns yet',
     'boost_empty_description' => 'Boost your events to reach more people through targeted advertising.',
+    'boost_no_upcoming_events' => 'Create an event on a Pro schedule to start boosting.',
     'boost_max_concurrent' => 'You have reached the maximum number of active boost campaigns.',
     'boost_onboarding_title' => 'How Boost works',
     'boost_onboarding_body' => 'Boost promotes your event to the right audience through targeted social media ads. You only pay for the ad budget plus a small service fee.',

@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Jobs\SendQueuedEmail;
 use App\Mail\WaitlistNotification;
 use App\Models\Event;
 use App\Models\TicketWaitlist;
@@ -67,7 +66,7 @@ class NotifyWaitlist implements ShouldQueue
             return;
         }
 
-        $role = $event->venue ?: $event->roles->first();
+        $role = $event->getRoleWithEmailSettings();
 
         $mailable = new WaitlistNotification($entry, $event, $role);
 

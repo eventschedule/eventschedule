@@ -44,12 +44,7 @@ class EmailService
 
             // If no role provided, try to get it from the event
             if (! $role && $event) {
-                // Load roles if not already loaded
-                if (! $event->relationLoaded('roles')) {
-                    $event->load('roles');
-                }
-                // Get the venue role if available, otherwise get the first role
-                $role = $event->venue ?: $event->roles->first();
+                $role = $event->getRoleWithEmailSettings();
             }
 
             // Check if we should send email

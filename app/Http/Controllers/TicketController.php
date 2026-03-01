@@ -10,12 +10,12 @@ use App\Models\Role;
 use App\Models\Sale;
 use App\Models\TicketWaitlist;
 use App\Models\User;
+use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
 use App\Services\EmailService;
 use App\Services\WebhookService;
 use App\Utils\InvoiceNinja;
 use App\Utils\MoneyUtils;
-use App\Rules\NoFakeEmail;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Endroid\QrCode\QrCode;
@@ -544,7 +544,7 @@ class TicketController extends Controller
 
         if (! $user && $request->create_account && config('app.hosted')) {
             $request->validate([
-                'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class, new NoFakeEmail],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class, new NoFakeEmail],
                 'password' => ['required', 'string', 'min:8'],
             ]);
 
@@ -1404,13 +1404,7 @@ class TicketController extends Controller
     private function sendTicketPurchaseEmail(Sale $sale, Event $event): void
     {
         try {
-            // Load roles if not already loaded
-            if (! $event->relationLoaded('roles')) {
-                $event->load('roles');
-            }
-
-            // Get the venue role if available, otherwise get the first role
-            $role = $event->venue ?: $event->roles->first();
+            $role = $event->getRoleWithEmailSettings();
 
             if (! $role) {
                 \Log::warning('No schedule found for ticket email', [
@@ -1438,11 +1432,7 @@ class TicketController extends Controller
     private function sendNewSaleNotification(Sale $sale, Event $event): void
     {
         try {
-            if (! $event->relationLoaded('roles')) {
-                $event->load('roles');
-            }
-
-            $role = $event->venue ?: $event->roles->first();
+            $role = $event->getRoleWithEmailSettings();
 
             if (! $role) {
                 return;
@@ -1473,13 +1463,7 @@ class TicketController extends Controller
         try {
             $event = $sale->event;
 
-            // Load roles if not already loaded
-            if (! $event->relationLoaded('roles')) {
-                $event->load('roles');
-            }
-
-            // Get the venue role if available, otherwise get the first role
-            $role = $event->venue ?: $event->roles->first();
+            $role = $event->getRoleWithEmailSettings();
 
             if (! $role) {
                 return response()->json(['error' => __('messages.error')], 400);

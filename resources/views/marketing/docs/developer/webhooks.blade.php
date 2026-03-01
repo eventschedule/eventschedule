@@ -20,76 +20,109 @@
 
     @include('marketing.docs.partials.styles')
 
-    <section class="py-16 sm:py-24 bg-white dark:bg-[#1e1e1e]">
-        <div class="max-w-4xl mx-auto px-6">
-            <!-- Header -->
-            <div class="mb-12">
-                <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
-                    <a href="{{ route('marketing.docs') }}" class="hover:text-gray-900 dark:hover:text-white">Docs</a>
-                    <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                    <span>Developer</span>
-                    <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                    <span class="text-gray-900 dark:text-white">Webhooks</span>
+    <!-- Hero Section -->
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
+        <div class="absolute inset-0">
+            <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-emerald-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-teal-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+        </div>
+        <div class="absolute inset-0 grid-pattern"></div>
+
+        <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <x-docs-breadcrumb currentTitle="Webhooks" section="developer" sectionTitle="Developer" :sectionRoute="'marketing.docs.developer.api'" />
+
+            <div class="flex items-center gap-4 mb-4">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/20">
+                    <svg aria-hidden="true" class="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
                 </div>
-                <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">Webhooks</h1>
-                <p class="text-xl text-gray-600 dark:text-gray-300">Receive real-time HTTP POST notifications when events happen in your schedules.</p>
-                <div class="mt-4 inline-flex items-center px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium">Pro plan required</div>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Webhooks</h1>
             </div>
+            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
+                Receive real-time HTTP POST notifications when events happen in your schedules.
+            </p>
+            <div class="mt-4 inline-flex items-center px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium">Pro plan required</div>
+        </div>
+    </section>
 
-            <!-- Overview -->
-            <section class="doc-section" id="overview">
-                <h2 class="doc-heading">Overview</h2>
-                <p class="text-gray-600 dark:text-gray-300 mb-4">
-                    Webhooks let you receive automatic POST notifications to your server when key events occur, such as ticket sales, event changes, or check-ins. Instead of polling the API, your application is notified in real time.
-                </p>
-                <p class="text-gray-600 dark:text-gray-300 mb-4">
-                    Each webhook delivery includes an HMAC-SHA256 signature so you can verify the payload came from Event Schedule. Delivery logs are available in your account settings for debugging.
-                </p>
-            </section>
+    <!-- Main Content -->
+    <section class="bg-white dark:bg-[#0a0a0f] py-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row gap-10">
+                <!-- Sidebar Navigation -->
+                <aside class="lg:w-64 flex-shrink-0">
+                    <nav class="lg:sticky lg:top-8 space-y-1">
+                        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
+                        <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Overview</a>
+                        <a href="#setup" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Setup</a>
+                        <a href="#event-types" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Event Types</a>
+                        <a href="#payload" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Payload Format</a>
+                        <a href="#headers" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Request Headers</a>
+                        <a href="#verification" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Signature Verification</a>
+                        <a href="#best-practices" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Best Practices</a>
+                        <a href="#testing" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Testing</a>
+                        <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
+                    </nav>
+                </aside>
 
-            <!-- Setup -->
-            <section class="doc-section" id="setup">
-                <h2 class="doc-heading">Setup</h2>
-                <ol class="doc-list doc-list-numbered">
-                    <li>Go to <strong>Settings</strong> in the admin panel and select the <strong>Webhooks</strong> section.</li>
-                    <li>Enter your endpoint URL (must be HTTPS in production).</li>
-                    <li>Select which event types you want to receive.</li>
-                    <li>Click <strong>Add Webhook</strong>. Your signing secret will be displayed once. Copy and store it securely.</li>
-                    <li>Use the <strong>Test</strong> button to send a test ping and verify your endpoint responds with a 2xx status.</li>
-                </ol>
-            </section>
+                <!-- Content -->
+                <div class="flex-1 min-w-0">
+                    <div class="prose-dark">
+                        <!-- Overview -->
+                        <section class="doc-section" id="overview">
+                            <h2 class="doc-heading">Overview</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Webhooks let you receive automatic POST notifications to your server when key events occur, such as ticket sales, event changes, or check-ins. Instead of polling the API, your application is notified in real time.
+                            </p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Each webhook delivery includes an HMAC-SHA256 signature so you can verify the payload came from Event Schedule. Delivery logs are available in your account settings for debugging.
+                            </p>
+                        </section>
 
-            <!-- Event Types -->
-            <section class="doc-section" id="event-types">
-                <h2 class="doc-heading">Event Types</h2>
-                <div class="overflow-x-auto">
-                    <table class="doc-table">
-                        <thead>
-                            <tr>
-                                <th>Event</th>
-                                <th>Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td class="font-mono text-sm">sale.created</td><td>A new ticket sale is created (status: unpaid)</td></tr>
-                            <tr><td class="font-mono text-sm">sale.paid</td><td>A sale is confirmed as paid (Stripe, Invoice Ninja, manual, or free)</td></tr>
-                            <tr><td class="font-mono text-sm">sale.refunded</td><td>A sale is refunded</td></tr>
-                            <tr><td class="font-mono text-sm">sale.cancelled</td><td>A sale is cancelled</td></tr>
-                            <tr><td class="font-mono text-sm">event.created</td><td>A new event is created</td></tr>
-                            <tr><td class="font-mono text-sm">event.updated</td><td>An event is updated</td></tr>
-                            <tr><td class="font-mono text-sm">event.deleted</td><td>An event is deleted</td></tr>
-                            <tr><td class="font-mono text-sm">ticket.scanned</td><td>A ticket QR code is scanned at check-in</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+                        <!-- Setup -->
+                        <section class="doc-section" id="setup">
+                            <h2 class="doc-heading">Setup</h2>
+                            <ol class="doc-list doc-list-numbered">
+                                <li>Go to <strong>Settings</strong> in the admin panel and select the <strong>Webhooks</strong> section.</li>
+                                <li>Enter your endpoint URL (must be HTTPS in production).</li>
+                                <li>Select which event types you want to receive.</li>
+                                <li>Click <strong>Add Webhook</strong>. Your signing secret will be displayed once. Copy and store it securely.</li>
+                                <li>Use the <strong>Test</strong> button to send a test ping and verify your endpoint responds with a 2xx status.</li>
+                            </ol>
+                        </section>
 
-            <!-- Payload Format -->
-            <section class="doc-section" id="payload">
-                <h2 class="doc-heading">Payload Format</h2>
-                <p class="text-gray-600 dark:text-gray-300 mb-4">All webhook payloads are JSON with this structure:</p>
-                <div class="doc-code-block">
-                    <pre><code>{
+                        <!-- Event Types -->
+                        <section class="doc-section" id="event-types">
+                            <h2 class="doc-heading">Event Types</h2>
+                            <div class="overflow-x-auto">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Event</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td class="font-mono text-sm">sale.created</td><td>A new ticket sale is created (status: unpaid)</td></tr>
+                                        <tr><td class="font-mono text-sm">sale.paid</td><td>A sale is confirmed as paid (Stripe, Invoice Ninja, manual, or free)</td></tr>
+                                        <tr><td class="font-mono text-sm">sale.refunded</td><td>A sale is refunded</td></tr>
+                                        <tr><td class="font-mono text-sm">sale.cancelled</td><td>A sale is cancelled</td></tr>
+                                        <tr><td class="font-mono text-sm">event.created</td><td>A new event is created</td></tr>
+                                        <tr><td class="font-mono text-sm">event.updated</td><td>An event is updated</td></tr>
+                                        <tr><td class="font-mono text-sm">event.deleted</td><td>An event is deleted</td></tr>
+                                        <tr><td class="font-mono text-sm">ticket.scanned</td><td>A ticket QR code is scanned at check-in</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <!-- Payload Format -->
+                        <section class="doc-section" id="payload">
+                            <h2 class="doc-heading">Payload Format</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">All webhook payloads are JSON with this structure:</p>
+                            <div class="doc-code-block">
+                                <pre><code>{
   "event": "sale.paid",
   "timestamp": "2026-03-01T12:00:00+00:00",
   "data": {
@@ -105,44 +138,44 @@
     ]
   }
 }</code></pre>
-                </div>
-                <p class="text-gray-600 dark:text-gray-300 mt-4">
-                    The <code class="doc-inline-code">data</code> object matches the corresponding API response format. Sale webhooks include the same fields as the <x-link href="{{ route('marketing.docs.developer.api') }}">Sales API</x-link>, and event webhooks match the Events API.
-                </p>
-            </section>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 mt-4">
+                                The <code class="doc-inline-code">data</code> object matches the corresponding API response format. Sale webhooks include the same fields as the <x-link href="{{ route('marketing.docs.developer.api') }}">Sales API</x-link>, and event webhooks match the Events API.
+                            </p>
+                        </section>
 
-            <!-- Headers -->
-            <section class="doc-section" id="headers">
-                <h2 class="doc-heading">Request Headers</h2>
-                <div class="overflow-x-auto">
-                    <table class="doc-table">
-                        <thead>
-                            <tr>
-                                <th>Header</th>
-                                <th>Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td class="font-mono text-sm">X-Webhook-Signature</td><td>HMAC-SHA256 signature: <code class="doc-inline-code">sha256=&lt;hex&gt;</code></td></tr>
-                            <tr><td class="font-mono text-sm">X-Webhook-Event</td><td>The event type (e.g. <code class="doc-inline-code">sale.paid</code>)</td></tr>
-                            <tr><td class="font-mono text-sm">X-Webhook-Timestamp</td><td>ISO 8601 timestamp of when the webhook was sent</td></tr>
-                            <tr><td class="font-mono text-sm">Content-Type</td><td><code class="doc-inline-code">application/json</code></td></tr>
-                            <tr><td class="font-mono text-sm">User-Agent</td><td><code class="doc-inline-code">EventSchedule-Webhook/1.0</code></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+                        <!-- Headers -->
+                        <section class="doc-section" id="headers">
+                            <h2 class="doc-heading">Request Headers</h2>
+                            <div class="overflow-x-auto">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Header</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td class="font-mono text-sm">X-Webhook-Signature</td><td>HMAC-SHA256 signature: <code class="doc-inline-code">sha256=&lt;hex&gt;</code></td></tr>
+                                        <tr><td class="font-mono text-sm">X-Webhook-Event</td><td>The event type (e.g. <code class="doc-inline-code">sale.paid</code>)</td></tr>
+                                        <tr><td class="font-mono text-sm">X-Webhook-Timestamp</td><td>ISO 8601 timestamp of when the webhook was sent</td></tr>
+                                        <tr><td class="font-mono text-sm">Content-Type</td><td><code class="doc-inline-code">application/json</code></td></tr>
+                                        <tr><td class="font-mono text-sm">User-Agent</td><td><code class="doc-inline-code">EventSchedule-Webhook/1.0</code></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
 
-            <!-- Signature Verification -->
-            <section class="doc-section" id="verification">
-                <h2 class="doc-heading">Signature Verification</h2>
-                <p class="text-gray-600 dark:text-gray-300 mb-4">
-                    Every webhook includes an <code class="doc-inline-code">X-Webhook-Signature</code> header containing an HMAC-SHA256 hash of the raw request body, signed with your webhook secret. Always verify this signature before processing the payload.
-                </p>
+                        <!-- Signature Verification -->
+                        <section class="doc-section" id="verification">
+                            <h2 class="doc-heading">Signature Verification</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Every webhook includes an <code class="doc-inline-code">X-Webhook-Signature</code> header containing an HMAC-SHA256 hash of the raw request body, signed with your webhook secret. Always verify this signature before processing the payload.
+                            </p>
 
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mt-6 mb-3">PHP</h3>
-                <div class="doc-code-block">
-                    <pre><code>$payload = file_get_contents('php://input');
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mt-6 mb-3">PHP</h3>
+                            <div class="doc-code-block">
+                                <pre><code>$payload = file_get_contents('php://input');
 $signature = $_SERVER['HTTP_X_WEBHOOK_SIGNATURE'] ?? '';
 
 $expected = 'sha256=' . hash_hmac('sha256', $payload, $webhookSecret);
@@ -153,11 +186,11 @@ if (!hash_equals($expected, $signature)) {
 }
 
 $data = json_decode($payload, true);</code></pre>
-                </div>
+                            </div>
 
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mt-6 mb-3">Node.js</h3>
-                <div class="doc-code-block">
-                    <pre><code>const crypto = require('crypto');
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mt-6 mb-3">Node.js</h3>
+                            <div class="doc-code-block">
+                                <pre><code>const crypto = require('crypto');
 
 function verifyWebhook(body, signature, secret) {
   const expected = 'sha256=' +
@@ -166,56 +199,61 @@ function verifyWebhook(body, signature, secret) {
     Buffer.from(expected), Buffer.from(signature)
   );
 }</code></pre>
-                </div>
+                            </div>
 
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mt-6 mb-3">Python</h3>
-                <div class="doc-code-block">
-                    <pre><code>import hmac, hashlib
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mt-6 mb-3">Python</h3>
+                            <div class="doc-code-block">
+                                <pre><code>import hmac, hashlib
 
 def verify_webhook(body: bytes, signature: str, secret: str) -> bool:
     expected = 'sha256=' + hmac.new(
         secret.encode(), body, hashlib.sha256
     ).hexdigest()
     return hmac.compare_digest(expected, signature)</code></pre>
-                </div>
-            </section>
+                            </div>
+                        </section>
 
-            <!-- Best Practices -->
-            <section class="doc-section" id="best-practices">
-                <h2 class="doc-heading">Best Practices</h2>
-                <ul class="doc-list">
-                    <li><strong>Respond quickly.</strong> Return a 2xx status within 5 seconds. Do heavy processing asynchronously after acknowledging receipt.</li>
-                    <li><strong>Verify signatures.</strong> Always validate the <code class="doc-inline-code">X-Webhook-Signature</code> header before processing any webhook payload.</li>
-                    <li><strong>Handle duplicates.</strong> Use the <code class="doc-inline-code">data.id</code> field as an idempotency key. In rare cases, the same event may be delivered more than once.</li>
-                    <li><strong>Use HTTPS.</strong> Always use an HTTPS endpoint to protect webhook payloads in transit.</li>
-                    <li><strong>Monitor deliveries.</strong> Check the delivery log in your Webhook settings to debug failed deliveries and verify payloads.</li>
-                </ul>
-            </section>
+                        <!-- Best Practices -->
+                        <section class="doc-section" id="best-practices">
+                            <h2 class="doc-heading">Best Practices</h2>
+                            <ul class="doc-list">
+                                <li><strong>Respond quickly.</strong> Return a 2xx status within 5 seconds. Do heavy processing asynchronously after acknowledging receipt.</li>
+                                <li><strong>Verify signatures.</strong> Always validate the <code class="doc-inline-code">X-Webhook-Signature</code> header before processing any webhook payload.</li>
+                                <li><strong>Handle duplicates.</strong> Use the <code class="doc-inline-code">data.id</code> field as an idempotency key. In rare cases, the same event may be delivered more than once.</li>
+                                <li><strong>Use HTTPS.</strong> Always use an HTTPS endpoint to protect webhook payloads in transit.</li>
+                                <li><strong>Monitor deliveries.</strong> Check the delivery log in your Webhook settings to debug failed deliveries and verify payloads.</li>
+                            </ul>
+                        </section>
 
-            <!-- Test Ping -->
-            <section class="doc-section" id="testing">
-                <h2 class="doc-heading">Testing</h2>
-                <p class="text-gray-600 dark:text-gray-300 mb-4">
-                    Use the <strong>Test</strong> button in your webhook settings to send a test payload. The test event uses the type <code class="doc-inline-code">webhook.test</code> with an empty data object:
-                </p>
-                <div class="doc-code-block">
-                    <pre><code>{
+                        <!-- Test Ping -->
+                        <section class="doc-section" id="testing">
+                            <h2 class="doc-heading">Testing</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Use the <strong>Test</strong> button in your webhook settings to send a test payload. The test event uses the type <code class="doc-inline-code">webhook.test</code> with an empty data object:
+                            </p>
+                            <div class="doc-code-block">
+                                <pre><code>{
   "event": "webhook.test",
   "timestamp": "2026-03-01T12:00:00+00:00",
   "data": {}
 }</code></pre>
-                </div>
-            </section>
+                            </div>
+                        </section>
 
-            <!-- See Also -->
-            <section class="doc-section" id="see-also">
-                <h2 class="doc-heading">See Also</h2>
-                <ul class="doc-list">
-                    <li><x-link href="{{ route('marketing.docs.developer.api') }}">REST API Reference</x-link> - Full API documentation for managing schedules and events</li>
-                    <li><x-link href="{{ route('marketing.docs.account_settings') }}">Account Settings</x-link> - Configure webhooks in your account</li>
-                    <li><x-link href="{{ route('marketing.docs.tickets') }}">Selling Tickets</x-link> - Learn about the ticketing system that generates sale events</li>
-                </ul>
-            </section>
+                        <!-- See Also -->
+                        <section class="doc-section" id="see-also">
+                            <h2 class="doc-heading">See Also</h2>
+                            <ul class="doc-list">
+                                <li><x-link href="{{ route('marketing.docs.developer.api') }}">REST API Reference</x-link> - Full API documentation for managing schedules and events</li>
+                                <li><x-link href="{{ route('marketing.docs.account_settings') }}">Account Settings</x-link> - Configure webhooks in your account</li>
+                                <li><x-link href="{{ route('marketing.docs.tickets') }}">Selling Tickets</x-link> - Learn about the ticketing system that generates sale events</li>
+                            </ul>
+                        </section>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
+
+    @include('marketing.docs.partials.scripts')
 </x-marketing-layout>

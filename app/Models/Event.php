@@ -328,6 +328,41 @@ class Event extends Model
         return null;
     }
 
+    /**
+     * Get a role associated with this event that has email settings configured.
+     * Prefers venue, then first role, then any role with settings.
+     * Falls back to venue-or-first if none have settings.
+     */
+    public function getRoleWithEmailSettings(): ?Role
+    {
+        if (! $this->relationLoaded('roles')) {
+            $this->load('roles');
+        }
+
+        $venue = $this->venue;
+        $firstRole = $this->roles->first();
+
+        // Prefer venue if it has email settings
+        if ($venue && $venue->hasEmailSettings()) {
+            return $venue;
+        }
+
+        // Then first role if it has email settings
+        if ($firstRole && $firstRole->hasEmailSettings()) {
+            return $firstRole;
+        }
+
+        // Then any role with email settings
+        foreach ($this->roles as $role) {
+            if ($role->hasEmailSettings()) {
+                return $role;
+            }
+        }
+
+        // Fallback to original logic (so downstream "not configured" error still fires)
+        return $venue ?: $firstRole;
+    }
+
     public function getGroupIdForSubdomain($subdomain)
     {
         if (! $this->relationLoaded('roles')) {

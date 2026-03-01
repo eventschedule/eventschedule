@@ -1,10 +1,8 @@
 <x-app-admin-layout>
 
-    @if ($eventsData->isNotEmpty())
     <x-slot name="head">
         <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
     </x-slot>
-    @endif
 
     <div class="max-w-7xl mx-auto">
         <div class="flex justify-between items-center mb-6">
@@ -25,11 +23,9 @@
                 </div>
                 @endif
 
-                @if ($eventsData->isNotEmpty())
                 <div id="boost-modal-app">
                     <boost-modal-app></boost-modal-app>
                 </div>
-                @endif
             </div>
         </div>
 
@@ -79,7 +75,6 @@
         });
     </script>
 
-    @if ($eventsData->isNotEmpty())
     <script {!! nonce_attr() !!}>
     document.addEventListener('DOMContentLoaded', function() {
         const { createApp, ref, computed } = Vue;
@@ -176,14 +171,23 @@
                     </svg>
                 </button>
             </div>
-            <div class="px-5 pb-3">
-                <x-event-selector />
-            </div>
-            <div class="flex justify-end px-5 pb-5 pt-2">
-                <button @click="boostEvent" :disabled="!selectedEvent"
-                    class="inline-flex items-center gap-2 px-5 py-2 bg-[#4E81FA] hover:bg-[#3a6de0] border border-transparent rounded-md font-semibold text-sm text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-[#1e1e1e] transition ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
-                    {{ __('messages.boost') }}
-                </button>
+            <template v-if="events.length > 0">
+                <div class="px-5 pb-3">
+                    <x-event-selector />
+                </div>
+                <div class="flex justify-end px-5 pb-5 pt-2">
+                    <button @click="boostEvent" :disabled="!selectedEvent"
+                        class="inline-flex items-center gap-2 px-5 py-2 bg-[#4E81FA] hover:bg-[#3a6de0] border border-transparent rounded-md font-semibold text-sm text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-[#1e1e1e] transition ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+                        {{ __('messages.boost') }}
+                    </button>
+                </div>
+            </template>
+            <div v-else class="text-center px-5 pb-5 pt-2">
+                <svg class="mx-auto h-12 w-12 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5v-5z"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">{{ __('messages.no_upcoming_events') }}</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.boost_no_upcoming_events') }}</p>
             </div>
         </div>
     </div>
@@ -194,6 +198,5 @@
         app.mount('#boost-modal-app');
     });
     </script>
-    @endif
 
 </x-app-admin-layout>
