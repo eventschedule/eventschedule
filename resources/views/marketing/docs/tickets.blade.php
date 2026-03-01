@@ -71,8 +71,11 @@
                         <div class="doc-nav-group expanded">
                             <a href="#general" class="doc-nav-group-header doc-nav-link">General <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
                             <div class="doc-nav-group-items">
+                                <a href="#external" class="doc-nav-link">External</a>
+                                <a href="#registration" class="doc-nav-link">Registration</a>
+                                <a href="#ticketing" class="doc-nav-link">Tickets</a>
                                 <a href="#ticket-types" class="doc-nav-link">Ticket Types</a>
-                                <a href="#free-events" class="doc-nav-link">Free Events & RSVPs</a>
+                                <a href="#free-events" class="doc-nav-link">Free Tickets</a>
                             </div>
                         </div>
                         <div class="doc-nav-group">
@@ -137,17 +140,61 @@
                                 </div>
                             </div>
 
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">When editing an event, the Tickets section offers three modes: <strong class="text-gray-900 dark:text-white">External</strong>, <strong class="text-gray-900 dark:text-white">Registration</strong>, and <strong class="text-gray-900 dark:text-white">Tickets</strong>. Choose the mode that fits your event.</p>
+                        </section>
+
+                        <!-- External -->
+                        <section id="external" class="doc-section">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">External</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">The default mode. Use this when tickets are sold through an external platform (e.g., Eventbrite, Ticketmaster) or when no ticketing is needed. No payment processing is handled within Event Schedule.</p>
+
+                            <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Fields</h4>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Registration URL:</strong> A link to your external ticketing page. Displayed as a button on your event page.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Price:</strong> An informational display price shown on the event page. Select a currency and enter the amount.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Coupon Code:</strong> Displayed alongside the registration URL for attendees to use on the external platform.</li>
+                            </ul>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>External mode is available on all plans, including Free.</p>
+                            </div>
+                        </section>
+
+                        <!-- Registration -->
+                        <section id="registration" class="doc-section">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Registration</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">A lightweight RSVP system for free events. Attendees sign up with their name and email - no payment setup required.</p>
+
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Edit your event and scroll to the <strong class="text-gray-900 dark:text-white">Tickets</strong> section</li>
+                                <li>Select the <strong class="text-gray-900 dark:text-white">Registration</strong> mode</li>
+                                <li>Optionally set an <strong class="text-gray-900 dark:text-white">RSVP Limit</strong> for capacity management</li>
+                                <li>Optionally add <strong class="text-gray-900 dark:text-white">Custom Fields</strong> to collect extra information from registrants</li>
+                                <li>Save the event</li>
+                            </ol>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors will see a "Register" button on your event page. After registering, they receive a confirmation email with a QR code for check-in. You can view all registrations in your sales list.</p>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>Registration is available on all plans, including Free. It's perfect for meetups, community events, and open gatherings where you want to know who's coming without the formality of tickets.</p>
+                            </div>
+                        </section>
+
+                        <!-- Ticketing -->
+                        <section id="ticketing" class="doc-section">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Tickets</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Full ticketing for paid or multi-type events. Create ticket types, connect a payment method, and sell directly from your event page.</p>
+
                             <div class="doc-callout doc-callout-info mb-6">
                                 <div class="doc-callout-title">Pro Feature</div>
                                 <p>Ticketing is available on Pro plans. Starting at just $5/month with a 7-day free trial - and zero platform fees on your ticket sales.</p>
                             </div>
 
-                            <h3 id="create-tickets" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Creating Tickets</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Add tickets to any event from the event edit page.</p>
-
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Edit your event</li>
-                                <li>Scroll to the <strong class="text-gray-900 dark:text-white">"Tickets"</strong> section</li>
+                                <li>Edit your event and scroll to the <strong class="text-gray-900 dark:text-white">Tickets</strong> section</li>
+                                <li>Select the <strong class="text-gray-900 dark:text-white">Tickets</strong> mode</li>
                                 <li>Click <strong class="text-gray-900 dark:text-white">"Add Ticket Type"</strong></li>
                                 <li>Enter ticket details:
                                     <ul class="doc-list mt-2 mb-2">
@@ -160,7 +207,15 @@
                                 <li>Save the event</li>
                             </ol>
 
-                            <p class="text-gray-600 dark:text-gray-300">Once tickets are added, a "Get Tickets" button appears on your event page.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Once tickets are added, a "Get Tickets" button appears on your event page.</p>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">The Tickets mode has four sub-tabs for configuration:</p>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">General:</strong> Add and manage ticket types</li>
+                                <li><strong class="text-gray-900 dark:text-white"><a href="#payment" class="text-cyan-400 hover:text-cyan-300">Payment</a>:</strong> Choose your payment method (Stripe, Invoice Ninja, Payment URL, or Cash)</li>
+                                <li><strong class="text-gray-900 dark:text-white"><a href="#options" class="text-cyan-400 hover:text-cyan-300">Options</a>:</strong> Custom checkout fields, ticket notes, terms, and expiration settings</li>
+                                <li><strong class="text-gray-900 dark:text-white"><a href="#promo-codes" class="text-cyan-400 hover:text-cyan-300">Promo Codes</a>:</strong> Create discount codes for your tickets</li>
+                            </ul>
                         </section>
 
                         <!-- Ticket Types -->
@@ -214,32 +269,13 @@
                             </ul>
                         </section>
 
-                        <!-- Free Events -->
+                        <!-- Free Tickets -->
                         <section id="free-events" class="doc-section">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Free Events & RSVPs</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">There are two ways to handle free events: lightweight registration (RSVP) or free tickets.</p>
-
-                            <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Registration (RSVP)</h4>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">The simplest option for free events. Enable registration and attendees can sign up with just their name and email. No payment setup required.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Free Tickets</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">If you need multiple ticket types (e.g. General and VIP) or promo codes for a free event, use the <a href="#ticketing" class="text-cyan-400 hover:text-cyan-300">Tickets</a> mode and set the price to zero:</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Edit your event and find the <strong class="text-gray-900 dark:text-white">Registration</strong> section</li>
-                                <li>Toggle <strong class="text-gray-900 dark:text-white">Enable Registration</strong> on</li>
-                                <li>Optionally set a <strong class="text-gray-900 dark:text-white">Registration Limit</strong> for capacity management</li>
-                                <li>Save the event</li>
-                            </ol>
-
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors will see a "Register" button on your event page. After registering, they receive a confirmation email with a QR code for check-in. You can view all registrations in your sales list.</p>
-
-                            <div class="doc-callout doc-callout-tip mb-6">
-                                <div class="doc-callout-title">Tip</div>
-                                <p>Registration is available on the Free plan. It's perfect for meetups, community events, and open gatherings where you want to know who's coming without the formality of tickets.</p>
-                            </div>
-
-                            <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Free Tickets</h4>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">If you need multiple ticket types (e.g. General and VIP) or promo codes for a free event, use the ticketing system instead:</p>
-
-                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Select the <strong class="text-gray-900 dark:text-white">Tickets</strong> mode in the Tickets section</li>
                                 <li>Create a ticket type</li>
                                 <li>Set the price to <strong class="text-gray-900 dark:text-white">$0</strong> (or leave it blank)</li>
                                 <li>Set a quantity limit if you have capacity constraints</li>
@@ -247,6 +283,11 @@
                             </ol>
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors can "purchase" free tickets to RSVP. They'll receive a confirmation email with a QR code, and you'll have a list of who's coming.</p>
+
+                            <div class="doc-callout doc-callout-tip mb-6">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>For simple free events where you only need a headcount, use the <a href="#registration" class="text-cyan-400 hover:text-cyan-300">Registration</a> mode instead - it's simpler and available on all plans.</p>
+                            </div>
 
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Note</div>

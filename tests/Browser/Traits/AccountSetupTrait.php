@@ -200,11 +200,28 @@ trait AccountSetupTrait
             ->waitFor('#email', 5)
             ->pause(500)
             ->type('email', $email)
-            ->type('password', $password)
-            ->pause(500)
-            ->scrollIntoView('button[type="submit"]')
-            ->click('button[type="submit"]')
-            ->waitForLocation('/events', 15)
+            ->type('password', $password);
+
+        // Ensure fields were set (JS fallback for headless Chrome flakiness)
+        $browser->script("
+            var emailField = document.getElementById('email');
+            if (!emailField.value) {
+                emailField.value = " . json_encode($email) . ";
+                emailField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            var passwordField = document.getElementById('password');
+            if (!passwordField.value) {
+                passwordField.value = " . json_encode($password) . ";
+                passwordField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        ");
+
+        $browser->pause(500);
+
+        // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
+        $browser->script("document.querySelector('form').requestSubmit()");
+
+        $browser->waitForLocation('/events', 15)
             ->assertPathIs('/events');
     }
 

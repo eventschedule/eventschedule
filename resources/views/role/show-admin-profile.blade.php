@@ -8,7 +8,14 @@
 
 @if (config('services.google.maps') && $role->formatted_address)
 <div class="pt-5">
-    <div id="map" style="height: 200px;"></div>
+    <div class="rounded-lg overflow-hidden" style="height: 400px;">
+        <iframe
+            width="100%" height="400" style="border:0"
+            loading="lazy" allowfullscreen
+            referrerpolicy="no-referrer-when-downgrade"
+            src="https://www.google.com/maps/embed/v1/place?key={{ config('services.google.maps') }}&q={{ $role->google_place_id ? 'place_id:' . $role->google_place_id : urlencode($role->bestAddress()) }}">
+        </iframe>
+    </div>
 </div>
 @endif
 
@@ -261,17 +268,6 @@ function removeLink(link_type, link) {
         $('#remove_link_type').val(link_type);
         $('#remove_link_form').submit();
     }
-}
-
-function initMap() {
-    var latitude = "{{ $role->geo_lat }}";
-    var longitude = "{{ $role->geo_lon }}";
-
-    var latLng = new google.maps.LatLng(latitude, longitude);
-    var map = new google.maps.Map(document.getElementById('map'), {
-        center: latLng,
-        zoom: 15
-    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {

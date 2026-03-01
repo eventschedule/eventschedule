@@ -79,20 +79,6 @@
         });
         </script>
         @endif
-        @elseif (config('services.google.maps') && $tab == 'profile' && $role->formatted_address)
-        <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps') }}&callback=initMap"
-            loading="async" defer {!! nonce_attr() !!}></script>
-        <style {!! nonce_attr() !!}>
-        .modal-overlay {
-            z-index: 50;
-        }
-
-        #map {
-            height: 400px;
-            width: 100%;
-            z-index: 1;
-        }
-        </style>
         @endif
 
         <script {!! nonce_attr() !!}>

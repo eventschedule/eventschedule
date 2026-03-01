@@ -394,6 +394,22 @@
                     updateHelpLinks(anchorMap[tabKey]);
                 }
             }
+
+            var ticketModeRadio = e.target.closest('.ticket-mode-radio');
+            if (ticketModeRadio) {
+                var modeKey = 'ticket-mode-' + ticketModeRadio.value;
+                if (anchorMap[modeKey]) {
+                    updateHelpLinks(anchorMap[modeKey]);
+                }
+            }
+
+            var ticketTab = e.target.closest('.ticket-tab');
+            if (ticketTab) {
+                var tabKey = 'ticket-tab-' + ticketTab.getAttribute('data-tab');
+                if (anchorMap[tabKey]) {
+                    updateHelpLinks(anchorMap[tabKey]);
+                }
+            }
         });
 
         // Handle browser back/forward

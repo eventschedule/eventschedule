@@ -462,6 +462,10 @@ class TicketController extends Controller
 
                 return $sale;
             });
+        } catch (\Illuminate\Database\QueryException $e) {
+            report($e);
+
+            return back()->with('error', __('messages.error'));
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -652,6 +656,10 @@ class TicketController extends Controller
 
                 return $sale;
             });
+        } catch (\Illuminate\Database\QueryException $e) {
+            report($e);
+
+            return back()->with('error', __('messages.error'));
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }

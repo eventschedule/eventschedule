@@ -2351,19 +2351,19 @@
                                 <div class="space-y-4 sm:flex sm:items-center sm:space-x-10 sm:space-y-0 rtl:sm:space-x-reverse">
                                     <div class="flex items-center">
                                         <input id="ticket_mode_external" type="radio" value="external" v-model="ticketMode"
-                                            class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                            class="ticket-mode-radio h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                         <label for="ticket_mode_external"
                                             class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.external') }}</label>
                                     </div>
                                     <div class="flex items-center">
                                         <input id="ticket_mode_rsvp" type="radio" value="rsvp" v-model="ticketMode"
-                                            class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                            class="ticket-mode-radio h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                         <label for="ticket_mode_rsvp"
                                             class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.registration') }}</label>
                                     </div>
                                     <div class="flex items-center">
                                         <input id="ticket_mode_tickets" type="radio" value="tickets" v-model="ticketMode"
-                                            class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]"
+                                            class="ticket-mode-radio h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]"
                                             {{ ! $role->isPro() ? 'disabled' : '' }}>
                                         <label for="ticket_mode_tickets"
                                             class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer{{ ! $role->isPro() ? ' opacity-50' : '' }}">
@@ -2382,27 +2382,6 @@
                                     </div>
                                 </div>
                             </fieldset>
-
-                            <div class="mb-6" v-show="event.rsvp_enabled">
-                                <x-input-label for="rsvp_limit" :value="__('messages.rsvp_limit')" />
-                                <x-text-input id="rsvp_limit" name="rsvp_limit" type="number" min="1" class="mt-1 block w-full"
-                                    v-model="event.rsvp_limit" />
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.rsvp_limit_help') }}</p>
-                            </div>
-
-                            @if ($role->isPro() && $user->isMember($subdomain))
-                            <div class="flex items-center gap-3 mt-3" v-show="event.tickets_enabled">
-                                <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                    <input id="save_default_tickets" name="save_default_tickets" type="checkbox"
-                                        class="sr-only peer">
-                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
-                                    <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                </label>
-                                <label for="save_default_tickets" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                    {{ __('messages.save_as_default') }}
-                                </label>
-                            </div>
-                            @endif
 
                             <!-- Registration URL (only visible when tickets and RSVP are disabled) -->
                             <div class="mb-6" v-show="!event.tickets_enabled && !event.rsvp_enabled">
@@ -2438,29 +2417,29 @@
                             </div>
 
                             @if ($role->isPro())
-                            <div v-show="event.tickets_enabled">
+                            <div v-show="event.tickets_enabled || event.rsvp_enabled">
 
                                 <!-- Ticket Section Tabs -->
-                                <div class="mt-6 mb-6 border-b border-gray-200 dark:border-gray-700">
+                                <div class="mt-6 mb-6 border-b border-gray-200 dark:border-gray-700" v-show="event.tickets_enabled">
                                     <nav class="-mb-px flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide">
                                         <button type="button" @click="activeTicketTab = 'tickets'"
                                             :class="activeTicketTab === 'tickets' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            class="ticket-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="tickets">
                                             {{ __('messages.general') }}
                                         </button>
                                         <button type="button" @click="activeTicketTab = 'payment'"
                                             :class="activeTicketTab === 'payment' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            class="ticket-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="payment">
                                             {{ __('messages.payment') }}
                                         </button>
                                         <button type="button" @click="activeTicketTab = 'options'"
                                             :class="activeTicketTab === 'options' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            class="ticket-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="options">
                                             {{ __('messages.options') }}
                                         </button>
                                         <button type="button" @click="activeTicketTab = 'promo_codes'"
                                             :class="activeTicketTab === 'promo_codes' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium">
+                                            class="ticket-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="promo_codes">
                                             {{ __('messages.promo_codes') }}
                                         </button>
                                     </nav>
@@ -2524,7 +2503,7 @@
                                 </div>
 
                                 <!-- Options Tab -->
-                                <div v-show="activeTicketTab === 'options'">
+                                <div v-show="activeTicketTab === 'options' || event.rsvp_enabled">
                                 <!-- Event-level Custom Fields -->
                                 <div class="mb-6">
                                     <x-input-label :value="__('messages.custom_fields') . ' (' . __('messages.per_order') . ')'" class="mb-3" />
@@ -2534,7 +2513,7 @@
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                 <div>
                                                     <x-input-label :value="__('messages.field_name') . ' *'" class="text-xs" />
-                                                    <x-text-input type="text" v-model="field.name" class="mt-1 block w-full text-sm" v-bind:required="event.tickets_enabled" v-bind:class="{ 'border-red-500': formSubmitAttempted && !field.name }" />
+                                                    <x-text-input type="text" v-model="field.name" class="mt-1 block w-full text-sm" v-bind:required="event.tickets_enabled || event.rsvp_enabled" v-bind:class="{ 'border-red-500': formSubmitAttempted && !field.name }" />
                                                     <p v-if="formSubmitAttempted && !field.name" class="mt-1 text-xs text-red-600">{{ __('messages.field_name_required') }}</p>
                                                 </div>
                                                 <div>
@@ -2577,6 +2556,13 @@
                                 </div>
                                 </div>
 
+                                <div class="mb-6" v-show="event.rsvp_enabled">
+                                    <x-input-label for="rsvp_limit" :value="__('messages.rsvp_limit')" />
+                                    <x-text-input id="rsvp_limit" name="rsvp_limit" type="number" min="1" class="mt-1 block w-full"
+                                        v-model="event.rsvp_limit" />
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.rsvp_limit_help') }}</p>
+                                </div>
+
                                 <!-- Tickets Tab -->
                                 <div v-show="activeTicketTab === 'tickets'">
                                 <div class="mb-6">
@@ -2616,7 +2602,7 @@
                                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                     <div>
                                                         <x-input-label :value="__('messages.field_name') . ' *'" class="text-xs" />
-                                                        <x-text-input type="text" v-model="field.name" class="mt-1 block w-full text-sm" v-bind:required="event.tickets_enabled" v-bind:class="{ 'border-red-500': formSubmitAttempted && !field.name }" />
+                                                        <x-text-input type="text" v-model="field.name" class="mt-1 block w-full text-sm" v-bind:required="event.tickets_enabled || event.rsvp_enabled" v-bind:class="{ 'border-red-500': formSubmitAttempted && !field.name }" />
                                                         <p v-if="formSubmitAttempted && !field.name" class="mt-1 text-xs text-red-600">{{ __('messages.field_name_required') }}</p>
                                                     </div>
                                                     <div>
@@ -2698,7 +2684,7 @@
                                 </div>
 
                                 <!-- Options Tab (continued) -->
-                                <div v-show="activeTicketTab === 'options'">
+                                <div v-show="activeTicketTab === 'options' && event.tickets_enabled">
                                 <div class="mb-6">
                                     <x-input-label for="ticket_notes" :value="__('messages.ticket_notes')" />
                                     <textarea id="ticket_notes" name="ticket_notes" v-model="event.ticket_notes" rows="4"
@@ -2896,6 +2882,21 @@
                                 </div>
 
                             </div>
+
+                            @if ($user->isMember($subdomain))
+                            <div class="flex items-center gap-3 mt-3">
+                                <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                    <input id="save_default_tickets" name="save_default_tickets" type="checkbox"
+                                        class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
+                                    <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                </label>
+                                <label for="save_default_tickets" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                    {{ __('messages.save_as_default') }}
+                                </label>
+                            </div>
+                            @endif
+
                             @endif
                         </div>
                     </div>
@@ -4717,6 +4718,9 @@
       ticketMode(newValue) {
         this.event.tickets_enabled = (newValue === 'tickets');
         this.event.rsvp_enabled = (newValue === 'rsvp');
+        if (newValue === 'rsvp') {
+            this.activeTicketTab = 'options';
+        }
         this.savePreferences();
       },
       'event.recurring_frequency'() {

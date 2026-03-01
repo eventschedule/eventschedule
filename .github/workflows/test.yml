@@ -75,6 +75,7 @@ jobs:
           sed -i 's/DB_USERNAME=.*/DB_USERNAME=root/' .env
           sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=password/' .env
           sed -i 's/APP_URL=.*/APP_URL=http:\/\/127.0.0.1:8000\nAPP_TESTING=true/' .env
+          sed -i 's/APP_DEBUG=.*/APP_DEBUG=true/' .env
           sed -i 's/SESSION_SECURE_COOKIE=.*/SESSION_SECURE_COOKIE=false/' .env
 
       - name: Generate application key

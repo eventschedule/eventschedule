@@ -346,7 +346,10 @@
 
         {{-- Cancel Registration --}}
         @if ($sale->isRsvp() && $sale->status === 'paid')
-        <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50 print:hidden">
+        <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50 print:hidden flex items-center justify-between">
+          <a href="{{ $event->getGuestUrl() }}" target="_blank" class="text-[13px] text-violet-400 hover:text-violet-300 transition-colors font-medium">
+            {{ __('messages.view_event') }}
+          </a>
           <form action="{{ route('rsvp.cancel', ['sale_id' => \App\Utils\UrlUtils::encodeId($sale->id)]) }}" method="POST"
                 onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
             @csrf

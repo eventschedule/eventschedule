@@ -22,7 +22,7 @@
                     turnstileToken: '',
                     turnstileWidgetId: null,
                     isSubmitting: false,
-                    rsvpFull: @json($event->isRsvpFull($date ?? request()->date)),
+                    rsvpFull: @json($event->isRsvpFull($date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d'))),
                 };
             },
             created() {
@@ -78,7 +78,7 @@
 </x-slot>
 
 <div id="rsvp-form">
-    @if ($event->isRsvpFull($date ?? request()->date))
+    @if ($event->isRsvpFull($date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d')))
         <div class="text-center py-4">
             <p class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.rsvp_full') }}</p>
         </div>
@@ -86,11 +86,11 @@
     <form action="{{ route('event.rsvp', ['subdomain' => $subdomain]) }}" method="post" v-on:submit="validateForm">
         @csrf
         <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
-        <input type="hidden" name="event_date" value="{{ $date }}">
+        <input type="hidden" name="event_date" value="{{ $date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d') }}">
         <input type="hidden" name="subdomain" value="{{ $subdomain }}">
 
         @if ($event->rsvp_limit)
-        @php $remaining = $event->rsvpRemaining($date ?? request()->date); @endphp
+        @php $remaining = $event->rsvpRemaining($date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d')); @endphp
         <div class="mb-6 text-sm text-gray-600 dark:text-gray-400">
             {{ __('messages.spots_remaining', ['count' => $remaining]) }}
         </div>

@@ -605,62 +605,74 @@
 
         {{-- Location icon badge --}}
         @if (($event->venue && $event->venue->name) || $event->getEventUrlDomain())
-        <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
-          <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900
-                      flex items-center justify-center shadow-sm">
-            @if ($event->venue && $event->venue->profile_image_url)
-              <img src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->translatedName() }}" class="w-11 h-11 rounded-lg object-cover" loading="lazy" decoding="async">
-            @else
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
-              </svg>
-            @endif
-          </div>
-          <div class="flex flex-col">
-            <span>
-              @if ($event->venue && $event->venue->translatedName())
-                @if ($event->venue->isClaimed())
-                  @php
-                    $venueUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
-                    $queryParams = [];
-                    if (request('category')) $queryParams['category'] = request('category');
-                    if (request('schedule')) $queryParams['schedule'] = request('schedule');
-                    if (request('date')) {
-                      $date = request('date');
-                      if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-                        $dateParts = explode('-', $date);
-                        $queryParams['month'] = (int)$dateParts[1];
-                        $queryParams['year'] = (int)$dateParts[0];
-                      }
-                    } else {
-                      if (request('month')) $queryParams['month'] = request('month');
-                      if (request('year')) $queryParams['year'] = request('year');
-                    }
-                    if (!empty($queryParams)) {
-                      $venueUrl .= '?' . http_build_query($queryParams);
-                    }
-                  @endphp
-                  <a href="{{ $venueUrl }}" class="group inline-flex items-center gap-1 w-fit">
-                    <span class="text-lg font-semibold text-gray-900 dark:text-white group-hover:underline">{!! str_replace(' , ', '<br>', e($event->venue->translatedName())) !!}</span>
-                    <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
-                    </svg>
-                  </a>
-                @else
-                  <span class="text-lg font-semibold text-gray-900 dark:text-white">{!! str_replace(' , ', '<br>', e($event->venue->translatedName())) !!}</span>
-                @endif
+        <div>
+          <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
+            <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900
+                        flex items-center justify-center shadow-sm">
+              @if ($event->venue && $event->venue->profile_image_url)
+                <img src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->translatedName() }}" class="w-11 h-11 rounded-lg object-cover" loading="lazy" decoding="async">
               @else
-                <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $event->getEventUrlDomain() }}</span>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
+                </svg>
               @endif
-            </span>
-            @if ($event->venue && $event->venue->shortAddress())
-            <span class="text-sm text-gray-500 dark:text-gray-400">
-              <x-link href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank" :nofollow="true">
-                {{ $event->venue->shortAddress() }}
-              </x-link>
-            </span>
-            @endif
+            </div>
+            <div class="flex flex-col">
+              <span>
+                @if ($event->venue && $event->venue->translatedName())
+                  @if ($event->venue->isClaimed())
+                    @php
+                      $venueUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
+                      $queryParams = [];
+                      if (request('category')) $queryParams['category'] = request('category');
+                      if (request('schedule')) $queryParams['schedule'] = request('schedule');
+                      if (request('date')) {
+                        $date = request('date');
+                        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                          $dateParts = explode('-', $date);
+                          $queryParams['month'] = (int)$dateParts[1];
+                          $queryParams['year'] = (int)$dateParts[0];
+                        }
+                      } else {
+                        if (request('month')) $queryParams['month'] = request('month');
+                        if (request('year')) $queryParams['year'] = request('year');
+                      }
+                      if (!empty($queryParams)) {
+                        $venueUrl .= '?' . http_build_query($queryParams);
+                      }
+                    @endphp
+                    <a href="{{ $venueUrl }}" class="group inline-flex items-center gap-1 w-fit">
+                      <span class="text-lg font-semibold text-gray-900 dark:text-white group-hover:underline">{!! str_replace(' , ', '<br>', e($event->venue->translatedName())) !!}</span>
+                      <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
+                      </svg>
+                    </a>
+                  @else
+                    <span class="text-lg font-semibold text-gray-900 dark:text-white">{!! str_replace(' , ', '<br>', e($event->venue->translatedName())) !!}</span>
+                  @endif
+                @else
+                  <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $event->getEventUrlDomain() }}</span>
+                @endif
+              </span>
+              @if ($event->venue && $event->venue->shortAddress())
+              <span class="text-sm text-gray-500 dark:text-gray-400">
+                <x-link href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank" :nofollow="true">
+                  {{ $event->venue->shortAddress() }}
+                </x-link>
+              </span>
+              @endif
+            </div>
           </div>
+          @if ($event->venue && $event->venue->formatted_address && config('services.google.maps'))
+          <div class="mt-3 rounded-xl overflow-hidden" style="height: 200px;">
+            <iframe
+                width="100%" height="200" style="border:0"
+                loading="lazy" allowfullscreen
+                referrerpolicy="no-referrer-when-downgrade"
+                src="https://www.google.com/maps/embed/v1/place?key={{ config('services.google.maps') }}&q={{ $event->venue->google_place_id ? 'place_id:' . $event->venue->google_place_id : urlencode($event->venue->bestAddress()) }}">
+            </iframe>
+          </div>
+          @endif
         </div>
         @endif
 
@@ -790,7 +802,7 @@
 
         @endif
         {{-- Share button --}}
-        @if (request()->get('tickets') !== 'true')
+        @if (request()->get('tickets') !== 'true' && request()->get('rsvp') !== 'true')
         <button type="button"
                 data-share-title="{{ $event->translatedName() }}"
                 @click="
