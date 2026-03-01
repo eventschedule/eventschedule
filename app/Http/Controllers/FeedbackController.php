@@ -161,7 +161,7 @@ class FeedbackController extends Controller
                 __('messages.submitted'),
             ]);
 
-            foreach ($query->cursor() as $feedback) {
+            foreach ($query->lazy() as $feedback) {
                 fputcsv($file, [
                     $feedback->event->name ?? '',
                     $feedback->event_date ?? '',

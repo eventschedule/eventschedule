@@ -207,6 +207,15 @@ function bindFeedbackPagination() {
     });
 }
 @endif
+
+// Auto-switch to tab from URL parameter
+var params = new URLSearchParams(window.location.search);
+var tab = params.get('tab');
+if (tab === 'feedback' && document.getElementById('tab-feedback')) {
+    document.getElementById('tab-feedback').click();
+} else if (tab === 'waitlist' && document.getElementById('tab-waitlist')) {
+    document.getElementById('tab-waitlist').click();
+}
 @endif
 
 let timeoutId;

@@ -22,7 +22,12 @@ class SendFeedbackRequests extends Command
 
         $count = 0;
 
-        $roles = Role::where('feedback_enabled', true)->get()->filter(fn ($role) => $role->isPro());
+        $roles = Role::where(function ($q) {
+            $q->where('feedback_enabled', true)
+                ->orWhereHas('events', function ($eq) {
+                    $eq->where('feedback_enabled', true);
+                });
+        })->get()->filter(fn ($role) => $role->isPro());
 
         foreach ($roles as $role) {
             if (is_demo_role($role)) {
@@ -42,9 +47,13 @@ class SendFeedbackRequests extends Command
             }
 
             $events = $role->events()
-                ->where(function ($q) {
-                    $q->where('events.feedback_enabled', true)
-                        ->orWhereNull('events.feedback_enabled');
+                ->where(function ($q) use ($role) {
+                    if ($role->feedback_enabled) {
+                        $q->where('events.feedback_enabled', true)
+                            ->orWhereNull('events.feedback_enabled');
+                    } else {
+                        $q->where('events.feedback_enabled', true);
+                    }
                 })
                 ->where(function ($q) {
                     $q->where('events.tickets_enabled', true)
