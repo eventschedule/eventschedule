@@ -2380,7 +2380,7 @@ class MarketingController extends Controller
 
             // Creating Schedules
             ['page' => 'Creating Schedules', 'section' => 'Schedule Types', 'description' => 'Choose the right schedule type for your use case.', 'url' => $r['creating_schedules'].'#schedule-types', 'category' => 'User Guide', 'keywords' => 'talent venue curator'],
-            ['page' => 'Creating Schedules', 'section' => 'Details', 'description' => 'Set name, description, website, and URL slug.', 'url' => $r['creating_schedules'].'#details', 'category' => 'User Guide', 'keywords' => 'name description website slug'],
+            ['page' => 'Creating Schedules', 'section' => 'Details', 'description' => 'Set name, description, website, and URL slug.', 'url' => $r['creating_schedules'].'#details', 'category' => 'User Guide', 'keywords' => 'name description website slug domain custom'],
             ['page' => 'Creating Schedules', 'section' => 'Address', 'description' => 'Configure location settings for your schedule.', 'url' => $r['creating_schedules'].'#address', 'category' => 'User Guide', 'keywords' => 'location map'],
             ['page' => 'Creating Schedules', 'section' => 'Contact Information', 'description' => 'Add contact methods to your schedule.', 'url' => $r['creating_schedules'].'#contact-info', 'category' => 'User Guide', 'keywords' => 'email phone social contact'],
             ['page' => 'Creating Schedules', 'section' => 'Style', 'description' => 'Visual styling options for your schedule.', 'url' => $r['creating_schedules'].'#style', 'category' => 'User Guide', 'keywords' => 'design theme appearance'],
