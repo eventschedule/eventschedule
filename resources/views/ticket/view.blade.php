@@ -229,7 +229,7 @@
                 </div>
                 <div>
                   <p class="text-[10px] text-white/50 print-text-gray uppercase tracking-wide font-medium">{{ __('messages.guests') }}</p>
-                  <p class="text-[13px] text-white print-text-dark font-semibold">{{ $sale->quantity() }}</p>
+                  <p class="text-[13px] text-white print-text-dark font-semibold">{{ $sale->isRsvp() ? 1 : $sale->quantity() }}</p>
                 </div>
               </div>
             </div>
@@ -244,6 +244,17 @@
           </div>
         </div>
 
+        @if ($sale->isRsvp())
+        {{-- RSVP Confirmation --}}
+        <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50">
+          <div class="flex items-center gap-[8px]">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" class="fill-emerald-400 print:fill-emerald-600"/>
+            </svg>
+            <span class="text-[14px] text-emerald-400 print:text-emerald-600 font-semibold">{{ __('messages.registered') }}</span>
+          </div>
+        </div>
+        @else
         {{-- Ticket Stub Divider --}}
         <div class="relative h-[1px] bg-transparent">
           <div class="ticket-cutout-left print:bg-white"></div>
@@ -252,6 +263,7 @@
         </div>
 
         {{-- Ticket Types Section --}}
+        @if ($sale->saleTickets->count() > 0)
         <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50">
           <h2 class="text-[11px] uppercase tracking-wider text-white/50 print-text-gray font-semibold mb-[12px]">{{ __('messages.tickets') }}</h2>
           <div class="space-y-[8px]">
@@ -273,6 +285,8 @@
             </div>
           @endif
         </div>
+        @endif
+        @endif
 
         {{-- Custom Fields Section --}}
         @php
@@ -328,6 +342,20 @@
               @endif
             @endforeach
           </div>
+        @endif
+
+        {{-- Cancel Registration --}}
+        @if ($sale->isRsvp() && $sale->status === 'paid')
+        <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50 print:hidden">
+          <form action="{{ route('rsvp.cancel', ['sale_id' => \App\Utils\UrlUtils::encodeId($sale->id)]) }}" method="POST"
+                onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+            @csrf
+            <input type="hidden" name="secret" value="{{ $sale->secret }}">
+            <button type="submit" class="text-[13px] text-red-400 print:text-red-600 hover:text-red-300 transition-colors font-medium">
+              {{ __('messages.cancel_registration') }}
+            </button>
+          </form>
+        </div>
         @endif
 
         {{-- Footer Section --}}

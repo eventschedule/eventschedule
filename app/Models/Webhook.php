@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Webhook extends Model
 {
+    protected $hidden = ['secret'];
+
     protected $fillable = [
         'user_id',
         'url',

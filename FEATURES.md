@@ -37,6 +37,7 @@ All users get these features with no subscription required.
 | Recurring events | Day-of-week recurring patterns with date exceptions (include/exclude specific dates) |
 | Newsletter management | Full newsletter creation and management UI (sending limits vary by tier) |
 | Embed calendar on website | iframe embed with X-Frame-Options |
+| Free event registration / RSVP | Native sign-up for free events with optional capacity limits |
 | 10 newsletters per month | Basic newsletter sending limit |
 
 ## Pro Features

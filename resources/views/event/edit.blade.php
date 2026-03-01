@@ -2345,7 +2345,29 @@
                                 {{ __('messages.tickets') }}
                             </h2>
 
-                            <div class="mb-6">
+                            <div class="mb-6" v-show="!event.tickets_enabled">
+                                <div class="flex items-center gap-3">
+                                    <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                        <input type="hidden" name="rsvp_enabled" :value="event.rsvp_enabled ? 1 : 0">
+                                        <input id="rsvp_enabled" name="rsvp_enabled" type="checkbox" v-model="event.rsvp_enabled" :value="1"
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
+                                        <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                    </label>
+                                    <label for="rsvp_enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                        {{ __('messages.enable_rsvp') }}
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-6" v-show="event.rsvp_enabled">
+                                <x-input-label for="rsvp_limit" :value="__('messages.rsvp_limit')" />
+                                <x-text-input id="rsvp_limit" name="rsvp_limit" type="number" min="1" class="mt-1 block w-full"
+                                    v-model="event.rsvp_limit" />
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.rsvp_limit_help') }}</p>
+                            </div>
+
+                            <div class="mb-6" v-show="!event.rsvp_enabled">
                                 <div class="flex items-center gap-3">
                                     <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
                                         <input type="hidden" name="tickets_enabled" :value="event.tickets_enabled ? 1 : 0">
@@ -2385,16 +2407,16 @@
                             </div>
                             @endif
 
-                            <!-- Registration URL (only visible when tickets are disabled) -->
-                            <div class="mb-6" v-show="!event.tickets_enabled">
+                            <!-- Registration URL (only visible when tickets and RSVP are disabled) -->
+                            <div class="mb-6" v-show="!event.tickets_enabled && !event.rsvp_enabled">
                                 <x-input-label for="registration_url" :value="__('messages.registration_url')" />
                                 <x-text-input id="registration_url" name="registration_url" type="url" class="mt-1 block w-full"
                                     v-model="event.registration_url" />
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.registration_url_help') }}</p>
                             </div>
 
-                            <!-- External Event Price (only visible when tickets are disabled) -->
-                            <div class="mb-6" v-show="!event.tickets_enabled">
+                            <!-- External Event Price (only visible when tickets and RSVP are disabled) -->
+                            <div class="mb-6" v-show="!event.tickets_enabled && !event.rsvp_enabled">
                                 <x-input-label :value="__('messages.price')" />
                                 <div class="mt-1 flex flex-col sm:flex-row gap-3">
                                     <select name="ticket_currency_code" v-model="event.ticket_currency_code" data-searchable
@@ -2412,7 +2434,7 @@
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.external_price_help') }}</p>
                             </div>
 
-                            <div class="mb-6" v-show="!event.tickets_enabled">
+                            <div class="mb-6" v-show="!event.tickets_enabled && !event.rsvp_enabled">
                                 <x-input-label for="coupon_code" :value="__('messages.coupon_code')" />
                                 <x-text-input id="coupon_code" name="coupon_code" type="text" class="mt-1 block w-full"
                                     v-model="event.coupon_code" maxlength="255" />
@@ -3400,6 +3422,8 @@
           ...@json($event),
           event_password: @json($event->event_password ?? ''),
           tickets_enabled: {{ $event->tickets_enabled ? 'true' : 'false' }},
+          rsvp_enabled: {{ $event->rsvp_enabled ? 'true' : 'false' }},
+          rsvp_limit: @json($event->rsvp_limit),
           total_tickets_mode: @json($event->total_tickets_mode ?? 'individual'),
           recurring_end_type: @json($event->recurring_end_type ?? 'never'),
           recurring_end_value: @json($event->recurring_end_value ?? null),
@@ -4060,7 +4084,8 @@
         localStorage.setItem('eventPreferences', JSON.stringify({
           isInPerson: this.isInPerson,
           isOnline: this.isOnline,
-          ticketsEnabled: this.event.tickets_enabled
+          ticketsEnabled: this.event.tickets_enabled,
+          rsvpEnabled: this.event.rsvp_enabled
         }));
       },
       loadPreferences() {
@@ -4068,12 +4093,13 @@
         @if (! $event->exists && $selectedVenue)
         this.isInPerson = true;
         if (preferences) {
-          this.isOnline = preferences.isOnline;          
+          this.isOnline = preferences.isOnline;
           @if ($role->isPro())
             this.event.tickets_enabled = preferences.ticketsEnabled ?? false;
           @else
             this.event.tickets_enabled = false;
           @endif
+          this.event.rsvp_enabled = preferences.rsvpEnabled ?? false;
         }
         @else
         if (preferences) {
@@ -4084,6 +4110,7 @@
           @else
             this.event.tickets_enabled = false;
           @endif
+          this.event.rsvp_enabled = preferences.rsvpEnabled ?? false;
         }
         @endif
       },
@@ -4688,6 +4715,15 @@
         deep: true
       },
       'event.tickets_enabled'(newValue) {
+        if (newValue) {
+          this.event.rsvp_enabled = false;
+        }
+        this.savePreferences();
+      },
+      'event.rsvp_enabled'(newValue) {
+        if (newValue) {
+          this.event.tickets_enabled = false;
+        }
         this.savePreferences();
       },
       'event.recurring_frequency'() {

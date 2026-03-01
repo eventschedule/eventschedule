@@ -59,9 +59,9 @@
     </style>
 
     <!-- Hero Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-20">
         <!-- Animated background -->
-        <div class="absolute inset-0">
+        <div class="absolute inset-0 overflow-hidden">
             <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-cyan-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
             <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 0.75s;"></div>
@@ -82,9 +82,52 @@
                 <span class="text-gradient">Event Schedule</span> Knowledge Base
             </h1>
 
-            <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+            <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-10">
                 Everything you need to get started, selfhost your own instance, or build integrations.
             </p>
+
+            <!-- Search -->
+            <div class="relative max-w-md mx-auto" x-data="docSearch()" @keydown.escape.window="close()" @click.outside="close()">
+                <svg aria-hidden="true" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input type="text" x-model="query" @input.debounce.150ms="search()"
+                       @focus="if(query.length >= 2) open = true"
+                       @keydown.arrow-down.prevent="moveDown()"
+                       @keydown.arrow-up.prevent="moveUp()"
+                       @keydown.enter.prevent="go()"
+                       x-ref="searchInput"
+                       placeholder="Search all docs..."
+                       class="w-full pl-10 pr-10 py-3 text-sm rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/40 transition-shadow shadow-sm">
+                <span x-show="!query" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 border border-gray-200 dark:border-white/15 rounded px-1.5 py-0.5 pointer-events-none font-mono">/</span>
+                <button x-show="query" x-cloak @click="clear()" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-lg leading-none">&times;</button>
+
+                <!-- Results dropdown -->
+                <div x-show="open && results.length > 0" x-cloak
+                     class="absolute z-50 mt-2 w-full sm:w-[28rem] left-1/2 -translate-x-1/2 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#1e1e1e] shadow-xl max-h-[400px] overflow-y-auto">
+                    <template x-for="(result, index) in results" :key="result.url">
+                        <a :href="result.url"
+                           class="block px-4 py-3 border-b border-gray-100 dark:border-white/5 last:border-0 transition-colors"
+                           :class="index === selected ? 'bg-gray-50 dark:bg-white/5' : 'hover:bg-gray-50 dark:hover:bg-white/5'"
+                           @mouseenter="selected = index">
+                            <div class="flex items-center gap-2 mb-0.5">
+                                <span class="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                                      :class="categoryClass(result.category)"
+                                      x-text="result.category"></span>
+                                <span class="text-xs text-gray-400 dark:text-gray-500 truncate" x-text="result.page"></span>
+                            </div>
+                            <div class="text-sm font-medium text-gray-900 dark:text-white text-left" x-html="highlight(result.section)"></div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 text-left" x-html="highlight(result.description)"></div>
+                        </a>
+                    </template>
+                </div>
+
+                <!-- No results -->
+                <div x-show="open && query.length >= 2 && results.length === 0" x-cloak
+                     class="absolute z-50 mt-2 w-full sm:w-[28rem] left-1/2 -translate-x-1/2 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#1e1e1e] shadow-xl p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                    No results found.
+                </div>
+            </div>
         </div>
     </section>
 
@@ -559,6 +602,128 @@
             }
         ]
     }
+    </script>
+
+    <script {!! nonce_attr() !!}>
+        function docSearch() {
+            return {
+                query: '',
+                results: [],
+                open: false,
+                selected: -1,
+                index: @json($searchIndex),
+
+                search() {
+                    const q = this.query.trim().toLowerCase();
+                    if (q.length < 2) {
+                        this.results = [];
+                        this.open = false;
+                        return;
+                    }
+
+                    const terms = q.split(/\s+/);
+                    const scored = [];
+
+                    for (const item of this.index) {
+                        const section = item.section.toLowerCase();
+                        const page = item.page.toLowerCase();
+                        const desc = item.description.toLowerCase();
+                        const keywords = (item.keywords || '').toLowerCase();
+                        const all = section + ' ' + page + ' ' + desc + ' ' + keywords;
+
+                        let match = true;
+                        for (const term of terms) {
+                            if (!all.includes(term)) {
+                                match = false;
+                                break;
+                            }
+                        }
+                        if (!match) continue;
+
+                        let score = 0;
+                        for (const term of terms) {
+                            if (section.includes(term)) score += 10;
+                            if (page.includes(term)) score += 5;
+                            if (desc.includes(term)) score += 3;
+                            if (keywords.includes(term)) score += 1;
+                            if (section === q) score += 20;
+                        }
+
+                        scored.push({ ...item, score });
+                    }
+
+                    scored.sort((a, b) => b.score - a.score);
+                    this.results = scored.slice(0, 8);
+                    this.selected = -1;
+                    this.open = true;
+                },
+
+                highlight(text) {
+                    const q = this.query.trim().toLowerCase();
+                    if (q.length < 2) return this.escapeHtml(text);
+
+                    const terms = q.split(/\s+/).filter(t => t.length > 0);
+                    const escaped = this.escapeHtml(text);
+
+                    if (terms.length === 0) return escaped;
+
+                    const pattern = terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+                    const regex = new RegExp('(' + pattern + ')', 'gi');
+
+                    return escaped.replace(regex, '<mark class="bg-yellow-200/80 dark:bg-yellow-500/30 text-inherit rounded px-0.5">$1</mark>');
+                },
+
+                escapeHtml(text) {
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                },
+
+                categoryClass(cat) {
+                    switch (cat) {
+                        case 'User Guide': return 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300';
+                        case 'Selfhost': return 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300';
+                        case 'SaaS': return 'bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300';
+                        case 'Developer': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300';
+                        default: return 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300';
+                    }
+                },
+
+                close() { this.open = false; },
+
+                clear() {
+                    this.query = '';
+                    this.results = [];
+                    this.open = false;
+                    this.$refs.searchInput.focus();
+                },
+
+                moveDown() {
+                    if (this.results.length === 0) return;
+                    this.selected = (this.selected + 1) % this.results.length;
+                },
+
+                moveUp() {
+                    if (this.results.length === 0) return;
+                    this.selected = this.selected <= 0 ? this.results.length - 1 : this.selected - 1;
+                },
+
+                go() {
+                    if (this.selected >= 0 && this.selected < this.results.length) {
+                        window.location.href = this.results[this.selected].url;
+                    }
+                },
+
+                init() {
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) && !document.activeElement.isContentEditable) {
+                            e.preventDefault();
+                            this.$refs.searchInput.focus();
+                        }
+                    });
+                }
+            };
+        }
     </script>
 
     <!-- Open Source Section -->

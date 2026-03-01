@@ -31,6 +31,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Keep `translateData` and `console.php` in sync** - Scheduled commands must be registered in both `AppController::translateData()` (hosted cron) and `routes/console.php` (selfhosted scheduler). When adding a new scheduled command, add it to both places with matching frequency.
 - **Use toggle switches for boolean settings** - In the admin portal, use `<x-toggle>` (or toggle switch markup for Vue pages) for standalone boolean on/off settings. Reserve plain checkboxes for multi-select lists and "required" indicators.
 - **Consistent primary action button sizing** - Primary action buttons in the AP should use `px-4 py-3 text-base` sizing to match `<x-brand-link>` / `<x-secondary-link>` components. Do not use smaller `py-2 text-sm` for standalone call-to-action buttons.
+- **Keep doc search index up-to-date** - When adding, removing, or renaming doc sections, update `getDocSearchIndex()` in `MarketingController` so the docs search stays accurate
 
 ## Terminology
 

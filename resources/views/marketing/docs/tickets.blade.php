@@ -217,7 +217,27 @@
                         <!-- Free Events -->
                         <section id="free-events" class="doc-section">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Free Events & RSVPs</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">You can also use the ticketing system for free events to collect RSVPs.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">There are two ways to handle free events: lightweight registration (RSVP) or free tickets.</p>
+
+                            <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Registration (RSVP)</h4>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">The simplest option for free events. Enable registration and attendees can sign up with just their name and email. No payment setup required.</p>
+
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Edit your event and find the <strong class="text-gray-900 dark:text-white">Registration</strong> section</li>
+                                <li>Toggle <strong class="text-gray-900 dark:text-white">Enable Registration</strong> on</li>
+                                <li>Optionally set a <strong class="text-gray-900 dark:text-white">Registration Limit</strong> for capacity management</li>
+                                <li>Save the event</li>
+                            </ol>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors will see a "Register" button on your event page. After registering, they receive a confirmation email with a QR code for check-in. You can view all registrations in your sales list.</p>
+
+                            <div class="doc-callout doc-callout-tip mb-6">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>Registration is available on the Free plan. It's perfect for meetups, community events, and open gatherings where you want to know who's coming without the formality of tickets.</p>
+                            </div>
+
+                            <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Free Tickets</h4>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">If you need multiple ticket types (e.g. General and VIP) or promo codes for a free event, use the ticketing system instead:</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Create a ticket type</li>
@@ -228,9 +248,9 @@
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors can "purchase" free tickets to RSVP. They'll receive a confirmation email with a QR code, and you'll have a list of who's coming.</p>
 
-                            <div class="doc-callout doc-callout-tip">
-                                <div class="doc-callout-title">Tip</div>
-                                <p>This is great for capacity management, even for free events. You'll know exactly how many people to expect.</p>
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Note</div>
+                                <p>Registration and ticketing are mutually exclusive on a single event. If you need both free and paid options, use the ticketing system with a $0 ticket type alongside your paid tickets.</p>
                             </div>
                         </section>
 

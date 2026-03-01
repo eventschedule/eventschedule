@@ -756,8 +756,20 @@
                                             <span class="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2" v-html="commaBreak(event.venue_name)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
                                         </div>
 
+                                        {{-- RSVP Free Badge --}}
+                                        <div v-if="event.rsvp_enabled && !event.is_password_protected" class="flex items-center gap-4">
+                                            <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
+                                                <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
+                                                    <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('messages.free_entry') }}</span>
+                                            </div>
+                                        </div>
+
                                         {{-- Ticket Price Badge --}}
-                                        <div v-if="event.registration_url && event.ticket_price != null && !event.is_password_protected" class="flex items-center gap-4">
+                                        <div v-if="!event.rsvp_enabled && event.registration_url && event.ticket_price != null && !event.is_password_protected" class="flex items-center gap-4">
                                             <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                                 <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
                                                     <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
@@ -1100,8 +1112,20 @@
                                         <span class="text-lg font-semibold text-gray-900 dark:text-white truncate" v-html="commaBreak(event.venue_name)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
                                     </div>
 
+                                    {{-- RSVP Free Badge --}}
+                                    <div v-if="event.rsvp_enabled && !event.is_password_protected" class="flex items-center gap-4">
+                                        <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
+                                            <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
+                                                <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('messages.free_entry') }}</span>
+                                        </div>
+                                    </div>
+
                                     {{-- Ticket Price Badge --}}
-                                    <div v-if="event.registration_url && event.ticket_price != null && !event.is_password_protected" class="flex items-center gap-4">
+                                    <div v-if="!event.rsvp_enabled && event.registration_url && event.ticket_price != null && !event.is_password_protected" class="flex items-center gap-4">
                                         <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                             <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
                                                 <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />

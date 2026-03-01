@@ -159,6 +159,7 @@
                                     ['Sale notifications', 'Yes (Pro)', 'Yes', 'No', 'No', 'No'],
                                     ['Sales data export', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
                                     ['Online events', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
+                                    ['Free event RSVP', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
                                     ['Recurring events', 'Yes (Free)', 'Yes', 'Yes', 'No', 'Yes'],
                                     ['Event polls', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
                                 ],

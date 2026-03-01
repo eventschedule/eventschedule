@@ -15,6 +15,12 @@ class CleanupWebhookDeliveries extends Command
     {
         $days = (int) $this->option('days');
 
+        if ($days < 1) {
+            $this->error('Days must be at least 1.');
+
+            return Command::FAILURE;
+        }
+
         $deleted = WebhookDelivery::where('created_at', '<', now()->subDays($days))->delete();
 
         $this->info("Deleted {$deleted} webhook delivery logs older than {$days} days.");

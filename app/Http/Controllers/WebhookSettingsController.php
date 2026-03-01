@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Webhook;
+use App\Models\WebhookDelivery;
+use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -24,18 +26,9 @@ class WebhookSettingsController extends Controller
 
         $url = $request->url;
 
-        // SSRF prevention in hosted mode
-        if (config('app.hosted')) {
-            $host = parse_url($url, PHP_URL_HOST);
-            if ($host) {
-                $ip = gethostbyname($host);
-                if ($ip !== $host || filter_var($host, FILTER_VALIDATE_IP)) {
-                    if (! filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-                        return redirect()->to(route('profile.edit').'#section-webhooks')
-                            ->with('error', __('messages.webhook_url_not_allowed'));
-                    }
-                }
-            }
+        if (config('app.hosted') && $this->isPrivateUrl($url)) {
+            return redirect()->to(route('profile.edit').'#section-webhooks')
+                ->with('error', __('messages.webhook_url_not_allowed'));
         }
 
         $secret = bin2hex(random_bytes(32));
@@ -58,12 +51,14 @@ class WebhookSettingsController extends Controller
             ->with('new_webhook_secret', $secret);
     }
 
-    public function update(Request $request, Webhook $webhook)
+    public function update(Request $request, string $webhookHash)
     {
         if (is_demo_mode()) {
             return redirect()->to(route('profile.edit').'#section-webhooks')
                 ->with('error', __('messages.demo_mode_restriction'));
         }
+
+        $webhook = Webhook::findOrFail(UrlUtils::decodeIdOrFail($webhookHash));
 
         if ($webhook->user_id !== auth()->id()) {
             abort(403);
@@ -78,18 +73,9 @@ class WebhookSettingsController extends Controller
 
         $url = $request->url;
 
-        // SSRF prevention in hosted mode
-        if (config('app.hosted')) {
-            $host = parse_url($url, PHP_URL_HOST);
-            if ($host) {
-                $ip = gethostbyname($host);
-                if ($ip !== $host || filter_var($host, FILTER_VALIDATE_IP)) {
-                    if (! filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-                        return redirect()->to(route('profile.edit').'#section-webhooks')
-                            ->with('error', __('messages.webhook_url_not_allowed'));
-                    }
-                }
-            }
+        if (config('app.hosted') && $this->isPrivateUrl($url)) {
+            return redirect()->to(route('profile.edit').'#section-webhooks')
+                ->with('error', __('messages.webhook_url_not_allowed'));
         }
 
         $eventTypes = $request->event_types;
@@ -107,12 +93,14 @@ class WebhookSettingsController extends Controller
             ->with('message', __('messages.webhook_updated'));
     }
 
-    public function destroy(Webhook $webhook)
+    public function destroy(string $webhookHash)
     {
         if (is_demo_mode()) {
             return redirect()->to(route('profile.edit').'#section-webhooks')
                 ->with('error', __('messages.demo_mode_restriction'));
         }
+
+        $webhook = Webhook::findOrFail(UrlUtils::decodeIdOrFail($webhookHash));
 
         if ($webhook->user_id !== auth()->id()) {
             abort(403);
@@ -124,12 +112,14 @@ class WebhookSettingsController extends Controller
             ->with('message', __('messages.webhook_deleted'));
     }
 
-    public function toggle(Webhook $webhook)
+    public function toggle(string $webhookHash)
     {
         if (is_demo_mode()) {
             return redirect()->to(route('profile.edit').'#section-webhooks')
                 ->with('error', __('messages.demo_mode_restriction'));
         }
+
+        $webhook = Webhook::findOrFail(UrlUtils::decodeIdOrFail($webhookHash));
 
         if ($webhook->user_id !== auth()->id()) {
             abort(403);
@@ -141,12 +131,14 @@ class WebhookSettingsController extends Controller
             ->with('message', $webhook->is_active ? __('messages.webhook_enabled') : __('messages.webhook_disabled'));
     }
 
-    public function regenerateSecret(Webhook $webhook)
+    public function regenerateSecret(string $webhookHash)
     {
         if (is_demo_mode()) {
             return redirect()->to(route('profile.edit').'#section-webhooks')
                 ->with('error', __('messages.demo_mode_restriction'));
         }
+
+        $webhook = Webhook::findOrFail(UrlUtils::decodeIdOrFail($webhookHash));
 
         if ($webhook->user_id !== auth()->id()) {
             abort(403);
@@ -161,29 +153,22 @@ class WebhookSettingsController extends Controller
             ->with('new_webhook_secret', $secret);
     }
 
-    public function test(Webhook $webhook)
+    public function test(string $webhookHash)
     {
         if (is_demo_mode()) {
             return redirect()->to(route('profile.edit').'#section-webhooks')
                 ->with('error', __('messages.demo_mode_restriction'));
         }
 
+        $webhook = Webhook::findOrFail(UrlUtils::decodeIdOrFail($webhookHash));
+
         if ($webhook->user_id !== auth()->id()) {
             abort(403);
         }
 
-        // SSRF prevention in hosted mode
-        if (config('app.hosted')) {
-            $host = parse_url($webhook->url, PHP_URL_HOST);
-            if ($host) {
-                $ip = gethostbyname($host);
-                if ($ip !== $host || filter_var($host, FILTER_VALIDATE_IP)) {
-                    if (! filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-                        return redirect()->to(route('profile.edit').'#section-webhooks')
-                            ->with('error', __('messages.webhook_url_not_allowed'));
-                    }
-                }
-            }
+        if (config('app.hosted') && $this->isPrivateUrl($webhook->url)) {
+            return redirect()->to(route('profile.edit').'#section-webhooks')
+                ->with('error', __('messages.webhook_url_not_allowed'));
         }
 
         $payload = [
@@ -194,6 +179,9 @@ class WebhookSettingsController extends Controller
 
         $jsonBody = json_encode($payload);
         $signature = hash_hmac('sha256', $jsonBody, $webhook->secret);
+
+        $startTime = microtime(true);
+        $responseBody = null;
 
         try {
             $response = Http::timeout(5)
@@ -209,10 +197,24 @@ class WebhookSettingsController extends Controller
 
             $status = $response->status();
             $success = $response->successful();
+            $responseBody = mb_substr($response->body(), 0, 10000);
         } catch (\Exception $e) {
             $status = null;
             $success = false;
         }
+
+        $durationMs = (int) round((microtime(true) - $startTime) * 1000);
+
+        WebhookDelivery::create([
+            'webhook_id' => $webhook->id,
+            'event_type' => 'webhook.test',
+            'payload' => $payload,
+            'response_status' => $status,
+            'response_body' => $responseBody,
+            'success' => $success,
+            'duration_ms' => $durationMs,
+            'created_at' => now(),
+        ]);
 
         if ($success) {
             return redirect()->to(route('profile.edit').'#section-webhooks')
@@ -223,8 +225,10 @@ class WebhookSettingsController extends Controller
             ->with('error', __('messages.webhook_test_failed', ['status' => $status ?? 'timeout']));
     }
 
-    public function deliveries(Webhook $webhook)
+    public function deliveries(string $webhookHash)
     {
+        $webhook = Webhook::findOrFail(UrlUtils::decodeIdOrFail($webhookHash));
+
         if ($webhook->user_id !== auth()->id()) {
             abort(403);
         }
@@ -235,5 +239,20 @@ class WebhookSettingsController extends Controller
             ->get();
 
         return response()->json($deliveries);
+    }
+
+    private function isPrivateUrl(string $url): bool
+    {
+        $host = parse_url($url, PHP_URL_HOST);
+        if (! $host) {
+            return false;
+        }
+
+        $ip = gethostbyname($host);
+        if ($ip !== $host || filter_var($host, FILTER_VALIDATE_IP)) {
+            return ! filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
+        }
+
+        return false;
     }
 }

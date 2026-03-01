@@ -72,7 +72,7 @@
                         </div>
                         <div class="flex items-center gap-1 flex-shrink-0">
                             {{-- Toggle active --}}
-                            <form method="POST" action="{{ route('webhooks.toggle', $webhook) }}">
+                            <form method="POST" action="{{ route('webhooks.toggle', \App\Utils\UrlUtils::encodeId($webhook->id)) }}">
                                 @csrf
                                 <button type="submit" class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700" title="{{ $webhook->is_active ? __('messages.disable') : __('messages.enable') }}">
                                     @if ($webhook->is_active)
@@ -83,18 +83,18 @@
                                 </button>
                             </form>
                             {{-- Test ping --}}
-                            <form method="POST" action="{{ route('webhooks.test', $webhook) }}">
+                            <form method="POST" action="{{ route('webhooks.test', \App\Utils\UrlUtils::encodeId($webhook->id)) }}">
                                 @csrf
                                 <button type="submit" class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700" title="{{ __('messages.webhook_test') }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                                 </button>
                             </form>
                             {{-- Edit (toggle form visibility) --}}
-                            <button type="button" class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 webhook-edit-btn" data-webhook-id="{{ $webhook->id }}" title="{{ __('messages.edit') }}">
+                            <button type="button" class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 webhook-edit-btn" data-webhook-id="{{ \App\Utils\UrlUtils::encodeId($webhook->id) }}" title="{{ __('messages.edit') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                             </button>
                             {{-- Delete --}}
-                            <form method="POST" action="{{ route('webhooks.destroy', $webhook) }}" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                            <form method="POST" action="{{ route('webhooks.destroy', \App\Utils\UrlUtils::encodeId($webhook->id)) }}" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700" title="{{ __('messages.delete') }}">
@@ -105,8 +105,8 @@
                     </div>
 
                     {{-- Edit form (hidden by default) --}}
-                    <div id="webhook-edit-{{ $webhook->id }}" class="hidden mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <form method="POST" action="{{ route('webhooks.update', $webhook) }}" class="space-y-4">
+                    <div id="webhook-edit-{{ \App\Utils\UrlUtils::encodeId($webhook->id) }}" class="hidden mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <form method="POST" action="{{ route('webhooks.update', \App\Utils\UrlUtils::encodeId($webhook->id)) }}" class="space-y-4">
                             @csrf
                             @method('PUT')
                             <div>
@@ -132,7 +132,7 @@
                                 <x-primary-button>{{ __('messages.save') }}</x-primary-button>
                             </div>
                         </form>
-                        <form method="POST" action="{{ route('webhooks.regenerate_secret', $webhook) }}" class="mt-2" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                        <form method="POST" action="{{ route('webhooks.regenerate_secret', \App\Utils\UrlUtils::encodeId($webhook->id)) }}" class="mt-2" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
                             @csrf
                             <button type="submit" class="text-sm text-gray-600 dark:text-gray-400 underline hover:text-gray-900 dark:hover:text-gray-200">{{ __('messages.regenerate_secret') }}</button>
                         </form>
@@ -140,8 +140,8 @@
 
                     {{-- Delivery log (loaded on demand) --}}
                     <div class="mt-3">
-                        <button type="button" class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 underline webhook-deliveries-btn" data-webhook-id="{{ $webhook->id }}">{{ __('messages.webhook_deliveries') }}</button>
-                        <div id="webhook-deliveries-{{ $webhook->id }}" class="hidden mt-2">
+                        <button type="button" class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 underline webhook-deliveries-btn" data-webhook-id="{{ \App\Utils\UrlUtils::encodeId($webhook->id) }}">{{ __('messages.webhook_deliveries') }}</button>
+                        <div id="webhook-deliveries-{{ \App\Utils\UrlUtils::encodeId($webhook->id) }}" class="hidden mt-2">
                             <div class="text-xs text-gray-400">{{ __('messages.loading') }}...</div>
                         </div>
                     </div>

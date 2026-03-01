@@ -60,6 +60,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::post('/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
         Route::post('/promo-code/validate', [PromoCodeController::class, 'validate'])->name('promo_code.validate')->middleware('throttle:20,1');
         Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
+        Route::post('/rsvp', [TicketController::class, 'rsvp'])->name('event.rsvp');
         Route::post('/waitlist/join', [WaitlistController::class, 'join'])->name('waitlist.join')->middleware('throttle:10,1');
         Route::get('/checkout/success/{sale_id}/{date}', [TicketController::class, 'success'])->name('checkout.success');
         Route::get('/checkout/cancel/{sale_id}/{date}', [TicketController::class, 'cancel'])->name('checkout.cancel');
@@ -124,6 +125,7 @@ Route::get('/translate_data', [AppController::class, 'translateData'])->name('tr
 
 Route::get('/ticket/qr_code/{event_id}/{secret}', [TicketController::class, 'qrCode'])->name('ticket.qr_code')->middleware('throttle:100,1');
 Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view'])->name('ticket.view')->middleware('throttle:100,1');
+Route::post('/rsvp/cancel/{sale_id}', [TicketController::class, 'cancelRsvp'])->name('rsvp.cancel')->middleware('throttle:10,1');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/event', [EventController::class, 'createDefault'])->name('event.create_default');
@@ -309,12 +311,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Webhook settings
     Route::post('/webhooks', [WebhookSettingsController::class, 'store'])->name('webhooks.store');
-    Route::put('/webhooks/{webhook}', [WebhookSettingsController::class, 'update'])->name('webhooks.update');
-    Route::delete('/webhooks/{webhook}', [WebhookSettingsController::class, 'destroy'])->name('webhooks.destroy');
-    Route::post('/webhooks/{webhook}/toggle', [WebhookSettingsController::class, 'toggle'])->name('webhooks.toggle');
-    Route::post('/webhooks/{webhook}/regenerate-secret', [WebhookSettingsController::class, 'regenerateSecret'])->name('webhooks.regenerate_secret');
-    Route::post('/webhooks/{webhook}/test', [WebhookSettingsController::class, 'test'])->name('webhooks.test');
-    Route::get('/webhooks/{webhook}/deliveries', [WebhookSettingsController::class, 'deliveries'])->name('webhooks.deliveries');
+    Route::put('/webhooks/{webhookHash}', [WebhookSettingsController::class, 'update'])->name('webhooks.update');
+    Route::delete('/webhooks/{webhookHash}', [WebhookSettingsController::class, 'destroy'])->name('webhooks.destroy');
+    Route::post('/webhooks/{webhookHash}/toggle', [WebhookSettingsController::class, 'toggle'])->name('webhooks.toggle');
+    Route::post('/webhooks/{webhookHash}/regenerate-secret', [WebhookSettingsController::class, 'regenerateSecret'])->name('webhooks.regenerate_secret');
+    Route::post('/webhooks/{webhookHash}/test', [WebhookSettingsController::class, 'test'])->name('webhooks.test');
+    Route::get('/webhooks/{webhookHash}/deliveries', [WebhookSettingsController::class, 'deliveries'])->name('webhooks.deliveries');
 
     // Admin password confirmation (outside admin middleware - the admin middleware redirects here)
     Route::get('/admin/confirm-password', [AdminController::class, 'showConfirmPassword'])
@@ -999,6 +1001,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     Route::post('/{subdomain}/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
     Route::post('/{subdomain}/promo-code/validate', [PromoCodeController::class, 'validate'])->name('promo_code.validate')->middleware('throttle:20,1');
     Route::post('/{subdomain}/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
+    Route::post('/{subdomain}/rsvp', [TicketController::class, 'rsvp'])->name('event.rsvp');
     Route::post('/{subdomain}/waitlist/join', [WaitlistController::class, 'join'])->name('waitlist.join')->middleware('throttle:10,1');
     Route::get('/{subdomain}/checkout/success/{sale_id}', [TicketController::class, 'success'])->name('checkout.success');
     Route::get('/{subdomain}/checkout/cancel/{sale_id}', [TicketController::class, 'cancel'])->name('checkout.cancel');

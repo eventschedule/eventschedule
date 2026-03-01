@@ -26,6 +26,9 @@ class Event extends Model
         'name_en',
         'slug',
         'tickets_enabled',
+        'rsvp_enabled',
+        'rsvp_limit',
+        'rsvp_sold',
         'ticket_currency_code',
         'ticket_price',
         'coupon_code',
@@ -56,6 +59,7 @@ class Event extends Model
     protected $casts = [
         'duration' => 'float',
         'is_private' => 'boolean',
+        'rsvp_enabled' => 'boolean',
         'custom_fields' => 'array',
         'custom_field_values' => 'array',
         'last_translated_at' => 'datetime',
@@ -746,11 +750,68 @@ class Event extends Model
 
     public function isFree()
     {
+        if ($this->rsvp_enabled) {
+            return true;
+        }
+
         if ($this->tickets_enabled) {
             return $this->areTicketsFree();
         }
 
         return $this->ticket_price !== null && $this->ticket_price == 0;
+    }
+
+    public function canAcceptRsvp($date = null)
+    {
+        if (! $this->rsvp_enabled) {
+            return false;
+        }
+
+        // Check if event is past
+        if ($this->recurring_frequency) {
+            if ($date && Carbon::parse($date)->endOfDay()->isPast()) {
+                return false;
+            }
+        } else {
+            if (Carbon::parse($this->starts_at)->endOfDay()->isPast()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function rsvpSoldCount($date)
+    {
+        $sold = $this->rsvp_sold ? json_decode($this->rsvp_sold, true) : [];
+
+        return $sold[$date] ?? 0;
+    }
+
+    public function rsvpRemaining($date)
+    {
+        if (! $this->rsvp_limit) {
+            return null;
+        }
+
+        return max(0, $this->rsvp_limit - $this->rsvpSoldCount($date));
+    }
+
+    public function isRsvpFull($date)
+    {
+        if (! $this->rsvp_limit) {
+            return false;
+        }
+
+        return $this->rsvpSoldCount($date) >= $this->rsvp_limit;
+    }
+
+    public function updateRsvpSold($date, $quantity)
+    {
+        $sold = $this->rsvp_sold ? json_decode($this->rsvp_sold, true) : [];
+        $sold[$date] = max(0, ($sold[$date] ?? 0) + $quantity);
+        $this->rsvp_sold = json_encode($sold);
+        $this->save();
     }
 
     public function getImageUrl()
@@ -1180,6 +1241,10 @@ class Event extends Model
             $data->recurring_end_type = $this->recurring_end_type;
             $data->recurring_end_value = $this->recurring_end_value;
         }
+
+        // RSVP
+        $data->rsvp_enabled = (bool) $this->rsvp_enabled;
+        $data->rsvp_limit = $this->rsvp_limit;
 
         // Tickets
         $data->tickets_enabled = (bool) $this->tickets_enabled;

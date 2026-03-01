@@ -32,6 +32,7 @@ return new class extends Migration
             $table->timestamp('created_at')->nullable();
 
             $table->index(['webhook_id', 'created_at']);
+            $table->index('created_at');
             $table->index('event_type');
         });
     }

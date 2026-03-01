@@ -51,8 +51,13 @@ class Sale extends Model
             }
 
             if ($sale->isDirty('status') && in_array($sale->status, ['cancelled', 'refunded', 'expired'])) {
-                foreach ($sale->saleTickets as $saleTicket) {
-                    $saleTicket->ticket->updateSold($sale->event_date, -$saleTicket->quantity);
+                if ($sale->payment_method === 'rsvp') {
+                    $sale->event->updateRsvpSold($sale->event_date, -1);
+                    AnalyticsEventsDaily::decrementSale($sale->event_id, 0);
+                } else {
+                    foreach ($sale->saleTickets as $saleTicket) {
+                        $saleTicket->ticket->updateSold($sale->event_date, -$saleTicket->quantity);
+                    }
                 }
 
                 if ($sale->promo_code_id) {
@@ -84,6 +89,11 @@ class Sale extends Model
     public function promoCode()
     {
         return $this->belongsTo(PromoCode::class);
+    }
+
+    public function isRsvp()
+    {
+        return $this->payment_method === 'rsvp';
     }
 
     public function calculateTotal()

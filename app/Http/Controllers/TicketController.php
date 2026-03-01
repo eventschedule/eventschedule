@@ -15,6 +15,7 @@ use App\Services\EmailService;
 use App\Services\WebhookService;
 use App\Utils\InvoiceNinja;
 use App\Utils\MoneyUtils;
+use App\Rules\NoFakeEmail;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Endroid\QrCode\QrCode;
@@ -501,6 +502,174 @@ class TicketController extends Controller
                     return $this->cashCheckout($subdomain, $sale, $event);
             }
         }
+    }
+
+    public function rsvp(Request $request, $subdomain)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'event_id' => 'required|string',
+            'event_date' => 'required|date',
+        ]);
+
+        // Turnstile CAPTCHA validation
+        if (\App\Utils\TurnstileUtils::isEnabled()) {
+            $request->validate([
+                'cf-turnstile-response' => 'required',
+            ]);
+
+            $turnstileValid = \App\Utils\TurnstileUtils::verify($request->input('cf-turnstile-response'));
+            if (! $turnstileValid) {
+                return back()->with('error', __('messages.turnstile_verification_failed'));
+            }
+        }
+
+        $event = Event::findOrFail(UrlUtils::decodeId($request->event_id));
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        if (! $event->roles()->wherePivot('role_id', $role->id)->exists()) {
+            abort(403);
+        }
+
+        $user = auth()->user();
+        $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+        if ($event->is_private && ! $isMemberOrAdmin) {
+            abort(404);
+        }
+
+        if (! $event->canAcceptRsvp($request->event_date)) {
+            return back()->with('error', __('messages.rsvp_unavailable'));
+        }
+
+        if (! $user && $request->create_account && config('app.hosted')) {
+            $request->validate([
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class, new NoFakeEmail],
+                'password' => ['required', 'string', 'min:8'],
+            ]);
+
+            $utmParams = session('utm_params', []);
+            if (empty($utmParams) && $request->cookie('utm_params')) {
+                $utmParams = json_decode($request->cookie('utm_params'), true) ?? [];
+            }
+
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'timezone' => $event->user->timezone,
+                'language_code' => $event->user->language_code,
+                'utm_source' => $utmParams['utm_source'] ?? null,
+                'utm_medium' => $utmParams['utm_medium'] ?? null,
+                'utm_campaign' => $utmParams['utm_campaign'] ?? null,
+                'utm_content' => $utmParams['utm_content'] ?? null,
+                'utm_term' => $utmParams['utm_term'] ?? null,
+                'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url'),
+                'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page'),
+            ]);
+
+            session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page']);
+            $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+        }
+
+        try {
+            $sale = DB::transaction(function () use ($request, $event, $user, $subdomain) {
+                // Lock the event row to prevent race conditions
+                $event = Event::lockForUpdate()->find($event->id);
+
+                // Check capacity
+                if ($event->rsvp_limit && $event->rsvpSoldCount($request->event_date) >= $event->rsvp_limit) {
+                    throw new \Exception(__('messages.rsvp_full'));
+                }
+
+                // Check for duplicate registration
+                $duplicate = Sale::where('event_id', $event->id)
+                    ->where('event_date', $request->event_date)
+                    ->where('email', $request->email)
+                    ->where('payment_method', 'rsvp')
+                    ->where('status', 'paid')
+                    ->where('is_deleted', false)
+                    ->exists();
+
+                if ($duplicate) {
+                    throw new \Exception(__('messages.rsvp_already_registered'));
+                }
+
+                $sale = new Sale;
+                $sale->name = $request->input('name');
+                $sale->email = $request->input('email');
+                $sale->event_date = $request->input('event_date');
+                $sale->subdomain = $subdomain;
+                $sale->event_id = $event->id;
+                $sale->user_id = $user ? $user->id : null;
+                $sale->secret = strtolower(Str::random(32));
+                $sale->payment_method = 'rsvp';
+                $sale->payment_amount = 0;
+                $sale->status = 'paid';
+
+                // Capture UTM attribution
+                $utmParams = $request->session()->get('utm_params', []);
+                if (empty($utmParams) && $request->cookie('utm_params')) {
+                    $utmParams = json_decode($request->cookie('utm_params'), true) ?? [];
+                }
+                $sale->utm_source = $utmParams['utm_source'] ?? null;
+                $sale->utm_medium = $utmParams['utm_medium'] ?? null;
+                $sale->utm_campaign = $utmParams['utm_campaign'] ?? null;
+                if (($utmParams['utm_source'] ?? null) === 'boost' && ($utmParams['utm_campaign'] ?? null)) {
+                    $sale->boost_campaign_id = UrlUtils::decodeId($utmParams['utm_campaign']);
+                }
+                if (($utmParams['utm_source'] ?? null) === 'newsletter' && ($utmParams['utm_campaign'] ?? null)) {
+                    $sale->newsletter_id = UrlUtils::decodeId($utmParams['utm_campaign']);
+                }
+
+                if (! $sale->event_date) {
+                    $sale->event_date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
+                }
+
+                // Store event-level custom field values
+                $eventCustomValues = $request->input('event_custom_values', []);
+                $eventCustomFields = $event->custom_fields ?? [];
+                $fallbackIndex = 1;
+                foreach ($eventCustomFields as $fieldKey => $fieldConfig) {
+                    $index = $fieldConfig['index'] ?? $fallbackIndex;
+                    $fallbackIndex++;
+                    if ($index >= 1 && $index <= 10) {
+                        $value = $eventCustomValues[$fieldKey] ?? null;
+                        if (is_array($value)) {
+                            $value = implode(', ', array_map('trim', $value));
+                        }
+                        if ($value !== null) {
+                            $value = trim(strip_tags($value));
+                        }
+                        $sale->{"custom_value{$index}"} = $value;
+                    }
+                }
+
+                $sale->save();
+
+                // Increment RSVP sold count
+                $event->updateRsvpSold($request->event_date, 1);
+
+                return $sale;
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        // Send confirmation email and admin notification
+        $this->sendTicketPurchaseEmail($sale, $event);
+        $this->sendNewSaleNotification($sale, $event);
+
+        AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'rsvp:event_id:'.$event->id);
+
+        // Record in analytics (0 revenue)
+        AnalyticsEventsDaily::incrementSale($event->id, 0);
+
+        // Dispatch webhooks
+        WebhookService::dispatch('sale.created', $sale);
+        WebhookService::dispatch('sale.paid', $sale);
+
+        return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
     }
 
     private function stripeCheckout($subdomain, $sale, $event)
@@ -1193,6 +1362,40 @@ class TicketController extends Controller
         \Artisan::call('app:release-tickets');
 
         return response()->json(['success' => true]);
+    }
+
+    public function cancelRsvp(Request $request, $sale_id)
+    {
+        $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
+
+        // Verify the secret to prevent unauthorized cancellations
+        $secret = $request->input('secret');
+        if (! $secret || ! hash_equals($sale->secret, $secret)) {
+            abort(403);
+        }
+
+        if ($sale->payment_method !== 'rsvp') {
+            abort(403);
+        }
+
+        $cancelled = DB::transaction(function () use ($sale) {
+            $sale = Sale::lockForUpdate()->find($sale->id);
+            if ($sale->status !== 'paid') {
+                return false;
+            }
+            $sale->status = 'cancelled';
+            $sale->save();
+
+            return true;
+        });
+
+        $event = $sale->event;
+
+        if ($cancelled) {
+            WebhookService::dispatch('sale.cancelled', $sale);
+        }
+
+        return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
     }
 
     /**

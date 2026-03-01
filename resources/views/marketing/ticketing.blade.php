@@ -333,6 +333,46 @@
                     </div>
                 </div>
 
+                <!-- Free Event Registration -->
+                <div class="bento-card lg:col-span-3 relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 border border-green-200 dark:border-white/10 p-8 lg:p-10">
+                    <div class="grid md:grid-cols-3 gap-8 items-center">
+                        <div class="md:col-span-2">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/20 text-green-700 dark:text-green-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                </svg>
+                                Free
+                            </div>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Free event registration</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Not selling tickets? Enable registration and let attendees sign up with just a name and email. No payment setup needed, no ticketing complexity. Perfect for meetups, community events, and open gatherings.</p>
+                            <div class="flex flex-wrap gap-3">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Optional capacity limits</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">QR code check-in</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Confirmation emails</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Free tier</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-center">
+                            <div class="w-full max-w-[220px] bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10">
+                                <div class="text-center mb-4">
+                                    <div class="text-gray-900 dark:text-white font-semibold">Community Meetup</div>
+                                    <div class="text-green-600 dark:text-green-300 text-sm">Free</div>
+                                </div>
+                                <div class="space-y-3 mb-4">
+                                    <div class="h-8 bg-gray-200 dark:bg-white/10 rounded-lg border border-gray-200 dark:border-white/10 flex items-center px-3">
+                                        <span class="text-gray-500 dark:text-gray-400 text-xs">Your name</span>
+                                    </div>
+                                    <div class="h-8 bg-gray-200 dark:bg-white/10 rounded-lg border border-gray-200 dark:border-white/10 flex items-center px-3">
+                                        <span class="text-gray-500 dark:text-gray-400 text-xs">Your email</span>
+                                    </div>
+                                </div>
+                                <div class="w-full py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-semibold rounded-xl text-center">Register</div>
+                                <div class="text-center mt-3 text-gray-500 dark:text-gray-400 text-xs">12 of 50 spots remaining</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Sale Notifications -->
                 <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-lime-100 to-green-100 dark:from-lime-900 dark:to-green-900 border border-lime-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-lime-500/20 text-lime-700 dark:text-lime-300 text-sm font-medium mb-4">

@@ -15,7 +15,7 @@ class CheckInController extends Controller
         $user = auth()->user();
 
         $events = Event::where('user_id', $user->id)
-            ->whereHas('tickets')
+            ->where(fn ($q) => $q->whereHas('tickets')->orWhere('rsvp_enabled', true))
             ->orderBy('starts_at', 'desc')
             ->get();
 

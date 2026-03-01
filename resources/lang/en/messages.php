@@ -2329,4 +2329,19 @@ return [
     'regenerate_secret' => 'Regenerate secret',
     'no_deliveries' => 'No deliveries yet.',
     'error_loading' => 'Failed to load data.',
+
+    // RSVP / Registration
+    'enable_rsvp' => 'Enable Registration',
+    'rsvp_limit' => 'Registration Limit',
+    'rsvp_limit_help' => 'Maximum number of registrations per date. Leave blank for unlimited.',
+    'rsvp_full' => 'Registration is full for this date.',
+    'rsvp_unavailable' => 'Registration is not available for this event.',
+    'rsvp_already_registered' => 'You are already registered for this event.',
+    'register' => 'Register',
+    'registration_confirmation' => 'Registration Confirmation',
+    'view_registration' => 'View Registration',
+    'spots_remaining' => ':count spots remaining',
+    'registered' => 'Registered',
+    'registration_full' => 'Registration Full',
+    'cancel_registration' => 'Cancel Registration',
 ];

@@ -48,22 +48,30 @@
 
     <!-- Dark Mode Detection -->
     <script {!! nonce_attr() !!}>
-        // Apply dark mode based on system preference
+        // Apply dark mode based on localStorage theme preference, falling back to system preference
         (function() {
-            function applySystemTheme() {
-                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (isDark) {
+            var storedTheme;
+            try { storedTheme = localStorage.getItem('theme'); } catch (e) {}
+
+            function getEffectiveTheme() {
+                if (storedTheme === 'dark') return 'dark';
+                if (storedTheme === 'light') return 'light';
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+
+            function applyTheme() {
+                if (getEffectiveTheme() === 'dark') {
                     document.documentElement.classList.add('dark');
                 } else {
                     document.documentElement.classList.remove('dark');
                 }
             }
-            
+
             // Apply immediately to prevent flash
-            applySystemTheme();
-            
+            applyTheme();
+
             // Watch for system theme changes
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applySystemTheme);
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
         })();
     </script>
 

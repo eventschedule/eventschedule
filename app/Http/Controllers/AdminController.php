@@ -1218,6 +1218,18 @@ class AdminController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        // Reusable scope: matches subscriptions that Cashier considers valid
+        // (active, on trial, or on a grace period after cancellation)
+        $validSubscriptionScope = function ($sq) {
+            $sq->where(function ($q) {
+                $q->active();
+            })->orWhere(function ($q) {
+                $q->onTrial();
+            })->orWhere(function ($q) {
+                $q->onGracePeriod();
+            });
+        };
+
         // Plan statistics (excluding demo roles)
         $planCounts = Role::select('plan_type', DB::raw('COUNT(*) as count'))
             ->whereNotNull('user_id')
@@ -1236,9 +1248,7 @@ class AdminController extends Controller
         $enterpriseCount = $planCounts['enterprise'] ?? 0;
 
         // Active Stripe subscriptions (excluding demo roles)
-        $stripePaidCount = Role::whereHas('subscriptions', function ($query) {
-            $query->where('stripe_status', 'active');
-        })
+        $stripePaidCount = Role::whereHas('subscriptions', $validSubscriptionScope)
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
             ->where('subdomain', 'not like', 'demo-%')
             ->count();
@@ -1247,9 +1257,7 @@ class AdminController extends Controller
         $manualPlanCount = Role::where('plan_type', '!=', 'free')
             ->whereNotNull('plan_expires')
             ->where('plan_expires', '>=', now()->format('Y-m-d'))
-            ->whereDoesntHave('subscriptions', function ($query) {
-                $query->where('stripe_status', 'active');
-            })
+            ->whereDoesntHave('subscriptions', $validSubscriptionScope)
             ->whereNull('trial_ends_at')
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
             ->where('subdomain', 'not like', 'demo-%')
@@ -1298,19 +1306,15 @@ class AdminController extends Controller
         // Status filter
         if ($status = $request->input('status')) {
             if ($status === 'active') {
-                $query->where(function ($q) {
+                $query->where(function ($q) use ($validSubscriptionScope) {
                     $q->where('plan_expires', '>=', now()->format('Y-m-d'))
-                        ->orWhereHas('subscriptions', function ($sq) {
-                            $sq->where('stripe_status', 'active');
-                        });
+                        ->orWhereHas('subscriptions', $validSubscriptionScope);
                 });
             } elseif ($status === 'expired') {
                 $query->where(function ($q) {
                     $q->where('plan_expires', '<', now()->format('Y-m-d'))
                         ->orWhereNull('plan_expires');
-                })->whereDoesntHave('subscriptions', function ($sq) {
-                    $sq->where('stripe_status', 'active');
-                });
+                })->whereDoesntHave('subscriptions', $validSubscriptionScope);
             } elseif ($status === 'trial') {
                 $query->whereNotNull('trial_ends_at')
                     ->where('trial_ends_at', '>', now());
@@ -1320,16 +1324,12 @@ class AdminController extends Controller
         // Source filter
         if ($source = $request->input('source')) {
             if ($source === 'stripe') {
-                $query->whereHas('subscriptions', function ($sq) {
-                    $sq->where('stripe_status', 'active');
-                });
+                $query->whereHas('subscriptions', $validSubscriptionScope);
             } elseif ($source === 'manual') {
                 $query->where('plan_type', '!=', 'free')
                     ->whereNotNull('plan_expires')
                     ->where('plan_expires', '>=', now()->format('Y-m-d'))
-                    ->whereDoesntHave('subscriptions', function ($sq) {
-                        $sq->where('stripe_status', 'active');
-                    })
+                    ->whereDoesntHave('subscriptions', $validSubscriptionScope)
                     ->whereNull('trial_ends_at');
             } elseif ($source === 'trial') {
                 $query->whereNotNull('trial_ends_at')
