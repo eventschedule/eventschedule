@@ -1,7 +1,7 @@
 <x-marketing-layout>
     <x-slot name="title">Selling Tickets - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Selling Tickets</x-slot>
-    <x-slot name="description">Learn how to set up and sell tickets for your events. Configure payment methods, create ticket types, and manage sales.</x-slot>
+    <x-slot name="description">Learn how to sell tickets and manage free event registration. Configure payment methods, create ticket types, enable RSVP, and manage sales.</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -28,7 +28,7 @@
             "@id": "{{ url()->current() }}"
         },
         "datePublished": "2024-01-01",
-        "dateModified": "2026-02-01"
+        "dateModified": "2026-03-01"
     }
     </script>
     </x-slot>
@@ -100,6 +100,7 @@
                             </div>
                         </div>
                         <a href="#waitlist" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Waitlist</a>
+                        <a href="#feedback" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Post-Event Feedback</a>
                         <a href="#financial" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Financial Information</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
@@ -175,6 +176,12 @@
                             </ol>
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors will see a "Register" button on your event page. After registering, they receive a confirmation email with a QR code for check-in. You can view all registrations in your sales list.</p>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Attendees can cancel their own registration from the confirmation page linked in their email.</p>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">For recurring events, capacity is tracked per occurrence, so each date has its own registration count against the RSVP limit.</p>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">If you have <x-link href="{{ route('marketing.docs.developer.webhooks') }}">webhooks</x-link> configured, registrations trigger <code class="doc-inline-code">sale.created</code> and cancellations trigger <code class="doc-inline-code">sale.cancelled</code> webhook events.</p>
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
@@ -609,6 +616,47 @@
                                 <div class="doc-callout-title">One at a Time</div>
                                 <p>Only one person is notified at a time to prevent overselling. The next person is notified only after the current person's 24-hour window expires or they complete their purchase.</p>
                             </div>
+                        </section>
+
+                        <!-- Post-Event Feedback -->
+                        <section id="feedback" class="doc-section">
+                            <h2 class="doc-heading">Post-Event Feedback <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-2">Pro</span></h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Automatically collect ratings and comments from attendees after your events end. Feedback emails are sent to ticket buyers and RSVP attendees, linking to a simple form where they can rate their experience.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Enabling Feedback</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Go to your schedule's edit page in the admin panel</li>
+                                <li>Open <strong class="text-gray-900 dark:text-white">Settings &rarr; Notifications</strong></li>
+                                <li>Enable <strong class="text-gray-900 dark:text-white">Post-event feedback</strong></li>
+                                <li>Choose a delay (how long after the event ends before emails are sent). The default is 24 hours.</li>
+                                <li>Save your changes</li>
+                            </ol>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Per-Event Override</div>
+                                <p>You can override the schedule-level setting for individual events. In the event edit page, scroll to the <strong>Feedback</strong> section and choose "Enabled" or "Disabled" to override, or "Use schedule default" to follow the schedule setting.</p>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">How It Works</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>After an event ends and the configured delay passes, feedback request emails are automatically sent to attendees</li>
+                                <li>Each email contains a link to a feedback form branded with your schedule's logo and colors</li>
+                                <li>Attendees rate their experience from 1 to 5 stars and can leave an optional comment</li>
+                                <li>Each attendee can only submit feedback once</li>
+                            </ol>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Viewing Feedback</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">View all feedback from <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales &rarr; Feedback</strong> tab. The page shows:</p>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Summary card</strong> with average rating, total responses, and response rate</li>
+                                <li><strong class="text-gray-900 dark:text-white">Feedback table</strong> listing each response with attendee name, event, date, star rating, comment, and submission time</li>
+                            </ul>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Exporting Feedback</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Click <strong class="text-gray-900 dark:text-white">Export Feedback</strong> on the Feedback tab to download a CSV file with all feedback data.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Feedback Notifications</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">To receive an email when new feedback is submitted, enable <strong class="text-gray-900 dark:text-white">New feedback</strong> in <strong class="text-gray-900 dark:text-white">Settings &rarr; Notifications</strong>. Each notification includes the event name, attendee name, star rating, and comment.</p>
                         </section>
 
                         <!-- Financial Information -->

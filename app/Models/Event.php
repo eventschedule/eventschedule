@@ -52,6 +52,7 @@ class Event extends Model
         'translation_attempts',
         'last_translated_at',
         'last_notified_fan_content_count',
+        'feedback_enabled',
     ];
 
     protected $hidden = ['event_password'];
@@ -67,6 +68,7 @@ class Event extends Model
         'ticket_price' => 'decimal:2',
         'recurring_include_dates' => 'array',
         'recurring_exclude_dates' => 'array',
+        'feedback_enabled' => 'boolean',
     ];
 
     protected static function boot()
@@ -413,6 +415,42 @@ class Event extends Model
     public function ticketWaitlists()
     {
         return $this->hasMany(TicketWaitlist::class);
+    }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(EventFeedback::class);
+    }
+
+    public function isFeedbackEnabled()
+    {
+        if (! is_null($this->feedback_enabled)) {
+            return (bool) $this->feedback_enabled;
+        }
+
+        $role = $this->roles->first(fn ($role) => $role->isTalent()) ?? $this->roles->first();
+
+        return $role ? (bool) $role->feedback_enabled : false;
+    }
+
+    public function getAverageRating($eventDate = null)
+    {
+        $query = $this->feedbacks();
+        if ($eventDate) {
+            $query->where('event_date', $eventDate);
+        }
+
+        return round($query->avg('rating'), 1);
+    }
+
+    public function getFeedbackCount($eventDate = null)
+    {
+        $query = $this->feedbacks();
+        if ($eventDate) {
+            $query->where('event_date', $eventDate);
+        }
+
+        return $query->count();
     }
 
     public function members()

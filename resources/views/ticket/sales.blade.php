@@ -1,16 +1,24 @@
 <x-app-admin-layout>
 
-    @if ($waitlistCount > 0)
+    @if ($waitlistCount > 0 || $hasPro)
     <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
         <nav class="-mb-px flex gap-6">
             <button type="button" id="tab-sales"
                 class="sales-tab whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-[#4E81FA] text-[#4E81FA]">
                 {{ __('messages.sales') }}
             </button>
+            @if ($waitlistCount > 0)
             <button type="button" id="tab-waitlist"
                 class="sales-tab whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300">
                 {{ __('messages.waitlist') }} ({{ $waitlistCount }})
             </button>
+            @endif
+            @if ($hasPro)
+            <button type="button" id="tab-feedback"
+                class="sales-tab whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300">
+                {{ __('messages.feedback') }}
+            </button>
+            @endif
         </nav>
     </div>
     @endif
@@ -67,28 +75,46 @@
     </div>
     @endif
 
+    @if ($hasPro)
+    <div id="feedback-panel" style="display: none;">
+        <div id="feedback-table">
+        </div>
+    </div>
+    @endif
+
 </x-app-admin-layout>
 
 <script {!! nonce_attr() !!}>
-@if ($waitlistCount > 0)
+@if ($waitlistCount > 0 || $hasPro)
 // Tab switching
 const activeClass = 'border-[#4E81FA] text-[#4E81FA]';
 const inactiveClass = 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300';
+const tabBaseClass = 'sales-tab whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium ';
+
+function setActiveTab(activeId) {
+    document.querySelectorAll('.sales-tab').forEach(function(tab) {
+        tab.className = tabBaseClass + inactiveClass;
+    });
+    document.getElementById(activeId).className = tabBaseClass + activeClass;
+
+    document.getElementById('sales-panel').style.display = activeId === 'tab-sales' ? '' : 'none';
+    var waitlistPanel = document.getElementById('waitlist-panel');
+    if (waitlistPanel) {
+        waitlistPanel.style.display = activeId === 'tab-waitlist' ? '' : 'none';
+    }
+    var feedbackPanel = document.getElementById('feedback-panel');
+    if (feedbackPanel) {
+        feedbackPanel.style.display = activeId === 'tab-feedback' ? '' : 'none';
+    }
+}
 
 document.getElementById('tab-sales').addEventListener('click', function() {
-    document.getElementById('sales-panel').style.display = '';
-    document.getElementById('waitlist-panel').style.display = 'none';
-    this.className = 'sales-tab whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium ' + activeClass;
-    document.getElementById('tab-waitlist').className = 'sales-tab whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium ' + inactiveClass;
+    setActiveTab('tab-sales');
 });
 
+@if ($waitlistCount > 0)
 document.getElementById('tab-waitlist').addEventListener('click', function() {
-    document.getElementById('sales-panel').style.display = 'none';
-    document.getElementById('waitlist-panel').style.display = '';
-    this.className = 'sales-tab whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium ' + activeClass;
-    document.getElementById('tab-sales').className = 'sales-tab whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium ' + inactiveClass;
-
-    // Load waitlist data on first click
+    setActiveTab('tab-waitlist');
     if (!document.getElementById('waitlist-panel').dataset.loaded) {
         loadWaitlist();
         document.getElementById('waitlist-panel').dataset.loaded = '1';
@@ -146,6 +172,39 @@ function handleWaitlistRemove(entryId) {
 }
 @endif
 
+@if ($hasPro)
+document.getElementById('tab-feedback').addEventListener('click', function() {
+    setActiveTab('tab-feedback');
+    if (!document.getElementById('feedback-panel').dataset.loaded) {
+        loadFeedback();
+        document.getElementById('feedback-panel').dataset.loaded = '1';
+    }
+});
+
+function loadFeedback(url) {
+    fetch(url || '{{ route("sales") }}?tab=feedback', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.text())
+    .then(html => {
+        document.getElementById('feedback-table').innerHTML = html;
+        bindFeedbackPagination();
+    });
+}
+
+function bindFeedbackPagination() {
+    document.querySelectorAll('#feedback-table nav[role="navigation"] a').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            var url = new URL(this.href);
+            url.searchParams.set('tab', 'feedback');
+            loadFeedback(url.toString());
+        });
+    });
+}
+@endif
+@endif
+
 let timeoutId;
 const filterInput = document.getElementById('filter');
 const clearButton = document.getElementById('clear-filter');
@@ -161,7 +220,7 @@ document.getElementById('export-sales').addEventListener('click', function(e) {
 filterInput.addEventListener('input', function(e) {
     clearTimeout(timeoutId);
     clearButton.style.display = e.target.value ? 'block' : 'none';
-    
+
     timeoutId = setTimeout(() => {
         updateResults(e.target.value);
     }, 500);

@@ -2144,6 +2144,42 @@
                                 help="{{ __('messages.notify_new_fan_content_help') }}" />
                         </div>
 
+                        @if ($role->isPro())
+                        <hr class="my-6 border-gray-200 dark:border-gray-700">
+                        <h3 class="text-base font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.feedback') }}</h3>
+
+                        @if (config('app.hosted') && ! $role->hasEmailSettings())
+                            <p class="text-sm text-amber-700 dark:text-amber-300 mb-4">
+                                {{ __('messages.feedback_requires_email_settings') }}
+                            </p>
+                        @endif
+
+                        <div class="mb-6">
+                            <x-toggle name="feedback_enabled"
+                                label="{{ __('messages.feedback_enabled') }}"
+                                checked="{{ old('feedback_enabled', $role->feedback_enabled) }}"
+                                help="{{ __('messages.feedback_enabled_help') }}" />
+                        </div>
+
+                        <div class="mb-6" id="feedback-delay-wrapper" style="{{ $role->feedback_enabled ? '' : 'display: none;' }}">
+                            <x-input-label for="feedback_delay_hours" value="{{ __('messages.feedback_delay') }}" />
+                            <select id="feedback_delay_hours" name="feedback_delay_hours" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                                @foreach ([1, 2, 6, 12, 24, 48] as $hours)
+                                <option value="{{ $hours }}" {{ old('feedback_delay_hours', $role->feedback_delay_hours ?? 24) == $hours ? 'selected' : '' }}>
+                                    {{ $hours }} {{ __('messages.feedback_hours') }}
+                                </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mb-6">
+                            <x-toggle name="notification_new_feedback"
+                                label="{{ __('messages.notify_new_feedback') }}"
+                                checked="{{ old('notification_new_feedback', $notificationSettings['new_feedback'] ?? false) }}"
+                                help="{{ __('messages.notify_new_feedback_help') }}" />
+                        </div>
+                        @endif
+
                         </div>
                         <!-- End Tab Content: Notifications -->
 
@@ -2786,6 +2822,15 @@
 // Scroll guard: force page to stay at top during all initialization.
 var _scrollGuard = function() { window.scrollTo(0, 0); };
 window.addEventListener('scroll', _scrollGuard);
+
+// Toggle feedback delay dropdown visibility
+var feedbackToggle = document.querySelector('input[name="feedback_enabled"][type="checkbox"]');
+var feedbackDelayWrapper = document.getElementById('feedback-delay-wrapper');
+if (feedbackToggle && feedbackDelayWrapper) {
+    feedbackToggle.addEventListener('change', function() {
+        feedbackDelayWrapper.style.display = this.checked ? '' : 'none';
+    });
+}
 
 // Toggle "Required" label visibility for import fields
 document.querySelectorAll('.import-field-toggle').forEach(function(toggle) {

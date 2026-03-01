@@ -604,6 +604,12 @@
         <priority>0.7</priority>
     </url>
     <url>
+        <loc>{{ url('/docs/saas/setup') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
         <loc>{{ url('/docs/saas/custom-domains') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>

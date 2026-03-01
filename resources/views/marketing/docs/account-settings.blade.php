@@ -28,7 +28,7 @@
             "@id": "{{ url()->current() }}"
         },
         "datePublished": "2024-01-01",
-        "dateModified": "2026-02-01"
+        "dateModified": "2026-03-01"
     }
     </script>
     </x-slot>

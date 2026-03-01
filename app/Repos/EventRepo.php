@@ -498,6 +498,12 @@ class EventRepo
         }
         */
 
+        // Handle nullable feedback_enabled (empty string = null = use schedule default)
+        if ($request->has('feedback_enabled')) {
+            $val = $request->input('feedback_enabled');
+            $event->feedback_enabled = $val === '' || $val === null ? null : (bool) $val;
+        }
+
         $event->save();
 
         if ($venue) {

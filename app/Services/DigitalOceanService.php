@@ -15,8 +15,8 @@ class DigitalOceanService
 
     public function __construct()
     {
-        $this->apiToken = config('services.digitalocean.api_token', '');
-        $this->appId = config('services.digitalocean.app_id', '');
+        $this->apiToken = config('services.digitalocean.api_token') ?? '';
+        $this->appId = config('services.digitalocean.app_id') ?? '';
     }
 
     public function isConfigured(): bool

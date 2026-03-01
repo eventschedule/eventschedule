@@ -2423,6 +2423,7 @@ class MarketingController extends Controller
             ['page' => 'Creating Events', 'section' => 'Privacy Settings', 'description' => 'Control event visibility and access.', 'url' => $r['creating_events'] . '#privacy', 'category' => 'User Guide', 'keywords' => 'private public hidden visibility'],
             ['page' => 'Creating Events', 'section' => 'Custom Fields', 'description' => 'Add custom information fields to events.', 'url' => $r['creating_events'] . '#custom-fields', 'category' => 'User Guide', 'keywords' => 'custom fields metadata'],
             ['page' => 'Creating Events', 'section' => 'Polls', 'description' => 'Create interactive polls for your events.', 'url' => $r['creating_events'] . '#polls', 'category' => 'User Guide', 'keywords' => 'voting survey poll'],
+            ['page' => 'Creating Events', 'section' => 'Feedback', 'description' => 'Control per-event feedback override settings.', 'url' => $r['creating_events'] . '#feedback', 'category' => 'User Guide', 'keywords' => 'feedback rating review post-event override'],
             ['page' => 'Creating Events', 'section' => 'Fan Content', 'description' => 'Manage user-submitted videos and content.', 'url' => $r['creating_events'] . '#fan-content', 'category' => 'User Guide', 'keywords' => 'user content videos submissions ugc'],
 
             // AI Import
@@ -2470,6 +2471,7 @@ class MarketingController extends Controller
             ['page' => 'Selling Tickets', 'section' => 'Check-In System', 'description' => 'QR code-based check-in for attendees.', 'url' => $r['tickets'] . '#check-in', 'category' => 'User Guide', 'keywords' => 'check-in qr code scan attendee'],
             ['page' => 'Selling Tickets', 'section' => 'Check-In Dashboard', 'description' => 'Dashboard for managing event check-ins.', 'url' => $r['tickets'] . '#checkin-dashboard', 'category' => 'User Guide', 'keywords' => 'dashboard check-in manage'],
             ['page' => 'Selling Tickets', 'section' => 'Waitlist', 'description' => 'Manage waitlists for sold-out events.', 'url' => $r['tickets'] . '#waitlist', 'category' => 'User Guide', 'keywords' => 'waitlist waiting list sold out'],
+            ['page' => 'Selling Tickets', 'section' => 'Post-Event Feedback', 'description' => 'Collect star ratings and comments from attendees after events.', 'url' => $r['tickets'] . '#feedback', 'category' => 'User Guide', 'keywords' => 'feedback rating stars review comment post-event'],
             ['page' => 'Selling Tickets', 'section' => 'Financial Reporting', 'description' => 'Track revenue and financial metrics.', 'url' => $r['tickets'] . '#financial', 'category' => 'User Guide', 'keywords' => 'revenue money financial report'],
 
             // Event Graphics

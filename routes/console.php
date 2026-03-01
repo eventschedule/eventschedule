@@ -31,6 +31,10 @@ Schedule::call(function () {
 })->hourly()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
+    Artisan::call('app:send-feedback-requests');
+})->hourly()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
     Artisan::call('caldav:sync');
 })->everyFifteenMinutes()->appendOutputTo(storage_path('logs/scheduler.log'));
 

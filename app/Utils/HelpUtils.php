@@ -50,6 +50,7 @@ class HelpUtils
                 'section-custom-fields' => '/docs/creating-events#custom-fields',
                 'section-fan-content' => '/docs/creating-events#fan-content',
                 'section-polls' => '/docs/creating-events#polls',
+                'section-feedback' => '/docs/tickets#feedback',
             ],
         ],
         '{subdomain}/add-event' => [
@@ -75,6 +76,7 @@ class HelpUtils
                 'section-custom-fields' => '/docs/creating-events#custom-fields',
                 'section-fan-content' => '/docs/creating-events#fan-content',
                 'section-polls' => '/docs/creating-events#polls',
+                'section-feedback' => '/docs/tickets#feedback',
             ],
         ],
         'settings' => [

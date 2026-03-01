@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\TicketCheckoutRequest;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
+use App\Models\EventFeedback;
 use App\Models\PromoCode;
 use App\Models\Role;
 use App\Models\Sale;
@@ -77,6 +78,11 @@ class TicketController extends Controller
             ->paginate(50, ['*'], 'page');
 
         if (request()->ajax()) {
+            $tab = request()->query('tab');
+            if ($tab === 'feedback') {
+                return view('ticket.feedback_table', $this->getFeedbackData());
+            }
+
             return view('ticket.sales_table', compact('sales'));
         } else {
             $user = auth()->user();
@@ -86,7 +92,9 @@ class TicketController extends Controller
 
             $waitlistEntries = collect();
 
-            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries'));
+            $hasPro = $user->roles()->get()->contains(fn ($role) => $role->isPro());
+
+            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries', 'hasPro'));
         }
     }
 
@@ -94,7 +102,7 @@ class TicketController extends Controller
     {
         $user = auth()->user();
 
-        $query = Sale::with('event', 'saleTickets.ticket', 'promoCode')
+        $query = Sale::with('event', 'saleTickets.ticket', 'promoCode', 'feedback')
             ->where('is_deleted', false)
             ->whereHas('event', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
@@ -113,6 +121,38 @@ class TicketController extends Controller
         }
 
         return $query;
+    }
+
+    private function getFeedbackData()
+    {
+        $user = auth()->user();
+
+        $feedbacks = EventFeedback::whereHas('event', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })
+            ->with(['event', 'sale'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(50, ['*'], 'feedback_page');
+
+        $totalFeedbacks = EventFeedback::whereHas('event', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        });
+
+        $feedbackCount = $totalFeedbacks->count();
+        $averageRating = $totalFeedbacks->avg('rating');
+        $averageRating = $averageRating ? round($averageRating, 1) : null;
+
+        $totalEligibleSales = Sale::where('status', 'paid')
+            ->where('is_deleted', false)
+            ->whereNotNull('feedback_sent_at')
+            ->whereHas('event', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->count();
+
+        $responseRate = $totalEligibleSales > 0 ? round(($feedbackCount / $totalEligibleSales) * 100) : 0;
+
+        return compact('feedbacks', 'feedbackCount', 'averageRating', 'responseRate');
     }
 
     public function exportSales()

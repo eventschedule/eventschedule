@@ -1,0 +1,92 @@
+<?php
+
+namespace App\Mail;
+
+use App\Models\Event;
+use App\Models\Role;
+use App\Models\Sale;
+use App\Utils\UrlUtils;
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
+use Illuminate\Queue\SerializesModels;
+
+class FeedbackRequest extends Mailable
+{
+    use Queueable, SerializesModels;
+
+    protected $sale;
+
+    protected $event;
+
+    protected $role;
+
+    public function __construct(Sale $sale, Event $event, ?Role $role = null)
+    {
+        $this->sale = $sale;
+        $this->event = $event;
+        $this->role = $role;
+    }
+
+    public function envelope(): Envelope
+    {
+        $fromAddress = config('mail.from.address');
+        $fromName = config('mail.from.name');
+
+        if ($this->role && $this->role->hasEmailSettings()) {
+            $emailSettings = $this->role->getEmailSettings();
+            if (! empty($emailSettings['from_address'])) {
+                $fromAddress = $emailSettings['from_address'];
+            }
+            if (! empty($emailSettings['from_name'])) {
+                $fromName = $emailSettings['from_name'];
+            }
+        }
+
+        return new Envelope(
+            subject: __('messages.feedback_request_subject').' - '.$this->event->name,
+            from: new Address($fromAddress, $fromName),
+        );
+    }
+
+    public function content(): Content
+    {
+        $feedbackUrl = route('feedback.show', [
+            'event_id' => UrlUtils::encodeId($this->event->id),
+            'secret' => $this->sale->secret,
+        ]);
+
+        return new Content(
+            view: 'emails.feedback_request',
+            text: 'emails.feedback_request_text',
+            with: [
+                'sale' => $this->sale,
+                'event' => $this->event,
+                'role' => $this->role,
+                'feedbackUrl' => $feedbackUrl,
+            ]
+        );
+    }
+
+    public function headers(): Headers
+    {
+        if ($this->role) {
+            return new Headers(
+                text: [
+                    'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $this->role->subdomain]).'>',
+                    'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
+                ],
+            );
+        }
+
+        return new Headers;
+    }
+
+    public function attachments(): array
+    {
+        return [];
+    }
+}

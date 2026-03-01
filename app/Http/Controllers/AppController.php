@@ -180,6 +180,7 @@ class AppController extends Controller
                 \Artisan::call('app:expire-waitlist');
                 \Artisan::call('app:translate');
                 \Artisan::call('app:send-graphic-emails');
+                \Artisan::call('app:send-feedback-requests');
 
                 if (config('app.hosted')) {
                     \Artisan::call('app:setup-demo');

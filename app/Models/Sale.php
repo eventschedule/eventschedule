@@ -37,6 +37,7 @@ class Sale extends Model
         'newsletter_id',
         'promo_code_id',
         'discount_amount',
+        'feedback_sent_at',
     ];
 
     protected static function booted()
@@ -89,6 +90,11 @@ class Sale extends Model
     public function promoCode()
     {
         return $this->belongsTo(PromoCode::class);
+    }
+
+    public function feedback()
+    {
+        return $this->hasOne(EventFeedback::class);
     }
 
     public function isRsvp()

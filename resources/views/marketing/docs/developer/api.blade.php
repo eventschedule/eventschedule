@@ -13,7 +13,7 @@
         "publisher": { "@type": "Organization", "name": "Event Schedule", "logo": { "@type": "ImageObject", "url": "{{ config('app.url') }}/images/light_logo.png", "width": 712, "height": 140 } },
         "mainEntityOfPage": { "@type": "WebPage", "@id": "{{ url()->current() }}" },
         "datePublished": "2024-01-01",
-        "dateModified": "2026-02-01"
+        "dateModified": "2026-03-01"
     }
     </script>
     </x-slot>
@@ -775,6 +775,7 @@
                                                     <tr><td><code class="doc-inline-code">name</code></td><td>Filter by event name (partial match)</td></tr>
                                                     <tr><td><code class="doc-inline-code">schedule_type</code></td><td>Filter by type: <code class="doc-inline-code">single</code> or <code class="doc-inline-code">recurring</code></td></tr>
                                                     <tr><td><code class="doc-inline-code">tickets_enabled</code></td><td>Filter by whether tickets are enabled (boolean)</td></tr>
+                                                    <tr><td><code class="doc-inline-code">rsvp_enabled</code></td><td>Filter by whether RSVP/registration is enabled (boolean)</td></tr>
                                                     <tr><td><code class="doc-inline-code">group_id</code></td><td>Filter by sub-schedule (encoded sub-schedule ID)</td></tr>
                                                 </tbody>
                                             </table>
@@ -796,6 +797,7 @@
             <span class="code-string">"starts_at"</span>: <span class="code-string">"2025-03-15 20:00:00"</span>,
             <span class="code-string">"duration"</span>: <span class="code-value">3</span>,
             <span class="code-string">"tickets_enabled"</span>: <span class="code-value">true</span>,
+            <span class="code-string">"rsvp_enabled"</span>: <span class="code-value">false</span>,
             ...
         }
     ],
@@ -868,6 +870,8 @@
                                                     <tr><td><code class="doc-inline-code">registration_url</code></td><td>No</td><td>External registration URL</td></tr>
                                                     <tr><td><code class="doc-inline-code">event_password</code></td><td>No</td><td>Password to protect the event page</td></tr>
                                                     <tr><td><code class="doc-inline-code">is_private</code></td><td>No</td><td>Make event private (hidden from calendar)</td></tr>
+                                                    <tr><td><code class="doc-inline-code">rsvp_enabled</code></td><td>No</td><td>Enable free RSVP/registration (boolean)</td></tr>
+                                                    <tr><td><code class="doc-inline-code">rsvp_limit</code></td><td>No</td><td>Maximum number of registrations (integer, min 1)</td></tr>
                                                     <tr><td><code class="doc-inline-code">category_id</code></td><td>No</td><td>Category ID (see <a href="#list-categories" class="text-cyan-400 hover:text-cyan-300">List Categories</a>)</td></tr>
                                                     <tr><td><code class="doc-inline-code">category</code></td><td>No</td><td>Category name (alternative to category_id)</td></tr>
                                                     <tr><td><code class="doc-inline-code">schedule</code></td><td>No</td><td>Sub-schedule slug to assign the event to</td></tr>
@@ -925,7 +929,7 @@
                                             <span class="bg-yellow-600 text-white px-2 py-1 rounded text-sm font-medium">PUT</span>
                                             <code class="doc-inline-code">/api/events/{id}</code>
                                         </div>
-                                        <p class="text-gray-600 dark:text-gray-300 mb-6">Update an event. Supports partial updates - only include the fields you want to change. Recurring configuration, tickets, and agenda parts are preserved when not included in the request. Requires Pro plan.</p>
+                                        <p class="text-gray-600 dark:text-gray-300 mb-6">Update an event. Accepts the same parameters as <a href="#create-event" class="text-cyan-400 hover:text-cyan-300">Create Event</a>. Supports partial updates - only include the fields you want to change. Recurring configuration, tickets, and agenda parts are preserved when not included in the request. Requires Pro plan.</p>
                                     </div>
                                     <div class="api-endpoint-code">
                                         <div class="doc-code-block">

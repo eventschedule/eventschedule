@@ -28,6 +28,8 @@ class ProfileTest extends DuskTestCase
             // 1. Change timezone
             // -----------------------------------------------
             $browser->visit('/settings')
+                ->waitFor('button[data-tab="localization"]', 5)
+                ->click('button[data-tab="localization"]')
                 ->waitFor('#timezone-search', 5);
 
             $browser->script("
@@ -45,14 +47,17 @@ class ProfileTest extends DuskTestCase
 
             // Verify persisted on reload
             $browser->visit('/settings')
+                ->waitFor('button[data-tab="localization"]', 5)
+                ->click('button[data-tab="localization"]')
                 ->waitFor('#timezone-search', 5)
                 ->assertInputValue('#timezone-search', 'Pacific/Auckland');
 
             // -----------------------------------------------
             // 2. Toggle 24-hour time
             // -----------------------------------------------
-            $browser->click('label[for="use_24_hour_time"]')
-                ->scrollIntoView('button[type="submit"]')
+            $browser->scrollIntoView('label[for="use_24_hour_time"]');
+            $browser->script("document.getElementById('use_24_hour_time').checked = true;");
+            $browser->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
                 ->waitForLocation('/settings', 15);
 
@@ -63,6 +68,8 @@ class ProfileTest extends DuskTestCase
             // 3. Change language to Spanish
             // -----------------------------------------------
             $browser->visit('/settings')
+                ->waitFor('button[data-tab="localization"]', 5)
+                ->click('button[data-tab="localization"]')
                 ->waitFor('#language_code', 5)
                 ->select('language_code', 'es')
                 ->scrollIntoView('button[type="submit"]')
@@ -74,6 +81,8 @@ class ProfileTest extends DuskTestCase
 
             // Verify page shows Spanish text (the settings page header)
             $browser->visit('/settings')
+                ->waitFor('button[data-tab="localization"]', 5)
+                ->click('button[data-tab="localization"]')
                 ->waitFor('#language_code', 5)
                 ->assertSee('Configuraci');
 
@@ -90,6 +99,8 @@ class ProfileTest extends DuskTestCase
             // 4. Change name
             // -----------------------------------------------
             $browser->visit('/settings')
+                ->waitFor('button[data-tab="general"]', 5)
+                ->click('button[data-tab="general"]')
                 ->waitFor('#name', 5)
                 ->clear('name')
                 ->type('name', 'New Name')
@@ -102,6 +113,8 @@ class ProfileTest extends DuskTestCase
 
             // Verify persisted on reload
             $browser->visit('/settings')
+                ->waitFor('button[data-tab="general"]', 5)
+                ->click('button[data-tab="general"]')
                 ->waitFor('#name', 5)
                 ->assertInputValue('name', 'New Name');
         });

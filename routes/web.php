@@ -10,6 +10,7 @@ use App\Http\Controllers\BoostController;
 use App\Http\Controllers\CalDAVController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\GoogleCalendarWebhookController;
 use App\Http\Controllers\GraphicController;
@@ -127,6 +128,9 @@ Route::get('/ticket/qr_code/{event_id}/{secret}', [TicketController::class, 'qrC
 Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view'])->name('ticket.view')->middleware('throttle:100,1');
 Route::post('/rsvp/cancel/{sale_id}', [TicketController::class, 'cancelRsvp'])->name('rsvp.cancel')->middleware('throttle:10,1');
 
+Route::get('/feedback/{event_id}/{secret}', [FeedbackController::class, 'show'])->name('feedback.show')->middleware('throttle:60,1');
+Route::post('/feedback/{event_id}/{secret}', [FeedbackController::class, 'store'])->name('feedback.store')->middleware('throttle:10,1');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/event', [EventController::class, 'createDefault'])->name('event.create_default');
     Route::get('/events', [HomeController::class, 'home'])->name('home');
@@ -144,6 +148,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/tickets', [TicketController::class, 'tickets'])->name('tickets');
     Route::get('/sales', [TicketController::class, 'sales'])->name('sales');
     Route::get('/sales/export', [TicketController::class, 'exportSales'])->name('sales.export');
+    Route::get('/sales/export-feedback', [FeedbackController::class, 'export'])->name('sales.export_feedback');
     Route::post('/sales/action/{sale_id}', [TicketController::class, 'handleAction'])->name('sales.action');
     Route::post('/sales/resend-email/{sale_id}', [TicketController::class, 'resendEmail'])->name('sales.resend_email');
     Route::get('/waitlist', [WaitlistController::class, 'index'])->name('waitlist.index');

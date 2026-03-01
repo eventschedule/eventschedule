@@ -28,7 +28,7 @@
             "@id": "{{ url()->current() }}"
         },
         "datePublished": "2024-01-01",
-        "dateModified": "2026-02-01"
+        "dateModified": "2026-03-01"
     }
     </script>
     </x-slot>
@@ -81,6 +81,7 @@
                         <a href="#privacy" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Privacy</a>
                         <a href="#custom-fields" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Custom Fields</a>
                         <a href="#polls" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Polls</a>
+                        <a href="#feedback" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Feedback</a>
                         <a href="#fan-content" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Fan Content</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
@@ -481,6 +482,31 @@
                             </ul>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 You can reopen a closed poll at any time if you want to allow voting again. Toggle the poll status from the event edit page in your admin panel.
+                            </p>
+                        </section>
+
+                        <!-- Feedback -->
+                        <section id="feedback" class="doc-section">
+                            <h2 class="doc-heading">Feedback <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-2">Pro</span></h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Control whether attendees receive a feedback request email after this event ends. By default, events inherit the schedule-level feedback setting.
+                            </p>
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Note</div>
+                                <p>Post-event feedback is a Pro feature. Enable it at the schedule level in <strong>Settings &rarr; Notifications</strong>, then optionally override per event here.</p>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Per-Event Override</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                The Feedback section on the event edit page offers three options:
+                            </p>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Use schedule default</strong> - Follows whatever you have set at the schedule level.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Enabled</strong> - Feedback emails will be sent for this event regardless of the schedule setting.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Disabled</strong> - No feedback emails will be sent for this event regardless of the schedule setting.</li>
+                            </ul>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                For more details on viewing and managing feedback, see <a href="{{ route('marketing.docs.tickets') }}#feedback" class="text-cyan-400 hover:text-cyan-300">Selling Tickets &rarr; Post-Event Feedback</a>.
                             </p>
                         </section>
 
