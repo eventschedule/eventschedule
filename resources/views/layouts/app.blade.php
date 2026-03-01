@@ -550,7 +550,7 @@
     </style>
 
     <script {!! nonce_attr() !!}>
-        $(document).ready(function() {
+        if (typeof $ !== 'undefined') $(document).ready(function() {
             $('.has-tooltip').hover(function(e) {
                 var tooltipText = $(this).attr('data-tooltip');
                 var tooltip = $('#tooltip');

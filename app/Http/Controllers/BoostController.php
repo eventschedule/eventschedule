@@ -64,10 +64,36 @@ class BoostController extends Controller
 
         $campaigns = $query->latest()->paginate(20);
 
+        // Load future boostable events for the "Boost Event" button
+        $proRoleIds = $roles->filter(fn ($r) => $r->isPro())->pluck('id');
+        if ($role) {
+            $proRoleIds = $proRoleIds->intersect([$role->id]);
+        }
+
+        $eventsData = collect();
+        if ($proRoleIds->isNotEmpty()) {
+            $eventsData = Event::with('roles')
+                ->whereHas('roles', fn ($q) => $q->whereIn('roles.id', $proRoleIds))
+                ->where('starts_at', '>', now())
+                ->where('name', '!=', '')
+                ->whereNotNull('name')
+                ->orderBy('starts_at')
+                ->limit(50)
+                ->get()
+                ->map(fn ($event) => [
+                    'id' => UrlUtils::encodeId($event->id),
+                    'name' => $event->translatedName(),
+                    'starts_at' => \Carbon\Carbon::parse($event->starts_at)->format('D, M j, Y'),
+                    'image_url' => $event->getImageUrl(),
+                    'role_id' => UrlUtils::encodeId($event->roles->firstWhere(fn ($r) => $proRoleIds->contains($r->id))?->id),
+                ]);
+        }
+
         return view('boost.index', [
             'campaigns' => $campaigns,
             'roles' => $roles,
             'selectedRole' => $role,
+            'eventsData' => $eventsData,
         ]);
     }
 

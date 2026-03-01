@@ -79,6 +79,7 @@
                             </div>
                         </div>
                         <a href="#api" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">API Settings</a>
+                        <a href="#webhooks" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Webhooks</a>
                         <a href="#google" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Google Settings</a>
                         <a href="#app-update" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">App Update</a>
                         <a href="#password" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Update Password</a>
@@ -233,6 +234,25 @@
                             <div class="doc-callout doc-callout-warning">
                                 <div class="doc-callout-title">Important</div>
                                 <p>Your API key grants full access to your account. If you suspect it has been compromised, disable and re-enable the API to generate a new key. Note that disabling API access immediately invalidates the existing key.</p>
+                            </div>
+                        </section>
+
+                        <!-- Webhooks -->
+                        <section id="webhooks" class="doc-section">
+                            <h2 class="doc-heading">Webhooks</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Configure webhook endpoints to receive real-time POST notifications when events occur in your schedules (Pro plan required). See the <a href="{{ route('marketing.docs.developer.webhooks') }}" class="text-cyan-400 hover:text-cyan-300">Webhook documentation</a> for payload formats and verification details.
+                            </p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Add Webhook</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Enter a URL, optional description, and select which event types to subscribe to. A signing secret is generated automatically and shown once after creation.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Manage Webhooks</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Edit URLs, toggle active/inactive, send test pings, view delivery logs, and regenerate signing secrets from the webhook list.</p>
+                                </div>
                             </div>
                         </section>
 

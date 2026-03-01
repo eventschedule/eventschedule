@@ -87,6 +87,10 @@
                     : null,
                 'recurring_end_type' => $event->recurring_end_type ?? 'never',
                 'recurring_end_value' => $event->recurring_end_value,
+                'recurring_frequency' => $event->recurring_frequency,
+                'recurring_interval' => $event->recurring_interval,
+                'recurring_include_dates' => $event->recurring_include_dates ?? [],
+                'recurring_exclude_dates' => $event->recurring_exclude_dates ?? [],
                 'start_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
                 'is_online' => !empty($event->event_url),
                 'registration_url' => $event->registration_url,
@@ -2377,6 +2381,25 @@ const calendarApp = createApp({
             return div.innerHTML.replace(/ , /g, '<br>');
         },
         matchesFrequency(event, date) {
+            const dateStr = date.getFullYear() + '-' +
+                String(date.getMonth() + 1).padStart(2, '0') + '-' +
+                String(date.getDate()).padStart(2, '0');
+
+            // Exclude dates have highest priority
+            if (event.recurring_exclude_dates && event.recurring_exclude_dates.length > 0
+                && event.recurring_exclude_dates.includes(dateStr)) {
+                return false;
+            }
+
+            // Include dates bypass pattern checks
+            if (event.recurring_include_dates && event.recurring_include_dates.length > 0
+                && event.recurring_include_dates.includes(dateStr)) {
+                return true;
+            }
+
+            return this.matchesFrequencyPattern(event, date);
+        },
+        matchesFrequencyPattern(event, date) {
             const frequency = event.recurring_frequency || 'weekly';
             const dayOfWeek = date.getDay();
 
@@ -2425,25 +2448,25 @@ const calendarApp = createApp({
         },
         countOccurrencesForFrequency(event, startDate, checkDate) {
             const frequency = event.recurring_frequency || 'weekly';
+            let count = 0;
 
             switch (frequency) {
                 case 'daily': {
                     const diffTime = checkDate.getTime() - startDate.getTime();
-                    return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                    count = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                    break;
                 }
 
                 case 'monthly_date': {
-                    let count = 0;
                     const current = new Date(startDate);
                     while (current <= checkDate) {
                         count++;
                         current.setMonth(current.getMonth() + 1);
                     }
-                    return count;
+                    break;
                 }
 
                 case 'monthly_weekday': {
-                    let count = 0;
                     const nthWeekday = Math.ceil(startDate.getDate() / 7);
                     const targetDayOfWeek = startDate.getDay();
                     const current = new Date(startDate);
@@ -2468,22 +2491,20 @@ const calendarApp = createApp({
                         current.setMonth(current.getMonth() + 1);
                         current.setDate(1);
                     }
-                    return count;
+                    break;
                 }
 
                 case 'yearly': {
-                    let count = 0;
                     const current = new Date(startDate);
                     while (current <= checkDate) {
                         count++;
                         current.setFullYear(current.getFullYear() + 1);
                     }
-                    return count;
+                    break;
                 }
 
                 case 'every_n_weeks': {
                     const interval = event.recurring_interval || 2;
-                    let count = 0;
                     const current = new Date(startDate);
                     while (current <= checkDate) {
                         const startWeek = new Date(startDate);
@@ -2497,12 +2518,11 @@ const calendarApp = createApp({
                         }
                         current.setDate(current.getDate() + 1);
                     }
-                    return count;
+                    break;
                 }
 
                 case 'weekly':
                 default: {
-                    let count = 0;
                     const current = new Date(startDate);
                     while (current <= checkDate) {
                         if (event.days_of_week && event.days_of_week[current.getDay()] === '1') {
@@ -2510,9 +2530,32 @@ const calendarApp = createApp({
                         }
                         current.setDate(current.getDate() + 1);
                     }
-                    return count;
+                    break;
                 }
             }
+
+            // Adjust count for include/exclude dates
+            if (event.recurring_exclude_dates && event.recurring_exclude_dates.length > 0) {
+                event.recurring_exclude_dates.forEach(excludeDateStr => {
+                    const excludeDate = new Date(excludeDateStr + 'T00:00:00');
+                    if (excludeDate >= startDate && excludeDate <= checkDate
+                        && this.matchesFrequencyPattern(event, excludeDate)) {
+                        count--;
+                    }
+                });
+            }
+
+            if (event.recurring_include_dates && event.recurring_include_dates.length > 0) {
+                event.recurring_include_dates.forEach(includeDateStr => {
+                    const includeDate = new Date(includeDateStr + 'T00:00:00');
+                    if (includeDate >= startDate && includeDate <= checkDate
+                        && !this.matchesFrequencyPattern(event, includeDate)) {
+                        count++;
+                    }
+                });
+            }
+
+            return Math.max(0, count);
         },
         getEventGroupColor(event) {
             if (!event.group_id) return null;

@@ -7,6 +7,7 @@ use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
 use App\Models\Sale;
 use App\Services\AuditService;
+use App\Services\WebhookService;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -209,6 +210,16 @@ class ApiSaleController extends Controller
             ['status' => $sale->status],
             $request->action.':event_id:'.$sale->event_id
         );
+
+        $webhookEvent = match ($request->action) {
+            'mark_paid' => 'sale.paid',
+            'refund' => 'sale.refunded',
+            'cancel' => 'sale.cancelled',
+            default => null,
+        };
+        if ($webhookEvent) {
+            WebhookService::dispatch($webhookEvent, $sale);
+        }
 
         $sale->load(['saleTickets.ticket', 'event']);
 
@@ -460,6 +471,11 @@ class ApiSaleController extends Controller
 
         // Reload sale with relationships for API response
         $sale->load(['saleTickets.ticket', 'event']);
+
+        WebhookService::dispatch('sale.created', $sale);
+        if ($sale->status === 'paid') {
+            WebhookService::dispatch('sale.paid', $sale);
+        }
 
         return response()->json([
             'data' => $sale->toApiData(),

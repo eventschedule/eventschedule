@@ -31,6 +31,7 @@ use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\MetaAdsService;
+use App\Services\WebhookService;
 use App\Utils\GeminiUtils;
 use App\Utils\ImageUtils;
 use App\Utils\MoneyUtils;
@@ -181,6 +182,14 @@ class EventController extends Controller
                 ]);
             }
         }
+
+        // Capture webhook payload before deletion
+        $webhookPayload = [
+            'event' => 'event.deleted',
+            'timestamp' => now()->toIso8601String(),
+            'data' => $event->toApiData(),
+        ];
+        WebhookService::dispatch('event.deleted', $event, $webhookPayload);
 
         $event->delete();
 

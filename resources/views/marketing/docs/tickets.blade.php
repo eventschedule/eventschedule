@@ -86,10 +86,17 @@
                         <div class="doc-nav-group">
                             <a href="#managing-sales" class="doc-nav-group-header doc-nav-link">Managing Sales <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
                             <div class="doc-nav-group-items">
+                                <a href="#sale-notifications" class="doc-nav-link">Sale Notifications</a>
                                 <a href="#export" class="doc-nav-link">Exporting Sales Data</a>
                             </div>
                         </div>
-                        <a href="#check-in" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Check-in at the Door</a>
+                        <div class="doc-nav-group">
+                            <a href="#check-in" class="doc-nav-group-header doc-nav-link">Check-in at the Door <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
+                            <div class="doc-nav-group-items">
+                                <a href="#checkin-dashboard" class="doc-nav-link">Check-in Dashboard</a>
+                            </div>
+                        </div>
+                        <a href="#waitlist" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Waitlist</a>
                         <a href="#financial" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Financial Information</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
@@ -123,6 +130,9 @@
                                         <li>Pay-what-you-wish pricing option</li>
                                         <li>Custom checkout fields for attendee info</li>
                                         <li>Promo codes with percentage or fixed discounts</li>
+                                        <li>Ticket waitlist for sold-out events</li>
+                                        <li>Real-time check-in dashboard</li>
+                                        <li>Sale notification emails for organizers</li>
                                     </ul>
                                 </div>
                             </div>
@@ -424,6 +434,28 @@
                             </ul>
                         </section>
 
+                        <!-- Sale Notifications -->
+                        <section id="sale-notifications" class="doc-section">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Sale Notification Emails</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Opt in to receive an email notification every time a ticket sells. Each notification includes:</p>
+
+                            <ul class="doc-list mb-6">
+                                <li>Buyer name and email</li>
+                                <li>Ticket type and quantity</li>
+                                <li>Total amount</li>
+                                <li>Payment status</li>
+                                <li>Discount or promo code applied</li>
+                            </ul>
+
+                            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How to Enable</h4>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Settings &rarr; Notifications</strong> and enable sale notification emails.</p>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Sender & Compliance</div>
+                                <p>If you have a custom sender email configured for your schedule, sale notifications are sent from that address. All notification emails include an unsubscribe link for compliance.</p>
+                            </div>
+                        </section>
+
                         <!-- Export -->
                         <section id="export" class="doc-section">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Exporting Sales Data</h3>
@@ -442,15 +474,17 @@
                                     <li>Buyer name and email</li>
                                     <li>Ticket type and quantity</li>
                                     <li>Purchase date and amount</li>
-                                    <li>Payment status</li>
+                                    <li>Transaction reference</li>
+                                    <li>Payment method and status</li>
+                                    <li>Promo code and discount amount</li>
                                     <li>Check-in status</li>
-                                    <li>Custom checkout field responses</li>
+                                    <li>Custom checkout field responses (event-level and ticket-level)</li>
                                 </ul>
                             </div>
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
-                                <p>Export your sales data regularly for your records. This is especially useful for tax reporting and financial reconciliation.</p>
+                                <p>The CSV includes a byte order mark (BOM) for Excel compatibility. Export your sales data regularly for your records - this is especially useful for tax reporting and financial reconciliation.</p>
                             </div>
                         </section>
 
@@ -473,6 +507,47 @@
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Ticket Security</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">Each ticket has a unique QR code that can only be scanned once. If someone tries to use a ticket that's already been checked in, you'll see a warning.</p>
+                        </section>
+
+                        <!-- Check-in Dashboard -->
+                        <section id="checkin-dashboard" class="doc-section">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Check-in Dashboard</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Monitor attendance in real time from <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Check-in</strong>. The dashboard provides a live overview of check-in progress for your event.</p>
+
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Overall progress bar</strong> with percentage of attendees checked in</li>
+                                <li><strong class="text-gray-900 dark:text-white">Per-ticket-type breakdown</strong> showing check-in counts for each ticket type</li>
+                                <li><strong class="text-gray-900 dark:text-white">Recent activity feed</strong> showing the last 10 check-ins with attendee names and times</li>
+                                <li><strong class="text-gray-900 dark:text-white">Filter by event and event date</strong> to view specific event dates</li>
+                            </ul>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Auto-Refresh</div>
+                                <p>The dashboard auto-refreshes every 10 seconds, so you always see the latest check-in data. It works on any device, including phones and tablets.</p>
+                            </div>
+                        </section>
+
+                        <!-- Waitlist -->
+                        <section id="waitlist" class="doc-section">
+                            <h2 class="doc-heading">Ticket Waitlist</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">When tickets sell out, fans can join a waitlist to be notified when spots become available.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">How It Works</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>When all tickets sell out for an event date, a <strong class="text-gray-900 dark:text-white">"Join Waitlist"</strong> button appears on the event page</li>
+                                <li>Guests enter their name and email</li>
+                                <li>When tickets become available (sale cancelled, refunded, or expired), the next person in line is notified via email</li>
+                                <li>They receive a 24-hour link to purchase</li>
+                                <li>If they don't purchase in time, the next person in line is notified</li>
+                            </ol>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Managing the Waitlist</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">View and manage the waitlist from <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Waitlist</strong>. The table shows each entry's name, email, event, date, and status.</p>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">One at a Time</div>
+                                <p>Only one person is notified at a time to prevent overselling. The next person is notified only after the current person's 24-hour window expires or they complete their purchase.</p>
+                            </div>
                         </section>
 
                         <!-- Financial Information -->
@@ -557,6 +632,12 @@
                 "name": "Manage Sales",
                 "text": "View all purchases, payment status, and check-in status from Admin Panel, then Sales.",
                 "url": "{{ url(route('marketing.docs.tickets')) }}#managing-sales"
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Track Check-ins",
+                "text": "Use the real-time check-in dashboard at Admin Panel, then Check-in, to monitor attendance with progress bars and a live activity feed.",
+                "url": "{{ url(route('marketing.docs.tickets')) }}#checkin-dashboard"
             },
             {
                 "@type": "HowToStep",

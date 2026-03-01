@@ -62,6 +62,30 @@
                     "@type": "Answer",
                     "text": "Yes! You can create promo codes with either percentage or fixed amount discounts. Promo codes can be targeted to specific ticket types, giving you full control over your discount strategy."
                 }
+            },
+            {
+                "@type": "Question",
+                "name": "What happens when tickets sell out?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "When all tickets sell out, a waitlist button appears automatically. Fans can join the waitlist and are notified one at a time when spots open up, with 24 hours to complete their purchase."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I get notified when tickets sell?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Enable sale notification emails in your schedule settings to receive an email whenever a ticket sells. Each notification includes buyer details, ticket type, and payment status."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I export my sales data?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Export all your sales as a CSV file with buyer info, ticket types, amounts, promo codes, payment status, and custom field responses. The file opens in Excel, Google Sheets, or any spreadsheet app."
+                }
             }
         ]
     }
@@ -256,6 +280,154 @@
                     </div>
                 </div>
 
+                <!-- Ticket Waitlist (spans 2 cols) -->
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 border border-teal-200 dark:border-white/10 p-8 lg:p-10">
+                    <div class="flex flex-col lg:flex-row gap-8 items-center">
+                        <div class="flex-1">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-700 dark:text-teal-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                                Waitlist
+                            </div>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Never miss a sale</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg">When tickets sell out, fans can join the waitlist. They're automatically notified when spots open up, one at a time, with 24 hours to buy.</p>
+                        </div>
+                        <div class="flex-shrink-0 w-64">
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-teal-500/10 border border-teal-400/20">
+                                    <div class="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center flex-shrink-0">
+                                        <svg aria-hidden="true" class="w-4 h-4 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="text-gray-900 dark:text-white text-sm font-medium truncate">Sarah M.</div>
+                                        <div class="text-teal-600 dark:text-teal-300 text-xs">Notified</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
+                                    <div class="w-8 h-8 rounded-full bg-gray-300 dark:bg-white/10 flex items-center justify-center flex-shrink-0">
+                                        <svg aria-hidden="true" class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="text-gray-900 dark:text-white text-sm font-medium truncate">James K.</div>
+                                        <div class="text-gray-500 dark:text-gray-400 text-xs">Waiting</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-200 dark:bg-white/10 border border-gray-200 dark:border-white/10">
+                                    <div class="w-8 h-8 rounded-full bg-gray-300 dark:bg-white/10 flex items-center justify-center flex-shrink-0">
+                                        <svg aria-hidden="true" class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="text-gray-900 dark:text-white text-sm font-medium truncate">Alex R.</div>
+                                        <div class="text-gray-500 dark:text-gray-400 text-xs">Waiting</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sale Notifications -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-lime-100 to-green-100 dark:from-lime-900 dark:to-green-900 border border-lime-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-lime-500/20 text-lime-700 dark:text-lime-300 text-sm font-medium mb-4">
+                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        Sale Alerts
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Know when you sell</h2>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Get an email whenever a ticket sells. Buyer details, ticket types, and payment status, right in your inbox.</p>
+
+                    <div class="bg-lime-500/10 rounded-xl p-4 border border-lime-400/20">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-8 h-8 rounded-full bg-lime-500/20 flex items-center justify-center">
+                                <svg aria-hidden="true" class="w-4 h-4 text-lime-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div class="text-gray-900 dark:text-white text-sm font-medium">New sale!</div>
+                        </div>
+                        <div class="text-gray-500 dark:text-gray-400 text-xs">2x VIP - Jazz Night</div>
+                        <div class="text-lime-600 dark:text-lime-300 text-xs mt-1">$150.00 - Paid</div>
+                    </div>
+                </div>
+
+                <!-- Check-in Dashboard -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900 dark:to-pink-900 border border-rose-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-700 dark:text-rose-300 text-sm font-medium mb-4">
+                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Live Dashboard
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Track every check-in</h2>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Real-time progress bars, per-ticket breakdowns, and a live activity feed. Auto-refreshes on any device.</p>
+
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-900 dark:text-white font-medium">Checked in</span>
+                                <span class="text-rose-600 dark:text-rose-300 font-semibold">67%</span>
+                            </div>
+                            <div class="w-full h-3 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-rose-500 to-pink-500 rounded-full" style="width: 67%"></div>
+                            </div>
+                            <div class="text-gray-500 dark:text-gray-400 text-xs mt-1">67 / 100 attendees</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sales Export (spans 2 cols) -->
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-100 to-indigo-100 dark:from-slate-900 dark:to-indigo-900 border border-slate-200 dark:border-white/10 p-8 lg:p-10">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Export
+                            </div>
+                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Download your sales data</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg">Export all sales as a CSV with buyer info, ticket types, amounts, promo codes, payment status, and custom field responses. Opens in Excel, Google Sheets, or any spreadsheet app.</p>
+                        </div>
+                        <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-4 border border-gray-200 dark:border-white/10 overflow-x-auto">
+                            <div class="flex gap-3 text-xs font-mono whitespace-nowrap">
+                                <div class="space-y-2">
+                                    <div class="text-gray-500 dark:text-gray-400 font-semibold">Name</div>
+                                    <div class="text-gray-900 dark:text-white">Sarah M.</div>
+                                    <div class="text-gray-900 dark:text-white">James K.</div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="text-gray-500 dark:text-gray-400 font-semibold">Ticket</div>
+                                    <div class="text-gray-900 dark:text-white">VIP</div>
+                                    <div class="text-gray-900 dark:text-white">GA</div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="text-gray-500 dark:text-gray-400 font-semibold">Amount</div>
+                                    <div class="text-gray-900 dark:text-white">$75.00</div>
+                                    <div class="text-gray-900 dark:text-white">$25.00</div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="text-gray-500 dark:text-gray-400 font-semibold">Promo</div>
+                                    <div class="text-gray-900 dark:text-white">EARLY20</div>
+                                    <div class="text-gray-500 dark:text-gray-400">-</div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="text-gray-500 dark:text-gray-400 font-semibold">Status</div>
+                                    <div class="text-emerald-600 dark:text-emerald-400">Paid</div>
+                                    <div class="text-emerald-600 dark:text-emerald-400">Paid</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
@@ -307,9 +479,9 @@
                     <div class="w-16 h-16 bg-gradient-to-br from-sky-500 to-blue-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-sky-500/25">
                         4
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Scan at Door</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Check In</h3>
                     <p class="text-gray-600 dark:text-gray-400 text-sm">
-                        Use your phone to scan QR codes and check in attendees.
+                        Scan QR codes at the door and track attendance with a live dashboard.
                     </p>
                 </div>
             </div>
@@ -546,6 +718,54 @@
                         </p>
                     </div>
                 </div>
+
+                <div class="bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 6 ? null : 6" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            What happens when tickets sell out?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 6 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 6" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            When all tickets sell out, a waitlist button appears automatically. Fans can join the waitlist and are notified one at a time when spots open up, with 24 hours to complete their purchase.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-lime-100 to-green-100 dark:from-lime-900 dark:to-green-900 rounded-2xl border border-lime-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 7 ? null : 7" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I get notified when tickets sell?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 7 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 7" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Enable sale notification emails in your schedule settings to receive an email whenever a ticket sells. Each notification includes buyer details, ticket type, and payment status.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-slate-100 to-indigo-100 dark:from-slate-900 dark:to-indigo-900 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 8 ? null : 8" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I export my sales data?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 8 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 8" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Export all your sales as a CSV file with buyer info, ticket types, amounts, promo codes, payment status, and custom field responses. The file opens in Excel, Google Sheets, or any spreadsheet app.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -637,7 +857,11 @@
             "Multiple ticket types",
             "Stripe payment processing",
             "Mobile check-in",
-            "Automatic confirmation emails"
+            "Automatic confirmation emails",
+            "Ticket waitlist",
+            "Check-in dashboard",
+            "Sale notification emails",
+            "Sales CSV export"
         ],
         "url": "{{ url()->current() }}",
         "provider": {

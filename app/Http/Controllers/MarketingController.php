@@ -946,6 +946,11 @@ class MarketingController extends Controller
         return view('marketing.docs.developer.api');
     }
 
+    public function docsDeveloperWebhooks()
+    {
+        return view('marketing.docs.developer.webhooks');
+    }
+
     /**
      * Get user personas data
      */

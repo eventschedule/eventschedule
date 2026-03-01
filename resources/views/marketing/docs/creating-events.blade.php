@@ -76,6 +76,7 @@
                         <a href="#agenda" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Agenda</a>
                         <a href="#schedules" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Schedules</a>
                         <a href="#google-calendar" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Google Calendar</a>
+                        <a href="#whatsapp" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">WhatsApp</a>
                         <a href="#tickets" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Tickets</a>
                         <a href="#privacy" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Privacy</a>
                         <a href="#custom-fields" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Custom Fields</a>
@@ -318,6 +319,50 @@
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
                                 <p>Recurring events sync to Google Calendar as individual occurrences, so each date appears separately in both calendars.</p>
+                            </div>
+                        </section>
+
+                        <!-- WhatsApp -->
+                        <section id="whatsapp" class="doc-section">
+                            <h2 class="doc-heading">Creating Events via WhatsApp <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span></h2>
+
+                            <div class="doc-callout doc-callout-info mb-6">
+                                <div class="doc-callout-title">Enterprise Feature</div>
+                                <p>Creating events via WhatsApp is an Enterprise feature. It requires Twilio integration.</p>
+                            </div>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Send a WhatsApp message to create events directly from your phone. You can send event details as text, or send a photo of a flyer or poster and AI will extract the information automatically.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">How It Works</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Verify your phone number in <strong class="text-gray-900 dark:text-white">Account Settings</strong></li>
+                                <li>Send a WhatsApp message to the Event Schedule number</li>
+                                <li>Include event details as text, or send a photo of a flyer or poster</li>
+                                <li>AI parses the details and creates the event on your default schedule</li>
+                                <li>You receive a confirmation message with the event name, date, and link</li>
+                            </ol>
+
+                            <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
+                                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">What AI Extracts</h4>
+                                <ul class="doc-list text-sm">
+                                    <li>Event name</li>
+                                    <li>Date and time</li>
+                                    <li>Duration</li>
+                                    <li>Venue (name, address, city, state)</li>
+                                    <li>Description</li>
+                                    <li>Flyer image</li>
+                                    <li>Category</li>
+                                </ul>
+                            </div>
+
+                            <div class="doc-callout doc-callout-tip mb-6">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>Works great with event flyers - snap a photo and send it via WhatsApp to create your event in seconds.</p>
+                            </div>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">SaaS Deployment</div>
+                                <p>WhatsApp event creation requires Twilio to be configured. See the <a href="{{ route('marketing.docs.saas.twilio') }}" class="text-cyan-400 hover:text-cyan-300">Twilio setup guide</a> for configuration details.</p>
                             </div>
                         </section>
 

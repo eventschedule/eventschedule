@@ -11,6 +11,7 @@ use App\Models\PromoCode;
 use App\Models\Role;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Services\WebhookService;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\SlugPatternUtils;
@@ -262,6 +263,14 @@ class EventRepo
         // Decode event-level custom_fields from JSON string
         if ($request->has('custom_fields')) {
             $customFields = json_decode($request->input('custom_fields'), true);
+
+            if (! empty($customFields)) {
+                foreach ($customFields as $fieldKey => $fieldData) {
+                    if (isset($fieldData['options'])) {
+                        $customFields[$fieldKey]['options'] = implode(',', array_map('trim', explode(',', $fieldData['options'])));
+                    }
+                }
+            }
 
             // Handle name_en for event-level custom fields
             if (! empty($customFields) && $currentRole && $currentRole->language_code !== 'en') {
@@ -624,6 +633,14 @@ class EventRepo
                 // Process custom_fields with name_en translation
                 $ticketCustomFields = isset($data['custom_fields']) ? json_decode($data['custom_fields'], true) : null;
 
+                if (! empty($ticketCustomFields)) {
+                    foreach ($ticketCustomFields as $fieldKey => $fieldData) {
+                        if (isset($fieldData['options'])) {
+                            $ticketCustomFields[$fieldKey]['options'] = implode(',', array_map('trim', explode(',', $fieldData['options'])));
+                        }
+                    }
+                }
+
                 if (! empty($ticketCustomFields) && $currentRole && $currentRole->language_code !== 'en') {
                     $existingTicket = ! empty($data['id']) ? Ticket::find($data['id']) : null;
                     $existingCustomFields = $existingTicket && $existingTicket->custom_fields ? $existingTicket->custom_fields : [];
@@ -820,6 +837,12 @@ class EventRepo
                 $event->syncToCalDAV('update');
             }
         }
+
+        // Dispatch webhook
+        WebhookService::dispatch(
+            $event->wasRecentlyCreated ? 'event.created' : 'event.updated',
+            $event
+        );
 
         return $event;
     }

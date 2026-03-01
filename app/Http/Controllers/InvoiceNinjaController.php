@@ -6,6 +6,7 @@ use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
 use App\Models\Sale;
 use App\Models\User;
+use App\Services\WebhookService;
 use App\Utils\InvoiceNinja;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
@@ -132,6 +133,8 @@ class InvoiceNinjaController extends Controller
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
             }
+
+            WebhookService::dispatch('sale.paid', $sale);
         });
 
         return response()->json(['status' => 'success']);
@@ -170,6 +173,8 @@ class InvoiceNinjaController extends Controller
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
             }
+
+            WebhookService::dispatch('sale.paid', $sale);
         });
 
         return response()->json(['status' => 'success']);
@@ -279,6 +284,8 @@ class InvoiceNinjaController extends Controller
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
             }
+
+            WebhookService::dispatch('sale.paid', $sale);
         });
 
         return response()->json(['status' => 'success']);

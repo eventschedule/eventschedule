@@ -246,7 +246,7 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">Ticketing & QR Check-ins</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm flex-grow">Sell tickets online with multiple types (GA, VIP), set limits, and scan QR codes for fast check-ins.</p>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm flex-grow">Sell tickets online with multiple types, scan QR codes for check-ins, and track attendance with a live dashboard.</p>
                     <div class="flex items-center gap-1.5 mt-2 text-xs text-gray-500 dark:text-gray-400">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />

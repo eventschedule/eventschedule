@@ -11,6 +11,7 @@ use App\Repos\EventRepo;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\MetaAdsService;
+use App\Services\WebhookService;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -518,6 +519,14 @@ class ApiEventController extends Controller
                 ]);
             }
         }
+
+        // Capture webhook payload before deletion
+        $webhookPayload = [
+            'event' => 'event.deleted',
+            'timestamp' => now()->toIso8601String(),
+            'data' => $event->toApiData(),
+        ];
+        WebhookService::dispatch('event.deleted', $event, $webhookPayload);
 
         $event->delete();
 

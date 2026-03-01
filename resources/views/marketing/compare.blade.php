@@ -154,6 +154,10 @@
                                 'Events & Ticketing' => [
                                     ['Ticketing', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
                                     ['QR check-ins', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
+                                    ['Ticket waitlist', 'Yes (Pro)', 'Yes', 'Yes', 'No', 'No'],
+                                    ['Check-in dashboard', 'Yes (Pro)', 'Yes', 'No', 'No', 'No'],
+                                    ['Sale notifications', 'Yes (Pro)', 'Yes', 'No', 'No', 'No'],
+                                    ['Sales data export', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
                                     ['Online events', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
                                     ['Recurring events', 'Yes (Free)', 'Yes', 'Yes', 'No', 'Yes'],
                                     ['Event polls', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
@@ -181,6 +185,7 @@
                                 ],
                                 'Platform' => [
                                     ['REST API', 'Yes (Pro)', 'Yes', 'Yes (Plus)', 'Yes', 'Yes'],
+                                    ['Webhooks', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
                                     ['Open source', 'Yes', 'No', 'No', 'No', 'No'],
                                     ['Selfhosting', 'Yes', 'No', 'No', 'No', 'No'],
                                 ],

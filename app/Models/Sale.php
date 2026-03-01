@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Jobs\NotifyWaitlist;
-use App\Models\TicketWaitlist;
 use App\Utils\UrlUtils;
 use Illuminate\Database\Eloquent\Model;
 
@@ -108,7 +107,7 @@ class Sale extends Model
         return $event->getGuestUrl($this->subdomain, $this->event_date);
     }
 
-    public function toApiData()
+    public function toApiData($includeSecret = false)
     {
         $data = new \stdClass;
 
@@ -124,10 +123,14 @@ class Sale extends Model
         $data->payment_amount = (float) $this->payment_amount;
         $data->transaction_reference = $this->transaction_reference;
 
-        // Only expose secret if the authenticated user is the event owner or the sale's user
-        $authUser = auth()->user();
-        if ($authUser && ($authUser->id === $this->user_id || $authUser->id === $this->event?->user_id)) {
+        // Include secret when explicitly requested (e.g. webhook payloads) or when the authenticated user is authorized
+        if ($includeSecret) {
             $data->secret = $this->secret;
+        } else {
+            $authUser = auth()->user();
+            if ($authUser && ($authUser->id === $this->user_id || $authUser->id === $this->event?->user_id)) {
+                $data->secret = $this->secret;
+            }
         }
 
         $data->created_at = $this->created_at ? $this->created_at->toIso8601String() : null;

@@ -3,14 +3,14 @@
         <div class="flex justify-between items-center gap-6 mb-6">
             @if (is_rtl())
                 <a href="{{ route('event.edit_admin', $event->hashedId()) }}"
-                   class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                   class="js-cancel-btn inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                     {{ __('messages.cancel') }}
                 </a>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('messages.boost_event') }}</h1>
             @else
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('messages.boost_event') }}</h1>
                 <a href="{{ route('event.edit_admin', $event->hashedId()) }}"
-                   class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                   class="js-cancel-btn inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                     {{ __('messages.cancel') }}
                 </a>
             @endif

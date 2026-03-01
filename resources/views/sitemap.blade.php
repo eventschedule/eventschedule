@@ -646,6 +646,12 @@
         <priority>0.7</priority>
     </url>
     <url>
+        <loc>{{ url('/docs/developer/webhooks') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
         <loc>{{ url('/privacy') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>yearly</changefreq>

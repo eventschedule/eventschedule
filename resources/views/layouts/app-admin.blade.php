@@ -184,6 +184,22 @@
             e.preventDefault();
             this.closest('form').submit();
         });
+
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.js-cancel-btn');
+            if (btn) {
+                e.preventDefault();
+                window._skipUnsavedWarning = true;
+                var fallback = btn.getAttribute('data-fallback-url') || btn.getAttribute('href');
+                var referrer = document.referrer;
+                var currentBase = location.origin + location.pathname + location.search;
+                if (referrer && referrer.indexOf(location.origin) === 0 && referrer !== currentBase) {
+                    window.location = referrer;
+                } else if (fallback) {
+                    window.location = fallback;
+                }
+            }
+        });
     </script>
 
 </x-app-layout>

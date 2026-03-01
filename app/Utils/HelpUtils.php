@@ -70,6 +70,7 @@ class HelpUtils
                 'payment-tab-invoiceninja' => '/docs/account-settings#invoice-ninja',
                 'payment-tab-payment-url' => '/docs/account-settings#payment-url',
                 'section-api' => '/docs/account-settings#api',
+                'section-webhooks' => '/docs/account-settings#webhooks',
                 'section-google-calendar' => '/docs/account-settings#google',
                 'section-app' => '/docs/account-settings#app-update',
                 'section-password' => '/docs/account-settings#password',
@@ -102,6 +103,7 @@ class HelpUtils
         'boost*' => '/docs/boost',
         'scan' => '/docs/tickets#check-in',
         'checkin' => '/docs/tickets#check-in',
+        'waitlist' => '/docs/tickets#waitlist',
         'new/*' => '/docs/creating-schedules',
     ];
 

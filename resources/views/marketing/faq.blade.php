@@ -264,6 +264,22 @@
                     "@type": "Answer",
                     "text": "Yes. Enable 'Accept Event Requests' in your schedule settings to let others submit events. You can optionally require approval before submitted events appear on your schedule."
                 }
+            },
+            {
+                "@type": "Question",
+                "name": "What happens when tickets sell out?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "When all tickets sell out, a waitlist button appears automatically. Fans can join the waitlist by entering their name and email. When spots open up (from cancellations or refunds), the next person in line is notified via email and given 24 hours to complete their purchase."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I track check-ins in real time?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. The live check-in dashboard shows real-time progress bars, per-ticket-type breakdowns, and a recent activity feed with attendee names and check-in times. It auto-refreshes every 10 seconds and works on any device."
+                }
             }
         ]
     }
@@ -500,6 +516,30 @@
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
                             <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. You can mix free and paid ticket types on the same event. This is useful for comp tickets, volunteer passes, or free admission with optional paid upgrades.</p>
+                        </div>
+                    </div>
+
+                    <div x-data="{ open: false }" class="faq-item bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
+                        <button @click="open = !open" class="w-full px-6 py-5 text-left flex items-center justify-between gap-4">
+                            <span class="font-semibold text-gray-900 dark:text-white">What happens when tickets sell out?</span>
+                            <svg aria-hidden="true" :class="{ 'rotate-180': open }" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="open" x-collapse class="px-6 pb-5">
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">When all tickets sell out, a waitlist button appears automatically. Fans can join the waitlist by entering their name and email. When spots open up (from cancellations or refunds), the next person in line is notified via email and given 24 hours to complete their purchase. Learn more in the <a href="{{ marketing_url('/docs/tickets#waitlist') }}" class="text-blue-600 hover:text-blue-700 underline">ticketing guide</a>.</p>
+                        </div>
+                    </div>
+
+                    <div x-data="{ open: false }" class="faq-item bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
+                        <button @click="open = !open" class="w-full px-6 py-5 text-left flex items-center justify-between gap-4">
+                            <span class="font-semibold text-gray-900 dark:text-white">Can I track check-ins in real time?</span>
+                            <svg aria-hidden="true" :class="{ 'rotate-180': open }" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="open" x-collapse class="px-6 pb-5">
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. The live <a href="{{ marketing_url('/docs/tickets#checkin-dashboard') }}" class="text-blue-600 hover:text-blue-700 underline">check-in dashboard</a> shows real-time progress bars, per-ticket-type breakdowns, and a recent activity feed with attendee names and check-in times. It auto-refreshes every 10 seconds and works on any device.</p>
                         </div>
                     </div>
                 </div>

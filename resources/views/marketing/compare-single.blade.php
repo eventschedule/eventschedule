@@ -27,7 +27,7 @@
                 "name": "Pro",
                 "price": "5.00",
                 "priceCurrency": "USD",
-                "description": "Everything in Free plus ticketing with QR check-ins, Stripe payments, remove branding, event graphics, and REST API.",
+                "description": "Everything in Free plus ticketing with QR check-ins and live dashboard, ticket waitlist, sale notifications, sales CSV export, Stripe payments, remove branding, event graphics, REST API, and webhooks.",
                 "availability": "https://schema.org/InStock"
             }
         ],
@@ -37,6 +37,10 @@
             "Two-way Google Calendar sync",
             "Newsletter builder with A/B testing",
             "QR code ticketing and check-in",
+            "Check-in dashboard",
+            "Ticket waitlist",
+            "Sale notification emails",
+            "Sales CSV export",
             "Open source with selfhosting option",
             "Embeddable calendar widget",
             "Fan videos and comments",

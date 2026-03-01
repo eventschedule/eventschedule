@@ -102,6 +102,10 @@
                                             <td><strong class="text-gray-900 dark:text-white">WhatsApp Messaging</strong></td>
                                             <td>Send event notifications and updates to attendees via WhatsApp, with support for the 24-hour messaging window</td>
                                         </tr>
+                                        <tr>
+                                            <td><strong class="text-gray-900 dark:text-white">WhatsApp Event Creation</strong></td>
+                                            <td>Organizers with verified phone numbers can create events by sending a WhatsApp message with event details or a flyer image. AI parses the content and creates the event automatically (Enterprise feature).</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -203,6 +207,11 @@ TWILIO_FROM_NUMBER=+1234567890</code></pre>
                                 <div class="doc-callout-title">24-Hour Messaging Window</div>
                                 <p>WhatsApp enforces a 24-hour reply window. You can send free-form messages only within 24 hours of a user's last message. Outside this window, you must use pre-approved message templates. Plan your messaging strategy accordingly.</p>
                             </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-6">Event Creation</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">When WhatsApp is configured, organizers with verified phone numbers and Enterprise plans can send messages to create events. AI parses both text messages and images (such as flyers) using Gemini to extract event details automatically.</p>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">For user-facing instructions on creating events via WhatsApp, see the <a href="{{ route('marketing.docs.creating_events') }}#whatsapp" class="text-cyan-400 hover:text-cyan-300">Creating Events guide</a>.</p>
                         </section>
 
                         <!-- Testing -->

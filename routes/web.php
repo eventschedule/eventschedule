@@ -27,6 +27,7 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SubscriptionWebhookController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\WaitlistController;
+use App\Http\Controllers\WebhookSettingsController;
 use App\Http\Controllers\WhatsAppWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -306,6 +307,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::patch('/api-settings', [ApiSettingsController::class, 'update'])->name('api-settings.update');
 
+    // Webhook settings
+    Route::post('/webhooks', [WebhookSettingsController::class, 'store'])->name('webhooks.store');
+    Route::put('/webhooks/{webhook}', [WebhookSettingsController::class, 'update'])->name('webhooks.update');
+    Route::delete('/webhooks/{webhook}', [WebhookSettingsController::class, 'destroy'])->name('webhooks.destroy');
+    Route::post('/webhooks/{webhook}/toggle', [WebhookSettingsController::class, 'toggle'])->name('webhooks.toggle');
+    Route::post('/webhooks/{webhook}/regenerate-secret', [WebhookSettingsController::class, 'regenerateSecret'])->name('webhooks.regenerate_secret');
+    Route::post('/webhooks/{webhook}/test', [WebhookSettingsController::class, 'test'])->name('webhooks.test');
+    Route::get('/webhooks/{webhook}/deliveries', [WebhookSettingsController::class, 'deliveries'])->name('webhooks.deliveries');
+
     // Admin password confirmation (outside admin middleware - the admin middleware redirects here)
     Route::get('/admin/confirm-password', [AdminController::class, 'showConfirmPassword'])
         ->name('admin.password.confirm.show');
@@ -527,6 +537,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/saas/twilio', [MarketingController::class, 'docsSaasTwilio'])->name('marketing.docs.saas.twilio');
         // Developer section
         Route::get('/docs/developer/api', [MarketingController::class, 'docsDeveloperApi'])->name('marketing.docs.developer.api');
+        Route::get('/docs/developer/webhooks', [MarketingController::class, 'docsDeveloperWebhooks'])->name('marketing.docs.developer.webhooks');
         // Redirects from old URLs to new URLs
         Route::get('/docs/installation', fn () => redirect()->route('marketing.docs.selfhost.installation', [], 301));
         Route::get('/docs/saas/setup', fn () => redirect()->route('marketing.docs.saas.setup', [], 301));
@@ -672,6 +683,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/saas/twilio', [MarketingController::class, 'docsSaasTwilio'])->name('marketing.docs.saas.twilio');
             // Developer section
             Route::get('/docs/developer/api', [MarketingController::class, 'docsDeveloperApi'])->name('marketing.docs.developer.api');
+            Route::get('/docs/developer/webhooks', [MarketingController::class, 'docsDeveloperWebhooks'])->name('marketing.docs.developer.webhooks');
             // Redirects from old URLs to new URLs
             Route::get('/docs/installation', fn () => redirect()->route('marketing.docs.selfhost.installation', [], 301));
             Route::get('/docs/saas/setup', fn () => redirect()->route('marketing.docs.saas.setup', [], 301));
@@ -815,6 +827,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/saas/twilio', fn () => redirect('https://eventschedule.com/docs/saas/twilio', 301));
             // Developer section
             Route::get('/docs/developer/api', fn () => redirect('https://eventschedule.com/docs/developer/api', 301));
+            Route::get('/docs/developer/webhooks', fn () => redirect('https://eventschedule.com/docs/developer/webhooks', 301));
             Route::get('/docs/developer', fn () => redirect('https://eventschedule.com/docs/developer/api', 301));
             // Old URL redirects
             Route::get('/docs/stripe', fn () => redirect('https://eventschedule.com/docs/selfhost/stripe', 301));
@@ -943,6 +956,7 @@ if (config('app.is_nexus')) {
     // Developer section
     Route::get('/docs/developer', fn () => redirect()->route('home'));
     Route::get('/docs/developer/api', fn () => redirect()->route('home'))->name('marketing.docs.developer.api');
+    Route::get('/docs/developer/webhooks', fn () => redirect()->route('home'))->name('marketing.docs.developer.webhooks');
     // Old URLs (still redirect to home)
     Route::get('/docs/stripe', fn () => redirect()->route('home'));
     Route::get('/docs/google-calendar', fn () => redirect()->route('home'));

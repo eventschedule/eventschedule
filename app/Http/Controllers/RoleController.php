@@ -1948,7 +1948,7 @@ class RoleController extends Controller
                     'name' => $fieldData['name'],
                     'type' => $fieldData['type'] ?? 'string',
                     'required' => ! empty($fieldData['required']),
-                    'options' => $fieldData['options'] ?? '',
+                    'options' => implode(',', array_map('trim', explode(',', $fieldData['options'] ?? ''))),
                     'ai_prompt' => $fieldData['ai_prompt'] ?? '',
                     'index' => $fieldIndex,
                 ];
@@ -1956,7 +1956,7 @@ class RoleController extends Controller
                 // Preserve options_en if dropdown options haven't changed
                 $existingField = $existingCustomFields[$fieldKey] ?? null;
                 if ($existingField && ! empty($existingField['options_en'])
-                    && ($existingField['options'] ?? '') === ($fieldData['options'] ?? '')) {
+                    && ($existingField['options'] ?? '') === $eventCustomFields[$fieldKey]['options']) {
                     $eventCustomFields[$fieldKey]['options_en'] = $existingField['options_en'];
                 }
 

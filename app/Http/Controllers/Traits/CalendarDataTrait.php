@@ -57,6 +57,8 @@ trait CalendarDataTrait
             'recurring_end_value' => $event->recurring_end_value,
             'recurring_frequency' => $event->recurring_frequency,
             'recurring_interval' => $event->recurring_interval,
+            'recurring_include_dates' => $event->recurring_include_dates ?? [],
+            'recurring_exclude_dates' => $event->recurring_exclude_dates ?? [],
             'start_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
             'is_online' => ! empty($event->event_url),
             'registration_url' => $event->registration_url,

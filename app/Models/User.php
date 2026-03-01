@@ -246,6 +246,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Sale::class);
     }
 
+    public function webhooks()
+    {
+        return $this->hasMany(Webhook::class);
+    }
+
     public function isMember($subdomain): bool
     {
         return $this->member()->where('subdomain', $subdomain)->exists();

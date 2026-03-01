@@ -784,7 +784,7 @@ class GeminiUtils
             $eventUrl = null;
             $event = Event::where('registration_url', $item['registration_url'])
                 ->where('starts_at', '>=', now())
-                ->whereHas('roles', fn($q) => $q->where('roles.id', $role->id))
+                ->whereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
                 ->first();
             if ($event) {
                 $data[$key]['event_url'] = $event->getGuestUrl();
@@ -798,7 +798,7 @@ class GeminiUtils
                 $eventDate = Carbon::parse($item['event_date_time'], $timezone)->setTimezone('UTC');
                 $query = Event::where('starts_at', $eventDate)
                     ->where('starts_at', '>=', now())
-                    ->whereHas('roles', fn($q) => $q->where('roles.id', $role->id));
+                    ->whereHas('roles', fn ($q) => $q->where('roles.id', $role->id));
 
                 // Check for same venue address
                 if (! empty($item['event_address'])) {
@@ -1298,6 +1298,13 @@ class GeminiUtils
                 // Select appropriate image based on category
                 $result['featured_image'] = self::selectImageForCategory($result['image_category']);
 
+                // Reject placeholder titles from incomplete API responses
+                if (stripos($result['title'] ?? '', 'Blog Post about') === 0) {
+                    \Log::warning('Rejecting blog post with placeholder title: '.$result['title']);
+
+                    return null;
+                }
+
                 return $result;
             }
 
@@ -1305,16 +1312,7 @@ class GeminiUtils
         } catch (\Exception $e) {
             \Log::error('Failed to generate blog post: '.$e->getMessage());
 
-            // Return fallback content
-            return [
-                'title' => 'Blog Post about '.$topic,
-                'content' => '<h1>'.$topic.'</h1><p>This is a placeholder for content about '.$topic.'. Please edit this content to add your own insights and information.</p>',
-                'excerpt' => 'A brief summary about '.$topic,
-                'tags' => ['events', 'scheduling', 'management'],
-                'meta_title' => 'Blog Post about '.$topic,
-                'meta_description' => 'A brief summary about '.$topic,
-                'featured_image' => 'Lets_do_Business.png',
-            ];
+            return null;
         }
     }
 

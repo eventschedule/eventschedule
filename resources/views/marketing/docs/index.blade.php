@@ -411,27 +411,27 @@
                                 <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">REST API</span>
                             </div>
 
-                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">API Reference</h2>
-                            <p class="text-gray-500 dark:text-gray-300 mb-6">Complete REST API documentation with authentication, endpoints, request/response examples, and error handling.</p>
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Developer</h2>
+                            <p class="text-gray-500 dark:text-gray-300 mb-6">REST API and webhook documentation for integrating with Event Schedule programmatically.</p>
 
                             <div class="flex flex-wrap items-center gap-4 mb-6">
                                 <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                     <svg aria-hidden="true" class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    JSON responses
+                                    REST API
                                 </div>
                                 <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                     <svg aria-hidden="true" class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    API key auth
+                                    Webhooks
                                 </div>
                                 <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                     <svg aria-hidden="true" class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    Full CRUD
+                                    HMAC signing
                                 </div>
                             </div>
 

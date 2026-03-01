@@ -7,6 +7,7 @@ use App\Models\Sale;
 use App\Services\AuditService;
 use App\Services\MetaAdsService;
 use App\Services\UsageTrackingService;
+use App\Services\WebhookService;
 use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
@@ -188,6 +189,8 @@ class StripeController extends Controller
 
                         // Send conversion event to Meta CAPI if event has active boost
                         $this->sendMetaConversion($sale, $webhookAmount);
+
+                        WebhookService::dispatch('sale.paid', $sale);
                     });
                 }
                 break;
@@ -256,6 +259,8 @@ class StripeController extends Controller
 
                             // Send conversion event to Meta CAPI if event has active boost
                             $this->sendMetaConversion($sale, $sale->payment_amount);
+
+                            WebhookService::dispatch('sale.paid', $sale);
                         });
                     }
                 }

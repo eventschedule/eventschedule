@@ -50,10 +50,15 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Sell online via Stripe | Tied to ticketing gate | Stripe Connect payments, no platform fees |
 | Generate event graphics | `GraphicController`, `$role->isPro()` | Auto-generated shareable images |
 | REST API access | All `Api/*Controller.php`, `$role->isPro()` | Full CRUD API for events, schedules, sales, sub-schedules |
+| Webhooks | `WebhookService::dispatch()`, `$event->isPro()` | POST notifications for sales, events, check-ins |
 | Event boosting with ads | `BoostController:101,202`, `$role->isPro()` | Meta Ads integration |
 | Custom CSS styling | `RoleController:1748`, `$role->isPro()` | Custom CSS on schedule pages |
 | Custom fields | `RoleController:1822`, `$role->isPro()` | Custom data fields on events |
 | Event polls | `EventController`, `$role->isPro()` | Create polls on events, guests vote |
+| Check-in dashboard | `CheckInController`, `$role->isPro()` | Real-time attendance tracking with per-ticket breakdown |
+| Ticket waitlist | `WaitlistController`, `$event->isPro()` | Auto-notify when sold-out tickets become available |
+| Sale notification emails | `EmailService::sendNewSaleNotification()` | Opt-in email alerts when tickets sell |
+| Sales CSV export | `TicketController::exportSales()` | Export sales data with custom fields |
 | 100 newsletters per month | `$role->newsletterLimit()` | Increased sending limit |
 
 ## Enterprise Features
@@ -72,6 +77,7 @@ Gated by `$role->isEnterprise()`.
 | Multiple team members | `RoleController:1210,1229`, `$role->isEnterprise()` | Add/manage multiple team members |
 | Availability management | `RoleController:2413`, `$role->isEnterprise()` | Team member availability tracking |
 | 1,000 newsletters per month | `$role->newsletterLimit()` | Highest sending limit |
+| WhatsApp event creation | `WhatsAppWebhookController`, `$role->isEnterprise()` | Create events via WhatsApp messages/images with AI parsing |
 | Priority support | Not code-gated | Service-level commitment |
 
 ## Selfhost-Only Features

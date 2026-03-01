@@ -210,10 +210,11 @@
                                 REST API
                             </div>
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Full REST API</h3>
-                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Create, read, update, and delete schedules, events, tickets, and sub-schedules. Standard HTTP methods, JSON responses, and predictable URL structure.</p>
+                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Create, read, update, and delete schedules, events, tickets, and sub-schedules. Standard HTTP methods, JSON responses, and predictable URL structure. Webhooks for real-time event notifications.</p>
                             <div class="flex flex-wrap gap-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">JSON responses</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">API key auth</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Webhooks</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Rate limiting</span>
                             </div>
                         </div>

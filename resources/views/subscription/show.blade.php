@@ -206,7 +206,7 @@
                 @endif
 
                 <div class="flex items-center justify-between pt-4">
-                    <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']) }}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-500">
+                    <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']) }}" class="js-cancel-btn text-sm text-gray-600 dark:text-gray-400 hover:text-gray-500">
                         {{ __('messages.cancel') }}
                     </a>
                     <button type="submit" id="submit-button" class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed">

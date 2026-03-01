@@ -12,6 +12,7 @@ use App\Models\TicketWaitlist;
 use App\Models\User;
 use App\Services\AuditService;
 use App\Services\EmailService;
+use App\Services\WebhookService;
 use App\Utils\InvoiceNinja;
 use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
@@ -472,6 +473,9 @@ class TicketController extends Controller
 
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'event_id:'.$event->id);
 
+        // Dispatch sale.created webhook (outside transaction)
+        WebhookService::dispatch('sale.created', $sale);
+
         if ($total == 0 && ! $isPaymentLink) {
             $sale->status = 'paid';
             $sale->save();
@@ -481,6 +485,8 @@ class TicketController extends Controller
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($event->id, $sale->discount_amount);
             }
+
+            WebhookService::dispatch('sale.paid', $sale);
 
             return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
         } else {
@@ -1023,6 +1029,8 @@ class TicketController extends Controller
             }
         }
 
+        WebhookService::dispatch('ticket.scanned', $sale);
+
         return response()->json($data);
     }
 
@@ -1154,6 +1162,16 @@ class TicketController extends Controller
                 ['status' => $sale->status],
                 $request->action.':event_id:'.$sale->event_id
             );
+
+            $webhookEvent = match ($request->action) {
+                'mark_paid' => 'sale.paid',
+                'refund' => 'sale.refunded',
+                'cancel' => 'sale.cancelled',
+                default => null,
+            };
+            if ($webhookEvent) {
+                WebhookService::dispatch($webhookEvent, $sale);
+            }
         }
 
         if ($request->ajax()) {

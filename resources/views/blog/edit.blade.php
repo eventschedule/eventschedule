@@ -170,7 +170,7 @@
 
             <div class="flex justify-end gap-3">
                 <a href="{{ route('blog.admin.index') }}"
-                   class="rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                   class="js-cancel-btn rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     {{ __('messages.cancel') }}
                 </a>
                 <x-brand-button type="submit" class="text-sm px-3 py-2">

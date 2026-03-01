@@ -26,7 +26,7 @@
                 "price": "5.00",
                 "priceCurrency": "USD",
                 "billingIncrement": "MON",
-                "description": "Everything in Free plus remove branding, ticketing with QR check-ins, Stripe payments, event graphics, event boosting with ads, event polls, custom fields, custom CSS styling, and REST API access.",
+                "description": "Everything in Free plus remove branding, ticketing with QR check-ins and live dashboard, ticket waitlist, sale notification emails, sales CSV export, Stripe payments, event graphics, event boosting with ads, event polls, custom fields, custom CSS styling, REST API access, and webhooks.",
                 "availability": "https://schema.org/InStock",
                 "priceSpecification": [
                     {
@@ -122,7 +122,7 @@
                 "name": "What is the difference between Pro and Enterprise?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Pro includes ticketing, Stripe payments, white-label branding, event graphics, event boosting with ads, custom fields, custom CSS styling, REST API access, and 100 newsletters per month. Enterprise adds custom domains, private and password-protected events, multiple team members, advanced AI features, email scheduling, agenda scanning, availability management, 1,000 newsletters per month, and priority support."
+                    "text": "Pro includes ticketing with a live check-in dashboard, ticket waitlist, sale notification emails, sales CSV export, Stripe payments, white-label branding, event graphics, event boosting with ads, custom fields, custom CSS styling, REST API access, and 100 newsletters per month. Enterprise adds custom domains, private and password-protected events, multiple team members, advanced AI features, WhatsApp event creation, email scheduling, agenda scanning, availability management, 1,000 newsletters per month, and priority support."
                 }
             },
             {
@@ -342,7 +342,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-600 dark:text-gray-300">Ticketing & QR code check-ins</span>
+                            <span class="text-gray-600 dark:text-gray-300">Ticketing with check-in dashboard</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -351,6 +351,30 @@
                                 </svg>
                             </div>
                             <span class="text-gray-600 dark:text-gray-300">Sell online via Stripe</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg aria-hidden="true" class="w-3 h-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-gray-600 dark:text-gray-300">Ticket waitlist</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg aria-hidden="true" class="w-3 h-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-gray-600 dark:text-gray-300">Sale notification emails</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg aria-hidden="true" class="w-3 h-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-gray-600 dark:text-gray-300">Sales CSV export</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -391,6 +415,14 @@
                                 </svg>
                             </div>
                             <span class="text-gray-600 dark:text-gray-300">REST API access</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg aria-hidden="true" class="w-3 h-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-gray-600 dark:text-gray-300">Webhooks</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -605,7 +637,7 @@
                     </button>
                     <div x-show="open === 3" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Pro includes ticketing, Stripe payments, white-label branding, event graphics, event boosting with ads, custom fields, custom CSS styling, REST API access, and 100 newsletters per month. Enterprise adds custom domains, private and password-protected events, multiple team members, advanced AI features, email scheduling, agenda scanning, availability management, 1,000 newsletters per month, and priority support.
+                            Pro includes ticketing with a live check-in dashboard, ticket waitlist, sale notification emails, sales CSV export, Stripe payments, white-label branding, event graphics, event boosting with ads, custom fields, custom CSS styling, REST API access, and 100 newsletters per month. Enterprise adds custom domains, private and password-protected events, multiple team members, advanced AI features, WhatsApp event creation, email scheduling, agenda scanning, availability management, 1,000 newsletters per month, and priority support.
                         </p>
                     </div>
                 </div>
