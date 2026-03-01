@@ -80,6 +80,12 @@ class TicketController extends Controller
         if (request()->ajax()) {
             $tab = request()->query('tab');
             if ($tab === 'feedback') {
+                $user = auth()->user();
+                $hasPro = $user->roles()->get()->contains(fn ($role) => $role->isPro());
+                if (! $hasPro) {
+                    abort(403);
+                }
+
                 return view('ticket.feedback_table', $this->getFeedbackData());
             }
 
@@ -145,7 +151,10 @@ class TicketController extends Controller
 
         $totalEligibleSales = Sale::where('status', 'paid')
             ->where('is_deleted', false)
-            ->whereNotNull('feedback_sent_at')
+            ->where(function ($q) {
+                $q->whereNotNull('feedback_sent_at')
+                    ->orWhereHas('feedback');
+            })
             ->whereHas('event', function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             })
@@ -870,13 +879,13 @@ class TicketController extends Controller
         $user = $event->user;
 
         if ($user->invoiceninja_mode === 'payment_link') {
-            return $this->invoiceninjaPaymentLinkCheckout($subdomain, $sale, $event);
+            return $this->invoiceninjaPaymentLinkCheckout($subdomain, $sale, $event, $isEmbed);
         }
 
-        return $this->invoiceninjaInvoiceCheckout($subdomain, $sale, $event);
+        return $this->invoiceninjaInvoiceCheckout($subdomain, $sale, $event, $isEmbed);
     }
 
-    private function invoiceninjaInvoiceCheckout($subdomain, $sale, $event)
+    private function invoiceninjaInvoiceCheckout($subdomain, $sale, $event, $isEmbed = false)
     {
         try {
             $user = $event->user;
@@ -938,7 +947,12 @@ class TicketController extends Controller
             $sale->save();
 
             if ($sendEmail) {
-                return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+                $url = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+                if ($isEmbed) {
+                    $url .= '?embed=true';
+                }
+
+                return redirect($url);
             } else {
                 return redirect($invoice['invitations'][0]['link']);
             }
@@ -953,7 +967,7 @@ class TicketController extends Controller
         }
     }
 
-    private function invoiceninjaPaymentLinkCheckout($subdomain, $sale, $event)
+    private function invoiceninjaPaymentLinkCheckout($subdomain, $sale, $event, $isEmbed = false)
     {
         try {
             $user = $event->user;
@@ -1016,7 +1030,7 @@ class TicketController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return $this->invoiceninjaInvoiceCheckout($subdomain, $sale, $event);
+            return $this->invoiceninjaInvoiceCheckout($subdomain, $sale, $event, $isEmbed);
         }
     }
 
@@ -1159,7 +1173,12 @@ class TicketController extends Controller
             }
         });
 
-        return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+        $url = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+        if (request()->boolean('embed')) {
+            $url .= '?embed=true';
+        }
+
+        return redirect($url);
     }
 
     public function paymentUrlCancel($sale_id)
@@ -1184,7 +1203,12 @@ class TicketController extends Controller
             $sale->save();
         });
 
-        return redirect($event->getGuestUrl($sale->subdomain, $sale->event_date).'?tickets=true');
+        $cancelUrl = $event->getGuestUrl($sale->subdomain, $sale->event_date).'?tickets=true';
+        if (request()->boolean('embed')) {
+            $cancelUrl .= '&embed=true';
+        }
+
+        return redirect($cancelUrl);
     }
 
     /**

@@ -2340,6 +2340,7 @@ return [
     'submitted' => 'Trimis',
     'enabled' => 'Activat',
     'disabled' => 'Dezactivat',
+    'engagement' => 'Implicare',
 
     'embed_tickets' => 'Embed Tickets',
     'embed_registration' => 'Embed Registration',

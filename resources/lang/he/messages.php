@@ -2297,6 +2297,7 @@ return [
     'submitted' => 'Submitted',
     'enabled' => 'Enabled',
     'disabled' => 'Disabled',
+    'engagement' => 'מעורבות',
     'embed_tickets' => 'Embed Tickets',
     'embed_registration' => 'Embed Registration',
     'embed_tickets_description' => 'Embed a ticket purchase form for this event on your website using the iframe code below.',

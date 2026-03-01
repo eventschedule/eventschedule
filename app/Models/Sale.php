@@ -40,6 +40,10 @@ class Sale extends Model
         'feedback_sent_at',
     ];
 
+    protected $casts = [
+        'feedback_sent_at' => 'datetime',
+    ];
+
     protected static function booted()
     {
         static::updated(function ($sale) {

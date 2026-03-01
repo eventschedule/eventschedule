@@ -33,6 +33,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Consistent primary action button sizing** - Primary action buttons in the AP should use `px-4 py-3 text-base` sizing to match `<x-brand-link>` / `<x-secondary-link>` components. Do not use smaller `py-2 text-sm` for standalone call-to-action buttons.
 - **Keep doc search index up-to-date** - When adding, removing, or renaming doc sections, update `getDocSearchIndex()` in `MarketingController` so the docs search stays accurate
 - **Never expose raw exception messages to users** - In catch blocks that handle user-facing responses, catch `QueryException` (and other system exceptions) separately and show a generic error message. Use `report($e)` to send to Sentry. Only show `$e->getMessage()` for intentional business logic exceptions.
+- **Always translate new language keys** - When adding a key to non-English `resources/lang/` files, use proper translations (check existing similar keys in the file for reference), never copy the English string
 
 ## Terminology
 

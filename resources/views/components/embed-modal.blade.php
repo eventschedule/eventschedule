@@ -161,14 +161,14 @@ document.addEventListener('click', function(event) {
     }
     // Close modal when clicking outside
     const modal = document.getElementById('embed-modal');
-    if (event.target === modal) {
+    if (! modal.classList.contains('hidden') && ! event.target.closest('.relative.transform')) {
         closeEmbedModal();
     }
 });
 
 // Close modal with Escape key
 document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
+    if (event.key === 'Escape' && ! document.getElementById('embed-modal').classList.contains('hidden')) {
         closeEmbedModal();
     }
 });

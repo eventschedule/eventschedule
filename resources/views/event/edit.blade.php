@@ -1111,45 +1111,21 @@
                                 </svg>
                                 {{ __('messages.tickets') }}
                             </a>
-                            <a href="#section-privacy" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-privacy">
+                            <a href="#section-event-settings" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-event-settings">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                 </svg>
-                                {{ __('messages.privacy') }}
+                                {{ __('messages.settings') }}
                             </a>
                             @endif
-                            @if ($role->isPro() && count($role->getEventCustomFields()) > 0)
-                            <a href="#section-custom-fields" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-custom-fields">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
-                                </svg>
-                                {{ __('messages.custom_fields') }}
-                            </a>
-                            @endif
-                            @if ($role->isPro())
-                            <a href="#section-polls" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-polls">
+                            @if ($role->isPro() || $event->exists)
+                            @php $fanContentPendingCount = $event->exists ? (($pendingVideos->count() ?? 0) + ($pendingComments->count() ?? 0) + ($pendingPhotos->count() ?? 0)) : 0; @endphp
+                            <a href="#section-engagement" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-engagement">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                                 </svg>
-                                {{ __('messages.polls') }}
-                            </a>
-                            @endif
-                            @if ($role->isPro())
-                            <a href="#section-feedback" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-feedback">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-                                </svg>
-                                {{ __('messages.feedback') }}
-                            </a>
-                            @endif
-                            @if ($event->exists)
-                            @php $fanContentPendingCount = ($pendingVideos->count() ?? 0) + ($pendingComments->count() ?? 0) + ($pendingPhotos->count() ?? 0); @endphp
-                            <a href="#section-fan-content" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-fan-content">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-                                </svg>
-                                {{ __('messages.fan_content') }}
+                                {{ __('messages.engagement') }}
                                 @if ($fanContentPendingCount > 0)
                                 <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $fanContentPendingCount }}</span>
                                 @endif
@@ -2923,488 +2899,489 @@
                 @endif
 
                 @if ($event->user_id == $user->id)
-                    <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-privacy">
+                    <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-event-settings">
                         <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                             </svg>
-                            {{ __('messages.privacy') }}
+                            {{ __('messages.settings') }}
                         </span>
                         <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </button>
-                    <div id="section-privacy" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                    <div id="section-event-settings" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                         <div class="max-w-xl">
                             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                 </svg>
-                                {{ __('messages.privacy') }}
+                                {{ __('messages.settings') }}
                             </h2>
 
-                            <div class="mb-6">
-                                <div class="flex items-center gap-3">
-                                    <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                        <input type="hidden" name="is_private" :value="event.is_private ? 1 : 0">
-                                        <input id="is_private" name="is_private" type="checkbox" v-model="event.is_private" :value="1"
-                                            class="sr-only peer"
-                                            {{ ! $role->isEnterprise() ? 'disabled' : '' }}>
-                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors{{ ! $role->isEnterprise() ? ' opacity-50' : '' }}"></div>
-                                        <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                    </label>
-                                    <label for="is_private" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                        {{ __('messages.private_event') }}
-                                        @if (! $role->isEnterprise() && config('app.hosted'))
-                                        <div class="text-xs pt-1">
-                                            <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-privacy')"
-                                                class="text-[#4E81FA] hover:underline font-medium">
-                                                {{ __('messages.requires_enterprise_plan') }}
-                                            </button>
-                                        </div>
-                                        @elseif (! $role->isEnterprise())
-                                        <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_enterprise_plan') }}</div>
-                                        @endif
-                                    </label>
-                                </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 ms-14">{{ __('messages.private_event_help') }}</p>
-                            </div>
-
-                            <div class="mb-6" v-show="event.is_private">
-                                <x-input-label for="event_password" :value="__('messages.event_password')" />
-                                <x-text-input id="event_password" name="event_password" type="text" class="mt-1 block w-full"
-                                    v-model="event.event_password" maxlength="255"
-                                    :disabled="! $role->isEnterprise()" />
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.event_password_help') }}</p>
-                                @if (! $role->isEnterprise() && config('app.hosted'))
-                                <div class="text-xs pt-1">
-                                    <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-privacy')"
-                                        class="text-[#4E81FA] hover:underline font-medium">
-                                        {{ __('messages.requires_enterprise_plan') }}
+                            <!-- Settings Tabs -->
+                            @if ($role->isPro() && count($role->getEventCustomFields()) > 0)
+                            <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+                                <nav class="-mb-px flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide">
+                                    <button type="button" @click="activeSettingsTab = 'privacy'"
+                                        :class="activeSettingsTab === 'privacy' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
+                                        class="settings-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="privacy">
+                                        {{ __('messages.privacy') }}
                                     </button>
-                                </div>
-                                @elseif (! $role->isEnterprise())
-                                <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_enterprise_plan') }}</div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
-                @if ($role->isPro() && count($role->getEventCustomFields()) > 0)
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-custom-fields">
-                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
-                        </svg>
-                        {{ __('messages.custom_fields') }}
-                    </span>
-                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div id="section-custom-fields" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
-                    <div class="max-w-xl">
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
-                            </svg>
-                            {{ __('messages.custom_fields') }}
-                        </h2>
-
-                        @php
-                            $eventCustomFields = $role->getEventCustomFields();
-                            $customFieldValues = $event->getCustomFieldValues();
-                        @endphp
-
-                        @foreach($eventCustomFields as $fieldKey => $field)
-                        <div class="mb-6">
-                            <x-input-label for="custom_field_{{ $fieldKey }}" :value="((app()->getLocale() === 'en' && !empty($field['name_en'])) ? $field['name_en'] : $field['name']) . (!empty($field['required']) ? ' *' : '')" />
-
-                            @if(($field['type'] ?? 'string') === 'string')
-                            <x-text-input
-                                id="custom_field_{{ $fieldKey }}"
-                                name="custom_field_values[{{ $fieldKey }}]"
-                                type="text"
-                                class="mt-1 block w-full"
-                                :value="old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '')"
-                                :required="!empty($field['required'])" />
-                            @elseif(($field['type'] ?? '') === 'multiline_string')
-                            <textarea
-                                id="custom_field_{{ $fieldKey }}"
-                                name="custom_field_values[{{ $fieldKey }}]"
-                                rows="3"
-                                dir="auto"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
-                                {{ !empty($field['required']) ? 'required' : '' }}>{{ old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '') }}</textarea>
-                            @elseif(($field['type'] ?? '') === 'switch')
-                            <div class="mt-2">
-                                <input type="hidden" name="custom_field_values[{{ $fieldKey }}]" value="0" />
-                                <input type="checkbox"
-                                    id="custom_field_{{ $fieldKey }}"
-                                    name="custom_field_values[{{ $fieldKey }}]"
-                                    value="1"
-                                    class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
-                                    {{ old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '') ? 'checked' : '' }} />
-                            </div>
-                            @elseif(($field['type'] ?? '') === 'date')
-                            <x-text-input
-                                id="custom_field_{{ $fieldKey }}"
-                                name="custom_field_values[{{ $fieldKey }}]"
-                                type="date"
-                                class="mt-1 block w-full"
-                                :value="old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '')"
-                                :required="!empty($field['required'])" />
-                            @elseif(($field['type'] ?? '') === 'dropdown')
-                            <select
-                                id="custom_field_{{ $fieldKey }}"
-                                name="custom_field_values[{{ $fieldKey }}]"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
-                                {{ !empty($field['required']) ? 'required' : '' }}>
-                                <option value="">{{ __('messages.select') }}...</option>
-                                @foreach(explode(',', $field['options'] ?? '') as $option)
-                                    @php $option = trim($option); @endphp
-                                    @if($option)
-                                    <option value="{{ $option }}" {{ old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '') === $option ? 'selected' : '' }}>
-                                        {{ $option }}
-                                    </option>
-                                    @endif
-                                @endforeach
-                            </select>
-                            @elseif(($field['type'] ?? '') === 'multiselect')
-                            @php
-                                $oldValue = old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '');
-                                $selectedValues = is_array($oldValue) ? $oldValue : array_map('trim', explode(',', $oldValue));
-                            @endphp
-                            <div class="mt-1 space-y-1">
-                                @foreach(explode(',', $field['options'] ?? '') as $option)
-                                    @php $option = trim($option); @endphp
-                                    @if($option)
-                                    <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                                        <input type="checkbox"
-                                            name="custom_field_values[{{ $fieldKey }}][]"
-                                            value="{{ $option }}"
-                                            {{ in_array($option, $selectedValues) ? 'checked' : '' }}
-                                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded" />
-                                        {{ $option }}
-                                    </label>
-                                    @endif
-                                @endforeach
+                                    <button type="button" @click="activeSettingsTab = 'custom_fields'"
+                                        :class="activeSettingsTab === 'custom_fields' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
+                                        class="settings-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="custom_fields">
+                                        {{ __('messages.custom_fields') }}
+                                    </button>
+                                </nav>
                             </div>
                             @endif
 
-                            <x-input-error class="mt-2" :messages="$errors->get('custom_field_values.' . $fieldKey)" />
+                            <!-- Privacy Tab -->
+                            <div v-show="activeSettingsTab === 'privacy'">
+                                <div class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input type="hidden" name="is_private" :value="event.is_private ? 1 : 0">
+                                            <input id="is_private" name="is_private" type="checkbox" v-model="event.is_private" :value="1"
+                                                class="sr-only peer"
+                                                {{ ! $role->isEnterprise() ? 'disabled' : '' }}>
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors{{ ! $role->isEnterprise() ? ' opacity-50' : '' }}"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="is_private" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.private_event') }}
+                                            @if (! $role->isEnterprise() && config('app.hosted'))
+                                            <div class="text-xs pt-1">
+                                                <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-privacy')"
+                                                    class="text-[#4E81FA] hover:underline font-medium">
+                                                    {{ __('messages.requires_enterprise_plan') }}
+                                                </button>
+                                            </div>
+                                            @elseif (! $role->isEnterprise())
+                                            <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_enterprise_plan') }}</div>
+                                            @endif
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 ms-14">{{ __('messages.private_event_help') }}</p>
+                                </div>
+
+                                <div class="mb-6" v-show="event.is_private">
+                                    <x-input-label for="event_password" :value="__('messages.event_password')" />
+                                    <x-text-input id="event_password" name="event_password" type="text" class="mt-1 block w-full"
+                                        v-model="event.event_password" maxlength="255"
+                                        :disabled="! $role->isEnterprise()" />
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.event_password_help') }}</p>
+                                    @if (! $role->isEnterprise() && config('app.hosted'))
+                                    <div class="text-xs pt-1">
+                                        <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-privacy')"
+                                            class="text-[#4E81FA] hover:underline font-medium">
+                                            {{ __('messages.requires_enterprise_plan') }}
+                                        </button>
+                                    </div>
+                                    @elseif (! $role->isEnterprise())
+                                    <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_enterprise_plan') }}</div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- Custom Fields Tab -->
+                            @if ($role->isPro() && count($role->getEventCustomFields()) > 0)
+                            <div v-show="activeSettingsTab === 'custom_fields'">
+                                @php
+                                    $eventCustomFields = $role->getEventCustomFields();
+                                    $customFieldValues = $event->getCustomFieldValues();
+                                @endphp
+
+                                @foreach($eventCustomFields as $fieldKey => $field)
+                                <div class="mb-6">
+                                    <x-input-label for="custom_field_{{ $fieldKey }}" :value="((app()->getLocale() === 'en' && !empty($field['name_en'])) ? $field['name_en'] : $field['name']) . (!empty($field['required']) ? ' *' : '')" />
+
+                                    @if(($field['type'] ?? 'string') === 'string')
+                                    <x-text-input
+                                        id="custom_field_{{ $fieldKey }}"
+                                        name="custom_field_values[{{ $fieldKey }}]"
+                                        type="text"
+                                        class="mt-1 block w-full"
+                                        :value="old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '')"
+                                        :required="!empty($field['required'])" />
+                                    @elseif(($field['type'] ?? '') === 'multiline_string')
+                                    <textarea
+                                        id="custom_field_{{ $fieldKey }}"
+                                        name="custom_field_values[{{ $fieldKey }}]"
+                                        rows="3"
+                                        dir="auto"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                        {{ !empty($field['required']) ? 'required' : '' }}>{{ old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '') }}</textarea>
+                                    @elseif(($field['type'] ?? '') === 'switch')
+                                    <div class="mt-2">
+                                        <input type="hidden" name="custom_field_values[{{ $fieldKey }}]" value="0" />
+                                        <input type="checkbox"
+                                            id="custom_field_{{ $fieldKey }}"
+                                            name="custom_field_values[{{ $fieldKey }}]"
+                                            value="1"
+                                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
+                                            {{ old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '') ? 'checked' : '' }} />
+                                    </div>
+                                    @elseif(($field['type'] ?? '') === 'date')
+                                    <x-text-input
+                                        id="custom_field_{{ $fieldKey }}"
+                                        name="custom_field_values[{{ $fieldKey }}]"
+                                        type="date"
+                                        class="mt-1 block w-full"
+                                        :value="old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '')"
+                                        :required="!empty($field['required'])" />
+                                    @elseif(($field['type'] ?? '') === 'dropdown')
+                                    <select
+                                        id="custom_field_{{ $fieldKey }}"
+                                        name="custom_field_values[{{ $fieldKey }}]"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                        {{ !empty($field['required']) ? 'required' : '' }}>
+                                        <option value="">{{ __('messages.select') }}...</option>
+                                        @foreach(explode(',', $field['options'] ?? '') as $option)
+                                            @php $option = trim($option); @endphp
+                                            @if($option)
+                                            <option value="{{ $option }}" {{ old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '') === $option ? 'selected' : '' }}>
+                                                {{ $option }}
+                                            </option>
+                                            @endif
+                                        @endforeach
+                                    </select>
+                                    @elseif(($field['type'] ?? '') === 'multiselect')
+                                    @php
+                                        $oldValue = old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '');
+                                        $selectedValues = is_array($oldValue) ? $oldValue : array_map('trim', explode(',', $oldValue));
+                                    @endphp
+                                    <div class="mt-1 space-y-1">
+                                        @foreach(explode(',', $field['options'] ?? '') as $option)
+                                            @php $option = trim($option); @endphp
+                                            @if($option)
+                                            <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                                                <input type="checkbox"
+                                                    name="custom_field_values[{{ $fieldKey }}][]"
+                                                    value="{{ $option }}"
+                                                    {{ in_array($option, $selectedValues) ? 'checked' : '' }}
+                                                    class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded" />
+                                                {{ $option }}
+                                            </label>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                    @endif
+
+                                    <x-input-error class="mt-2" :messages="$errors->get('custom_field_values.' . $fieldKey)" />
+                                </div>
+                                @endforeach
+                            </div>
+                            @endif
                         </div>
-                        @endforeach
                     </div>
-                </div>
                 @endif
 
-            @if ($role->isPro())
-            <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-polls">
+            @if ($role->isPro() || $event->exists)
+            <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-engagement">
                 <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                     </svg>
-                    {{ __('messages.polls') }}
+                    {{ __('messages.engagement') }}
                 </span>
                 <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
             </button>
-            <div id="section-polls" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+            <div id="section-engagement" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                 <div class="max-w-2xl">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                         </svg>
-                        {{ __('messages.polls') }}
+                        {{ __('messages.engagement') }}
                     </h2>
 
-                    {{-- Poll message/error --}}
-                    <div v-if="pollMessage" class="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-700 dark:text-green-400">
-                        @{{ pollMessage }}
-                    </div>
-                    <div v-if="pollError" class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">
-                        @{{ pollError }}
+                    <!-- Engagement Tabs -->
+                    <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+                        <nav class="-mb-px flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide">
+                            @if ($role->isPro())
+                            <button type="button" @click="activeEngagementTab = 'polls'"
+                                :class="activeEngagementTab === 'polls' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
+                                class="engagement-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="polls">
+                                {{ __('messages.polls') }}
+                            </button>
+                            <button type="button" @click="activeEngagementTab = 'feedback'"
+                                :class="activeEngagementTab === 'feedback' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
+                                class="engagement-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="feedback">
+                                {{ __('messages.feedback') }}
+                            </button>
+                            @endif
+                            @if ($event->exists)
+                            <button type="button" @click="activeEngagementTab = 'fan_content'"
+                                :class="activeEngagementTab === 'fan_content' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
+                                class="engagement-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="fan_content">
+                                {{ __('messages.fan_content') }}
+                                @php $fanContentPendingCount = ($pendingVideos->count() ?? 0) + ($pendingComments->count() ?? 0) + ($pendingPhotos->count() ?? 0); @endphp
+                                @if ($fanContentPendingCount > 0)
+                                <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full ms-1">{{ $fanContentPendingCount }}</span>
+                                @endif
+                            </button>
+                            @endif
+                        </nav>
                     </div>
 
-                    {{-- Existing Polls --}}
-                    <div v-if="polls.length > 0" class="space-y-4 mb-4">
-                        <div v-for="(poll, pollIndex) in polls" :key="poll.hash || ('new-' + pollIndex)" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                            {{-- Question input --}}
-                            <div class="flex items-start justify-between gap-3 mb-3">
-                                <div class="flex-1">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_question') }}</label>
-                                    <input type="text" v-model="poll.question" maxlength="500" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.poll_question') }}'">
-                                </div>
-                                <span v-if="poll.hash" class="shrink-0 mt-6 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
-                                      :class="poll.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'">
-                                    @{{ poll.is_active ? pollLabelActive : pollLabelClosed }}
-                                </span>
-                            </div>
+                    <!-- Polls Tab -->
+                    @if ($role->isPro())
+                    <div v-show="activeEngagementTab === 'polls'">
+                        {{-- Poll message/error --}}
+                        <div v-if="pollMessage" class="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-700 dark:text-green-400">
+                            @{{ pollMessage }}
+                        </div>
+                        <div v-if="pollError" class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">
+                            @{{ pollError }}
+                        </div>
 
-                            {{-- Options: read-only with vote results when has votes --}}
-                            <template v-if="poll.votes_count > 0">
-                                <div v-for="(option, idx) in poll.options" :key="idx" class="mb-2">
-                                    <div class="flex justify-between text-sm mb-1">
-                                        <span class="text-gray-700 dark:text-gray-300">@{{ option }}</span>
-                                        <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums">@{{ pollOptionCount(poll, idx) }} (@{{ pollOptionPct(poll, idx) }}%)</span>
+                        {{-- Existing Polls --}}
+                        <div v-if="polls.length > 0" class="space-y-4 mb-4">
+                            <div v-for="(poll, pollIndex) in polls" :key="poll.hash || ('new-' + pollIndex)" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                                {{-- Question input --}}
+                                <div class="flex items-start justify-between gap-3 mb-3">
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_question') }}</label>
+                                        <input type="text" v-model="poll.question" maxlength="500" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.poll_question') }}'">
                                     </div>
-                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                        <div class="h-2 rounded-full" :style="pollBarStyle(poll, idx)"></div>
+                                    <span v-if="poll.hash" class="shrink-0 mt-6 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                                          :class="poll.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'">
+                                        @{{ poll.is_active ? pollLabelActive : pollLabelClosed }}
+                                    </span>
+                                </div>
+
+                                {{-- Options: read-only with vote results when has votes --}}
+                                <template v-if="poll.votes_count > 0">
+                                    <div v-for="(option, idx) in poll.options" :key="idx" class="mb-2">
+                                        <div class="flex justify-between text-sm mb-1">
+                                            <span class="text-gray-700 dark:text-gray-300">@{{ option }}</span>
+                                            <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums">@{{ pollOptionCount(poll, idx) }} (@{{ pollOptionPct(poll, idx) }}%)</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                            <div class="h-2 rounded-full" :style="pollBarStyle(poll, idx)"></div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 mb-3">
+                                        @{{ poll.votes_count }} {{ __('messages.votes') }}
+                                    </p>
+                                    <p class="text-xs text-amber-600 dark:text-amber-400 mb-3">{{ __('messages.cannot_edit_poll_with_votes') }}</p>
+                                </template>
+
+                                {{-- Options: editable when no votes --}}
+                                <template v-else>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_options') }}</label>
+                                        <div v-for="(option, idx) in poll.options" :key="idx" class="flex items-center gap-2 mb-2">
+                                            <input type="text" v-model="poll.options[idx]" maxlength="200" class="flex-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.option_placeholder') }} ' + (idx + 1)">
+                                            <button v-if="poll.options.length > 2" type="button" @click="poll.options.splice(idx, 1)" class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                                            </button>
+                                        </div>
+                                        <div class="flex items-center justify-between mt-1">
+                                            <button v-if="poll.options.length < 10" type="button" @click="poll.options.push('')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                                                {{ __('messages.add_option') }}
+                                            </button>
+                                            <span v-else></span>
+                                            <button v-if="!poll.hash" type="button" @click="polls.splice(pollIndex, 1)" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
+                                                {{ __('messages.remove') }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                {{-- Actions --}}
+                                <div v-if="poll.hash" class="flex items-center gap-2">
+                                    <button type="button" @click="togglePoll(poll)" :disabled="pollSubmitting" class="text-sm px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
+                                        @{{ poll.is_active ? pollLabelClose : pollLabelReopen }}
+                                    </button>
+                                    <button type="button" @click="deletePoll(poll, pollIndex)" :disabled="pollSubmitting" class="text-sm px-3 py-1.5 rounded border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50">
+                                        {{ __('messages.delete') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <p v-else class="text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.no_polls') }}</p>
+
+                        {{-- Hidden inputs for form submission --}}
+                        <template v-for="(poll, pIdx) in polls" :key="'poll-input-' + pIdx">
+                            <input type="hidden" :name="'polls[' + pIdx + '][hash]'" :value="poll.hash || ''">
+                            <input type="hidden" :name="'polls[' + pIdx + '][question]'" :value="poll.question">
+                            <input type="hidden" :name="'polls[' + pIdx + '][options]'" :value="JSON.stringify(poll.options)">
+                        </template>
+
+                        {{-- Add Poll Link --}}
+                        <button type="button" @click="polls.push({hash: null, question: '', options: ['', ''], is_active: true, votes_count: 0, results: []})" v-if="polls.length < 5"
+                                class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            {{ __('messages.add_poll') }}
+                        </button>
+                    </div>
+
+                    <!-- Feedback Tab -->
+                    <div v-show="activeEngagementTab === 'feedback'">
+                        <div class="mb-6">
+                            <x-input-label for="feedback_enabled" value="{{ __('messages.feedback_override') }}" />
+                            <select id="feedback_enabled" name="feedback_enabled" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                                <option value="" {{ is_null($event->feedback_enabled) ? 'selected' : '' }}>{{ __('messages.use_schedule_default') }}</option>
+                                <option value="1" {{ $event->feedback_enabled === true ? 'selected' : '' }}>{{ __('messages.enabled') }}</option>
+                                <option value="0" {{ $event->feedback_enabled === false && !is_null($event->feedback_enabled) ? 'selected' : '' }}>{{ __('messages.disabled') }}</option>
+                            </select>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.feedback_override_help') }}</p>
+                        </div>
+                    </div>
+                    @endif
+
+                    <!-- Fan Content Tab -->
+                    @if ($event->exists)
+                    <div v-show="activeEngagementTab === 'fan_content'">
+                        @if ($pendingVideos->count() == 0 && $pendingComments->count() == 0 && $pendingPhotos->count() == 0 && $approvedVideos->count() == 0 && $approvedComments->count() == 0 && $approvedPhotos->count() == 0)
+                        <p class="text-gray-500 dark:text-gray-400">{{ __('messages.no_fan_content') }}</p>
+                        @else
+
+                        {{-- Pending Section --}}
+                        @if ($pendingVideos->count() > 0 || $pendingComments->count() > 0 || $pendingPhotos->count() > 0)
+                        <div class="mb-8">
+                            <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-4">{{ __('messages.pending_approval') }}</h3>
+                            <div class="space-y-4">
+                                @foreach ($pendingVideos as $video)
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                                    <div class="flex-1">
+                                        <div class="rounded overflow-hidden mb-2">
+                                            <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                                        </div>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                                            {{ $video->eventPart ? $video->eventPart->name : __('messages.general') }}
+                                            @if ($video->event_date)
+                                            &middot; {{ \Carbon\Carbon::parse($video->event_date)->format('M j, Y') }}
+                                            @endif
+                                            &middot; {{ __('messages.submitted_by') }} {{ $video->user?->name }}
+                                        </p>
+                                    </div>
+                                    <div class="flex gap-2 shrink-0">
+                                        <button type="submit" form="form-approve-video-{{ $video->id }}" class="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">{{ __('messages.approve') }}</button>
+                                        <button type="submit" form="form-reject-video-{{ $video->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
                                     </div>
                                 </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 mb-3">
-                                    @{{ poll.votes_count }} {{ __('messages.votes') }}
-                                </p>
-                                <p class="text-xs text-amber-600 dark:text-amber-400 mb-3">{{ __('messages.cannot_edit_poll_with_votes') }}</p>
-                            </template>
+                                @endforeach
 
-                            {{-- Options: editable when no votes --}}
-                            <template v-else>
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_options') }}</label>
-                                    <div v-for="(option, idx) in poll.options" :key="idx" class="flex items-center gap-2 mb-2">
-                                        <input type="text" v-model="poll.options[idx]" maxlength="200" class="flex-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.option_placeholder') }} ' + (idx + 1)">
-                                        <button v-if="poll.options.length > 2" type="button" @click="poll.options.splice(idx, 1)" class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
-                                        </button>
+                                @foreach ($pendingComments as $comment)
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                                    <div class="flex-1">
+                                        <p class="text-gray-800 dark:text-gray-200">{{ $comment->comment }}</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                            {{ $comment->eventPart ? $comment->eventPart->name : __('messages.general') }}
+                                            @if ($comment->event_date)
+                                            &middot; {{ \Carbon\Carbon::parse($comment->event_date)->format('M j, Y') }}
+                                            @endif
+                                            &middot; {{ __('messages.submitted_by') }} {{ $comment->user?->name }}
+                                        </p>
                                     </div>
-                                    <div class="flex items-center justify-between mt-1">
-                                        <button v-if="poll.options.length < 10" type="button" @click="poll.options.push('')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                                            {{ __('messages.add_option') }}
-                                        </button>
-                                        <span v-else></span>
-                                        <button v-if="!poll.hash" type="button" @click="polls.splice(pollIndex, 1)" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
-                                            {{ __('messages.remove') }}
-                                        </button>
+                                    <div class="flex gap-2 shrink-0">
+                                        <button type="submit" form="form-approve-comment-{{ $comment->id }}" class="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">{{ __('messages.approve') }}</button>
+                                        <button type="submit" form="form-reject-comment-{{ $comment->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
                                     </div>
                                 </div>
-                            </template>
+                                @endforeach
 
-                            {{-- Actions --}}
-                            <div v-if="poll.hash" class="flex items-center gap-2">
-                                <button type="button" @click="togglePoll(poll)" :disabled="pollSubmitting" class="text-sm px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
-                                    @{{ poll.is_active ? pollLabelClose : pollLabelReopen }}
-                                </button>
-                                <button type="button" @click="deletePoll(poll, pollIndex)" :disabled="pollSubmitting" class="text-sm px-3 py-1.5 rounded border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50">
-                                    {{ __('messages.delete') }}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <p v-else class="text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.no_polls') }}</p>
-
-                    {{-- Hidden inputs for form submission --}}
-                    <template v-for="(poll, pIdx) in polls" :key="'poll-input-' + pIdx">
-                        <input type="hidden" :name="'polls[' + pIdx + '][hash]'" :value="poll.hash || ''">
-                        <input type="hidden" :name="'polls[' + pIdx + '][question]'" :value="poll.question">
-                        <input type="hidden" :name="'polls[' + pIdx + '][options]'" :value="JSON.stringify(poll.options)">
-                    </template>
-
-                    {{-- Add Poll Link --}}
-                    <button type="button" @click="polls.push({hash: null, question: '', options: ['', ''], is_active: true, votes_count: 0, results: []})" v-if="polls.length < 5"
-                            class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        {{ __('messages.add_poll') }}
-                    </button>
-                </div>
-            </div>
-            @endif
-
-            @if ($role->isPro())
-            <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-feedback">
-                <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-                    </svg>
-                    {{ __('messages.feedback') }}
-                </span>
-                <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-            </button>
-            <div id="section-feedback" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
-                <div class="max-w-2xl">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-                        </svg>
-                        {{ __('messages.feedback') }}
-                    </h2>
-
-                    <div class="mb-6">
-                        <x-input-label for="feedback_enabled" value="{{ __('messages.feedback_override') }}" />
-                        <select id="feedback_enabled" name="feedback_enabled" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
-                            <option value="" {{ is_null($event->feedback_enabled) ? 'selected' : '' }}>{{ __('messages.use_schedule_default') }}</option>
-                            <option value="1" {{ $event->feedback_enabled === true ? 'selected' : '' }}>{{ __('messages.enabled') }}</option>
-                            <option value="0" {{ $event->feedback_enabled === false && !is_null($event->feedback_enabled) ? 'selected' : '' }}>{{ __('messages.disabled') }}</option>
-                        </select>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.feedback_override_help') }}</p>
-                    </div>
-                </div>
-            </div>
-            @endif
-
-            @if ($event->exists)
-            <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-fan-content">
-                <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-                    </svg>
-                    {{ __('messages.fan_content') }}
-                </span>
-                <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-            </button>
-            <div id="section-fan-content" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
-                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                    {{ __('messages.fan_content') }}
-                </h2>
-
-                @if ($pendingVideos->count() == 0 && $pendingComments->count() == 0 && $pendingPhotos->count() == 0 && $approvedVideos->count() == 0 && $approvedComments->count() == 0 && $approvedPhotos->count() == 0)
-                <p class="text-gray-500 dark:text-gray-400">{{ __('messages.no_fan_content') }}</p>
-                @else
-
-                {{-- Pending Section --}}
-                @if ($pendingVideos->count() > 0 || $pendingComments->count() > 0 || $pendingPhotos->count() > 0)
-                <div class="mb-8">
-                    <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-4">{{ __('messages.pending_approval') }}</h3>
-                    <div class="space-y-4">
-                        @foreach ($pendingVideos as $video)
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                            <div class="flex-1">
-                                <div class="rounded overflow-hidden mb-2">
-                                    <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                                @foreach ($pendingPhotos as $photo)
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                                    <div class="flex-1">
+                                        <img src="{{ $photo->photo_url }}" alt="" class="h-32 w-auto rounded object-cover mb-2">
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                                            {{ $photo->eventPart ? $photo->eventPart->name : __('messages.general') }}
+                                            @if ($photo->event_date)
+                                            &middot; {{ \Carbon\Carbon::parse($photo->event_date)->format('M j, Y') }}
+                                            @endif
+                                            &middot; {{ __('messages.submitted_by') }} {{ $photo->user?->name }}
+                                        </p>
+                                    </div>
+                                    <div class="flex gap-2 shrink-0">
+                                        <button type="submit" form="form-approve-photo-{{ $photo->id }}" class="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">{{ __('messages.approve') }}</button>
+                                        <button type="submit" form="form-reject-photo-{{ $photo->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
+                                    </div>
                                 </div>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    {{ $video->eventPart ? $video->eventPart->name : __('messages.general') }}
-                                    @if ($video->event_date)
-                                    &middot; {{ \Carbon\Carbon::parse($video->event_date)->format('M j, Y') }}
-                                    @endif
-                                    &middot; {{ __('messages.submitted_by') }} {{ $video->user?->name }}
-                                </p>
-                            </div>
-                            <div class="flex gap-2 shrink-0">
-                                <button type="submit" form="form-approve-video-{{ $video->id }}" class="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">{{ __('messages.approve') }}</button>
-                                <button type="submit" form="form-reject-video-{{ $video->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
+                                @endforeach
                             </div>
                         </div>
-                        @endforeach
+                        @endif
 
-                        @foreach ($pendingComments as $comment)
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                            <div class="flex-1">
-                                <p class="text-gray-800 dark:text-gray-200">{{ $comment->comment }}</p>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                    {{ $comment->eventPart ? $comment->eventPart->name : __('messages.general') }}
-                                    @if ($comment->event_date)
-                                    &middot; {{ \Carbon\Carbon::parse($comment->event_date)->format('M j, Y') }}
-                                    @endif
-                                    &middot; {{ __('messages.submitted_by') }} {{ $comment->user?->name }}
-                                </p>
-                            </div>
-                            <div class="flex gap-2 shrink-0">
-                                <button type="submit" form="form-approve-comment-{{ $comment->id }}" class="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">{{ __('messages.approve') }}</button>
-                                <button type="submit" form="form-reject-comment-{{ $comment->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
-                            </div>
-                        </div>
-                        @endforeach
-
-                        @foreach ($pendingPhotos as $photo)
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                            <div class="flex-1">
-                                <img src="{{ $photo->photo_url }}" alt="" class="h-32 w-auto rounded object-cover mb-2">
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    {{ $photo->eventPart ? $photo->eventPart->name : __('messages.general') }}
-                                    @if ($photo->event_date)
-                                    &middot; {{ \Carbon\Carbon::parse($photo->event_date)->format('M j, Y') }}
-                                    @endif
-                                    &middot; {{ __('messages.submitted_by') }} {{ $photo->user?->name }}
-                                </p>
-                            </div>
-                            <div class="flex gap-2 shrink-0">
-                                <button type="submit" form="form-approve-photo-{{ $photo->id }}" class="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">{{ __('messages.approve') }}</button>
-                                <button type="submit" form="form-reject-photo-{{ $photo->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
-
-                {{-- Approved Section --}}
-                @if ($approvedVideos->count() > 0 || $approvedComments->count() > 0 || $approvedPhotos->count() > 0)
-                <div>
-                    <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-4">{{ __('messages.approved_content') }}</h3>
-                    <div class="space-y-4">
-                        @foreach ($approvedVideos as $video)
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <div class="flex-1">
-                                <div class="rounded overflow-hidden mb-2">
-                                    <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                        {{-- Approved Section --}}
+                        @if ($approvedVideos->count() > 0 || $approvedComments->count() > 0 || $approvedPhotos->count() > 0)
+                        <div>
+                            <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-4">{{ __('messages.approved_content') }}</h3>
+                            <div class="space-y-4">
+                                @foreach ($approvedVideos as $video)
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                    <div class="flex-1">
+                                        <div class="rounded overflow-hidden mb-2">
+                                            <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                                        </div>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                                            {{ $video->eventPart ? $video->eventPart->name : __('messages.general') }}
+                                            @if ($video->event_date)
+                                            &middot; {{ \Carbon\Carbon::parse($video->event_date)->format('M j, Y') }}
+                                            @endif
+                                            &middot; {{ __('messages.submitted_by') }} {{ $video->user?->name }}
+                                        </p>
+                                    </div>
+                                    <div class="shrink-0">
+                                        <button type="submit" form="form-reject-video-{{ $video->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
+                                    </div>
                                 </div>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    {{ $video->eventPart ? $video->eventPart->name : __('messages.general') }}
-                                    @if ($video->event_date)
-                                    &middot; {{ \Carbon\Carbon::parse($video->event_date)->format('M j, Y') }}
-                                    @endif
-                                    &middot; {{ __('messages.submitted_by') }} {{ $video->user?->name }}
-                                </p>
-                            </div>
-                            <div class="shrink-0">
-                                <button type="submit" form="form-reject-video-{{ $video->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
-                            </div>
-                        </div>
-                        @endforeach
+                                @endforeach
 
-                        @foreach ($approvedComments as $comment)
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <div class="flex-1">
-                                <p class="text-gray-800 dark:text-gray-200">{{ $comment->comment }}</p>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                    {{ $comment->eventPart ? $comment->eventPart->name : __('messages.general') }}
-                                    @if ($comment->event_date)
-                                    &middot; {{ \Carbon\Carbon::parse($comment->event_date)->format('M j, Y') }}
-                                    @endif
-                                    &middot; {{ __('messages.submitted_by') }} {{ $comment->user?->name }}
-                                </p>
-                            </div>
-                            <div class="shrink-0">
-                                <button type="submit" form="form-reject-comment-{{ $comment->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
-                            </div>
-                        </div>
-                        @endforeach
+                                @foreach ($approvedComments as $comment)
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                    <div class="flex-1">
+                                        <p class="text-gray-800 dark:text-gray-200">{{ $comment->comment }}</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                            {{ $comment->eventPart ? $comment->eventPart->name : __('messages.general') }}
+                                            @if ($comment->event_date)
+                                            &middot; {{ \Carbon\Carbon::parse($comment->event_date)->format('M j, Y') }}
+                                            @endif
+                                            &middot; {{ __('messages.submitted_by') }} {{ $comment->user?->name }}
+                                        </p>
+                                    </div>
+                                    <div class="shrink-0">
+                                        <button type="submit" form="form-reject-comment-{{ $comment->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
+                                    </div>
+                                </div>
+                                @endforeach
 
-                        @foreach ($approvedPhotos as $photo)
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <div class="flex-1">
-                                <img src="{{ $photo->photo_url }}" alt="" class="h-32 w-auto rounded object-cover mb-2">
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    {{ $photo->eventPart ? $photo->eventPart->name : __('messages.general') }}
-                                    @if ($photo->event_date)
-                                    &middot; {{ \Carbon\Carbon::parse($photo->event_date)->format('M j, Y') }}
-                                    @endif
-                                    &middot; {{ __('messages.submitted_by') }} {{ $photo->user?->name }}
-                                </p>
-                            </div>
-                            <div class="shrink-0">
-                                <button type="submit" form="form-reject-photo-{{ $photo->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
+                                @foreach ($approvedPhotos as $photo)
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                    <div class="flex-1">
+                                        <img src="{{ $photo->photo_url }}" alt="" class="h-32 w-auto rounded object-cover mb-2">
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                                            {{ $photo->eventPart ? $photo->eventPart->name : __('messages.general') }}
+                                            @if ($photo->event_date)
+                                            &middot; {{ \Carbon\Carbon::parse($photo->event_date)->format('M j, Y') }}
+                                            @endif
+                                            &middot; {{ __('messages.submitted_by') }} {{ $photo->user?->name }}
+                                        </p>
+                                    </div>
+                                    <div class="shrink-0">
+                                        <button type="submit" form="form-reject-photo-{{ $photo->id }}" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700">{{ __('messages.reject') }}</button>
+                                    </div>
+                                </div>
+                                @endforeach
                             </div>
                         </div>
-                        @endforeach
+                        @endif
+
+                        @endif
                     </div>
+                    @endif
                 </div>
-                @endif
-
-                @endif
             </div>
             @endif
 
@@ -3535,6 +3512,8 @@
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
         isInvoiceNinjaPaymentLink: @json($user->invoiceninja_api_key && $user->invoiceninja_mode === 'payment_link'),
         activeTicketTab: 'tickets',
+        activeSettingsTab: 'privacy',
+        activeEngagementTab: @json($role->isPro() ? 'polls' : ($event->exists ? 'fan_content' : 'polls')),
         promoCodes: (() => {
           var pcs = @json($event->promoCodes ?? []).map(pc => ({
             ...pc,

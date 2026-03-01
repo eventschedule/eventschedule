@@ -70,7 +70,7 @@
                     {{-- Submit --}}
                     <button type="submit" id="submit-btn"
                         class="w-full px-4 py-3 text-base font-medium text-white rounded-lg transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-[#2d2d30] opacity-50 cursor-not-allowed"
-                        style="background-color: {{ $role->accent_color ?? '#4E81FA' }};"
+                        style="background-color: {{ $role->accent_color ?? '#4E81FA' }}; --tw-ring-color: {{ $role->accent_color ?? '#4E81FA' }};"
                         disabled>
                         {{ __('messages.feedback_submit') }}
                     </button>

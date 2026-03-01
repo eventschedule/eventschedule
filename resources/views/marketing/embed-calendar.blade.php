@@ -28,7 +28,7 @@
                 "name": "How do I embed my schedule on my website?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Copy the embed code from your schedule settings and paste it into your website's HTML. We provide both iframe embeds and a JavaScript widget that matches your site's style."
+                    "text": "Copy the embed code from your schedule settings and paste it into your website's HTML. The iframe embed automatically adapts to your site and is fully responsive."
                 }
             },
             {
@@ -81,7 +81,7 @@
             </p>
 
             <div class="flex flex-wrap justify-center gap-4 animate-reveal delay-300" style="opacity: 0;">
-                <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
+                <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
                     Start for free
                     <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -119,7 +119,7 @@
                                 <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10 max-w-sm">
                                     <div class="text-gray-500 dark:text-gray-400 text-xs mb-2">Embed code</div>
                                     <div class="bg-gray-200 dark:bg-white/5 rounded-lg p-3 font-mono text-xs text-blue-600 dark:text-blue-300 break-all leading-relaxed">
-                                        &lt;iframe src="https://your-schedule.eventschedule.com?embed=true" width="100%" height="600"&gt;&lt;/iframe&gt;
+                                        &lt;iframe src="https://your-schedule.eventschedule.com?embed=true" width="100%" height="800"&gt;&lt;/iframe&gt;
                                     </div>
                                     <div class="mt-3 flex items-center gap-2 text-blue-500 dark:text-blue-400 text-xs">
                                         <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -219,20 +219,20 @@
                     </div>
                 </div>
 
-                <!-- Pro Feature (spans 2 cols) -->
+                <!-- Free Feature (spans 2 cols) -->
                 <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="flex-1">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
                                 <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
-                                Availability
+                                Free
                             </div>
-                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Available on paid plans</h2>
-                            <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Embedding requires a paid plan on the hosted platform because the server needs to allow framing via X-Frame-Options headers. Selfhosted users get this free.</p>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Free for everyone</h2>
+                            <p class="text-gray-600 dark:text-white/80 text-lg mb-4">Embedding your calendar is free on all plans, including selfhosted. No upgrade required.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-300 text-sm">Pro plan</span>
+                                <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-300 text-sm">Free on all plans</span>
                                 <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-300 text-sm">Free for selfhosted</span>
                             </div>
                         </div>
@@ -240,12 +240,12 @@
                             <div class="animate-float" style="animation-delay: 0.3s;">
                                 <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10 max-w-[200px]">
                                     <div class="flex items-center gap-2 mb-3">
-                                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-500 flex items-center justify-center">
+                                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center">
                                             <svg aria-hidden="true" class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                             </svg>
                                         </div>
-                                        <span class="text-gray-900 dark:text-white text-sm font-medium">Pro Plan</span>
+                                        <span class="text-gray-900 dark:text-white text-sm font-medium">All Plans</span>
                                     </div>
                                     <div class="flex items-center gap-2 text-xs text-green-500">
                                         <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -259,7 +259,7 @@
                     </div>
                 </div>
 
-                <!-- Copy Feedback -->
+                <!-- Feedback -->
                 <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
                         <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -268,27 +268,70 @@
                         Feedback
                     </div>
                     <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Built-in feedback</h2>
-                    <p class="text-gray-600 dark:text-white/80 mb-6">Click the copy button and get instant confirmation that the code is on your clipboard.</p>
+                    <p class="text-gray-600 dark:text-white/80 mb-6">Automatically collect post-event feedback from attendees to improve your future events.</p>
 
-                    <div class="flex flex-col items-center gap-3">
-                        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500 text-white text-sm font-medium">
-                            <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                            </svg>
-                            Copy Code
+                    <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">How was the event?</div>
+                        <div class="flex gap-1 mb-3">
+                            <svg aria-hidden="true" class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg aria-hidden="true" class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg aria-hidden="true" class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg aria-hidden="true" class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg aria-hidden="true" class="w-5 h-5 text-gray-300 dark:text-gray-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                        </svg>
-                        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-500 text-white text-sm font-medium">
-                            <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            Copied!
-                        </div>
+                        <div class="h-2 bg-gray-200 dark:bg-white/10 rounded w-full mb-1.5"></div>
+                        <div class="h-2 bg-gray-200 dark:bg-white/10 rounded w-2/3"></div>
                     </div>
                 </div>
 
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
+        <div class="absolute inset-0">
+            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-sky-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+        </div>
+
+        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    How it works
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400">
+                    Up and running in three steps.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Step 1 -->
+                <div class="relative text-center">
+                    <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 mb-6 mx-auto">
+                        <span class="text-2xl font-bold text-blue-500">1</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Copy the embed code</h3>
+                    <p class="text-gray-500 dark:text-gray-400">Go to your schedule in the admin portal, open the menu, and click "Embed Schedule" to copy the iframe code.</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="relative text-center">
+                    <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 mb-6 mx-auto">
+                        <span class="text-2xl font-bold text-blue-500">2</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Paste into your website</h3>
+                    <p class="text-gray-500 dark:text-gray-400">Add the iframe tag to your website's HTML wherever you want the calendar to appear.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="relative text-center">
+                    <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 mb-6 mx-auto">
+                        <span class="text-2xl font-bold text-blue-500">3</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Customize with URL parameters</h3>
+                    <p class="text-gray-500 dark:text-gray-400">Optionally set the language, filter by sub-schedule, or force dark mode using query parameters.</p>
+                </div>
             </div>
         </div>
     </section>
@@ -395,7 +438,7 @@
                     </button>
                     <div x-show="open === 1" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Copy the embed code from your schedule settings and paste it into your website's HTML. We provide both iframe embeds and a JavaScript widget that matches your site's style.
+                            Copy the embed code from your schedule settings and paste it into your website's HTML. The iframe embed automatically adapts to your site and is fully responsive.
                         </p>
                     </div>
                 </div>

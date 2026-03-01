@@ -163,10 +163,10 @@ class FeedbackController extends Controller
 
             foreach ($query->lazy() as $feedback) {
                 fputcsv($file, [
-                    $feedback->event->name ?? '',
+                    $feedback->event?->name ?? '',
                     $feedback->event_date ?? '',
-                    $feedback->sale->name ?? '',
-                    $feedback->sale->email ?? '',
+                    $feedback->sale?->name ?? '',
+                    $feedback->sale?->email ?? '',
                     $feedback->rating,
                     $feedback->comment ?? '',
                     $feedback->created_at->format('Y-m-d H:i'),
