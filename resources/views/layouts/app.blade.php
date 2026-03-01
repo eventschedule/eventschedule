@@ -681,6 +681,13 @@
             }
 
             function initTheme() {
+                // Check for ?dark=true URL parameter (useful for embeds)
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('dark') === 'true') {
+                    applyTheme(THEMES.DARK);
+                    return;
+                }
+
                 const storedTheme = safeGetItem(THEME_STORAGE_KEY);
                 const theme = storedTheme || THEMES.SYSTEM;
 

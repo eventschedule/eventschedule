@@ -88,6 +88,9 @@
         <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
         <input type="hidden" name="event_date" value="{{ $date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d') }}">
         <input type="hidden" name="subdomain" value="{{ $subdomain }}">
+        @if (request()->embed)
+        <input type="hidden" name="embed" value="true">
+        @endif
 
         @if ($event->rsvp_limit)
         @php $remaining = $event->rsvpRemaining($date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d')); @endphp
@@ -109,7 +112,7 @@
                 v-model="email" required autocomplete="email" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
-            @if (! auth()->check() && config('app.hosted'))
+            @if (! auth()->check() && config('app.hosted') && ! request()->embed)
                 <div class="mt-6">
                     <div class="flex items-center">
                         <input id="create_account" name="create_account" type="checkbox"

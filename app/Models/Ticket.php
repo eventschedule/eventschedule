@@ -24,12 +24,19 @@ class Ticket extends Model
         'sold',
         'price',
         'description',
+        'sales_end_at',
         'custom_fields',
     ];
 
     protected $casts = [
         'custom_fields' => 'array',
+        'sales_end_at' => 'datetime',
     ];
+
+    public function isSalesEnded()
+    {
+        return $this->sales_end_at && $this->sales_end_at->isPast();
+    }
 
     public function sales()
     {

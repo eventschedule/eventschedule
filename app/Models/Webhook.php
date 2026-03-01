@@ -34,6 +34,7 @@ class Webhook extends Model
         'event.updated',
         'event.deleted',
         'ticket.scanned',
+        'feedback.submitted',
     ];
 
     public function user()

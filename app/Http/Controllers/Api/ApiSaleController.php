@@ -349,6 +349,10 @@ class ApiSaleController extends Controller
                 }
             }
 
+            if ($ticket->isSalesEnded()) {
+                return response()->json(['error' => 'Ticket sales have ended for: '.$ticketIdentifier], 422);
+            }
+
             $ticketIds[$ticket->id] = $quantity;
         }
 

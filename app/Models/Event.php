@@ -38,7 +38,6 @@ class Event extends Model
         'payment_method',
         'payment_instructions',
         'expire_unpaid_tickets',
-        'ticket_sales_end_at',
         'registration_url',
         'category_id',
         'creator_role_id',
@@ -64,7 +63,6 @@ class Event extends Model
         'custom_fields' => 'array',
         'custom_field_values' => 'array',
         'last_translated_at' => 'datetime',
-        'ticket_sales_end_at' => 'datetime',
         'ticket_price' => 'decimal:2',
         'recurring_include_dates' => 'array',
         'recurring_exclude_dates' => 'array',
@@ -807,11 +805,22 @@ class Event extends Model
             }
         }
 
-        if ($this->ticket_sales_end_at && $this->ticket_sales_end_at->isPast()) {
+        if ($this->tickets->isNotEmpty() && $this->allTicketSalesEnded()) {
             return false;
         }
 
         return $this->tickets_enabled && $this->isPro();
+    }
+
+    public function allTicketSalesEnded()
+    {
+        if ($this->tickets->isEmpty()) {
+            return false;
+        }
+
+        return $this->tickets->every(function ($ticket) {
+            return $ticket->sales_end_at && $ticket->sales_end_at->isPast();
+        });
     }
 
     public function areTicketsFree()
@@ -1329,6 +1338,7 @@ class Event extends Model
                     'price' => $ticket->price,
                     'quantity' => $ticket->quantity,
                     'description' => $ticket->description,
+                    'sales_end_at' => $ticket->sales_end_at ? $ticket->sales_end_at->toIso8601String() : null,
                 ];
             })->values();
         }

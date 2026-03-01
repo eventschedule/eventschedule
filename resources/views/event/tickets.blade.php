@@ -11,7 +11,7 @@
             data() {
                 return {
                     createAccount: @json((bool) old('create_account', false)),
-                    tickets: @json($event->tickets->map(function ($ticket) {
+                    tickets: @json($event->tickets->filter(fn($t) => !$t->isSalesEnded())->values()->map(function ($ticket) {
                         $data = $ticket->toData(request()->date);
                         $data['selectedQty'] = old('tickets')[$data['id']] ?? 0;
                         $data['custom_fields'] = $ticket->custom_fields ?? [];
@@ -306,11 +306,15 @@
 </x-slot>
 
 <div id="ticket-selector">
-    <form action="{{ route('event.checkout', ['subdomain' => $subdomain]) }}" method="post" v-on:submit="validateForm">
+    <form action="{{ route('event.checkout', ['subdomain' => $subdomain]) }}" method="post" v-on:submit="validateForm"
+        @if (request()->embed && in_array($event->payment_method, ['stripe', 'invoiceninja', 'payment_url'])) target="_top" @endif>
         @csrf
         <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
         <input type="hidden" name="event_date" value="{{ $date }}">
         <input type="hidden" name="subdomain" value="{{ $subdomain }}">
+        @if (request()->embed)
+        <input type="hidden" name="embed" value="true">
+        @endif
 
         <div class="mb-6">
             <label for="name" class="text-gray-900 dark:text-gray-100">{{ __('messages.name') . ' *' }}</label>
@@ -325,7 +329,7 @@
                 v-model="email" required autocomplete="email" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
-            @if (! auth()->check() && config('app.hosted'))
+            @if (! auth()->check() && config('app.hosted') && ! request()->embed)
                 <div class="mt-6">
                     <div class="flex items-center">
                         <input id="create_account" name="create_account" type="checkbox"
@@ -576,9 +580,11 @@
                 @{{ waitlistMessage }}
             </div>
             <div v-if="!waitlistSuccess" class="flex justify-end items-center pt-2 gap-8">
+                @if (! request()->embed)
                 <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
                     {{ strtoupper(__('messages.cancel')) }}
                 </a>
+                @endif
                 <button type="button" @click="joinWaitlist"
                     :disabled="!name.trim() || !email.trim() || waitlistSubmitting"
                     class="mt-4 text-lg px-6 inline-flex items-center rounded-md border border-transparent py-3 font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
@@ -587,17 +593,21 @@
                     <span v-else>{{ strtoupper(__('messages.join_waitlist')) }}</span>
                 </button>
             </div>
+            @if (! request()->embed)
             <div v-else class="flex justify-end pt-2">
                 <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
                     {{ strtoupper(__('messages.back')) }}
                 </a>
             </div>
+            @endif
         </div>
 
         <div v-if="!isAllSoldOut" class="flex justify-end items-center pt-2 gap-8">
+            @if (! request()->embed)
             <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
                 {{ strtoupper(__('messages.cancel')) }}
             </a>
+            @endif
 
             <x-brand-button
                 type="submit"

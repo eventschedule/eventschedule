@@ -707,6 +707,8 @@ class EventRepo
                     }
                 }
 
+                $salesEndAt = ! empty($data['sales_end_at']) ? $data['sales_end_at'] : null;
+
                 if (! empty($data['id'])) {
                     $ticket = Ticket::find($data['id']);
                     $ticketIds[] = $ticket->id;
@@ -716,6 +718,7 @@ class EventRepo
                             'quantity' => $data['quantity'] ?? null,
                             'price' => $data['price'] ?? null,
                             'description' => $data['description'] ?? null,
+                            'sales_end_at' => $salesEndAt,
                             'custom_fields' => $ticketCustomFields,
                         ]);
                     }
@@ -726,6 +729,7 @@ class EventRepo
                         'quantity' => $data['quantity'] ?? null,
                         'price' => $data['price'] ?? null,
                         'description' => $data['description'] ?? null,
+                        'sales_end_at' => $salesEndAt,
                         'custom_fields' => $ticketCustomFields,
                     ]);
                     $ticketIds[] = $ticket->id;

@@ -189,6 +189,10 @@ function loadFeedback(url) {
     .then(html => {
         document.getElementById('feedback-table').innerHTML = html;
         bindFeedbackPagination();
+    })
+    .catch(error => {
+        document.getElementById('feedback-table').innerHTML =
+            '<div class="text-center py-8 text-gray-500 dark:text-[#9ca3af]">{{ __("messages.an_error_occurred") }}</div>';
     });
 }
 

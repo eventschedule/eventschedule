@@ -19,7 +19,7 @@
             </p>
             @if ($feedback->event_date)
             <p style="margin: 0 0 15px 0; font-size: 14px; color: #666;">
-                {{ $event->getStartDateTime($feedback->event_date, true)->format('F j, Y') }}
+                {{ $event->getStartDateTime($feedback->event_date, true)->translatedFormat('F j, Y') }}
             </p>
             @endif
 

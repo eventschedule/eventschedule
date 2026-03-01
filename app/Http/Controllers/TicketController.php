@@ -130,17 +130,18 @@ class TicketController extends Controller
         $feedbacks = EventFeedback::whereHas('event', function ($q) use ($user) {
             $q->where('user_id', $user->id);
         })
+            ->whereHas('sale', fn ($q) => $q->where('is_deleted', false))
             ->with(['event', 'sale'])
             ->orderBy('created_at', 'desc')
             ->paginate(50, ['*'], 'feedback_page');
 
-        $totalFeedbacks = EventFeedback::whereHas('event', function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        });
+        $stats = EventFeedback::whereHas('event', fn ($q) => $q->where('user_id', $user->id))
+            ->whereHas('sale', fn ($q) => $q->where('is_deleted', false))
+            ->selectRaw('COUNT(*) as feedback_count, AVG(rating) as avg_rating')
+            ->first();
 
-        $feedbackCount = $totalFeedbacks->count();
-        $averageRating = $totalFeedbacks->avg('rating');
-        $averageRating = $averageRating ? round($averageRating, 1) : null;
+        $feedbackCount = $stats->feedback_count;
+        $averageRating = $stats->avg_rating ? round($stats->avg_rating, 1) : null;
 
         $totalEligibleSales = Sale::where('status', 'paid')
             ->where('is_deleted', false)
@@ -347,6 +348,10 @@ class TicketController extends Controller
                                 throw new \Exception(__('messages.ticket_not_found'));
                             }
 
+                            if ($ticketModel->isSalesEnded()) {
+                                throw new \Exception(__('messages.tickets_not_available'));
+                            }
+
                             if ($ticketModel->quantity > 0) {
                                 // Handle combined mode logic
                                 if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
@@ -521,6 +526,8 @@ class TicketController extends Controller
         // Dispatch sale.created webhook (outside transaction)
         WebhookService::dispatch('sale.created', $sale);
 
+        $isEmbed = $request->boolean('embed');
+
         if ($total == 0 && ! $isPaymentLink) {
             $sale->status = 'paid';
             $sale->save();
@@ -533,17 +540,22 @@ class TicketController extends Controller
 
             WebhookService::dispatch('sale.paid', $sale);
 
-            return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+            $ticketViewUrl = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+            if ($isEmbed) {
+                $ticketViewUrl .= '?embed=true';
+            }
+
+            return redirect($ticketViewUrl);
         } else {
             switch ($event->payment_method) {
                 case 'stripe':
-                    return $this->stripeCheckout($subdomain, $sale, $event);
+                    return $this->stripeCheckout($subdomain, $sale, $event, $isEmbed);
                 case 'invoiceninja':
-                    return $this->invoiceninjaCheckout($subdomain, $sale, $event);
+                    return $this->invoiceninjaCheckout($subdomain, $sale, $event, $isEmbed);
                 case 'payment_url':
-                    return $this->paymentUrlCheckout($subdomain, $sale, $event);
+                    return $this->paymentUrlCheckout($subdomain, $sale, $event, $isEmbed);
                 default:
-                    return $this->cashCheckout($subdomain, $sale, $event);
+                    return $this->cashCheckout($subdomain, $sale, $event, $isEmbed);
             }
         }
     }
@@ -717,10 +729,15 @@ class TicketController extends Controller
         WebhookService::dispatch('sale.created', $sale);
         WebhookService::dispatch('sale.paid', $sale);
 
-        return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+        $ticketViewUrl = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+        if ($request->boolean('embed')) {
+            $ticketViewUrl .= '?embed=true';
+        }
+
+        return redirect($ticketViewUrl);
     }
 
-    private function stripeCheckout($subdomain, $sale, $event)
+    private function stripeCheckout($subdomain, $sale, $event, $isEmbed = false)
     {
         $promoCode = $sale->promo_code_id ? $sale->promoCode : null;
         $discount = $sale->discount_amount ?? 0;
@@ -816,8 +833,8 @@ class TicketController extends Controller
                             'sale_id' => UrlUtils::encodeId($sale->id),
                         ],
                     ],
-                    'success_url' => custom_domain_url(route('checkout.success', $data).'?session_id={CHECKOUT_SESSION_ID}'),
-                    'cancel_url' => custom_domain_url(route('checkout.cancel', $data).'?secret='.$sale->secret),
+                    'success_url' => custom_domain_url(route('checkout.success', $data).(str_contains(route('checkout.success', $data), '?') ? '&' : '?').'session_id={CHECKOUT_SESSION_ID}'.($isEmbed ? '&embed=true' : '')),
+                    'cancel_url' => custom_domain_url(route('checkout.cancel', $data).(str_contains(route('checkout.cancel', $data), '?') ? '&' : '?').'secret='.$sale->secret.($isEmbed ? '&embed=true' : '')),
                 ],
                 [
                     'stripe_account' => $event->user->stripe_account_id,
@@ -840,15 +857,15 @@ class TicketController extends Controller
                         'sale_id' => UrlUtils::encodeId($sale->id),
                     ],
                 ],
-                'success_url' => custom_domain_url(route('checkout.success', $data).'?session_id={CHECKOUT_SESSION_ID}&direct=1'),
-                'cancel_url' => custom_domain_url(route('checkout.cancel', $data).'?secret='.$sale->secret),
+                'success_url' => custom_domain_url(route('checkout.success', $data).(str_contains(route('checkout.success', $data), '?') ? '&' : '?').'session_id={CHECKOUT_SESSION_ID}&direct=1'.($isEmbed ? '&embed=true' : '')),
+                'cancel_url' => custom_domain_url(route('checkout.cancel', $data).(str_contains(route('checkout.cancel', $data), '?') ? '&' : '?').'secret='.$sale->secret.($isEmbed ? '&embed=true' : '')),
             ]);
         }
 
         return redirect($session->url);
     }
 
-    private function invoiceninjaCheckout($subdomain, $sale, $event)
+    private function invoiceninjaCheckout($subdomain, $sale, $event, $isEmbed = false)
     {
         $user = $event->user;
 
@@ -1003,16 +1020,21 @@ class TicketController extends Controller
         }
     }
 
-    private function paymentUrlCheckout($subdomain, $sale, $event)
+    private function paymentUrlCheckout($subdomain, $sale, $event, $isEmbed = false)
     {
         $user = $event->user;
 
         return redirect($user->payment_url);
     }
 
-    private function cashCheckout($subdomain, $sale, $event)
+    private function cashCheckout($subdomain, $sale, $event, $isEmbed = false)
     {
-        return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+        $url = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+        if ($isEmbed) {
+            $url .= '?embed=true';
+        }
+
+        return redirect($url);
     }
 
     public function success($subdomain, $sale_id)
@@ -1049,7 +1071,12 @@ class TicketController extends Controller
                     'session_id' => request()->session_id,
                 ]);
 
-                return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+                $mismatchUrl = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+                if (request()->boolean('embed')) {
+                    $mismatchUrl .= '?embed=true';
+                }
+
+                return redirect($mismatchUrl);
             }
 
             // Store the transaction reference so the webhook can find this sale,
@@ -1064,7 +1091,12 @@ class TicketController extends Controller
             \Log::warning('Stripe session retrieval failed in success(): '.$e->getMessage());
         }
 
-        return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+        $successUrl = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+        if (request()->boolean('embed')) {
+            $successUrl .= '?embed=true';
+        }
+
+        return redirect($successUrl);
     }
 
     public function cancel($subdomain, $sale_id)
@@ -1089,8 +1121,12 @@ class TicketController extends Controller
         });
 
         $event = $sale->event;
+        $cancelRedirectUrl = $event->getGuestUrl($subdomain, $sale->event_date).'?tickets=true';
+        if (request()->boolean('embed')) {
+            $cancelRedirectUrl .= '&embed=true';
+        }
 
-        return redirect($event->getGuestUrl($subdomain, $sale->event_date).'&tickets=true');
+        return redirect($cancelRedirectUrl);
     }
 
     public function paymentUrlSuccess($sale_id)
@@ -1148,7 +1184,7 @@ class TicketController extends Controller
             $sale->save();
         });
 
-        return redirect($event->getGuestUrl($sale->subdomain, $sale->event_date).'&tickets=true');
+        return redirect($event->getGuestUrl($sale->subdomain, $sale->event_date).'?tickets=true');
     }
 
     /**

@@ -2346,12 +2346,23 @@
                     </button>
                     <div id="section-tickets" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                         <div class="max-w-xl">                                                
-                            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
-                                </svg>
-                                {{ __('messages.tickets') }}
-                            </h2>
+                            <div class="mb-6 flex items-center justify-between">
+                                <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+                                    </svg>
+                                    {{ __('messages.tickets') }}
+                                </h2>
+                                @if ($event->exists && $role->isPro() && !$event->is_private)
+                                <a href="#" id="embed-ticket-link" v-show="event.tickets_enabled || event.rsvp_enabled"
+                                    class="js-open-embed-ticket-modal inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                        <path d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z" />
+                                    </svg>
+                                    {{ $event->rsvp_enabled && !$event->tickets_enabled ? __('messages.embed_registration') : __('messages.embed_tickets') }}
+                                </a>
+                                @endif
+                            </div>
 
                             <input type="hidden" name="rsvp_enabled" :value="event.rsvp_enabled ? 1 : 0">
                             <input type="hidden" name="tickets_enabled" :value="event.tickets_enabled ? 1 : 0">
@@ -2653,6 +2664,30 @@
                                             <textarea v-bind:name="`tickets[${index}][description]`" v-model="ticket.description" rows="4"
                                                 class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
                                         </div>
+
+                                        <div class="mt-4">
+                                            <x-input-label :value="__('messages.ticket_sales_end_at')" />
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <input type="text"
+                                                    class="datepicker-ticket-sales-end flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm"
+                                                    :data-ticket-index="index"
+                                                    :value="ticket.sales_end_at_date"
+                                                    autocomplete="off" />
+                                                <div class="relative w-28">
+                                                    <input type="text"
+                                                        class="ticket-sales-end-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm"
+                                                        :value="formatPartTime(ticket.sales_end_at_time)"
+                                                        @focus="initTicketSalesEndTimePickerOnFocus($event, index)"
+                                                        @change="onTicketSalesEndTimeChange(index, $event)"
+                                                        autocomplete="off" placeholder="{{ __('messages.time') }}" />
+                                                    <div class="time-dropdown" :ref="'ticket_sales_end_time_dropdown_' + index"></div>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" v-bind:name="`tickets[${index}][sales_end_at]`" :value="ticket.sales_end_at_date && ticket.sales_end_at_time ? ticket.sales_end_at_date + ' ' + ticket.sales_end_at_time + ':00' : (ticket.sales_end_at_date ? ticket.sales_end_at_date + ' 23:59:00' : '')" />
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                {{ __('messages.ticket_sales_end_at_help') }}
+                                            </p>
+                                        </div>
                                     </div>
 
                                     <!-- Total Tickets Mode Selection -->
@@ -2706,29 +2741,6 @@
                                         v-model="event.terms_url" />
                                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                         {{ __('messages.terms_url_help') }}
-                                    </p>
-                                </div>
-
-                                <div class="mb-6">
-                                    <x-input-label :value="__('messages.ticket_sales_end_at')" />
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <input type="text"
-                                            class="datepicker-sales-end-date flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm"
-                                            :value="ticketSalesEndDate"
-                                            autocomplete="off" />
-                                        <div class="relative w-28">
-                                            <input type="text"
-                                                class="sales-end-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm"
-                                                :value="formatPartTime(ticketSalesEndTime)"
-                                                @focus="initSalesEndTimePickerOnFocus($event)"
-                                                @change="onSalesEndTimeChange($event)"
-                                                autocomplete="off" placeholder="{{ __('messages.time') }}" />
-                                            <div class="time-dropdown" ref="sales_end_time_dropdown"></div>
-                                        </div>
-                                    </div>
-                                    <input type="hidden" name="ticket_sales_end_at" :value="ticketSalesEndDate && ticketSalesEndTime ? ticketSalesEndDate + ' ' + ticketSalesEndTime + ':00' : (ticketSalesEndDate ? ticketSalesEndDate + ' 23:59:00' : '')" />
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                        {{ __('messages.ticket_sales_end_at_help') }}
                                     </p>
                                 </div>
 
@@ -3505,6 +3517,8 @@
         tickets: @json($event->tickets ?? [new Ticket()]).map(ticket => ({
           ...ticket,
           custom_fields: ticket.custom_fields || {},
+          sales_end_at_date: ticket.sales_end_at ? ticket.sales_end_at.substring(0, 10) : '',
+          sales_end_at_time: ticket.sales_end_at ? ticket.sales_end_at.substring(11, 16) : '',
           /*
           price: new Intl.NumberFormat('{{ app()->getLocale() }}', {
             style: 'currency',
@@ -3519,8 +3533,6 @@
         })),
         eventCustomFields: @json($event->custom_fields ?? []),
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
-        ticketSalesEndDate: @json($event->ticket_sales_end_at ? $event->ticket_sales_end_at->format('Y-m-d') : ''),
-        ticketSalesEndTime: @json($event->ticket_sales_end_at ? $event->ticket_sales_end_at->format('H:i') : ''),
         isInvoiceNinjaPaymentLink: @json($user->invoiceninja_api_key && $user->invoiceninja_mode === 'payment_link'),
         activeTicketTab: 'tickets',
         promoCodes: (() => {
@@ -4200,6 +4212,7 @@
         this.isDirty = false;
       },
       addTicket() {
+        var newIndex = this.tickets.length;
         this.tickets.push({
             id: null,
             type: '',
@@ -4207,10 +4220,24 @@
             price: null,
             description: '',
             custom_fields: {},
+            sales_end_at_date: '',
+            sales_end_at_time: '',
+        });
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            this.initTicketSalesEndDatePicker(newIndex);
+          });
         });
       },
       removeTicket(index) {
+        // Destroy flatpickr instances before removing
+        document.querySelectorAll('.datepicker-ticket-sales-end').forEach(input => {
+          if (input._flatpickr) input._flatpickr.destroy();
+        });
         this.tickets.splice(index, 1);
+        if (this.tickets.length > 0) {
+          this.$nextTick(() => { this.initAllTicketSalesEndDatePickers(); });
+        }
       },
       addPromoCode() {
         this.promoCodes.push({
@@ -4304,11 +4331,15 @@
           this.promoCodes[pcIndex].expires_at_time = '';
         }
       },
-      initSalesEndDatePicker() {
+      initTicketSalesEndDatePicker(ticketIndex) {
         this.$nextTick(() => {
-          var input = document.querySelector('.datepicker-sales-end-date');
+          var inputs = document.querySelectorAll('.datepicker-ticket-sales-end');
+          var input = null;
+          inputs.forEach(function(el) {
+            if (el.getAttribute('data-ticket-index') == ticketIndex) input = el;
+          });
           if (!input || input._flatpickr) return;
-          var defaultDate = this.ticketSalesEndDate || null;
+          var defaultDate = this.tickets[ticketIndex].sales_end_at_date || null;
           if (defaultDate) input.removeAttribute('value');
           var fpLocale = window.flatpickrLocales ? window.flatpickrLocales[window.appLocale] : null;
           var localeConfig = fpLocale ? { locale: fpLocale } : {};
@@ -4321,29 +4352,35 @@
             dateFormat: "Y-m-d",
             defaultDate: defaultDate,
             onChange: function(selectedDates, dateStr) {
-              self.ticketSalesEndDate = dateStr;
+              self.tickets[ticketIndex].sales_end_at_date = dateStr;
             },
           }, localeConfig));
           if (f._input) f._input.onkeydown = () => false;
         });
       },
-      initSalesEndTimePickerOnFocus(event) {
+      initAllTicketSalesEndDatePickers() {
+        for (var i = 0; i < this.tickets.length; i++) {
+          this.initTicketSalesEndDatePicker(i);
+        }
+      },
+      initTicketSalesEndTimePickerOnFocus(event, ticketIndex) {
         var inputEl = event.target;
-        var dropdownEl = this.$refs['sales_end_time_dropdown'];
+        var dropdownRef = 'ticket_sales_end_time_dropdown_' + ticketIndex;
+        var dropdownEl = this.$refs[dropdownRef];
         if (Array.isArray(dropdownEl)) dropdownEl = dropdownEl[0];
         if (dropdownEl && !inputEl._timepickerInit) {
           initPartTimePicker(inputEl, dropdownEl);
         }
       },
-      onSalesEndTimeChange(event) {
+      onTicketSalesEndTimeChange(ticketIndex, event) {
         var minutes = parseTimeToMinutes(event.target.value);
         if (minutes !== null) {
           var h = Math.floor(minutes / 60);
           var m = minutes % 60;
-          this.ticketSalesEndTime = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+          this.tickets[ticketIndex].sales_end_at_time = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
           event.target.value = formatMinutesToTime(minutes);
         } else {
-          this.ticketSalesEndTime = '';
+          this.tickets[ticketIndex].sales_end_at_time = '';
         }
       },
       togglePoll(poll) {
@@ -4844,7 +4881,7 @@
         if (self.promoCodes.length > 0) {
           self.initAllPromoDatePickers();
         }
-        self.initSalesEndDatePicker();
+        self.initAllTicketSalesEndDatePickers();
       });
       
       // Initialize sendEmailToMembers for existing selectedMembers
@@ -5376,5 +5413,9 @@ function deleteFlyer(url, hash, token, element) {
 <x-upgrade-modal name="upgrade-privacy" tier="enterprise" :subdomain="$subdomain" docsUrl="{{ route('marketing.private_events') }}">
     {{ __('messages.upgrade_feature_description_privacy') }}
 </x-upgrade-modal>
+
+@if ($event->exists && $role->isPro() && !$event->is_private)
+    @include('components.embed-ticket-modal')
+@endif
 
 </x-app-admin-layout>

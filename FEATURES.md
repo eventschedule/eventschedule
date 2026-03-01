@@ -61,6 +61,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Sale notification emails | `EmailService::sendNewSaleNotification()` | Opt-in email alerts when tickets sell |
 | Sales CSV export | `TicketController::exportSales()` | Export sales data with custom fields |
 | Post-event feedback | `FeedbackController`, `$role->isPro()` | Collect star ratings and comments from attendees after events |
+| Embed ticket widget | `edit.blade.php`, `$role->isPro()` | Embed ticket purchase or RSVP form on external websites via iframe |
 | 100 newsletters per month | `$role->newsletterLimit()` | Increased sending limit |
 
 ## Enterprise Features

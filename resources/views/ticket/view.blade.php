@@ -1,7 +1,7 @@
 <x-app-layout>
 
     <x-slot name="head">
-        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <link href="/vendor/manrope/manrope.css" rel="stylesheet">
         <style {!! nonce_attr() !!}>
             /* Animations */
             @keyframes pulse-slow {
@@ -123,12 +123,14 @@
       class="font-['Manrope'] text-[15px] font-normal leading-[1.75em] flex flex-col gap-[16px] flex-1 relative z-0 overflow-y-auto p-[16px] sm:p-[24px] focus:outline-none min-h-screen bg-[#0a0a0f] print:bg-white"
       tabindex="0"
     >
-      {{-- Animated gradient orbs (hidden in print) --}}
+      {{-- Animated gradient orbs (hidden in print and embed) --}}
+      @if (! request()->boolean('embed'))
       <div class="fixed inset-0 overflow-hidden pointer-events-none print-hidden" aria-hidden="true">
         <div class="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
         <div class="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] bg-fuchsia-600/20 rounded-full blur-[100px] animate-pulse-slow animate-float"></div>
         <div class="absolute top-[40%] right-[20%] w-[300px] h-[300px] bg-indigo-600/15 rounded-full blur-[80px] animate-float-delayed"></div>
       </div>
+      @endif
 
       {{-- Ticket Card Container --}}
       <div class="relative z-10 w-full max-w-[440px] mx-auto">

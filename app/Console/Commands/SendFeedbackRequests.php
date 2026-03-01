@@ -7,7 +7,6 @@ use App\Mail\FeedbackRequest;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
-use App\Services\EmailService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -21,7 +20,6 @@ class SendFeedbackRequests extends Command
     {
         Log::info('Sending feedback requests...');
 
-        $emailService = new EmailService;
         $count = 0;
 
         $roles = Role::where('feedback_enabled', true)->get()->filter(fn ($role) => $role->isPro());
@@ -55,10 +53,6 @@ class SendFeedbackRequests extends Command
                 ->get();
 
             foreach ($events as $event) {
-                if ($event->feedback_enabled === false) {
-                    continue;
-                }
-
                 $sales = Sale::where('event_id', $event->id)
                     ->where('status', 'paid')
                     ->where('is_deleted', false)
@@ -67,8 +61,8 @@ class SendFeedbackRequests extends Command
                     ->get();
 
                 foreach ($sales as $sale) {
-                    // Skip test emails
-                    if ($this->isTestEmail($sale->email)) {
+                    // Skip empty or test emails
+                    if (empty($sale->email) || $this->isTestEmail($sale->email)) {
                         continue;
                     }
 
@@ -94,6 +88,7 @@ class SendFeedbackRequests extends Command
                         $sale->save();
                         $count++;
                     } catch (\Exception $e) {
+                        report($e);
                         Log::error('Failed to send feedback request: '.$e->getMessage(), [
                             'sale_id' => $sale->id,
                             'event_id' => $event->id,

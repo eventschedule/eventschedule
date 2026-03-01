@@ -647,7 +647,16 @@ class RoleController extends Controller
         $embed = request()->embed;
         $view = 'role/show-guest';
 
-        if ($embed) {
+        if ($embed && $event && (request()->get('tickets') === 'true' || request()->get('rsvp') === 'true')) {
+            // Password check for embed mode
+            $bypassPassword = ($user && ($user->isAdmin() || $user->isMember($subdomain)))
+                || session()->has('event_password_'.$event->id);
+            if ($event->isPasswordProtected() && $role->isEnterprise() && ! $bypassPassword) {
+                abort(404);
+            }
+            $view = 'event/show-guest-ticket-embed';
+            $event->loadMissing(['tickets']);
+        } elseif ($embed) {
             $view = 'role/show-guest-embed';
         } elseif ($event) {
             // Check if event requires a password and user hasn't provided it
@@ -732,11 +741,6 @@ class RoleController extends Controller
                 'myPendingComments',
                 'myPendingPhotos',
             ));
-
-        // Allow embedding when embed parameter is present
-        if ($embed) {
-            $response->header('X-Frame-Options', 'ALLOW-FROM *');
-        }
 
         return $response;
     }

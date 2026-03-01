@@ -18,7 +18,7 @@
             <div class="bg-white dark:bg-[#2d2d30] rounded-lg shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6 mb-6">
                 <h1 class="text-xl font-semibold text-gray-900 dark:text-white mb-1">{{ $event->name }}</h1>
                 <p class="text-sm text-gray-500 dark:text-[#9ca3af]">
-                    {{ $event->getStartDateTime($sale->event_date, true)->format('F j, Y') }}
+                    {{ $event->getStartDateTime($sale->event_date, true)->translatedFormat('F j, Y') }}
                     &middot;
                     {{ $event->getStartEndTime($sale->event_date) }}
                 </p>
@@ -69,9 +69,8 @@
 
                     {{-- Submit --}}
                     <button type="submit" id="submit-btn"
-                        class="w-full px-4 py-3 text-base font-medium text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-[#2d2d30]"
+                        class="w-full px-4 py-3 text-base font-medium text-white rounded-lg transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-[#2d2d30] opacity-50 cursor-not-allowed"
                         style="background-color: {{ $role->accent_color ?? '#4E81FA' }};"
-                        onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'"
                         disabled>
                         {{ __('messages.feedback_submit') }}
                     </button>
@@ -121,6 +120,23 @@
                 star.addEventListener('mouseleave', function() {
                     updateStars(currentRating);
                 });
+            });
+
+            submitBtn.addEventListener('mouseenter', function() {
+                if (!submitBtn.disabled) {
+                    submitBtn.style.opacity = '0.9';
+                }
+            });
+            submitBtn.addEventListener('mouseleave', function() {
+                if (!submitBtn.disabled) {
+                    submitBtn.style.opacity = '';
+                }
+            });
+
+            submitBtn.closest('form').addEventListener('submit', function() {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                submitBtn.style.opacity = '';
             });
 
             if (currentRating > 0) {

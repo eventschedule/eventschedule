@@ -122,6 +122,11 @@
                                 <li>Paste it into your website where you want the schedule to appear</li>
                             </ol>
 
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Embed Tickets Too</div>
+                                <p>You can also embed a ticket purchase or RSVP form on your website. See the <a href="{{ route('marketing.docs.tickets') }}#embed-widget" class="text-cyan-400 hover:text-cyan-300">Embed Widget</a> section in the Selling Tickets guide.</p>
+                            </div>
+
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Embed Options</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">Customize how your embedded schedule looks:</p>
 
@@ -263,7 +268,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed shows wrong theme</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Check the embed code parameters. Add <code class="doc-inline-code">?theme=dark</code> or <code class="doc-inline-code">?theme=light</code> to the URL to force a specific theme.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Check the embed code parameters. Add <code class="doc-inline-code">?dark=true</code> to the URL to force dark mode.</p>
                                 </div>
                             </div>
 
@@ -287,6 +292,7 @@
                                 <li><a href="{{ route('marketing.docs.analytics') }}" class="text-cyan-400 hover:text-cyan-300">Analytics</a> - Track how sharing drives views and engagement</li>
                                 <li><a href="{{ route('marketing.docs.newsletters') }}" class="text-cyan-400 hover:text-cyan-300">Newsletters</a> - Send newsletters to engage your followers</li>
                                 <li><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Selling Tickets</a> - Sell tickets for your events</li>
+                                <li><a href="{{ route('marketing.docs.tickets') }}#embed-widget" class="text-cyan-400 hover:text-cyan-300">Embed Widget</a> - Embed a ticket form on your website</li>
                             </ul>
                         </section>
 

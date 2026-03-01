@@ -36,6 +36,13 @@ class SecurityHeaders
             'event.view_guest',          // Hosted guest view (slug only)
             'event.view_guest_with_id',  // Hosted guest view (slug + id)
             'event.view_guest_full',     // Hosted guest view (slug + id + date)
+            'event.checkout',            // Ticket checkout POST
+            'checkout.success',          // Stripe success redirect
+            'checkout.cancel',           // Stripe cancel redirect
+            'ticket.view',               // Ticket confirmation page
+            'event.rsvp',                // RSVP POST
+            'payment_url.success',       // Payment URL success
+            'payment_url.cancel',        // Payment URL cancel
         ];
         $currentRouteName = $request->route()?->getName();
         $isEmbeddable = $request->has('embed')

@@ -17,7 +17,7 @@ class FeedbackController extends Controller
     public function show($eventId, $secret)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
-        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->where('is_deleted', false)->firstOrFail();
+        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->where('status', 'paid')->where('is_deleted', false)->firstOrFail();
 
         $event->loadMissing('roles');
         $role = $event->role() ?? $event->roles->first();
@@ -27,6 +27,11 @@ class FeedbackController extends Controller
         }
 
         if (! $event->isFeedbackEnabled()) {
+            abort(404);
+        }
+
+        $endDateTime = $event->getEndDateTime($sale->event_date);
+        if ($endDateTime->isFuture()) {
             abort(404);
         }
 
@@ -42,7 +47,7 @@ class FeedbackController extends Controller
     public function store(Request $request, $eventId, $secret)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
-        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->where('is_deleted', false)->firstOrFail();
+        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->where('status', 'paid')->where('is_deleted', false)->firstOrFail();
 
         $event->loadMissing('roles');
         $role = $event->role() ?? $event->roles->first();
@@ -52,6 +57,11 @@ class FeedbackController extends Controller
         }
 
         if (! $event->isFeedbackEnabled()) {
+            abort(404);
+        }
+
+        $endDateTime = $event->getEndDateTime($sale->event_date);
+        if ($endDateTime->isFuture()) {
             abort(404);
         }
 
@@ -69,15 +79,24 @@ class FeedbackController extends Controller
             'comment' => 'nullable|string|max:2000',
         ]);
 
-        $comment = $validated['comment'] ? strip_tags($validated['comment']) : null;
+        $comment = $validated['comment'] ?? null;
 
-        $feedback = EventFeedback::create([
-            'event_id' => $event->id,
-            'sale_id' => $sale->id,
-            'event_date' => $sale->event_date,
-            'rating' => $validated['rating'],
-            'comment' => $comment,
-        ]);
+        try {
+            $feedback = EventFeedback::create([
+                'event_id' => $event->id,
+                'sale_id' => $sale->id,
+                'event_date' => $sale->event_date,
+                'rating' => $validated['rating'],
+                'comment' => $comment,
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            report($e);
+
+            return redirect()->route('feedback.show', [
+                'event_id' => UrlUtils::encodeId($event->id),
+                'secret' => $sale->secret,
+            ]);
+        }
 
         // Dispatch webhook
         WebhookService::dispatch('feedback.submitted', $sale, [
@@ -106,27 +125,19 @@ class FeedbackController extends Controller
     public function export(Request $request)
     {
         $user = auth()->user();
-        $roleId = $request->query('role_id');
 
-        if (! $roleId) {
-            abort(404);
-        }
+        $hasPro = $user->roles()->get()->contains(fn ($role) => $role->isPro());
 
-        $role = $user->roles()->where('roles.id', UrlUtils::decodeId($roleId))->firstOrFail();
-
-        if (! $role->isPro()) {
+        if (! $hasPro) {
             abort(403);
         }
 
-        $feedbacks = EventFeedback::whereHas('event', function ($q) use ($user) {
+        $query = EventFeedback::whereHas('event', function ($q) use ($user) {
             $q->where('user_id', $user->id);
         })
-            ->whereHas('event.roles', function ($q) use ($role) {
-                $q->where('roles.id', $role->id);
-            })
+            ->whereHas('sale', fn ($q) => $q->where('is_deleted', false))
             ->with(['event', 'sale'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->orderBy('created_at', 'desc');
 
         $filename = 'feedback-'.now()->format('Y-m-d').'.csv';
 
@@ -135,7 +146,7 @@ class FeedbackController extends Controller
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ];
 
-        $callback = function () use ($feedbacks) {
+        $callback = function () use ($query) {
             $file = fopen('php://output', 'w');
             // UTF-8 BOM
             fwrite($file, "\xEF\xBB\xBF");
@@ -150,7 +161,7 @@ class FeedbackController extends Controller
                 __('messages.submitted'),
             ]);
 
-            foreach ($feedbacks as $feedback) {
+            foreach ($query->cursor() as $feedback) {
                 fputcsv($file, [
                     $feedback->event->name ?? '',
                     $feedback->event_date ?? '',
@@ -199,6 +210,7 @@ class FeedbackController extends Controller
                     $editor->language_code ?? app()->getLocale()
                 );
             } catch (\Exception $e) {
+                report($e);
                 Log::error('Failed to send feedback notification: '.$e->getMessage(), [
                     'feedback_id' => $feedback->id,
                     'editor_id' => $editor->id,

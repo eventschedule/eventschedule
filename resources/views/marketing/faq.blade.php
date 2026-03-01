@@ -86,7 +86,7 @@
                 "name": "Can I create different ticket types for one event?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. You can create multiple ticket types per event, such as General Admission, VIP, Early Bird, or Student pricing. Each type can have its own price, quantity limit, and description."
+                    "text": "Yes. You can create multiple ticket types per event, such as General Admission, VIP, Early Bird, or Student pricing. Each type can have its own price, quantity limit, sales end date, and description."
                 }
             },
             {
@@ -479,7 +479,7 @@
                             </svg>
                         </button>
                         <div x-show="open" x-collapse class="px-6 pb-5">
-                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. You can create multiple ticket types per event, such as General Admission, VIP, Early Bird, or Student pricing. Each type can have its own price, quantity limit, and description.</p>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Yes. You can create multiple ticket types per event, such as General Admission, VIP, Early Bird, or Student pricing. Each type can have its own price, quantity limit, sales end date, and description.</p>
                         </div>
                     </div>
 

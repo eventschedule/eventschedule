@@ -754,7 +754,7 @@
               </button>
             </a>
           @endif
-        @elseif ($event->ticket_sales_end_at && $event->ticket_sales_end_at->isPast() && $event->tickets_enabled)
+        @elseif ($event->allTicketSalesEnded() && $event->tickets_enabled)
               <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_sales_ended') }}</span>
               <button type="button"
                   class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
@@ -1745,7 +1745,7 @@
             </button>
           </a>
         @endif
-      @elseif ($event->ticket_sales_end_at && $event->ticket_sales_end_at->isPast() && $event->tickets_enabled)
+      @elseif ($event->allTicketSalesEnded() && $event->tickets_enabled)
         <span class="flex-1 text-center text-sm text-gray-500 dark:text-gray-400 py-3">{{ __('messages.ticket_sales_ended') }}</span>
       @else
         <button type="button"

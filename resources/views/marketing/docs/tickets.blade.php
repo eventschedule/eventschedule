@@ -102,6 +102,7 @@
                         <a href="#waitlist" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Waitlist</a>
                         <a href="#feedback" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Post-Event Feedback</a>
                         <a href="#financial" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Financial Information</a>
+                        <a href="#embed-widget" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Embed Widget</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
                 </aside>
@@ -271,7 +272,7 @@
                             <ul class="doc-list mb-6">
                                 <li><strong class="text-gray-900 dark:text-white">Quantity:</strong> Limit how many tickets can be sold (leave blank for unlimited)</li>
                                 <li><strong class="text-gray-900 dark:text-white">Per-person limit:</strong> Limit how many one person can buy</li>
-                                <li><strong class="text-gray-900 dark:text-white">Sales end date:</strong> Stop selling tickets at a specific time</li>
+                                <li><strong class="text-gray-900 dark:text-white">Sales end date:</strong> Set a per-ticket-type cutoff to stop selling at a specific time</li>
                                 <li><strong class="text-gray-900 dark:text-white">Combined inventory:</strong> Set a total ticket limit across all ticket types for your event</li>
                             </ul>
                         </section>
@@ -439,7 +440,7 @@
                             <ul class="doc-list">
                                 <li><strong class="text-gray-900 dark:text-white">Ticket notes:</strong> Add notes that appear on the ticket (e.g., parking instructions, what to bring)</li>
                                 <li><strong class="text-gray-900 dark:text-white">Terms URL:</strong> Link to your terms and conditions. Buyers must agree before purchasing.</li>
-                                <li><strong class="text-gray-900 dark:text-white">Ticket sales end:</strong> Set a date and time when ticket sales automatically stop</li>
+                                <li><strong class="text-gray-900 dark:text-white">Ticket sales end:</strong> Set a date and time per ticket type when sales automatically stop. Use this to create time-based pricing tiers (e.g. early bird ending before regular tickets).</li>
                                 <li><strong class="text-gray-900 dark:text-white">Expire unpaid tickets:</strong> Automatically release unpaid tickets after a set number of hours, making them available for other buyers</li>
                             </ul>
                         </section>
@@ -693,6 +694,65 @@
                             </div>
                         </section>
 
+                        <!-- Embed Widget -->
+                        <section id="embed-widget" class="doc-section">
+                            <h2 class="doc-heading">Embed Widget <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-2">Pro</span></h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Embed a ticket purchase or RSVP form directly on your own website using an iframe. Visitors can buy tickets or register without leaving your site.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Getting the Embed Code</h3>
+                            <ol class="doc-list list-decimal mb-6">
+                                <li>Open your event in the admin panel and go to the <strong class="text-gray-900 dark:text-white">Tickets</strong> section</li>
+                                <li>Enable <strong class="text-gray-900 dark:text-white">Tickets</strong> or <strong class="text-gray-900 dark:text-white">Registration</strong> mode</li>
+                                <li>Click the <strong class="text-gray-900 dark:text-white">Embed Tickets</strong> (or <strong class="text-gray-900 dark:text-white">Embed Registration</strong>) link next to the section heading</li>
+                                <li>Copy the iframe code and paste it into your website's HTML</li>
+                            </ol>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">URL Parameters</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">You can customize the embed URL with these parameters:</p>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="min-w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b border-gray-200 dark:border-white/10">
+                                            <th class="text-left py-2 pr-4 font-semibold text-gray-900 dark:text-white">Parameter</th>
+                                            <th class="text-left py-2 font-semibold text-gray-900 dark:text-white">Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-gray-600 dark:text-gray-300">
+                                        <tr class="border-b border-gray-100 dark:border-white/5">
+                                            <td class="py-2 pr-4"><code class="doc-code">tickets=true</code></td>
+                                            <td class="py-2">Show the ticket purchase form</td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100 dark:border-white/5">
+                                            <td class="py-2 pr-4"><code class="doc-code">rsvp=true</code></td>
+                                            <td class="py-2">Show the RSVP registration form</td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100 dark:border-white/5">
+                                            <td class="py-2 pr-4"><code class="doc-code">embed=true</code></td>
+                                            <td class="py-2">Enable embed mode (compact layout, no navigation)</td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100 dark:border-white/5">
+                                            <td class="py-2 pr-4"><code class="doc-code">dark=true</code></td>
+                                            <td class="py-2">Force dark mode</td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100 dark:border-white/5">
+                                            <td class="py-2 pr-4"><code class="doc-code">promo=CODE</code></td>
+                                            <td class="py-2">Pre-fill a promo code</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Private Events</div>
+                                <p>The embed widget is not available for private events since they require authentication to access.</p>
+                            </div>
+
+                            <div class="doc-callout doc-callout-info mt-4">
+                                <div class="doc-callout-title">Payment Redirects</div>
+                                <p>Stripe, Invoice Ninja, and custom payment URL checkouts will open in the parent window (outside the iframe) since external payment portals may not support being loaded inside iframes. Cash and free ticket checkouts complete inside the embed.</p>
+                            </div>
+                        </section>
+
                         <!-- See Also -->
                         <section id="see-also" class="doc-section">
                             <h2 class="doc-heading">See Also</h2>
@@ -703,6 +763,7 @@
                                 <li><a href="{{ route('marketing.docs.analytics') }}" class="text-cyan-400 hover:text-cyan-300">Analytics</a> - Track conversion rates and revenue per view</li>
                                 <li><a href="{{ route('marketing.docs.account_settings') }}" class="text-cyan-400 hover:text-cyan-300">Account Settings</a> - Set up your payment method</li>
                                 <li><a href="{{ route('marketing.docs.newsletters') }}" class="text-cyan-400 hover:text-cyan-300">Newsletters</a> - Send newsletters to promote ticket sales</li>
+                                <li><a href="{{ marketing_url('/features/embed-tickets') }}" class="text-cyan-400 hover:text-cyan-300">Embed Tickets</a> - Embed a ticket form on your website</li>
                             </ul>
                         </section>
 

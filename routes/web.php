@@ -148,7 +148,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/tickets', [TicketController::class, 'tickets'])->name('tickets');
     Route::get('/sales', [TicketController::class, 'sales'])->name('sales');
     Route::get('/sales/export', [TicketController::class, 'exportSales'])->name('sales.export');
-    Route::get('/sales/export-feedback', [FeedbackController::class, 'export'])->name('sales.export_feedback');
+    Route::get('/sales/export-feedback', [FeedbackController::class, 'export'])->name('sales.export_feedback')->middleware('throttle:10,1');
     Route::post('/sales/action/{sale_id}', [TicketController::class, 'handleAction'])->name('sales.action');
     Route::post('/sales/resend-email/{sale_id}', [TicketController::class, 'resendEmail'])->name('sales.resend_email');
     Route::get('/waitlist', [WaitlistController::class, 'index'])->name('waitlist.index');
@@ -438,6 +438,7 @@ if (config('app.is_nexus')) {
         Route::get('/features/newsletters', [MarketingController::class, 'newsletters'])->name('marketing.newsletters');
         Route::get('/features/recurring-events', [MarketingController::class, 'recurringEvents'])->name('marketing.recurring_events');
         Route::get('/features/embed-calendar', [MarketingController::class, 'embedCalendar'])->name('marketing.embed_calendar');
+        Route::get('/features/embed-tickets', [MarketingController::class, 'embedTickets'])->name('marketing.embed_tickets');
         Route::get('/features/fan-videos', [MarketingController::class, 'fanVideos'])->name('marketing.fan_videos');
         Route::get('/features/polls', [MarketingController::class, 'polls'])->name('marketing.polls');
         Route::get('/features/boost', [MarketingController::class, 'boost'])->name('marketing.boost');
@@ -459,6 +460,7 @@ if (config('app.is_nexus')) {
         Route::get('/online-events', fn () => redirect()->route('marketing.online_events', [], 301));
         Route::get('/recurring-events', fn () => redirect()->route('marketing.recurring_events', [], 301));
         Route::get('/embed-calendar', fn () => redirect()->route('marketing.embed_calendar', [], 301));
+        Route::get('/embed-tickets', fn () => redirect()->route('marketing.embed_tickets', [], 301));
         Route::get('/for-talent', [MarketingController::class, 'forTalent'])->name('marketing.for_talent');
         Route::get('/for-venues', [MarketingController::class, 'forVenues'])->name('marketing.for_venues');
         Route::get('/for-curators', [MarketingController::class, 'forCurators'])->name('marketing.for_curators');
@@ -582,6 +584,7 @@ if (config('app.is_nexus')) {
             Route::get('/features/newsletters', [MarketingController::class, 'newsletters'])->name('marketing.newsletters');
             Route::get('/features/recurring-events', [MarketingController::class, 'recurringEvents'])->name('marketing.recurring_events');
             Route::get('/features/embed-calendar', [MarketingController::class, 'embedCalendar'])->name('marketing.embed_calendar');
+            Route::get('/features/embed-tickets', [MarketingController::class, 'embedTickets'])->name('marketing.embed_tickets');
             Route::get('/features/fan-videos', [MarketingController::class, 'fanVideos'])->name('marketing.fan_videos');
             Route::get('/features/polls', [MarketingController::class, 'polls'])->name('marketing.polls');
             Route::get('/features/boost', [MarketingController::class, 'boost'])->name('marketing.boost');
@@ -603,6 +606,7 @@ if (config('app.is_nexus')) {
             Route::get('/newsletters', fn () => redirect()->route('marketing.newsletters', [], 301));
             Route::get('/recurring-events', fn () => redirect()->route('marketing.recurring_events', [], 301));
             Route::get('/embed-calendar', fn () => redirect()->route('marketing.embed_calendar', [], 301));
+            Route::get('/embed-tickets', fn () => redirect()->route('marketing.embed_tickets', [], 301));
             Route::get('/wp/analytics', fn () => redirect()->route('marketing.analytics', [], 301));
             Route::get('/wp/newsletters', fn () => redirect()->route('marketing.newsletters', [], 301));
             Route::get('/for-talent', [MarketingController::class, 'forTalent'])->name('marketing.for_talent');
@@ -728,6 +732,7 @@ if (config('app.is_nexus')) {
             Route::get('/newsletters', fn () => redirect('https://eventschedule.com/features/newsletters', 301));
             Route::get('/recurring-events', fn () => redirect('https://eventschedule.com/features/recurring-events', 301));
             Route::get('/embed-calendar', fn () => redirect('https://eventschedule.com/features/embed-calendar', 301));
+            Route::get('/embed-tickets', fn () => redirect('https://eventschedule.com/features/embed-tickets', 301));
             Route::get('/features/ticketing', fn () => redirect('https://eventschedule.com/features/ticketing', 301));
             Route::get('/features/ai', fn () => redirect('https://eventschedule.com/features/ai', 301));
             Route::get('/features/calendar-sync', fn () => redirect('https://eventschedule.com/features/calendar-sync', 301));
@@ -740,6 +745,7 @@ if (config('app.is_nexus')) {
             Route::get('/features/newsletters', fn () => redirect('https://eventschedule.com/features/newsletters', 301));
             Route::get('/features/recurring-events', fn () => redirect('https://eventschedule.com/features/recurring-events', 301));
             Route::get('/features/embed-calendar', fn () => redirect('https://eventschedule.com/features/embed-calendar', 301));
+            Route::get('/features/embed-tickets', fn () => redirect('https://eventschedule.com/features/embed-tickets', 301));
             Route::get('/features/fan-videos', fn () => redirect('https://eventschedule.com/features/fan-videos', 301));
             Route::get('/features/polls', fn () => redirect('https://eventschedule.com/features/polls', 301));
             Route::get('/features/boost', fn () => redirect('https://eventschedule.com/features/boost', 301));
@@ -868,6 +874,7 @@ if (config('app.is_nexus')) {
     Route::get('/features/newsletters', fn () => redirect()->route('home'));
     Route::get('/features/recurring-events', fn () => redirect()->route('home'));
     Route::get('/features/embed-calendar', fn () => redirect()->route('home'));
+    Route::get('/features/embed-tickets', fn () => redirect()->route('home'));
     Route::get('/features/fan-videos', fn () => redirect()->route('home'));
     Route::get('/features/polls', fn () => redirect()->route('home'))->name('marketing.polls');
     Route::get('/features/boost', fn () => redirect()->route('home'));
@@ -888,6 +895,7 @@ if (config('app.is_nexus')) {
     Route::get('/online-events', fn () => redirect()->route('home'));
     Route::get('/recurring-events', fn () => redirect()->route('home'));
     Route::get('/embed-calendar', fn () => redirect()->route('home'));
+    Route::get('/embed-tickets', fn () => redirect()->route('home'));
     Route::get('/for-talent', fn () => redirect()->route('home'));
     Route::get('/for-venues', fn () => redirect()->route('home'));
     Route::get('/for-curators', fn () => redirect()->route('home'));

@@ -51,6 +51,7 @@ class HelpUtils
                 'section-fan-content' => '/docs/creating-events#fan-content',
                 'section-polls' => '/docs/creating-events#polls',
                 'section-feedback' => '/docs/tickets#feedback',
+                'section-embed-widget' => '/docs/tickets#embed-widget',
             ],
         ],
         '{subdomain}/add-event' => [
@@ -77,6 +78,7 @@ class HelpUtils
                 'section-fan-content' => '/docs/creating-events#fan-content',
                 'section-polls' => '/docs/creating-events#polls',
                 'section-feedback' => '/docs/tickets#feedback',
+                'section-embed-widget' => '/docs/tickets#embed-widget',
             ],
         ],
         'settings' => [

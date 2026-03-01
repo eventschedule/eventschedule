@@ -85,6 +85,8 @@ class RoleUpdateRequest extends FormRequest
             'event_layout' => ['nullable', 'string', 'in:calendar,list'],
             'direct_registration' => ['nullable', 'boolean'],
             'first_day_of_week' => ['nullable', 'integer', 'min:0', 'max:6'],
+            'feedback_enabled' => ['nullable', 'boolean'],
+            'feedback_delay_hours' => ['nullable', 'integer', 'in:1,2,6,12,24,48'],
         ];
     }
 }

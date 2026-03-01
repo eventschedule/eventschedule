@@ -6,9 +6,13 @@
 
 {{ $event->name }}
 
-{{ __('messages.date') }}: {{ $event->getStartDateTime($sale->event_date, true)->format('F j, Y') }}
+{{ __('messages.date') }}: {{ $event->getStartDateTime($sale->event_date, true)->translatedFormat('F j, Y') }}
 {{ __('messages.time') }}: {{ $event->getStartEndTime($sale->event_date) }}
 
 {{ __('messages.feedback_submit') }}: {{ $feedbackUrl }}
 
-{{ __('messages.event_support_contact') }}: {{ $event->user->email }}
+@php
+    $emailSettings = $role->getEmailSettings();
+    $supportEmail = !empty($emailSettings['from_address']) ? $emailSettings['from_address'] : ($event->user?->email ?? config('mail.from.address'));
+@endphp
+{{ __('messages.event_support_contact') }}: {{ $supportEmail }}
