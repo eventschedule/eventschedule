@@ -2345,52 +2345,49 @@
                                 {{ __('messages.tickets') }}
                             </h2>
 
-                            <div class="mb-6" v-show="!event.tickets_enabled">
-                                <div class="flex items-center gap-3">
-                                    <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                        <input type="hidden" name="rsvp_enabled" :value="event.rsvp_enabled ? 1 : 0">
-                                        <input id="rsvp_enabled" name="rsvp_enabled" type="checkbox" v-model="event.rsvp_enabled" :value="1"
-                                            class="sr-only peer">
-                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
-                                        <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                    </label>
-                                    <label for="rsvp_enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                        {{ __('messages.enable_rsvp') }}
-                                    </label>
+                            <input type="hidden" name="rsvp_enabled" :value="event.rsvp_enabled ? 1 : 0">
+                            <input type="hidden" name="tickets_enabled" :value="event.tickets_enabled ? 1 : 0">
+                            <fieldset class="mb-6">
+                                <div class="space-y-4 sm:flex sm:items-center sm:space-x-10 sm:space-y-0 rtl:sm:space-x-reverse">
+                                    <div class="flex items-center">
+                                        <input id="ticket_mode_external" type="radio" value="external" v-model="ticketMode"
+                                            class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                        <label for="ticket_mode_external"
+                                            class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.external') }}</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input id="ticket_mode_rsvp" type="radio" value="rsvp" v-model="ticketMode"
+                                            class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                        <label for="ticket_mode_rsvp"
+                                            class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.registration') }}</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input id="ticket_mode_tickets" type="radio" value="tickets" v-model="ticketMode"
+                                            class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]"
+                                            {{ ! $role->isPro() ? 'disabled' : '' }}>
+                                        <label for="ticket_mode_tickets"
+                                            class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer{{ ! $role->isPro() ? ' opacity-50' : '' }}">
+                                            {{ __('messages.tickets') }}
+                                            @if (! $role->isPro() && config('app.hosted'))
+                                            <div class="text-xs pt-1">
+                                                <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-tickets')"
+                                                    class="text-[#4E81FA] hover:underline font-medium">
+                                                    {{ __('messages.requires_pro_plan') }}
+                                                </button>
+                                            </div>
+                                            @elseif (! $role->isPro())
+                                            <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_pro_plan') }}</div>
+                                            @endif
+                                        </label>
+                                    </div>
                                 </div>
-                            </div>
+                            </fieldset>
 
                             <div class="mb-6" v-show="event.rsvp_enabled">
                                 <x-input-label for="rsvp_limit" :value="__('messages.rsvp_limit')" />
                                 <x-text-input id="rsvp_limit" name="rsvp_limit" type="number" min="1" class="mt-1 block w-full"
                                     v-model="event.rsvp_limit" />
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.rsvp_limit_help') }}</p>
-                            </div>
-
-                            <div class="mb-6" v-show="!event.rsvp_enabled">
-                                <div class="flex items-center gap-3">
-                                    <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                        <input type="hidden" name="tickets_enabled" :value="event.tickets_enabled ? 1 : 0">
-                                        <input id="tickets_enabled" name="tickets_enabled" type="checkbox" v-model="event.tickets_enabled" :value="1"
-                                            class="sr-only peer"
-                                            {{ ! $role->isPro() ? 'disabled' : '' }}>
-                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors{{ ! $role->isPro() ? ' opacity-50' : '' }}"></div>
-                                        <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                    </label>
-                                    <label for="tickets_enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                        {{ __('messages.enable_tickets') }}
-                                        @if (! $role->isPro() && config('app.hosted'))
-                                        <div class="text-xs pt-1">
-                                            <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-tickets')"
-                                                class="text-[#4E81FA] hover:underline font-medium">
-                                                {{ __('messages.requires_pro_plan') }}
-                                            </button>
-                                        </div>
-                                        @elseif (! $role->isPro())
-                                        <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_pro_plan') }}</div>
-                                        @endif
-                                    </label>
-                                </div>
                             </div>
 
                             @if ($role->isPro() && $user->isMember($subdomain))
@@ -3430,6 +3427,7 @@
           recurring_frequency: @json($event->recurring_frequency ?? 'weekly'),
           recurring_interval: @json($event->recurring_interval ?? 2),
         },
+        ticketMode: {{ $event->tickets_enabled ? "'tickets'" : ($event->rsvp_enabled ? "'rsvp'" : "'external'") }},
         venues: @json($venues),
         members: @json($members ?? []),
         venueType: "{{ count($venues) > 0 ? 'use_existing' : 'create_new' }}",
@@ -4100,6 +4098,7 @@
             this.event.tickets_enabled = false;
           @endif
           this.event.rsvp_enabled = preferences.rsvpEnabled ?? false;
+          this.ticketMode = this.event.tickets_enabled ? 'tickets' : (this.event.rsvp_enabled ? 'rsvp' : 'external');
         }
         @else
         if (preferences) {
@@ -4111,6 +4110,7 @@
             this.event.tickets_enabled = false;
           @endif
           this.event.rsvp_enabled = preferences.rsvpEnabled ?? false;
+          this.ticketMode = this.event.tickets_enabled ? 'tickets' : (this.event.rsvp_enabled ? 'rsvp' : 'external');
         }
         @endif
       },
@@ -4714,16 +4714,9 @@
         },
         deep: true
       },
-      'event.tickets_enabled'(newValue) {
-        if (newValue) {
-          this.event.rsvp_enabled = false;
-        }
-        this.savePreferences();
-      },
-      'event.rsvp_enabled'(newValue) {
-        if (newValue) {
-          this.event.tickets_enabled = false;
-        }
+      ticketMode(newValue) {
+        this.event.tickets_enabled = (newValue === 'tickets');
+        this.event.rsvp_enabled = (newValue === 'rsvp');
         this.savePreferences();
       },
       'event.recurring_frequency'() {

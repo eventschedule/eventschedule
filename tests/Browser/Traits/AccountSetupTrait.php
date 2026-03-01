@@ -35,11 +35,29 @@ trait AccountSetupTrait
             ->pause(1000)
             ->type('name', $name);
 
+        // Ensure name was set (JS fallback for headless Chrome flakiness)
+        $browser->script("
+            var nameField = document.getElementById('name');
+            if (!nameField.value) {
+                nameField.value = " . json_encode($name) . ";
+                nameField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        ");
+
         // Use JavaScript to switch to address section (more reliable than clicking the nav link)
         $browser->script("document.querySelector('a[data-section=\"section-address\"]').click()");
 
         $browser->waitFor('#address1', 15)
             ->type('address1', $address);
+
+        // Ensure address was set (JS fallback for headless Chrome flakiness)
+        $browser->script("
+            var addressField = document.getElementById('address1');
+            if (!addressField.value) {
+                addressField.value = " . json_encode($address) . ";
+                addressField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        ");
 
         // Use JavaScript to submit form (avoids click-targeting issues with multiple submit buttons)
         $browser->script("document.getElementById('edit-form').requestSubmit()");
