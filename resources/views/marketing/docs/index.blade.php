@@ -649,6 +649,11 @@
                             if (section === q) score += 20;
                         }
 
+                        // Category priority: User Guide results above Selfhost/SaaS
+                        const cat = item.category;
+                        if (cat === 'User Guide') score += 2;
+                        else if (cat === 'Developer') score += 1;
+
                         scored.push({ ...item, score });
                     }
 
