@@ -3427,7 +3427,7 @@
           recurring_frequency: @json($event->recurring_frequency ?? 'weekly'),
           recurring_interval: @json($event->recurring_interval ?? 2),
         },
-        ticketMode: {{ $event->tickets_enabled ? "'tickets'" : ($event->rsvp_enabled ? "'rsvp'" : "'external'") }},
+        ticketMode: @json($event->tickets_enabled ? 'tickets' : ($event->rsvp_enabled ? 'rsvp' : 'external')),
         venues: @json($venues),
         members: @json($members ?? []),
         venueType: "{{ count($venues) > 0 ? 'use_existing' : 'create_new' }}",
@@ -4327,14 +4327,14 @@
           this.pollMessage = data.message;
         })
         .catch(err => {
-          this.pollError = err.error || err.message || '{{ __("messages.error") }}';
+          this.pollError = err.error || err.message || @json(__("messages.error"));
         })
         .finally(() => {
           this.pollSubmitting = false;
         });
       },
       deletePoll(poll, index) {
-        if (!confirm('{{ __("messages.delete_poll") }}?')) return;
+        if (!confirm(@json(__("messages.delete_poll") . '?'))) return;
 
         this.pollSubmitting = true;
         this.pollMessage = '';
@@ -4359,7 +4359,7 @@
           this.pollMessage = data.message;
         })
         .catch(err => {
-          this.pollError = err.error || err.message || '{{ __("messages.error") }}';
+          this.pollError = err.error || err.message || @json(__("messages.error"));
         })
         .finally(() => {
           this.pollSubmitting = false;
