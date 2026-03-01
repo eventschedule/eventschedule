@@ -302,7 +302,7 @@
                             <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
-                            <span class="text-gray-600 dark:text-gray-400">AI-powered event parsing and automatic graphics generation</span>
+                            <span class="text-gray-600 dark:text-gray-400">AI-powered event parsing, flyer generation, and automatic graphics</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

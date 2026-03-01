@@ -17,7 +17,7 @@
                 "name": "Free",
                 "price": "0",
                 "priceCurrency": "USD",
-                "description": "Professional event calendars, mobile-optimized design, custom schedule URLs, team collaboration, venue maps, and Google Calendar sync.",
+                "description": "Professional event calendars, mobile-optimized design, custom schedule URLs, team collaboration, venue maps, Google Calendar sync, built-in analytics, and sub-schedules.",
                 "availability": "https://schema.org/InStock"
             },
             {
@@ -26,7 +26,7 @@
                 "price": "5.00",
                 "priceCurrency": "USD",
                 "billingIncrement": "MON",
-                "description": "Everything in Free plus remove branding, ticketing with QR check-ins and live dashboard, ticket waitlist, sale notification emails, sales CSV export, Stripe payments, event graphics, event boosting with ads, event polls, custom fields, custom CSS styling, REST API access, and webhooks.",
+                "description": "Everything in Free plus remove branding, full ticketing suite with check-in dashboard, Stripe payments, event graphics, event boosting with ads, event polls, post-event feedback, custom fields, custom CSS styling, REST API and webhooks, and embed ticket widget.",
                 "availability": "https://schema.org/InStock",
                 "priceSpecification": [
                     {
@@ -59,7 +59,7 @@
                 "price": "15.00",
                 "priceCurrency": "USD",
                 "billingIncrement": "MON",
-                "description": "Everything in Pro plus custom domains, private events, advanced AI features, email scheduling, agenda scanning, availability management, multiple team members, 1,000 newsletters per month, and priority support.",
+                "description": "Everything in Pro plus custom domains, private events, AI event parsing, WhatsApp event creation, email scheduling, agenda scanning, AI flyer generation, availability management, multiple team members, 1,000 newsletters per month, and priority support.",
                 "availability": "https://schema.org/InStock",
                 "priceSpecification": [
                     {
@@ -122,7 +122,7 @@
                 "name": "What is the difference between Pro and Enterprise?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Pro includes ticketing with a live check-in dashboard, ticket waitlist, sale notification emails, sales CSV export, Stripe payments, white-label branding, event graphics, event boosting with ads, custom fields, custom CSS styling, REST API access, and 100 newsletters per month. Enterprise adds custom domains, private and password-protected events, multiple team members, advanced AI features, WhatsApp event creation, email scheduling, agenda scanning, availability management, 1,000 newsletters per month, and priority support."
+                    "text": "Pro includes a full ticketing suite with check-in dashboard, Stripe payments, white-label branding, event graphics, event boosting with ads, custom fields, custom CSS styling, REST API and webhooks, and 100 newsletters per month. Enterprise adds custom domains, private and password-protected events, multiple team members, AI event parsing, WhatsApp event creation, email scheduling, agenda scanning, availability management, 1,000 newsletters per month, and priority support."
                 }
             },
             {
@@ -285,7 +285,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-600 dark:text-gray-300">Free event registration / RSVP</span>
+                            <span class="text-gray-600 dark:text-gray-300">Free event registration</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -302,22 +302,6 @@
                                 </svg>
                             </div>
                             <span class="text-gray-600 dark:text-gray-300">Sub-schedules</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg aria-hidden="true" class="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <span class="text-gray-600 dark:text-gray-300">Online events</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg aria-hidden="true" class="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <span class="text-gray-600 dark:text-gray-300">CalDAV sync</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -430,15 +414,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-600 dark:text-gray-300">REST API access</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <div class="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg aria-hidden="true" class="w-3 h-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <span class="text-gray-600 dark:text-gray-300">Webhooks</span>
+                            <span class="text-gray-600 dark:text-gray-300">REST API & webhooks</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -535,7 +511,15 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-600 dark:text-gray-300">Advanced AI features</span>
+                            <span class="text-gray-600 dark:text-gray-300">AI event parsing</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg aria-hidden="true" class="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-gray-600 dark:text-gray-300">WhatsApp event creation</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -560,6 +544,14 @@
                                 </svg>
                             </div>
                             <span class="text-gray-600 dark:text-gray-300">Agenda scanning</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg aria-hidden="true" class="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-gray-600 dark:text-gray-300">AI flyer generation</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -669,7 +661,7 @@
                     </button>
                     <div x-show="open === 3" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Pro includes ticketing with a live check-in dashboard, ticket waitlist, sale notification emails, sales CSV export, Stripe payments, white-label branding, event graphics, event boosting with ads, custom fields, custom CSS styling, REST API access, and 100 newsletters per month. Enterprise adds custom domains, private and password-protected events, multiple team members, advanced AI features, WhatsApp event creation, email scheduling, agenda scanning, availability management, 1,000 newsletters per month, and priority support.
+                            Pro includes a full ticketing suite with check-in dashboard, Stripe payments, white-label branding, event graphics, event boosting with ads, custom fields, custom CSS styling, REST API & webhooks, and 100 newsletters per month. Enterprise adds custom domains, private and password-protected events, multiple team members, AI event parsing, WhatsApp event creation, email scheduling, agenda scanning, availability management, 1,000 newsletters per month, and priority support.
                         </p>
                     </div>
                 </div>

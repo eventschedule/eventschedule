@@ -284,6 +284,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{subdomain}/import', [EventController::class, 'showImport'])->name('event.show_import');
     Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse');
     Route::post('/{subdomain}/parse-event-parts', [EventController::class, 'parseEventParts'])->name('event.parse_parts');
+    Route::post('/{subdomain}/generate-flyer', [EventController::class, 'generateFlyer'])->name('event.generate_flyer');
     Route::post('/{subdomain}/import', [EventController::class, 'import'])->name('event.import');
     Route::post('/{subdomain}/test-import', [RoleController::class, 'testImport'])->name('role.test_import');
     Route::get('/{subdomain}/search-youtube', [RoleController::class, 'searchYouTube'])->name('role.search_youtube');

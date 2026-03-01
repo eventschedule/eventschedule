@@ -455,6 +455,13 @@ https://example.com/event/summer-concert</code></pre>
                             </div>
                         </section>
 
+                        <div class="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-500/30 rounded-lg p-4 mb-6">
+                            <p class="text-gray-600 dark:text-gray-300 text-sm">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-teal-500/20 text-teal-700 dark:text-teal-300 mr-2">Enterprise</span>
+                                In addition to auto-generated event graphics, Enterprise users can generate individual event flyers using AI directly from the <a href="{{ route('marketing.docs.creating_events') }}#ai-flyer" class="text-cyan-600 dark:text-cyan-400 hover:text-cyan-500">event edit page</a>.
+                            </p>
+                        </div>
+
                         <!-- AI Prompt -->
                         <section id="ai-prompt" class="doc-section">
                             <h2 class="doc-heading">AI Text Prompt</h2>

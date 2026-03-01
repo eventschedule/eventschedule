@@ -175,7 +175,7 @@
                                     ['Built-in analytics', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
                                 ],
                                 'Unique Features' => [
-                                    ['AI event parsing (incl. agenda scanning)', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
+                                    ['AI event parsing, agenda scanning & flyer generation', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
                                     ['Event graphics gen', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
                                     ['Sub-schedules', 'Yes (Free)', 'No', 'No', 'No', 'Multiple calendars'],
                                     ['Fan videos & comments', 'Yes (Free)', 'No', 'No', 'No', 'No'],

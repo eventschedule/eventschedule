@@ -1207,6 +1207,180 @@ class GeminiUtils
         return array_slice($sortedVideos, 0, 6);
     }
 
+    private static function sendImageGenerationRequest($prompt)
+    {
+        $model = 'gemini-2.5-flash-image';
+
+        $apiKey = config('services.google.gemini_key');
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=".$apiKey;
+
+        $data = [
+            'contents' => [
+                [
+                    'parts' => [['text' => $prompt]],
+                ],
+            ],
+            'generationConfig' => [
+                'responseModalities' => ['TEXT', 'IMAGE'],
+                'imageConfig' => ['aspectRatio' => '3:4'],
+            ],
+        ];
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            CURLOPT_POSTFIELDS => json_encode($data),
+            CURLOPT_TIMEOUT => 60,
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            \Log::error('Gemini image generation API error response: '.$response);
+
+            $errorData = json_decode($response, true);
+            if (json_last_error() === JSON_ERROR_NONE && isset($errorData['error']['message'])) {
+                $errorMessage = $errorData['error']['message'];
+                $errorStatus = $errorData['error']['status'] ?? null;
+
+                if (str_contains($errorMessage, 'quota') || str_contains($errorMessage, 'Quota exceeded')) {
+                    $exception = new \Exception('Gemini image generation API quota exceeded: '.$errorMessage);
+
+                    \Sentry\withScope(function (\Sentry\State\Scope $scope) use ($exception, $httpCode, $response, $prompt): void {
+                        $scope->setLevel(\Sentry\Severity::error());
+                        $scope->setTag('service', 'gemini');
+                        $scope->setTag('error_type', 'quota_exceeded');
+                        $scope->setContext('gemini_api', [
+                            'http_code' => $httpCode,
+                            'response' => $response,
+                            'prompt_preview' => substr($prompt, 0, 100),
+                        ]);
+                        \Sentry\captureException($exception);
+                    });
+
+                    return null;
+                }
+
+                if ($httpCode === 503 ||
+                    $errorStatus === 'UNAVAILABLE' ||
+                    str_contains(strtolower($errorMessage), 'overloaded') ||
+                    str_contains(strtolower($errorMessage), 'overload')) {
+                    $exception = new \Exception('Gemini image generation API model overloaded: '.$errorMessage);
+
+                    \Sentry\withScope(function (\Sentry\State\Scope $scope) use ($exception, $httpCode, $response, $prompt, $errorStatus): void {
+                        $scope->setLevel(\Sentry\Severity::warning());
+                        $scope->setTag('service', 'gemini');
+                        $scope->setTag('error_type', 'model_overloaded');
+                        $scope->setContext('gemini_api', [
+                            'http_code' => $httpCode,
+                            'status' => $errorStatus,
+                            'response' => $response,
+                            'prompt_preview' => substr($prompt, 0, 100),
+                        ]);
+                        \Sentry\captureException($exception);
+                    });
+
+                    return null;
+                }
+
+                throw new \Exception($errorMessage);
+            }
+
+            throw new \Exception('Gemini image generation API request failed with status code: '.$httpCode);
+        }
+
+        $data = json_decode($response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            \Log::error('Failed to parse Gemini image generation API response: '.$response);
+            throw new \Exception('Invalid JSON response from Gemini image generation API');
+        }
+
+        // Look for image data in response parts
+        $parts = $data['candidates'][0]['content']['parts'] ?? [];
+        foreach ($parts as $part) {
+            if (isset($part['inlineData']['data'])) {
+                return base64_decode($part['inlineData']['data']);
+            }
+        }
+
+        \Log::error('No image data in Gemini image generation response: '.json_encode($data));
+
+        return null;
+    }
+
+    public static function generateEventFlyer(Event $event, ?string $styleInstructions = null): ?string
+    {
+        $prompt = self::buildFlyerPrompt($event, $styleInstructions);
+
+        return self::sendImageGenerationRequest($prompt);
+    }
+
+    private static function buildFlyerPrompt(Event $event, ?string $styleInstructions): string
+    {
+        $prompt = "Create a professional event flyer/poster with the following details:\n\n";
+
+        $prompt .= "Event name (most prominent element): {$event->name}\n";
+
+        if ($event->starts_at) {
+            $prompt .= 'Date: '.Carbon::parse($event->starts_at)->format('l, F j, Y')."\n";
+            $prompt .= 'Time: '.Carbon::parse($event->starts_at)->format('g:i A')."\n";
+        }
+
+        if ($event->duration) {
+            $prompt .= "Duration: {$event->duration} hours\n";
+        }
+
+        if ($event->venue) {
+            $prompt .= "Venue: {$event->venue->name}\n";
+            if ($event->venue->address1) {
+                $prompt .= "Address: {$event->venue->address1}";
+                if ($event->venue->city) {
+                    $prompt .= ", {$event->venue->city}";
+                }
+                $prompt .= "\n";
+            }
+        }
+
+        if ($event->short_description) {
+            $prompt .= "Description: {$event->short_description}\n";
+        }
+
+        $categories = config('app.event_categories', []);
+        if ($event->category_id && isset($categories[$event->category_id])) {
+            $prompt .= "Category: {$categories[$event->category_id]}\n";
+        }
+
+        $performers = $event->roles->filter(fn ($r) => $r->type === 'talent');
+        if ($performers->isNotEmpty()) {
+            $performerNames = $performers->pluck('name')->implode(', ');
+            $prompt .= "Performers: {$performerNames}\n";
+        }
+
+        $ticket = $event->tickets->first();
+        if ($ticket && $ticket->price > 0) {
+            $prompt .= "Ticket price: {$ticket->price} {$ticket->currency_code}\n";
+        }
+
+        $prompt .= "\nDesign directives:\n";
+        $prompt .= "- Clean, modern layout with strong visual hierarchy\n";
+        $prompt .= "- Event name should be the most prominent text element\n";
+        $prompt .= "- All text must be clearly legible\n";
+        $prompt .= "- Use category-appropriate colors and decorative elements\n";
+        $prompt .= "- Do not include AI-generated photos of people\n";
+        $prompt .= "- Suitable for digital sharing on social media\n";
+        $prompt .= "- Professional typography and spacing\n";
+
+        if ($styleInstructions) {
+            $prompt .= "\nCustom style instructions: {$styleInstructions}\n";
+        }
+
+        return $prompt;
+    }
+
     public static function generateBlogPost($topic, $parentPageUrl = null, $parentPageTitle = null, $features = [])
     {
         // Randomly select a length to vary content length

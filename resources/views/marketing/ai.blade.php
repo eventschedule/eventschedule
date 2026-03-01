@@ -325,6 +325,60 @@
                     </div>
                 </div>
 
+                <!-- Generate Event Flyers (spans 2 cols) -->
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 border border-teal-200 dark:border-white/10 p-8 lg:p-10">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                                </svg>
+                                AI Flyer Generation
+                            </div>
+                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Generate event flyers with AI</h3>
+                            <p class="text-gray-500 dark:text-white/80 text-lg mb-6">Enter your event details and let AI create a professional, eye-catching flyer. Customize the style and regenerate until it's perfect.</p>
+                            <div class="flex flex-wrap gap-3">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">One-click generation</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Custom style instructions</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Regenerate anytime</span>
+                            </div>
+                            <div class="mt-4">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">Enterprise</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <div class="relative">
+                                <!-- Event details -->
+                                <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-2xl border border-gray-200 dark:border-white/10 p-4 max-w-xs mb-4">
+                                    <div class="text-xs text-gray-400 dark:text-gray-400 mb-2">Event details</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                                        <div class="font-semibold text-gray-900 dark:text-white">Summer Jazz Festival</div>
+                                        <div>Saturday, July 12, 2025</div>
+                                        <div>Central Park Amphitheater</div>
+                                        <div class="text-xs mt-1 text-gray-400">Music</div>
+                                    </div>
+                                </div>
+                                <!-- Arrow -->
+                                <div class="flex justify-center my-2">
+                                    <svg aria-hidden="true" class="w-6 h-6 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                    </svg>
+                                </div>
+                                <!-- Generated flyer mockup -->
+                                <div class="bg-gradient-to-br from-teal-500/20 to-cyan-500/20 rounded-2xl border border-teal-400/30 p-4 max-w-xs">
+                                    <div class="text-xs text-teal-700 dark:text-teal-300 mb-2">Generated flyer</div>
+                                    <div class="bg-gradient-to-br from-teal-600 to-cyan-700 rounded-xl p-4 text-center text-white">
+                                        <div class="text-lg font-bold mb-1">Summer Jazz Festival</div>
+                                        <div class="text-xs opacity-80 mb-2">Saturday, July 12, 2025</div>
+                                        <div class="w-12 h-0.5 bg-white/40 mx-auto mb-2"></div>
+                                        <div class="text-[10px] opacity-70">Central Park Amphitheater</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Custom AI Prompts -->
                 <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-blue-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">

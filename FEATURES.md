@@ -30,7 +30,7 @@ All users get these features with no subscription required.
 | Venue location maps | Google Maps integration |
 | Google Calendar sync | Bidirectional sync |
 | CalDAV sync | Standard calendar protocol |
-| Fan videos & comments on events | User-generated content on events |
+| Fan videos, photos & comments on events | User-generated content on events |
 | Built-in analytics | Schedule analytics dashboard |
 | Sub-schedules | Group events into sub-schedules |
 | Online events | Virtual event support |
@@ -38,6 +38,9 @@ All users get these features with no subscription required.
 | Newsletter management | Full newsletter creation and management UI (sending limits vary by tier) |
 | Embed calendar on website | iframe embed with X-Frame-Options |
 | Free event registration / RSVP | Native sign-up for free events with optional capacity limits |
+| iCal download | Download .ics files for individual events and recurring event dates |
+| Fan photos on events | User-submitted photos with approval workflow |
+| Event cloning | Duplicate an existing event as a starting point for a new one |
 | 10 newsletters per month | Basic newsletter sending limit |
 
 ## Pro Features
@@ -62,6 +65,8 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Sales CSV export | `TicketController::exportSales()` | Export sales data with custom fields |
 | Post-event feedback | `FeedbackController`, `$role->isPro()` | Collect star ratings and comments from attendees after events |
 | Embed ticket widget | `edit.blade.php`, `$role->isPro()` | Embed ticket purchase or RSVP form on external websites via iframe |
+| Promo/discount codes | `PromoCodeController`, tied to ticketing gate | Percentage or fixed discounts with usage limits and expiration dates |
+| Invoice Ninja integration | `InvoiceNinjaController` | Alternative payment processing via Invoice Ninja |
 | 100 newsletters per month | `$role->newsletterLimit()` | Increased sending limit |
 
 ## Enterprise Features
@@ -71,6 +76,7 @@ Gated by `$role->isEnterprise()`.
 | Feature | Gate location | Notes |
 |---------|--------------|-------|
 | AI event parsing | `EventController:1019`, `$role->isEnterprise()` | Parse event details from text/images via Gemini |
+| AI flyer generation | `EventController`, `$role->isEnterprise()` | Generate event flyer images from event details via Gemini |
 | Agenda scanning | `EventController:1594`, `$role->isEnterprise()` | Scan agendas to auto-create event parts |
 | Save parsed event parts | `EventController:1654`, `$role->isEnterprise()` | Save AI-parsed event data |
 | AI text processing on graphics | `GraphicController:298`, `$role->isEnterprise()` | AI prompt for graphic text via Gemini |

@@ -32,6 +32,8 @@ class UsageTrackingService
 
     const GEMINI_TRANSLATE_FIELD_OPTIONS = 'gemini_translate_field_options';
 
+    const GEMINI_GENERATE_FLYER = 'gemini_generate_flyer';
+
     // YouTube
     const YOUTUBE_SEARCH = 'youtube_search';
 

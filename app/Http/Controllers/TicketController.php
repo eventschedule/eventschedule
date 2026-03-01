@@ -843,7 +843,7 @@ class TicketController extends Controller
                         ],
                     ],
                     'success_url' => custom_domain_url(route('checkout.success', $data).(str_contains(route('checkout.success', $data), '?') ? '&' : '?').'session_id={CHECKOUT_SESSION_ID}'.($isEmbed ? '&embed=true' : '')),
-                    'cancel_url' => custom_domain_url(route('checkout.cancel', $data).(str_contains(route('checkout.cancel', $data), '?') ? '&' : '?').'secret='.$sale->secret.($isEmbed ? '&embed=true' : '')),
+                    'cancel_url' => custom_domain_url(route('checkout.cancel', $data).(str_contains(route('checkout.cancel', $data), '?') ? '&' : '?').'secret='.$sale->secret),
                 ],
                 [
                     'stripe_account' => $event->user->stripe_account_id,
@@ -867,7 +867,7 @@ class TicketController extends Controller
                     ],
                 ],
                 'success_url' => custom_domain_url(route('checkout.success', $data).(str_contains(route('checkout.success', $data), '?') ? '&' : '?').'session_id={CHECKOUT_SESSION_ID}&direct=1'.($isEmbed ? '&embed=true' : '')),
-                'cancel_url' => custom_domain_url(route('checkout.cancel', $data).(str_contains(route('checkout.cancel', $data), '?') ? '&' : '?').'secret='.$sale->secret.($isEmbed ? '&embed=true' : '')),
+                'cancel_url' => custom_domain_url(route('checkout.cancel', $data).(str_contains(route('checkout.cancel', $data), '?') ? '&' : '?').'secret='.$sale->secret),
             ]);
         }
 
@@ -1136,9 +1136,6 @@ class TicketController extends Controller
 
         $event = $sale->event;
         $cancelRedirectUrl = $event->getGuestUrl($subdomain, $sale->event_date).'?tickets=true';
-        if (request()->boolean('embed')) {
-            $cancelRedirectUrl .= '&embed=true';
-        }
 
         return redirect($cancelRedirectUrl);
     }
@@ -1204,9 +1201,6 @@ class TicketController extends Controller
         });
 
         $cancelUrl = $event->getGuestUrl($sale->subdomain, $sale->event_date).'?tickets=true';
-        if (request()->boolean('embed')) {
-            $cancelUrl .= '&embed=true';
-        }
 
         return redirect($cancelUrl);
     }

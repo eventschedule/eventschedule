@@ -157,8 +157,8 @@
                                             <td>Details about the event (supports markdown formatting)</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Image</span></td>
-                                            <td>A flyer or photo for the event</td>
+                                            <td id="ai-flyer"><span class="font-semibold text-gray-900 dark:text-white">Image</span></td>
+                                            <td>A flyer or photo for the event. Enterprise users can also click <strong>Generate AI Flyer</strong> to automatically create a professional flyer from the event details using AI. You can optionally describe your preferred style (e.g. "minimalist, blue and white") before generating.</td>
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Sub-schedule</span></td>

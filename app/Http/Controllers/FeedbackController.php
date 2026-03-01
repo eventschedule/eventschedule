@@ -151,6 +151,15 @@ class FeedbackController extends Controller
             // UTF-8 BOM
             fwrite($file, "\xEF\xBB\xBF");
 
+            // Sanitize values to prevent CSV formula injection in spreadsheet apps
+            $sanitize = function ($value) {
+                if ($value && preg_match('/^[\=\+\-\@\t\r]/', $value)) {
+                    return "'".$value;
+                }
+
+                return $value;
+            };
+
             fputcsv($file, [
                 __('messages.event'),
                 __('messages.date'),
@@ -163,12 +172,12 @@ class FeedbackController extends Controller
 
             foreach ($query->lazy() as $feedback) {
                 fputcsv($file, [
-                    $feedback->event?->name ?? '',
+                    $sanitize($feedback->event?->name ?? ''),
                     $feedback->event_date ?? '',
-                    $feedback->sale?->name ?? '',
+                    $sanitize($feedback->sale?->name ?? ''),
                     $feedback->sale?->email ?? '',
                     $feedback->rating,
-                    $feedback->comment ?? '',
+                    $sanitize($feedback->comment ?? ''),
                     $feedback->created_at->format('Y-m-d H:i'),
                 ]);
             }

@@ -172,6 +172,13 @@
                             <p class="text-gray-600 dark:text-gray-300">You can set a custom prompt per import, or set a default prompt for your entire schedule under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>.</p>
                         </section>
 
+                        <div class="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-500/30 rounded-lg p-4 mb-6">
+                            <p class="text-gray-600 dark:text-gray-300 text-sm">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-teal-500/20 text-teal-700 dark:text-teal-300 mr-2">Enterprise</span>
+                                AI can also generate professional event flyers from your event details. See <a href="{{ route('marketing.docs.creating_events') }}#ai-flyer" class="text-cyan-600 dark:text-cyan-400 hover:text-cyan-500">Creating Events</a> for details.
+                            </p>
+                        </div>
+
                         <!-- See Also -->
                         <section id="see-also" class="doc-section">
                             <h2 class="doc-heading">See Also</h2>

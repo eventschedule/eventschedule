@@ -2435,6 +2435,7 @@ class MarketingController extends Controller
             ['page' => 'Creating Events', 'section' => 'Polls', 'description' => 'Create interactive polls for your events.', 'url' => $r['creating_events'].'#polls', 'category' => 'User Guide', 'keywords' => 'voting survey poll'],
             ['page' => 'Creating Events', 'section' => 'Feedback', 'description' => 'Control per-event feedback override settings.', 'url' => $r['creating_events'].'#feedback', 'category' => 'User Guide', 'keywords' => 'feedback rating review post-event override'],
             ['page' => 'Creating Events', 'section' => 'Fan Content', 'description' => 'Manage user-submitted videos and content.', 'url' => $r['creating_events'].'#fan-content', 'category' => 'User Guide', 'keywords' => 'user content videos submissions ugc'],
+            ['page' => 'Creating Events', 'section' => 'AI Flyer Generation', 'description' => 'Generate event flyer images using AI (Enterprise).', 'url' => $r['creating_events'].'#ai-flyer', 'category' => 'User Guide', 'keywords' => 'ai flyer image generate poster design'],
 
             // AI Import
             ['page' => 'AI Import', 'section' => 'Overview', 'description' => 'Use AI to automatically import events.', 'url' => $r['ai_import'].'#ai-import', 'category' => 'User Guide', 'keywords' => 'ai artificial intelligence import parse'],

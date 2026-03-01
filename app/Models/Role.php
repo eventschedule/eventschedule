@@ -1188,6 +1188,37 @@ class Role extends Model implements MustVerifyEmail
         return $this->newslettersSentThisMonth() < $limit;
     }
 
+    public function photoLimit(): ?int
+    {
+        if (! config('app.hosted')) {
+            return null;
+        }
+
+        if ($this->isPro()) {
+            return null;
+        }
+
+        return 25;
+    }
+
+    public function photoCount(): int
+    {
+        return \App\Models\EventPhoto::whereIn('event_id',
+            $this->events()->pluck('events.id')
+        )->count();
+    }
+
+    public function canUploadPhoto(): bool
+    {
+        $limit = $this->photoLimit();
+
+        if (is_null($limit)) {
+            return true;
+        }
+
+        return $this->photoCount() < $limit;
+    }
+
     public function groups()
     {
         return $this->hasMany(\App\Models\Group::class);

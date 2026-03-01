@@ -1284,8 +1284,36 @@
                                         </svg>
                                         {{ __('messages.choose_file') }}
                                     </button>
+                                    @if ($event->exists && config('services.google.gemini_key'))
+                                        @if ($role->isEnterprise())
+                                            <button type="button" @click="generateFlyer"
+                                                v-bind:disabled="generatingFlyer"
+                                                class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600 disabled:opacity-50">
+                                                <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"></path>
+                                                </svg>
+                                                <span v-if="generatingFlyer">{{ __('messages.generating') }}</span>
+                                                <span v-else>{{ __('messages.generate_ai_flyer') }}</span>
+                                            </button>
+                                        @elseif (config('app.hosted'))
+                                            <button type="button" onclick="Livewire.dispatch('openModal', {component: 'upgrade-modal', arguments: {name: 'upgrade-ai-flyer'}})"
+                                                class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-sm font-medium rounded-md border border-gray-300 dark:border-gray-600 opacity-75">
+                                                <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"></path>
+                                                </svg>
+                                                {{ __('messages.generate_ai_flyer') }}
+                                            </button>
+                                        @endif
+                                    @endif
                                     <span id="flyer_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
                                 </div>
+                                @if ($event->exists && config('services.google.gemini_key') && $role->isEnterprise())
+                                    <div class="mt-2">
+                                        <input type="text" maxlength="500" v-model="flyerStyleInstructions"
+                                            placeholder="{{ __('messages.flyer_style_placeholder') }}"
+                                            class="w-full max-w-md text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]" />
+                                    </div>
+                                @endif
                                 <x-input-error class="mt-2" :messages="$errors->get('flyer_image')" />
                                 <p id="image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
                                     {{ __('messages.image_size_warning') }}
@@ -1311,6 +1339,17 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
                                 </button>
+                                @if (config('services.google.gemini_key') && $role->isEnterprise())
+                                    <button type="button" @click="generateFlyer"
+                                        v-bind:disabled="generatingFlyer"
+                                        class="mt-2 inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600 disabled:opacity-50">
+                                        <svg class="w-3 h-3 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"></path>
+                                        </svg>
+                                        <span v-if="generatingFlyer">{{ __('messages.generating') }}</span>
+                                        <span v-else>{{ __('messages.regenerate_ai_flyer') }}</span>
+                                    </button>
+                                @endif
                             </div>
                             @endif
                         </div>
@@ -3586,6 +3625,8 @@
         @endphp
         polls: @json($pollsJson),
         eventExists: @json($event->exists),
+        generatingFlyer: false,
+        flyerStyleInstructions: '',
         pollSubmitting: false,
         pollMessage: '',
         pollError: '',
@@ -3596,6 +3637,47 @@
       }
     },
     methods: {
+      generateFlyer() {
+        this.generatingFlyer = true;
+        fetch('{{ url('/' . $subdomain . '/generate-flyer') }}', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({
+            event_id: '{{ $event->exists ? \App\Utils\UrlUtils::encodeId($event->id) : '' }}',
+            style_instructions: this.flyerStyleInstructions,
+          }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            var existingDiv = document.getElementById('flyer_image_existing');
+            if (existingDiv) {
+              var img = document.getElementById('flyer_preview');
+              if (img) {
+                img.src = data.flyer_image_url;
+              }
+            } else {
+              window.location.reload();
+            }
+            var chooseDiv = document.getElementById('flyer_image_choose');
+            if (chooseDiv) {
+              chooseDiv.style.display = 'none';
+            }
+          } else {
+            alert(data.error || @json(__('messages.ai_flyer_generation_failed')));
+          }
+        })
+        .catch(() => {
+          alert(@json(__('messages.ai_flyer_generation_failed')));
+        })
+        .finally(() => {
+          this.generatingFlyer = false;
+        });
+      },
       showBoostError() {
         alert(this.boostDynamicReason);
       },
@@ -5391,6 +5473,10 @@ function deleteFlyer(url, hash, token, element) {
 
 <x-upgrade-modal name="upgrade-privacy" tier="enterprise" :subdomain="$subdomain" docsUrl="{{ route('marketing.private_events') }}">
     {{ __('messages.upgrade_feature_description_privacy') }}
+</x-upgrade-modal>
+
+<x-upgrade-modal name="upgrade-ai-flyer" tier="enterprise" :subdomain="$subdomain">
+    {{ __('messages.upgrade_feature_description_ai_flyer') }}
 </x-upgrade-modal>
 
 @if ($event->exists && $role->isPro() && !$event->is_private)
