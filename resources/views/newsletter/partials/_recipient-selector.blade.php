@@ -25,7 +25,7 @@
 @endif
 
 <div class="mt-3">
-    <a href="{{ route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="text-sm text-[#4E81FA] hover:text-blue-700">
+    <a href="{{ route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
         {{ __('messages.manage_segments') }}
     </a>
 </div>

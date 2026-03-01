@@ -80,13 +80,13 @@
                                         @endif
                                         <div class="flex flex-col">
                                             <span class="font-semibold">{{ $sale->name }}</span>
-                                            <a href="mailto:{{ $sale->email }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline text-xs">{{ $sale->email }}</a>
+                                            <a href="mailto:{{ $sale->email }}" class="text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8] hover:underline text-xs">{{ $sale->email }}</a>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
                                     <a href="{{ $sale->getEventUrl() }}"
-                                        target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">{{ $sale->event->name }}
+                                        target="_blank" class="text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8] hover:underline">{{ $sale->event->name }}
                                     </a>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
@@ -290,7 +290,7 @@
                 <div class="flex items-start justify-between">
                     <div class="flex-1">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ $sale->name }}</h3>
-                        <a href="mailto:{{ $sale->email }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm">{{ $sale->email }}</a>
+                        <a href="mailto:{{ $sale->email }}" class="text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8] text-sm">{{ $sale->email }}</a>
                     </div>
                     <div class="ms-4">
                         @if($sale->status === 'paid')
@@ -471,7 +471,7 @@
                         <button @click="open = !open; $nextTick(() => positionDropdown())" 
                                 x-ref="button"
                                 type="button" 
-                                class="w-full inline-flex items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/30 px-4 py-3 text-sm font-semibold text-blue-700 dark:text-blue-300 shadow-sm ring-1 ring-inset ring-blue-200 dark:ring-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors duration-150">
+                                class="w-full inline-flex items-center justify-center rounded-lg bg-[#4E81FA]/10 dark:bg-[#4E81FA]/10 px-4 py-3 text-sm font-semibold text-[#4E81FA] dark:text-[#4E81FA] shadow-sm ring-1 ring-inset ring-[#4E81FA]/30 dark:ring-[#4E81FA]/30 hover:bg-[#4E81FA]/20 dark:hover:bg-[#4E81FA]/20 transition-colors duration-150">
                             <svg class="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
                             </svg>

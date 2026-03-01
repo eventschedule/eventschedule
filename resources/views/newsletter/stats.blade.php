@@ -96,7 +96,7 @@
             <div class="space-y-3">
                 @foreach ($topLinks as $link)
                 <div class="flex justify-between items-center">
-                    <a href="{{ $link->url }}" target="_blank" class="text-sm text-[#4E81FA] hover:text-blue-700 truncate {{ is_rtl() ? 'ms-4' : 'me-4' }}" style="max-width: 80%;">{{ $link->url }}</a>
+                    <a href="{{ $link->url }}" target="_blank" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8] truncate {{ is_rtl() ? 'ms-4' : 'me-4' }}" style="max-width: 80%;">{{ $link->url }}</a>
                     <span class="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">{{ $link->click_count }} {{ __('messages.clicks') }}</span>
                 </div>
                 @endforeach

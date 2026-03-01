@@ -2291,4 +2291,13 @@ return [
     'just_now' => 'chiar acum',
     'minutes_ago' => 'min în urmă',
     'ago' => 'în urmă',
+    'confirm_retry_all_failed' => 'Reîncercați toate cele :count sarcini eșuate?',
+    'confirm_delete_all_failed' => 'Ștergeți definitiv toate cele :count sarcini eșuate?',
+    'confirm_flush_pending' => 'Ștergeți definitiv toate cele :count sarcini în așteptare? Această acțiune nu poate fi anulată.',
+    'n_days_left' => ':count zile rămase',
+    'confirm_clear_log' => 'Ștergeți întregul fișier jurnal? Această acțiune nu poate fi anulată.',
+    'notify_new_request' => 'Cereri noi de evenimente',
+    'notify_new_request_help' => 'Primiți un e-mail când sunt cereri noi de evenimente în așteptarea aprobării.',
+    'notify_new_fan_content' => 'Conținut nou de la fani',
+    'notify_new_fan_content_help' => 'Primiți un e-mail când fanii trimit videoclipuri, comentarii sau fotografii noi pentru evenimentele dvs.',
 ];

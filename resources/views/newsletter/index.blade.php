@@ -109,11 +109,11 @@
                             <div class="flex gap-2 {{ is_rtl() ? 'justify-start' : 'justify-end' }}">
                                 @if ($newsletter->status === 'draft' || $newsletter->status === 'scheduled')
                                 <a href="{{ route('newsletter.edit', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                                    class="text-[#4E81FA] hover:text-blue-800">{{ __('messages.edit') }}</a>
+                                    class="text-[#4E81FA] hover:text-[#3D6FE8]">{{ __('messages.edit') }}</a>
                                 @endif
                                 @if (in_array($newsletter->status, ['sent', 'sending']))
                                 <a href="{{ route('newsletter.stats', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                                    class="text-[#4E81FA] hover:text-blue-800">{{ __('messages.newsletter_stats') }}</a>
+                                    class="text-[#4E81FA] hover:text-[#3D6FE8]">{{ __('messages.newsletter_stats') }}</a>
                                 @endif
                                 <form method="POST" action="{{ route('newsletter.clone', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="inline">
                                     @csrf

@@ -77,11 +77,11 @@
                                 <div class="flex gap-2 {{ is_rtl() ? 'justify-start' : 'justify-end' }}">
                                     @if ($newsletter->status === 'draft' || $newsletter->status === 'scheduled')
                                     <a href="{{ route('admin.newsletters.edit', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]) }}"
-                                        class="text-[#4E81FA] hover:text-blue-800">{{ __('messages.edit') }}</a>
+                                        class="text-[#4E81FA] hover:text-[#3D6FE8]">{{ __('messages.edit') }}</a>
                                     @endif
                                     @if (in_array($newsletter->status, ['sent', 'sending']))
                                     <a href="{{ route('admin.newsletters.stats', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]) }}"
-                                        class="text-[#4E81FA] hover:text-blue-800">{{ __('messages.newsletter_stats') }}</a>
+                                        class="text-[#4E81FA] hover:text-[#3D6FE8]">{{ __('messages.newsletter_stats') }}</a>
                                     @endif
                                     <form method="POST" action="{{ route('admin.newsletters.clone', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]) }}" class="inline">
                                         @csrf

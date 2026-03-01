@@ -1700,11 +1700,11 @@
                                             </div>
                                             <div class="flex gap-4 items-center justify-between">
                                                 <div class="flex gap-4 items-center">
-                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" id="edit-button-{{ is_object($group) ? $group->id : $i }}" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" id="edit-button-{{ is_object($group) ? $group->id : $i }}" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
                                                         {{ __('messages.edit') }}
                                                     </button>
                                                     @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
-                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" class="hidden text-sm text-[#4E81FA] hover:text-blue-700" id="cancel-button-{{ is_object($group) ? $group->id : $i }}">
+                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" class="hidden text-sm text-[#4E81FA] hover:text-[#3D6FE8]" id="cancel-button-{{ is_object($group) ? $group->id : $i }}">
                                                         {{ __('messages.cancel') }}
                                                     </button>
                                                     @endif
@@ -1723,7 +1723,7 @@
                                         </div>
                                     @endforeach
                                 </div>
-                                <button type="button" data-action="add-group-field" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                <button type="button" data-action="add-group-field" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
                                     + {{ __('messages.add_subschedule') }}
                                 </button>
                             </div>
@@ -2027,7 +2027,7 @@
                             @endforeach
                         </div>
 
-                        <button type="button" data-action="add-custom-field" id="add-event-custom-field-btn" class="text-sm text-[#4E81FA] hover:text-blue-700 {{ count($eventCustomFields) >= 10 ? 'hidden' : '' }}">
+                        <button type="button" data-action="add-custom-field" id="add-event-custom-field-btn" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8] {{ count($eventCustomFields) >= 10 ? 'hidden' : '' }}">
                             + {{ __('messages.add_field') }}
                         </button>
 
@@ -2090,7 +2090,7 @@
                                     </div>
                                 @endforeach
                             </div>
-                            <button type="button" data-action="add-approved-subdomain" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                            <button type="button" data-action="add-approved-subdomain" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
                                 + {{ __('messages.add_schedule') }}
                             </button>
                         </div>
@@ -2283,7 +2283,7 @@
                                         </div>
                                     @endforeach
                                 </div>
-                                <button type="button" data-action="add-import-url" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                <button type="button" data-action="add-import-url" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
                                     + {{ __('messages.add') }}
                                 </button>
                             </div>
@@ -2311,7 +2311,7 @@
                                         </div>
                                     @endforeach
                                 </div>
-                                <button type="button" data-action="add-import-city" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                <button type="button" data-action="add-import-city" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
                                     + {{ __('messages.add') }}
                                 </button>
                             </div>

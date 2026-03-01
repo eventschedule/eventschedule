@@ -161,8 +161,8 @@
                                     :class="['absolute p-2 rounded-md transition-all duration-200 shadow-md', 
                                         'end-16 bottom-3',
                                         (isLoading || detailsImage)
-                                            ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed border border-gray-400 dark:border-gray-500' 
-                                            : 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl']"
+                                            ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed border border-gray-400 dark:border-gray-500'
+                                            : '{{ (isset($isGuest) && $isGuest) ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl' : 'bg-[#4E81FA] hover:bg-[#3D6FE8] text-white cursor-pointer border border-[#4E81FA]/30 shadow-lg hover:shadow-xl' }}']"
                                     title="{{ __('messages.add_image') }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -177,7 +177,7 @@
                                     :class="['absolute p-2 rounded-md transition-all duration-200 shadow-md', 
                                         'end-5 bottom-3',
                                         canSubmit && !isLoading
-                                            ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl' 
+                                            ? '{{ (isset($isGuest) && $isGuest) ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl' : 'bg-[#4E81FA] hover:bg-[#3D6FE8] text-white cursor-pointer border border-[#4E81FA]/30 shadow-lg hover:shadow-xl' }}'
                                             : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed border border-gray-400 dark:border-gray-500']"
                                     title="{{ __('messages.submit') }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,7 +239,7 @@
                             id="show_all_fields" 
                             v-model="showAllFields" 
                             @change="saveShowAllFieldsPreference"
-                            class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                            class="rounded border-gray-300 {{ (isset($isGuest) && $isGuest) ? 'text-blue-500 focus:border-blue-500 focus:ring-blue-500' : 'text-[#4E81FA] focus:border-[#4E81FA] focus:ring-[#4E81FA]' }} shadow-sm focus:ring focus:ring-opacity-50">
                     <label for="show_all_fields" class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                         {{ __('messages.show_all_fields') }}
                     </label>
@@ -250,7 +250,7 @@
 
                 <!-- Action buttons - now includes Save All -->
                 <div class="flex gap-2 self-end sm:self-auto">
-                    <button @click="handleSaveAll" v-if="({{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1) && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
+                    <button @click="handleSaveAll" v-if="({{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1) && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" type="button" class="px-4 py-2 bg-[#4E81FA] text-white rounded-md hover:bg-[#3D6FE8] transition-all duration-200 hover:scale-105 hover:shadow-md">
                         {{ __('messages.save_all') }}
                     </button>
                 </div>
@@ -307,7 +307,7 @@
                                     <!-- View button -->
                                     <a :href="preview.parsed[idx].event_url"
                                         target="_blank"
-                                        class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
+                                        class="px-4 py-2 {{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 hover:bg-blue-600' : 'bg-[#4E81FA] hover:bg-[#3D6FE8]' }} text-white rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md">
                                         {{ __('messages.view') }}
                                     </a>
                                     <!-- Show Select button if event hasn't been added to curator schedule -->
@@ -753,7 +753,7 @@
                         <!-- Add buttons at the bottom of the left column -->
                         <div class="mt-12 flex justify-end gap-2">
                             <template v-if="savedEvents[idx]">
-                                <button v-if="!savedEventData[idx]?.is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" @click="handleEdit(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
+                                <button v-if="!savedEventData[idx]?.is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" @click="handleEdit(idx)" type="button" class="px-4 py-2 {{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 hover:bg-blue-600' : 'bg-[#4E81FA] hover:bg-[#3D6FE8]' }} text-white rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md">
                                     {{ __('messages.edit') }}
                                 </button>
                                 <button v-if="{{ auth()->check() ? 'true' : 'false' }}" @click="handleView(idx)" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
@@ -776,7 +776,7 @@
                                         :class="['px-4 py-2 rounded-md transition-all duration-200',
                                             (savingEvents[idx] || !canCreateAccount)
                                                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                                                : 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-105']">
+                                                : '{{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-[#4E81FA] text-white hover:bg-[#3D6FE8]' }} hover:scale-105']">
                                     <span v-if="savingEvents[idx]" class="inline-flex items-center">
                                         <svg class="animate-spin -ms-1 me-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

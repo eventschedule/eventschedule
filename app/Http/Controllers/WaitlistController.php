@@ -57,15 +57,25 @@ class WaitlistController extends Controller
             ->whereIn('status', ['expired', 'purchased'])
             ->delete();
 
-        TicketWaitlist::create([
-            'event_id' => $eventId,
-            'event_date' => $request->event_date,
-            'name' => strip_tags($request->name),
-            'email' => $request->email,
-            'subdomain' => $subdomain,
-            'status' => 'waiting',
-            'locale' => app()->getLocale(),
-        ]);
+        try {
+            TicketWaitlist::create([
+                'event_id' => $eventId,
+                'event_date' => $request->event_date,
+                'name' => strip_tags($request->name),
+                'email' => $request->email,
+                'subdomain' => $subdomain,
+                'status' => 'waiting',
+                'locale' => app()->getLocale(),
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->errorInfo[1] == 1062) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('messages.waitlist_already_joined'),
+                ]);
+            }
+            throw $e;
+        }
 
         return response()->json([
             'success' => true,

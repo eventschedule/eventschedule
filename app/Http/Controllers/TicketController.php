@@ -965,7 +965,9 @@ class TicketController extends Controller
             return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
         }
 
-        $sale = Sale::where('event_id', $event->id)
+        $sale = Sale::with('saleTickets.ticket')
+            ->where('event_id', $event->id)
+            ->where('is_deleted', false)
             ->where('secret', $secret)
             ->first();
 
@@ -998,7 +1000,7 @@ class TicketController extends Controller
         foreach ($sale->saleTickets as $saleTicket) {
             $data->tickets[] = [
                 'type' => $saleTicket->ticket->type,
-                'seats' => json_decode($saleTicket->seats, true),
+                'seats' => json_decode($saleTicket->seats, true) ?? [],
             ];
         }
 
@@ -1006,6 +1008,9 @@ class TicketController extends Controller
             $seats = $saleTicket->seats;
             if ($seats) {
                 $seats = json_decode($seats, true);
+                if (! is_array($seats)) {
+                    continue;
+                }
                 foreach ($seats as $key => $value) {
                     if (! $value) {
                         $seats[$key] = time();

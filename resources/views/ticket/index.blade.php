@@ -3,14 +3,14 @@
     <div class="flow-root">
         <div class="mb-4">
             @if($past)
-                <a href="{{ route('tickets') }}" class="inline-flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                <a href="{{ route('tickets') }}" class="inline-flex items-center text-sm text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8]">
                     <svg class="w-4 h-4 me-1 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
                     {{ __('messages.back') }}
                 </a>
             @elseif(!empty($hasPastTickets))
-                <a href="{{ route('tickets', ['past' => 1]) }}" class="inline-flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                <a href="{{ route('tickets', ['past' => 1]) }}" class="inline-flex items-center text-sm text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8]">
                     {{ __('messages.show_past_events') }}
                 </a>
             @endif
@@ -49,13 +49,13 @@
                                         <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                                             <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
                                                 <a href="{{ $sale->getEventUrl() }}"
-                                                    target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">{{ $sale->event->name }}
+                                                    target="_blank" class="text-[#4E81FA] hover:text-[#3D6FE8] hover:underline">{{ $sale->event->name }}
                                                 </a>
                                             </td>
                                             <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
                                                 @if ($sale->event->venue && $sale->event->venue->isClaimed())
                                                     <a href="{{ $sale->event->venue->getGuestUrl() }}"   
-                                                        target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">
+                                                        target="_blank" class="text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8] hover:underline">
                                                         {{ $sale->event->venue->getDisplayName(false) }}
                                                     </a>
                                                 @else
@@ -184,7 +184,7 @@
                             <div class="pt-2">
                                 <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" 
                                    target="_blank" 
-                                   class="w-full inline-flex items-center justify-center rounded-lg bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-700 shadow-sm ring-1 ring-inset ring-blue-200 hover:bg-blue-100 transition-colors duration-150">
+                                   class="w-full inline-flex items-center justify-center rounded-lg bg-[#4E81FA]/10 px-4 py-3 text-sm font-semibold text-[#4E81FA] shadow-sm ring-1 ring-inset ring-[#4E81FA]/30 hover:bg-[#4E81FA]/20 transition-colors duration-150">
                                     <svg class="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>

@@ -1544,7 +1544,7 @@
                                         </span>
                                     </div>
                                     <div class="flex items-center gap-3">
-                                        <button v-if="!selectedVenue.user_id" @click="editSelectedVenue" type="button" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                        <button v-if="!selectedVenue.user_id" @click="editSelectedVenue" type="button" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
                                             {{ __('messages.edit') }}
                                         </button>
                                         <button v-if="!roleIsVenue" @click="clearSelectedVenue" type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
@@ -1673,7 +1673,7 @@
                                             @endif
                                         </div>
                                         <div class="flex items-center gap-3">
-                                            <button v-if="!member.user_id" @click="editMember(member)" type="button" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                            <button v-if="!member.user_id" @click="editMember(member)" type="button" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
                                                 {{ __('messages.edit') }}
                                             </button>
                                             <button v-if="!(roleIsTalent && member.id === roleEncodedId)" @click="removeMember(member)" type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
@@ -1685,7 +1685,7 @@
                             </div>
 
                             <div v-if="!showMemberTypeRadio">
-                                <button type="button" @click="showAddMemberForm" class="text-[#4E81FA] hover:text-blue-700 text-sm font-medium flex items-center gap-1">
+                                <button type="button" @click="showAddMemberForm" class="text-[#4E81FA] hover:text-[#3D6FE8] text-sm font-medium flex items-center gap-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                     </svg>
@@ -1915,7 +1915,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <button type="button" @click="addIncludeDate()" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                            <button type="button" @click="addIncludeDate()" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
                                 + {{ __('messages.add_date') }}
                             </button>
                         </div>
@@ -1933,7 +1933,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <button type="button" @click="addExcludeDate()" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                            <button type="button" @click="addExcludeDate()" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
                                 + {{ __('messages.add_date') }}
                             </button>
                         </div>
@@ -2062,7 +2062,7 @@
                         </div>
 
                         <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
-                            <button type="button" @click="addPart" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                            <button type="button" @click="addPart" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
                                 + {{ __('messages.add_part') }}
                             </button>
 
@@ -2152,7 +2152,7 @@
                                 </div>
                             </div>
                             <div class="flex gap-2">
-                                <x-secondary-button type="button" @click="acceptParsedParts" class="!bg-blue-600 !text-white hover:!bg-blue-700">
+                                <x-secondary-button type="button" @click="acceptParsedParts" class="!bg-[#4E81FA] !text-white hover:!bg-[#3D6FE8]">
                                     {{ __('messages.accept_parts') }}
                                 </x-secondary-button>
                                 <x-secondary-button type="button" @click="showPartsPreview = false; parsedPartsPreview = []">
@@ -2215,7 +2215,7 @@
                                     <div class="ms-2 flex-shrink-0">
                                         @if($curator->accept_requests && $curator->request_terms)
                                         <div class="relative group">
-                                            <button type="button" class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none">
+                                            <button type="button" class="text-[#4E81FA] hover:text-[#3D6FE8] dark:text-[#4E81FA] dark:hover:text-[#3D6FE8] focus:outline-none">
                                                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                                                 </svg>
@@ -2552,7 +2552,7 @@
                                         </div>
                                     </div>
                                     <input type="hidden" name="custom_fields" :value="JSON.stringify(eventCustomFields || {})">
-                                    <button type="button" @click="addEventCustomField" class="mt-2 text-sm text-[#4E81FA] hover:text-blue-700" v-if="getEventCustomFieldCount() < 10">
+                                    <button type="button" @click="addEventCustomField" class="mt-2 text-sm text-[#4E81FA] hover:text-[#3D6FE8]" v-if="getEventCustomFieldCount() < 10">
                                         + {{ __('messages.add_field') }}
                                     </button>
                                 </div>
@@ -2582,7 +2582,7 @@
                                                 <p v-if="formSubmitAttempted && tickets.length > 1 && !ticket.type" class="mt-1 text-xs text-red-600">{{ __('messages.ticket_type_required') }}</p>
                                             </div>
                                             <div v-if="tickets.length > 1" class="flex items-end gap-3">
-                                                <button type="button" @click="addTicketCustomField(index)" class="mt-1 text-sm text-[#4E81FA] hover:text-blue-700" v-if="getTicketCustomFieldCount(index) < 10">
+                                                <button type="button" @click="addTicketCustomField(index)" class="mt-1 text-sm text-[#4E81FA] hover:text-[#3D6FE8]" v-if="getTicketCustomFieldCount(index) < 10">
                                                     + {{ __('messages.add_field') }}
                                                 </button>
                                                 <button type="button" @click="removeTicket(index)" class="mt-1 text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
@@ -2671,7 +2671,7 @@
                                     </div>
 
                                     <div class="flex gap-2 mt-4">
-                                        <button type="button" @click="addTicket" class="text-sm text-[#4E81FA] hover:text-blue-700">
+                                        <button type="button" @click="addTicket" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
                                             + {{ __('messages.add_type') }}
                                         </button>
                                     </div>
@@ -2870,7 +2870,7 @@
 
                                     <button type="button" @click="addPromoCode"
                                         v-show="!(isInvoiceNinjaPaymentLink && event.payment_method === 'invoiceninja' && promoCodes.length >= 1)"
-                                        class="mt-2 text-sm text-[#4E81FA] hover:text-blue-700">
+                                        class="mt-2 text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
                                         + {{ __('messages.add_promo_code') }}
                                     </button>
                                 </div>

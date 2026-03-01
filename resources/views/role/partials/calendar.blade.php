@@ -207,6 +207,11 @@
 
     $accentColor = $accentColor ?? (isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA');
     $contrastColor = accent_contrast_color($accentColor);
+
+    if ($isAdminRoute) {
+        $accentColor = '#4E81FA';
+        $contrastColor = '#ffffff';
+    }
 @endphp
 
 {{-- Panel wrapper --}}
@@ -523,7 +528,7 @@
                         @else
                         @php
                             $isToday = $currentDate->day == $today->day && $currentDate->month == $today->month && $currentDate->year == $today->year;
-                            $todayAccent = (isset($otherRole) && $otherRole->accent_color ? $otherRole->accent_color : (isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA'));
+                            $todayAccent = $isAdminRoute ? '#4E81FA' : (isset($otherRole) && $otherRole->accent_color ? $otherRole->accent_color : (isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA'));
                         @endphp
                         <time datetime="{{ $currentDate->format('Y-m-d') }}"
                             style="{{ $isToday ? 'background-color: ' . $todayAccent . '; color: ' . accent_contrast_color($todayAccent) : '' }}"

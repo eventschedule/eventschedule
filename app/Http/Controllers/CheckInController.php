@@ -22,23 +22,15 @@ class CheckInController extends Controller
         $today = now()->format('Y-m-d');
 
         // Pre-select event with sales for today, else most recent
-        $selectedEventId = null;
-        foreach ($events as $event) {
-            $hasTodaySales = Sale::where('event_id', $event->id)
-                ->where('event_date', $today)
-                ->where('status', 'paid')
-                ->where('is_deleted', false)
-                ->exists();
+        $eventIdsWithTodaySales = Sale::whereIn('event_id', $events->pluck('id'))
+            ->where('event_date', $today)
+            ->where('status', 'paid')
+            ->where('is_deleted', false)
+            ->pluck('event_id')
+            ->unique();
 
-            if ($hasTodaySales) {
-                $selectedEventId = $event->id;
-                break;
-            }
-        }
-
-        if (! $selectedEventId && $events->isNotEmpty()) {
-            $selectedEventId = $events->first()->id;
-        }
+        $selectedEventId = $events->first(fn ($e) => $eventIdsWithTodaySales->contains($e->id))?->id
+            ?? $events->first()?->id;
 
         $eventsData = $events->map(function ($event) {
             return [

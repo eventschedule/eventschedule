@@ -23,7 +23,7 @@
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 min-w-0">{{ $segment->name }}</h3>
                     <div class="shrink-0 space-x-3">
                         <a href="{{ route('newsletter.segment.edit', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
-                            class="text-[#4E81FA] hover:text-blue-700 text-sm">{{ __('messages.edit') }}</a>
+                            class="text-[#4E81FA] hover:text-[#3D6FE8] text-sm">{{ __('messages.edit') }}</a>
                         <form method="POST" action="{{ route('newsletter.segment.delete', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
                             class="inline js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
                             @csrf

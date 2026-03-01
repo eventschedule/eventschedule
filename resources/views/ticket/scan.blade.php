@@ -14,7 +14,10 @@
                 border-radius: 1rem !important;
             }
             #html5-qrcode-button-camera-permission {
-                @apply bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors;
+                background-color: #4E81FA; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: background-color 0.15s;
+            }
+            #html5-qrcode-button-camera-permission:hover {
+                background-color: #3D6FE8;
             }
             #html5-qrcode-button-camera-start, 
             #html5-qrcode-button-camera-stop {
@@ -90,7 +93,7 @@
 
                 </div>
 
-                <button @click="startNewScan" class="mt-6 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                <button @click="startNewScan" class="mt-6 bg-[#4E81FA] text-white px-4 py-2 rounded-lg hover:bg-[#3D6FE8] transition-colors">
                         {{ __('messages.scan_another_ticket') }}
                 </button>
             </div>

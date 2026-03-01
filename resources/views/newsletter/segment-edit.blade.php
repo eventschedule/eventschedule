@@ -70,7 +70,7 @@
                 </button>
             </form>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">
-                <a href="{{ route('newsletter.import', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="text-[#4E81FA] hover:text-blue-700">
+                <a href="{{ route('newsletter.import', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="text-[#4E81FA] hover:text-[#3D6FE8]">
                     {{ __('messages.import_in_bulk') }}
                 </a>
             </p>
@@ -111,7 +111,7 @@
                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $subscriber->created_at?->format('M j, Y') }}</td>
                             <td class="px-4 py-3 text-sm text-right">
                                 <div class="flex gap-3 justify-end">
-                                    <button type="button" @click="editingId = '{{ $encodedId }}'" class="text-[#4E81FA] hover:text-blue-700">{{ __('messages.edit') }}</button>
+                                    <button type="button" @click="editingId = '{{ $encodedId }}'" class="text-[#4E81FA] hover:text-[#3D6FE8]">{{ __('messages.edit') }}</button>
                                     <form method="POST" action="{{ route('newsletter.segment.user.delete', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id), 'userHash' => $encodedId]) }}"
                                         class="js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
                                         @csrf

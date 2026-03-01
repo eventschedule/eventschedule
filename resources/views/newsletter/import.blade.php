@@ -125,7 +125,7 @@
 
                 <div class="mt-3">
                     <button type="button" @click="addFormRow()"
-                        class="text-sm text-[#4E81FA] hover:text-blue-700">
+                        class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
                         + {{ __('messages.add_row') }}
                     </button>
                 </div>
