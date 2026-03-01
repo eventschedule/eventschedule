@@ -188,6 +188,13 @@
         } elseif ($path === 'docs/selfhost') {
             $breadcrumbs[] = ['name' => 'Documentation', 'url' => url('/docs')];
             $breadcrumbs[] = ['name' => 'Selfhost', 'url' => url()->current()];
+        } elseif (str_starts_with($path, 'docs/saas/')) {
+            $breadcrumbs[] = ['name' => 'Documentation', 'url' => url('/docs')];
+            $breadcrumbs[] = ['name' => 'SaaS', 'url' => url('/docs/saas')];
+            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+        } elseif ($path === 'docs/saas') {
+            $breadcrumbs[] = ['name' => 'Documentation', 'url' => url('/docs')];
+            $breadcrumbs[] = ['name' => 'SaaS', 'url' => url()->current()];
         } elseif (str_starts_with($path, 'docs/developer/')) {
             $breadcrumbs[] = ['name' => 'Documentation', 'url' => url('/docs')];
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];

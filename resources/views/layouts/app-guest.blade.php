@@ -63,10 +63,8 @@
             <meta property="og:description" content="{{ $event->getMetaDescription($date) }}">
             @php $eventOgImage = $event->getImageUrl() ?: (config('app.url') . '/images/social/home.png'); @endphp
             <meta property="og:image" content="{{ $eventOgImage }}">
-            @if (! $event->getImageUrl())
             <meta property="og:image:width" content="1200">
             <meta property="og:image:height" content="630">
-            @endif
             <meta property="og:image:alt" content="{{ $event->translatedName() }}">
             <meta property="og:url" content="{{ $event->getGuestUrl(false, $date) }}">
             <meta property="og:site_name" content="Event Schedule">
@@ -112,11 +110,11 @@
             <meta name="twitter:image" content="{{ $image }}">
             @else
             <meta property="og:image" content="{{ config('app.url') . '/images/social/home.png' }}">
-            <meta property="og:image:width" content="1200">
-            <meta property="og:image:height" content="630">
             <meta property="og:image:alt" content="{{ $name ?? $role->translatedName() }}">
             <meta name="twitter:image" content="{{ config('app.url') . '/images/social/home.png' }}">
             @endif
+            <meta property="og:image:width" content="1200">
+            <meta property="og:image:height" content="630">
             <meta property="og:type" content="website">
             <meta property="og:url" content="{{ $role->getGuestUrl() }}">
             <meta property="og:site_name" content="Event Schedule">

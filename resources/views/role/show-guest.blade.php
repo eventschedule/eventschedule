@@ -63,6 +63,15 @@
             <div class="absolute -top-40 -bottom-3 left-1/2 -translate-x-1/2 w-screen bg-cover bg-no-repeat bg-top md:hidden -z-10"
                  style="background-image: url('{{ $mobileBannerUrl }}');"></div>
         @endif
+        @if (config('app.hosted') && !request()->embed)
+        <nav aria-label="Breadcrumb" class="text-sm text-gray-500 dark:text-gray-400 mb-2">
+            <a href="{{ marketing_url() }}" class="hover:underline hover:text-gray-700 dark:hover:text-gray-200">
+                {{ __('messages.home') }}
+            </a>
+            <span class="mx-1">/</span>
+            <span class="text-gray-900 dark:text-gray-100">{{ $role->translatedName() }}</span>
+        </nav>
+        @endif
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl mb-0 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} transition-[max-width] duration-300 ease-in-out mx-auto"
           data-view-width
           style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"
@@ -88,7 +97,7 @@
             />
             @endif
           </div>
-          <div id="schedule-header" class="px-6 lg:px-16 pb-1 md:pb-4 relative z-10 {{ $isRtl ? 'rtl' : '' }}">
+          <header id="schedule-header" class="px-6 lg:px-16 pb-1 md:pb-4 relative z-10 {{ $isRtl ? 'rtl' : '' }}">
             @if ($role->profile_image_url)
             <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] mx-auto {{ $isRtl ? 'sm:mr-0 sm:ml-auto' : 'sm:mx-0 sm:-ml-2' }} mb-3 sm:mb-6 bg-white dark:bg-gray-900 flex items-center justify-center">
               <img
@@ -468,7 +477,7 @@
             </div>
             -->
 
-          </div>
+          </header>
         </div>
 
         @if (! $role->isTalent())
@@ -699,6 +708,7 @@
         }
       </style>
 
+      <section aria-label="{{ __('messages.events') }}">
       <div
         class="calendar-panel-border mt-2 md:mt-6 mb-6 px-0 md:px-6 lg:px-16 pt-0 md:pt-4 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
         id="calendar-panel-wrapper"
@@ -707,6 +717,7 @@
       >
         @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'eventLayout' => $role->event_layout ?? 'calendar', 'pastEvents' => $pastEvents ?? collect()])
       </div>
+      </section>
 
       @if ($role->youtube_links && $role->youtube_links != '[]')
         @php

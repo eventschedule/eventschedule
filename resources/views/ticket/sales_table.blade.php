@@ -228,7 +228,7 @@
                                 </td>
                             </tr>
                             @if ($hasAnyCustomValues)
-                            <tr class="custom-fields-row hidden bg-gray-50 dark:bg-gray-900/50" style="border-top: none;">
+                            <tr class="custom-fields-row hidden bg-gray-50 dark:bg-[#2d2d30]/50" style="border-top: none;">
                                 <td colspan="6" class="px-6 py-3">
                                     <div class="text-sm space-y-2">
                                         {{-- Event-level Custom Fields --}}

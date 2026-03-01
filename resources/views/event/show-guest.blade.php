@@ -855,7 +855,7 @@
 
         {{-- Description --}}
         @if ($translation ? $translation->description_translated : $event->translatedDescription())
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8">
+        <article class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8">
           <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
             {{ __('messages.about') }}
           </h2>
@@ -864,7 +864,7 @@
               {!! \App\Utils\UrlUtils::convertUrlsToLinks($translation ? ($translation->description_html_translated ?: $translation->description_translated) : $event->translatedDescription()) !!}
             </div>
           </div>
-        </div>
+        </article>
         @endif
 
         {{-- Agenda image --}}

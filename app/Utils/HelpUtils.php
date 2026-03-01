@@ -101,6 +101,7 @@ class HelpUtils
         'newsletter-import*' => '/docs/newsletters',
         'boost*' => '/docs/boost',
         'scan' => '/docs/tickets#check-in',
+        'checkin' => '/docs/tickets#check-in',
         'new/*' => '/docs/creating-schedules',
     ];
 

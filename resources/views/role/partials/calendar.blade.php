@@ -707,10 +707,10 @@
                                         {{-- Event Title --}}
                                         <div class="flex items-start gap-2">
                                             <span v-if="getEventGroupColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
-                                            <h3 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto">
+                                            <h2 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto">
                                                 <span v-html="commaBreak(event.name)"></span>
                                                 <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-6 h-6 text-gray-400 ms-2 align-middle"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
-                                            </h3>
+                                            </h2>
                                         </div>
                                         <p v-if="event.short_description && !event.is_password_protected" class="text-gray-600 dark:text-gray-400 mt-2" dir="auto" v-text="event.short_description"></p>
 
@@ -1051,10 +1051,10 @@
                                     {{-- Event Title --}}
                                     <div class="flex items-start gap-2">
                                         <span v-if="getEventGroupColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
-                                        <h3 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto">
+                                        <h2 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto">
                                             <span v-html="commaBreak(event.name)"></span>
                                             <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-6 h-6 text-gray-400 ms-2 align-middle"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
-                                        </h3>
+                                        </h2>
                                     </div>
                                     <p v-if="event.short_description && !event.is_password_protected" class="text-gray-600 dark:text-gray-400 mt-2" dir="auto" v-text="event.short_description"></p>
 
@@ -3547,10 +3547,19 @@ document.addEventListener('DOMContentLoaded', function() {
     @if ($events->isNotEmpty() && $events->first() instanceof \App\Models\Event)
     <ul>
         @foreach ($events as $noscriptEvent)
-        <li>
+        <li style="margin-bottom: 1rem;">
             <a href="{{ $noscriptEvent->getGuestUrl($role->subdomain) }}">
-                {{ $noscriptEvent->translatedName() }} - {{ $noscriptEvent->localStartsAt(true) }}
+                <strong>{{ $noscriptEvent->translatedName() }}</strong>
             </a>
+            <br>
+            {{ $noscriptEvent->localStartsAt(true) }}
+            @if ($noscriptEvent->venue)
+                - {{ $noscriptEvent->venue->getDisplayName() }}
+            @endif
+            @if ($noscriptEvent->translatedShortDescription())
+                <br>
+                <span>{{ Str::limit($noscriptEvent->translatedShortDescription(), 100) }}</span>
+            @endif
         </li>
         @endforeach
     </ul>

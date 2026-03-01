@@ -190,6 +190,7 @@
                                          alt="{{ $schedule['name'] }} header image"
                                          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                          loading="lazy"
+                                         decoding="async"
                                          width="400"
                                          height="280">
                                 </picture>
@@ -205,6 +206,7 @@
                                              alt="{{ $schedule['name'] }} logo"
                                              class="w-full h-full object-cover"
                                              loading="lazy"
+                                             decoding="async"
                                              width="64"
                                              height="64">
                                     </picture>
@@ -231,6 +233,7 @@
                                                  alt="{{ $schedule['name'] }} logo"
                                                  class="w-full h-full object-cover"
                                                  loading="lazy"
+                                                 decoding="async"
                                                  width="64"
                                                  height="64">
                                         </picture>

@@ -90,13 +90,23 @@ document.getElementById('tab-waitlist').addEventListener('click', function() {
     }
 });
 
-function loadWaitlist() {
-    fetch('{{ route("waitlist.index") }}', {
+function loadWaitlist(url) {
+    fetch(url || '{{ route("waitlist.index") }}', {
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
     })
     .then(response => response.text())
     .then(html => {
         document.getElementById('waitlist-table').innerHTML = html;
+        bindWaitlistPagination();
+    });
+}
+
+function bindWaitlistPagination() {
+    document.querySelectorAll('#waitlist-table nav[role="navigation"] a').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            loadWaitlist(this.href);
+        });
     });
 }
 
@@ -157,6 +167,11 @@ clearButton.addEventListener('click', function() {
     clearButton.style.display = 'none';
     updateResults(''); // Call directly without timeout
 });
+
+// Show clear button if filter has a value on initial load
+if (filterInput.value) {
+    clearButton.style.display = 'block';
+}
 
 function updateResults(value) {
     fetch(`${window.location.pathname}?filter=${encodeURIComponent(value)}`, {

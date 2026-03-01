@@ -854,13 +854,15 @@ class TicketController extends Controller
             abort(403);
         }
 
-        DB::transaction(function () use ($sale) {
+        $cancelled = DB::transaction(function () use ($sale) {
             $sale = Sale::lockForUpdate()->find($sale->id);
             if ($sale->status !== 'unpaid') {
-                return;
+                return false;
             }
             $sale->status = 'cancelled';
             $sale->save();
+
+            return true;
         });
 
         $event = $sale->event;
