@@ -30,7 +30,7 @@
 
         <p style="font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
             @php
-                $emailSettings = $role->getEmailSettings();
+                $emailSettings = $role ? $role->getEmailSettings() : [];
                 $supportEmail = !empty($emailSettings['from_address']) ? $emailSettings['from_address'] : ($event->user?->email ?? config('mail.from.address'));
             @endphp
             {{ __('messages.event_support_contact') }}: <a href="mailto:{{ $supportEmail }}" style="color: #4E81FA;">{{ $supportEmail }}</a>

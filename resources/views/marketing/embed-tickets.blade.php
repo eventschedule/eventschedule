@@ -244,7 +244,7 @@
                                 Dark Mode + RTL
                             </div>
                             <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Adapts to any context</h2>
-                            <p class="text-gray-600 dark:text-white/80 text-lg">The widget automatically matches your visitor's system preference for light or dark mode, and supports right-to-left languages including Arabic and Hebrew.</p>
+                            <p class="text-gray-600 dark:text-white/80 text-lg">The widget automatically matches your visitor's system preference for light or dark mode, and supports right-to-left languages including Arabic and Hebrew. You can also force dark mode with <code class="text-sm bg-blue-200/50 dark:bg-blue-800/50 px-1.5 py-0.5 rounded">?dark=true</code> or set a language with <code class="text-sm bg-blue-200/50 dark:bg-blue-800/50 px-1.5 py-0.5 rounded">?lang=xx</code> in the embed URL.</p>
                         </div>
                         <div class="flex gap-4">
                             <div class="flex-1 rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10">
@@ -360,8 +360,8 @@
                     <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 mb-6 mx-auto">
                         <span class="text-2xl font-bold text-blue-500">2</span>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Click "Embed Tickets"</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Edit your event, scroll to the Tickets section, and click the "Embed Tickets" link to copy the iframe code.</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Copy the embed code</h3>
+                    <p class="text-gray-500 dark:text-gray-400">Edit your event, scroll to the Tickets section, and click the "Embed Tickets" (or "Embed Registration" for RSVP-only events) link to copy the iframe code.</p>
                 </div>
 
                 <!-- Step 3 -->

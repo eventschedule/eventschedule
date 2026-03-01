@@ -68,6 +68,12 @@ class SendFeedbackRequests extends Command
 
                     // Check if enough time has passed since event ended
                     $endDateTime = $event->getEndDateTime($sale->event_date);
+
+                    // Don't send feedback requests for events that ended more than 30 days ago
+                    if ($endDateTime->copy()->addDays(30)->isPast()) {
+                        continue;
+                    }
+
                     $delayHours = $role->feedback_delay_hours ?? 24;
 
                     if ($endDateTime->copy()->addHours($delayHours)->isFuture()) {

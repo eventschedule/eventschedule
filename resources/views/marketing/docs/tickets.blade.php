@@ -738,6 +738,10 @@
                                             <td class="py-2 pr-4"><code class="doc-code">promo=CODE</code></td>
                                             <td class="py-2">Pre-fill a promo code</td>
                                         </tr>
+                                        <tr class="border-b border-gray-100 dark:border-white/5">
+                                            <td class="py-2 pr-4"><code class="doc-code">lang=xx</code></td>
+                                            <td class="py-2">Set the widget language (e.g., <code class="doc-code">lang=es</code> for Spanish)</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>

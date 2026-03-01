@@ -12,7 +12,7 @@
 {{ __('messages.feedback_submit') }}: {{ $feedbackUrl }}
 
 @php
-    $emailSettings = $role->getEmailSettings();
+    $emailSettings = $role ? $role->getEmailSettings() : [];
     $supportEmail = !empty($emailSettings['from_address']) ? $emailSettings['from_address'] : ($event->user?->email ?? config('mail.from.address'));
 @endphp
 {{ __('messages.event_support_contact') }}: {{ $supportEmail }}
