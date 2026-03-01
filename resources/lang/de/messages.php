@@ -364,7 +364,7 @@ return [
     'checkout' => 'Kasse',
     'tickets' => 'Tickets',
     'general' => 'Allgemein',
-    'localization' => 'Localization',
+    'localization' => 'Lokalisierung',
     'payment' => 'Zahlung',
     'options' => 'Optionen',
     'requires_pro_plan' => 'Erfordert einen Pro-Plan',

@@ -422,7 +422,7 @@ return [
     'checkout' => 'Проверить',
     'tickets' => 'Билеты',
     'general' => 'Общий',
-    'localization' => 'Localization',
+    'localization' => 'Локализация',
     'payment' => 'Оплата',
     'options' => 'Параметры',
     'requires_pro_plan' => 'Требуется план Pro',

@@ -370,7 +370,7 @@ return [
     'checkout' => 'Pagar',
     'tickets' => 'Entradas',
     'general' => 'General',
-    'localization' => 'Localization',
+    'localization' => 'Localización',
     'payment' => 'Pago',
     'options' => 'Opciones',
     'requires_pro_plan' => 'Requiere un plan Pro',

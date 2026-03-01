@@ -30,7 +30,9 @@ class EventManagementTest extends DuskTestCase
                 ->waitFor('#event_name', 5)
                 ->type('name', 'Original Event')
                 ->click('a[data-section="section-venue"]')
-                ->waitFor('#selected_venue', 5)
+                ->waitFor('#in_person', 5);
+            $browser->script("var cb = document.getElementById('in_person'); if (!cb.checked) cb.click();");
+            $browser->waitFor('#selected_venue', 5)
                 ->select('#selected_venue')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')

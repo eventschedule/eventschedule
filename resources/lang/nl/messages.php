@@ -205,7 +205,7 @@ return [
     'checkout' => 'Afrekenen',
     'tickets' => 'Tickets',
     'general' => 'Algemeen',
-    'localization' => 'Localization',
+    'localization' => 'Lokalisatie',
     'payment' => 'Betaling',
     'options' => 'Opties',
     'requires_pro_plan' => 'Vereist een Pro-abonnement',

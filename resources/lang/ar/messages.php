@@ -357,7 +357,7 @@ return [
     'checkout' => 'الدفع',
     'tickets' => 'التذاكر',
     'general' => 'عام',
-    'localization' => 'Localization',
+    'localization' => 'التوطين',
     'payment' => 'الدفع',
     'options' => 'خيارات',
     'requires_pro_plan' => 'يتطلب خطة برو',

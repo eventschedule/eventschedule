@@ -115,11 +115,13 @@ trait AccountSetupTrait
         $browser->visit('/'.strtolower(str_replace(' ', '-', $talentName)).'/add-event?date='.date('Y-m-d', strtotime('+3 days')))
             ->type('name', $eventName)
             ->click('a[data-section="section-venue"]')
-            ->pause(1000)
+            ->waitFor('#in_person', 5);
+        $browser->script("var cb = document.getElementById('in_person'); if (!cb.checked) cb.click();");
+        $browser->waitFor('#selected_venue', 5)
             ->select('#selected_venue')
             ->click('a[data-section="section-tickets"]')
-            ->waitFor('#tickets_enabled', 5)
-            ->click('label[for="tickets_enabled"]')
+            ->waitFor('#ticket_mode_tickets', 5)
+            ->click('label[for="ticket_mode_tickets"]')
             ->pause(1000); // Wait for Vue to render the ticket tabs
 
         // Use JavaScript to scroll the price input into view and ensure it's visible

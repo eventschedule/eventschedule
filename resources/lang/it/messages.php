@@ -208,7 +208,7 @@ return [
     'checkout' => 'Checkout',
     'tickets' => 'Biglietti',
     'general' => 'Generale',
-    'localization' => 'Localization',
+    'localization' => 'Localizzazione',
     'payment' => 'Pagamento',
     'options' => 'Opzioni',
     'requires_pro_plan' => 'Richiede un piano Pro',

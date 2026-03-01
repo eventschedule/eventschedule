@@ -421,7 +421,7 @@ return [
     'checkout' => 'Kassasse',
     'tickets' => 'Piletid',
     'general' => 'Üldine',
-    'localization' => 'Localization',
+    'localization' => 'Lokaliseerimine',
     'payment' => 'Makse',
     'options' => 'Valikud',
     'requires_pro_plan' => 'Nõuab Pro-plaani',

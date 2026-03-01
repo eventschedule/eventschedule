@@ -61,6 +61,8 @@ class GeneralTest extends DuskTestCase
                 ->waitFor('#event_name', 10)
                 ->pause(500);
             $browser->script("document.querySelector('a[data-section=\"section-venue\"]').click()");
+            $browser->waitFor('#in_person', 5);
+            $browser->script("var cb = document.getElementById('in_person'); if (!cb.checked) cb.click();");
             $browser->waitFor('#selected_venue', 5)
                 ->select('#selected_venue')
                 ->scrollIntoView('button[type="submit"]')

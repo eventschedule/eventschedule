@@ -206,7 +206,7 @@ return [
     'checkout' => 'Finalizar compra',
     'tickets' => 'Ingressos',
     'general' => 'Geral',
-    'localization' => 'Localization',
+    'localization' => 'Localização',
     'payment' => 'Pagamento',
     'options' => 'Opções',
     'requires_pro_plan' => 'Requer um plano Pro',

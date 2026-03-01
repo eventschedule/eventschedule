@@ -200,7 +200,7 @@ return [
     'checkout' => 'תשלום',
     'tickets' => 'כרטיסים',
     'general' => 'כללי',
-    'localization' => 'Localization',
+    'localization' => 'התאמה אזורית',
     'payment' => 'תשלום',
     'options' => 'אפשרויות',
     'requires_pro_plan' => 'נדרש מסלול מקצועי',

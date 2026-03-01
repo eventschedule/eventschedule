@@ -369,7 +369,7 @@ return [
     'checkout' => 'Paiement',
     'tickets' => 'Billets',
     'general' => 'Général',
-    'localization' => 'Localization',
+    'localization' => 'Localisation',
     'payment' => 'Paiement',
     'options' => 'Options',
     'requires_pro_plan' => 'Nécessite un plan pro',

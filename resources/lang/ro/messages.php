@@ -421,7 +421,7 @@ return [
     'checkout' => 'Finalizare Comandă',
     'tickets' => 'Bilete',
     'general' => 'General',
-    'localization' => 'Localization',
+    'localization' => 'Localizare',
     'payment' => 'Plată',
     'options' => 'Opțiuni',
     'requires_pro_plan' => 'Necesită un plan Pro sau superior',
