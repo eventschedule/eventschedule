@@ -61,6 +61,11 @@ class CheckInController extends Controller
         }
 
         $requestedDate = request()->query('date', now()->format('Y-m-d'));
+        try {
+            $requestedDate = \Carbon\Carbon::createFromFormat('Y-m-d', $requestedDate)->format('Y-m-d');
+        } catch (\Exception $e) {
+            $requestedDate = now()->format('Y-m-d');
+        }
 
         // Get available dates for this event
         $availableDates = Sale::where('event_id', $event->id)
@@ -102,6 +107,9 @@ class CheckInController extends Controller
 
         foreach ($saleTickets as $saleTicket) {
             $seats = $saleTicket->seats ? json_decode($saleTicket->seats, true) : [];
+            if (! is_array($seats)) {
+                $seats = [];
+            }
 
             foreach ($seats as $seatNum => $timestamp) {
                 if ($timestamp !== null) {
