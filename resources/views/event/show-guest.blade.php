@@ -1759,7 +1759,7 @@
 
   {{-- Sticky mobile CTA --}}
   <div x-data="{ shareState: 'idle' }"
-       class="fixed bottom-0 inset-x-0 z-40 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 shadow-lg" style="font-family: sans-serif; padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
+       class="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 shadow-lg" style="font-family: sans-serif; padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
     <div class="flex items-center gap-3 {{ $role->isRtl() ? 'rtl' : '' }}">
       {{-- Mobile share button --}}
       <button type="button"
