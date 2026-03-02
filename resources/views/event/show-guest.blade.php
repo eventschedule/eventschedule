@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts" :showMobileBackground="true">
+<x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts" :showMobileBackground="true" :otherRole="$otherRole">
 
   <main>
     @php

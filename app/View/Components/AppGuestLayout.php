@@ -16,6 +16,7 @@ class AppGuestLayout extends Component
         public array $fonts = [],
         public bool $showMobileBackground = false,
         public bool $passwordGate = false,
+        public ?Role $otherRole = null,
     ) {}
 
     /**
