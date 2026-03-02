@@ -2341,4 +2341,8 @@ return [
     'photo_upgrade_plan' => 'Обновите для неограниченного количества фотографий',
     'download_all_photos' => 'Скачать все фотографии',
     'no_photos_to_download' => 'Нет фотографий для скачивания.',
+
+    'social_tip_grid' => 'Лучше всего для публикаций в Instagram и Facebook',
+    'social_tip_row' => 'Лучше всего для публикаций в Twitter/X и баннеров сайтов',
+    'social_tip_list' => 'Лучше всего для Instagram Stories и email-рассылок',
 ];

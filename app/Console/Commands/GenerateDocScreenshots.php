@@ -162,11 +162,15 @@ class GenerateDocScreenshots extends Command
                 ['id' => 'creating-schedules--section-settings', 'route' => '/simpsons/edit', 'section' => 'section-settings'],
                 ['id' => 'creating-schedules--section-auto-import', 'route' => '/simpsons/edit', 'section' => 'section-auto-import'],
                 ['id' => 'creating-schedules--section-integrations', 'route' => '/simpsons/edit', 'section' => 'section-integrations'],
+                ['id' => 'creating-schedules--section-email-settings', 'route' => '/simpsons/edit', 'section' => 'section-email-settings'],
             ],
             'creating-events' => [
                 ['id' => 'creating-events--schedule-tab', 'route' => '/simpsons/schedule'],
                 ['id' => 'creating-events--add-event', 'route' => '/simpsons/add-event'],
                 ['id' => 'creating-events--import', 'route' => '/simpsons/import'],
+            ],
+            'fan-content' => [
+                ['id' => 'fan-content--videos-tab', 'route' => '/simpsons/videos'],
             ],
             'sharing' => [
                 ['id' => 'sharing--guest-portal', 'route' => '/simpsons', 'public' => true],

@@ -624,6 +624,54 @@ class MarketingController extends Controller
     }
 
     /**
+     * Compare vs Sched page
+     */
+    public function compareSched()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('sched'));
+    }
+
+    /**
+     * Compare vs Whova page
+     */
+    public function compareWhova()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('whova'));
+    }
+
+    /**
+     * Compare vs Accelevents page
+     */
+    public function compareAccelevents()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('accelevents'));
+    }
+
+    /**
+     * Compare vs Tito page
+     */
+    public function compareTito()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('tito'));
+    }
+
+    /**
+     * Compare vs AddEvent page
+     */
+    public function compareAddEvent()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('addevent'));
+    }
+
+    /**
+     * Compare vs Pretix page
+     */
+    public function comparePretix()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('pretix'));
+    }
+
+    /**
      * Contact page
      */
     public function contact()
@@ -1261,7 +1309,7 @@ class MarketingController extends Controller
                 'cross_links' => [
                     ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
                     ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
-                    ['name' => 'Meetup', 'route' => 'marketing.compare_meetup'],
+                    ['name' => 'Tito', 'route' => 'marketing.compare_tito'],
                 ],
             ],
             'luma' => [
@@ -1513,7 +1561,7 @@ class MarketingController extends Controller
                 'cross_links' => [
                     ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
                     ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
-                    ['name' => 'Google Calendar', 'route' => 'marketing.compare_google_calendar'],
+                    ['name' => 'Tito', 'route' => 'marketing.compare_tito'],
                 ],
             ],
             'google-calendar' => [
@@ -1640,7 +1688,7 @@ class MarketingController extends Controller
                 'cross_links' => [
                     ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
                     ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
-                    ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
+                    ['name' => 'AddEvent', 'route' => 'marketing.compare_addevent'],
                 ],
             ],
             'meetup' => [
@@ -2142,7 +2190,758 @@ class MarketingController extends Controller
                 'cross_links' => [
                     ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
                     ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
-                    ['name' => 'Meetup', 'route' => 'marketing.compare_meetup'],
+                    ['name' => 'Accelevents', 'route' => 'marketing.compare_accelevents'],
+                ],
+            ],
+            'sched' => [
+                'name' => 'Sched',
+                'key' => 'sched',
+                'slug' => 'sched-alternative',
+                'tagline' => 'A more affordable, full-featured alternative to Sched with zero platform fees.',
+                'description' => 'Compare Event Schedule with Sched. Get zero platform fees, calendar sync, and open source flexibility for $5/mo instead of $50+/mo.',
+                'keywords' => 'sched alternative, sched.com alternative, conference schedule platform, event agenda alternative, sched competitor',
+                'about' => 'Sched is a conference and event scheduling platform popular for managing multi-track agendas, speaker profiles, and personalized attendee schedules. It targets conferences, trade shows, and multi-day events.',
+                'competitor_strengths' => [
+                    'Multi-track conference agenda management with personalized attendee schedules',
+                    'Comprehensive speaker and sponsor profile management',
+                    'Session-level attendance tracking and feedback collection',
+                ],
+                'sections' => [
+                    'Pricing & Fees' => [
+                        ['Free plan', 'Yes (forever)', 'Small events only (under 50 attendees)', true],
+                        ['Paid plan price', '$5/mo (7-day free trial)', 'From $50/mo', true],
+                        ['Platform fees', '0%', 'Ticketing add-on required', true],
+                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe (separate)', false],
+                    ],
+                    'Events & Ticketing' => [
+                        ['Ticketing', 'Yes (Pro)', 'Yes (paid add-on)', true],
+                        ['QR check-ins', 'Yes (Pro)', 'Yes (Boost+)', false],
+                        ['Ticket waitlist', 'Yes (Pro)', 'No', true],
+                        ['Check-in dashboard', 'Yes (Pro)', 'Yes', false],
+                        ['Sale notifications', 'Yes (Pro)', 'No', true],
+                        ['Sales data export', 'Yes (Pro)', 'Yes', false],
+                        ['Recurring events', 'Yes (Free)', 'No', true],
+                        ['Online events', 'Yes (Free)', 'Yes', false],
+                        ['Free event RSVP', 'Yes (Free)', 'Yes (small events)', true],
+                        ['Event polls', 'Yes (Pro)', 'Feedback surveys only', true],
+                        ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
+                        ['Post-event feedback', 'Yes (Pro)', 'Yes', false],
+                    ],
+                    'Integrations' => [
+                        ['Google Calendar sync', 'Yes (Free)', 'Export/subscribe only', true],
+                        ['CalDAV sync', 'Yes (Free)', 'No', true],
+                        ['Newsletters', 'Yes (Free)', 'Event email only', true],
+                    ],
+                    'Customization' => [
+                        ['Custom domains', 'Yes (Enterprise)', 'No', true],
+                        ['Remove branding', 'Yes (Pro)', 'No', true],
+                        ['Custom fields', 'Yes (Pro)', 'Yes', false],
+                        ['Custom CSS', 'Yes (Pro)', 'Yes', false],
+                        ['Built-in analytics', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Unique Features' => [
+                        ['AI event parsing', 'Yes (Enterprise)', 'No', true],
+                        ['Event graphics gen', 'Yes (Pro)', 'No', true],
+                        ['Sub-schedules', 'Yes (Free)', 'No', true],
+                        ['Fan videos & comments', 'Yes (Free)', 'No', true],
+                        ['Private/password-protected events', 'Yes (Enterprise)', 'No', true],
+                        ['Availability management', 'Yes (Enterprise)', 'No', true],
+                        ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
+                        ['Team collaboration', 'Yes (Enterprise)', 'Yes', false],
+                    ],
+                    'Platform' => [
+                        ['REST API', 'Yes (Pro)', 'Yes', false],
+                        ['Webhooks', 'Yes (Pro)', 'No', true],
+                        ['Open source', 'Yes', 'No', true],
+                        ['Selfhosting', 'Yes', 'No', true],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => '10x More Affordable',
+                        'description' => '$5/mo vs $50+/mo starting price. Get more features for a fraction of the cost.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => 'Two-Way Calendar Sync',
+                        'description' => 'Google Calendar and CalDAV sync included free. Sched only offers one-way iCal export.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30',
+                        'border' => 'border-violet-200 dark:border-violet-500/20',
+                        'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20',
+                        'icon_color' => 'text-violet-600 dark:text-violet-400',
+                    ],
+                    [
+                        'title' => 'AI Event Parsing',
+                        'description' => 'Paste event details in any format and AI extracts everything automatically. Unique to Event Schedule.',
+                        'icon' => 'ai',
+                        'gradient' => 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30',
+                        'border' => 'border-fuchsia-200 dark:border-fuchsia-500/20',
+                        'icon_bg' => 'bg-fuchsia-100 dark:bg-fuchsia-500/20',
+                        'icon_color' => 'text-fuchsia-600 dark:text-fuchsia-400',
+                    ],
+                    [
+                        'title' => 'Built-in Newsletters',
+                        'description' => 'Keep your audience engaged with built-in newsletters. Sched only has event email notifications.',
+                        'icon' => 'mail',
+                        'gradient' => 'from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30',
+                        'border' => 'border-indigo-200 dark:border-indigo-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                    [
+                        'title' => 'Recurring Events',
+                        'description' => 'Create automated recurring events on any schedule. Sched does not support recurring events.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                    [
+                        'title' => 'Open Source',
+                        'description' => 'Fully open source with selfhosting option. Own your data completely with no vendor lock-in.',
+                        'icon' => 'code',
+                        'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30',
+                        'border' => 'border-rose-200 dark:border-rose-500/20',
+                        'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20',
+                        'icon_color' => 'text-rose-600 dark:text-rose-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Whova', 'route' => 'marketing.compare_whova'],
+                    ['name' => 'Accelevents', 'route' => 'marketing.compare_accelevents'],
+                    ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
+                ],
+            ],
+            'whova' => [
+                'name' => 'Whova',
+                'key' => 'whova',
+                'slug' => 'whova-alternative',
+                'tagline' => 'A transparent, affordable alternative to Whova with zero platform fees.',
+                'description' => 'Compare Event Schedule with Whova. Get transparent pricing, zero platform fees, and open source flexibility without custom quotes or sales calls.',
+                'keywords' => 'whova alternative, whova alternative free, event app alternative, whova competitor, event management platform',
+                'about' => 'Whova is an event management and networking platform popular for conferences and corporate events. It offers a feature-rich mobile app with attendee networking, live polls, and engagement tools, with custom quote-based pricing.',
+                'competitor_strengths' => [
+                    'Advanced attendee networking with AI-powered matchmaking and messaging',
+                    'Feature-rich mobile app with high attendee engagement rates',
+                    'Comprehensive virtual and hybrid event capabilities',
+                ],
+                'sections' => [
+                    'Pricing & Fees' => [
+                        ['Free plan', 'Yes (forever)', 'No (quote-based)', true],
+                        ['Paid plan price', '$5/mo (7-day free trial)', 'Custom quotes', true],
+                        ['Platform fees', '0%', '3% + $0.99/ticket', true],
+                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe (2.9% + $0.30)', false],
+                    ],
+                    'Events & Ticketing' => [
+                        ['Ticketing', 'Yes (Pro)', 'Yes', false],
+                        ['QR check-ins', 'Yes (Pro)', 'Yes', false],
+                        ['Ticket waitlist', 'Yes (Pro)', 'No', true],
+                        ['Check-in dashboard', 'Yes (Pro)', 'Yes', false],
+                        ['Sale notifications', 'Yes (Pro)', 'No', true],
+                        ['Sales data export', 'Yes (Pro)', 'Yes', false],
+                        ['Recurring events', 'Yes (Free)', 'No', true],
+                        ['Online events', 'Yes (Free)', 'Yes', false],
+                        ['Free event RSVP', 'Yes (Free)', 'Yes', false],
+                        ['Event polls', 'Yes (Pro)', 'Yes', false],
+                        ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
+                        ['Post-event feedback', 'Yes (Pro)', 'Yes', false],
+                    ],
+                    'Integrations' => [
+                        ['Google Calendar sync', 'Yes (Free)', 'No (Zapier only)', true],
+                        ['CalDAV sync', 'Yes (Free)', 'No', true],
+                        ['Newsletters', 'Yes (Free)', 'Announcements only', true],
+                    ],
+                    'Customization' => [
+                        ['Custom domains', 'Yes (Enterprise)', 'No', true],
+                        ['Remove branding', 'Yes (Pro)', 'No (not white-label)', true],
+                        ['Custom fields', 'Yes (Pro)', 'Yes', false],
+                        ['Custom CSS', 'Yes (Pro)', 'No', true],
+                        ['Built-in analytics', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Unique Features' => [
+                        ['AI event parsing', 'Yes (Enterprise)', 'No', true],
+                        ['Event graphics gen', 'Yes (Pro)', 'No', true],
+                        ['Sub-schedules', 'Yes (Free)', 'No', true],
+                        ['Fan videos & comments', 'Yes (Free)', 'No', true],
+                        ['Embeddable calendar', 'Yes (Free)', 'Agenda widget', true],
+                        ['Private/password-protected events', 'Yes (Enterprise)', 'No', true],
+                        ['Availability management', 'Yes (Enterprise)', 'No', true],
+                        ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
+                        ['Team collaboration', 'Yes (Enterprise)', 'Yes', false],
+                    ],
+                    'Platform' => [
+                        ['REST API', 'Yes (Pro)', 'Not public', true],
+                        ['Webhooks', 'Yes (Pro)', 'No (Zapier only)', true],
+                        ['Open source', 'Yes', 'No', true],
+                        ['Selfhosting', 'Yes', 'No', true],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => 'Transparent Pricing',
+                        'description' => '$5/mo flat vs opaque custom quotes requiring sales calls. No surprises, no negotiations.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => '0% Platform Fees',
+                        'description' => 'Whova charges 3% + $0.99 per paid ticket on top of their subscription. Event Schedule has zero platform fees.',
+                        'icon' => 'percent',
+                        'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30',
+                        'border' => 'border-violet-200 dark:border-violet-500/20',
+                        'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20',
+                        'icon_color' => 'text-violet-600 dark:text-violet-400',
+                    ],
+                    [
+                        'title' => 'Calendar Sync',
+                        'description' => 'Two-way Google Calendar and CalDAV sync included free. Whova has no native calendar sync.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30',
+                        'border' => 'border-fuchsia-200 dark:border-fuchsia-500/20',
+                        'icon_bg' => 'bg-fuchsia-100 dark:bg-fuchsia-500/20',
+                        'icon_color' => 'text-fuchsia-600 dark:text-fuchsia-400',
+                    ],
+                    [
+                        'title' => 'Custom CSS',
+                        'description' => 'Full design control with custom CSS. Whova limits customization to their dashboard options.',
+                        'icon' => 'code',
+                        'gradient' => 'from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30',
+                        'border' => 'border-indigo-200 dark:border-indigo-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                    [
+                        'title' => 'Open Source',
+                        'description' => 'Fully open source with selfhosting option. No vendor lock-in, complete data ownership.',
+                        'icon' => 'code',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                    [
+                        'title' => 'Event Graphics',
+                        'description' => 'Auto-generate shareable event images for social media. Not available on Whova.',
+                        'icon' => 'image',
+                        'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30',
+                        'border' => 'border-rose-200 dark:border-rose-500/20',
+                        'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20',
+                        'icon_color' => 'text-rose-600 dark:text-rose-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Sched', 'route' => 'marketing.compare_sched'],
+                    ['name' => 'Accelevents', 'route' => 'marketing.compare_accelevents'],
+                    ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
+                ],
+            ],
+            'accelevents' => [
+                'name' => 'Accelevents',
+                'key' => 'accelevents',
+                'slug' => 'accelevents-alternative',
+                'tagline' => 'A simpler, more affordable alternative to Accelevents without enterprise pricing.',
+                'description' => 'Compare Event Schedule with Accelevents. Get zero platform fees, instant setup, and open source flexibility for $5/mo instead of $7,500+/year.',
+                'keywords' => 'accelevents alternative, accelevents alternative free, event management platform, accelevents competitor, affordable event platform',
+                'about' => 'Accelevents is an enterprise event management platform offering in-person, virtual, and hybrid event solutions. It targets mid-to-large organizations with badge printing, CRM integrations, and white-label capabilities.',
+                'competitor_strengths' => [
+                    'Enterprise-grade badge printing and onsite check-in with kiosk support',
+                    'Native CRM integrations with Salesforce, HubSpot, and Marketo',
+                    'Comprehensive virtual and hybrid event hosting with built-in streaming',
+                ],
+                'sections' => [
+                    'Pricing & Fees' => [
+                        ['Free plan', 'Yes (forever)', 'Limited (high per-ticket fees)', true],
+                        ['Paid plan price', '$5/mo (7-day free trial)', 'From $7,500/year', true],
+                        ['Platform fees', '0%', '$1 + 1%/ticket (paid plans)', true],
+                        ['Payment processing', 'Stripe (2.9% + $0.30)', '2.9% + $0.30', false],
+                    ],
+                    'Events & Ticketing' => [
+                        ['Ticketing', 'Yes (Pro)', 'Yes', false],
+                        ['QR check-ins', 'Yes (Pro)', 'Yes', false],
+                        ['Ticket waitlist', 'Yes (Pro)', 'Yes', false],
+                        ['Check-in dashboard', 'Yes (Pro)', 'Yes', false],
+                        ['Sale notifications', 'Yes (Pro)', 'Yes', false],
+                        ['Sales data export', 'Yes (Pro)', 'Yes', false],
+                        ['Recurring events', 'Yes (Free)', 'Yes (in-person only)', true],
+                        ['Online events', 'Yes (Free)', 'Yes (paid add-on)', true],
+                        ['Free event RSVP', 'Yes (Free)', 'Yes', false],
+                        ['Event polls', 'Yes (Pro)', 'Yes', false],
+                        ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
+                        ['Post-event feedback', 'Yes (Pro)', 'Yes (surveys)', false],
+                    ],
+                    'Integrations' => [
+                        ['Google Calendar sync', 'Yes (Free)', 'No (add-to-calendar only)', true],
+                        ['CalDAV sync', 'Yes (Free)', 'No', true],
+                        ['Newsletters', 'Yes (Free)', 'Yes (Engage module)', false],
+                    ],
+                    'Customization' => [
+                        ['Custom domains', 'Yes (Enterprise)', 'White Label plan only', true],
+                        ['Remove branding', 'Yes (Pro)', 'White Label plan only', true],
+                        ['Custom fields', 'Yes (Pro)', 'Yes', false],
+                        ['Custom CSS', 'Yes (Pro)', 'Yes', false],
+                        ['Built-in analytics', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Unique Features' => [
+                        ['AI event parsing', 'Yes (Enterprise)', 'No', true],
+                        ['Event graphics gen', 'Yes (Pro)', 'No', true],
+                        ['Sub-schedules', 'Yes (Free)', 'No', true],
+                        ['Fan videos & comments', 'Yes (Free)', 'No', true],
+                        ['Private/password-protected events', 'Yes (Enterprise)', 'No', true],
+                        ['Availability management', 'Yes (Enterprise)', 'No', true],
+                        ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
+                        ['Team collaboration', 'Yes (Enterprise)', 'Yes (unlimited admins)', false],
+                    ],
+                    'Platform' => [
+                        ['REST API', 'Yes (Pro)', 'Yes (Enterprise only)', true],
+                        ['Webhooks', 'Yes (Pro)', 'Yes (Enterprise only)', true],
+                        ['Open source', 'Yes', 'No', true],
+                        ['Selfhosting', 'Yes', 'No', true],
+                        ['Setup time', 'Minutes', 'Weeks (implementation)', true],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => '$5/mo vs $7,500+/year',
+                        'description' => '125x more affordable for core event management features. No enterprise contracts required.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => 'Instant Setup',
+                        'description' => 'Start in minutes vs weeks of enterprise onboarding. No implementation team needed.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30',
+                        'border' => 'border-violet-200 dark:border-violet-500/20',
+                        'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20',
+                        'icon_color' => 'text-violet-600 dark:text-violet-400',
+                    ],
+                    [
+                        'title' => 'No Sales Process',
+                        'description' => 'Sign up and go. No demos, no contracts, no waiting for a sales rep to get back to you.',
+                        'icon' => 'globe',
+                        'gradient' => 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30',
+                        'border' => 'border-fuchsia-200 dark:border-fuchsia-500/20',
+                        'icon_bg' => 'bg-fuchsia-100 dark:bg-fuchsia-500/20',
+                        'icon_color' => 'text-fuchsia-600 dark:text-fuchsia-400',
+                    ],
+                    [
+                        'title' => 'Calendar Sync',
+                        'description' => 'Two-way Google Calendar and CalDAV sync included free. Accelevents only offers add-to-calendar links.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30',
+                        'border' => 'border-indigo-200 dark:border-indigo-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                    [
+                        'title' => 'AI Event Parsing',
+                        'description' => 'Paste event details and AI extracts everything automatically. Not available on Accelevents.',
+                        'icon' => 'ai',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                    [
+                        'title' => 'Open Source',
+                        'description' => 'Full transparency and selfhosting option. No vendor lock-in or enterprise contracts.',
+                        'icon' => 'code',
+                        'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30',
+                        'border' => 'border-rose-200 dark:border-rose-500/20',
+                        'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20',
+                        'icon_color' => 'text-rose-600 dark:text-rose-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Whova', 'route' => 'marketing.compare_whova'],
+                    ['name' => 'Splash', 'route' => 'marketing.compare_splash'],
+                    ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
+                ],
+            ],
+            'tito' => [
+                'name' => 'Tito',
+                'key' => 'tito',
+                'slug' => 'tito-alternative',
+                'tagline' => 'A flat-rate alternative to Tito with calendar sync, newsletters, and zero per-ticket fees.',
+                'description' => 'Compare Event Schedule with Tito. Get flat $5/mo pricing instead of 3% per ticket, plus calendar sync, newsletters, and selfhosting.',
+                'keywords' => 'tito alternative, ti.to alternative, tito ticketing alternative, event ticketing platform, tito competitor',
+                'about' => 'Tito is a simple, developer-friendly ticketing platform popular with tech conferences and community events. It charges 3% per paid ticket with no monthly subscription, and is known for its clean interface and well-documented API.',
+                'competitor_strengths' => [
+                    'Simple, no-frills interface focused purely on ticketing',
+                    'Developer-friendly with well-documented REST API and webhooks',
+                    'No monthly fee, with free branding removal included',
+                ],
+                'sections' => [
+                    'Pricing & Fees' => [
+                        ['Free plan', 'Yes (forever)', 'Free for free events', false],
+                        ['Paid plan price', '$5/mo (7-day free trial)', '3% per ticket (cap 25 EUR)', true],
+                        ['Platform fees', '0%', '3% per ticket', true],
+                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal', false],
+                    ],
+                    'Events & Ticketing' => [
+                        ['Ticketing', 'Yes (Pro)', 'Yes', false],
+                        ['QR check-ins', 'Yes (Pro)', 'Yes (iOS/Android/web)', false],
+                        ['Ticket waitlist', 'Yes (Pro)', 'Yes', false],
+                        ['Check-in dashboard', 'Yes (Pro)', 'Yes', false],
+                        ['Sale notifications', 'Yes (Pro)', 'No (webhooks only)', true],
+                        ['Sales data export', 'Yes (Pro)', 'Yes', false],
+                        ['Recurring events', 'Yes (Free)', 'No', true],
+                        ['Online events', 'Yes (Free)', 'Yes (via meeting links)', false],
+                        ['Free event RSVP', 'Yes (Free)', 'Yes', false],
+                        ['Event polls', 'Yes (Pro)', 'No', true],
+                        ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
+                        ['Post-event feedback', 'Yes (Pro)', 'No', true],
+                    ],
+                    'Integrations' => [
+                        ['Google Calendar sync', 'Yes (Free)', 'No', true],
+                        ['CalDAV sync', 'Yes (Free)', 'No', true],
+                        ['Newsletters', 'Yes (Free)', 'Basic messaging only', true],
+                    ],
+                    'Customization' => [
+                        ['Custom domains', 'Yes (Enterprise)', 'No (discontinued)', true],
+                        ['Remove branding', 'Yes (Pro)', 'Yes (free)', false],
+                        ['Custom fields', 'Yes (Pro)', 'Yes', false],
+                        ['Custom CSS', 'Yes (Pro)', 'Yes (widget mode)', false],
+                        ['Built-in analytics', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Unique Features' => [
+                        ['AI event parsing', 'Yes (Enterprise)', 'No', true],
+                        ['Event graphics gen', 'Yes (Pro)', 'No', true],
+                        ['Sub-schedules', 'Yes (Free)', 'No', true],
+                        ['Fan videos & comments', 'Yes (Free)', 'No', true],
+                        ['Embeddable calendar', 'Yes (Free)', 'Checkout widget only', true],
+                        ['Private/password-protected events', 'Yes (Enterprise)', 'No', true],
+                        ['Availability management', 'Yes (Enterprise)', 'No', true],
+                        ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
+                        ['Team collaboration', 'Yes (Enterprise)', 'Yes (4 roles)', false],
+                    ],
+                    'Platform' => [
+                        ['REST API', 'Yes (Pro)', 'Yes', false],
+                        ['Webhooks', 'Yes (Pro)', 'Yes', false],
+                        ['Open source', 'Yes', 'No', true],
+                        ['Selfhosting', 'Yes', 'No', true],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => 'Flat-Rate Pricing',
+                        'description' => '$5/mo flat vs 3% per ticket. Sell 200 x $25 tickets and save $145/mo.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => 'Calendar Sync',
+                        'description' => 'Two-way Google Calendar and CalDAV sync included free. Tito has no calendar integration.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30',
+                        'border' => 'border-violet-200 dark:border-violet-500/20',
+                        'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20',
+                        'icon_color' => 'text-violet-600 dark:text-violet-400',
+                    ],
+                    [
+                        'title' => 'Built-in Newsletters',
+                        'description' => 'Keep your audience engaged with built-in newsletters. Tito only has basic transactional messaging.',
+                        'icon' => 'mail',
+                        'gradient' => 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30',
+                        'border' => 'border-fuchsia-200 dark:border-fuchsia-500/20',
+                        'icon_bg' => 'bg-fuchsia-100 dark:bg-fuchsia-500/20',
+                        'icon_color' => 'text-fuchsia-600 dark:text-fuchsia-400',
+                    ],
+                    [
+                        'title' => 'Custom Domains',
+                        'description' => 'Use your own domain for your event pages. Tito discontinued custom domain support.',
+                        'icon' => 'globe',
+                        'gradient' => 'from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30',
+                        'border' => 'border-indigo-200 dark:border-indigo-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                    [
+                        'title' => 'Event Graphics',
+                        'description' => 'Auto-generate shareable images for social media. Not available on Tito.',
+                        'icon' => 'image',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                    [
+                        'title' => 'Open Source',
+                        'description' => 'Fully open source with selfhosting option for complete data ownership.',
+                        'icon' => 'code',
+                        'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30',
+                        'border' => 'border-rose-200 dark:border-rose-500/20',
+                        'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20',
+                        'icon_color' => 'text-rose-600 dark:text-rose-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
+                    ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
+                    ['name' => 'Pretix', 'route' => 'marketing.compare_pretix'],
+                ],
+            ],
+            'addevent' => [
+                'name' => 'AddEvent',
+                'key' => 'addevent',
+                'slug' => 'addevent-alternative',
+                'tagline' => 'A complete event platform that goes beyond "Add to Calendar" buttons.',
+                'description' => 'Compare Event Schedule with AddEvent. Get ticketing, public event pages, and a full event platform for $5/mo instead of just calendar buttons at $29/mo.',
+                'keywords' => 'addevent alternative, add to calendar alternative, addevent competitor, event calendar platform, calendar button alternative',
+                'about' => 'AddEvent is a calendar marketing tool focused on "Add to Calendar" buttons, subscription calendars, and RSVP collection. It helps drive event attendance through calendar engagement but does not offer ticketing or event management features.',
+                'competitor_strengths' => [
+                    'Industry-leading "Add to Calendar" buttons supporting all major calendar apps',
+                    'Subscription calendars that auto-sync updates to followers\' personal calendars',
+                    'Easy integration with websites, emails, and marketing platforms',
+                ],
+                'sections' => [
+                    'Pricing & Fees' => [
+                        ['Free plan', 'Yes (forever)', 'Yes (100 clicks/mo, 20 RSVPs)', true],
+                        ['Paid plan price', '$5/mo (7-day free trial)', 'From $29/mo', true],
+                        ['Platform fees', '0%', 'N/A (no ticketing)', true],
+                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'N/A (no ticketing)', true],
+                    ],
+                    'Events & Calendar' => [
+                        ['Ticketing', 'Yes (Pro)', 'No', true],
+                        ['QR check-ins', 'Yes (Pro)', 'No', true],
+                        ['Free event RSVP', 'Yes (Free)', 'Yes (limited)', true],
+                        ['Recurring events', 'Yes (Free)', 'Yes', false],
+                        ['Online events', 'Yes (Free)', 'No', true],
+                        ['Event polls', 'Yes (Pro)', 'No', true],
+                        ['Promo/discount codes', 'Yes (Pro)', 'No', true],
+                        ['Post-event feedback', 'Yes (Pro)', 'No', true],
+                        ['Add to calendar buttons', 'Via embeds', 'Yes (core feature)', false],
+                        ['Subscription calendars', 'Via CalDAV/embeds', 'Yes (core feature)', false],
+                    ],
+                    'Integrations' => [
+                        ['Google Calendar sync', 'Yes (Free)', 'Import only (one-way)', true],
+                        ['CalDAV sync', 'Yes (Free)', 'No', true],
+                        ['Newsletters', 'Yes (Free)', 'RSVP emails only', true],
+                    ],
+                    'Customization' => [
+                        ['Custom domains', 'Yes (Enterprise)', 'Yes (via support)', false],
+                        ['Remove branding', 'Yes (Pro)', 'Yes (paid plans)', false],
+                        ['Custom fields', 'Yes (Pro)', 'Yes (RSVP forms)', false],
+                        ['Custom CSS', 'Yes (Pro)', 'Yes (Professional+)', false],
+                        ['Built-in analytics', 'Yes (Free)', 'Yes (paid plans)', false],
+                    ],
+                    'Unique Features' => [
+                        ['AI event parsing', 'Yes (Enterprise)', 'No', true],
+                        ['Event graphics gen', 'Yes (Pro)', 'No', true],
+                        ['Sub-schedules', 'Yes (Free)', 'No', true],
+                        ['Fan videos & comments', 'Yes (Free)', 'No', true],
+                        ['Private/password-protected events', 'Yes (Enterprise)', 'No', true],
+                        ['Availability management', 'Yes (Enterprise)', 'No', true],
+                        ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
+                    ],
+                    'Platform' => [
+                        ['REST API', 'Yes (Pro)', 'Yes (Small Business+)', false],
+                        ['Webhooks', 'Yes (Pro)', 'No (Zapier only)', true],
+                        ['Open source', 'Yes', 'No', true],
+                        ['Selfhosting', 'Yes', 'No', true],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => 'Full Ticketing',
+                        'description' => 'Sell tickets with QR check-in and zero platform fees. AddEvent has no ticketing whatsoever.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => 'Public Event Pages',
+                        'description' => 'SEO-optimized event pages with rich descriptions. AddEvent only offers calendar/RSVP landing pages.',
+                        'icon' => 'globe',
+                        'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30',
+                        'border' => 'border-violet-200 dark:border-violet-500/20',
+                        'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20',
+                        'icon_color' => 'text-violet-600 dark:text-violet-400',
+                    ],
+                    [
+                        'title' => '6x More Affordable',
+                        'description' => '$5/mo vs $29/mo, with far more features included.',
+                        'icon' => 'percent',
+                        'gradient' => 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30',
+                        'border' => 'border-fuchsia-200 dark:border-fuchsia-500/20',
+                        'icon_bg' => 'bg-fuchsia-100 dark:bg-fuchsia-500/20',
+                        'icon_color' => 'text-fuchsia-600 dark:text-fuchsia-400',
+                    ],
+                    [
+                        'title' => 'AI Event Parsing',
+                        'description' => 'Paste event details and AI extracts everything automatically. Not available on AddEvent.',
+                        'icon' => 'ai',
+                        'gradient' => 'from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30',
+                        'border' => 'border-indigo-200 dark:border-indigo-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                    [
+                        'title' => 'Two-Way Calendar Sync',
+                        'description' => 'Bidirectional Google Calendar and CalDAV sync. AddEvent only imports one-way.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                    [
+                        'title' => 'Open Source',
+                        'description' => 'Fully open source with selfhosting. Own your data completely.',
+                        'icon' => 'code',
+                        'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30',
+                        'border' => 'border-rose-200 dark:border-rose-500/20',
+                        'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20',
+                        'icon_color' => 'text-rose-600 dark:text-rose-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Google Calendar', 'route' => 'marketing.compare_google_calendar'],
+                    ['name' => 'Luma', 'route' => 'marketing.compare_luma'],
+                    ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
+                ],
+            ],
+            'pretix' => [
+                'name' => 'Pretix',
+                'key' => 'pretix',
+                'slug' => 'pretix-alternative',
+                'tagline' => 'A broader open source event platform with flat pricing and more built-in features.',
+                'description' => 'Compare Event Schedule with Pretix. Get flat $5/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and fan engagement.',
+                'keywords' => 'pretix alternative, pretix alternative free, open source ticketing alternative, pretix competitor, event platform open source',
+                'about' => 'Pretix is an open source ticketing platform (AGPLv3) based in Germany, focused on ticket sales for conferences, festivals, and exhibitions. It offers a selfhosted Community Edition and a paid hosted service with per-ticket pricing.',
+                'competitor_strengths' => [
+                    'Open source (AGPLv3) with full selfhosted Community Edition',
+                    'Seating plan editor with interactive graphical seat selection',
+                    'Offline-capable check-in app (pretixSCAN) and point-of-sale system',
+                ],
+                'sections' => [
+                    'Pricing & Fees' => [
+                        ['Free plan', 'Yes (forever)', 'Selfhosted only (Community Edition)', true],
+                        ['Hosted pricing', '$5/mo (7-day free trial)', '2.5%/ticket (cap 15 EUR)', true],
+                        ['Platform fees', '0%', '2.5% per ticket', true],
+                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal/Mollie', false],
+                    ],
+                    'Events & Ticketing' => [
+                        ['Ticketing', 'Yes (Pro)', 'Yes', false],
+                        ['QR check-ins', 'Yes (Pro)', 'Yes (pretixSCAN, offline-capable)', false],
+                        ['Ticket waitlist', 'Yes (Pro)', 'Yes (automated)', false],
+                        ['Check-in dashboard', 'Yes (Pro)', 'Yes', false],
+                        ['Sale notifications', 'Yes (Pro)', 'Yes', false],
+                        ['Sales data export', 'Yes (Pro)', 'Yes', false],
+                        ['Recurring events', 'Yes (Free)', 'Yes (Event Series)', false],
+                        ['Online events', 'Yes (Free)', 'Yes (Venueless integration)', false],
+                        ['Free event RSVP', 'Yes (Free)', 'Yes (free tickets)', false],
+                        ['Event polls', 'Yes (Pro)', 'No', true],
+                        ['Promo/discount codes', 'Yes (Pro)', 'Yes (vouchers + discounts)', false],
+                        ['Post-event feedback', 'Yes (Pro)', 'No', true],
+                    ],
+                    'Integrations' => [
+                        ['Google Calendar sync', 'Yes (Free)', 'No', true],
+                        ['CalDAV sync', 'Yes (Free)', 'No', true],
+                        ['Newsletters', 'Yes (Free)', 'MailChimp integration', true],
+                    ],
+                    'Customization' => [
+                        ['Custom domains', 'Yes (Enterprise)', 'Yes', false],
+                        ['Remove branding', 'Yes (Pro)', 'Partial (subtle branding)', true],
+                        ['Custom fields', 'Yes (Pro)', 'Yes', false],
+                        ['Custom CSS', 'Yes (Pro)', 'Yes (via plugin)', false],
+                        ['Built-in analytics', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Unique Features' => [
+                        ['AI event parsing', 'Yes (Enterprise)', 'No', true],
+                        ['Event graphics gen', 'Yes (Pro)', 'No', true],
+                        ['Sub-schedules', 'Yes (Free)', 'No', true],
+                        ['Fan videos & comments', 'Yes (Free)', 'No', true],
+                        ['Embeddable calendar', 'Yes (Free)', 'Ticket widget only', true],
+                        ['Private/password-protected events', 'Yes (Enterprise)', 'No', true],
+                        ['Availability management', 'Yes (Enterprise)', 'No', true],
+                        ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
+                        ['Team collaboration', 'Yes (Enterprise)', 'Yes (unlimited teams)', false],
+                    ],
+                    'Platform' => [
+                        ['REST API', 'Yes (Pro)', 'Yes', false],
+                        ['Webhooks', 'Yes (Pro)', 'Yes', false],
+                        ['Open source', 'Yes', 'Yes (AGPLv3)', false],
+                        ['Selfhosting', 'Yes', 'Yes', false],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => 'Flat $5/mo Pricing',
+                        'description' => 'No per-ticket fees ever. Pretix charges 2.5% per ticket on their hosted plan.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => 'Calendar Sync',
+                        'description' => 'Two-way Google Calendar and CalDAV sync included free. Pretix has no calendar integration.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30',
+                        'border' => 'border-violet-200 dark:border-violet-500/20',
+                        'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20',
+                        'icon_color' => 'text-violet-600 dark:text-violet-400',
+                    ],
+                    [
+                        'title' => 'Built-in Newsletters',
+                        'description' => 'Engage your audience directly. Pretix requires a separate MailChimp integration.',
+                        'icon' => 'mail',
+                        'gradient' => 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30',
+                        'border' => 'border-fuchsia-200 dark:border-fuchsia-500/20',
+                        'icon_bg' => 'bg-fuchsia-100 dark:bg-fuchsia-500/20',
+                        'icon_color' => 'text-fuchsia-600 dark:text-fuchsia-400',
+                    ],
+                    [
+                        'title' => 'AI Event Parsing',
+                        'description' => 'Paste event details and AI extracts everything automatically. Not available on Pretix.',
+                        'icon' => 'ai',
+                        'gradient' => 'from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30',
+                        'border' => 'border-indigo-200 dark:border-indigo-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                    [
+                        'title' => 'Fan Engagement',
+                        'description' => 'Let attendees share videos and comments on events. Pretix is purely a ticketing tool.',
+                        'icon' => 'image',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                    [
+                        'title' => 'Simpler Setup',
+                        'description' => 'Ready in minutes with no technical expertise. Pretix selfhosting requires Docker and server administration.',
+                        'icon' => 'globe',
+                        'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30',
+                        'border' => 'border-rose-200 dark:border-rose-500/20',
+                        'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20',
+                        'icon_color' => 'text-rose-600 dark:text-rose-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Tito', 'route' => 'marketing.compare_tito'],
+                    ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
+                    ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
                 ],
             ],
         ];
@@ -2158,18 +2957,18 @@ class MarketingController extends Controller
         $pages = [
             ['route' => 'marketing.docs.getting_started', 'title' => 'Getting Started'],
             ['route' => 'marketing.docs.creating_schedules', 'title' => 'Creating Schedules'],
-            ['route' => 'marketing.docs.schedule_styling', 'title' => 'Schedule Styling'],
             ['route' => 'marketing.docs.managing_schedules', 'title' => 'Managing Schedules'],
             ['route' => 'marketing.docs.creating_events', 'title' => 'Creating Events'],
             ['route' => 'marketing.docs.ai_import', 'title' => 'AI Import'],
-            ['route' => 'marketing.docs.sharing', 'title' => 'Sharing Your Schedule'],
-            ['route' => 'marketing.docs.newsletters', 'title' => 'Newsletters'],
+            ['route' => 'marketing.docs.scan_agenda', 'title' => 'Scan Agenda'],
             ['route' => 'marketing.docs.tickets', 'title' => 'Selling Tickets'],
+            ['route' => 'marketing.docs.sharing', 'title' => 'Sharing Your Schedule'],
             ['route' => 'marketing.docs.event_graphics', 'title' => 'Event Graphics'],
+            ['route' => 'marketing.docs.newsletters', 'title' => 'Newsletters'],
+            ['route' => 'marketing.docs.boost', 'title' => 'Boost'],
+            ['route' => 'marketing.docs.schedule_styling', 'title' => 'Schedule Styling'],
             ['route' => 'marketing.docs.analytics', 'title' => 'Analytics'],
             ['route' => 'marketing.docs.account_settings', 'title' => 'Account Settings'],
-            ['route' => 'marketing.docs.scan_agenda', 'title' => 'Scan Agenda'],
-            ['route' => 'marketing.docs.boost', 'title' => 'Boost'],
         ];
 
         $currentIndex = null;

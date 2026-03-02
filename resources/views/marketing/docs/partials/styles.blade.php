@@ -318,6 +318,7 @@
 
     .prose-dark {
         padding-bottom: 20vh;
+        isolation: isolate;
     }
 
     .prose-dark a {

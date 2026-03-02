@@ -507,6 +507,12 @@ if (config('app.is_nexus')) {
         Route::get('/dice-alternative', [MarketingController::class, 'compareDice'])->name('marketing.compare_dice');
         Route::get('/brown-paper-tickets-alternative', [MarketingController::class, 'compareBrownPaperTickets'])->name('marketing.compare_brown_paper_tickets');
         Route::get('/splash-alternative', [MarketingController::class, 'compareSplash'])->name('marketing.compare_splash');
+        Route::get('/sched-alternative', [MarketingController::class, 'compareSched'])->name('marketing.compare_sched');
+        Route::get('/whova-alternative', [MarketingController::class, 'compareWhova'])->name('marketing.compare_whova');
+        Route::get('/accelevents-alternative', [MarketingController::class, 'compareAccelevents'])->name('marketing.compare_accelevents');
+        Route::get('/tito-alternative', [MarketingController::class, 'compareTito'])->name('marketing.compare_tito');
+        Route::get('/addevent-alternative', [MarketingController::class, 'compareAddEvent'])->name('marketing.compare_addevent');
+        Route::get('/pretix-alternative', [MarketingController::class, 'comparePretix'])->name('marketing.compare_pretix');
         Route::get('/contact', [MarketingController::class, 'contact'])->name('marketing.contact');
         Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
         Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
@@ -655,6 +661,12 @@ if (config('app.is_nexus')) {
             Route::get('/dice-alternative', [MarketingController::class, 'compareDice'])->name('marketing.compare_dice');
             Route::get('/brown-paper-tickets-alternative', [MarketingController::class, 'compareBrownPaperTickets'])->name('marketing.compare_brown_paper_tickets');
             Route::get('/splash-alternative', [MarketingController::class, 'compareSplash'])->name('marketing.compare_splash');
+            Route::get('/sched-alternative', [MarketingController::class, 'compareSched'])->name('marketing.compare_sched');
+            Route::get('/whova-alternative', [MarketingController::class, 'compareWhova'])->name('marketing.compare_whova');
+            Route::get('/accelevents-alternative', [MarketingController::class, 'compareAccelevents'])->name('marketing.compare_accelevents');
+            Route::get('/tito-alternative', [MarketingController::class, 'compareTito'])->name('marketing.compare_tito');
+            Route::get('/addevent-alternative', [MarketingController::class, 'compareAddEvent'])->name('marketing.compare_addevent');
+            Route::get('/pretix-alternative', [MarketingController::class, 'comparePretix'])->name('marketing.compare_pretix');
             Route::get('/contact', [MarketingController::class, 'contact'])->name('marketing.contact');
             Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
             Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');

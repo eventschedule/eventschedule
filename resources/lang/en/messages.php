@@ -2405,4 +2405,8 @@ return [
     'photo_upgrade_plan' => 'Upgrade for unlimited photos',
     'download_all_photos' => 'Download all photos',
     'no_photos_to_download' => 'No photos to download.',
+
+    'social_tip_grid' => 'Best for Instagram and Facebook posts',
+    'social_tip_row' => 'Best for Twitter/X posts and website banners',
+    'social_tip_list' => 'Best for Instagram Stories and email newsletters',
 ];

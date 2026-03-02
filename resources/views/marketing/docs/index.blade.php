@@ -148,6 +148,7 @@
             </div>
 
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {{-- Row 1: Blue --}}
                 <a href="{{ route('marketing.docs.getting_started') }}" class="doc-card block">
                     <div class="rounded-xl border border-blue-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-900 dark:to-sky-900 hover:border-blue-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
@@ -173,22 +174,10 @@
                     </div>
                 </a>
 
-                <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-card block">
-                    <div class="rounded-xl border border-sky-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-sky-900 dark:to-cyan-900 hover:border-sky-500/30 transition-colors">
-                        <div class="flex items-center gap-3 mb-3">
-                            <svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                            </svg>
-                            <h3 class="font-semibold text-gray-900 dark:text-white">Schedule Styling</h3>
-                        </div>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Customize colors, fonts, and branding for your schedule.</p>
-                    </div>
-                </a>
-
                 <a href="{{ route('marketing.docs.managing_schedules') }}" class="doc-card block">
-                    <div class="rounded-xl border border-sky-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-sky-900 dark:to-cyan-900 hover:border-sky-500/30 transition-colors">
+                    <div class="rounded-xl border border-blue-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-900 dark:to-sky-900 hover:border-blue-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
-                            <svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                             </svg>
                             <h3 class="font-semibold text-gray-900 dark:text-white">Managing Schedules</h3>
@@ -197,6 +186,7 @@
                     </div>
                 </a>
 
+                {{-- Row 2: Sky --}}
                 <a href="{{ route('marketing.docs.creating_events') }}" class="doc-card block">
                     <div class="rounded-xl border border-sky-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-sky-900 dark:to-cyan-900 hover:border-sky-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
@@ -221,30 +211,20 @@
                     </div>
                 </a>
 
-                <a href="{{ route('marketing.docs.sharing') }}" class="doc-card block">
-                    <div class="rounded-xl border border-cyan-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-cyan-50 to-sky-50 dark:from-cyan-900 dark:to-sky-900 hover:border-cyan-500/30 transition-colors">
+                <a href="{{ route('marketing.docs.scan_agenda') }}" class="doc-card block">
+                    <div class="rounded-xl border border-sky-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-sky-900 dark:to-cyan-900 hover:border-sky-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
-                            <svg aria-hidden="true" class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                            <svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            <h3 class="font-semibold text-gray-900 dark:text-white">Sharing</h3>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Scan Agenda</h3>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Embed, share on social, and grow followers.</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Use AI to scan a photo of a printed agenda and automatically create event parts.</p>
                     </div>
                 </a>
 
-                <a href="{{ route('marketing.docs.newsletters') }}" class="doc-card block">
-                    <div class="rounded-xl border border-cyan-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900 dark:to-teal-900 hover:border-cyan-500/30 transition-colors">
-                        <div class="flex items-center gap-3 mb-3">
-                            <svg aria-hidden="true" class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                            <h3 class="font-semibold text-gray-900 dark:text-white">Newsletters</h3>
-                        </div>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Send branded emails to your audience.</p>
-                    </div>
-                </a>
-
+                {{-- Row 3: Cyan --}}
                 <a href="{{ route('marketing.docs.tickets') }}" class="doc-card block">
                     <div class="rounded-xl border border-cyan-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900 dark:to-teal-900 hover:border-cyan-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
@@ -257,15 +237,64 @@
                     </div>
                 </a>
 
-                <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-card block">
-                    <div class="rounded-xl border border-teal-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900 dark:to-cyan-900 hover:border-teal-500/30 transition-colors">
+                <a href="{{ route('marketing.docs.sharing') }}" class="doc-card block">
+                    <div class="rounded-xl border border-cyan-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900 dark:to-teal-900 hover:border-cyan-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
-                            <svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                            </svg>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Sharing</h3>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Embed, share on social, and grow followers.</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-card block">
+                    <div class="rounded-xl border border-cyan-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900 dark:to-teal-900 hover:border-cyan-500/30 transition-colors">
+                        <div class="flex items-center gap-3 mb-3">
+                            <svg aria-hidden="true" class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                             <h3 class="font-semibold text-gray-900 dark:text-white">Event Graphics</h3>
                         </div>
                         <p class="text-gray-500 dark:text-gray-400 text-sm">Generate shareable images for social media.</p>
+                    </div>
+                </a>
+
+                {{-- Rows 4-5: Teal --}}
+                <a href="{{ route('marketing.docs.newsletters') }}" class="doc-card block">
+                    <div class="rounded-xl border border-teal-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900 dark:to-cyan-900 hover:border-teal-500/30 transition-colors">
+                        <div class="flex items-center gap-3 mb-3">
+                            <svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Newsletters</h3>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Send branded emails to your audience.</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('marketing.docs.boost') }}" class="doc-card block">
+                    <div class="rounded-xl border border-teal-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900 dark:to-cyan-900 hover:border-teal-500/30 transition-colors">
+                        <div class="flex items-center gap-3 mb-3">
+                            <svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                            </svg>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Boost</h3>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Promote events with automated Facebook and Instagram ads.</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-card block">
+                    <div class="rounded-xl border border-teal-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900 dark:to-cyan-900 hover:border-teal-500/30 transition-colors">
+                        <div class="flex items-center gap-3 mb-3">
+                            <svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                            </svg>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Schedule Styling</h3>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Customize colors, fonts, and branding for your schedule.</p>
                     </div>
                 </a>
 
@@ -282,7 +311,7 @@
                 </a>
 
                 <a href="{{ route('marketing.docs.account_settings') }}" class="doc-card block">
-                    <div class="rounded-xl border border-teal-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-teal-50 to-sky-50 dark:from-teal-900 dark:to-sky-900 hover:border-teal-500/30 transition-colors">
+                    <div class="rounded-xl border border-teal-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900 dark:to-cyan-900 hover:border-teal-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">
                             <svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -291,31 +320,6 @@
                             <h3 class="font-semibold text-gray-900 dark:text-white">Account Settings</h3>
                         </div>
                         <p class="text-gray-500 dark:text-gray-400 text-sm">Manage your profile, payments, and API access.</p>
-                    </div>
-                </a>
-
-                <a href="{{ route('marketing.docs.scan_agenda') }}" class="doc-card block">
-                    <div class="rounded-xl border border-cyan-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900 dark:to-teal-900 hover:border-cyan-500/30 transition-colors">
-                        <div class="flex items-center gap-3 mb-3">
-                            <svg aria-hidden="true" class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <h3 class="font-semibold text-gray-900 dark:text-white">Scan Agenda</h3>
-                        </div>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Use AI to scan a photo of a printed agenda and automatically create event parts.</p>
-                    </div>
-                </a>
-
-                <a href="{{ route('marketing.docs.boost') }}" class="doc-card block">
-                    <div class="rounded-xl border border-cyan-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900 dark:to-teal-900 hover:border-cyan-500/30 transition-colors">
-                        <div class="flex items-center gap-3 mb-3">
-                            <svg aria-hidden="true" class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                            </svg>
-                            <h3 class="font-semibold text-gray-900 dark:text-white">Boost</h3>
-                        </div>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Promote events with automated Facebook and Instagram ads.</p>
                     </div>
                 </a>
 

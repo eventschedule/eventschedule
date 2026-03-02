@@ -2322,4 +2322,8 @@ return [
     'photo_upgrade_plan' => 'Actualizar para fotos ilimitadas',
     'download_all_photos' => 'Descargar todas las fotos',
     'no_photos_to_download' => 'No hay fotos para descargar.',
+
+    'social_tip_grid' => 'Ideal para publicaciones de Instagram y Facebook',
+    'social_tip_row' => 'Ideal para publicaciones de Twitter/X y banners web',
+    'social_tip_list' => 'Ideal para Instagram Stories y boletines por correo',
 ];

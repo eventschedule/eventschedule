@@ -2338,4 +2338,8 @@ return [
     'photo_upgrade_plan' => 'Uuenda piiramatute fotode jaoks',
     'download_all_photos' => 'Laadi kõik fotod alla',
     'no_photos_to_download' => 'Pole fotosid allalaadimiseks.',
+
+    'social_tip_grid' => 'Parim Instagrami ja Facebooki postituste jaoks',
+    'social_tip_row' => 'Parim Twitter/X postituste ja veebibännerite jaoks',
+    'social_tip_list' => 'Parim Instagrami lugude ja e-posti uudiskirjade jaoks',
 ];

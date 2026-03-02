@@ -2322,4 +2322,8 @@ return [
     'photo_upgrade_plan' => 'Passa a un piano superiore per foto illimitate',
     'download_all_photos' => 'Scarica tutte le foto',
     'no_photos_to_download' => 'Nessuna foto da scaricare.',
+
+    'social_tip_grid' => 'Ideale per post su Instagram e Facebook',
+    'social_tip_row' => 'Ideale per post su Twitter/X e banner web',
+    'social_tip_list' => 'Ideale per le Storie di Instagram e le newsletter',
 ];

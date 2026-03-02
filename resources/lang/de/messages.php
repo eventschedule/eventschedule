@@ -2327,4 +2327,8 @@ return [
     'photo_upgrade_plan' => 'Für unbegrenzte Fotos upgraden',
     'download_all_photos' => 'Alle Fotos herunterladen',
     'no_photos_to_download' => 'Keine Fotos zum Herunterladen.',
+
+    'social_tip_grid' => 'Ideal für Instagram- und Facebook-Beiträge',
+    'social_tip_row' => 'Ideal für Twitter/X-Beiträge und Website-Banner',
+    'social_tip_list' => 'Ideal für Instagram Stories und E-Mail-Newsletter',
 ];

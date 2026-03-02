@@ -2321,4 +2321,8 @@ return [
     'photo_upgrade_plan' => 'Upgraden voor onbeperkte foto\'s',
     'download_all_photos' => 'Alle foto\'s downloaden',
     'no_photos_to_download' => 'Geen foto\'s om te downloaden.',
+
+    'social_tip_grid' => 'Ideaal voor Instagram- en Facebook-berichten',
+    'social_tip_row' => 'Ideaal voor Twitter/X-berichten en websitebanners',
+    'social_tip_list' => 'Ideaal voor Instagram Stories en e-mailnieuwsbrieven',
 ];

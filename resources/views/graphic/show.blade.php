@@ -457,6 +457,7 @@
                 currentLayout = layout;
                 toggleDatePositionVisibility();
                 toggleMaxPerRowVisibility();
+                updateSocialTips();
 
                 // Update date position selects
                 ['date_position', 'date_position_mobile'].forEach(id => {
@@ -541,6 +542,22 @@
                             container.classList.add('hidden');
                         }
                     }
+                });
+            }
+
+            const socialTips = {
+                grid: @json(__('messages.social_tip_grid')),
+                row: @json(__('messages.social_tip_row')),
+                list: @json(__('messages.social_tip_list')),
+            };
+
+            function updateSocialTips() {
+                const layout = document.querySelector('input[name="layout"]:checked')?.value ||
+                               document.querySelector('input[name="layout_mobile"]:checked')?.value || 'grid';
+                const tip = socialTips[layout] || socialTips.grid;
+                ['social_tip', 'social_tip_mobile'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = tip;
                 });
             }
 
@@ -1063,6 +1080,7 @@
                         if (otherRadio) otherRadio.checked = true;
                         toggleDatePositionVisibility();
                         toggleMaxPerRowVisibility();
+                        updateSocialTips();
                     });
                 });
 
@@ -1386,6 +1404,7 @@
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.list_layout') }}</span>
                                 </label>
                             </div>
+                            <p id="social_tip_mobile" class="text-xs text-gray-400 dark:text-gray-500 mt-2">{{ __('messages.social_tip_grid') }}</p>
                         </div>
 
                         <!-- Show Text (only for grid and row layouts) -->
@@ -1704,6 +1723,7 @@
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.list_layout') }}</span>
                                     </label>
                                 </div>
+                                <p id="social_tip" class="text-xs text-gray-400 dark:text-gray-500 mt-2">{{ __('messages.social_tip_grid') }}</p>
                             </div>
 
                             <!-- Show Text (only for grid and row layouts) -->

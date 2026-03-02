@@ -139,6 +139,9 @@ abstract class AbstractEventDesign
         // Render footer after event layout
         $this->renderFooter();
 
+        // Render branding watermark (hosted only)
+        $this->renderBranding();
+
         // Output the image
         ob_start();
 
@@ -266,6 +269,50 @@ abstract class AbstractEventDesign
      * Render footer with "Want to see your event here?" message
      */
     protected function renderFooter(): void {}
+
+    /**
+     * Render subtle "eventschedule.com" branding watermark (hosted only)
+     */
+    protected function renderBranding(): void
+    {
+        if (! config('app.hosted')) {
+            return;
+        }
+
+        $text = 'eventschedule.com';
+        $fontSize = 10;
+        $font = $this->fonts['en']['regular'];
+        $padding = 10;
+
+        // Measure text dimensions
+        $bbox = imagettfbbox($fontSize, 0, $font, $text);
+        $textWidth = abs($bbox[2] - $bbox[0]);
+        $textHeight = abs($bbox[7] - $bbox[1]);
+
+        // Position: bottom-right corner
+        $x = $this->totalWidth - $textWidth - $padding;
+        $y = $this->totalHeight - $padding;
+
+        // Sample background color at watermark position to determine contrast
+        $sampleX = min(max($x, 0), $this->totalWidth - 1);
+        $sampleY = min(max($y - $textHeight, 0), $this->totalHeight - 1);
+        $rgb = imagecolorat($this->im, $sampleX, $sampleY);
+        $r = ($rgb >> 16) & 0xFF;
+        $g = ($rgb >> 8) & 0xFF;
+        $b = $rgb & 0xFF;
+
+        // ITU-R BT.601 perceived brightness
+        $brightness = (0.299 * $r) + (0.587 * $g) + (0.114 * $b);
+
+        // Alpha 50 = ~60% transparency (0=opaque, 127=fully transparent)
+        if ($brightness > 128) {
+            $color = imagecolorallocatealpha($this->im, 100, 100, 100, 50);
+        } else {
+            $color = imagecolorallocatealpha($this->im, 200, 200, 200, 50);
+        }
+
+        imagettftext($this->im, $fontSize, 0, $x, $y, $color, $font, $text);
+    }
 
     /**
      * Get the URL for the event request page
