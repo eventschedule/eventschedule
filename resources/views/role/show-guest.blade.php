@@ -63,15 +63,6 @@
             <div class="absolute -top-40 -bottom-3 left-1/2 -translate-x-1/2 w-screen bg-cover bg-no-repeat bg-top md:hidden -z-10"
                  style="background-image: url('{{ $mobileBannerUrl }}');"></div>
         @endif
-        @if (config('app.hosted') && !request()->embed)
-        <nav aria-label="Breadcrumb" class="text-sm text-gray-500 dark:text-gray-400 mb-2">
-            <a href="{{ marketing_url() }}" class="hover:underline hover:text-gray-700 dark:hover:text-gray-200">
-                {{ __('messages.home') }}
-            </a>
-            <span class="mx-1">/</span>
-            <span class="text-gray-900 dark:text-gray-100">{{ $role->translatedName() }}</span>
-        </nav>
-        @endif
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl mb-0 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} transition-[max-width] duration-300 ease-in-out mx-auto"
           data-view-width
           style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"

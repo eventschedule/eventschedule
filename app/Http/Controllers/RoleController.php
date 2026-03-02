@@ -465,12 +465,12 @@ class RoleController extends Controller
 
         if ($event) {
             if ($role->isCurator()) {
-                // When viewing from curator, prioritize first claimed talent with styling, fallback to venue
+                // When viewing from curator, prioritize first claimed talent, fallback to claimed venue
                 $talentRoles = $event->roles->filter(fn ($r) => $r->type === 'talent');
-                $claimedTalentWithStyling = $talentRoles->first(fn ($r) => $r->isClaimed() && $r->accent_color);
-                if ($claimedTalentWithStyling) {
-                    $otherRole = $claimedTalentWithStyling;
-                } elseif ($event->venue) {
+                $claimedTalent = $talentRoles->first(fn ($r) => $r->isClaimed());
+                if ($claimedTalent) {
+                    $otherRole = $claimedTalent;
+                } elseif ($event->venue && $event->venue->isClaimed()) {
                     $otherRole = $event->venue;
                 } else {
                     $otherRole = $role;

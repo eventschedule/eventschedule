@@ -732,14 +732,11 @@
             <span class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ __('messages.you_are_registered') }}
             </span>
-            <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $userSale->secret]) }}"
+            <x-link href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $userSale->secret]) }}"
                target="_blank"
-               class="text-sm font-medium hover:underline" style="color: {{ $accentColor }}">
+               class="text-sm font-medium">
               {{ __('messages.view_ticket') }}
-              <svg class="ml-1 h-3 w-3 flex-shrink-0 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
+            </x-link>
           </div>
         </div>
         @endif
@@ -1787,8 +1784,7 @@
       @if ($userSale)
         <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $userSale->secret]) }}"
            target="_blank"
-           class="flex-shrink-0 inline-flex items-center justify-center rounded-md px-4 py-3 text-sm font-semibold border transition-colors"
-           style="border-color: {{ $accentColor }}; color: {{ $accentColor }};">
+           class="flex-shrink-0 inline-flex items-center justify-center rounded-md px-4 py-3 text-sm font-semibold border transition-colors border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400">
           {{ __('messages.view_ticket') }}
         </a>
       @endif
