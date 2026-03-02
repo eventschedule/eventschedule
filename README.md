@@ -112,7 +112,7 @@ For advanced configuration, see the following guides:
 Event Schedule includes a comprehensive browser test suite powered by Laravel Dusk.
 
 > [!WARNING]  
-> WARNING: Running the tests will empty the database. 
+> WARNING: Running the tests will empty the database
 
 ### Prerequisites
 
