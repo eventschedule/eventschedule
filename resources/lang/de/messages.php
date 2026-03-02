@@ -2315,6 +2315,7 @@ return [
     'view_registration' => 'Registrierung anzeigen',
     'spots_remaining' => ':count Plätze verbleibend',
     'registered' => 'Registriert',
+    'you_are_registered' => 'Du bist registriert!',
     'registration_full' => 'Registrierung voll',
     'cancel_registration' => 'Registrierung stornieren',
 

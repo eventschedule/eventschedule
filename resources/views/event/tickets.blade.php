@@ -438,14 +438,15 @@
                     <label v-for="option in (field.options || '').split(',')" :key="option.trim()" class="flex items-center gap-2 text-gray-900 dark:text-gray-100">
                         <input type="checkbox" :value="option.trim()"
                             v-model="eventMultiselectValues[fieldKey]"
-                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded" />
+                            class="h-4 w-4 border-gray-300 rounded"
+                            style="accent-color: {{ $accentColor }}" />
                         @{{ option.trim() }}
                     </label>
                 </div>
             </div>
         </div>
 
-        <div v-if="!isPaymentLinkMode && !isAllSoldOut" v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-6 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4 border-[#4E81FA]">
+        <div v-if="!isPaymentLinkMode && !isAllSoldOut" v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-6 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4" style="border-inline-start-color: {{ $accentColor }}">
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ ticket.type }}</h3>
@@ -527,7 +528,8 @@
                         <label v-for="option in (field.options || '').split(',')" :key="option.trim()" class="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100">
                             <input type="checkbox" :value="option.trim()"
                                 v-model="ticket.multiselect_values[fieldKey]"
-                                class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded" />
+                                class="h-4 w-4 border-gray-300 rounded"
+                            style="accent-color: {{ $accentColor }}" />
                             @{{ option.trim() }}
                         </label>
                     </div>

@@ -2329,6 +2329,7 @@ return [
     'view_registration' => 'Просмотр регистрации',
     'spots_remaining' => ':count мест осталось',
     'registered' => 'Зарегистрирован',
+    'you_are_registered' => 'Вы зарегистрированы!',
     'registration_full' => 'Регистрация заполнена',
     'cancel_registration' => 'Отменить регистрацию',
 

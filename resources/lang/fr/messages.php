@@ -2310,6 +2310,7 @@ return [
     'view_registration' => 'Voir l\'inscription',
     'spots_remaining' => ':count places restantes',
     'registered' => 'Inscrit',
+    'you_are_registered' => 'Vous êtes inscrit !',
     'registration_full' => 'Inscriptions complètes',
     'cancel_registration' => 'Annuler l\'inscription',
 

@@ -2350,6 +2350,7 @@ return [
     'view_registration' => 'View Registration',
     'spots_remaining' => ':count spots remaining',
     'registered' => 'Registered',
+    'you_are_registered' => 'You\'re registered!',
     'registration_full' => 'Registration Full',
     'cancel_registration' => 'Cancel Registration',
 

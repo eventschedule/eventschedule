@@ -719,6 +719,31 @@
         </div>
         @endif
 
+        {{-- Already registered indicator --}}
+        @if ($userSale)
+        <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
+          <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
+                      bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
+            <svg width="24" height="24" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" class="fill-green-600 dark:fill-green-400" />
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ __('messages.you_are_registered') }}
+            </span>
+            <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $userSale->secret]) }}"
+               target="_blank"
+               class="text-sm font-medium hover:underline" style="color: {{ $accentColor }}">
+              {{ __('messages.view_ticket') }}
+              <svg class="ml-1 h-3 w-3 flex-shrink-0 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </div>
+        </div>
+        @endif
+
         {{-- CTA buttons --}}
         <div style="font-family: sans-serif" x-data="{ shareState: 'idle' }" class="relative items-center gap-3 text-left hidden sm:inline-flex self-start {{ $role->isRtl() ? 'rtl' : '' }}">
         @if ($event->canAcceptRsvp($date))
@@ -830,8 +855,6 @@
         </button>
         </div>
 
-        {{-- Sentinel for sticky mobile CTA visibility --}}
-        <div id="mobile-cta-sentinel" class="h-px w-full" aria-hidden="true"></div>
         </div>
 
         {{-- Mobile calendar bottom sheet (outside hidden sm:block container so it's visible on mobile) --}}
@@ -869,12 +892,11 @@
         {{-- RSVP form section (hidden by default, shown on CTA click) --}}
         @if ($event->canAcceptRsvp($date))
         <div id="event-form-section" class="scroll-mt-4"
-             x-data="{ showForm: {{ (request()->get('rsvp') === 'true' || $errors->any()) ? 'true' : 'false' }} }"
-             x-show="showForm" x-transition x-cloak
-             x-on:show-event-form.window="showForm = true; const url = new URL(window.location); url.searchParams.set('rsvp', 'true'); history.replaceState(null, '', url); $nextTick(() => { document.getElementById('event-form-section').scrollIntoView({ behavior: 'smooth', block: 'start' }); window.dispatchEvent(new CustomEvent('event-form-shown')); const nameInput = document.getElementById('name'); if (nameInput && !nameInput.value.trim()) { nameInput.focus(); } })"
-             x-on:hide-event-form.window="showForm = false; const url = new URL(window.location); url.searchParams.delete('rsvp'); history.replaceState(null, '', url)"
-             x-init="if (showForm) { setTimeout(() => { $el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.dispatchEvent(new CustomEvent('event-form-shown')); const nameInput = document.getElementById('name'); if (nameInput && !nameInput.value.trim()) { nameInput.focus(); } }, 300) }">
-            <div x-ignore class="flex flex-col gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">
+             style="display: none; transition: opacity 0.2s ease, transform 0.2s ease;"
+             @if (request()->get('rsvp') === 'true' || $errors->any())
+             data-show-initial="true"
+             @endif>
+            <div class="flex flex-col gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">
               <div class="flex-1">
                 <div class="flex flex-col gap-4">
                   <h2 class="text-[28px] leading-snug text-gray-900 dark:text-gray-100">
@@ -890,18 +912,74 @@
         @elseif ($event->canSellTickets($date) && $event->isPro())
         {{-- Ticket form section (hidden by default, shown on CTA click) --}}
         <div id="event-form-section" class="scroll-mt-4"
-             x-data="{ showForm: {{ (request()->get('tickets') === 'true' || $errors->any()) ? 'true' : 'false' }} }"
-             x-show="showForm" x-transition x-cloak
-             x-on:show-event-form.window="showForm = true; const url = new URL(window.location); url.searchParams.set('tickets', 'true'); history.replaceState(null, '', url); $nextTick(() => { document.getElementById('event-form-section').scrollIntoView({ behavior: 'smooth', block: 'start' }); window.dispatchEvent(new CustomEvent('event-form-shown')); const nameInput = document.getElementById('name'); if (nameInput && !nameInput.value.trim()) { nameInput.focus(); } })"
-             x-on:hide-event-form.window="showForm = false; const url = new URL(window.location); url.searchParams.delete('tickets'); history.replaceState(null, '', url)"
-             x-init="if (showForm) { setTimeout(() => { $el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.dispatchEvent(new CustomEvent('event-form-shown')); const nameInput = document.getElementById('name'); if (nameInput && !nameInput.value.trim()) { nameInput.focus(); } }, 300) }">
-            <div x-ignore class="flex flex-col gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">
+             style="display: none; transition: opacity 0.2s ease, transform 0.2s ease;"
+             @if (request()->get('tickets') === 'true' || $errors->any())
+             data-show-initial="true"
+             @endif>
+            <div class="flex flex-col gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">
               <div class="flex-1">
                 @include('event.tickets', ['event' => $event, 'subdomain' => $subdomain])
               </div>
             </div>
         </div>
         @endif
+
+        <script {!! nonce_attr() !!}>
+        (function() {
+            var form = document.getElementById('event-form-section');
+            if (!form) return;
+
+            var paramKey = form.querySelector('#ticket-selector') ? 'tickets' : 'rsvp';
+
+            function showForm() {
+                form.style.display = '';
+                requestAnimationFrame(function() {
+                    form.style.opacity = '1';
+                    form.style.transform = 'none';
+                });
+                var url = new URL(window.location);
+                url.searchParams.set(paramKey, 'true');
+                history.replaceState(null, '', url);
+                setTimeout(function() {
+                    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    window.dispatchEvent(new CustomEvent('event-form-shown'));
+                    var nameInput = document.getElementById('name');
+                    if (nameInput && !nameInput.value.trim()) { nameInput.focus(); }
+                }, 50);
+            }
+
+            function hideForm() {
+                form.style.opacity = '0';
+                form.style.transform = 'translateY(-8px)';
+                setTimeout(function() {
+                    form.style.display = 'none';
+                }, 200);
+                var url = new URL(window.location);
+                url.searchParams.delete(paramKey);
+                history.replaceState(null, '', url);
+            }
+
+            window.addEventListener('show-event-form', showForm);
+            window.addEventListener('hide-event-form', hideForm);
+
+            if (form.hasAttribute('data-show-initial')) {
+                form.removeAttribute('data-show-initial');
+                form.style.opacity = '0';
+                form.style.transform = 'translateY(-8px)';
+                form.style.display = '';
+                requestAnimationFrame(function() {
+                    form.style.opacity = '1';
+                    form.style.transform = 'none';
+                    setTimeout(function() {
+                        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        window.dispatchEvent(new CustomEvent('event-form-shown'));
+                        var nameInput = document.getElementById('name');
+                        if (nameInput && !nameInput.value.trim()) { nameInput.focus(); }
+                    }, 300);
+                });
+            }
+        })();
+        </script>
 
         {{-- Flyer image --}}
         @if ($event->flyer_image_url)
@@ -1680,26 +1758,8 @@
   </main>
 
   {{-- Sticky mobile CTA --}}
-  <div x-data="{ ctaVisible: true, shareState: 'idle' }"
-       x-init="
-         let sentinel = document.getElementById('mobile-cta-sentinel');
-         if (sentinel && window.IntersectionObserver) {
-           new IntersectionObserver(function(entries) {
-             ctaVisible = entries[0].isIntersecting;
-           }, { threshold: 0 }).observe(sentinel);
-         } else {
-           ctaVisible = false;
-         }
-       "
-       x-show="!ctaVisible"
-       x-cloak
-       x-transition:enter="transition ease-out duration-200"
-       x-transition:enter-start="translate-y-full"
-       x-transition:enter-end="translate-y-0"
-       x-transition:leave="transition ease-in duration-200"
-       x-transition:leave-start="translate-y-0"
-       x-transition:leave-end="translate-y-full"
-       class="fixed bottom-0 inset-x-0 z-40 sm:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 shadow-lg" style="font-family: sans-serif; padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
+  <div x-data="{ shareState: 'idle' }"
+       class="fixed bottom-0 inset-x-0 z-40 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 shadow-lg" style="font-family: sans-serif; padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
     <div class="flex items-center gap-3 {{ $role->isRtl() ? 'rtl' : '' }}">
       {{-- Mobile share button --}}
       <button type="button"
@@ -1723,6 +1783,15 @@
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-600 dark:text-green-400" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
         </template>
       </button>
+      {{-- View Ticket (if already registered) --}}
+      @if ($userSale)
+        <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $userSale->secret]) }}"
+           target="_blank"
+           class="flex-shrink-0 inline-flex items-center justify-center rounded-md px-4 py-3 text-sm font-semibold border transition-colors"
+           style="border-color: {{ $accentColor }}; color: {{ $accentColor }};">
+          {{ __('messages.view_ticket') }}
+        </a>
+      @endif
       {{-- Main CTA --}}
       @if ($event->canAcceptRsvp($date))
           <button type="button"

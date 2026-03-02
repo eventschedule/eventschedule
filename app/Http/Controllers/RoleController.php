@@ -644,6 +644,7 @@ class RoleController extends Controller
         $myPendingComments = collect();
         $myPendingPhotos = collect();
         $photoLimitReached = false;
+        $userSale = null;
 
         $embed = request()->embed;
         $view = 'role/show-guest';
@@ -701,6 +702,16 @@ class RoleController extends Controller
                     ->where('user_id', auth()->id())
                     ->where('is_approved', false)
                     ->get();
+
+                $userSale = \App\Models\Sale::where('event_id', $event->id)
+                    ->where('status', 'paid')
+                    ->where('is_deleted', false)
+                    ->where(function ($q) {
+                        $q->where('user_id', auth()->id())
+                          ->orWhere('email', auth()->user()->email);
+                    })
+                    ->when($date, fn ($q, $d) => $q->where('event_date', $d))
+                    ->first();
             }
         }
 
@@ -743,6 +754,7 @@ class RoleController extends Controller
                 'myPendingComments',
                 'myPendingPhotos',
                 'photoLimitReached',
+                'userSale',
             ));
 
         return $response;

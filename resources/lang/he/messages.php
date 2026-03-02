@@ -2304,6 +2304,7 @@ return [
     'view_registration' => 'צפה בהרשמה',
     'spots_remaining' => ':count מקומות נותרו',
     'registered' => 'רשום',
+    'you_are_registered' => 'אתה רשום!',
     'registration_full' => 'ההרשמה מלאה',
     'cancel_registration' => 'בטל הרשמה',
 

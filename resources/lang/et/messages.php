@@ -2326,6 +2326,7 @@ return [
     'view_registration' => 'Vaata registreerimist',
     'spots_remaining' => ':count kohta jäänud',
     'registered' => 'Registreeritud',
+    'you_are_registered' => 'Oled registreeritud!',
     'registration_full' => 'Registreerimine täis',
     'cancel_registration' => 'Tühista registreerimine',
 

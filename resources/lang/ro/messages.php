@@ -2348,6 +2348,7 @@ return [
     'view_registration' => 'Vizualizare înregistrare',
     'spots_remaining' => ':count locuri rămase',
     'registered' => 'Înregistrat',
+    'you_are_registered' => 'Ești înregistrat!',
     'registration_full' => 'Înregistrare completă',
     'cancel_registration' => 'Anulare înregistrare',
 

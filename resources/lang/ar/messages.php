@@ -2312,6 +2312,7 @@ return [
     'view_registration' => 'عرض التسجيل',
     'spots_remaining' => ':count أماكن متبقية',
     'registered' => 'مسجّل',
+    'you_are_registered' => 'أنت مسجّل!',
     'registration_full' => 'التسجيل ممتلئ',
     'cancel_registration' => 'إلغاء التسجيل',
 
