@@ -3563,7 +3563,7 @@
         eventCustomFields: @json($event->custom_fields ?? []),
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
         isInvoiceNinjaPaymentLink: @json($user->invoiceninja_api_key && $user->invoiceninja_mode === 'payment_link'),
-        activeTicketTab: 'tickets',
+        activeTicketTab: @json($event->rsvp_enabled ? 'options' : 'tickets'),
         activeSettingsTab: 'privacy',
         activeEngagementTab: @json($role->isPro() ? 'polls' : ($event->exists ? 'fan_content' : 'polls')),
         promoCodes: (() => {

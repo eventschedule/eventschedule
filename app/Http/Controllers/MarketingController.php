@@ -672,6 +672,22 @@ class MarketingController extends Controller
     }
 
     /**
+     * Compare vs Humanitix page
+     */
+    public function compareHumanitix()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('humanitix'));
+    }
+
+    /**
+     * Compare vs Eventzilla page
+     */
+    public function compareEventzilla()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('eventzilla'));
+    }
+
+    /**
      * Contact page
      */
     public function contact()
@@ -1330,7 +1346,7 @@ class MarketingController extends Controller
                         ['Free plan', 'Yes (forever)', 'Yes (forever)', false],
                         ['Paid plan price', '$5/mo (7-day free trial)', '$59/mo', true],
                         ['Platform fees', '0%', '5% (free plan), 0% (Plus)', true],
-                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in', false],
+                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe (2.9% + $0.30)', false],
                     ],
                     'Events & Ticketing' => [
                         ['Ticketing', 'Yes (Pro)', 'Yes', false],
@@ -2002,7 +2018,6 @@ class MarketingController extends Controller
                         ['Webhooks', 'Yes (Pro)', 'No', true],
                         ['Open source', 'Yes', 'No', true],
                         ['Selfhosting', 'Yes', 'No', true],
-                        ['Active development', 'Yes (regular updates)', 'Minimal updates', true],
                     ],
                 ],
                 'key_advantages' => [
@@ -2942,6 +2957,260 @@ class MarketingController extends Controller
                     ['name' => 'Tito', 'route' => 'marketing.compare_tito'],
                     ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
                     ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
+                ],
+            ],
+
+            'humanitix' => [
+                'name' => 'Humanitix',
+                'key' => 'humanitix',
+                'slug' => 'humanitix-alternative',
+                'tagline' => 'Flat pricing, zero platform fees, and more built-in features than Humanitix.',
+                'description' => 'Compare Event Schedule with Humanitix. Get flat $5/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and selfhosting.',
+                'keywords' => 'humanitix alternative, humanitix alternative free, event ticketing platform, humanitix competitor, affordable event platform',
+                'about' => 'Humanitix is a ticketing platform that donates profits to charity, primarily children\'s education. It charges per-ticket fees (5% + $1.29) with no subscription plans. It offers ticketing, QR check-in, promo codes, and embeddable widgets.',
+                'competitor_strengths' => [
+                    'Profits go to charity (children\'s education and humanitarian causes)',
+                    'No subscription required with pay-as-you-go per-ticket pricing',
+                    'Nonprofit discount pricing (3.9% + $1.29 per ticket)',
+                ],
+                'sections' => [
+                    'Pricing & Fees' => [
+                        ['Free plan', 'Yes (forever)', 'Free for free events', false],
+                        ['Paid plan price', '$5/mo (7-day free trial)', 'No subscription (per-ticket only)', true],
+                        ['Platform fees', '0%', '5% + $1.29/ticket (3.9% + $1.29 nonprofits)', true],
+                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Included in platform fee', false],
+                    ],
+                    'Events & Ticketing' => [
+                        ['Ticketing', 'Yes (Pro)', 'Yes', false],
+                        ['QR check-ins', 'Yes (Pro)', 'Yes', false],
+                        ['Ticket waitlist', 'Yes (Pro)', 'Yes', false],
+                        ['Check-in dashboard', 'Yes (Pro)', 'Yes', false],
+                        ['Sale notifications', 'Yes (Pro)', 'Yes', false],
+                        ['Sales data export', 'Yes (Pro)', 'Yes', false],
+                        ['Recurring events', 'Yes (Free)', 'Yes', false],
+                        ['Online events', 'Yes (Free)', 'Yes', false],
+                        ['Free event RSVP', 'Yes (Free)', 'Yes', false],
+                        ['Event polls', 'Yes (Pro)', 'No', true],
+                        ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
+                        ['Post-event feedback', 'Yes (Pro)', 'No', true],
+                    ],
+                    'Integrations' => [
+                        ['Google Calendar sync', 'Yes (Free)', 'No', true],
+                        ['CalDAV sync', 'Yes (Free)', 'No', true],
+                        ['Newsletters', 'Yes (Free)', 'No', true],
+                    ],
+                    'Customization' => [
+                        ['Custom domains', 'Yes (Enterprise)', 'No', true],
+                        ['Remove branding', 'Yes (Pro)', 'No', true],
+                        ['Custom fields', 'Yes (Pro)', 'Yes', false],
+                        ['Custom CSS', 'Yes (Pro)', 'No', true],
+                        ['Built-in analytics', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Unique Features' => [
+                        ['AI event parsing', 'Yes (Enterprise)', 'No', true],
+                        ['Event graphics gen', 'Yes (Pro)', 'No', true],
+                        ['Sub-schedules', 'Yes (Free)', 'No', true],
+                        ['Fan videos & comments', 'Yes (Free)', 'No', true],
+                        ['Embeddable calendar', 'Yes (Free)', 'Widget only', true],
+                        ['Private/password-protected events', 'Yes (Enterprise)', 'No', true],
+                        ['Availability management', 'Yes (Enterprise)', 'No', true],
+                        ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
+                        ['Team collaboration', 'Yes (Enterprise)', 'Yes', false],
+                    ],
+                    'Platform' => [
+                        ['REST API', 'Yes (Pro)', 'Yes', false],
+                        ['Webhooks', 'Yes (Pro)', 'No', true],
+                        ['Open source', 'Yes', 'No', true],
+                        ['Selfhosting', 'Yes', 'No', true],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => 'Flat $5/mo Pricing',
+                        'description' => 'No per-ticket fees ever. Humanitix charges 5% + $1.29 per ticket on every paid event.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => 'Calendar Sync',
+                        'description' => 'Two-way Google Calendar and CalDAV sync included free. Humanitix has no calendar integration.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30',
+                        'border' => 'border-violet-200 dark:border-violet-500/20',
+                        'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20',
+                        'icon_color' => 'text-violet-600 dark:text-violet-400',
+                    ],
+                    [
+                        'title' => 'Built-in Newsletters',
+                        'description' => 'Engage your audience directly with built-in newsletters. Not available on Humanitix.',
+                        'icon' => 'mail',
+                        'gradient' => 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30',
+                        'border' => 'border-fuchsia-200 dark:border-fuchsia-500/20',
+                        'icon_bg' => 'bg-fuchsia-100 dark:bg-fuchsia-500/20',
+                        'icon_color' => 'text-fuchsia-600 dark:text-fuchsia-400',
+                    ],
+                    [
+                        'title' => 'AI Event Parsing',
+                        'description' => 'Paste event details and AI extracts everything automatically. Not available on Humanitix.',
+                        'icon' => 'ai',
+                        'gradient' => 'from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30',
+                        'border' => 'border-indigo-200 dark:border-indigo-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                    [
+                        'title' => 'Open Source & Selfhosted',
+                        'description' => 'Full source code access and selfhosting option. Humanitix is a closed-source hosted-only platform.',
+                        'icon' => 'globe',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                    [
+                        'title' => 'Fan Engagement',
+                        'description' => 'Let attendees share videos and comments on events. Humanitix focuses on ticketing only.',
+                        'icon' => 'image',
+                        'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30',
+                        'border' => 'border-rose-200 dark:border-rose-500/20',
+                        'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20',
+                        'icon_color' => 'text-rose-600 dark:text-rose-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
+                    ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
+                    ['name' => 'Eventzilla', 'route' => 'marketing.compare_eventzilla'],
+                ],
+            ],
+
+            'eventzilla' => [
+                'name' => 'Eventzilla',
+                'key' => 'eventzilla',
+                'slug' => 'eventzilla-alternative',
+                'tagline' => 'Flat pricing, zero platform fees, and more built-in features than Eventzilla.',
+                'description' => 'Compare Event Schedule with Eventzilla. Get flat $5/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and open source.',
+                'keywords' => 'eventzilla alternative, eventzilla alternative free, event registration platform, eventzilla competitor, affordable event platform',
+                'about' => 'Eventzilla is an event registration and ticketing platform offering per-ticket pricing across multiple tiers. Plans range from $1.50/registration (Basic) to $5,999/year (Unlimited). It includes features like badge printing, speaker management, live streaming, and CRM integrations.',
+                'competitor_strengths' => [
+                    'Badge printing with customizable templates and QR codes',
+                    'Speaker and session management for conferences',
+                    'Native integrations with Zapier, HubSpot, and Salesforce',
+                ],
+                'sections' => [
+                    'Pricing & Fees' => [
+                        ['Free plan', 'Yes (forever)', 'Free for free events only', true],
+                        ['Paid plan price', '$5/mo (7-day free trial)', '$1.50 to $2.90/ticket or $5,999/yr', true],
+                        ['Platform fees', '0%', '1.9% to 2.9% (Pro/Plus plans)', true],
+                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal (separate fees)', false],
+                    ],
+                    'Events & Ticketing' => [
+                        ['Ticketing', 'Yes (Pro)', 'Yes', false],
+                        ['QR check-ins', 'Yes (Pro)', 'Yes (kiosk mode)', false],
+                        ['Ticket waitlist', 'Yes (Pro)', 'Yes', false],
+                        ['Check-in dashboard', 'Yes (Pro)', 'Yes', false],
+                        ['Sale notifications', 'Yes (Pro)', 'Yes', false],
+                        ['Sales data export', 'Yes (Pro)', 'Yes', false],
+                        ['Recurring events', 'Yes (Free)', 'Yes', false],
+                        ['Online events', 'Yes (Free)', 'Yes (live streaming)', false],
+                        ['Free event RSVP', 'Yes (Free)', 'Yes', false],
+                        ['Event polls', 'Yes (Pro)', 'Yes (surveys)', false],
+                        ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
+                        ['Post-event feedback', 'Yes (Pro)', 'Yes (surveys)', false],
+                    ],
+                    'Integrations' => [
+                        ['Google Calendar sync', 'Yes (Free)', 'No', true],
+                        ['CalDAV sync', 'Yes (Free)', 'No', true],
+                        ['Newsletters', 'Yes (Free)', 'No (Mailchimp/HubSpot integration)', true],
+                    ],
+                    'Customization' => [
+                        ['Custom domains', 'Yes (Enterprise)', 'Yes (Plus/Unlimited)', false],
+                        ['Remove branding', 'Yes (Pro)', 'Yes (Plus/Unlimited)', false],
+                        ['Custom fields', 'Yes (Pro)', 'Yes', false],
+                        ['Custom CSS', 'Yes (Pro)', 'No', true],
+                        ['Built-in analytics', 'Yes (Free)', 'Yes', false],
+                    ],
+                    'Unique Features' => [
+                        ['AI event parsing', 'Yes (Enterprise)', 'No', true],
+                        ['Event graphics gen', 'Yes (Pro)', 'No', true],
+                        ['Sub-schedules', 'Yes (Free)', 'No', true],
+                        ['Fan videos & comments', 'Yes (Free)', 'No', true],
+                        ['Embeddable calendar', 'Yes (Free)', 'Widget only', true],
+                        ['Private/password-protected events', 'Yes (Enterprise)', 'Yes', false],
+                        ['Availability management', 'Yes (Enterprise)', 'No', true],
+                        ['WhatsApp event creation', 'Yes (Enterprise)', 'No', true],
+                        ['Team collaboration', 'Yes (Enterprise)', 'Yes', false],
+                    ],
+                    'Platform' => [
+                        ['REST API', 'Yes (Pro)', 'Yes', false],
+                        ['Webhooks', 'Yes (Pro)', 'Yes (Zapier)', false],
+                        ['Open source', 'Yes', 'No', true],
+                        ['Selfhosting', 'Yes', 'No', true],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => 'Flat $5/mo Pricing',
+                        'description' => 'No per-ticket fees ever. Eventzilla charges $1.50 to $2.90 per ticket plus percentage fees.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => 'Calendar Sync',
+                        'description' => 'Two-way Google Calendar and CalDAV sync included free. Eventzilla has no calendar integration.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30',
+                        'border' => 'border-violet-200 dark:border-violet-500/20',
+                        'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20',
+                        'icon_color' => 'text-violet-600 dark:text-violet-400',
+                    ],
+                    [
+                        'title' => 'Built-in Newsletters',
+                        'description' => 'Engage your audience directly with built-in newsletters. Eventzilla requires third-party integrations.',
+                        'icon' => 'mail',
+                        'gradient' => 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30',
+                        'border' => 'border-fuchsia-200 dark:border-fuchsia-500/20',
+                        'icon_bg' => 'bg-fuchsia-100 dark:bg-fuchsia-500/20',
+                        'icon_color' => 'text-fuchsia-600 dark:text-fuchsia-400',
+                    ],
+                    [
+                        'title' => 'AI Event Parsing',
+                        'description' => 'Paste event details and AI extracts everything automatically. Not available on Eventzilla.',
+                        'icon' => 'ai',
+                        'gradient' => 'from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30',
+                        'border' => 'border-indigo-200 dark:border-indigo-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                    [
+                        'title' => 'Open Source & Selfhosted',
+                        'description' => 'Full source code access and selfhosting option. Eventzilla is a closed-source hosted-only platform.',
+                        'icon' => 'globe',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                    [
+                        'title' => 'Fan Engagement',
+                        'description' => 'Let attendees share videos and comments on events. Eventzilla focuses on registration and ticketing.',
+                        'icon' => 'image',
+                        'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30',
+                        'border' => 'border-rose-200 dark:border-rose-500/20',
+                        'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20',
+                        'icon_color' => 'text-rose-600 dark:text-rose-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
+                    ['name' => 'Humanitix', 'route' => 'marketing.compare_humanitix'],
+                    ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
                 ],
             ],
         ];

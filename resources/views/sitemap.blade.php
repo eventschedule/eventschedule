@@ -130,6 +130,18 @@
         <priority>0.8</priority>
     </url>
     <url>
+        <loc>{{ url('/humanitix-alternative') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>{{ url('/eventzilla-alternative') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
         <loc>{{ url('/faq') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>

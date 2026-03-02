@@ -81,20 +81,28 @@
             },
             mounted() {
                 if (this.turnstileEnabled && this.turnstileSiteKey) {
-                    const checkTurnstile = () => {
-                        if (typeof turnstile !== 'undefined') {
-                            this.turnstileWidgetId = turnstile.render('#turnstile-checkout-widget', {
-                                sitekey: this.turnstileSiteKey,
-                                size: 'flexible',
-                                callback: (token) => {
-                                    this.turnstileToken = token;
-                                },
-                            });
-                        } else {
-                            setTimeout(checkTurnstile, 100);
-                        }
+                    const renderTurnstile = () => {
+                        const checkTurnstile = () => {
+                            if (typeof turnstile !== 'undefined') {
+                                this.turnstileWidgetId = turnstile.render('#turnstile-checkout-widget', {
+                                    sitekey: this.turnstileSiteKey,
+                                    size: 'flexible',
+                                    callback: (token) => {
+                                        this.turnstileToken = token;
+                                    },
+                                });
+                            } else {
+                                setTimeout(checkTurnstile, 100);
+                            }
+                        };
+                        checkTurnstile();
                     };
-                    checkTurnstile();
+                    const el = document.getElementById('ticket-selector');
+                    if (el && el.offsetParent !== null) {
+                        renderTurnstile();
+                    } else {
+                        window.addEventListener('event-form-shown', () => renderTurnstile(), { once: true });
+                    }
                 }
             },
             computed: {
@@ -162,6 +170,9 @@
                         alert(@json(__('messages.turnstile_verification_failed')));
                         return;
                     }
+                    const url = new URL(window.location);
+                    url.searchParams.set('tickets', 'true');
+                    history.replaceState(null, '', url);
                     this.isSubmitting = true;
                 },
                 getAvailableQuantity(ticket) {
@@ -247,6 +258,10 @@
                     this.promoCodeMessage = '';
                     this.discountAmount = 0;
                 },
+                hideForm() {
+                    window.dispatchEvent(new CustomEvent('hide-event-form'));
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
                 joinWaitlist() {
                     if (!this.name.trim() || !this.email.trim() || this.waitlistSubmitting) return;
                     this.waitlistSubmitting = true;
@@ -319,7 +334,7 @@
         <div class="mb-6">
             <label for="name" class="text-gray-900 dark:text-gray-100">{{ __('messages.name') . ' *' }}</label>
             <input type="text" name="name" id="name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
-                v-model="name" required autofocus autocomplete="name" />
+                v-model="name" required autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
@@ -581,9 +596,9 @@
             </div>
             <div v-if="!waitlistSuccess" class="flex justify-end items-center pt-2 gap-8">
                 @if (! request()->embed)
-                <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+                <button type="button" @click="hideForm" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
                     {{ strtoupper(__('messages.cancel')) }}
-                </a>
+                </button>
                 @endif
                 <button type="button" @click="joinWaitlist"
                     :disabled="!name.trim() || !email.trim() || waitlistSubmitting"
@@ -595,18 +610,18 @@
             </div>
             @if (! request()->embed)
             <div v-else class="flex justify-end pt-2">
-                <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+                <button type="button" @click="hideForm" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
                     {{ strtoupper(__('messages.back')) }}
-                </a>
+                </button>
             </div>
             @endif
         </div>
 
         <div v-if="!isAllSoldOut" class="flex justify-end items-center pt-2 gap-8">
             @if (! request()->embed)
-            <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+            <button type="button" @click="hideForm" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
                 {{ strtoupper(__('messages.cancel')) }}
-            </a>
+            </button>
             @endif
 
             <x-brand-button

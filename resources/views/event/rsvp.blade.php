@@ -34,20 +34,28 @@
             },
             mounted() {
                 if (this.turnstileEnabled && this.turnstileSiteKey) {
-                    const checkTurnstile = () => {
-                        if (typeof turnstile !== 'undefined') {
-                            this.turnstileWidgetId = turnstile.render('#turnstile-rsvp-widget', {
-                                sitekey: this.turnstileSiteKey,
-                                size: 'flexible',
-                                callback: (token) => {
-                                    this.turnstileToken = token;
-                                },
-                            });
-                        } else {
-                            setTimeout(checkTurnstile, 100);
-                        }
+                    const renderTurnstile = () => {
+                        const checkTurnstile = () => {
+                            if (typeof turnstile !== 'undefined') {
+                                this.turnstileWidgetId = turnstile.render('#turnstile-rsvp-widget', {
+                                    sitekey: this.turnstileSiteKey,
+                                    size: 'flexible',
+                                    callback: (token) => {
+                                        this.turnstileToken = token;
+                                    },
+                                });
+                            } else {
+                                setTimeout(checkTurnstile, 100);
+                            }
+                        };
+                        checkTurnstile();
                     };
-                    checkTurnstile();
+                    const el = document.getElementById('rsvp-form');
+                    if (el && el.offsetParent !== null) {
+                        renderTurnstile();
+                    } else {
+                        window.addEventListener('event-form-shown', () => renderTurnstile(), { once: true });
+                    }
                 }
             },
             computed: {
@@ -59,6 +67,10 @@
                 },
             },
             methods: {
+                hideForm() {
+                    window.dispatchEvent(new CustomEvent('hide-event-form'));
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
                 validateForm(e) {
                     if (!this.canSubmit) {
                         e.preventDefault();
@@ -69,6 +81,9 @@
                         alert(@json(__('messages.turnstile_verification_failed')));
                         return;
                     }
+                    const url = new URL(window.location);
+                    url.searchParams.set('rsvp', 'true');
+                    history.replaceState(null, '', url);
                     this.isSubmitting = true;
                 },
             },
@@ -102,7 +117,7 @@
         <div class="mb-6">
             <label for="name" class="text-gray-900 dark:text-gray-100">{{ __('messages.name') . ' *' }}</label>
             <input type="text" name="name" id="name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
-                v-model="name" required autofocus autocomplete="name" />
+                v-model="name" required autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
@@ -227,13 +242,22 @@
         </div>
         @endif
 
-        <button type="submit"
-            :disabled="!canSubmit || isSubmitting"
-            class="w-full justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            style="background-color: #4E81FA; color: white;">
-            <span v-if="isSubmitting">...</span>
-            <span v-else>{{ __('messages.register') }}</span>
-        </button>
+        <div class="flex justify-end items-center pt-2 gap-8">
+            @if (! request()->embed)
+            <button type="button"
+                @click="hideForm"
+                class="px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+                {{ strtoupper(__('messages.cancel')) }}
+            </button>
+            @endif
+            <button type="submit"
+                :disabled="!canSubmit || isSubmitting"
+                class="flex-1 justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                <span v-if="isSubmitting">...</span>
+                <span v-else>{{ __('messages.submit') }}</span>
+            </button>
+        </div>
     </form>
     @endif
 </div>

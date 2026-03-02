@@ -513,6 +513,8 @@ if (config('app.is_nexus')) {
         Route::get('/tito-alternative', [MarketingController::class, 'compareTito'])->name('marketing.compare_tito');
         Route::get('/addevent-alternative', [MarketingController::class, 'compareAddEvent'])->name('marketing.compare_addevent');
         Route::get('/pretix-alternative', [MarketingController::class, 'comparePretix'])->name('marketing.compare_pretix');
+        Route::get('/humanitix-alternative', [MarketingController::class, 'compareHumanitix'])->name('marketing.compare_humanitix');
+        Route::get('/eventzilla-alternative', [MarketingController::class, 'compareEventzilla'])->name('marketing.compare_eventzilla');
         Route::get('/contact', [MarketingController::class, 'contact'])->name('marketing.contact');
         Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
         Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
@@ -667,6 +669,8 @@ if (config('app.is_nexus')) {
             Route::get('/tito-alternative', [MarketingController::class, 'compareTito'])->name('marketing.compare_tito');
             Route::get('/addevent-alternative', [MarketingController::class, 'compareAddEvent'])->name('marketing.compare_addevent');
             Route::get('/pretix-alternative', [MarketingController::class, 'comparePretix'])->name('marketing.compare_pretix');
+            Route::get('/humanitix-alternative', [MarketingController::class, 'compareHumanitix'])->name('marketing.compare_humanitix');
+            Route::get('/eventzilla-alternative', [MarketingController::class, 'compareEventzilla'])->name('marketing.compare_eventzilla');
             Route::get('/contact', [MarketingController::class, 'contact'])->name('marketing.contact');
             Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
             Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');

@@ -734,7 +734,7 @@
                                         </div>
 
                                         {{-- Venue Badge --}}
-                                        <a v-if="event.venue_name && event.venue_guest_url && !event.is_password_protected" :href="event.venue_guest_url" class="flex items-center gap-4 min-w-0 hover:opacity-80 transition-opacity">
+                                        <a v-if="event.venue_name && event.venue_guest_url && !event.is_password_protected" :href="event.venue_guest_url" class="w-fit flex items-center gap-4 min-w-0 hover:opacity-80 transition-opacity">
                                             <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                                 <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
                                                 <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">

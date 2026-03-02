@@ -79,7 +79,7 @@ class SecurityHeaders
                 "img-src 'self' data: {$host}:* *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com *.ytimg.com eventschedule.nyc3.cdn.digitaloceanspaces.com cdn.jsdelivr.net",
                 "font-src 'self' data: {$host}:* *.googleapis.com *.gstatic.com *.bootstrapcdn.com",
                 "connect-src 'self' {$host}:* ws://{$host}:* wss://{$host}:* *.googleapis.com *.google-analytics.com *.googletagmanager.com *.jsdelivr.net *.stripe.com *.sentry.io *.sentry-cdn.com ipapi.co",
-                "frame-src 'self' *.{$host} *.stripe.com *.youtube.com *.youtube-nocookie.com *.googletagmanager.com challenges.cloudflare.com",
+                "frame-src 'self' *.{$host} *.stripe.com *.youtube.com *.youtube-nocookie.com *.googletagmanager.com *.google.com challenges.cloudflare.com",
                 "object-src 'none'",
                 "base-uri 'self'",
             ];
@@ -93,7 +93,7 @@ class SecurityHeaders
                 "img-src 'self' data: *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com *.ytimg.com eventschedule.nyc3.cdn.digitaloceanspaces.com cdn.jsdelivr.net",
                 "font-src 'self' data: *.googleapis.com *.gstatic.com *.bootstrapcdn.com",
                 "connect-src 'self' *.googleapis.com *.google-analytics.com *.googletagmanager.com *.jsdelivr.net *.stripe.com *.sentry.io *.sentry-cdn.com ipapi.co",
-                "frame-src 'self' *.eventschedule.com *.stripe.com *.youtube.com *.youtube-nocookie.com *.googletagmanager.com challenges.cloudflare.com",
+                "frame-src 'self' *.eventschedule.com *.stripe.com *.youtube.com *.youtube-nocookie.com *.googletagmanager.com *.google.com challenges.cloudflare.com",
                 "object-src 'none'",
                 "base-uri 'self'",
                 'upgrade-insecure-requests',
