@@ -724,7 +724,7 @@
         @if ($event->canAcceptRsvp($date))
             <button type="button"
                   @click="$dispatch('show-event-form')"
-                  class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                  class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
               @if ($event->isRsvpFull($date))
                 {{ __('messages.registration_full') }}
@@ -736,7 +736,7 @@
           @if ($event->canSellTickets($date))
             <button type="button"
                   @click="$dispatch('show-event-form')"
-                  class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                  class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
               @if ($event->allTicketsSoldOut($date))
                 {{ __('messages.join_waitlist') }}
@@ -752,7 +752,7 @@
               @endif
             >
                 <button type="button"
-                      class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                      class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                       style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
                   {{ __('messages.view_event') }}
                 </button>
@@ -761,7 +761,7 @@
         @elseif ($event->allTicketSalesEnded() && $event->tickets_enabled)
               <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_sales_ended') }}</span>
               <button type="button"
-                  class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                  class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
                   id="menu-button" aria-expanded="true" aria-haspopup="true">
               {{ __('messages.add_to_calendar') }}
@@ -771,7 +771,7 @@
               </button>
         @else
               <button type="button"
-                  class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                  class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
                   id="menu-button" aria-expanded="true" aria-haspopup="true">
               {{ __('messages.add_to_calendar') }}
@@ -866,14 +866,47 @@
         </div>
         @endif
 
+        {{-- RSVP form section (hidden by default, shown on CTA click) --}}
+        @if ($event->canAcceptRsvp($date))
+        <div id="event-form-section" class="scroll-mt-4"
+             x-data="{ showForm: {{ (request()->get('rsvp') === 'true' || $errors->any()) ? 'true' : 'false' }} }"
+             x-show="showForm" x-transition x-cloak
+             x-on:show-event-form.window="showForm = true; const url = new URL(window.location); url.searchParams.set('rsvp', 'true'); history.replaceState(null, '', url); $nextTick(() => { document.getElementById('event-form-section').scrollIntoView({ behavior: 'smooth', block: 'start' }); window.dispatchEvent(new CustomEvent('event-form-shown')); const nameInput = document.getElementById('name'); if (nameInput && !nameInput.value.trim()) { nameInput.focus(); } })"
+             x-on:hide-event-form.window="showForm = false; const url = new URL(window.location); url.searchParams.delete('rsvp'); history.replaceState(null, '', url)"
+             x-init="if (showForm) { setTimeout(() => { $el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.dispatchEvent(new CustomEvent('event-form-shown')); const nameInput = document.getElementById('name'); if (nameInput && !nameInput.value.trim()) { nameInput.focus(); } }, 300) }">
+            <div x-ignore class="flex flex-col gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">
+              <div class="flex-1">
+                <div class="flex flex-col gap-4">
+                  <h2 class="text-[28px] leading-snug text-gray-900 dark:text-gray-100">
+                    {{ __('messages.register') }}
+                  </h2>
+                  <div class="text-base text-gray-700 dark:text-gray-300">
+                    @include('event.rsvp', ['event' => $event, 'subdomain' => $subdomain])
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+        @elseif ($event->canSellTickets($date) && $event->isPro())
+        {{-- Ticket form section (hidden by default, shown on CTA click) --}}
+        <div id="event-form-section" class="scroll-mt-4"
+             x-data="{ showForm: {{ (request()->get('tickets') === 'true' || $errors->any()) ? 'true' : 'false' }} }"
+             x-show="showForm" x-transition x-cloak
+             x-on:show-event-form.window="showForm = true; const url = new URL(window.location); url.searchParams.set('tickets', 'true'); history.replaceState(null, '', url); $nextTick(() => { document.getElementById('event-form-section').scrollIntoView({ behavior: 'smooth', block: 'start' }); window.dispatchEvent(new CustomEvent('event-form-shown')); const nameInput = document.getElementById('name'); if (nameInput && !nameInput.value.trim()) { nameInput.focus(); } })"
+             x-on:hide-event-form.window="showForm = false; const url = new URL(window.location); url.searchParams.delete('tickets'); history.replaceState(null, '', url)"
+             x-init="if (showForm) { setTimeout(() => { $el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.dispatchEvent(new CustomEvent('event-form-shown')); const nameInput = document.getElementById('name'); if (nameInput && !nameInput.value.trim()) { nameInput.focus(); } }, 300) }">
+            <div x-ignore class="flex flex-col gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">
+              <div class="flex-1">
+                @include('event.tickets', ['event' => $event, 'subdomain' => $subdomain])
+              </div>
+            </div>
+        </div>
+        @endif
+
         {{-- Flyer image --}}
         @if ($event->flyer_image_url)
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden"
-             x-data="{ flyerOpen: false, flyerHidden: {{ (request()->get('rsvp') === 'true' || request()->get('tickets') === 'true' || $errors->any()) ? 'true' : 'false' }} }"
-             x-on:show-event-form.window="flyerHidden = true"
-             x-on:hide-event-form.window="flyerHidden = false"
-             x-show="!flyerHidden"
-             {!! (request()->get('rsvp') === 'true' || request()->get('tickets') === 'true' || $errors->any()) ? 'style="display:none"' : '' !!}
+             x-data="{ flyerOpen: false }"
              @keydown.escape.window="if (flyerOpen) { flyerOpen = false; document.body.style.overflow = ''; }">
           <img src="{{ $event->flyer_image_url }}" alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.flyer') }}" class="w-full cursor-pointer" loading="lazy" decoding="async" @click="flyerOpen = true; document.body.style.overflow = 'hidden'"/>
           <template x-teleport="body">
@@ -885,55 +918,6 @@
               <img src="{{ $event->flyer_image_url }}" class="max-w-[96vw] max-h-[90vh] object-contain pointer-events-none" alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.flyer') }}">
             </div>
           </template>
-        </div>
-        @endif
-
-        {{-- RSVP form section (hidden by default, shown on CTA click) --}}
-        @if ($event->canAcceptRsvp($date))
-        <div id="event-form-section"
-             x-data="{ showForm: {{ (request()->get('rsvp') === 'true' || $errors->any()) ? 'true' : 'false' }} }"
-             x-on:show-event-form.window="showForm = true; const url = new URL(window.location); url.searchParams.set('rsvp', 'true'); history.replaceState(null, '', url); $nextTick(() => { document.getElementById('event-form-section').scrollIntoView({ behavior: 'smooth', block: 'start' }); window.dispatchEvent(new CustomEvent('event-form-shown')); })"
-             x-on:hide-event-form.window="showForm = false; const url = new URL(window.location); url.searchParams.delete('rsvp'); history.replaceState(null, '', url)"
-             x-init="if (showForm) { setTimeout(() => { $el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.dispatchEvent(new CustomEvent('event-form-shown')); }, 300) }">
-          <div x-show="showForm" x-transition x-cloak>
-            <div class="flex flex-col {{ $event->flyer_image_url ? 'xl:flex-row' : '' }} gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">
-              <div class="flex-1">
-                <div class="flex flex-col gap-4">
-                  <h2 class="text-[28px] leading-snug text-gray-900 dark:text-gray-100">
-                    {{ __('messages.register') }}
-                  </h2>
-                  <div class="text-base text-gray-700 dark:text-gray-300">
-                    @include('event.rsvp', ['event' => $event, 'subdomain' => $subdomain])
-                  </div>
-                </div>
-              </div>
-              @if ($event->flyer_image_url)
-              <div class="flex-1">
-                  <img src="{{ $event->flyer_image_url }}" alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.flyer') }}" class="block rounded-lg" loading="lazy" decoding="async"/>
-              </div>
-              @endif
-            </div>
-          </div>
-        </div>
-        @elseif ($event->canSellTickets($date) && $event->isPro())
-        {{-- Ticket form section (hidden by default, shown on CTA click) --}}
-        <div id="event-form-section"
-             x-data="{ showForm: {{ (request()->get('tickets') === 'true' || $errors->any()) ? 'true' : 'false' }} }"
-             x-on:show-event-form.window="showForm = true; const url = new URL(window.location); url.searchParams.set('tickets', 'true'); history.replaceState(null, '', url); $nextTick(() => { document.getElementById('event-form-section').scrollIntoView({ behavior: 'smooth', block: 'start' }); window.dispatchEvent(new CustomEvent('event-form-shown')); })"
-             x-on:hide-event-form.window="showForm = false; const url = new URL(window.location); url.searchParams.delete('tickets'); history.replaceState(null, '', url)"
-             x-init="if (showForm) { setTimeout(() => { $el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.dispatchEvent(new CustomEvent('event-form-shown')); }, 300) }">
-          <div x-show="showForm" x-transition x-cloak>
-            <div class="flex flex-col {{ $event->flyer_image_url ? 'xl:flex-row' : '' }} gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">
-              <div class="flex-1">
-                @include('event.tickets', ['event' => $event, 'subdomain' => $subdomain])
-              </div>
-              @if ($event->flyer_image_url)
-              <div class="flex-1">
-                  <img src="{{ $event->flyer_image_url }}" alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.flyer') }}" class="block rounded-lg" loading="lazy" decoding="async"/>
-              </div>
-              @endif
-            </div>
-          </div>
         </div>
         @endif
 
@@ -1743,7 +1727,7 @@
       @if ($event->canAcceptRsvp($date))
           <button type="button"
                 @click="$dispatch('show-event-form')"
-                class="flex-1 justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                 style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
             @if ($event->isRsvpFull($date))
               {{ __('messages.registration_full') }}
@@ -1755,7 +1739,7 @@
         @if ($event->canSellTickets($date))
           <button type="button"
                 @click="$dispatch('show-event-form')"
-                class="flex-1 justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                 style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
             @if ($event->allTicketsSoldOut($date))
               {{ __('messages.join_waitlist') }}
@@ -1773,7 +1757,7 @@
             @endif
           >
             <button type="button"
-                  class="w-full justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                  class="w-full justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
               {{ __('messages.view_event') }}
             </button>
@@ -1784,7 +1768,7 @@
       @else
         <button type="button"
             id="mobile-calendar-cta"
-            class="flex-1 justify-center rounded-xl px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+            class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
             style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
           {{ __('messages.add_to_calendar') }}
         </button>

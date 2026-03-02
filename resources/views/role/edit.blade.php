@@ -3484,6 +3484,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     testEmailResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
                     testEmailResult.textContent = data.error || @json(__('messages.failed_to_send_test_email'), JSON_UNESCAPED_UNICODE);
+                    if (data.details) {
+                        testEmailResult.textContent += '\n\n' + data.details;
+                        testEmailResult.style.whiteSpace = 'pre-wrap';
+                    }
                 }
                 testEmailResult.classList.remove('hidden');
             })

@@ -3379,7 +3379,10 @@ class RoleController extends Controller
                 'email' => $email,
             ]);
 
-            return response()->json(['error' => __('messages.failed_to_send_test_email')], 500);
+            return response()->json([
+                'error' => __('messages.failed_to_send_test_email'),
+                'details' => $e->getMessage(),
+            ], 500);
         }
     }
 
