@@ -45,7 +45,8 @@ class GroupsTest extends DuskTestCase
             // Step 4: Test filtering in guest view
             $this->testGuestViewFiltering($browser);
 
-            // Step 5: Test API functionality
+            // Step 5: Upgrade talent to enterprise (API is a Pro feature) and test API functionality
+            $this->upgradeToEnterprise('talent');
             $this->testApiGroupFunctionality($browser);
         });
     }

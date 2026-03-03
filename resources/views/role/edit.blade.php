@@ -462,7 +462,8 @@
             if (headerImage && headerImage !== 'none' && headerImage !== '') {
                 headerUrl = "{{ asset('images/headers/thumbs') }}" + '/' + headerImage + '.jpg';
             } else if (headerImage === '') {
-                headerUrl = $('#header_image_url_preview').attr('src') || '{{ $role->header_image_url }}';
+                var customSrc = $('#header_image_url_preview').attr('src');
+                headerUrl = (customSrc && customSrc !== '#') ? customSrc : '{{ $role->header_image_url }}';
             }
 
             // Build header image HTML
@@ -480,20 +481,23 @@
             // Build profile image HTML
             var profileHtml = '';
             var profileBorderColor = isDark ? '#1e1e1e' : '#ffffff';
+            var cardOverflow = 'hidden';
+            var cardMarginTop = '';
             if (profileSrc && headerUrl) {
                 // Overlapping profile image (matches GP -mt-[100px] scaled down)
                 var profileAlign = isRtl ? 'margin-left: auto; margin-right: 0;' : 'margin-right: auto; margin-left: 0;';
-                profileHtml = '<div style="margin-top: -26px; margin-bottom: 4px; ' + profileAlign + '">' +
-                    '<div style="width: 38px; height: 38px; border-radius: 6px; background-color: ' + profileBorderColor + '; display: flex; align-items: center; justify-content: center;">' +
+                profileHtml = '<div style="position: relative; z-index: 10; margin-top: -26px; margin-bottom: 4px; ' + profileAlign + '">' +
+                    '<div style="width: 38px; height: 38px; border-radius: 6px; background-color: ' + profileBorderColor + '; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">' +
                         '<img src="' + profileSrc + '" style="width: 34px; height: 34px; border-radius: 5px; object-fit: cover;" />' +
                     '</div>' +
                 '</div>';
             } else if (profileSrc) {
-                // No header image: profile with spacer above (matches GP pt-16)
+                // No header image: profile protrudes above card (matches GP pt-16 + -mt-[100px])
+                cardOverflow = 'visible';
+                cardMarginTop = 'margin-top: 18px;';
                 var profileAlign = isRtl ? 'margin-left: auto; margin-right: 0;' : 'margin-right: auto; margin-left: 0;';
-                profileHtml = '<div style="padding-top: 10px;"></div>' +
-                    '<div style="margin-bottom: 4px; ' + profileAlign + '">' +
-                    '<div style="width: 38px; height: 38px; border-radius: 6px; background-color: ' + profileBorderColor + '; display: flex; align-items: center; justify-content: center;">' +
+                profileHtml = '<div style="position: relative; z-index: 10; margin-top: -20px; margin-bottom: 4px; ' + profileAlign + '">' +
+                    '<div style="width: 38px; height: 38px; border-radius: 6px; background-color: ' + profileBorderColor + '; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">' +
                         '<img src="' + profileSrc + '" style="width: 34px; height: 34px; border-radius: 5px; object-fit: cover;" />' +
                     '</div>' +
                 '</div>';
@@ -504,16 +508,17 @@
 
             // Build content HTML
             var contentTopPadding = !profileSrc && !headerUrl ? 'padding-top: 10px;' : '';
-            var textAlign = isRtl ? 'text-align: right;' : 'text-align: left;';
             var contentHtml =
-                '<div dir="' + (isRtl ? 'rtl' : 'ltr') + '" style="width: 100%; border-radius: 16px; background-color: ' + cardBg + '; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; flex-direction: column; overflow: hidden;">' +
+                '<div dir="' + (isRtl ? 'rtl' : 'ltr') + '" style="width: 100%; border-radius: 16px; background-color: ' + cardBg + '; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; flex-direction: column; overflow: ' + cardOverflow + '; ' + cardMarginTop + '">' +
                     headerHtml +
-                    '<div style="padding: 8px 10px 10px; display: flex; flex-direction: column; ' + contentTopPadding + '">' +
+                    '<div style="position: relative; z-index: 5; padding: 8px 16px 14px; display: flex; flex-direction: column; ' + contentTopPadding + '">' +
                         profileHtml +
-                        '<div style="font-size: 13px; font-weight: 600; color: ' + fontColor + '; font-family: \'' + fontFamily + '\', sans-serif; ' + textAlign + ' line-height: 1.3; margin-bottom: 6px;">' + name + '</div>' +
-                        '<div>' +
-                            '<div style="display: inline-block; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 600; background-color: ' + accentColor + '; color: ' + getContrastColor(accentColor) + '; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">' +
-                                followText +
+                        '<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">' +
+                            '<div style="font-size: 13px; font-weight: 600; color: ' + fontColor + '; font-family: \'' + fontFamily + '\', sans-serif; line-height: 1.3; min-width: 0;">' + name + '</div>' +
+                            '<div style="flex-shrink: 0;">' +
+                                '<div style="display: inline-block; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 600; background-color: ' + accentColor + '; color: ' + getContrastColor(accentColor) + '; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">' +
+                                    followText +
+                                '</div>' +
                             '</div>' +
                         '</div>' +
                     '</div>' +
@@ -831,9 +836,9 @@
                             </a>
                             <a href="#section-subschedules" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-subschedules">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
                                 </svg>
-                                {{ __('messages.subschedules') }}
+                                {{ __('messages.customize') }}
                             </a>
                             <a href="#section-settings" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-settings">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -1245,10 +1250,6 @@
                                 class="style-tab-button text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
                                 {{ __('messages.advanced') }}
                             </button>
-                            <button type="button" data-style-tab="sponsors" id="style-tab-sponsors"
-                                class="style-tab-button text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
-                                {{ __('messages.sponsors') }}
-                            </button>
                         </nav>
                     </div>
 
@@ -1347,7 +1348,7 @@
 
                             @php
                                 $effectiveHeaderImage = $role->header_image;
-                                if ($role->header_image_url && ($effectiveHeaderImage == 'none' || !$effectiveHeaderImage)) {
+                                if ($role->header_image_url && !$effectiveHeaderImage) {
                                     $effectiveHeaderImage = ''; // Custom
                                 }
                             @endphp
@@ -1680,23 +1681,248 @@
                             </div>
                     </div>
 
-                    <!-- Sponsors Tab Content -->
-                    <div id="style-content-sponsors" style="display: none;">
-                        @if ($role->isPro())
-                            <div class="mb-6">
-                                <x-input-label for="sponsor_section_title" :value="__('messages.sponsor_section_title')" />
-                                <input type="text" id="sponsor_section_title" name="sponsor_section_title"
-                                    value="{{ old('sponsor_section_title', $role->sponsor_section_title) }}"
-                                    placeholder="{{ __('messages.our_sponsors') }}"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.sponsor_section_title_help') }}</p>
-                                <x-input-error class="mt-2" :messages="$errors->get('sponsor_section_title')" />
-                            </div>
 
-                            <div class="mb-4">
-                                <x-input-label :value="__('messages.sponsors')" />
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.sponsor_logos_help') }}</p>
+                        </div>
+
+                        <!-- Preview (always visible, right column on desktop) -->
+                        <div class="w-full xl:w-1/2 mt-6 xl:mt-0">
+                            <x-input-label :value="__('messages.preview')" />
+                            <div id="preview" class="h-[210px] w-full"></div>
+                        </div>
+                    </div>
+
+                    </div>
+                </div>
+
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-subschedules">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+                        </svg>
+                        {{ __('messages.customize') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="section-subschedules" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                    <div class="max-w-xl">
+
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+                            </svg>
+                            {{ __('messages.customize') }}
+                        </h2>
+
+                        <!-- Tab Navigation -->
+                        <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                            <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
+                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="subschedules">
+                                    {{ __('messages.subschedules') }}
+                                </button>
+                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
+                                    {{ __('messages.custom_fields') }}
+                                </button>
+                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="sponsors">
+                                    {{ __('messages.sponsors') }}
+                                </button>
+                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-labels">
+                                    {{ __('messages.custom_labels') }}
+                                </button>
+                            </nav>
+                        </div>
+
+                        <!-- Tab Content: Sub-schedules -->
+                        <div id="customize-tab-subschedules" class="customize-tab-content">
+
+                        <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.subschedules_help') }}</p>
+                        <div class="mb-6">
+                            <div id="groups-list">
+                                @php $groups = $role->groups ?? []; @endphp
+                                <div id="group-items">
+                                    @foreach(old('groups', $groups) as $i => $group)
+                                        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                            <div class="mb-4">
+                                                <x-input-label for="group_name_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.name') . ' *'" />
+                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name : $group['name'] ?? ''" />
+                                            </div>
+                                            @if($role->language_code !== 'en' || app()->getLocale() !== 'en')
+                                            <div class="mb-4">
+                                                <x-input-label for="group_name_en_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.english_name')" />
+                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name_en]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name_en : $group['name_en'] ?? ''" />
+                                            </div>
+                                            @endif
+                                            <div class="mb-4">
+                                                <x-input-label :value="__('messages.color')" />
+                                                <div class="vue-color-picker" data-props="{{ json_encode([
+                                                    'name' => 'groups[' . (is_object($group) ? $group->id : $i) . '][color]',
+                                                    'initialColor' => is_object($group) ? $group->color : ($group['color'] ?? ''),
+                                                    'colors' => ['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#A855F7','#EC4899','#F43F5E','#6B7280'],
+                                                    'clearLabel' => __('messages.clear'),
+                                                ]) }}"></div>
+                                            </div>
+                                            @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
+                                            <div class="mb-4" id="group-url-display-{{ is_object($group) ? $group->id : $i }}">
+                                                <p class="text-sm text-gray-500 flex items-center gap-2">
+                                                    <x-link href="{{ $role->getGuestUrl(true) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank" class="min-w-0 break-all">
+                                                        {{ \App\Utils\UrlUtils::clean($role->getGuestUrl(true)) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}
+                                                    </x-link>
+                                                    <button type="button" data-action="copy-group-url" data-copy-url="{{ $role->getGuestUrl(true) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" class="flex-shrink-0 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
+                                                        </svg>
+                                                    </button>
+                                                </p>
+                                            </div>
+                                            <div class="mb-4 {{ (is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])) ? 'hidden' : '' }}" id="group-slug-edit-{{ is_object($group) ? $group->id : $i }}">
+                                                <x-input-label for="group_slug_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.slug')" />
+                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][slug]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->slug : $group['slug'] ?? ''" />
+                                            </div>
+                                            <div class="flex gap-4 items-center justify-between">
+                                                <div class="flex gap-4 items-center">
+                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" id="edit-button-{{ is_object($group) ? $group->id : $i }}" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
+                                                        {{ __('messages.edit') }}
+                                                    </button>
+                                                    @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
+                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" class="hidden text-sm text-[#4E81FA] hover:text-[#3D6FE8]" id="cancel-button-{{ is_object($group) ? $group->id : $i }}">
+                                                        {{ __('messages.cancel') }}
+                                                    </button>
+                                                    @endif
+                                                </div>
+                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                    {{ __('messages.remove') }}
+                                                </button>
+                                            </div>
+                                            @else
+                                            <div class="flex gap-4 items-center justify-end">
+                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                    {{ __('messages.remove') }}
+                                                </button>
+                                            </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <button type="button" data-action="add-group-field" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
+                                    + {{ __('messages.add_subschedule') }}
+                                </button>
                             </div>
+                            <x-input-error class="mt-2" :messages="$errors->get('groups')" />
+                        </div>
+
+                        </div>
+                        <!-- End Tab Content: Sub-schedules -->
+
+                        <!-- Tab Content: Custom Fields -->
+                        <div id="customize-tab-custom-fields" class="customize-tab-content hidden">
+                        @if ($role->isPro())
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                            {{ __('messages.event_custom_fields_help') }}
+                        </p>
+
+                        <div id="event-custom-fields-container">
+                            <input type="hidden" name="event_custom_fields_submitted" value="1">
+                            @php
+                                $eventCustomFields = $role->event_custom_fields ?? [];
+                                uasort($eventCustomFields, fn($a, $b) => ($a['index'] ?? 999) <=> ($b['index'] ?? 999));
+                                $fieldIndex = 0;
+                            @endphp
+                            @foreach($eventCustomFields as $fieldKey => $field)
+                            <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg event-custom-field-item" data-field-key="{{ $fieldKey }}" data-field-index="{{ $field['index'] ?? '' }}">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <x-input-label :value="__('messages.field_name') . ' *'" class="text-sm" />
+                                        <x-text-input type="text" name="event_custom_fields[{{ $fieldKey }}][name]"
+                                            value="{{ $field['name'] ?? '' }}"
+                                            class="mt-1 block w-full" required />
+                                    </div>
+                                    <div>
+                                        <x-input-label :value="__('messages.field_type')" class="text-sm" />
+                                        <select name="event_custom_fields[{{ $fieldKey }}][type]"
+                                            data-action="toggle-field-options"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                            <option value="string" {{ ($field['type'] ?? 'string') === 'string' ? 'selected' : '' }}>{{ __('messages.type_string') }}</option>
+                                            <option value="multiline_string" {{ ($field['type'] ?? '') === 'multiline_string' ? 'selected' : '' }}>{{ __('messages.type_multiline_string') }}</option>
+                                            <option value="switch" {{ ($field['type'] ?? '') === 'switch' ? 'selected' : '' }}>{{ __('messages.type_switch') }}</option>
+                                            <option value="date" {{ ($field['type'] ?? '') === 'date' ? 'selected' : '' }}>{{ __('messages.type_date') }}</option>
+                                            <option value="dropdown" {{ ($field['type'] ?? '') === 'dropdown' ? 'selected' : '' }}>{{ __('messages.type_dropdown') }}</option>
+                                            <option value="multiselect" {{ ($field['type'] ?? '') === 'multiselect' ? 'selected' : '' }}>{{ __('messages.type_multiselect') }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                @if($role->language_code !== 'en')
+                                <div class="mt-3">
+                                    <x-input-label :value="__('messages.english_name')" class="text-sm" />
+                                    <x-text-input type="text" name="event_custom_fields[{{ $fieldKey }}][name_en]"
+                                        value="{{ $field['name_en'] ?? '' }}"
+                                        class="mt-1 block w-full"
+                                        :placeholder="__('messages.auto_translated_placeholder')" />
+                                </div>
+                                @endif
+                                <div class="mt-3 event-field-options-container" style="{{ in_array($field['type'] ?? '', ['dropdown', 'multiselect']) ? '' : 'display: none;' }}">
+                                    <x-input-label :value="__('messages.field_options')" class="text-sm" />
+                                    <x-text-input type="text" name="event_custom_fields[{{ $fieldKey }}][options]"
+                                        value="{{ $field['options'] ?? '' }}"
+                                        class="mt-1 block w-full"
+                                        :placeholder="__('messages.options_placeholder')" />
+                                </div>
+                                <div class="mt-3">
+                                    <x-input-label :value="__('messages.ai_prompt_custom_field')" class="text-sm" />
+                                    <textarea name="event_custom_fields[{{ $fieldKey }}][ai_prompt]"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm ai-prompt-textarea"
+                                        rows="2"
+                                        maxlength="500">{{ $field['ai_prompt'] ?? '' }}</textarea>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_prompt_custom_field_help') }}</p>
+                                </div>
+                                <div class="mt-3 flex items-center justify-between">
+                                    <div class="flex items-center gap-4">
+                                        <div class="flex items-center">
+                                            <input type="checkbox" name="event_custom_fields[{{ $fieldKey }}][required]"
+                                                id="event_field_required_{{ $fieldKey }}"
+                                                value="1"
+                                                {{ !empty($field['required']) ? 'checked' : '' }}
+                                                class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                            <label for="event_field_required_{{ $fieldKey }}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
+                                        </div>
+                                        <input type="hidden" name="event_custom_fields[{{ $fieldKey }}][index]" value="{{ $field['index'] ?? '' }}">
+                                        @if(!empty($field['index']))
+                                        <span class="text-xs text-gray-400 dark:text-gray-500 font-mono">→ {custom_{{ $field['index'] }}}</span>
+                                        @endif
+                                    </div>
+                                    <button type="button" data-action="remove-custom-field" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                        {{ __('messages.remove') }}
+                                    </button>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+
+                        <button type="button" data-action="add-custom-field" id="add-event-custom-field-btn" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8] {{ count($eventCustomFields) >= 10 ? 'hidden' : '' }}">
+                            + {{ __('messages.add_field') }}
+                        </button>
+
+                        <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                            {{ __('messages.event_custom_fields_graphic_help') }}
+                        </p>
+                        @else
+                        <div class="text-center py-8">
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                                {{ __('messages.custom_fields_pro_only') }}
+                            </p>
+                            @if (config('app.hosted'))
+                            <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-fields')"
+                                class="text-[#4E81FA] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
+                            @endif
+                        </div>
+                        @endif
+                        </div>
+                        <!-- End Tab Content: Custom Fields -->
+
+                        <!-- Tab Content: Sponsors -->
+                        <div id="customize-tab-sponsors" class="customize-tab-content hidden">
+                        @if ($role->isPro())
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.sponsor_logos_help') }}</p>
 
                             <input type="hidden" name="existing_sponsors" id="existing_sponsors_input" value="{{ $role->sponsor_logos ?? '[]' }}" />
 
@@ -1820,115 +2046,81 @@
                                 @endif
                             </div>
                         @endif
-                    </div>
+                        </div>
+                        <!-- End Tab Content: Sponsors -->
 
+                        <!-- Tab Content: Custom Labels -->
+                        <div id="customize-tab-custom-labels" class="customize-tab-content hidden">
+                        @if ($role->isPro())
+                        <input type="hidden" name="custom_labels_submitted" value="1">
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                            {{ __('messages.custom_labels_help') }}
+                        </p>
+
+                        <div class="flex gap-2 mb-6">
+                            <select id="custom-label-select" data-searchable class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                <option value="">{{ __('messages.select_label_to_customize') }}</option>
+                                @php $existingLabelKeys = array_keys($role->custom_labels ?? []); @endphp
+                                @foreach(\App\Models\Role::getCustomizableLabels() as $labelKey => $labelDefault)
+                                    @if(!in_array($labelKey, $existingLabelKeys))
+                                    <option value="{{ $labelKey }}">{{ __('messages.' . $labelKey) }}</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                            <button type="button" data-action="add-custom-label"
+                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[#4E81FA] rounded-md hover:bg-blue-600 transition-colors">
+                                <svg class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                {{ __('messages.add') }}
+                            </button>
                         </div>
 
-                        <!-- Preview (always visible, right column on desktop) -->
-                        <div class="w-full xl:w-1/2 mt-6 xl:mt-0">
-                            <x-input-label :value="__('messages.preview')" />
-                            <div id="preview" class="h-[210px] w-full"></div>
-                        </div>
-                    </div>
-
-                    </div>
-                </div>
-
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-subschedules">
-                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
-                        </svg>
-                        {{ __('messages.subschedules') }}
-                    </span>
-                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div id="section-subschedules" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
-                    <div class="max-w-xl">
-
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
-                            </svg>
-                            {{ __('messages.subschedules') }}
-                        </h2>
-
-                        <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.subschedules_help') }}</p>
-                        <div class="mb-6">
-                            <div id="groups-list">
-                                @php $groups = $role->groups ?? []; @endphp
-                                <div id="group-items">
-                                    @foreach(old('groups', $groups) as $i => $group)
-                                        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                                            <div class="mb-4">
-                                                <x-input-label for="group_name_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.name') . ' *'" />
-                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name : $group['name'] ?? ''" />
-                                            </div>
-                                            @if($role->language_code !== 'en' || app()->getLocale() !== 'en')
-                                            <div class="mb-4">
-                                                <x-input-label for="group_name_en_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.english_name')" />
-                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name_en]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name_en : $group['name_en'] ?? ''" />
-                                            </div>
-                                            @endif
-                                            <div class="mb-4">
-                                                <x-input-label :value="__('messages.color')" />
-                                                <div class="vue-color-picker" data-props="{{ json_encode([
-                                                    'name' => 'groups[' . (is_object($group) ? $group->id : $i) . '][color]',
-                                                    'initialColor' => is_object($group) ? $group->color : ($group['color'] ?? ''),
-                                                    'colors' => ['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#A855F7','#EC4899','#F43F5E','#6B7280'],
-                                                    'clearLabel' => __('messages.clear'),
-                                                ]) }}"></div>
-                                            </div>
-                                            @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
-                                            <div class="mb-4" id="group-url-display-{{ is_object($group) ? $group->id : $i }}">
-                                                <p class="text-sm text-gray-500 flex items-center gap-2">
-                                                    <x-link href="{{ $role->getGuestUrl(true) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank" class="min-w-0 break-all">
-                                                        {{ \App\Utils\UrlUtils::clean($role->getGuestUrl(true)) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}
-                                                    </x-link>
-                                                    <button type="button" data-action="copy-group-url" data-copy-url="{{ $role->getGuestUrl(true) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" class="flex-shrink-0 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
-                                                        </svg>
-                                                    </button>
-                                                </p>
-                                            </div>
-                                            <div class="mb-4 {{ (is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])) ? 'hidden' : '' }}" id="group-slug-edit-{{ is_object($group) ? $group->id : $i }}">
-                                                <x-input-label for="group_slug_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.slug')" />
-                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][slug]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->slug : $group['slug'] ?? ''" />
-                                            </div>
-                                            <div class="flex gap-4 items-center justify-between">
-                                                <div class="flex gap-4 items-center">
-                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" id="edit-button-{{ is_object($group) ? $group->id : $i }}" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
-                                                        {{ __('messages.edit') }}
-                                                    </button>
-                                                    @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
-                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" class="hidden text-sm text-[#4E81FA] hover:text-[#3D6FE8]" id="cancel-button-{{ is_object($group) ? $group->id : $i }}">
-                                                        {{ __('messages.cancel') }}
-                                                    </button>
-                                                    @endif
-                                                </div>
-                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                                    {{ __('messages.remove') }}
-                                                </button>
-                                            </div>
-                                            @else
-                                            <div class="flex gap-4 items-center justify-end">
-                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                                    {{ __('messages.remove') }}
-                                                </button>
-                                            </div>
-                                            @endif
-                                        </div>
-                                    @endforeach
+                        <div id="custom-labels-list" class="space-y-3">
+                            @foreach(($role->custom_labels ?? []) as $labelKey => $labelData)
+                            <div class="custom-label-item p-4 border border-gray-200 dark:border-gray-700 rounded-lg" data-label-key="{{ $labelKey }}">
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.' . $labelKey) }}</span>
+                                    <button type="button" data-action="remove-custom-label" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                        {{ __('messages.remove') }}
+                                    </button>
                                 </div>
-                                <button type="button" data-action="add-group-field" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
-                                    + {{ __('messages.add_subschedule') }}
-                                </button>
+                                <div class="space-y-3">
+                                    <div>
+                                        <x-input-label :value="__('messages.custom_value')" class="text-sm" />
+                                        <x-text-input type="text" name="custom_labels[{{ $labelKey }}][value]"
+                                            value="{{ $labelData['value'] ?? '' }}"
+                                            class="mt-1 block w-full"
+                                            placeholder="{{ __('messages.' . $labelKey) }}"
+                                            maxlength="200" />
+                                    </div>
+                                    @if($role->language_code !== 'en')
+                                    <div>
+                                        <x-input-label :value="__('messages.english_name')" class="text-sm" />
+                                        <x-text-input type="text" name="custom_labels[{{ $labelKey }}][value_en]"
+                                            value="{{ $labelData['value_en'] ?? '' }}"
+                                            class="mt-1 block w-full"
+                                            :placeholder="__('messages.auto_translated_placeholder')"
+                                            maxlength="200" />
+                                    </div>
+                                    @endif
+                                </div>
                             </div>
-                            <x-input-error class="mt-2" :messages="$errors->get('groups')" />
+                            @endforeach
                         </div>
+                        @else
+                        <div class="text-center py-8">
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                                {{ __('messages.custom_labels_pro_only') }}
+                            </p>
+                            @if (config('app.hosted'))
+                            <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-labels')"
+                                class="text-[#4E81FA] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
+                            @endif
+                        </div>
+                        @endif
+                        </div>
+                        <!-- End Tab Content: Custom Labels -->
 
                     </div>
                 </div>
@@ -1967,9 +2159,6 @@
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                                 <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="general">
                                     {{ __('messages.general') }}
-                                </button>
-                                <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
-                                    {{ __('messages.custom_fields') }}
                                 </button>
                                 <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="notifications">
                                     {{ __('messages.notifications') }}
@@ -2135,111 +2324,6 @@
 
                         </div>
                         <!-- End Tab Content: General -->
-
-                        <!-- Tab Content: Custom Fields -->
-                        <div id="settings-tab-custom-fields" class="settings-tab-content hidden">
-                        @if ($role->isPro())
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                            {{ __('messages.event_custom_fields_help') }}
-                        </p>
-
-                        <div id="event-custom-fields-container">
-                            <input type="hidden" name="event_custom_fields_submitted" value="1">
-                            @php
-                                $eventCustomFields = $role->event_custom_fields ?? [];
-                                uasort($eventCustomFields, fn($a, $b) => ($a['index'] ?? 999) <=> ($b['index'] ?? 999));
-                                $fieldIndex = 0;
-                            @endphp
-                            @foreach($eventCustomFields as $fieldKey => $field)
-                            <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg event-custom-field-item" data-field-key="{{ $fieldKey }}" data-field-index="{{ $field['index'] ?? '' }}">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <x-input-label :value="__('messages.field_name') . ' *'" class="text-sm" />
-                                        <x-text-input type="text" name="event_custom_fields[{{ $fieldKey }}][name]"
-                                            value="{{ $field['name'] ?? '' }}"
-                                            class="mt-1 block w-full" required />
-                                    </div>
-                                    <div>
-                                        <x-input-label :value="__('messages.field_type')" class="text-sm" />
-                                        <select name="event_custom_fields[{{ $fieldKey }}][type]"
-                                            data-action="toggle-field-options"
-                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                            <option value="string" {{ ($field['type'] ?? 'string') === 'string' ? 'selected' : '' }}>{{ __('messages.type_string') }}</option>
-                                            <option value="multiline_string" {{ ($field['type'] ?? '') === 'multiline_string' ? 'selected' : '' }}>{{ __('messages.type_multiline_string') }}</option>
-                                            <option value="switch" {{ ($field['type'] ?? '') === 'switch' ? 'selected' : '' }}>{{ __('messages.type_switch') }}</option>
-                                            <option value="date" {{ ($field['type'] ?? '') === 'date' ? 'selected' : '' }}>{{ __('messages.type_date') }}</option>
-                                            <option value="dropdown" {{ ($field['type'] ?? '') === 'dropdown' ? 'selected' : '' }}>{{ __('messages.type_dropdown') }}</option>
-                                            <option value="multiselect" {{ ($field['type'] ?? '') === 'multiselect' ? 'selected' : '' }}>{{ __('messages.type_multiselect') }}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                @if($role->language_code !== 'en')
-                                <div class="mt-3">
-                                    <x-input-label :value="__('messages.english_name')" class="text-sm" />
-                                    <x-text-input type="text" name="event_custom_fields[{{ $fieldKey }}][name_en]"
-                                        value="{{ $field['name_en'] ?? '' }}"
-                                        class="mt-1 block w-full"
-                                        :placeholder="__('messages.auto_translated_placeholder')" />
-                                </div>
-                                @endif
-                                <div class="mt-3 event-field-options-container" style="{{ in_array($field['type'] ?? '', ['dropdown', 'multiselect']) ? '' : 'display: none;' }}">
-                                    <x-input-label :value="__('messages.field_options')" class="text-sm" />
-                                    <x-text-input type="text" name="event_custom_fields[{{ $fieldKey }}][options]"
-                                        value="{{ $field['options'] ?? '' }}"
-                                        class="mt-1 block w-full"
-                                        :placeholder="__('messages.options_placeholder')" />
-                                </div>
-                                <div class="mt-3">
-                                    <x-input-label :value="__('messages.ai_prompt_custom_field')" class="text-sm" />
-                                    <textarea name="event_custom_fields[{{ $fieldKey }}][ai_prompt]"
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm ai-prompt-textarea"
-                                        rows="2"
-                                        maxlength="500">{{ $field['ai_prompt'] ?? '' }}</textarea>
-                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_prompt_custom_field_help') }}</p>
-                                </div>
-                                <div class="mt-3 flex items-center justify-between">
-                                    <div class="flex items-center gap-4">
-                                        <div class="flex items-center">
-                                            <input type="checkbox" name="event_custom_fields[{{ $fieldKey }}][required]"
-                                                id="event_field_required_{{ $fieldKey }}"
-                                                value="1"
-                                                {{ !empty($field['required']) ? 'checked' : '' }}
-                                                class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                                            <label for="event_field_required_{{ $fieldKey }}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
-                                        </div>
-                                        <input type="hidden" name="event_custom_fields[{{ $fieldKey }}][index]" value="{{ $field['index'] ?? '' }}">
-                                        @if(!empty($field['index']))
-                                        <span class="text-xs text-gray-400 dark:text-gray-500 font-mono">→ {custom_{{ $field['index'] }}}</span>
-                                        @endif
-                                    </div>
-                                    <button type="button" data-action="remove-custom-field" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                        {{ __('messages.remove') }}
-                                    </button>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-
-                        <button type="button" data-action="add-custom-field" id="add-event-custom-field-btn" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8] {{ count($eventCustomFields) >= 10 ? 'hidden' : '' }}">
-                            + {{ __('messages.add_field') }}
-                        </button>
-
-                        <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                            {{ __('messages.event_custom_fields_graphic_help') }}
-                        </p>
-                        @else
-                        <div class="text-center py-8">
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                                {{ __('messages.custom_fields_pro_only') }}
-                            </p>
-                            @if (config('app.hosted'))
-                            <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-fields')"
-                                class="text-[#4E81FA] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
-                            @endif
-                        </div>
-                        @endif
-                        </div>
-                        <!-- End Tab Content: Custom Fields -->
 
                         <!-- Tab Content: Notifications -->
                         <div id="settings-tab-notifications" class="settings-tab-content hidden">
@@ -2491,11 +2575,21 @@
 
                         <!-- Tab Content: Fan Content -->
                         <div id="engagement-tab-fan_content" class="engagement-tab-content {{ $showRequestsTab ? 'hidden' : '' }}">
-                            <div class="mb-6">
-                                <x-toggle name="fan_content_enabled"
-                                    label="{{ __('messages.fan_content_enabled') }}"
-                                    checked="{{ old('fan_content_enabled', $role->fan_content_enabled) }}"
-                                    help="{{ __('messages.fan_content_enabled_help') }}" />
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.fan_content_help') }}</p>
+                            <div class="mb-4">
+                                <x-toggle name="fan_comments_enabled"
+                                    label="{{ __('messages.fan_comments_enabled') }}"
+                                    checked="{{ old('fan_comments_enabled', $role->fan_comments_enabled) }}" />
+                            </div>
+                            <div class="mb-4">
+                                <x-toggle name="fan_photos_enabled"
+                                    label="{{ __('messages.fan_photos_enabled') }}"
+                                    checked="{{ old('fan_photos_enabled', $role->fan_photos_enabled) }}" />
+                            </div>
+                            <div class="mb-4">
+                                <x-toggle name="fan_videos_enabled"
+                                    label="{{ __('messages.fan_videos_enabled') }}"
+                                    checked="{{ old('fan_videos_enabled', $role->fan_videos_enabled) }}" />
                             </div>
                         </div>
                         <!-- End Tab Content: Fan Content -->
@@ -2675,6 +2769,9 @@
                                 </button>
                                 <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="caldav">
                                     {{ __('messages.caldav_calendar') }}
+                                </button>
+                                <button type="button" class="integration-tab feeds-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="feeds">
+                                    {{ __('messages.feeds') }}
                                 </button>
                             </nav>
                         </div>
@@ -3020,6 +3117,49 @@
                             @endif
                         </div>
 
+                        <!-- Tab Content: Feeds -->
+                        <div id="integration-tab-feeds" class="integration-tab-content hidden">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                                {{ __('messages.feeds_description') }}
+                            </p>
+
+                            @if ($role->exists && $role->subdomain)
+                            <div class="space-y-6">
+                                <!-- iCal Feed -->
+                                <div>
+                                    <x-input-label :value="__('messages.ical_feed')" />
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-2">{{ __('messages.ical_feed_description') }}</p>
+                                    <div class="flex items-center gap-2">
+                                        <x-text-input id="ical_feed_url" type="text" class="block w-full" readonly
+                                            value="{{ route('feed.ical', ['subdomain' => $role->subdomain]) }}" />
+                                        <button type="button" onclick="copyFeedUrl('ical_feed_url', this)" class="shrink-0 inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9.75a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- RSS Feed -->
+                                <div>
+                                    <x-input-label :value="__('messages.rss_feed')" />
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-2">{{ __('messages.rss_feed_description') }}</p>
+                                    <div class="flex items-center gap-2">
+                                        <x-text-input id="rss_feed_url" type="text" class="block w-full" readonly
+                                            value="{{ route('feed.rss', ['subdomain' => $role->subdomain]) }}" />
+                                        <button type="button" onclick="copyFeedUrl('rss_feed_url', this)" class="shrink-0 inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9.75a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            @else
+                            <p class="text-sm text-gray-500 dark:text-gray-400 italic">{{ __('messages.save_schedule_first_for_feeds') }}</p>
+                            @endif
+                        </div>
+
                         </div>
                     </div>
                 </div>
@@ -3106,7 +3246,7 @@ document.querySelectorAll('.import-field-toggle').forEach(function(toggle) {
 // Style sub-tab navigation
 function showStyleTab(tabName) {
     // Hide all style tab contents
-    const tabContents = ['branding', 'background', 'advanced', 'sponsors'];
+    const tabContents = ['branding', 'background', 'advanced'];
     tabContents.forEach(function(tab) {
         const content = document.getElementById('style-content-' + tab);
         if (content) {
@@ -3138,6 +3278,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Migrate old tab names to new names
             if (savedStyleTab === 'images') savedStyleTab = 'branding';
             if (savedStyleTab === 'settings') savedStyleTab = 'advanced';
+            if (savedStyleTab === 'sponsors') savedStyleTab = 'branding';
             showStyleTab(savedStyleTab);
         }
     }
@@ -3176,6 +3317,21 @@ function addGroupField() {
     `;
     container.appendChild(div);
     div.querySelectorAll('.vue-color-picker').forEach(window.mountColorPicker);
+}
+
+function copyFeedUrl(inputId, button) {
+    const url = document.getElementById(inputId).value;
+    navigator.clipboard.writeText(url).then(() => {
+        const originalHTML = button.innerHTML;
+        button.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-green-500">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+        `;
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+        }, 2000);
+    }).catch(() => {});
 }
 
 function copyHostname(button) {
@@ -4107,6 +4263,55 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Customize tabs switching
+document.addEventListener('DOMContentLoaded', function() {
+    const customizeTabs = document.querySelectorAll('.customize-tab');
+    const customizeTabContents = document.querySelectorAll('.customize-tab-content');
+
+    // Restore active tab from localStorage
+    if (!isNewSchedule) {
+        const savedCustomizeTab = localStorage.getItem('customizeActiveTab');
+        if (savedCustomizeTab) {
+            if (document.getElementById('customize-tab-' + savedCustomizeTab)) {
+                switchCustomizeTab(savedCustomizeTab);
+            } else {
+                switchCustomizeTab('subschedules');
+            }
+        }
+    }
+
+    customizeTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabName = this.dataset.tab;
+            switchCustomizeTab(tabName);
+            localStorage.setItem('customizeActiveTab', tabName);
+        });
+    });
+
+    function switchCustomizeTab(tabName) {
+        // Update tab buttons
+        customizeTabs.forEach(tab => {
+            if (tab.dataset.tab === tabName) {
+                tab.classList.add('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
+            } else {
+                tab.classList.remove('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
+            }
+        });
+
+        // Update tab contents
+        customizeTabContents.forEach(content => {
+            const contentId = content.id.replace('customize-tab-', '');
+            if (contentId === tabName) {
+                content.classList.remove('hidden');
+            } else {
+                content.classList.add('hidden');
+            }
+        });
+    }
+});
+
 // Settings tabs switching
 document.addEventListener('DOMContentLoaded', function() {
     const settingsTabs = document.querySelectorAll('.settings-tab');
@@ -4116,7 +4321,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!isNewSchedule) {
         const savedSettingsTab = localStorage.getItem('settingsActiveTab');
         if (savedSettingsTab) {
-            if (document.getElementById('settings-tab-' + savedSettingsTab)) {
+            // Migrate old tab name
+            if (savedSettingsTab === 'custom-fields') {
+                localStorage.removeItem('settingsActiveTab');
+                switchSettingsTab('general');
+            } else if (document.getElementById('settings-tab-' + savedSettingsTab)) {
                 switchSettingsTab(savedSettingsTab);
             } else {
                 switchSettingsTab('general');
@@ -4618,6 +4827,77 @@ function updateEventCustomFieldButton() {
     }
 }
 
+var customLabelDefaults = @json(collect(\App\Models\Role::getCustomizableLabels())->mapWithKeys(fn($v, $k) => [$k => __('messages.' . $k)]));
+var showEnField = {{ ($role->language_code !== 'en') ? 'true' : 'false' }};
+
+function addCustomLabel() {
+    var select = document.getElementById('custom-label-select');
+    var key = select.value;
+    if (!key) return;
+
+    // Check for duplicates
+    if (document.querySelector('.custom-label-item[data-label-key="' + key + '"]')) return;
+
+    var displayName = customLabelDefaults[key] || key;
+
+    var enFieldHtml = '';
+    if (showEnField) {
+        enFieldHtml = `
+            <div>
+                <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.english_name') !!}</label>
+                <input type="text" name="custom_labels[${key}][value_en]"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                    placeholder="{!! __('messages.auto_translated_placeholder') !!}"
+                    maxlength="200" />
+            </div>`;
+    }
+
+    var html = `
+        <div class="custom-label-item p-4 border border-gray-200 dark:border-gray-700 rounded-lg" data-label-key="${key}">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">${displayName}</span>
+                <button type="button" data-action="remove-custom-label" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                    {!! __('messages.remove') !!}
+                </button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.custom_value') !!}</label>
+                    <input type="text" name="custom_labels[${key}][value]"
+                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                        placeholder="${displayName}"
+                        maxlength="200" />
+                </div>
+                ${enFieldHtml}
+            </div>
+        </div>
+    `;
+
+    document.getElementById('custom-labels-list').insertAdjacentHTML('beforeend', html);
+
+    // Remove option from select
+    var option = select.querySelector('option[value="' + key + '"]');
+    if (option) option.remove();
+    select.value = '';
+}
+
+function removeCustomLabel(btn) {
+    var item = btn.closest('.custom-label-item');
+    if (!item) return;
+
+    var key = item.dataset.labelKey;
+    var displayName = customLabelDefaults[key] || key;
+
+    // Restore option to select
+    var select = document.getElementById('custom-label-select');
+    var option = document.createElement('option');
+    option.value = key;
+    option.textContent = displayName;
+    select.appendChild(option);
+
+    item.remove();
+}
+
 function deleteRoleImage(url, token, element) {
     if (!confirm(@json(__('messages.are_you_sure'), JSON_UNESCAPED_UNICODE))) {
         return;
@@ -4658,6 +4938,7 @@ function updateSponsorHiddenInput() {
     var items = document.querySelectorAll('#sponsors-list .sponsor-item');
     var sponsors = [];
     items.forEach(function(item) {
+        if (item.dataset.newIdx !== undefined) return;
         var data = JSON.parse(item.dataset.sponsor);
         sponsors.push(data);
     });
@@ -4894,6 +5175,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'remove-sponsor':
                 removeSponsor(btn);
+                break;
+            case 'add-custom-label':
+                addCustomLabel();
+                break;
+            case 'remove-custom-label':
+                removeCustomLabel(btn);
                 break;
         }
     });

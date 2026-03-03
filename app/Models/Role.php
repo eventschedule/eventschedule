@@ -87,13 +87,16 @@ class Role extends Model implements MustVerifyEmail
         'direct_registration',
         'feedback_enabled',
         'feedback_delay_hours',
-        'fan_content_enabled',
+        'fan_comments_enabled',
+        'fan_photos_enabled',
+        'fan_videos_enabled',
         'first_day_of_week',
         'approved_subdomains',
         'default_curator_ids',
         'sponsor_logos',
         'sponsor_section_title',
         'sponsor_section_title_en',
+        'custom_labels',
     ];
 
     /**
@@ -110,7 +113,9 @@ class Role extends Model implements MustVerifyEmail
         'last_translated_at' => 'datetime',
         'direct_registration' => 'boolean',
         'feedback_enabled' => 'boolean',
-        'fan_content_enabled' => 'boolean',
+        'fan_comments_enabled' => 'boolean',
+        'fan_photos_enabled' => 'boolean',
+        'fan_videos_enabled' => 'boolean',
         'boost_credit' => 'decimal:2',
         'boost_max_budget' => 'decimal:2',
         'phone_verified_at' => 'datetime',
@@ -120,6 +125,7 @@ class Role extends Model implements MustVerifyEmail
         'default_curator_ids' => 'array',
         'trial_reminder_sent_at' => 'datetime',
         'renewal_reminder_sent_at' => 'datetime',
+        'custom_labels' => 'array',
     ];
 
     /**
@@ -881,10 +887,6 @@ class Role extends Model implements MustVerifyEmail
             return true;
         }
 
-        if (config('app.is_testing')) {
-            return true;
-        }
-
         // Check if user has an active Stripe subscription
         if ($this->hasActiveSubscription()) {
             return true;
@@ -906,7 +908,7 @@ class Role extends Model implements MustVerifyEmail
 
     public function scopeWherePro($query)
     {
-        if (! config('app.hosted') || config('app.is_testing')) {
+        if (! config('app.hosted')) {
             return $query;
         }
 
@@ -936,10 +938,6 @@ class Role extends Model implements MustVerifyEmail
             return true;
         }
 
-        if (config('app.is_testing')) {
-            return true;
-        }
-
         // Check for active enterprise Stripe subscription
         if ($this->hasActiveEnterpriseSubscription()) {
             return true;
@@ -952,10 +950,6 @@ class Role extends Model implements MustVerifyEmail
     public function isWhiteLabeled()
     {
         if (! config('app.hosted')) {
-            return true;
-        }
-
-        if (config('app.is_testing')) {
             return true;
         }
 
@@ -1057,17 +1051,55 @@ class Role extends Model implements MustVerifyEmail
         return $sponsors;
     }
 
+    public static function getCustomizableLabels(): array
+    {
+        return [
+            'request_to_book' => 'Request to Book',
+            'submit_event' => 'Submit Event',
+            'follow' => 'Follow',
+            'show_more' => 'Show more',
+            'show_less' => 'Show less',
+            'our_sponsors' => 'Our Sponsors',
+            'events' => 'Events',
+            'filters' => 'Filter Events',
+            'past_events' => 'Past Events',
+            'show_past_events' => 'Show Past Events',
+            'no_scheduled_events' => 'No scheduled events',
+            'free_entry' => 'Free entry',
+            'load_more' => 'Load More',
+            'add_photo' => 'Add Photo',
+            'add_video' => 'Add Video',
+            'add_comment' => 'Add Comment',
+            'schedule' => 'Schedule',
+            'category' => 'Category',
+            'venue' => 'Venue',
+            'online' => 'Online',
+            'show_all' => 'Show All',
+            'clear_filters' => 'Clear Filters',
+            'done' => 'Done',
+        ];
+    }
+
+    public function customLabel(string $key): string
+    {
+        $labels = $this->custom_labels ?? [];
+
+        if (isset($labels[$key])) {
+            if (! empty($labels[$key]['value_en']) && (session()->has('translate') || request()->lang == 'en')) {
+                return $labels[$key]['value_en'];
+            }
+
+            if (! empty($labels[$key]['value'])) {
+                return $labels[$key]['value'];
+            }
+        }
+
+        return __('messages.'.$key);
+    }
+
     public function translatedSponsorSectionTitle()
     {
-        if ($this->sponsor_section_title_en && (session()->has('translate') || request()->lang == 'en')) {
-            return $this->sponsor_section_title_en;
-        }
-
-        if ($this->sponsor_section_title) {
-            return $this->sponsor_section_title;
-        }
-
-        return __('messages.our_sponsors');
+        return $this->customLabel('our_sponsors');
     }
 
     public function translatedShortDescription()

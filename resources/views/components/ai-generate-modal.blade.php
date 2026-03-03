@@ -142,7 +142,12 @@ document.addEventListener('alpine:init', function() {
                     },
                     body: JSON.stringify(body)
                 })
-                .then(function(response) { return response.json(); })
+                .then(function(response) {
+                    if (response.status === 429) {
+                        throw new Error('rate_limit');
+                    }
+                    return response.json();
+                })
                 .then(function(data) {
                     if (data.success) {
                         window[{!! json_encode($successCallback) !!}](data);
@@ -158,8 +163,12 @@ document.addEventListener('alpine:init', function() {
                         alert(data.error || @json($errorMessage));
                     }
                 })
-                .catch(function() {
-                    alert(@json($errorMessage));
+                .catch(function(err) {
+                    if (err.message === 'rate_limit') {
+                        alert(@json(__('messages.ai_rate_limit')));
+                    } else {
+                        alert(@json($errorMessage));
+                    }
                 })
                 .finally(function() {
                     self.generating = false;

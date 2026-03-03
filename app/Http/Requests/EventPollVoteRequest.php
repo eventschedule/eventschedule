@@ -10,6 +10,7 @@ class EventPollVoteRequest extends FormRequest
     {
         return [
             'option_index' => ['required', 'integer', 'min:0', 'max:9'],
+            'event_date' => ['nullable', 'date_format:Y-m-d'],
         ];
     }
 }

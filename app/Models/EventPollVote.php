@@ -10,6 +10,7 @@ class EventPollVote extends Model
         'event_poll_id',
         'user_id',
         'option_index',
+        'event_date',
     ];
 
     public function poll()

@@ -1658,7 +1658,7 @@ class GeminiUtils
         $prompt = "Create an abstract, decorative brand icon/logo for a schedule called '{$role->name}'. {$context}. ";
         $prompt .= 'The image should be purely visual - no text, no letters, no words, no people, no faces. ';
         $prompt .= 'Use shapes, patterns, and colors that evoke the theme. ';
-        $prompt .= "Primary color: {$accentColor}. Clean, modern design. Fill the full square canvas with your design rather than centering a circle in the middle. Do not round the corners of the image.";
+        $prompt .= "Primary color: {$accentColor}. Clean, modern design. Fill the full square canvas with your design rather than centering a circle in the middle. Do not round the corners of the image. Do not add any border, outline, or frame to the image.";
 
         if ($styleInstructions) {
             $prompt .= " Style preferences: {$styleInstructions}";

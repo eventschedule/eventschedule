@@ -141,6 +141,10 @@ class Translate extends Command
                         // Include roles with sponsor names that might need translation
                         $q->whereNotNull('sponsor_logos')
                             ->where('sponsor_logos', '!=', '[]');
+                    })
+                    ->orWhere(function ($q) {
+                        // Include roles with custom labels that might need translation
+                        $q->whereNotNull('custom_labels');
                     });
             });
 
@@ -390,6 +394,45 @@ class Translate extends Command
                         $role->event_custom_fields = $customFields;
                     } catch (\Exception $e) {
                         $this->error('Failed to translate custom field options: '.$e->getMessage());
+                    }
+                }
+            }
+
+            // Translate custom labels
+            if ($role->custom_labels) {
+                $customLabels = $role->custom_labels;
+                $labelsNeedingTranslation = [];
+
+                foreach ($customLabels as $key => $labelData) {
+                    if (! empty($labelData['value']) && empty($labelData['value_en'])) {
+                        $labelsNeedingTranslation[$key] = $labelData['value'];
+                    }
+                }
+
+                if (! empty($labelsNeedingTranslation)) {
+                    if ($debug) {
+                        $this->info('Translating '.count($labelsNeedingTranslation).' custom labels');
+                    }
+
+                    try {
+                        $translations = GeminiUtils::translateCustomFieldNames(
+                            array_values($labelsNeedingTranslation),
+                            $role->language_code
+                        );
+
+                        foreach ($labelsNeedingTranslation as $key => $value) {
+                            if (isset($translations[$value])) {
+                                $customLabels[$key]['value_en'] = $translations[$value];
+                                $translationAttempted = true;
+                                if ($debug) {
+                                    $this->info("Translated custom label '{$value}' → '{$translations[$value]}'");
+                                }
+                            }
+                        }
+
+                        $role->custom_labels = $customLabels;
+                    } catch (\Exception $e) {
+                        $this->error('Failed to translate custom labels: '.$e->getMessage());
                     }
                 }
             }

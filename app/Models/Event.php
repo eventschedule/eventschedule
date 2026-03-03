@@ -52,7 +52,9 @@ class Event extends Model
         'last_translated_at',
         'last_notified_fan_content_count',
         'feedback_enabled',
-        'fan_content_enabled',
+        'fan_comments_enabled',
+        'fan_photos_enabled',
+        'fan_videos_enabled',
         'ask_phone',
         'require_phone',
     ];
@@ -70,7 +72,9 @@ class Event extends Model
         'recurring_include_dates' => 'array',
         'recurring_exclude_dates' => 'array',
         'feedback_enabled' => 'boolean',
-        'fan_content_enabled' => 'boolean',
+        'fan_comments_enabled' => 'boolean',
+        'fan_photos_enabled' => 'boolean',
+        'fan_videos_enabled' => 'boolean',
         'ask_phone' => 'boolean',
         'require_phone' => 'boolean',
     ];
@@ -437,15 +441,42 @@ class Event extends Model
         return $role ? (bool) $role->feedback_enabled : false;
     }
 
-    public function isFanContentEnabled()
+    public function isFanCommentsEnabled()
     {
-        if (! is_null($this->fan_content_enabled)) {
-            return (bool) $this->fan_content_enabled;
+        if (! is_null($this->fan_comments_enabled)) {
+            return (bool) $this->fan_comments_enabled;
         }
 
         $role = $this->roles->first(fn ($role) => $role->isTalent()) ?? $this->roles->first();
 
-        return $role ? (bool) $role->fan_content_enabled : true;
+        return $role ? (bool) $role->fan_comments_enabled : true;
+    }
+
+    public function isFanPhotosEnabled()
+    {
+        if (! is_null($this->fan_photos_enabled)) {
+            return (bool) $this->fan_photos_enabled;
+        }
+
+        $role = $this->roles->first(fn ($role) => $role->isTalent()) ?? $this->roles->first();
+
+        return $role ? (bool) $role->fan_photos_enabled : true;
+    }
+
+    public function isFanVideosEnabled()
+    {
+        if (! is_null($this->fan_videos_enabled)) {
+            return (bool) $this->fan_videos_enabled;
+        }
+
+        $role = $this->roles->first(fn ($role) => $role->isTalent()) ?? $this->roles->first();
+
+        return $role ? (bool) $role->fan_videos_enabled : true;
+    }
+
+    public function isFanContentEnabled()
+    {
+        return $this->isFanCommentsEnabled() || $this->isFanPhotosEnabled() || $this->isFanVideosEnabled();
     }
 
     public function getAverageRating($eventDate = null)

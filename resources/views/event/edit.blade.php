@@ -3196,6 +3196,7 @@
                                 :class="activeEngagementTab === 'polls' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
                                 class="engagement-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="polls">
                                 {{ __('messages.polls') }}
+                                <span v-if="polls.some(p => p.pending_options && p.pending_options.length > 0)" class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full ms-1">@{{ polls.reduce((sum, p) => sum + (p.pending_options ? p.pending_options.length : 0), 0) }}</span>
                             </button>
                             <button type="button" @click="activeEngagementTab = 'fan_content'"
                                 :class="activeEngagementTab === 'fan_content' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
@@ -3282,6 +3283,53 @@
                                     </div>
                                 </template>
 
+                                {{-- User options toggles --}}
+                                <div class="mb-3 space-y-2">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input type="checkbox" :checked="poll.allow_user_options"
+                                                @change="poll.allow_user_options = $event.target.checked; if (!$event.target.checked) poll.require_option_approval = false"
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.allow_user_options') }}</span>
+                                    </div>
+                                    <div v-if="poll.allow_user_options" class="flex items-center gap-3 ms-6">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input type="checkbox" :checked="poll.require_option_approval"
+                                                @change="poll.require_option_approval = $event.target.checked"
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.require_option_approval') }}</span>
+                                    </div>
+                                </div>
+
+                                {{-- Pending options --}}
+                                <template v-if="poll.hash && poll.pending_options && poll.pending_options.length > 0">
+                                    <div class="mb-3">
+                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            {{ __('messages.pending_options') }}
+                                            <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full ms-1">@{{ poll.pending_options.length }}</span>
+                                        </p>
+                                        <div v-for="(pending, pendingIdx) in poll.pending_options" :key="pendingIdx" class="flex items-center justify-between gap-2 mb-2 px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700">
+                                            <span class="text-sm text-gray-800 dark:text-gray-200">@{{ pending.label }}</span>
+                                            <div class="flex items-center gap-1 shrink-0">
+                                                <button type="button" @click="approvePollOption(poll, pendingIdx)" :disabled="pollSubmitting"
+                                                        class="text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50 disabled:opacity-50">
+                                                    {{ __('messages.approve') }}
+                                                </button>
+                                                <button type="button" @click="rejectPollOption(poll, pendingIdx)" :disabled="pollSubmitting"
+                                                        class="text-xs px-2 py-1 rounded bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 disabled:opacity-50">
+                                                    {{ __('messages.reject') }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+
                                 {{-- Actions --}}
                                 <div v-if="poll.hash" class="flex items-center gap-2">
                                     <button type="button" @click="togglePoll(poll)" :disabled="pollSubmitting" class="text-sm px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
@@ -3300,10 +3348,12 @@
                             <input type="hidden" :name="'polls[' + pIdx + '][hash]'" :value="poll.hash || ''">
                             <input type="hidden" :name="'polls[' + pIdx + '][question]'" :value="poll.question">
                             <input type="hidden" :name="'polls[' + pIdx + '][options]'" :value="JSON.stringify(poll.options)">
+                            <input type="hidden" :name="'polls[' + pIdx + '][allow_user_options]'" :value="poll.allow_user_options ? '1' : '0'">
+                            <input type="hidden" :name="'polls[' + pIdx + '][require_option_approval]'" :value="poll.require_option_approval ? '1' : '0'">
                         </template>
 
                         {{-- Add Poll Link --}}
-                        <button type="button" @click="polls.push({hash: null, question: '', options: ['', ''], is_active: true, votes_count: 0, results: []})" v-if="polls.length < 5"
+                        <button type="button" @click="polls.push({hash: null, question: '', options: ['', ''], is_active: true, allow_user_options: false, require_option_approval: false, pending_options: [], votes_count: 0, results: []})" v-if="polls.length < 5"
                                 class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -3324,14 +3374,33 @@
                     <!-- Fan Content Tab -->
                     <div v-show="activeEngagementTab === 'fan_content'">
                     @if ($role->isPro())
-                        <div class="mb-6">
-                            <x-input-label for="fan_content_enabled" value="{{ __('messages.fan_content_override') }}" />
-                            <select id="fan_content_enabled" name="fan_content_enabled" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
-                                <option value="" {{ is_null($event->fan_content_enabled) ? 'selected' : '' }}>{{ __('messages.use_schedule_default') }}</option>
-                                <option value="1" {{ $event->fan_content_enabled === true ? 'selected' : '' }}>{{ __('messages.enabled') }}</option>
-                                <option value="0" {{ $event->fan_content_enabled === false && !is_null($event->fan_content_enabled) ? 'selected' : '' }}>{{ __('messages.disabled') }}</option>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.fan_content_override_help') }}</p>
+
+                        <div class="mb-4">
+                            <x-input-label for="fan_comments_enabled" value="{{ __('messages.fan_comments_enabled') }}" />
+                            <select id="fan_comments_enabled" name="fan_comments_enabled" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                                <option value="" {{ is_null($event->fan_comments_enabled) ? 'selected' : '' }}>{{ __('messages.use_schedule_default') }}</option>
+                                <option value="1" {{ $event->fan_comments_enabled === true ? 'selected' : '' }}>{{ __('messages.enabled') }}</option>
+                                <option value="0" {{ $event->fan_comments_enabled === false && !is_null($event->fan_comments_enabled) ? 'selected' : '' }}>{{ __('messages.disabled') }}</option>
                             </select>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.fan_content_override_help') }}</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <x-input-label for="fan_photos_enabled" value="{{ __('messages.fan_photos_enabled') }}" />
+                            <select id="fan_photos_enabled" name="fan_photos_enabled" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                                <option value="" {{ is_null($event->fan_photos_enabled) ? 'selected' : '' }}>{{ __('messages.use_schedule_default') }}</option>
+                                <option value="1" {{ $event->fan_photos_enabled === true ? 'selected' : '' }}>{{ __('messages.enabled') }}</option>
+                                <option value="0" {{ $event->fan_photos_enabled === false && !is_null($event->fan_photos_enabled) ? 'selected' : '' }}>{{ __('messages.disabled') }}</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <x-input-label for="fan_videos_enabled" value="{{ __('messages.fan_videos_enabled') }}" />
+                            <select id="fan_videos_enabled" name="fan_videos_enabled" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                                <option value="" {{ is_null($event->fan_videos_enabled) ? 'selected' : '' }}>{{ __('messages.use_schedule_default') }}</option>
+                                <option value="1" {{ $event->fan_videos_enabled === true ? 'selected' : '' }}>{{ __('messages.enabled') }}</option>
+                                <option value="0" {{ $event->fan_videos_enabled === false && !is_null($event->fan_videos_enabled) ? 'selected' : '' }}>{{ __('messages.disabled') }}</option>
+                            </select>
                         </div>
                     @endif
                     @if ($event->exists)
@@ -3706,6 +3775,9 @@
                     'question' => $poll->question,
                     'options' => $poll->options,
                     'is_active' => $poll->is_active,
+                    'allow_user_options' => $poll->allow_user_options,
+                    'require_option_approval' => $poll->require_option_approval,
+                    'pending_options' => $poll->pending_options ?? [],
                     'votes_count' => $poll->votes_count ?? 0,
                     'results' => $poll->getResults(),
                 ];
@@ -4664,6 +4736,71 @@
         const width = Math.max(pct, poll.votes_count > 0 ? 2 : 0);
         const color = (count === maxCount && poll.votes_count > 0) ? '#4E81FA' : '#9ca3af';
         return { width: width + '%', backgroundColor: color };
+      },
+      approvePollOption(poll, pendingIdx) {
+        this.pollSubmitting = true;
+        this.pollMessage = '';
+        this.pollError = '';
+
+        const url = '{{ $event->exists ? route("event.approve_poll_option", ["subdomain" => $subdomain, "event_hash" => \App\Utils\UrlUtils::encodeId($event->id), "poll_hash" => "POLL_HASH"]) : "" }}'.replace('POLL_HASH', poll.hash);
+
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({ option_index: pendingIdx }),
+        })
+        .then(response => {
+          if (!response.ok) return response.json().then(data => { throw data; });
+          return response.json();
+        })
+        .then(data => {
+          poll.options = data.options;
+          poll.pending_options = data.pending_options;
+          this.pollMessage = data.message;
+        })
+        .catch(err => {
+          this.pollError = err.error || err.message || @json(__("messages.error"));
+        })
+        .finally(() => {
+          this.pollSubmitting = false;
+        });
+      },
+      rejectPollOption(poll, pendingIdx) {
+        this.pollSubmitting = true;
+        this.pollMessage = '';
+        this.pollError = '';
+
+        const url = '{{ $event->exists ? route("event.reject_poll_option", ["subdomain" => $subdomain, "event_hash" => \App\Utils\UrlUtils::encodeId($event->id), "poll_hash" => "POLL_HASH"]) : "" }}'.replace('POLL_HASH', poll.hash);
+
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({ option_index: pendingIdx }),
+        })
+        .then(response => {
+          if (!response.ok) return response.json().then(data => { throw data; });
+          return response.json();
+        })
+        .then(data => {
+          poll.pending_options = data.pending_options;
+          this.pollMessage = data.message;
+        })
+        .catch(err => {
+          this.pollError = err.error || err.message || @json(__("messages.error"));
+        })
+        .finally(() => {
+          this.pollSubmitting = false;
+        });
       },
       getNextAvailableEventFieldIndex() {
         const usedIndices = Object.values(this.eventCustomFields || {}).map(f => f.index).filter(i => i);

@@ -11,6 +11,7 @@ use App\Http\Controllers\CalDAVController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\FeedController;
 use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\GoogleCalendarWebhookController;
 use App\Http\Controllers\GraphicController;
@@ -61,6 +62,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::post('/submit-comment/{event_hash}', [EventController::class, 'submitComment'])->name('event.submit_comment')->middleware('throttle:20,60');
         Route::post('/submit-photo/{event_hash}', [EventController::class, 'submitPhoto'])->name('event.submit_photo')->middleware('throttle:10,60');
         Route::post('/vote-poll/{event_hash}/{poll_hash}', [EventController::class, 'votePoll'])->name('event.vote_poll')->middleware('throttle:30,60');
+        Route::post('/suggest-poll-option/{event_hash}/{poll_hash}', [EventController::class, 'suggestPollOption'])->name('event.suggest_poll_option')->middleware('throttle:20,60');
         Route::post('/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
         Route::post('/promo-code/validate', [PromoCodeController::class, 'validate'])->name('promo_code.validate')->middleware('throttle:20,1');
         Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
@@ -73,6 +75,9 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         // iCal download for Apple Calendar
         Route::get('/{slug}/{id}/ical', [EventController::class, 'downloadIcal'])->where(['id' => '[A-Za-z0-9+=]+']);
         Route::get('/{slug}/{id}/{date}/ical', [EventController::class, 'downloadIcal'])->where(['date' => '\d{4}-\d{2}-\d{2}', 'id' => '[A-Za-z0-9+=]+']);
+        // Feed subscription endpoints
+        Route::get('/feed/ical', [FeedController::class, 'icalFeed'])->name('feed.ical');
+        Route::get('/feed/rss', [FeedController::class, 'rssFeed'])->name('feed.rss');
         // Photo gallery
         Route::get('/{slug}/{id}/{date}/photos', [EventController::class, 'photoGallery'])->where(['date' => '\d{4}-\d{2}-\d{2}', 'id' => '[A-Za-z0-9+=]+']);
         Route::get('/{slug}/{id}/photos', [EventController::class, 'photoGallery'])->where(['id' => '[A-Za-z0-9+=]+']);
@@ -322,6 +327,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/{subdomain}/polls/{event_hash}/{poll_hash}', [EventController::class, 'updatePoll'])->name('event.update_poll');
     Route::delete('/{subdomain}/polls/{event_hash}/{poll_hash}', [EventController::class, 'deletePoll'])->name('event.delete_poll');
     Route::post('/{subdomain}/polls/{event_hash}/{poll_hash}/toggle', [EventController::class, 'togglePoll'])->name('event.toggle_poll');
+    Route::post('/{subdomain}/polls/{event_hash}/{poll_hash}/approve-option', [EventController::class, 'approvePollOption'])->name('event.approve_poll_option');
+    Route::post('/{subdomain}/polls/{event_hash}/{poll_hash}/reject-option', [EventController::class, 'rejectPollOption'])->name('event.reject_poll_option');
 
     Route::get('/{subdomain}/scan-agenda', [EventController::class, 'scanAgenda'])->name('event.scan_agenda')->where('subdomain', '(?!docs(?=/|$))[^/]+');
     Route::post('/{subdomain}/save-event-parts', [EventController::class, 'saveEventParts'])->name('event.save_parts');
@@ -1056,6 +1063,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     Route::post('/{subdomain}/submit-comment/{event_hash}', [EventController::class, 'submitComment'])->name('event.submit_comment')->middleware('throttle:20,60');
     Route::post('/{subdomain}/submit-photo/{event_hash}', [EventController::class, 'submitPhoto'])->name('event.submit_photo')->middleware('throttle:10,60');
     Route::post('/{subdomain}/vote-poll/{event_hash}/{poll_hash}', [EventController::class, 'votePoll'])->name('event.vote_poll')->middleware('throttle:30,60');
+    Route::post('/{subdomain}/suggest-poll-option/{event_hash}/{poll_hash}', [EventController::class, 'suggestPollOption'])->name('event.suggest_poll_option')->middleware('throttle:20,60');
     Route::post('/{subdomain}/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
     Route::post('/{subdomain}/promo-code/validate', [PromoCodeController::class, 'validate'])->name('promo_code.validate')->middleware('throttle:20,1');
     Route::post('/{subdomain}/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
@@ -1070,6 +1078,9 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     // iCal download for Apple Calendar
     Route::get('/{subdomain}/{slug}/{id}/ical', [EventController::class, 'downloadIcal'])->where(['id' => '[A-Za-z0-9+=]+']);
     Route::get('/{subdomain}/{slug}/{id}/{date}/ical', [EventController::class, 'downloadIcal'])->where(['date' => '\d{4}-\d{2}-\d{2}', 'id' => '[A-Za-z0-9+=]+']);
+    // Feed subscription endpoints
+    Route::get('/{subdomain}/feed/ical', [FeedController::class, 'icalFeed'])->name('feed.ical');
+    Route::get('/{subdomain}/feed/rss', [FeedController::class, 'rssFeed'])->name('feed.rss');
     // Photo gallery
     Route::get('/{subdomain}/{slug}/{id}/{date}/photos', [EventController::class, 'photoGallery'])->where(['date' => '\d{4}-\d{2}-\d{2}', 'id' => '[A-Za-z0-9+=]+']);
     Route::get('/{subdomain}/{slug}/{id}/photos', [EventController::class, 'photoGallery'])->where(['id' => '[A-Za-z0-9+=]+']);

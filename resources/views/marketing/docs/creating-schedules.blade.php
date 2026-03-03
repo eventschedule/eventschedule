@@ -81,13 +81,20 @@
                         <a href="#ai-details-generator" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">AI Details Generator</a>
                         <a href="#address" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Address</a>
                         <a href="#style" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Style</a>
-                        <a href="#subschedules" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Sub-schedules</a>
+                        <div class="doc-nav-group">
+                            <a href="#customize" class="doc-nav-group-header doc-nav-link">Customize <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
+                            <div class="doc-nav-group-items">
+                                <a href="#customize-subschedules" class="doc-nav-link">Sub-schedules</a>
+                                <a href="#customize-custom-fields" class="doc-nav-link">Custom Fields</a>
+                                <a href="#customize-sponsors" class="doc-nav-link">Sponsors</a>
+                                <a href="#customize-custom-labels" class="doc-nav-link">Custom Labels</a>
+                            </div>
+                        </div>
                         <div class="doc-nav-group">
                             <a href="#settings" class="doc-nav-group-header doc-nav-link">Settings <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
                             <div class="doc-nav-group-items">
                                 <a href="#settings-general" class="doc-nav-link">General</a>
                                 <a href="#custom-domain" class="doc-nav-link">Custom Domain</a>
-                                <a href="#settings-custom-fields" class="doc-nav-link">Custom Fields</a>
                                 <a href="#settings-notifications" class="doc-nav-link">Notifications</a>
                                 <a href="#settings-advanced" class="doc-nav-link">Advanced</a>
                             </div>
@@ -277,15 +284,18 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Customize your schedule's visual appearance including colors, fonts, backgrounds, and layout. See the full <a href="{{ route('marketing.docs.schedule_styling') }}" class="text-cyan-400 hover:text-cyan-300">Schedule Styling</a> guide for all customization options.</p>
                         </section>
 
-                        <!-- Sub-schedules -->
-                        <section id="subschedules" class="doc-section">
-                            <h2 class="doc-heading">Sub-schedules</h2>
+                        <!-- Customize -->
+                        <section id="customize" class="doc-section">
+                            <h2 class="doc-heading">Customize</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Customize your schedule with sub-schedules, custom fields, and sponsors. Access these settings from <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit &rarr; Customize</strong>.</p>
+
+                            <h3 id="customize-subschedules" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Sub-schedules</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Organize your events into sub-schedules (categories). This helps visitors filter and find events that interest them.</p>
 
                             <x-doc-screenshot id="creating-schedules--section-subschedules" alt="Sub-schedules settings" />
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Creating Sub-schedules</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">To create a sub-schedule, go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> and scroll to the Sub-schedules section.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">To create a sub-schedule, go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit &rarr; Customize</strong> and select the Sub-schedules tab.</p>
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -304,6 +314,111 @@
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Assigning Events to Sub-schedules</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">When creating or editing an event, select a sub-schedule from the dropdown. Events can belong to one sub-schedule at a time.</p>
+
+                            <!-- Custom Fields -->
+                            <h3 id="customize-custom-fields" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Custom Fields</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Define <a href="{{ marketing_url('/features/custom-fields') }}" class="text-cyan-400 hover:text-cyan-300">Event Custom Fields</a> to add extra data to your events. Custom field values can also be used as URL pattern variables.
+                            </p>
+
+                            @if (!empty($customFieldsData))
+                                {{-- Dynamic: Show user's actual custom fields --}}
+                                @foreach ($customFieldsData as $scheduleData)
+                                    <h4 class="text-md font-medium text-gray-200 mb-2">{{ $scheduleData['role_name'] }}</h4>
+                                    <div class="overflow-x-auto mb-6">
+                                        <table class="doc-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Variable</th>
+                                                    <th>Field Name</th>
+                                                    <th>Type</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($scheduleData['fields'] as $index => $field)
+                                                <tr>
+                                                    <td><code class="doc-inline-code">{custom_{{ $loop->iteration }}}</code></td>
+                                                    <td>{{ $field['name'] }}</td>
+                                                    <td>{{ ucfirst(str_replace('_', ' ', $field['type'] ?? 'string')) }}</td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endforeach
+                            @else
+                                {{-- Static: Generic documentation for logged-out users or users without custom fields --}}
+                                <div class="overflow-x-auto mb-6">
+                                    <table class="doc-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Variable</th>
+                                                <th>Description</th>
+                                                <th>Example</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><code class="doc-inline-code">{custom_1}</code></td>
+                                                <td>Value of the 1st custom field</td>
+                                                <td>john-smith</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code class="doc-inline-code">{custom_2}</code></td>
+                                                <td>Value of the 2nd custom field</td>
+                                                <td>room-101</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code class="doc-inline-code">{custom_3}</code></td>
+                                                <td>Value of the 3rd custom field</td>
+                                                <td>workshop</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="3" class="text-gray-400 text-sm">...up to {custom_10}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">URL-Safe Formatting</div>
+                                <p>All variable values are automatically converted to URL-safe slugs: lowercase letters, numbers, and dashes only. For example, "Summer Concert" becomes "summer-concert" and "New York" becomes "new-york".</p>
+                            </div>
+
+                            <!-- Sponsors -->
+                            <h3 id="customize-sponsors" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Sponsors</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Showcase your sponsors on your schedule page. Add sponsor logos, names, URLs, and assign tiers (Gold, Silver, Bronze). Sponsors are displayed in a dedicated section on your public schedule page.
+                            </p>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Adding Sponsors</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Enter a sponsor name, optional URL, tier level, and upload a logo. You can add up to 12 sponsors per schedule.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Reordering</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Drag and drop sponsors to change their display order on the public schedule page.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Custom Labels -->
+                        <section>
+                            <h3 id="customize-custom-labels" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Custom Labels <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-1">Pro</span></h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Override any of the default labels displayed on your public schedule page. For example, change "Events" to "Shows", "Follow" to "Subscribe", or "Free entry" to "No cover charge".
+                            </p>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Adding a Custom Label</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Select a label from the dropdown and click Add. Enter your custom text in the "Custom Value" field. For non-English schedules, you can also provide an English translation or let it be auto-translated.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Available Labels</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">You can customize labels for buttons (Request to Book, Submit Event, Follow), navigation (Events, Filters, Past Events), event details (Free entry, Schedule, Category, Venue), and more.</p>
+                                </div>
+                            </div>
                         </section>
 
                         <!-- Settings -->
@@ -540,77 +655,6 @@
                                 <li>Create a redirect rule that matches your custom domain and redirects to your eventschedule.com schedule URL (e.g., <code class="doc-inline-code">https://yourname.eventschedule.com</code>).</li>
                                 <li>Visitors who go to your custom domain will be seamlessly redirected to your schedule.</li>
                             </ol>
-
-                            <!-- Custom Fields Tab -->
-                            <h3 id="settings-custom-fields" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Custom Fields</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                Define <a href="{{ marketing_url('/features/custom-fields') }}" class="text-cyan-400 hover:text-cyan-300">Event Custom Fields</a> to add extra data to your events. Custom field values can also be used as URL pattern variables.
-                            </p>
-
-                            @if (!empty($customFieldsData))
-                                {{-- Dynamic: Show user's actual custom fields --}}
-                                @foreach ($customFieldsData as $scheduleData)
-                                    <h4 class="text-md font-medium text-gray-200 mb-2">{{ $scheduleData['role_name'] }}</h4>
-                                    <div class="overflow-x-auto mb-6">
-                                        <table class="doc-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Variable</th>
-                                                    <th>Field Name</th>
-                                                    <th>Type</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($scheduleData['fields'] as $index => $field)
-                                                <tr>
-                                                    <td><code class="doc-inline-code">{custom_{{ $loop->iteration }}}</code></td>
-                                                    <td>{{ $field['name'] }}</td>
-                                                    <td>{{ ucfirst(str_replace('_', ' ', $field['type'] ?? 'string')) }}</td>
-                                                </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                @endforeach
-                            @else
-                                {{-- Static: Generic documentation for logged-out users or users without custom fields --}}
-                                <div class="overflow-x-auto mb-6">
-                                    <table class="doc-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Variable</th>
-                                                <th>Description</th>
-                                                <th>Example</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td><code class="doc-inline-code">{custom_1}</code></td>
-                                                <td>Value of the 1st custom field</td>
-                                                <td>john-smith</td>
-                                            </tr>
-                                            <tr>
-                                                <td><code class="doc-inline-code">{custom_2}</code></td>
-                                                <td>Value of the 2nd custom field</td>
-                                                <td>room-101</td>
-                                            </tr>
-                                            <tr>
-                                                <td><code class="doc-inline-code">{custom_3}</code></td>
-                                                <td>Value of the 3rd custom field</td>
-                                                <td>workshop</td>
-                                            </tr>
-                                            <tr>
-                                                <td colspan="3" class="text-gray-400 text-sm">...up to {custom_10}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            @endif
-
-                            <div class="doc-callout doc-callout-info">
-                                <div class="doc-callout-title">URL-Safe Formatting</div>
-                                <p>All variable values are automatically converted to URL-safe slugs: lowercase letters, numbers, and dashes only. For example, "Summer Concert" becomes "summer-concert" and "New York" becomes "new-york".</p>
-                            </div>
 
                             <!-- Notifications Tab -->
                             <h3 id="settings-notifications" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Notifications</h3>

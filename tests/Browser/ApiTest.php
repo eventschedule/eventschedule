@@ -31,6 +31,9 @@ class ApiTest extends DuskTestCase
             $this->createTestTalent($browser);
             $this->createTestEventWithTickets($browser);
 
+            // Upgrade talent to enterprise (API is a Pro feature)
+            $this->upgradeToEnterprise('talent');
+
             // Enable API and get the API key
             $apiKey = $this->enableApi($browser);
 

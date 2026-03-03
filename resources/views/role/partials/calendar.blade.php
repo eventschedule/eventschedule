@@ -133,6 +133,7 @@
                 'uniqueKey' => \App\Utils\UrlUtils::encodeId($event->id),
                 'submit_video_url' => isset($role) ? route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : null,
                 'submit_comment_url' => isset($role) ? route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : null,
+                'submit_photo_url' => isset($role) ? route('event.submit_photo', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : null,
                 'polls' => (isset($role) && $role->isPro() && $event->relationLoaded('polls')) ? $event->polls->map(fn($poll) => [
                     'id' => \App\Utils\UrlUtils::encodeId($poll->id),
                     'question' => $poll->question,
@@ -145,6 +146,9 @@
                 'poll_count' => (isset($role) && $role->isPro()) ? ($event->polls_count ?? 0) : 0,
                 'vote_poll_url' => (isset($role) && $role->isPro()) ? route('event.vote_poll', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id), 'poll_hash' => 'POLL_HASH']) : null,
                 'custom_field_values' => $event->custom_field_values ?? [],
+                'fan_comments_enabled' => $event->isFanCommentsEnabled(),
+                'fan_photos_enabled' => $event->isFanPhotosEnabled(),
+                'fan_videos_enabled' => $event->isFanVideosEnabled(),
             ];
         };
 
@@ -316,7 +320,7 @@
                                 <path d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z" />
                                 </svg>
                                 <div>
-                                    {{ __('messages.venue') }}
+                                    {{ $role->customLabel('venue') }}
                                     <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.new_venue_tooltip') }}</div>
                                 </div>
                             </a>
@@ -347,7 +351,7 @@
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3H19C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z"/>
                         </svg>
-                        {{ __('messages.filters') }}
+                        {{ $role->customLabel('filters') }}
                         <span v-if="activeFilterCount > 0"
                               class="ms-1 px-1.5 py-0.5 text-xs bg-[#4E81FA] text-white rounded-full">
                             @{{ activeFilterCount }}
@@ -379,7 +383,7 @@
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3H19C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z"/>
                     </svg>
-                    {{ __('messages.filters') }}
+                    {{ $role->customLabel('filters') }}
                     {{-- Active filter count badge --}}
                     <span v-if="activeFilterCount > 0"
                           class="ms-1 px-1.5 py-0.5 text-xs bg-[#4E81FA] text-white rounded-full">
@@ -605,7 +609,7 @@
         <div v-show="currentView === 'calendar' && !isLoadingEvents" class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
             <div v-if="mobileEventsList.length">
                 <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden mb-4 w-full text-center">
-                    {{ __('messages.show_past_events') }}
+                    {{ $role->customLabel('show_past_events') }}
                 </button>
                 <div id="mobileEventsList" class="space-y-6">
                     <template v-for="(group, groupIndex) in eventsGroupedByDate" :key="'date-' + group.date">
@@ -639,7 +643,7 @@
             <div v-else-if="!isLoadingEvents && {{ $tab != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
-                        {{ __('messages.no_scheduled_events') }}
+                        {{ $role->customLabel('no_scheduled_events') }}
                     </div>
                 </div>
             </div>
@@ -697,7 +701,7 @@
                          class="py-4 flex items-center gap-4">
                         <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
                         <span class="text-sm font-semibold text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-full px-4 py-1 bg-white dark:bg-gray-900">
-                            {{ __('messages.past_events') }}
+                            {{ $role->customLabel('past_events') }}
                         </span>
                         <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
                     </div>
@@ -764,7 +768,7 @@
                                                 </svg>
                                             </div>
                                             <div class="flex flex-col">
-                                                <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('messages.free_entry') }}</span>
+                                                <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $role->customLabel('free_entry') }}</span>
                                             </div>
                                         </div>
 
@@ -777,7 +781,7 @@
                                             </div>
                                             <div class="flex flex-col">
                                                 <span class="text-lg font-semibold text-gray-900 dark:text-white">
-                                                    <span v-if="event.ticket_price == 0">{{ __('messages.free_entry') }}</span>
+                                                    <span v-if="event.ticket_price == 0">{{ $role->customLabel('free_entry') }}</span>
                                                     <span v-else v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span>
                                                 </span>
                                                 <span v-if="event.coupon_code" class="text-sm text-gray-500 dark:text-gray-400">
@@ -807,7 +811,7 @@
                                         </div>
 
                                         {{-- Video Thumbnails --}}
-                                        <div v-if="event.videos && event.videos.length > 0 && !event.is_password_protected" class="mt-3 space-y-2">
+                                        <div v-if="event.videos && event.videos.length > 0 && !event.is_password_protected && event.fan_videos_enabled" class="mt-3 space-y-2">
                                             {{-- Playing video iframe (full width, above thumbnails) --}}
                                             <div v-if="event.videos.some((v, i) => playingVideo === event.uniqueKey + '-' + i)"
                                                  class="w-full aspect-video rounded-lg overflow-hidden shadow-sm" @click.stop>
@@ -843,7 +847,7 @@
                                         </div>
 
                                         {{-- Photo Thumbnails --}}
-                                        <div v-if="event.photos && event.photos.length > 0 && !event.is_password_protected" class="mt-3">
+                                        <div v-if="event.photos && event.photos.length > 0 && !event.is_password_protected && event.fan_photos_enabled" class="mt-3">
                                             <div class="flex gap-2 overflow-x-auto">
                                                 <div v-for="(photo, photoIdx) in event.photos" :key="'photo-' + photoIdx"
                                                      class="relative flex-shrink-0 w-28 h-20 rounded-lg overflow-hidden shadow-sm">
@@ -853,7 +857,7 @@
                                         </div>
 
                                         {{-- Recent Comments --}}
-                                        <div v-if="event.recent_comments && event.recent_comments.length > 0 && !event.is_password_protected" class="space-y-1.5" :dir="isRtl ? 'rtl' : 'ltr'">
+                                        <div v-if="event.recent_comments && event.recent_comments.length > 0 && !event.is_password_protected && event.fan_comments_enabled" class="space-y-1.5" :dir="isRtl ? 'rtl' : 'ltr'">
                                             <div v-for="(comment, cIdx) in event.recent_comments" :key="'c-' + cIdx"
                                                  class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
                                                 <svg class="h-4 w-4 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
@@ -948,23 +952,23 @@
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>
                                                 {{ __('messages.edit') }}
                                             </a>
-                                                <button @click.stop="togglePhotoForm(event, $event)"
+                                                <button v-if="event.fan_photos_enabled" @click.stop="togglePhotoForm(event, $event)"
                                                         class="hover-accent inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md border"
                                                         style="border-color: {{ $accentColor }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
-                                                    {{ __('messages.add_photo') }}
+                                                    {{ $role->customLabel('add_photo') }}
                                                 </button>
-                                                <button @click.stop="toggleVideoForm(event, $event)"
+                                                <button v-if="event.fan_videos_enabled" @click.stop="toggleVideoForm(event, $event)"
                                                         class="hover-accent inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md border"
                                                         style="border-color: {{ $accentColor }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
-                                                    {{ __('messages.add_video') }}
+                                                    {{ $role->customLabel('add_video') }}
                                                 </button>
-                                                <button @click.stop="toggleCommentForm(event, $event)"
+                                                <button v-if="event.fan_comments_enabled" @click.stop="toggleCommentForm(event, $event)"
                                                         class="hover-accent inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md border"
                                                         style="border-color: {{ $accentColor }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
-                                                    {{ __('messages.add_comment') }}
+                                                    {{ $role->customLabel('add_comment') }}
                                                 </button>
                                         </div>
 
@@ -1120,7 +1124,7 @@
                                             </svg>
                                         </div>
                                         <div class="flex flex-col">
-                                            <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('messages.free_entry') }}</span>
+                                            <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $role->customLabel('free_entry') }}</span>
                                         </div>
                                     </div>
 
@@ -1133,7 +1137,7 @@
                                         </div>
                                         <div class="flex flex-col">
                                             <span class="text-lg font-semibold text-gray-900 dark:text-white">
-                                                <span v-if="event.ticket_price == 0">{{ __('messages.free_entry') }}</span>
+                                                <span v-if="event.ticket_price == 0">{{ $role->customLabel('free_entry') }}</span>
                                                 <span v-else v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span>
                                             </span>
                                             <span v-if="event.coupon_code" class="text-sm text-gray-500 dark:text-gray-400">
@@ -1163,7 +1167,7 @@
                                     </div>
 
                                     {{-- Video Thumbnails --}}
-                                    <div v-if="event.videos && event.videos.length > 0 && !event.is_password_protected" class="mt-3 space-y-2">
+                                    <div v-if="event.videos && event.videos.length > 0 && !event.is_password_protected && event.fan_videos_enabled" class="mt-3 space-y-2">
                                         {{-- Playing video iframe (full width, above thumbnails) --}}
                                         <div v-if="event.videos.some((v, i) => playingVideo === event.uniqueKey + '-' + i)"
                                              class="w-full aspect-video rounded-lg overflow-hidden shadow-sm" @click.stop>
@@ -1199,7 +1203,7 @@
                                     </div>
 
                                     {{-- Photo Thumbnails --}}
-                                    <div v-if="event.photos && event.photos.length > 0 && !event.is_password_protected" class="mt-3">
+                                    <div v-if="event.photos && event.photos.length > 0 && !event.is_password_protected && event.fan_photos_enabled" class="mt-3">
                                         <div class="flex gap-2 overflow-x-auto">
                                             <div v-for="(photo, photoIdx) in event.photos" :key="'photo2-' + photoIdx"
                                                  class="relative flex-shrink-0 w-28 h-20 rounded-lg overflow-hidden shadow-sm">
@@ -1209,7 +1213,7 @@
                                     </div>
 
                                     {{-- Recent Comments --}}
-                                    <div v-if="event.recent_comments && event.recent_comments.length > 0 && !event.is_password_protected" class="space-y-1.5" :dir="isRtl ? 'rtl' : 'ltr'">
+                                    <div v-if="event.recent_comments && event.recent_comments.length > 0 && !event.is_password_protected && event.fan_comments_enabled" class="space-y-1.5" :dir="isRtl ? 'rtl' : 'ltr'">
                                         <div v-for="(comment, cIdx) in event.recent_comments" :key="'c-' + cIdx"
                                              class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
                                             <svg class="h-4 w-4 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
@@ -1304,23 +1308,23 @@
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>
                                             {{ __('messages.edit') }}
                                         </a>
-                                            <button @click.stop="togglePhotoForm(event, $event)"
+                                            <button v-if="event.fan_photos_enabled" @click.stop="togglePhotoForm(event, $event)"
                                                     class="hover-accent inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 border"
                                                     style="border-color: {{ $accentColor }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
-                                                {{ __('messages.add_photo') }}
+                                                {{ $role->customLabel('add_photo') }}
                                             </button>
-                                            <button @click.stop="toggleVideoForm(event, $event)"
+                                            <button v-if="event.fan_videos_enabled" @click.stop="toggleVideoForm(event, $event)"
                                                     class="hover-accent inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 border"
                                                     style="border-color: {{ $accentColor }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
-                                                {{ __('messages.add_video') }}
+                                                {{ $role->customLabel('add_video') }}
                                             </button>
-                                            <button @click.stop="toggleCommentForm(event, $event)"
+                                            <button v-if="event.fan_comments_enabled" @click.stop="toggleCommentForm(event, $event)"
                                                     class="hover-accent inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 border"
                                                     style="border-color: {{ $accentColor }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
-                                                {{ __('messages.add_comment') }}
+                                                {{ $role->customLabel('add_comment') }}
                                             </button>
                                     </div>
 
@@ -1419,7 +1423,7 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    {{ __('messages.load_more') }}
+                    {{ $role->customLabel('load_more') }}
                 </button>
             </div>
 
@@ -1428,7 +1432,7 @@
             <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
-                        {{ __('messages.no_scheduled_events') }}
+                        {{ $role->customLabel('no_scheduled_events') }}
                     </div>
                 </div>
             </div>
@@ -1483,7 +1487,7 @@
                          class="py-1 flex items-center gap-4">
                         <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
                         <span class="text-sm font-semibold text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-full px-4 py-1 bg-white dark:bg-gray-900">
-                            {{ __('messages.past_events') }}
+                            {{ $role->customLabel('past_events') }}
                         </span>
                         <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
                     </div>
@@ -1520,7 +1524,7 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    {{ __('messages.load_more') }}
+                    {{ $role->customLabel('load_more') }}
                 </button>
             </div>
 
@@ -1528,7 +1532,7 @@
             <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0 && {{ ($tab ?? '') != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
-                        {{ __('messages.no_scheduled_events') }}
+                        {{ $role->customLabel('no_scheduled_events') }}
                     </div>
                 </div>
             </div>
@@ -1546,22 +1550,22 @@
     <div class="fixed inset-x-0 bottom-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl max-h-[80vh] overflow-y-auto {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
         {{-- Header --}}
         <div class="px-6 pt-5 pb-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.filters') }}</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $role->customLabel('filters') }}</h3>
             <button v-if="activeFilterCount > 0"
                     @click="clearFilters"
                     class="text-sm text-[#4E81FA] hover:text-[#3d6fd9] font-medium">
-                {{ __('messages.clear_filters') }}
+                {{ $role->customLabel('clear_filters') }}
             </button>
         </div>
 
         {{-- Schedule Filter --}}
         @if(isset($role) && $role->groups && $role->groups->count() > 1)
         <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.schedule') }}</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $role->customLabel('schedule') }}</label>
             <select v-model="selectedGroup" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-                <option value="">{{ __('messages.show_all') }} (@{{ eventCountByGroup[''] }})</option>
+                <option value="">{{ $role->customLabel('show_all') }} (@{{ eventCountByGroup[''] }})</option>
                 <option v-for="group in groups" :key="group.slug" :value="group.slug">
                     @{{ group.name }} (@{{ eventCountByGroup[group.slug] || 0 }})
                 </option>
@@ -1571,11 +1575,11 @@
 
         {{-- Category Filter --}}
         <div v-if="availableCategories.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.category') }}</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $role->customLabel('category') }}</label>
             <select v-model="selectedCategory" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                <option value="">{{ __('messages.show_all') }} (@{{ eventCountByCategory[''] }})</option>
+                <option value="">{{ $role->customLabel('show_all') }} (@{{ eventCountByCategory[''] }})</option>
                 <option v-for="category in availableCategories" :key="category.id" :value="category.id">
                     @{{ category.name }} (@{{ eventCountByCategory[category.id] || 0 }})
                 </option>
@@ -1584,11 +1588,11 @@
 
         {{-- Venue Filter --}}
         <div v-if="uniqueVenues.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.venue') }}</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $role->customLabel('venue') }}</label>
             <select v-model="selectedVenue" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                <option value="">{{ __('messages.show_all') }} (@{{ eventCountByVenue[''] }})</option>
+                <option value="">{{ $role->customLabel('show_all') }} (@{{ eventCountByVenue[''] }})</option>
                 <option v-for="venue in uniqueVenues" :key="venue.subdomain" :value="venue.subdomain">
                     @{{ venue.name }} (@{{ eventCountByVenue[venue.subdomain] || 0 }})
                 </option>
@@ -1605,7 +1609,7 @@
                 <select v-model="selectedCustomFields[field.key]" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                    <option value="">{{ __('messages.show_all') }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
+                    <option value="">{{ $role->customLabel('show_all') }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
                     <option v-for="opt in availableCustomFieldOptions[field.key]" :key="opt" :value="opt">
                         @{{ field.optionsMap[opt] || opt }} (@{{ (eventCountByCustomField[field.key] || {})[opt] || 0 }})
                     </option>
@@ -1616,7 +1620,7 @@
         {{-- Price Filter --}}
         <div v-if="hasFreeEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <div @click="showFreeOnly = !showFreeOnly" class="flex items-center justify-between cursor-pointer">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.free_entry') }}</span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $role->customLabel('free_entry') }}</span>
                 <button role="switch" :aria-checked="showFreeOnly.toString()"
                         class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
                         :class="showFreeOnly ? 'bg-[#4E81FA]' : 'bg-gray-300 dark:bg-gray-600'">
@@ -1629,7 +1633,7 @@
         {{-- Online Filter --}}
         <div v-if="hasOnlineEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <div @click="showOnlineOnly = !showOnlineOnly" class="flex items-center justify-between cursor-pointer">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.online') }}</span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $role->customLabel('online') }}</span>
                 <button role="switch" :aria-checked="showOnlineOnly.toString()"
                         class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
                         :class="showOnlineOnly ? 'bg-[#4E81FA]' : 'bg-gray-300 dark:bg-gray-600'">
@@ -1642,7 +1646,7 @@
         {{-- Done button --}}
         <div class="px-6 py-4">
                 <x-brand-button @click="showFiltersDrawer = false" class="w-full">
-                {{ __('messages.done') }}
+                {{ $role->customLabel('done') }}
             </x-brand-button>
         </div>
     </div>
@@ -1661,22 +1665,22 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto pointer-events-auto {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Header --}}
             <div class="px-6 py-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.filters') }}</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $role->customLabel('filters') }}</h3>
                 <button v-if="activeFilterCount > 0"
                         @click="clearFilters"
                         class="text-sm text-[#4E81FA] hover:text-[#3d6fd9] font-medium">
-                    {{ __('messages.clear_filters') }}
+                    {{ $role->customLabel('clear_filters') }}
                 </button>
             </div>
 
             {{-- Schedule Filter --}}
             @if(isset($role) && $role->groups && $role->groups->count() > 1)
             <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.schedule') }}</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $role->customLabel('schedule') }}</label>
                 <select v-model="selectedGroup" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-                    <option value="">{{ __('messages.show_all') }} (@{{ eventCountByGroup[''] }})</option>
+                    <option value="">{{ $role->customLabel('show_all') }} (@{{ eventCountByGroup[''] }})</option>
                     <option v-for="group in groups" :key="group.slug" :value="group.slug">
                         @{{ group.name }} (@{{ eventCountByGroup[group.slug] || 0 }})
                     </option>
@@ -1686,11 +1690,11 @@
 
             {{-- Category Filter --}}
             <div v-if="availableCategories.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.category') }}</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $role->customLabel('category') }}</label>
                 <select v-model="selectedCategory" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                    <option value="">{{ __('messages.show_all') }} (@{{ eventCountByCategory[''] }})</option>
+                    <option value="">{{ $role->customLabel('show_all') }} (@{{ eventCountByCategory[''] }})</option>
                     <option v-for="category in availableCategories" :key="category.id" :value="category.id">
                         @{{ category.name }} (@{{ eventCountByCategory[category.id] || 0 }})
                     </option>
@@ -1699,11 +1703,11 @@
 
             {{-- Venue Filter --}}
             <div v-if="uniqueVenues.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.venue') }}</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $role->customLabel('venue') }}</label>
                 <select v-model="selectedVenue" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                    <option value="">{{ __('messages.show_all') }} (@{{ eventCountByVenue[''] }})</option>
+                    <option value="">{{ $role->customLabel('show_all') }} (@{{ eventCountByVenue[''] }})</option>
                     <option v-for="venue in uniqueVenues" :key="venue.subdomain" :value="venue.subdomain">
                         @{{ venue.name }} (@{{ eventCountByVenue[venue.subdomain] || 0 }})
                     </option>
@@ -1720,7 +1724,7 @@
                     <select v-model="selectedCustomFields[field.key]" style="font-family: sans-serif"
                             class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                    bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                        <option value="">{{ __('messages.show_all') }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
+                        <option value="">{{ $role->customLabel('show_all') }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
                         <option v-for="opt in availableCustomFieldOptions[field.key]" :key="opt" :value="opt">
                             @{{ field.optionsMap[opt] || opt }} (@{{ (eventCountByCustomField[field.key] || {})[opt] || 0 }})
                         </option>
@@ -1731,7 +1735,7 @@
             {{-- Price Filter --}}
             <div v-if="hasFreeEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                 <div @click="showFreeOnly = !showFreeOnly" class="flex items-center justify-between cursor-pointer">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.free_entry') }}</span>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $role->customLabel('free_entry') }}</span>
                     <button role="switch" :aria-checked="showFreeOnly.toString()"
                             class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
                             :class="showFreeOnly ? 'bg-[#4E81FA]' : 'bg-gray-300 dark:bg-gray-600'">
@@ -1744,7 +1748,7 @@
             {{-- Online Filter --}}
             <div v-if="hasOnlineEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                 <div @click="showOnlineOnly = !showOnlineOnly" class="flex items-center justify-between cursor-pointer">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.online') }}</span>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $role->customLabel('online') }}</span>
                     <button role="switch" :aria-checked="showOnlineOnly.toString()"
                             class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
                             :class="showOnlineOnly ? 'bg-[#4E81FA]' : 'bg-gray-300 dark:bg-gray-600'">
@@ -1757,7 +1761,7 @@
             {{-- Done button --}}
             <div class="px-6 py-4">
                 <x-brand-button @click="showDesktopFiltersModal = false" class="w-full">
-                    {{ __('messages.done') }}
+                    {{ $role->customLabel('done') }}
                 </x-brand-button>
             </div>
         </div>
@@ -3135,7 +3139,7 @@ const calendarApp = createApp({
             if (priceEl && priceTextEl) {
                 if (popupData.registration_url && popupData.ticket_price != null) {
                     priceTextEl.textContent = popupData.ticket_price == 0
-                        ? @json(__('messages.free_entry'))
+                        ? @json($role->customLabel('free_entry'))
                         : this.formatPrice(popupData.ticket_price, popupData.ticket_currency_code);
                     priceEl.style.display = 'flex';
                 } else {

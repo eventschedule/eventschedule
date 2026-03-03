@@ -1867,7 +1867,7 @@ class RoleController extends Controller
         // Guard sponsor logos behind Pro plan
         if (! $role->isPro()) {
             $request->merge([
-                'sponsor_section_title' => $role->sponsor_section_title,
+                'sponsor_logos' => $role->sponsor_logos,
             ]);
             $request->files->remove('new_sponsor_logos');
         }
@@ -1895,11 +1895,6 @@ class RoleController extends Controller
         $newCalendarId = $request->input('google_calendar_id');
 
         $role->fill($request->all());
-
-        // Null out sponsor_section_title_en when title changes (so Translate command re-translates)
-        if ($role->isDirty('sponsor_section_title')) {
-            $role->sponsor_section_title_en = null;
-        }
 
         // If sync_direction or calendar changed, handle webhook management
         if (($newSyncDirection && $oldSyncDirection !== $newSyncDirection) ||
@@ -2080,6 +2075,34 @@ class RoleController extends Controller
             }
 
             $role->event_custom_fields = ! empty($eventCustomFields) ? $eventCustomFields : null;
+        }
+
+        // Handle custom labels (Pro feature)
+        if ($request->has('custom_labels_submitted') && $role->isPro()) {
+            $submittedLabels = $request->input('custom_labels', []);
+            $existingLabels = $role->custom_labels ?? [];
+            $validKeys = array_keys(Role::getCustomizableLabels());
+            $customLabels = [];
+
+            foreach ($submittedLabels as $key => $labelData) {
+                if (! in_array($key, $validKeys) || empty($labelData['value'])) {
+                    continue;
+                }
+
+                $customLabels[$key] = ['value' => $labelData['value']];
+
+                if (! empty($labelData['value_en'])) {
+                    $customLabels[$key]['value_en'] = $labelData['value_en'];
+                } elseif ($role->language_code !== 'en') {
+                    // Preserve existing translation if value unchanged, otherwise null out for re-translation
+                    $existingLabel = $existingLabels[$key] ?? null;
+                    if ($existingLabel && ($existingLabel['value'] ?? null) === $labelData['value'] && ! empty($existingLabel['value_en'])) {
+                        $customLabels[$key]['value_en'] = $existingLabel['value_en'];
+                    }
+                }
+            }
+
+            $role->custom_labels = ! empty($customLabels) ? $customLabels : null;
         }
 
         $approvedSubdomains = array_filter(array_map('trim', $request->input('approved_subdomains', [])));

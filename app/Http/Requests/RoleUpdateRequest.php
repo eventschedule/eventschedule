@@ -86,12 +86,18 @@ class RoleUpdateRequest extends FormRequest
             'direct_registration' => ['nullable', 'boolean'],
             'first_day_of_week' => ['nullable', 'integer', 'min:0', 'max:6'],
             'feedback_enabled' => ['nullable', 'boolean'],
+            'fan_comments_enabled' => ['nullable', 'boolean'],
+            'fan_photos_enabled' => ['nullable', 'boolean'],
+            'fan_videos_enabled' => ['nullable', 'boolean'],
             'feedback_delay_hours' => ['nullable', 'integer', 'in:1,2,6,12,24,48'],
             'new_sponsor_logos.*' => ['image', 'max:2500'],
             'new_sponsor_names.*' => ['nullable', 'string', 'max:100'],
             'new_sponsor_urls.*' => ['nullable', 'url', 'max:500'],
             'new_sponsor_tiers.*' => ['nullable', 'string', 'in:gold,silver,bronze'],
             'sponsor_section_title' => ['nullable', 'string', 'max:100'],
+            'custom_labels' => ['nullable', 'array', 'max:30'],
+            'custom_labels.*.value' => ['required_with:custom_labels', 'string', 'max:200'],
+            'custom_labels.*.value_en' => ['nullable', 'string', 'max:200'],
         ];
     }
 }

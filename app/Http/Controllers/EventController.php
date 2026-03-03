@@ -630,18 +630,22 @@ class EventController extends Controller
                     continue;
                 }
 
+                $allowUserOptions = ! empty($pollData['allow_user_options']) && $pollData['allow_user_options'] !== '0';
+                $requireOptionApproval = ! empty($pollData['require_option_approval']) && $pollData['require_option_approval'] !== '0';
+
                 if ($hash) {
                     $poll = EventPoll::where('event_id', $event->id)
                         ->find(UrlUtils::decodeId($hash));
                     if ($poll) {
-                        if ($poll->votes()->exists()) {
-                            $poll->update(['question' => Str::limit($question, 500)]);
-                        } else {
-                            $poll->update([
-                                'question' => Str::limit($question, 500),
-                                'options' => array_slice($options, 0, 10),
-                            ]);
+                        $data = [
+                            'question' => Str::limit($question, 500),
+                            'allow_user_options' => $allowUserOptions,
+                            'require_option_approval' => $requireOptionApproval,
+                        ];
+                        if (! $poll->votes()->exists()) {
+                            $data['options'] = array_slice($options, 0, 10);
                         }
+                        $poll->update($data);
                     }
                 } else {
                     EventPoll::create([
@@ -649,6 +653,8 @@ class EventController extends Controller
                         'question' => Str::limit($question, 500),
                         'options' => array_slice($options, 0, 10),
                         'sort_order' => ++$maxSort,
+                        'allow_user_options' => $allowUserOptions,
+                        'require_option_approval' => $requireOptionApproval,
                     ]);
                 }
             }
@@ -899,6 +905,8 @@ class EventController extends Controller
                         'question' => Str::limit($question, 500),
                         'options' => array_slice($options, 0, 10),
                         'sort_order' => $sortOrder++,
+                        'allow_user_options' => ! empty($pollData['allow_user_options']) && $pollData['allow_user_options'] !== '0',
+                        'require_option_approval' => ! empty($pollData['require_option_approval']) && $pollData['require_option_approval'] !== '0',
                     ]);
                 }
             }
@@ -1884,7 +1892,7 @@ class EventController extends Controller
             abort(404);
         }
 
-        if (! $event->isFanContentEnabled()) {
+        if (! $event->isFanVideosEnabled()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -1992,7 +2000,7 @@ class EventController extends Controller
             abort(404);
         }
 
-        if (! $event->isFanContentEnabled()) {
+        if (! $event->isFanCommentsEnabled()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -2132,7 +2140,7 @@ class EventController extends Controller
             abort(404);
         }
 
-        if (! $event->isFanContentEnabled()) {
+        if (! $event->isFanPhotosEnabled()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -2479,8 +2487,8 @@ class EventController extends Controller
             return redirect($event->getGuestUrl($subdomain, $date));
         }
 
-        // Redirect if fan content is disabled
-        if (! $event->isFanContentEnabled()) {
+        // Redirect if fan photos are disabled
+        if (! $event->isFanPhotosEnabled()) {
             return redirect($event->getGuestUrl($subdomain, $date));
         }
 
@@ -2674,6 +2682,8 @@ class EventController extends Controller
             'question' => $request->input('question'),
             'options' => $request->input('options'),
             'sort_order' => $maxSort + 1,
+            'allow_user_options' => $request->boolean('allow_user_options'),
+            'require_option_approval' => $request->boolean('require_option_approval'),
         ]);
 
         if ($request->ajax()) {
@@ -2682,6 +2692,9 @@ class EventController extends Controller
                 'question' => $poll->question,
                 'options' => $poll->options,
                 'is_active' => $poll->is_active,
+                'allow_user_options' => $poll->allow_user_options,
+                'require_option_approval' => $poll->require_option_approval,
+                'pending_options' => $poll->pending_options ?? [],
                 'votes_count' => 0,
                 'results' => [],
                 'poll_count' => $pollCount + 1,
@@ -2715,14 +2728,17 @@ class EventController extends Controller
                 return;
             }
 
-            if ($poll->votes()->exists()) {
-                $poll->update(['question' => $request->input('question')]);
-            } else {
-                $poll->update([
-                    'question' => $request->input('question'),
-                    'options' => $request->input('options'),
-                ]);
+            $data = [
+                'question' => $request->input('question'),
+                'allow_user_options' => $request->boolean('allow_user_options'),
+                'require_option_approval' => $request->boolean('require_option_approval'),
+            ];
+
+            if (! $poll->votes()->exists()) {
+                $data['options'] = $request->input('options');
             }
+
+            $poll->update($data);
         });
 
         return redirect()->to(url()->previous().'#section-polls')->with('message', __('messages.poll_updated'));
@@ -2844,8 +2860,9 @@ class EventController extends Controller
             ->findOrFail(UrlUtils::decodeId($pollHash));
 
         $optionIndex = $request->input('option_index');
+        $eventDate = $event->days_of_week ? ($request->input('event_date') ?: '') : '';
 
-        $result = DB::transaction(function () use ($poll, $optionIndex) {
+        $result = DB::transaction(function () use ($poll, $optionIndex, $eventDate) {
             $poll = EventPoll::lockForUpdate()->find($poll->id);
 
             if (! $poll || ! $poll->is_active) {
@@ -2861,6 +2878,7 @@ class EventController extends Controller
                     'event_poll_id' => $poll->id,
                     'user_id' => auth()->id(),
                     'option_index' => $optionIndex,
+                    'event_date' => $eventDate,
                 ]);
             } catch (\Illuminate\Database\QueryException $e) {
                 if ($e->errorInfo[1] !== 1062) {
@@ -2876,8 +2894,10 @@ class EventController extends Controller
             return response()->json(['error' => $result['error']], $result['status']);
         }
 
-        $results = $poll->getResults();
-        $totalVotes = $poll->votes()->count();
+        $results = $poll->getResults($eventDate);
+        $totalVotes = $eventDate !== ''
+            ? $poll->votes()->where('event_date', $eventDate)->count()
+            : $poll->votes()->count();
 
         return response()->json([
             'success' => true,
@@ -2885,5 +2905,215 @@ class EventController extends Controller
             'results' => $results,
             'total_votes' => $totalVotes,
         ]);
+    }
+
+    public function suggestPollOption(Request $request, $subdomain, $eventHash, $pollHash)
+    {
+        $role = Role::where('subdomain', $subdomain)->firstOrFail();
+        if (is_demo_role($role)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (! $role->isPro()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (! auth()->check()) {
+            return response()->json(['error' => __('messages.sign_in_to_vote')], 401);
+        }
+
+        $request->validate([
+            'label' => ['required', 'string', 'max:200'],
+        ]);
+
+        $event = Event::findOrFail(UrlUtils::decodeId($eventHash));
+
+        if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
+            return response()->json(['error' => __('messages.not_authorized')], 404);
+        }
+
+        if ($event->is_private) {
+            $user = auth()->user();
+            $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+            if (! $isMemberOrAdmin) {
+                return response()->json(['error' => __('messages.not_authorized')], 404);
+            }
+        }
+
+        $poll = EventPoll::where('event_id', $event->id)
+            ->where('is_active', true)
+            ->where('allow_user_options', true)
+            ->findOrFail(UrlUtils::decodeId($pollHash));
+
+        $label = trim($request->input('label'));
+
+        $result = DB::transaction(function () use ($poll, $label) {
+            $poll = EventPoll::lockForUpdate()->find($poll->id);
+
+            if (! $poll || ! $poll->is_active || ! $poll->allow_user_options) {
+                return ['error' => __('messages.not_authorized'), 'status' => 403];
+            }
+
+            $options = $poll->options ?? [];
+            $pendingOptions = $poll->pending_options ?? [];
+
+            // Check total options limit (existing + pending)
+            if (count($options) + count($pendingOptions) >= 10) {
+                return ['error' => __('messages.max_options_reached'), 'status' => 422];
+            }
+
+            // Check for duplicate in existing options
+            $existingLabels = array_map('strtolower', $options);
+            if (in_array(strtolower($label), $existingLabels)) {
+                return ['error' => __('messages.duplicate_option'), 'status' => 422];
+            }
+
+            // Check for duplicate in pending options
+            $pendingLabels = array_map(function ($p) {
+                return strtolower($p['label']);
+            }, $pendingOptions);
+            if (in_array(strtolower($label), $pendingLabels)) {
+                return ['error' => __('messages.duplicate_option'), 'status' => 422];
+            }
+
+            if (! $poll->require_option_approval) {
+                // Add directly to options
+                $options[] = $label;
+                $poll->update(['options' => $options]);
+
+                return ['success' => true, 'options' => $options, 'message' => __('messages.option_suggested')];
+            }
+
+            // Add to pending
+            $pendingOptions[] = [
+                'label' => $label,
+                'user_id' => auth()->id(),
+                'created_at' => now()->toIso8601String(),
+            ];
+            $poll->update(['pending_options' => $pendingOptions]);
+
+            return ['success' => true, 'message' => __('messages.option_suggested_approval')];
+        });
+
+        if (isset($result['error'])) {
+            return response()->json(['error' => $result['error']], $result['status']);
+        }
+
+        return response()->json($result);
+    }
+
+    public function approvePollOption(Request $request, $subdomain, $eventHash, $pollHash)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        if (is_demo_role($role)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+        if (! $role->isPro()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $event = Event::with('roles')->findOrFail(UrlUtils::decodeId($eventHash));
+        if (! $request->user()->canEditEvent($event)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'option_index' => ['required', 'integer', 'min:0'],
+        ]);
+
+        $poll = EventPoll::where('event_id', $event->id)->findOrFail(UrlUtils::decodeId($pollHash));
+        $optionIndex = $request->input('option_index');
+
+        $result = DB::transaction(function () use ($poll, $optionIndex) {
+            $poll = EventPoll::lockForUpdate()->find($poll->id);
+            if (! $poll) {
+                return ['error' => __('messages.not_authorized'), 'status' => 403];
+            }
+
+            $pendingOptions = $poll->pending_options ?? [];
+            if (! isset($pendingOptions[$optionIndex])) {
+                return ['error' => __('messages.invalid_option'), 'status' => 422];
+            }
+
+            $options = $poll->options ?? [];
+            if (count($options) >= 10) {
+                return ['error' => __('messages.max_options_reached'), 'status' => 422];
+            }
+
+            $approved = $pendingOptions[$optionIndex];
+            $options[] = $approved['label'];
+            array_splice($pendingOptions, $optionIndex, 1);
+
+            $poll->update([
+                'options' => $options,
+                'pending_options' => empty($pendingOptions) ? null : array_values($pendingOptions),
+            ]);
+
+            return [
+                'success' => true,
+                'message' => __('messages.option_approved'),
+                'options' => $options,
+                'pending_options' => array_values($pendingOptions),
+            ];
+        });
+
+        if (isset($result['error'])) {
+            return response()->json(['error' => $result['error']], $result['status']);
+        }
+
+        return response()->json($result);
+    }
+
+    public function rejectPollOption(Request $request, $subdomain, $eventHash, $pollHash)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        if (is_demo_role($role)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+        if (! $role->isPro()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $event = Event::with('roles')->findOrFail(UrlUtils::decodeId($eventHash));
+        if (! $request->user()->canEditEvent($event)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'option_index' => ['required', 'integer', 'min:0'],
+        ]);
+
+        $poll = EventPoll::where('event_id', $event->id)->findOrFail(UrlUtils::decodeId($pollHash));
+        $optionIndex = $request->input('option_index');
+
+        $result = DB::transaction(function () use ($poll, $optionIndex) {
+            $poll = EventPoll::lockForUpdate()->find($poll->id);
+            if (! $poll) {
+                return ['error' => __('messages.not_authorized'), 'status' => 403];
+            }
+
+            $pendingOptions = $poll->pending_options ?? [];
+            if (! isset($pendingOptions[$optionIndex])) {
+                return ['error' => __('messages.invalid_option'), 'status' => 422];
+            }
+
+            array_splice($pendingOptions, $optionIndex, 1);
+
+            $poll->update([
+                'pending_options' => empty($pendingOptions) ? null : array_values($pendingOptions),
+            ]);
+
+            return [
+                'success' => true,
+                'message' => __('messages.option_rejected'),
+                'pending_options' => array_values($pendingOptions),
+            ];
+        });
+
+        if (isset($result['error'])) {
+            return response()->json(['error' => $result['error']], $result['status']);
+        }
+
+        return response()->json($result);
     }
 }

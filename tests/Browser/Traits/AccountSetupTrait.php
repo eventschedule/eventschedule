@@ -231,6 +231,17 @@ trait AccountSetupTrait
     }
 
     /**
+     * Upgrade a schedule to enterprise plan
+     */
+    protected function upgradeToEnterprise(string $slug): void
+    {
+        \App\Models\Role::where('subdomain', $slug)->update([
+            'plan_type' => 'enterprise',
+            'plan_expires' => now()->addYear()->format('Y-m-d'),
+        ]);
+    }
+
+    /**
      * Login user
      */
     protected function loginUser(Browser $browser, string $email, string $password): void

@@ -9,7 +9,7 @@
   @endphp
 
   @php
-    $hasHeaderImage = ($role->header_image && $role->header_image !== 'none') || $role->header_image_url;
+    $hasHeaderImage = ($role->header_image && $role->header_image !== 'none') || ($role->header_image_url && $role->header_image !== 'none');
   @endphp
 
   @if ($role->profile_image_url && !$hasHeaderImage)
@@ -80,7 +80,7 @@
                 alt="{{ $role->translatedName() }}"
               />
             </picture>
-            @elseif ($role->header_image_url)
+            @elseif ($role->header_image_url && $role->header_image !== 'none')
             <img
               class="block max-h-72 w-full object-cover"
               src="{{ $role->header_image_url }}"
@@ -196,7 +196,7 @@
                       style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
                       class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
-                      {{ $role->isTalent() ? __('messages.request_to_book') : __('messages.submit_event') }}
+                      {{ $role->isTalent() ? $role->customLabel('request_to_book') : $role->customLabel('submit_event') }}
                     </button>
                   </a>
                   @endif
@@ -210,7 +210,7 @@
                       style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
                       class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
-                      {{ __('messages.follow') }}
+                      {{ $role->customLabel('follow') }}
                     </button>
                   </a>
                   @endif
@@ -235,28 +235,19 @@
               {{-- Description below --}}
               @if($role->translatedDescription())
               <div class="w-full mt-2">
-                @if(str_word_count(strip_tags($role->translatedDescription())) > 5)
-                <div x-data="{ expanded: false, collapse() { if (window.scrollY < 5) { this.expanded = false; return; } window.scrollTo({ top: 0, behavior: 'smooth' }); let f = 0; const check = () => { if (window.scrollY < 5 || f++ > 300) this.expanded = false; else requestAnimationFrame(check); }; requestAnimationFrame(check); } }" class="text-start text-sm text-[#33383C] dark:text-gray-300">
-                  <div x-show="!expanded">
-                    <span>{{ Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...') }}</span>
-                    <button @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">
-                      {{ __('messages.show_more') }}
-                    </button>
+                <div x-data="{ expanded: false, clamped: false, collapse() { if (window.scrollY < 5) { this.expanded = false; return; } window.scrollTo({ top: 0, behavior: 'smooth' }); let f = 0; const check = () => { if (window.scrollY < 5 || f++ > 300) this.expanded = false; else requestAnimationFrame(check); }; requestAnimationFrame(check); } }"
+                     x-init="$nextTick(() => { clamped = $refs.content.scrollHeight > $refs.content.clientHeight })"
+                     class="text-start text-sm text-[#33383C] dark:text-gray-300">
+                  <div x-ref="content" :class="!expanded ? 'line-clamp-3' : ''" class="custom-content">
+                    {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                   </div>
-                  <div x-show="expanded" x-cloak>
-                    <div class="custom-content">
-                      {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
-                    </div>
-                    <button @click="collapse()" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
-                      {{ __('messages.show_less') }}
-                    </button>
-                  </div>
+                  <button x-show="clamped && !expanded" x-cloak @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
+                    {{ $role->customLabel('show_more') }}
+                  </button>
+                  <button x-show="expanded" x-cloak @click="collapse()" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
+                    {{ $role->customLabel('show_less') }}
+                  </button>
                 </div>
-                @else
-                <div class="text-center text-sm text-[#33383C] dark:text-gray-300 custom-content">
-                  {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
-                </div>
-                @endif
               </div>
               @endif
             </div>
@@ -347,7 +338,7 @@
                       style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
                       class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
-                      {{ $role->isTalent() ? __('messages.request_to_book') : __('messages.submit_event') }}
+                      {{ $role->isTalent() ? $role->customLabel('request_to_book') : $role->customLabel('submit_event') }}
                     </button>
                   </a>
                   @endif
@@ -361,7 +352,7 @@
                       style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
                       class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
-                      {{ __('messages.follow') }}
+                      {{ $role->customLabel('follow') }}
                     </button>
                   </a>
                   @endif
@@ -422,28 +413,19 @@
 
               {{-- Description below (full width) --}}
               @if($role->translatedDescription())
-              @if(str_word_count(strip_tags($role->translatedDescription())) > 5)
-              <div x-data="{ expanded: false, collapse() { if (window.scrollY < 5) { this.expanded = false; return; } window.scrollTo({ top: 0, behavior: 'smooth' }); let f = 0; const check = () => { if (window.scrollY < 5 || f++ > 300) this.expanded = false; else requestAnimationFrame(check); }; requestAnimationFrame(check); } }" class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
-                <div x-show="!expanded">
-                  <span>{{ Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...') }}</span>
-                  <button @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">
-                    {{ __('messages.show_more') }}
-                  </button>
+              <div x-data="{ expanded: false, clamped: false, collapse() { if (window.scrollY < 5) { this.expanded = false; return; } window.scrollTo({ top: 0, behavior: 'smooth' }); let f = 0; const check = () => { if (window.scrollY < 5 || f++ > 300) this.expanded = false; else requestAnimationFrame(check); }; requestAnimationFrame(check); } }"
+                   x-init="$nextTick(() => { clamped = $refs.content.scrollHeight > $refs.content.clientHeight })"
+                   class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
+                <div x-ref="content" :class="!expanded ? 'line-clamp-3' : ''" class="custom-content">
+                  {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                 </div>
-                <div x-show="expanded" x-cloak>
-                  <div class="custom-content">
-                    {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
-                  </div>
-                  <button @click="collapse()" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
-                    {{ __('messages.show_less') }}
-                  </button>
-                </div>
+                <button x-show="clamped && !expanded" x-cloak @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
+                  {{ $role->customLabel('show_more') }}
+                </button>
+                <button x-show="expanded" x-cloak @click="collapse()" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
+                  {{ $role->customLabel('show_less') }}
+                </button>
               </div>
-              @else
-              <div class="mt-2 text-sm text-[#33383C] dark:text-gray-300 custom-content">
-                {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
-              </div>
-              @endif
               @endif
             </div>
             <!--
@@ -583,7 +565,7 @@
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3H19C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z"/>
             </svg>
-            {{ __('messages.filters') }}
+            {{ $role->customLabel('filters') }}
             <span id="hero-filters-badge-mobile"
                   class="ms-1 px-1.5 py-0.5 text-xs bg-[#4E81FA] text-white rounded-full hidden"></span>
         </button>
@@ -697,7 +679,7 @@
         }
       </style>
 
-      <section aria-label="{{ __('messages.events') }}">
+      <section aria-label="{{ $role->customLabel('events') }}">
       <div
         class="calendar-panel-border mt-2 md:mt-6 mb-6 px-0 md:px-6 lg:px-16 pt-0 md:pt-4 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
         id="calendar-panel-wrapper"

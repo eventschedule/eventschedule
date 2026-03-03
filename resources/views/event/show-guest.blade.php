@@ -1128,20 +1128,25 @@
                   @endif
                   @if ($event->isFanContentEnabled())
                   <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
-                    @if (! $photoLimitReached)
+                    @if ($event->isFanPhotosEnabled() && ! $photoLimitReached)
                     <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
                       {{ __('messages.add_photo') }}
                     </button>
                     @endif
+                    @if ($event->isFanVideosEnabled())
                     <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                       {{ __('messages.add_video') }}
                     </button>
+                    @endif
+                    @if ($event->isFanCommentsEnabled())
                     <button @click="showComment = !showComment; showVideo = false; showPhoto = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                       {{ __('messages.add_comment') }}
                     </button>
+                    @endif
+                    @if ($event->isFanVideosEnabled())
                     <div x-show="showVideo" x-cloak class="mt-2 w-full">
                       <form method="POST" action="{{ route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex flex-col gap-2">
                         @csrf
@@ -1153,7 +1158,8 @@
                         <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
-                    @if (! $photoLimitReached)
+                    @endif
+                    @if ($event->isFanPhotosEnabled() && ! $photoLimitReached)
                     <div x-show="showPhoto" x-cloak class="mt-2 w-full">
                       <form method="POST" action="{{ route('event.submit_photo', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" enctype="multipart/form-data" class="flex flex-col gap-2">
                         @csrf
@@ -1192,6 +1198,7 @@
                       </form>
                     </div>
                     @endif
+                    @if ($event->isFanCommentsEnabled())
                     <div x-show="showComment" x-cloak class="mt-2 w-full">
                       <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex flex-col gap-2">
                         @csrf
@@ -1203,6 +1210,7 @@
                         <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
+                    @endif
                   </div>
                   @endif
                   @endif
@@ -1307,20 +1315,25 @@
                   @endif
                   @if ($event->isFanContentEnabled())
                   <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
-                    @if (! $photoLimitReached)
+                    @if ($event->isFanPhotosEnabled() && ! $photoLimitReached)
                     <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
                       {{ __('messages.add_photo') }}
                     </button>
                     @endif
+                    @if ($event->isFanVideosEnabled())
                     <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                       {{ __('messages.add_video') }}
                     </button>
+                    @endif
+                    @if ($event->isFanCommentsEnabled())
                     <button @click="showComment = !showComment; showVideo = false; showPhoto = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                       {{ __('messages.add_comment') }}
                     </button>
+                    @endif
+                    @if ($event->isFanVideosEnabled())
                     <div x-show="showVideo" x-cloak class="w-full">
                       <form method="POST" action="{{ route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex flex-col gap-2">
                         @csrf
@@ -1332,7 +1345,8 @@
                         <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
-                    @if (! $photoLimitReached)
+                    @endif
+                    @if ($event->isFanPhotosEnabled() && ! $photoLimitReached)
                     <div x-show="showPhoto" x-cloak class="mt-2 w-full">
                       <form method="POST" action="{{ route('event.submit_photo', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" enctype="multipart/form-data" class="flex flex-col gap-2">
                         @csrf
@@ -1371,6 +1385,7 @@
                       </form>
                     </div>
                     @endif
+                    @if ($event->isFanCommentsEnabled())
                     <div x-show="showComment" x-cloak class="mt-2 w-full">
                       <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex flex-col gap-2">
                         @csrf
@@ -1382,6 +1397,7 @@
                         <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
+                    @endif
                   </div>
                   @endif
                   @endif
@@ -1421,7 +1437,10 @@
                   <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ $poll->question }}</h4>
 
                   @auth
-                      @php $userVote = $poll->getUserVote(auth()->id()); @endphp
+                      @php
+                          $pollEventDate = ($event->days_of_week && $date) ? $date : '';
+                          $userVote = $poll->getUserVote(auth()->id(), $pollEventDate);
+                      @endphp
                       @if ($userVote === null && $poll->is_active)
                           {{-- Voting buttons --}}
                           @php $pollHash = \App\Utils\UrlUtils::encodeId($poll->id); @endphp
@@ -1468,8 +1487,8 @@
                       @else
                           {{-- Already voted or poll closed: show results server-rendered --}}
                           @php
-                              $results = $poll->getResults();
-                              $totalVotes = $poll->votes()->count();
+                              $results = $poll->getResults($pollEventDate);
+                              $totalVotes = $pollEventDate !== '' ? $poll->votes()->where('event_date', $pollEventDate)->count() : $poll->votes()->count();
                               $maxCount = $totalVotes > 0 ? max(array_values($results + [0])) : 0;
                           @endphp
                           @foreach ($poll->options as $idx => $option)
@@ -1501,6 +1520,23 @@
                               @if (!$poll->is_active) &middot; {{ __('messages.poll_closed_status') }} @endif
                           </p>
                       @endif
+                      @if ($poll->is_active && $poll->allow_user_options && count($poll->options) < 10)
+                          @php $pollHash = $pollHash ?? \App\Utils\UrlUtils::encodeId($poll->id); @endphp
+                          <div class="mt-3 flex gap-2">
+                              <input type="text" x-model="suggestInput['{{ $pollHash }}']" maxlength="200"
+                                     placeholder="{{ __('messages.suggest_option') }}"
+                                     @keydown.enter="suggestOption('{{ $pollHash }}')"
+                                     class="flex-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm py-1.5 px-2.5">
+                              <button type="button" @click="suggestOption('{{ $pollHash }}')"
+                                      :disabled="suggestSubmitting['{{ $pollHash }}'] || !(suggestInput['{{ $pollHash }}'] || '').trim()"
+                                      class="shrink-0 rounded-md px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+                                      style="background-color: {{ $accentColor }}">
+                                  <span x-show="!suggestSubmitting['{{ $pollHash }}']">+</span>
+                                  <span x-show="suggestSubmitting['{{ $pollHash }}']" x-cloak>...</span>
+                              </button>
+                          </div>
+                          <p x-show="suggestMessage['{{ $pollHash }}']" x-text="suggestMessage['{{ $pollHash }}']" class="text-xs text-gray-500 dark:text-gray-400 mt-1" x-cloak></p>
+                      @endif
                   @else
                       @if ($poll->is_active)
                       {{-- Not logged in: show options + sign in prompt --}}
@@ -1515,8 +1551,9 @@
                       @else
                       {{-- Closed poll: show results --}}
                       @php
-                          $results = $poll->getResults();
-                          $totalVotes = $poll->votes()->count();
+                          $pollEventDate = ($event->days_of_week && $date) ? $date : '';
+                          $results = $poll->getResults($pollEventDate);
+                          $totalVotes = $pollEventDate !== '' ? $poll->votes()->where('event_date', $pollEventDate)->count() : $poll->votes()->count();
                           $maxCount = $totalVotes > 0 ? max(array_values($results + [0])) : 0;
                       @endphp
                       @foreach ($poll->options as $idx => $option)
@@ -1618,20 +1655,25 @@
           @endif
           @if ($event->parts->count() == 0 && $event->isFanContentEnabled())
           <div class="flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
-            @if (! $photoLimitReached)
+            @if ($event->isFanPhotosEnabled() && ! $photoLimitReached)
             <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
               {{ __('messages.add_photo') }}
             </button>
             @endif
+            @if ($event->isFanVideosEnabled())
             <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; if (showVideo) setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
               {{ __('messages.add_video') }}
             </button>
+            @endif
+            @if ($event->isFanCommentsEnabled())
             <button @click="showComment = !showComment; showVideo = false; showPhoto = false; if (showComment) setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
               {{ __('messages.add_comment') }}
             </button>
+            @endif
+            @if ($event->isFanVideosEnabled())
             <div x-show="showVideo" x-cloak class="w-full mt-2">
               <form method="POST" action="{{ route('event.submit_video', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex flex-col gap-2">
                 @csrf
@@ -1642,7 +1684,8 @@
                 <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
               </form>
             </div>
-            @if (! $photoLimitReached)
+            @endif
+            @if ($event->isFanPhotosEnabled() && ! $photoLimitReached)
             <div x-show="showPhoto" x-cloak class="w-full mt-2">
               <form method="POST" action="{{ route('event.submit_photo', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" enctype="multipart/form-data" class="flex flex-col gap-2">
                 @csrf
@@ -1680,6 +1723,7 @@
               </form>
             </div>
             @endif
+            @if ($event->isFanCommentsEnabled())
             <div x-show="showComment" x-cloak class="w-full mt-2">
               <form method="POST" action="{{ route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" class="flex flex-col gap-2">
                 @csrf
@@ -1690,6 +1734,7 @@
                 <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
               </form>
             </div>
+            @endif
           </div>
           @endif
         </div>
@@ -1865,6 +1910,9 @@
         voted: {},
         pollData: {},
         showResults: {},
+        suggestInput: {},
+        suggestSubmitting: {},
+        suggestMessage: {},
         async vote(pollHash, optionIndex, clickEvent, buttonEl) {
           if (this.votingOption[pollHash] != null) return;
           this.votingOption[pollHash] = optionIndex;
@@ -1872,7 +1920,7 @@
             const resp = await fetch('{{ route('event.vote_poll', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id), 'poll_hash' => 'POLL_HASH']) }}'.replace('POLL_HASH', pollHash), {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
-              body: JSON.stringify({ option_index: optionIndex }),
+              body: JSON.stringify({ option_index: optionIndex, event_date: '{{ ($event->days_of_week && $date) ? $date : '' }}' }),
             });
             if (resp.status === 401) {
               window.location.href = '{{ app_url("/login") }}';
@@ -1912,6 +1960,38 @@
           var pd = this.pollData[pollHash];
           if (!pd || !pd.results) return 0;
           return Math.max.apply(null, Object.values(pd.results).concat([0]));
+        },
+        async suggestOption(pollHash) {
+          var label = (this.suggestInput[pollHash] || '').trim();
+          if (!label || this.suggestSubmitting[pollHash]) return;
+          this.suggestSubmitting[pollHash] = true;
+          this.suggestMessage[pollHash] = '';
+          try {
+            var resp = await fetch('{{ route('event.suggest_poll_option', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id), 'poll_hash' => 'POLL_HASH']) }}'.replace('POLL_HASH', pollHash), {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+              body: JSON.stringify({ label: label }),
+            });
+            if (resp.status === 401) {
+              window.location.href = '{{ app_url("/login") }}';
+              return;
+            }
+            var data = await resp.json();
+            if (data.success) {
+              this.suggestInput[pollHash] = '';
+              this.suggestMessage[pollHash] = data.message;
+              if (data.options) {
+                // Option was added directly - reload to show it
+                window.location.reload();
+              }
+            } else {
+              this.suggestMessage[pollHash] = data.error || '{{ __("messages.an_error_occurred") }}';
+            }
+          } catch (e) {
+            this.suggestMessage[pollHash] = '{{ __("messages.an_error_occurred") }}';
+          } finally {
+            this.suggestSubmitting[pollHash] = false;
+          }
         }
       }
     }

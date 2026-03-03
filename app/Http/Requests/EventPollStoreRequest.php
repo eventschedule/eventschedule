@@ -12,6 +12,8 @@ class EventPollStoreRequest extends FormRequest
             'question' => ['required', 'string', 'max:500'],
             'options' => ['required', 'array', 'min:2', 'max:10'],
             'options.*' => ['required', 'string', 'max:200'],
+            'allow_user_options' => ['sometimes', 'boolean'],
+            'require_option_approval' => ['sometimes', 'boolean'],
         ];
     }
 }

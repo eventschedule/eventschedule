@@ -57,6 +57,9 @@ class TicketTest extends DuskTestCase
             $this->createTestVenue($browser);
             $this->createTestTalent($browser);
 
+            // Upgrade talent to enterprise (promo codes and custom fields are Pro features)
+            $this->upgradeToEnterprise('talent');
+
             // Create event with 2 ticket types, custom fields, and promo code
             $eventDate = date('Y-m-d', strtotime('+3 days'));
             $browser->visit('/talent/add-event?date='.$eventDate)
