@@ -2000,7 +2000,7 @@ const calendarApp = createApp({
         },
         eventsForFilters() {
             if (this.currentView === 'list') {
-                return this.allEvents;
+                return this.futureEvents;
             }
             return this.allEvents.filter(e => this.eventIdsInViewedMonth.includes(e.id));
         },

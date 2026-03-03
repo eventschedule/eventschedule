@@ -1947,6 +1947,7 @@ return [
     'ai' => 'AI',
     'ai_generator' => 'AI-generator',
     'upgrade_feature_description_ai_details' => 'Gebruik AI om automatisch details voor je agenda of evenement te genereren.',
+    'upgrade_feature_description_ai_import' => 'Gebruik AI om automatisch evenementen uit tekst of afbeeldingen te parseren en te importeren.',
     'has_existing_value' => 'Heeft bestaande waarde',
     'feature_ai_style' => 'AI-stijlgeneratie',
     'background_image' => 'Achtergrondafbeelding',

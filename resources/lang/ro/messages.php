@@ -1976,7 +1976,9 @@ return [
     'ai_details_description' => 'Generează detalii folosind AI pe baza informațiilor tale existente.',
     'ai_details_generation_failed' => 'Generarea detaliilor a eșuat. Te rugăm să încerci din nou.',
     'ai' => 'AI',
+    'ai_generator' => 'Generator AI',
     'upgrade_feature_description_ai_details' => 'Folosește AI pentru a genera automat detalii pentru programul sau evenimentul tău.',
+    'upgrade_feature_description_ai_import' => 'Folosește AI pentru a analiza și importa automat evenimente din text sau imagini.',
     'has_existing_value' => 'Are valoare existentă',
     'feature_ai_style' => 'Generare stil cu AI',
     'background_image' => 'Imagine de fundal',
@@ -2543,4 +2545,6 @@ return [
     'rss_feed' => 'Flux RSS',
     'rss_feed_description' => 'Abonează-te în cititorul tău RSS pentru a primi actualizări ale evenimentelor.',
     'save_schedule_first_for_feeds' => 'Salvează programul mai întâi pentru a vedea URL-urile fluxurilor.',
+    'copy_ical_feed' => 'Copiază fluxul iCal',
+    'copy_rss_feed' => 'Copiază fluxul RSS',
 ];

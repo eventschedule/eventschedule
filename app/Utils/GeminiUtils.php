@@ -1321,9 +1321,10 @@ class GeminiUtils
 
     private static function buildFlyerPrompt(Event $event, ?string $styleInstructions): string
     {
-        $prompt = "Create a professional event flyer/poster with the following details:\n\n";
+        $prompt = "Create a professional event flyer/poster. Every piece of text must exactly match the details provided below.\n\n";
 
-        $prompt .= "Event name (most prominent element): {$event->name}\n";
+        $prompt .= "EVENT DETAILS:\n";
+        $prompt .= "Event name: {$event->name}\n";
 
         if ($event->starts_at) {
             $prompt .= 'Date: '.Carbon::parse($event->starts_at)->format('l, F j, Y')."\n";
@@ -1350,8 +1351,10 @@ class GeminiUtils
         }
 
         $categories = config('app.event_categories', []);
+        $categoryName = null;
         if ($event->category_id && isset($categories[$event->category_id])) {
-            $prompt .= "Category: {$categories[$event->category_id]}\n";
+            $categoryName = $categories[$event->category_id];
+            $prompt .= "Category: {$categoryName}\n";
         }
 
         $performers = $event->roles->filter(fn ($r) => $r->type === 'talent');
@@ -1365,14 +1368,18 @@ class GeminiUtils
             $prompt .= 'Ticket price: '.MoneyUtils::format($ticket->price, $event->ticket_currency_code)."\n";
         }
 
-        $prompt .= "\nDesign directives:\n";
-        $prompt .= "- Clean, modern layout with strong visual hierarchy\n";
-        $prompt .= "- Event name should be the most prominent text element\n";
-        $prompt .= "- All text must be clearly legible\n";
-        $prompt .= "- Use category-appropriate colors and decorative elements\n";
-        $prompt .= "- Do not include AI-generated photos of people\n";
-        $prompt .= "- Suitable for digital sharing on social media\n";
-        $prompt .= "- Professional typography and spacing\n";
+        $prompt .= "\nLAYOUT (top to bottom):\n";
+        $prompt .= "- Top third: event name in large, bold type (at least 3x larger than body text).\n";
+        $prompt .= "- Middle: date, time, and venue in medium type.\n";
+        $prompt .= "- Bottom third: remaining details (description, performers, ticket price) in smaller type.\n";
+
+        $prompt .= "\nDESIGN DIRECTIVES:\n";
+        $prompt .= '- Background: rich color or gradient inspired by the event category'.($categoryName ? " ({$categoryName})" : '').". Not plain white.\n";
+        $prompt .= "- Use category-appropriate decorative elements (abstract shapes, icons) to set the mood.\n";
+        $prompt .= "- All text must be clearly legible with strong contrast against the background.\n";
+        $prompt .= "- Professional typography with generous spacing.\n";
+        $prompt .= "- Do not include AI-generated photos of people.\n";
+        $prompt .= "- Suitable for digital sharing on social media.\n";
 
         if ($styleInstructions) {
             $prompt .= "\nCustom style instructions: {$styleInstructions}\n";
@@ -1631,37 +1638,92 @@ class GeminiUtils
         return ! empty($output) ? $output : null;
     }
 
-    private static function buildScheduleImageContext(Role $role): string
+    private static function getVisualDirection(Role $role): array
     {
-        $scheduleType = $role->type === 'talent' ? 'talent' : ($role->type === 'venue' ? 'venue' : 'curator');
-        $context = "Schedule name: '{$role->name}', type: {$scheduleType}";
+        $typeMoods = [
+            'talent' => [
+                'mood' => 'energetic and dynamic',
+                'motifs' => 'sound waves, stage lighting rays, rhythmic pulse lines',
+            ],
+            'venue' => [
+                'mood' => 'welcoming and atmospheric',
+                'motifs' => 'architectural arches, ambient light glows, structural lines',
+            ],
+            'curator' => [
+                'mood' => 'connected and curated',
+                'motifs' => 'interconnected nodes, constellation patterns, mosaic tiles',
+            ],
+        ];
 
-        if ($role->short_description) {
-            $context .= ', description: '.substr($role->short_description, 0, 200);
-        }
+        $categoryAccents = [
+            1 => 'brush strokes, gallery frames',             // Art & Culture
+            2 => 'handshake silhouettes, network graphs',     // Business Networking
+            3 => 'interlocking circles, gathering shapes',    // Community
+            4 => 'equalizer bars, spotlight beams',           // Concerts
+            5 => 'open book outlines, lightbulb shapes',      // Education
+            6 => 'steam wisps, glass outlines',               // Food & Drink
+            7 => 'heartbeat lines, radial energy rings',      // Health & Fitness
+            8 => 'confetti bursts, strobe streaks',           // Parties & Festivals
+            9 => 'rising arrows, spiral growth paths',        // Personal Growth
+            10 => 'chevron stripes, motion trails',           // Sports
+            11 => 'mandala rings, soft radiance halos',       // Spirituality
+            12 => 'circuit traces, pixel grids',              // Tech
+        ];
+
+        $scheduleType = $role->type === 'talent' ? 'talent' : ($role->type === 'venue' ? 'venue' : 'curator');
+        $typeInfo = $typeMoods[$scheduleType];
 
         $categories = $role->events()->wherePivot('is_accepted', true)->pluck('category_id')->filter()->unique()->values();
-        if ($categories->isNotEmpty()) {
-            $categoryNames = $categories->map(fn ($id) => config('app.event_categories.'.$id))->filter()->implode(', ');
-            if ($categoryNames) {
-                $context .= ", event categories: {$categoryNames}";
+        $categoryNames = [];
+        $accents = [];
+        foreach ($categories as $id) {
+            $name = config('app.event_categories.'.$id);
+            if ($name) {
+                $categoryNames[] = $name;
+            }
+            if (isset($categoryAccents[$id])) {
+                $accents[] = $categoryAccents[$id];
             }
         }
 
-        return $context;
+        return [
+            'type' => $scheduleType,
+            'mood' => $typeInfo['mood'],
+            'motifs' => $typeInfo['motifs'],
+            'categoryNames' => $categoryNames,
+            'accents' => $accents,
+            'description' => $role->short_description ? substr($role->short_description, 0, 200) : null,
+        ];
     }
 
     private static function buildProfileImagePrompt(Role $role, string $accentColor, ?string $styleInstructions): string
     {
-        $context = self::buildScheduleImageContext($role);
+        $v = self::getVisualDirection($role);
 
-        $prompt = "Create an abstract, decorative brand icon/logo for a schedule called '{$role->name}'. {$context}. ";
-        $prompt .= 'The image should be purely visual - no text, no letters, no words, no people, no faces. ';
-        $prompt .= 'Use shapes, patterns, and colors that evoke the theme. ';
-        $prompt .= "Primary color: {$accentColor}. Clean, modern design. The image must be full bleed - the design should extend all the way to every edge of the canvas with no padding, margins, or empty space around it. Do not center a small element in the middle of the canvas. Do not round the corners of the image. Do not add any border, outline, or frame to the image.";
+        $prompt = "Create a flat vector illustration with clean geometric shapes and smooth gradients for a {$v['type']} schedule called '{$role->name}'.";
+
+        if ($v['description']) {
+            $prompt .= " Description: {$v['description']}.";
+        }
+
+        $prompt .= "\n\nVisual mood: {$v['mood']}.";
+        $prompt .= "\nComposition: one strong central motif that fills most of the canvas. High contrast between the main element and the background so the image reads clearly at small sizes (as small as 32px).";
+        $prompt .= "\nSuggested motifs: {$v['motifs']}.";
+
+        if (! empty($v['accents'])) {
+            $prompt .= "\nCategory-inspired accents: ".implode(', ', $v['accents']).'.';
+        }
+
+        $prompt .= "\nColor palette: use {$accentColor} as the dominant color with 2 to 3 tonal variations and one contrasting accent for depth.";
+
+        $prompt .= "\n\nCRITICAL CONSTRAINTS:";
+        $prompt .= "\n- Absolutely no text, letters, words, numbers, people, or faces.";
+        $prompt .= "\n- Full bleed: the design extends to every edge of the canvas with no padding, margins, or empty space.";
+        $prompt .= "\n- No border, outline, frame, or rounded corners on the image.";
+        $prompt .= "\n- Do not center a small element in the middle of empty space.";
 
         if ($styleInstructions) {
-            $prompt .= " Style preferences: {$styleInstructions}";
+            $prompt .= "\n\nStyle preferences: {$styleInstructions}";
         }
 
         return $prompt;
@@ -1669,15 +1731,31 @@ class GeminiUtils
 
     private static function buildHeaderImagePrompt(Role $role, string $accentColor, ?string $styleInstructions): string
     {
-        $context = self::buildScheduleImageContext($role);
+        $v = self::getVisualDirection($role);
 
-        $prompt = "Create an abstract, decorative wide banner image for a schedule called '{$role->name}'. {$context}. ";
-        $prompt .= 'The image should be purely visual - no text, no letters, no words, no people, no faces. ';
-        $prompt .= 'Use abstract patterns, gradients, or decorative elements that evoke the theme. ';
-        $prompt .= "Color palette based on {$accentColor}. Professional and modern.";
+        $prompt = "Create a smooth abstract illustration with flowing gradients and layered geometric shapes for a wide banner image. This is for a {$v['type']} schedule called '{$role->name}'.";
+
+        if ($v['description']) {
+            $prompt .= " Description: {$v['description']}.";
+        }
+
+        $prompt .= "\n\nVisual mood: {$v['mood']}.";
+        $prompt .= "\nComposition: flows horizontally from left to right. Visual weight toward the left and right edges, with the center area simpler and lighter so overlaid text remains legible.";
+        $prompt .= "\nSuggested motifs: {$v['motifs']}.";
+
+        if (! empty($v['accents'])) {
+            $prompt .= "\nCategory-inspired accents: ".implode(', ', $v['accents']).'.';
+        }
+
+        $prompt .= "\nColor palette: use {$accentColor} as the base, shifting subtly across the width through 2 to 3 related tones.";
+
+        $prompt .= "\n\nCRITICAL CONSTRAINTS:";
+        $prompt .= "\n- Absolutely no text, letters, words, numbers, people, or faces.";
+        $prompt .= "\n- Full bleed with no padding or borders.";
+        $prompt .= "\n- Professional and modern.";
 
         if ($styleInstructions) {
-            $prompt .= " Style preferences: {$styleInstructions}";
+            $prompt .= "\n\nStyle preferences: {$styleInstructions}";
         }
 
         return $prompt;
@@ -1685,15 +1763,26 @@ class GeminiUtils
 
     private static function buildBackgroundImagePrompt(Role $role, string $accentColor, ?string $styleInstructions): string
     {
-        $context = self::buildScheduleImageContext($role);
+        $v = self::getVisualDirection($role);
 
-        $prompt = "Create an abstract, decorative background image for a schedule called '{$role->name}'. {$context}. ";
-        $prompt .= 'The image should be a subtle, non-distracting background suitable for displaying text and event listings over it. ';
-        $prompt .= 'Purely visual - no text, no letters, no words, no people, no faces. ';
-        $prompt .= "Color palette based on {$accentColor}. Soft, muted tones that won't compete with foreground content.";
+        $prompt = "Create a soft watercolor wash with faint geometric line work as a background image for a {$v['type']} schedule called '{$role->name}'.";
+
+        $prompt .= "\n\nPurpose: this image sits behind text and event listings, so it must be very subtle and non-distracting.";
+        $prompt .= "\nComposition: even and uniform across the entire canvas. No strong focal point. No area should be dramatically darker or lighter than another.";
+        $prompt .= "\nColor palette: very pale, washed-out tints of {$accentColor} at about 15 to 25 percent opacity. Soft, muted tones that will not compete with foreground content.";
+
+        if (! empty($v['motifs'])) {
+            $prompt .= "\nOptional hint of motifs (like a watermark, barely visible): {$v['motifs']}.";
+        }
+
+        $prompt .= "\n\nCRITICAL CONSTRAINTS:";
+        $prompt .= "\n- Absolutely no text, letters, words, numbers, people, or faces.";
+        $prompt .= "\n- Must be subtle enough that black or dark text is easily readable over every part of the image.";
+        $prompt .= "\n- No bold shapes, no high-contrast elements, no vivid colors.";
+        $prompt .= "\n- Full bleed with no padding or borders.";
 
         if ($styleInstructions) {
-            $prompt .= " Style preferences: {$styleInstructions}";
+            $prompt .= "\n\nStyle preferences: {$styleInstructions}";
         }
 
         return $prompt;

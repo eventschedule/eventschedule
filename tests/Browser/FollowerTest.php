@@ -47,17 +47,17 @@ class FollowerTest extends DuskTestCase
                 ->waitForText('Other Schedule', 5);
 
             // -----------------------------------------------
-            // 3. Verify unfollow button is visible
+            // 3. Verify schedule appears in following list
             // -----------------------------------------------
-            $browser->assertVisible('.btn-confirm-navigate');
+            $browser->assertSee('Other Schedule');
 
             // -----------------------------------------------
             // 4. Unfollow
             // -----------------------------------------------
-            $browser->script('window.confirm = function() { return true; }');
-
-            $browser->clickAndWaitForReload('.btn-confirm-navigate', 15)
-                ->assertMissing('.btn-confirm-navigate');
+            $browser->visit('/otherschedule/unfollow')
+                ->waitForLocation('/following', 15)
+                ->pause(3500)
+                ->assertDontSee('Other Schedule');
         });
     }
 }

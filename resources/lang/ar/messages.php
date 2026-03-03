@@ -1950,6 +1950,7 @@ return [
     'ai' => 'AI',
     'ai_generator' => 'مولد الذكاء الاصطناعي',
     'upgrade_feature_description_ai_details' => 'استخدم الذكاء الاصطناعي لتوليد التفاصيل تلقائيًا لجدولك أو حدثك.',
+    'upgrade_feature_description_ai_import' => 'استخدم الذكاء الاصطناعي لتحليل واستيراد الأحداث تلقائيًا من النص أو الصور.',
     'has_existing_value' => 'يحتوي على قيمة موجودة',
     'feature_ai_style' => 'توليد النمط بالذكاء الاصطناعي',
     'background_image' => 'صورة الخلفية',

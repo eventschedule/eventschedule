@@ -1948,6 +1948,7 @@ return [
     'ai' => 'AI',
     'ai_generator' => 'Gerador de IA',
     'upgrade_feature_description_ai_details' => 'Use IA para gerar automaticamente detalhes para sua agenda ou evento.',
+    'upgrade_feature_description_ai_import' => 'Use IA para analisar e importar automaticamente eventos de texto ou imagens.',
     'has_existing_value' => 'Tem valor existente',
     'feature_ai_style' => 'Geração de estilo com IA',
     'background_image' => 'Imagem de fundo',

@@ -1965,6 +1965,7 @@ return [
     'ai' => 'AI',
     'ai_generator' => 'AI generaator',
     'upgrade_feature_description_ai_details' => 'Kasuta tehisintellekti, et automaatselt genereerida üksikasjad oma ajakavale või üritusele.',
+    'upgrade_feature_description_ai_import' => 'Kasuta tehisintellekti, et automaatselt sõeluda ja importida üritusi tekstist või piltidest.',
     'has_existing_value' => 'Omab olemasolevat väärtust',
     'feature_ai_style' => 'AI stiiligeneerimine',
     'background_image' => 'Taustapilt',

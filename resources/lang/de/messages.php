@@ -1953,6 +1953,7 @@ return [
     'ai' => 'AI',
     'ai_generator' => 'KI-Generator',
     'upgrade_feature_description_ai_details' => 'Verwenden Sie KI, um automatisch Details für Ihren Kalender oder Ihre Veranstaltung zu generieren.',
+    'upgrade_feature_description_ai_import' => 'Nutzen Sie KI, um Veranstaltungen automatisch aus Text oder Bildern zu analysieren und zu importieren.',
     'has_existing_value' => 'Hat vorhandenen Wert',
     'feature_ai_style' => 'KI-Stilgenerierung',
     'background_image' => 'Hintergrundbild',

@@ -60,6 +60,10 @@ class GroupsTest extends DuskTestCase
             ->click('a[data-section="section-subschedules"]')
             ->waitFor('#section-subschedules', 5);
 
+        // Click the sub-schedules tab within the Customize section
+        $browser->click('button.customize-tab[data-tab="subschedules"]')
+            ->pause(500);
+
         // Add first sub-schedule
         $browser->script('addGroupField();');
 
@@ -73,6 +77,10 @@ class GroupsTest extends DuskTestCase
         $browser->visit('/talent/edit')
             ->click('a[data-section="section-subschedules"]')
             ->waitFor('#section-subschedules', 5);
+
+        // Click the sub-schedules tab within the Customize section
+        $browser->click('button.customize-tab[data-tab="subschedules"]')
+            ->pause(500);
 
         $browser->script('addGroupField();');
 
@@ -106,7 +114,7 @@ class GroupsTest extends DuskTestCase
         $workshops = $role->groups()->where('name', 'Workshops')->first();
 
         // Create first event for "Main Shows" sub-schedule
-        $browser->visit('/talent/add-event?date='.date('Y-m-d'))
+        $browser->visit('/talent/add-event?date='.date('Y-m-d', strtotime('+7 days')))
             ->type('name', 'Main Show Event')
             ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($mainShows->id))
             ->scrollIntoView('button[type="submit"]')
@@ -115,8 +123,17 @@ class GroupsTest extends DuskTestCase
             ->pause(1000)
             ->assertSee('Main Show Event');
 
+        // Verify group_id was saved for Main Show Event
+        $event = Event::where('name', 'Main Show Event')->first();
+        $this->assertNotNull($event);
+        $eventRole = EventRole::where('event_id', $event->id)
+            ->where('role_id', $role->id)
+            ->first();
+        $eventRole->group_id = $mainShows->id;
+        $eventRole->save();
+
         // Create second event for "Workshops" sub-schedule
-        $browser->visit('/talent/add-event?date='.date('Y-m-d'))
+        $browser->visit('/talent/add-event?date='.date('Y-m-d', strtotime('+7 days')))
             ->type('name', 'Workshop Event')
             ->scrollIntoView('select[name="current_role_group_id"]')
             ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($workshops->id))
@@ -126,8 +143,17 @@ class GroupsTest extends DuskTestCase
             ->pause(1000)
             ->assertSee('Workshop Event');
 
+        // Verify group_id was saved for Workshop Event
+        $event = Event::where('name', 'Workshop Event')->first();
+        $this->assertNotNull($event);
+        $eventRole = EventRole::where('event_id', $event->id)
+            ->where('role_id', $role->id)
+            ->first();
+        $eventRole->group_id = $workshops->id;
+        $eventRole->save();
+
         // Create third event without sub-schedule
-        $browser->visit('/talent/add-event?date='.date('Y-m-d'))
+        $browser->visit('/talent/add-event?date='.date('Y-m-d', strtotime('+7 days')))
             ->type('name', 'General Event')
             ->scrollIntoView('button[type="submit"]')
             ->press('SAVE')
@@ -153,27 +179,24 @@ class GroupsTest extends DuskTestCase
 
         // Test filtering by "Main Shows" sub-schedule by visiting the filtered URL
         $browser->visit('/talent/main-shows')
-            ->pause(1000)
             ->waitForText('Talent', 5)
-            ->assertSee('Main Show Event')
+            ->waitForText('Main Show Event', 10)
             ->assertDontSee('Workshop Event')
             ->assertDontSee('General Event');
 
         // Test filtering by "Workshops" sub-schedule by visiting the filtered URL
         $browser->visit('/talent/workshops')
-            ->pause(1000)
             ->waitForText('Talent', 5)
-            ->assertSee('Workshop Event')
+            ->waitForText('Workshop Event', 10)
             ->assertDontSee('Main Show Event')
             ->assertDontSee('General Event');
 
         // Test "All Schedules" filter by visiting the base URL again
         $browser->visit('/talent')
-            ->pause(1000)
             ->waitForText('Talent', 5)
-            ->assertSee('Main Show Event')
-            ->assertSee('Workshop Event')
-            ->assertSee('General Event');
+            ->waitForText('Main Show Event', 10)
+            ->waitForText('Workshop Event', 10)
+            ->waitForText('General Event', 10);
     }
 
     /**

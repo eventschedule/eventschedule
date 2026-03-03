@@ -1942,6 +1942,7 @@ return [
     'ai' => 'AI',
     'ai_generator' => 'מחולל AI',
     'upgrade_feature_description_ai_details' => 'השתמש ב-AI כדי ליצור אוטומטית פרטים עבור לוח הזמנים או האירוע שלך.',
+    'upgrade_feature_description_ai_import' => 'השתמש ב-AI כדי לנתח ולייבוא אוטומטית אירועים מטקסט או מתמונות.',
     'has_existing_value' => 'יש ערך קיים',
     'feature_ai_style' => 'יצירת סגנון עם AI',
     'background_image' => 'תמונת רקע',
