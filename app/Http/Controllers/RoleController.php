@@ -2484,6 +2484,131 @@ class RoleController extends Controller
         }
     }
 
+    public function generateStyleNew(Request $request)
+    {
+        set_time_limit(300);
+
+        if (is_demo_mode()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (config('app.hosted') && ! auth()->user()->isAdmin()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:talent,venue,curator',
+            'style_instructions' => 'nullable|string|max:500',
+            'elements' => 'required|array|min:1',
+            'elements.*' => 'in:profile_image,header_image,accent_color,font,background_image',
+        ]);
+
+        $tempRole = new Role;
+        $tempRole->name = $request->input('name');
+        $tempRole->type = $request->input('type');
+        $tempRole->short_description = $request->input('short_description');
+        $tempRole->accent_color = $request->input('accent_color', '#007bff');
+
+        $currentValues = [
+            'accent_color' => $request->input('accent_color'),
+            'font_family' => $request->input('font_family'),
+        ];
+
+        try {
+            $results = GeminiUtils::generateScheduleStyle(
+                $tempRole,
+                $request->input('elements'),
+                $request->input('style_instructions'),
+                $currentValues
+            );
+
+            if (empty($results) || (isset($results['text_error']) && isset($results['image_error']) && count($results) === 2)) {
+                return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
+            }
+
+            $response = ['success' => true];
+
+            foreach (['profile_image', 'header_image', 'background_image'] as $imageField) {
+                if (isset($results[$imageField])) {
+                    $filename = $results[$imageField];
+                    if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                        $response[$imageField.'_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
+                    } elseif (config('filesystems.default') == 'local') {
+                        $response[$imageField.'_url'] = url('/storage/'.$filename);
+                    } else {
+                        $response[$imageField.'_url'] = $filename;
+                    }
+                    $response[$imageField.'_filename'] = $filename;
+                }
+            }
+
+            if (isset($results['accent_color'])) {
+                $response['accent_color'] = $results['accent_color'];
+            }
+            if (isset($results['font_family'])) {
+                $response['font_family'] = $results['font_family'];
+            }
+            if (isset($results['image_error'])) {
+                $response['image_error'] = true;
+            }
+            if (isset($results['text_error'])) {
+                $response['text_error'] = true;
+            }
+
+            return response()->json($response);
+        } catch (\Illuminate\Database\QueryException $e) {
+            report($e);
+
+            return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
+        } catch (\Exception $e) {
+            \Log::error('AI style generation failed: '.$e->getMessage());
+
+            return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
+        }
+    }
+
+    public function generateScheduleDetailsNew(Request $request)
+    {
+        if (is_demo_mode()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (config('app.hosted') && ! auth()->user()->isAdmin()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'elements' => 'required|array|min:1',
+            'elements.*' => 'in:short_description,description',
+        ]);
+
+        try {
+            $results = GeminiUtils::generateScheduleDetails(
+                $request->input('name'),
+                $request->input('type', 'talent'),
+                $request->input('short_description'),
+                $request->input('elements'),
+                $request->input('description')
+            );
+
+            if (empty($results)) {
+                return response()->json(['error' => __('messages.ai_details_generation_failed')], 500);
+            }
+
+            return response()->json(array_merge(['success' => true], $results));
+        } catch (\Illuminate\Database\QueryException $e) {
+            report($e);
+
+            return response()->json(['error' => __('messages.ai_details_generation_failed')], 500);
+        } catch (\Exception $e) {
+            \Log::error('AI schedule details generation failed: '.$e->getMessage());
+
+            return response()->json(['error' => __('messages.ai_details_generation_failed')], 500);
+        }
+    }
+
     public function updateLinks(RoleLinkUpdateRequest $request, $subdomain): RedirectResponse
     {
         if (! auth()->user()->isEditor($subdomain)) {

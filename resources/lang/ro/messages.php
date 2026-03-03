@@ -1951,7 +1951,7 @@ return [
     'ai_style_select_elements' => 'Selectează elementele de generat:',
     'ai_style_instructions' => 'Instrucțiuni de stil (opțional)',
     'ai_style_instructions_placeholder' => 'Ex., Modern și minimalist cu tonuri de albastru...',
-    'ai_style_replace_warning' => 'Aceasta va înlocui selecțiile curente pentru elementele bifate.',
+    'ai_style_replace_warning' => 'Aceasta va înlocui valorile curente pentru elementele bifate.',
     'ai_style_generation_failed' => 'Generarea stilului a eșuat. Te rugăm să încerci din nou.',
     'ai_style_image_partial_error' => 'Unele imagini nu au putut fi generate. Valorile de stil text au fost aplicate.',
     'upgrade_feature_description_ai_style' => 'Folosește AI pentru a genera automat un branding și stil coerent pentru programul tău.',

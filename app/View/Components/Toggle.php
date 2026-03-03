@@ -16,18 +16,21 @@ class Toggle extends Component
 
     public $id;
 
+    public $disabled;
+
     /**
      * Create a new component instance.
      *
      * @return void
      */
-    public function __construct($name, $label = '', $checked = false, $help = '', $id = null)
+    public function __construct($name, $label = '', $checked = false, $help = '', $id = null, $disabled = false)
     {
         $this->name = $name;
         $this->label = $label;
         $this->checked = $checked;
         $this->help = $help;
         $this->id = $id ?? $name;
+        $this->disabled = $disabled;
     }
 
     /**

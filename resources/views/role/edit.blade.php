@@ -199,6 +199,15 @@
                 });
             }
 
+            const notificationNewRequestSection = document.getElementById('notification_new_request_section');
+
+            if (acceptRequestsCheckbox && notificationNewRequestSection) {
+                notificationNewRequestSection.style.display = acceptRequestsCheckbox.checked ? 'block' : 'none';
+                acceptRequestsCheckbox.addEventListener('change', function() {
+                    notificationNewRequestSection.style.display = this.checked ? 'block' : 'none';
+                });
+            }
+
             const requireApprovalCheckbox = document.querySelector('input[name="require_approval"][type="checkbox"]');
             const approvedSubdomainsSection = document.getElementById('approved_subdomains_section');
 
@@ -898,7 +907,7 @@
                                         <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                                         </svg>
-                                        {{ __('messages.ai') }}
+                                        {{ __('messages.ai_generator') }}
                                     </button>
                                 @elseif (config('app.hosted'))
                                     <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-details')"
@@ -907,7 +916,7 @@
                                         <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                                         </svg>
-                                        {{ __('messages.ai') }}
+                                        {{ __('messages.ai_generator') }}
                                     </button>
                                 @endif
                             @endif
@@ -1210,6 +1219,27 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 3 3 0 005.78-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
                         </svg>
                         {{ __('messages.schedule_style') }}
+                        @if (config('services.google.gemini_key') && !is_demo_mode())
+                            @if ($role->isEnterprise())
+                                <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'ai-style-generator')"
+                                    class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600"
+                                    title="{{ __('messages.ai_style_generator') }}">
+                                    <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                                    </svg>
+                                    {{ __('messages.ai_generator') }}
+                                </button>
+                            @elseif (config('app.hosted'))
+                                <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-style')"
+                                    class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 opacity-75"
+                                    title="{{ __('messages.ai_style_generator') }}">
+                                    <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                                    </svg>
+                                    {{ __('messages.ai_generator') }}
+                                </button>
+                            @endif
+                        @endif
                     </h2>
 
                     <div class="flex flex-col xl:flex-row xl:gap-12">
@@ -2142,25 +2172,9 @@
                         <!-- Tab Content: Notifications -->
                         <div id="settings-tab-notifications" class="settings-tab-content hidden">
 
-                        @if (config('app.hosted') && ! $role->hasEmailSettings())
-                            <div class="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
-                                <p class="text-sm text-amber-800 dark:text-amber-200">
-                                    {{ __('messages.notification_requires_email_settings') }}
-                                    <a href="#section-email-settings" class="text-[#4E81FA] hover:underline font-medium">{{ __('messages.configure_email_settings') }}</a>
-                                </p>
-                            </div>
-                        @endif
-
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.notification_settings_help') }}</p>
 
-                        <div class="mb-6">
-                            <x-toggle name="notification_new_sale"
-                                label="{{ __('messages.notify_new_sale') }}"
-                                checked="{{ old('notification_new_sale', $notificationSettings['new_sale'] ?? false) }}"
-                                help="{{ __('messages.notify_new_sale_help') }}" />
-                        </div>
-
-                        <div class="mb-6">
+                        <div class="mb-6" id="notification_new_request_section">
                             <x-toggle name="notification_new_request"
                                 label="{{ __('messages.notify_new_request') }}"
                                 checked="{{ old('notification_new_request', $notificationSettings['new_request'] ?? false) }}"
@@ -2174,26 +2188,38 @@
                                 help="{{ __('messages.notify_new_fan_content_help') }}" />
                         </div>
 
-                        @if ($role->isPro())
-                        <hr class="my-6 border-gray-200 dark:border-gray-700">
-                        <h3 class="text-base font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.feedback') }}</h3>
+                        @php $emailDisabled = config('app.hosted') && ! $role->hasEmailSettings(); @endphp
 
-                        @if (config('app.hosted') && ! $role->hasEmailSettings())
-                            <p class="text-sm text-amber-700 dark:text-amber-300 mb-4">
-                                {{ __('messages.feedback_requires_email_settings') }}
-                            </p>
+                        @if ($emailDisabled)
+                            <hr class="my-6 border-gray-200 dark:border-gray-700">
+                            <div class="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                                <p class="text-sm text-amber-800 dark:text-amber-200">
+                                    {{ __('messages.notification_requires_email_settings') }}
+                                    <a href="#section-email-settings" class="text-[#4E81FA] hover:underline font-medium">{{ __('messages.configure_email_settings') }}</a>
+                                </p>
+                            </div>
                         @endif
 
+                        <div class="mb-6">
+                            <x-toggle name="notification_new_sale"
+                                label="{{ __('messages.notify_new_sale') }}"
+                                checked="{{ old('notification_new_sale', $notificationSettings['new_sale'] ?? false) }}"
+                                help="{{ __('messages.notify_new_sale_help') }}"
+                                :disabled="$emailDisabled" />
+                        </div>
+
+                        @if ($role->isPro())
                         <div class="mb-6">
                             <x-toggle name="feedback_enabled"
                                 label="{{ __('messages.feedback_enabled') }}"
                                 checked="{{ old('feedback_enabled', $role->feedback_enabled) }}"
-                                help="{{ __('messages.feedback_enabled_help') }}" />
+                                help="{{ __('messages.feedback_enabled_help') }}"
+                                :disabled="$emailDisabled" />
                         </div>
 
-                        <div class="mb-6" id="feedback-delay-wrapper" style="{{ $role->feedback_enabled ? '' : 'display: none;' }}">
+                        <div class="mb-6" id="feedback-delay-wrapper" style="{{ $role->feedback_enabled && ! $emailDisabled ? '' : 'display: none;' }}">
                             <x-input-label for="feedback_delay_hours" value="{{ __('messages.feedback_delay') }}" />
-                            <select id="feedback_delay_hours" name="feedback_delay_hours" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                            <select id="feedback_delay_hours" name="feedback_delay_hours" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" {{ $emailDisabled ? 'disabled' : '' }}>
                                 @foreach ([1, 2, 6, 12, 24, 48] as $hours)
                                 <option value="{{ $hours }}" {{ old('feedback_delay_hours', $role->feedback_delay_hours ?? 24) == $hours ? 'selected' : '' }}>
                                     {{ $hours }} {{ __('messages.feedback_hours') }}
@@ -2206,7 +2232,8 @@
                             <x-toggle name="notification_new_feedback"
                                 label="{{ __('messages.notify_new_feedback') }}"
                                 checked="{{ old('notification_new_feedback', $notificationSettings['new_feedback'] ?? false) }}"
-                                help="{{ __('messages.notify_new_feedback_help') }}" />
+                                help="{{ __('messages.notify_new_feedback_help') }}"
+                                :disabled="$emailDisabled" />
                         </div>
                         @endif
 
@@ -2243,6 +2270,14 @@
                                 @endforeach
                             </div>
                         @endif
+
+                        <div class="mb-6">
+                            <x-toggle name="direct_registration"
+                                label="{{ __('messages.direct_registration') }}"
+                                checked="{{ old('direct_registration', $role->direct_registration) }}"
+                                help="{{ __('messages.direct_registration_help') }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('direct_registration')" />
+                        </div>
 
                         @if ((config('app.hosted') || config('app.is_testing')) && ($role->isVenue() || $role->isCurator()))
                         <div class="mb-6" id="import_form_fields_section">
@@ -2291,14 +2326,6 @@
                             </div>
                         </div>
                         @endif
-
-                        <div class="mb-6">
-                            <x-toggle name="direct_registration"
-                                label="{{ __('messages.direct_registration') }}"
-                                checked="{{ old('direct_registration', $role->direct_registration) }}"
-                                help="{{ __('messages.direct_registration_help') }}" />
-                            <x-input-error class="mt-2" :messages="$errors->get('direct_registration')" />
-                        </div>
 
                         </div>
                         <!-- End Tab Content: Advanced -->
@@ -4685,7 +4712,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ['key' => 'font', 'label' => __('messages.font_family'), 'has_value' => $role->font_family !== 'Roboto'],
         ['key' => 'background_image', 'label' => __('messages.background_image'), 'has_value' => (bool)$role->background_image_url],
     ]"
-    endpoint="{{ url('/'.$role->subdomain.'/generate-style') }}"
+    endpoint="{{ $role->exists ? url('/'.$role->subdomain.'/generate-style') : url('/generate-style') }}"
     successCallback="handleAiStyleResults"
     extraDataCallback="getStyleExtraData"
     :slowGeneration="true"
@@ -4697,7 +4724,10 @@ document.addEventListener('DOMContentLoaded', function() {
 window.getStyleExtraData = function() {
     return {
         accent_color: document.getElementById('accent_color') ? document.getElementById('accent_color').value : '',
-        font_family: document.getElementById('font_family') ? document.getElementById('font_family').value : ''
+        font_family: document.getElementById('font_family') ? document.getElementById('font_family').value : '',
+        name: document.getElementById('name').value,
+        type: document.querySelector('input[name="type"]') ? document.querySelector('input[name="type"]').value : (document.querySelector('select[name="type"]') ? document.querySelector('select[name="type"]').value : ''),
+        short_description: document.getElementById('short_description') ? document.getElementById('short_description').value : ''
     };
 };
 
@@ -4825,7 +4855,7 @@ window.handleAiStyleResults = function(data) {
         ['key' => 'short_description', 'label' => __('messages.short_description'), 'has_value' => (bool)$role->short_description],
         ['key' => 'description', 'label' => __('messages.description'), 'has_value' => (bool)$role->description],
     ]"
-    endpoint="{{ url('/'.$role->subdomain.'/generate-schedule-details') }}"
+    endpoint="{{ $role->exists ? url('/'.$role->subdomain.'/generate-schedule-details') : url('/generate-schedule-details') }}"
     successCallback="handleAiScheduleDetailsResults"
     extraDataCallback="getScheduleDetailsExtraData"
     :showInstructions="false"
