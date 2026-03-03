@@ -312,6 +312,25 @@
     </div>
 </div>
 
+@if (config('app.hosted'))
+<div class="pt-5 container mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 border border-gray-100 dark:border-gray-700">
+        <div class="flex items-start gap-4">
+            <svg class="w-8 h-8 text-[#4E81FA] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M21,12L14,5V9C7,10 4,15 3,20C5.5,16.5 9,14.9 14,14.9V19L21,12Z" />
+            </svg>
+            <div>
+                <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-1">{{ __('messages.referral_program') }}</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{{ __('messages.referral_plan_page_description') }}</p>
+                <a href="{{ route('referrals') }}" class="text-[#4E81FA] hover:underline font-medium text-sm">
+                    {{ __('messages.view_referral_dashboard') }} &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 <script {!! nonce_attr() !!}>
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.link-confirm').forEach(function(link) {

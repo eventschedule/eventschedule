@@ -39,6 +39,7 @@
                                 {{ __('messages.talent_feature_3') }}
                             </li>
                         </ul>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-3"><b><i>Your events</i></b> at various venues</p>
                         <div class="flex items-center gap-1 text-sm font-semibold text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all">
                             {{ __('messages.get_started_cta') }}
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
@@ -71,6 +72,7 @@
                                 {{ __('messages.venue_feature_3') }}
                             </li>
                         </ul>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Various events at <b><i>your venue</i></b></p>
                         <div class="flex items-center gap-1 text-sm font-semibold text-sky-600 dark:text-sky-400 group-hover:gap-2 transition-all">
                             {{ __('messages.get_started_cta') }}
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
@@ -103,6 +105,7 @@
                                 {{ __('messages.curator_feature_3') }}
                             </li>
                         </ul>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Various events at various venues</p>
                         <div class="flex items-center gap-1 text-sm font-semibold text-indigo-600 dark:text-indigo-400 group-hover:gap-2 transition-all">
                             {{ __('messages.get_started_cta') }}
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>

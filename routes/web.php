@@ -22,6 +22,7 @@ use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\NewsletterTrackingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromoCodeController;
+use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\SubscriptionController;
@@ -72,6 +73,10 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         // iCal download for Apple Calendar
         Route::get('/{slug}/{id}/ical', [EventController::class, 'downloadIcal'])->where(['id' => '[A-Za-z0-9+=]+']);
         Route::get('/{slug}/{id}/{date}/ical', [EventController::class, 'downloadIcal'])->where(['date' => '\d{4}-\d{2}-\d{2}', 'id' => '[A-Za-z0-9+=]+']);
+        // Photo gallery
+        Route::get('/{slug}/{id}/{date}/photos', [EventController::class, 'photoGallery'])->where(['date' => '\d{4}-\d{2}-\d{2}', 'id' => '[A-Za-z0-9+=]+']);
+        Route::get('/{slug}/{id}/photos', [EventController::class, 'photoGallery'])->where(['id' => '[A-Za-z0-9+=]+']);
+        Route::get('/{slug}/photos', [EventController::class, 'photoGallery']);
 
         // Event with ID and date (recurring)
         Route::get('/{slug}/{id}/{date}', [RoleController::class, 'viewGuest'])
@@ -198,6 +203,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/boost/{hash}', [BoostController::class, 'show'])->name('boost.show');
     Route::post('/boost/{hash}/toggle-pause', [BoostController::class, 'togglePause'])->name('boost.toggle_pause');
     Route::post('/boost/{hash}/cancel', [BoostController::class, 'cancel'])->name('boost.cancel');
+
+    // Referral routes (hosted only)
+    if (config('app.hosted')) {
+        Route::get('/referrals', [ReferralController::class, 'index'])->name('referrals');
+        Route::post('/referrals/apply-credit', [ReferralController::class, 'applyCredit'])->name('referrals.apply_credit');
+    }
 
     Route::get('/settings', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/settings', [ProfileController::class, 'update'])->name('profile.update');
@@ -360,6 +371,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::put('/admin/plans/{role}', [AdminController::class, 'updatePlan'])->name('admin.plans.update');
         }
 
+        if (config('app.hosted')) {
+            Route::get('/admin/referrals', [AdminController::class, 'referrals'])->name('admin.referrals');
+        }
+
         Route::get('/admin/audit-log', [AdminController::class, 'auditLog'])->name('admin.audit_log');
         Route::post('/admin/sale/{sale}/approve', [AdminController::class, 'approveSale'])->name('admin.sale.approve');
         Route::post('/admin/sale/{sale}/refund', [AdminController::class, 'refundSale'])->name('admin.sale.refund');
@@ -429,6 +444,7 @@ if (config('app.is_nexus')) {
         // TODO: Re-enable search when there are more events worldwide
         // Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
         Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
+        Route::get('/referral-program', [MarketingController::class, 'referralProgram'])->name('marketing.referral_program');
         Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
         Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
         Route::get('/features/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
@@ -583,6 +599,7 @@ if (config('app.is_nexus')) {
             // TODO: Re-enable search when there are more events worldwide
             // Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
             Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
+            Route::get('/referral-program', [MarketingController::class, 'referralProgram'])->name('marketing.referral_program');
             Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
             Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
             Route::get('/features/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
@@ -884,6 +901,7 @@ if (config('app.is_nexus')) {
     Route::get('/examples', fn () => redirect()->route('home'));
     Route::get('/search', fn () => redirect()->route('home'));
     Route::get('/faq', fn () => redirect()->route('home'));
+    Route::get('/referral-program', fn () => redirect()->route('home'));
     Route::get('/features/ticketing', fn () => redirect()->route('home'));
     Route::get('/features/ai', fn () => redirect()->route('home'));
     Route::get('/features/calendar-sync', fn () => redirect()->route('home'));
@@ -1052,6 +1070,10 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     // iCal download for Apple Calendar
     Route::get('/{subdomain}/{slug}/{id}/ical', [EventController::class, 'downloadIcal'])->where(['id' => '[A-Za-z0-9+=]+']);
     Route::get('/{subdomain}/{slug}/{id}/{date}/ical', [EventController::class, 'downloadIcal'])->where(['date' => '\d{4}-\d{2}-\d{2}', 'id' => '[A-Za-z0-9+=]+']);
+    // Photo gallery
+    Route::get('/{subdomain}/{slug}/{id}/{date}/photos', [EventController::class, 'photoGallery'])->where(['date' => '\d{4}-\d{2}-\d{2}', 'id' => '[A-Za-z0-9+=]+']);
+    Route::get('/{subdomain}/{slug}/{id}/photos', [EventController::class, 'photoGallery'])->where(['id' => '[A-Za-z0-9+=]+']);
+    Route::get('/{subdomain}/{slug}/photos', [EventController::class, 'photoGallery']);
 
     // Event with ID and date (recurring)
     Route::get('/{subdomain}/{slug}/{id}/{date}', [RoleController::class, 'viewGuest'])

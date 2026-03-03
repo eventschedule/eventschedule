@@ -2175,6 +2175,7 @@ class EventController extends Controller
                 'event_part_id' => $request->input('event_part_id'),
                 'event_date' => $request->input('event_date'),
                 'return_url' => url()->previous(),
+                'return_to' => $request->input('return_to'),
             ]);
 
             return redirect(app_url(route('sign_up', [], false)));
@@ -2217,12 +2218,16 @@ class EventController extends Controller
             ? __('messages.photo_submitted_approved')
             : __('messages.photo_submitted');
 
-        $redirect = redirect()->to($event->getGuestUrl($subdomain))->with('message', $message);
-
-        if ($isApproved) {
-            $redirect = $redirect->with('scroll_to', 'event-media-section');
+        if ($request->input('return_to') === 'gallery') {
+            $redirect = redirect()->to($event->getPhotoGalleryUrl($subdomain))->with('message', $message);
         } else {
-            $redirect = $redirect->with('scroll_to', 'pending-photo-'.$photo->id);
+            $redirect = redirect()->to($event->getGuestUrl($subdomain))->with('message', $message);
+
+            if ($isApproved) {
+                $redirect = $redirect->with('scroll_to', 'event-media-section');
+            } else {
+                $redirect = $redirect->with('scroll_to', 'pending-photo-'.$photo->id);
+            }
         }
 
         return $redirect;
@@ -2423,6 +2428,156 @@ class EventController extends Controller
             'edit_url' => route('event.edit', ['subdomain' => $subdomain, 'hash' => UrlUtils::encodeId($event->id)]),
             'view_url' => route('event.view_guest', ['subdomain' => $subdomain, 'slug' => $event->slug]),
         ]);
+    }
+
+    public function photoGallery(Request $request, $subdomain, $slug = '', $id = null, $date = null)
+    {
+        $role = Role::subdomain($subdomain)->first();
+
+        if (! $role || ! $role->isClaimed()) {
+            return redirect(app_url());
+        }
+
+        // Locale handling
+        if ($request->lang) {
+            if (is_valid_language_code($request->lang)) {
+                app()->setLocale($request->lang);
+
+                if ($request->lang == 'en') {
+                    session()->put('translate', true);
+                } else {
+                    session()->forget('translate');
+                }
+            } else {
+                return redirect(request()->url());
+            }
+        } elseif (session()->has('translate')) {
+            app()->setLocale('en');
+        } elseif (is_valid_language_code($role->language_code)) {
+            app()->setLocale($role->language_code);
+        }
+
+        $eventIdParam = $id ? UrlUtils::decodeId($id) : null;
+        $eventRepo = app(EventRepo::class);
+        $event = $slug ? $eventRepo->getEvent($subdomain, $slug, $date, $eventIdParam, $role) : null;
+
+        if (! $event) {
+            return redirect($role->getGuestUrl());
+        }
+
+        // Privacy check
+        $user = auth()->user();
+        $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+
+        if ($event->is_private && $role->isEnterprise() && ! $event->isPasswordProtected() && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
+            return redirect($role->getGuestUrl());
+        }
+
+        // Password gate
+        $bypassPassword = $isMemberOrAdmin || session()->has('event_password_'.$event->id);
+        if ($event->isPasswordProtected() && $role->isEnterprise() && ! $bypassPassword) {
+            return redirect($event->getGuestUrl($subdomain, $date));
+        }
+
+        // Redirect if fan content is disabled
+        if (! $event->isFanContentEnabled()) {
+            return redirect($event->getGuestUrl($subdomain, $date));
+        }
+
+        // Resolve next date for recurring events
+        if (! $date && $event->days_of_week) {
+            $nextDate = now();
+            $daysOfWeek = str_split($event->days_of_week);
+            while (true) {
+                if ($daysOfWeek[$nextDate->dayOfWeek] == '1' && $nextDate >= now()->format('Y-m-d')) {
+                    break;
+                }
+                $nextDate->addDay();
+            }
+            $date = $nextDate->format('Y-m-d');
+        }
+
+        // Load photos
+        $event->loadMissing(['approvedPhotos.user', 'parts.approvedPhotos.user']);
+
+        // Determine otherRole (same logic as viewGuest)
+        $otherRole = null;
+        if ($role->isCurator()) {
+            $talentRoles = $event->roles->filter(fn ($r) => $r->type === 'talent');
+            $claimedTalent = $talentRoles->first(fn ($r) => $r->isClaimed());
+            if ($claimedTalent) {
+                $otherRole = $claimedTalent;
+            } elseif ($event->venue && $event->venue->isClaimed()) {
+                $otherRole = $event->venue;
+            } else {
+                $otherRole = $role;
+            }
+        } elseif ($event->venue) {
+            if ($event->venue->subdomain == $subdomain) {
+                $talentRoles = $event->roles->filter(fn ($r) => $r->type === 'talent');
+                $otherRole = $talentRoles->count() > 0
+                    ? ($talentRoles->firstWhere('subdomain', $slug) ?? $talentRoles->first())
+                    : $role;
+            } else {
+                $otherRole = $event->venue;
+            }
+        } else {
+            $otherRole = $role;
+        }
+
+        // Collect all approved photos
+        $allPhotos = collect();
+        foreach ($event->parts as $part) {
+            $partPhotos = $part->approvedPhotos;
+            if ($event->days_of_week && $date) {
+                $partPhotos = $partPhotos->filter(fn ($p) => $p->event_date === $date || $p->event_date === null);
+            }
+            foreach ($partPhotos as $photo) {
+                $allPhotos->push($photo);
+            }
+        }
+        $eventPhotos = $event->approvedPhotos->whereNull('event_part_id');
+        if ($event->days_of_week && $date) {
+            $eventPhotos = $eventPhotos->filter(fn ($p) => $p->event_date === $date || $p->event_date === null);
+        }
+        foreach ($eventPhotos as $photo) {
+            $allPhotos->push($photo);
+        }
+
+        // User's pending photos
+        $myPendingPhotos = collect();
+        if (auth()->check()) {
+            $myPendingPhotos = EventPhoto::where('event_id', $event->id)
+                ->where('user_id', auth()->id())
+                ->where('is_approved', false)
+                ->get();
+        }
+
+        $photoLimitReached = ! $role->canUploadPhoto();
+
+        // Fonts
+        $fonts = [];
+        if ($event->venue) {
+            $fonts[] = $event->venue->font_family;
+        }
+        foreach ($event->roles as $each) {
+            if ($each->isClaimed() && $each->isTalent()) {
+                $fonts[] = $each->font_family;
+            }
+        }
+        $fonts = array_unique($fonts);
+
+        return response()->view('event/photo-gallery', compact(
+            'subdomain',
+            'role',
+            'otherRole',
+            'event',
+            'date',
+            'fonts',
+            'allPhotos',
+            'myPendingPhotos',
+            'photoLimitReached',
+        ));
     }
 
     public function downloadIcal($subdomain, $slug, $id, $date = null)

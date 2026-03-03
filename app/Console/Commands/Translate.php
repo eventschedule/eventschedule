@@ -131,6 +131,16 @@ class Translate extends Command
                     ->orWhere(function ($q) {
                         // Include roles with custom fields that might need translation
                         $q->whereNotNull('event_custom_fields');
+                    })
+                    ->orWhere(function ($q) {
+                        $q->whereNotNull('sponsor_section_title')
+                            ->where('sponsor_section_title', '!=', '')
+                            ->whereNull('sponsor_section_title_en');
+                    })
+                    ->orWhere(function ($q) {
+                        // Include roles with sponsor names that might need translation
+                        $q->whereNotNull('sponsor_logos')
+                            ->where('sponsor_logos', '!=', '[]');
                     });
             });
 
@@ -250,6 +260,55 @@ class Translate extends Command
                 $translationAttempted = true;
                 if ($debug) {
                     $this->info("Translated request terms from {$role->language_code} to en: '{$role->request_terms}' → '{$role->request_terms_en}'");
+                }
+            }
+
+            if ($role->sponsor_section_title && ! $role->sponsor_section_title_en) {
+                $role->sponsor_section_title_en = GeminiUtils::translate($role->sponsor_section_title, $role->language_code, 'en');
+                $translationAttempted = true;
+                if ($debug) {
+                    $this->info("Translated sponsor section title from {$role->language_code} to en: '{$role->sponsor_section_title}' → '{$role->sponsor_section_title_en}'");
+                }
+            }
+
+            // Translate sponsor names inside JSON
+            if ($role->sponsor_logos) {
+                $sponsorLogos = json_decode($role->sponsor_logos, true);
+                if (is_array($sponsorLogos)) {
+                    $namesNeedingTranslation = [];
+
+                    foreach ($sponsorLogos as $idx => $sponsor) {
+                        if (! empty($sponsor['name']) && empty($sponsor['name_en'])) {
+                            $namesNeedingTranslation[$idx] = $sponsor['name'];
+                        }
+                    }
+
+                    if (! empty($namesNeedingTranslation)) {
+                        if ($debug) {
+                            $this->info('Translating '.count($namesNeedingTranslation).' sponsor names');
+                        }
+
+                        try {
+                            $translations = GeminiUtils::translateCustomFieldNames(
+                                array_values($namesNeedingTranslation),
+                                $role->language_code
+                            );
+
+                            foreach ($namesNeedingTranslation as $idx => $name) {
+                                if (isset($translations[$name])) {
+                                    $sponsorLogos[$idx]['name_en'] = $translations[$name];
+                                    $translationAttempted = true;
+                                    if ($debug) {
+                                        $this->info("Translated sponsor name '{$name}' → '{$translations[$name]}'");
+                                    }
+                                }
+                            }
+
+                            $role->sponsor_logos = json_encode($sponsorLogos);
+                        } catch (\Exception $e) {
+                            $this->error('Failed to translate sponsor names: '.$e->getMessage());
+                        }
+                    }
                 }
             }
 

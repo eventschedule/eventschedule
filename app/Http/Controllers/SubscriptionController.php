@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SubscriptionStoreRequest;
 use App\Http\Requests\SubscriptionSwapRequest;
+use App\Models\Referral;
 use App\Models\Role;
 use App\Services\UsageTrackingService;
 use Illuminate\Http\Request;
@@ -158,6 +159,22 @@ class SubscriptionController extends Controller
             });
 
             UsageTrackingService::track(UsageTrackingService::STRIPE_SUBSCRIPTION, $role->id);
+
+            // Track referral subscription
+            if (config('app.hosted')) {
+                $referral = Referral::where('referred_user_id', $role->user_id)
+                    ->where('status', 'pending')
+                    ->first();
+
+                if ($referral) {
+                    $referral->update([
+                        'referred_role_id' => $role->id,
+                        'plan_type' => $tier,
+                        'subscribed_at' => now(),
+                        'status' => 'subscribed',
+                    ]);
+                }
+            }
 
             return redirect()
                 ->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])

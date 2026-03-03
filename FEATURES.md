@@ -69,6 +69,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Invoice Ninja integration | `InvoiceNinjaController` | Alternative payment processing via Invoice Ninja |
 | 100 newsletter emails per month | `$role->newsletterLimit()` | Increased email sending limit (counts each recipient as one email) |
 | Unlimited fan photos + bulk download | `EventController`, `$role->isPro()` | No per-schedule photo cap; download all event photos as zip |
+| Sponsor/partner logos | `RoleController`, `$role->isPro()` | Display sponsor logos with tiers on schedule page |
 
 ## Enterprise Features
 

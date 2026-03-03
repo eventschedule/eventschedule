@@ -1245,6 +1245,10 @@
                                 class="style-tab-button text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
                                 {{ __('messages.advanced') }}
                             </button>
+                            <button type="button" data-style-tab="sponsors" id="style-tab-sponsors"
+                                class="style-tab-button text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
+                                {{ __('messages.sponsors') }}
+                            </button>
                         </nav>
                     </div>
 
@@ -1674,6 +1678,148 @@
                                 </div>
                                 @endif
                             </div>
+                    </div>
+
+                    <!-- Sponsors Tab Content -->
+                    <div id="style-content-sponsors" style="display: none;">
+                        @if ($role->isPro())
+                            <div class="mb-6">
+                                <x-input-label for="sponsor_section_title" :value="__('messages.sponsor_section_title')" />
+                                <input type="text" id="sponsor_section_title" name="sponsor_section_title"
+                                    value="{{ old('sponsor_section_title', $role->sponsor_section_title) }}"
+                                    placeholder="{{ __('messages.our_sponsors') }}"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.sponsor_section_title_help') }}</p>
+                                <x-input-error class="mt-2" :messages="$errors->get('sponsor_section_title')" />
+                            </div>
+
+                            <div class="mb-4">
+                                <x-input-label :value="__('messages.sponsors')" />
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.sponsor_logos_help') }}</p>
+                            </div>
+
+                            <input type="hidden" name="existing_sponsors" id="existing_sponsors_input" value="{{ $role->sponsor_logos ?? '[]' }}" />
+
+                            @php
+                                $existingSponsors = json_decode($role->sponsor_logos ?? '[]', true) ?: [];
+                            @endphp
+
+                            <div id="sponsors-list" class="space-y-3 mb-6">
+                                @foreach ($existingSponsors as $index => $sponsor)
+                                <div class="sponsor-item flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg" data-sponsor='@json($sponsor)'>
+                                    <div class="drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                                        </svg>
+                                    </div>
+                                    @php
+                                        $logoUrl = '';
+                                        if (!empty($sponsor['logo'])) {
+                                            if (str_starts_with($sponsor['logo'], 'demo_')) {
+                                                $logoUrl = url('/images/demo/' . $sponsor['logo']);
+                                            } elseif (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                                                $logoUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $sponsor['logo'];
+                                            } elseif (config('filesystems.default') == 'local') {
+                                                $logoUrl = url('/storage/' . $sponsor['logo']);
+                                            } else {
+                                                $logoUrl = $sponsor['logo'];
+                                            }
+                                        }
+                                    @endphp
+                                    <div class="w-16 h-12 flex-shrink-0 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden">
+                                        @if ($logoUrl)
+                                            <img src="{{ $logoUrl }}" alt="{{ $sponsor['name'] ?? '' }}" class="max-w-full max-h-full object-contain" />
+                                        @endif
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ $sponsor['name'] ?? '' }}</div>
+                                        @if (!empty($sponsor['tier']))
+                                            <span class="inline-block text-xs px-1.5 py-0.5 rounded
+                                                {{ $sponsor['tier'] === 'gold' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' : '' }}
+                                                {{ $sponsor['tier'] === 'silver' ? 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300' : '' }}
+                                                {{ $sponsor['tier'] === 'bronze' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300' : '' }}
+                                            ">{{ __('messages.' . $sponsor['tier']) }}</span>
+                                        @endif
+                                        @if (!empty($sponsor['url']))
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $sponsor['url'] }}</div>
+                                        @endif
+                                    </div>
+                                    <button type="button" data-action="remove-sponsor" class="flex-shrink-0 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                @endforeach
+                            </div>
+
+                            <div id="sponsor-limit-message" class="mb-4 {{ count($existingSponsors) >= 12 ? '' : 'hidden' }}">
+                                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                    <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                        <span>{{ __('messages.max_sponsors_reached') }}</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div id="add-sponsor-form" class="{{ count($existingSponsors) >= 12 ? 'hidden' : '' }}">
+                                <div class="p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg border-dashed">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                        <div>
+                                            <x-input-label for="new_sponsor_name_input" :value="__('messages.sponsor_name')" />
+                                            <input type="text" id="new_sponsor_name_input" maxlength="100"
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm" />
+                                        </div>
+                                        <div>
+                                            <x-input-label for="new_sponsor_url_input" :value="__('messages.sponsor_url_optional')" />
+                                            <input type="url" id="new_sponsor_url_input" maxlength="500"
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm" />
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                        <div>
+                                            <x-input-label :value="__('messages.sponsor_tier')" />
+                                            <select id="new_sponsor_tier_input"
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm">
+                                                <option value="">—</option>
+                                                <option value="gold">{{ __('messages.gold') }}</option>
+                                                <option value="silver">{{ __('messages.silver') }}</option>
+                                                <option value="bronze">{{ __('messages.bronze') }}</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <x-input-label :value="__('messages.logo')" />
+                                            <input type="file" id="new_sponsor_logo_input" accept="image/*"
+                                                class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#4E81FA] file:text-white hover:file:bg-blue-600" />
+                                        </div>
+                                    </div>
+                                    <button type="button" data-action="add-sponsor"
+                                        class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[#4E81FA] rounded-md hover:bg-blue-600 transition-colors">
+                                        <svg class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        {{ __('messages.add_sponsor') }}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="new-sponsor-inputs-container"></div>
+                        @else
+                            <div class="text-center py-8">
+                                <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                                </svg>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                                    {{ __('messages.upgrade_sponsor_logos') }}
+                                </p>
+                                @if (config('app.hosted'))
+                                <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-css')"
+                                    class="text-[#4E81FA] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
+                                @endif
+                            </div>
+                        @endif
                     </div>
 
                         </div>
@@ -2924,7 +3070,11 @@
 
 </x-app-admin-layout>
 
+<script src="{{ asset('js/sortable.min.js') }}" {!! nonce_attr() !!}></script>
+
 <script {!! nonce_attr() !!}>
+var isNewSchedule = {{ $role->exists ? 'false' : 'true' }};
+
 // Scroll guard: force page to stay at top during all initialization.
 var _scrollGuard = function() { window.scrollTo(0, 0); };
 window.addEventListener('scroll', _scrollGuard);
@@ -2956,7 +3106,7 @@ document.querySelectorAll('.import-field-toggle').forEach(function(toggle) {
 // Style sub-tab navigation
 function showStyleTab(tabName) {
     // Hide all style tab contents
-    const tabContents = ['branding', 'background', 'advanced'];
+    const tabContents = ['branding', 'background', 'advanced', 'sponsors'];
     tabContents.forEach(function(tab) {
         const content = document.getElementById('style-content-' + tab);
         if (content) {
@@ -2982,12 +3132,14 @@ function showStyleTab(tabName) {
 
 // Restore active style tab from localStorage on page load
 document.addEventListener('DOMContentLoaded', function() {
-    var savedStyleTab = localStorage.getItem('styleActiveTab');
-    if (savedStyleTab) {
-        // Migrate old tab names to new names
-        if (savedStyleTab === 'images') savedStyleTab = 'branding';
-        if (savedStyleTab === 'settings') savedStyleTab = 'advanced';
-        showStyleTab(savedStyleTab);
+    if (!isNewSchedule) {
+        var savedStyleTab = localStorage.getItem('styleActiveTab');
+        if (savedStyleTab) {
+            // Migrate old tab names to new names
+            if (savedStyleTab === 'images') savedStyleTab = 'branding';
+            if (savedStyleTab === 'settings') savedStyleTab = 'advanced';
+            showStyleTab(savedStyleTab);
+        }
     }
 });
 
@@ -3844,9 +3996,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const integrationTabContents = document.querySelectorAll('.integration-tab-content');
 
     // Restore active tab from localStorage
-    const savedTab = localStorage.getItem('integrationActiveTab');
-    if (savedTab && document.getElementById('integration-tab-' + savedTab)) {
-        switchIntegrationTab(savedTab);
+    if (!isNewSchedule) {
+        const savedTab = localStorage.getItem('integrationActiveTab');
+        if (savedTab && document.getElementById('integration-tab-' + savedTab)) {
+            switchIntegrationTab(savedTab);
+        }
     }
 
     integrationTabs.forEach(tab => {
@@ -3910,12 +4064,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (engagementTabs.length === 0) return;
 
     // Restore active tab from localStorage
-    const savedEngagementTab = localStorage.getItem('engagementActiveTab');
-    if (savedEngagementTab) {
-        if (document.getElementById('engagement-tab-' + savedEngagementTab)) {
-            switchEngagementTab(savedEngagementTab);
-        } else {
-            switchEngagementTab(document.querySelector('.engagement-tab').dataset.tab);
+    if (!isNewSchedule) {
+        const savedEngagementTab = localStorage.getItem('engagementActiveTab');
+        if (savedEngagementTab) {
+            if (document.getElementById('engagement-tab-' + savedEngagementTab)) {
+                switchEngagementTab(savedEngagementTab);
+            } else {
+                switchEngagementTab(document.querySelector('.engagement-tab').dataset.tab);
+            }
         }
     }
 
@@ -3957,12 +4113,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const settingsTabContents = document.querySelectorAll('.settings-tab-content');
 
     // Restore active tab from localStorage
-    const savedSettingsTab = localStorage.getItem('settingsActiveTab');
-    if (savedSettingsTab) {
-        if (document.getElementById('settings-tab-' + savedSettingsTab)) {
-            switchSettingsTab(savedSettingsTab);
-        } else {
-            switchSettingsTab('general');
+    if (!isNewSchedule) {
+        const savedSettingsTab = localStorage.getItem('settingsActiveTab');
+        if (savedSettingsTab) {
+            if (document.getElementById('settings-tab-' + savedSettingsTab)) {
+                switchSettingsTab(savedSettingsTab);
+            } else {
+                switchSettingsTab('general');
+            }
         }
     }
 
@@ -4004,12 +4162,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const detailsTabContents = document.querySelectorAll('.details-tab-content');
 
     // Restore active tab from localStorage
-    const savedDetailsTab = localStorage.getItem('detailsActiveTab');
-    if (savedDetailsTab) {
-        if (document.getElementById('details-tab-' + savedDetailsTab)) {
-            switchDetailsTab(savedDetailsTab);
-        } else {
-            switchDetailsTab('general');
+    if (!isNewSchedule) {
+        const savedDetailsTab = localStorage.getItem('detailsActiveTab');
+        if (savedDetailsTab) {
+            if (document.getElementById('details-tab-' + savedDetailsTab)) {
+                switchDetailsTab(savedDetailsTab);
+            } else {
+                switchDetailsTab('general');
+            }
         }
     }
 
@@ -4490,10 +4650,144 @@ function deleteRoleImage(url, token, element) {
 }
 
 // ============================================================
+// Sponsor logo management
+// ============================================================
+var sponsorFileCounter = 0;
+
+function updateSponsorHiddenInput() {
+    var items = document.querySelectorAll('#sponsors-list .sponsor-item');
+    var sponsors = [];
+    items.forEach(function(item) {
+        var data = JSON.parse(item.dataset.sponsor);
+        sponsors.push(data);
+    });
+    var input = document.getElementById('existing_sponsors_input');
+    if (input) input.value = JSON.stringify(sponsors);
+    updateSponsorLimitVisibility();
+}
+
+function updateSponsorLimitVisibility() {
+    var count = document.querySelectorAll('#sponsors-list .sponsor-item').length;
+    var limitMsg = document.getElementById('sponsor-limit-message');
+    var addForm = document.getElementById('add-sponsor-form');
+    if (limitMsg) limitMsg.classList.toggle('hidden', count < 12);
+    if (addForm) addForm.classList.toggle('hidden', count >= 12);
+}
+
+function addSponsor() {
+    var nameInput = document.getElementById('new_sponsor_name_input');
+    var urlInput = document.getElementById('new_sponsor_url_input');
+    var tierInput = document.getElementById('new_sponsor_tier_input');
+    var fileInput = document.getElementById('new_sponsor_logo_input');
+
+    if (!fileInput || !fileInput.files.length) return;
+
+    var file = fileInput.files[0];
+    var name = nameInput ? nameInput.value.trim() : '';
+    var url = urlInput ? urlInput.value.trim() : '';
+    var tier = tierInput ? tierInput.value : '';
+
+    var count = document.querySelectorAll('#sponsors-list .sponsor-item').length;
+    if (count >= 12) return;
+
+    var idx = sponsorFileCounter++;
+
+    // Create hidden file inputs for form submission
+    var container = document.getElementById('new-sponsor-inputs-container');
+    var dt = new DataTransfer();
+    dt.items.add(file);
+
+    var fileHidden = document.createElement('input');
+    fileHidden.type = 'file';
+    fileHidden.name = 'new_sponsor_logos[' + idx + ']';
+    fileHidden.style.display = 'none';
+    fileHidden.files = dt.files;
+    container.appendChild(fileHidden);
+
+    var nameHidden = document.createElement('input');
+    nameHidden.type = 'hidden';
+    nameHidden.name = 'new_sponsor_names[' + idx + ']';
+    nameHidden.value = name;
+    container.appendChild(nameHidden);
+
+    var urlHidden = document.createElement('input');
+    urlHidden.type = 'hidden';
+    urlHidden.name = 'new_sponsor_urls[' + idx + ']';
+    urlHidden.value = url;
+    container.appendChild(urlHidden);
+
+    var tierHidden = document.createElement('input');
+    tierHidden.type = 'hidden';
+    tierHidden.name = 'new_sponsor_tiers[' + idx + ']';
+    tierHidden.value = tier;
+    container.appendChild(tierHidden);
+
+    // Create preview card
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var tierBadge = '';
+        if (tier === 'gold') tierBadge = '<span class="inline-block text-xs px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">' + @json(__('messages.gold')) + '</span>';
+        if (tier === 'silver') tierBadge = '<span class="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300">' + @json(__('messages.silver')) + '</span>';
+        if (tier === 'bronze') tierBadge = '<span class="inline-block text-xs px-1.5 py-0.5 rounded bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300">' + @json(__('messages.bronze')) + '</span>';
+
+        var urlDisplay = url ? '<div class="text-xs text-gray-500 dark:text-gray-400 truncate">' + escapeHtml(url) + '</div>' : '';
+
+        var div = document.createElement('div');
+        div.className = 'sponsor-item flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg';
+        div.dataset.sponsor = JSON.stringify({name: name, logo: '', url: url || null, tier: tier});
+        div.dataset.newIdx = idx;
+        div.innerHTML = '<div class="drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></div>' +
+            '<div class="w-16 h-12 flex-shrink-0 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden"><img src="' + e.target.result + '" class="max-w-full max-h-full object-contain" /></div>' +
+            '<div class="flex-1 min-w-0"><div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">' + escapeHtml(name) + '</div>' + tierBadge + urlDisplay + '</div>' +
+            '<button type="button" data-action="remove-sponsor" class="flex-shrink-0 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>';
+
+        document.getElementById('sponsors-list').appendChild(div);
+        updateSponsorLimitVisibility();
+    };
+    reader.readAsDataURL(file);
+
+    // Reset form inputs
+    if (nameInput) nameInput.value = '';
+    if (urlInput) urlInput.value = '';
+    if (tierInput) tierInput.value = '';
+    fileInput.value = '';
+}
+
+function removeSponsor(btn) {
+    var item = btn.closest('.sponsor-item');
+    if (!item) return;
+
+    // If it's a new (not yet saved) sponsor, remove its hidden file inputs
+    if (item.dataset.newIdx !== undefined) {
+        var idx = item.dataset.newIdx;
+        var container = document.getElementById('new-sponsor-inputs-container');
+        container.querySelectorAll('[name="new_sponsor_logos[' + idx + ']"], [name="new_sponsor_names[' + idx + ']"], [name="new_sponsor_urls[' + idx + ']"], [name="new_sponsor_tiers[' + idx + ']"]').forEach(function(el) {
+            el.remove();
+        });
+    }
+
+    item.remove();
+    updateSponsorHiddenInput();
+}
+
+// ============================================================
 // Event delegation and addEventListener bindings
 // (replaces all inline event handlers)
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
+
+    // --- Initialize SortableJS for sponsor logos ---
+    var sponsorsList = document.getElementById('sponsors-list');
+    if (sponsorsList && typeof Sortable !== 'undefined') {
+        Sortable.create(sponsorsList, {
+            handle: '.drag-handle',
+            animation: 150,
+            ghostClass: 'opacity-50',
+            onEnd: function() {
+                updateSponsorHiddenInput();
+            }
+        });
+    }
 
     // --- Navigation action map for prev/next buttons ---
     var navActionMap = {
@@ -4594,6 +4888,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'close-import-output':
                 closeImportOutput();
+                break;
+            case 'add-sponsor':
+                addSponsor();
+                break;
+            case 'remove-sponsor':
+                removeSponsor(btn);
                 break;
         }
     });

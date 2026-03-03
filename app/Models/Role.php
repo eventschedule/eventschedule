@@ -91,6 +91,9 @@ class Role extends Model implements MustVerifyEmail
         'first_day_of_week',
         'approved_subdomains',
         'default_curator_ids',
+        'sponsor_logos',
+        'sponsor_section_title',
+        'sponsor_section_title_en',
     ];
 
     /**
@@ -1011,6 +1014,60 @@ class Role extends Model implements MustVerifyEmail
         }
 
         return $value;
+    }
+
+    public function getSponsorLogos(): array
+    {
+        if (! $this->sponsor_logos) {
+            return [];
+        }
+
+        $sponsors = json_decode($this->sponsor_logos, true);
+
+        if (! is_array($sponsors)) {
+            return [];
+        }
+
+        $useTranslation = session()->has('translate') || request()->lang == 'en';
+
+        foreach ($sponsors as &$sponsor) {
+            if (! empty($sponsor['logo'])) {
+                $filename = $sponsor['logo'];
+
+                if (str_starts_with($filename, 'demo_')) {
+                    $sponsor['logo_url'] = url('/images/demo/'.$filename);
+                } elseif (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                    $sponsor['logo_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
+                } elseif (config('filesystems.default') == 'local') {
+                    $sponsor['logo_url'] = url('/storage/'.$filename);
+                } else {
+                    $sponsor['logo_url'] = $filename;
+                }
+            } else {
+                $sponsor['logo_url'] = '';
+            }
+
+            if ($useTranslation && ! empty($sponsor['name_en'])) {
+                $sponsor['display_name'] = $sponsor['name_en'];
+            } else {
+                $sponsor['display_name'] = $sponsor['name'] ?? '';
+            }
+        }
+
+        return $sponsors;
+    }
+
+    public function translatedSponsorSectionTitle()
+    {
+        if ($this->sponsor_section_title_en && (session()->has('translate') || request()->lang == 'en')) {
+            return $this->sponsor_section_title_en;
+        }
+
+        if ($this->sponsor_section_title) {
+            return $this->sponsor_section_title;
+        }
+
+        return __('messages.our_sponsors');
     }
 
     public function translatedShortDescription()

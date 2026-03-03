@@ -94,6 +94,19 @@
                 </li>
                 @endif
 
+                @if (config('app.hosted'))
+                <li>
+                    <a href="{{ route('referrals') }}"
+                        class="group flex gap-x-4 items-center rounded-md p-2 text-lg font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('referrals') ? 'bg-gray-800 text-white' : '' }}">
+                        <svg class="h-8 w-8 shrink-0" viewBox="0 0 24 24"
+                            fill="{{ request()->is('referrals') ? '#ccc' : '#666' }}" aria-hidden="true">
+                            <path d="M21,12L14,5V9C7,10 4,15 3,20C5.5,16.5 9,14.9 14,14.9V19L21,12Z" />
+                        </svg>
+                        {{ __('messages.referrals') }}
+                    </a>
+                </li>
+                @endif
+
                 @if (config('app.hosted') && auth()->user()->isAdmin())
                 <li>
                     <a href="{{ route('admin.dashboard') }}"

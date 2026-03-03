@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Referral;
 use App\Models\User;
 use App\Notifications\SignupVerificationCode;
 use App\Rules\NoFakeEmail;
@@ -315,10 +316,28 @@ class RegisteredUserController extends Controller
             ]);
         }
 
-        session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language']);
+        // Link referral if referral code exists in session
+        if (config('app.hosted')) {
+            $referralCode = session('referral_code');
+            if ($referralCode) {
+                $referrer = User::where('referral_code', $referralCode)->first();
+                if ($referrer && $referrer->id !== $user->id) {
+                    $user->referred_by_user_id = $referrer->id;
+                    $user->save();
+
+                    Referral::create([
+                        'referrer_user_id' => $referrer->id,
+                        'referred_user_id' => $user->id,
+                        'status' => 'pending',
+                    ]);
+                }
+            }
+        }
+
+        session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language', 'referral_code']);
 
         // In selfhost mode, make the first user an admin
-        if (!config('app.hosted') && User::count() === 1) {
+        if (! config('app.hosted') && User::count() === 1) {
             $user->is_admin = true;
         }
 

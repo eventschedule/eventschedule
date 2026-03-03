@@ -199,6 +199,7 @@ class AppController extends Controller
                     \Artisan::call('app:generate-sub-audience-blog');
                     \Artisan::call('app:generate-daily-blog-post');
                     \Artisan::call('app:send-subscription-reminders');
+                    \Artisan::call('app:process-referral-credits');
                 }
 
                 if (! config('app.hosted')) {

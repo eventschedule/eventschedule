@@ -15,6 +15,7 @@ class HelpUtils
                 'section-address' => '/docs/creating-schedules#address',
                 'details-tab-contact' => '/docs/creating-schedules#contact-info',
                 'section-style' => '/docs/schedule-styling#overview',
+                'style-tab-sponsors' => '/docs/schedule-styling#sponsors',
                 'section-subschedules' => '/docs/creating-schedules#subschedules',
                 'section-settings' => '/docs/creating-schedules#settings',
                 'section-engagement' => '/docs/creating-schedules#engagement',

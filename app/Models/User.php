@@ -55,6 +55,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'utm_term',
         'referrer_url',
         'landing_page',
+        'referral_code',
+        'referred_by_user_id',
         'use_24_hour_time',
         'two_factor_confirmed_at',
         'admin_newsletter_unsubscribed_at',
@@ -439,5 +441,36 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return (bool) config('services.stripe_platform.secret');
+    }
+
+    public function referrals()
+    {
+        return $this->hasMany(Referral::class, 'referrer_user_id');
+    }
+
+    public function referredBy()
+    {
+        return $this->belongsTo(User::class, 'referred_by_user_id');
+    }
+
+    public function getOrCreateReferralCode(): string
+    {
+        if ($this->referral_code) {
+            return $this->referral_code;
+        }
+
+        do {
+            $code = strtolower(substr(str_replace(['/', '+', '='], '', base64_encode(random_bytes(6))), 0, 8));
+        } while (self::where('referral_code', $code)->exists());
+
+        $this->referral_code = $code;
+        $this->save();
+
+        return $code;
+    }
+
+    public function referralUrl(): string
+    {
+        return url('/?ref='.$this->getOrCreateReferralCode());
     }
 }

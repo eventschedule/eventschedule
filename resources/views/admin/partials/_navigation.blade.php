@@ -5,7 +5,7 @@
     $insightsActive = in_array($active, ['users', 'revenue', 'analytics', 'usage']);
     $manageKeys = ['boost', 'newsletters'];
     if (config('app.hosted')) {
-        $manageKeys = array_merge($manageKeys, ['plans', 'domains', 'blog']);
+        $manageKeys = array_merge($manageKeys, ['plans', 'domains', 'referrals', 'blog']);
     }
     $manageActive = in_array($active, $manageKeys);
     $systemActive = in_array($active, ['audit-log', 'queue', 'logs']);
@@ -91,6 +91,9 @@
                         </a>
                         <a href="{{ route('admin.domains') }}" class="{{ $active === 'domains' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.domains')
+                        </a>
+                        <a href="{{ route('admin.referrals') }}" class="{{ $active === 'referrals' ? $dropdownItemActive : $dropdownItem }}">
+                            @lang('messages.referrals')
                         </a>
                         @endif
                         <a href="{{ route('admin.newsletters.index') }}" class="{{ $active === 'newsletters' ? $dropdownItemActive : $dropdownItem }}">

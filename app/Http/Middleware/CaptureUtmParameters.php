@@ -10,6 +10,15 @@ class CaptureUtmParameters
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // Capture referral code (first-touch)
+        if (! $request->session()->has('referral_code') && $request->has('ref')) {
+            $refCode = preg_replace('/[^a-zA-Z0-9]/', '', $request->query('ref'));
+            $refCode = substr($refCode, 0, 8);
+            if ($refCode) {
+                $request->session()->put('referral_code', $refCode);
+            }
+        }
+
         // Only capture if UTM params are present and session doesn't already have them (first-touch)
         if (! $request->session()->has('utm_params') && $this->hasUtmParams($request)) {
             $utmParams = [

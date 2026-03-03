@@ -43,6 +43,11 @@ class MarketingController extends Controller
     /**
      * About page
      */
+    public function referralProgram()
+    {
+        return view('marketing.referral-program');
+    }
+
     public function about()
     {
         return view('marketing.about', [
@@ -3592,6 +3597,7 @@ class MarketingController extends Controller
             'developer_webhooks' => route('marketing.docs.developer.webhooks'),
             'embed_calendar_feature' => route('marketing.embed_calendar'),
             'embed_tickets_feature' => route('marketing.embed_tickets'),
+            'referral_program' => route('marketing.referral_program'),
         ];
 
         return [
@@ -3919,6 +3925,9 @@ class MarketingController extends Controller
             ['page' => 'Webhooks', 'section' => 'Signature Verification', 'description' => 'Verify webhooks with HMAC-SHA256 signatures.', 'url' => $r['developer_webhooks'].'#verification', 'category' => 'Developer', 'keywords' => 'signature hmac sha256 verify security'],
             ['page' => 'Webhooks', 'section' => 'Best Practices', 'description' => 'Best practices for reliable webhook handling.', 'url' => $r['developer_webhooks'].'#best-practices', 'category' => 'Developer', 'keywords' => 'best practices reliability idempotent'],
             ['page' => 'Webhooks', 'section' => 'Testing', 'description' => 'Test webhook endpoints and payloads.', 'url' => $r['developer_webhooks'].'#testing', 'category' => 'Developer', 'keywords' => 'test debug webhook'],
+
+            // ===== REFERRAL PROGRAM =====
+            ['page' => 'Referral Program', 'section' => 'Referral Program', 'description' => 'Earn free months by referring other event organizers.', 'url' => $r['referral_program'], 'category' => 'Product', 'keywords' => 'referral refer earn free credit discount'],
         ];
     }
 }

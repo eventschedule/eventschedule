@@ -364,8 +364,12 @@ class HomeController extends Controller
                 'photo_url' => $filename,
                 'is_approved' => false,
             ]);
-            $returnUrl = $event->getGuestUrl($pending['subdomain']);
-            session()->flash('scroll_to', 'pending-photo-'.$photo->id);
+            if (($pending['return_to'] ?? null) === 'gallery') {
+                $returnUrl = $event->getPhotoGalleryUrl($pending['subdomain']);
+            } else {
+                $returnUrl = $event->getGuestUrl($pending['subdomain']);
+                session()->flash('scroll_to', 'pending-photo-'.$photo->id);
+            }
 
             session()->flash('message', __('messages.photo_submitted'));
         }

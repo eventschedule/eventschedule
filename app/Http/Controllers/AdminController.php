@@ -13,6 +13,7 @@ use App\Models\Event;
 use App\Models\EventPart;
 use App\Models\EventRole;
 use App\Models\Newsletter;
+use App\Models\Referral;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\UsageDaily;
@@ -1240,6 +1241,47 @@ class AdminController extends Controller
     /**
      * Display the admin plans management page.
      */
+    public function referrals(Request $request)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $statusFilter = $request->input('status');
+
+        $totalReferrals = Referral::count();
+        $credited = Referral::where('status', 'credited')->count();
+        $qualified = Referral::where('status', 'qualified')->count();
+        $subscribed = Referral::where('status', 'subscribed')->count();
+        $pending = Referral::where('status', 'pending')->count();
+        $expired = Referral::where('status', 'expired')->count();
+
+        $conversionRate = $totalReferrals > 0
+            ? round(($credited + $qualified + $subscribed) / $totalReferrals * 100, 1)
+            : 0;
+
+        $query = Referral::with('referrer', 'referredUser', 'referredRole', 'creditedRole')
+            ->orderByDesc('created_at');
+
+        if ($statusFilter) {
+            $query->where('status', $statusFilter);
+        }
+
+        $referrals = $query->paginate(50)->withQueryString();
+
+        return view('admin.referrals', [
+            'totalReferrals' => $totalReferrals,
+            'credited' => $credited,
+            'qualified' => $qualified,
+            'subscribed' => $subscribed,
+            'pending' => $pending,
+            'expired' => $expired,
+            'conversionRate' => $conversionRate,
+            'referrals' => $referrals,
+            'statusFilter' => $statusFilter,
+        ]);
+    }
+
     public function plans(Request $request)
     {
         if (! auth()->user()->isAdmin()) {

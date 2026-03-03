@@ -734,6 +734,49 @@
         @endif
       @endif
 
+      @php
+        $sponsorLogos = $role->getSponsorLogos();
+      @endphp
+      @if (!empty($sponsorLogos))
+        <div
+            class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl px-6 lg:px-16 py-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
+            data-view-width
+            style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"
+        >
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center mb-6">
+                {{ $role->translatedSponsorSectionTitle() }}
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 items-center justify-items-center">
+                @foreach ($sponsorLogos as $sponsor)
+                    @php
+                        $sizeClasses = match($sponsor['tier'] ?? '') {
+                            'gold' => 'max-h-20 max-w-[160px]',
+                            'silver' => 'max-h-16 max-w-[130px]',
+                            default => 'max-h-12 max-w-[100px]',
+                        };
+                    @endphp
+                    <div class="flex flex-col items-center gap-2">
+                        @if (!empty($sponsor['url']))
+                            <a href="{{ $sponsor['url'] }}" target="_blank" rel="noopener noreferrer nofollow" class="hover:opacity-80 transition-opacity">
+                        @endif
+                        @if (!empty($sponsor['logo_url']))
+                            <img src="{{ $sponsor['logo_url'] }}"
+                                alt="{{ $sponsor['display_name'] }}"
+                                class="{{ $sizeClasses }} object-contain"
+                                loading="lazy" />
+                        @endif
+                        @if (!empty($sponsor['display_name']))
+                            <span class="text-xs text-gray-600 dark:text-gray-400 text-center truncate max-w-full">{{ $sponsor['display_name'] }}</span>
+                        @endif
+                        @if (!empty($sponsor['url']))
+                            </a>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+      @endif
+
     </div>
   </main>
 

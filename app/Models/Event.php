@@ -1003,6 +1003,13 @@ class Event extends Model
         return route($routeName, $data);
     }
 
+    public function getPhotoGalleryUrl($subdomain = false, $date = null)
+    {
+        $url = $this->getGuestUrl($subdomain, $date);
+
+        return $url ? $url.'/photos' : '';
+    }
+
     public function getGuestUrlData($subdomain = false, $date = null)
     {
         $venueSubdomain = $this->venue && $this->venue->isClaimed() ? $this->venue->subdomain : null;

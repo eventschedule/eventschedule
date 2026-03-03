@@ -52,6 +52,36 @@
             <meta name="twitter:card" content="summary_large_image">
             <meta name="twitter:site" content="@ScheduleEvent">
         @elseif ($event && $event->exists)
+            @if ($galleryMode)
+                @php
+                    $galleryTitle = $event->translatedName() . ' - ' . __('messages.photo_gallery');
+                    $firstPhoto = $event->approvedPhotos->first();
+                    if (!$firstPhoto) {
+                        foreach ($event->parts as $part) {
+                            $firstPhoto = $part->approvedPhotos->first();
+                            if ($firstPhoto) break;
+                        }
+                    }
+                    $galleryOgImage = $firstPhoto ? $firstPhoto->photo_url : ($event->getImageUrl() ?: (config('app.url') . '/images/social/home.png'));
+                @endphp
+                <link rel="canonical" href="{{ $event->getPhotoGalleryUrl(false, $date) }}">
+                <meta name="description" content="{{ $galleryTitle }}">
+                <meta property="og:type" content="website">
+                <meta property="og:title" content="{{ $galleryTitle }}">
+                <meta property="og:description" content="{{ $event->getMetaDescription($date) }}">
+                <meta property="og:image" content="{{ $galleryOgImage }}">
+                <meta property="og:image:width" content="1200">
+                <meta property="og:image:height" content="630">
+                <meta property="og:image:alt" content="{{ $galleryTitle }}">
+                <meta property="og:url" content="{{ $event->getPhotoGalleryUrl(false, $date) }}">
+                <meta property="og:site_name" content="Event Schedule">
+                <meta name="twitter:title" content="{{ $galleryTitle }}">
+                <meta name="twitter:description" content="{{ $event->getMetaDescription($date) }}">
+                <meta name="twitter:image" content="{{ $galleryOgImage }}">
+                <meta name="twitter:image:alt" content="{{ $galleryTitle }}">
+                <meta name="twitter:card" content="summary_large_image">
+                <meta name="twitter:site" content="@ScheduleEvent">
+            @else
             @if ($role->language_code != 'en')
                 <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}?{{ 'lang=' . (is_valid_language_code(request()->lang) ? request()->lang : (session()->has('translate') ? 'en' : $role->language_code)) }}">
             @else
@@ -74,6 +104,7 @@
             <meta name="twitter:image:alt" content="{{ $event->translatedName() }}">
             <meta name="twitter:card" content="summary_large_image">
             <meta name="twitter:site" content="@ScheduleEvent">
+            @endif
         @elseif ($role->exists)
             @if ($role->language_code != 'en')
                 <link rel="canonical" href="{{ $role->getGuestUrl() }}?{{ 'lang=' . (is_valid_language_code(request()->lang) ? request()->lang : (session()->has('translate') ? 'en' : $role->language_code)) }}">

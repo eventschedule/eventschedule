@@ -146,6 +146,19 @@ class RoleController extends Controller
             Storage::delete($path);
         }
 
+        if ($role->sponsor_logos) {
+            $sponsors = json_decode($role->sponsor_logos, true) ?: [];
+            foreach ($sponsors as $sponsor) {
+                if (! empty($sponsor['logo'])) {
+                    $path = $sponsor['logo'];
+                    if (config('filesystems.default') == 'local') {
+                        $path = 'public/'.$path;
+                    }
+                    Storage::delete($path);
+                }
+            }
+        }
+
         $emails = $role->members()->pluck('email');
 
         // Clean up custom domain from DigitalOcean before deleting role
@@ -1843,11 +1856,20 @@ class RoleController extends Controller
             // Remove image uploads
             $request->files->remove('profile_image');
             $request->files->remove('header_image');
+            $request->files->remove('new_sponsor_logos');
         }
 
         // Guard custom_css behind Pro plan
         if (! $role->isPro()) {
             $request->merge(['custom_css' => $role->custom_css]);
+        }
+
+        // Guard sponsor logos behind Pro plan
+        if (! $role->isPro()) {
+            $request->merge([
+                'sponsor_section_title' => $role->sponsor_section_title,
+            ]);
+            $request->files->remove('new_sponsor_logos');
         }
 
         // Guard custom_domain behind Enterprise plan
@@ -1873,6 +1895,11 @@ class RoleController extends Controller
         $newCalendarId = $request->input('google_calendar_id');
 
         $role->fill($request->all());
+
+        // Null out sponsor_section_title_en when title changes (so Translate command re-translates)
+        if ($role->isDirty('sponsor_section_title')) {
+            $role->sponsor_section_title_en = null;
+        }
 
         // If sync_direction or calendar changed, handle webhook management
         if (($newSyncDirection && $oldSyncDirection !== $newSyncDirection) ||
@@ -2351,6 +2378,63 @@ class RoleController extends Controller
             $role->background_image_url = $request->input('ai_background_image');
             $role->background = 'image';
             $role->background_image = null;
+            $role->save();
+        }
+
+        // Handle sponsor logos (Pro feature)
+        if ($role->isPro() && ! is_demo_mode()) {
+            $oldSponsors = json_decode($role->getAttributes()['sponsor_logos'] ?? '[]', true) ?: [];
+            $oldLogoFiles = array_filter(array_column($oldSponsors, 'logo'));
+
+            // Process existing sponsors (reordered via drag-and-drop)
+            $existingSponsorsJson = $request->input('existing_sponsors', '[]');
+            $sponsors = json_decode($existingSponsorsJson, true) ?: [];
+
+            // Process new sponsor uploads
+            $newFiles = $request->file('new_sponsor_logos', []);
+            $newNames = $request->input('new_sponsor_names', []);
+            $newUrls = $request->input('new_sponsor_urls', []);
+            $newTiers = $request->input('new_sponsor_tiers', []);
+
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+
+            foreach ($newFiles as $index => $file) {
+                if (count($sponsors) >= 12) {
+                    break;
+                }
+
+                $extension = strtolower($file->getClientOriginalExtension());
+                if (! in_array($extension, $allowedExtensions) || ! in_array($file->getMimeType(), $allowedMimeTypes)) {
+                    continue;
+                }
+
+                $filename = strtolower('sponsor_'.Str::random(32).'.'.$extension);
+                $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+
+                $sponsors[] = [
+                    'name' => $newNames[$index] ?? '',
+                    'logo' => $filename,
+                    'url' => ! empty($newUrls[$index]) ? $newUrls[$index] : null,
+                    'tier' => $newTiers[$index] ?? '',
+                ];
+            }
+
+            // Cap at 12
+            $sponsors = array_slice($sponsors, 0, 12);
+
+            // Delete orphaned logo files
+            $currentLogoFiles = array_filter(array_column($sponsors, 'logo'));
+            $orphanedFiles = array_diff($oldLogoFiles, $currentLogoFiles);
+            foreach ($orphanedFiles as $orphanedFile) {
+                $path = $orphanedFile;
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/'.$path;
+                }
+                Storage::delete($path);
+            }
+
+            $role->sponsor_logos = ! empty($sponsors) ? json_encode(array_values($sponsors)) : null;
             $role->save();
         }
 
