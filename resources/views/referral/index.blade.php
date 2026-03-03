@@ -16,7 +16,7 @@
         @endif
 
         {{-- Referral Link --}}
-        <div class="mb-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6">
+        <div id="referral-link" class="mb-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('messages.your_referral_link') }}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">{{ __('messages.referral_link_description') }}</p>
             <div class="flex gap-2">
@@ -34,7 +34,7 @@
         </div>
 
         {{-- Stats --}}
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div id="referral-dashboard" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 text-center">
                 <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $totalReferrals }}</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.total_referrals') }}</div>
@@ -55,7 +55,7 @@
 
         {{-- Pending Credits --}}
         @if ($qualifiedCredits->isNotEmpty())
-        <div class="mb-8 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-6">
+        <div id="referral-credits" class="mb-8 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 <svg class="w-5 h-5 inline-block text-green-600 dark:text-green-400 me-1" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
@@ -95,7 +95,7 @@
         @endif
 
         {{-- How It Works --}}
-        <div class="mb-8 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div id="referral-how-it-works" class="mb-8 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('messages.how_it_works') }}</h3>
             <div class="grid md:grid-cols-3 gap-6">
                 <div class="text-center">
@@ -123,7 +123,7 @@
 
         {{-- Referral History --}}
         @if ($referralHistory->isNotEmpty())
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div id="referral-history" class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('messages.referral_history') }}</h3>
             </div>
@@ -175,7 +175,7 @@
                                     {{ __('messages.qualified') }}
                                 </span>
                                 @elseif ($referral->status === 'credited')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
                                     {{ __('messages.credited') }}
                                 </span>
                                 @elseif ($referral->status === 'expired')

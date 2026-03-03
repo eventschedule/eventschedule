@@ -138,6 +138,7 @@ class HelpUtils
         'scan' => '/docs/tickets#check-in',
         'checkin' => '/docs/tickets#check-in',
         'waitlist' => '/docs/tickets#waitlist',
+        'referrals' => '/docs/referral-program',
         'new/*' => '/docs/creating-schedules',
     ];
 

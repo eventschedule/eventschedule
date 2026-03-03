@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Referral;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\DemoService;
@@ -121,9 +122,69 @@ class GenerateDocScreenshots extends Command
             $this->line('Cleared laravel.log for clean screenshots.');
         }
 
+        // Create referral demo data so the referral page has content
+        $referralUsers = [];
+        $referralRecords = [];
+        if (isset($pages['referral-program'])) {
+            $maskedEmails = ['li***@example.com', 'ja***@example.com', 'sa***@example.com', 'mi***@example.com', 'em***@example.com'];
+            foreach ($maskedEmails as $email) {
+                $referralUsers[] = User::create([
+                    'name' => explode('@', $email)[0],
+                    'email' => 'ref-demo-' . uniqid() . '@temp.local',
+                    'password' => Hash::make('temp'),
+                ]);
+            }
+
+            $referralRecords[] = Referral::create([
+                'referrer_user_id' => $user->id,
+                'referred_user_id' => $referralUsers[0]->id,
+                'status' => 'pending',
+            ]);
+            $referralRecords[] = Referral::create([
+                'referrer_user_id' => $user->id,
+                'referred_user_id' => $referralUsers[1]->id,
+                'status' => 'subscribed',
+                'plan_type' => 'pro',
+                'subscribed_at' => now()->subDays(10),
+            ]);
+            $referralRecords[] = Referral::create([
+                'referrer_user_id' => $user->id,
+                'referred_user_id' => $referralUsers[2]->id,
+                'status' => 'qualified',
+                'plan_type' => 'pro',
+                'subscribed_at' => now()->subDays(45),
+                'qualified_at' => now()->subDays(2),
+            ]);
+            $referralRecords[] = Referral::create([
+                'referrer_user_id' => $user->id,
+                'referred_user_id' => $referralUsers[3]->id,
+                'status' => 'credited',
+                'plan_type' => 'enterprise',
+                'subscribed_at' => now()->subDays(90),
+                'qualified_at' => now()->subDays(50),
+                'credited_at' => now()->subDays(48),
+                'credited_role_id' => $role->id,
+            ]);
+            $referralRecords[] = Referral::create([
+                'referrer_user_id' => $user->id,
+                'referred_user_id' => $referralUsers[4]->id,
+                'status' => 'expired',
+            ]);
+
+            $this->line('Created referral demo data.');
+        }
+
         try {
             return $this->generate($user, $pages, $force, $outputDir);
         } finally {
+            // Clean up referral demo data
+            foreach ($referralRecords as $referral) {
+                $referral->delete();
+            }
+            foreach ($referralUsers as $refUser) {
+                $refUser->delete();
+            }
+
             // Restore original credentials
             $user->password = $originalPasswordHash;
             $user->email = $originalEmail;
@@ -208,6 +269,12 @@ class GenerateDocScreenshots extends Command
                 ['id' => 'boost--page', 'route' => $demoEvent
                     ? '/boost/create?event_id='.UrlUtils::encodeId($demoEvent->id).'&role_id='.$encodedRoleId
                     : '/boost'],
+            ],
+            'referral-program' => [
+                ['id' => 'referral-link', 'route' => '/referrals'],
+                ['id' => 'referral-dashboard', 'route' => '/referrals', 'script' => "document.getElementById('referral-dashboard').scrollIntoView({block: 'start'})"],
+                ['id' => 'referral-credits', 'route' => '/referrals', 'script' => "(document.getElementById('referral-credits') || document.getElementById('referral-how-it-works')).scrollIntoView({block: 'start'})"],
+                ['id' => 'referral-history', 'route' => '/referrals', 'script' => "(document.getElementById('referral-history') || document.getElementById('referral-how-it-works')).scrollIntoView({block: 'start'})"],
             ],
             'selfhost-admin' => [
                 ['id' => 'selfhost-admin--dashboard', 'route' => '/admin', 'pause' => 3000],
@@ -361,6 +428,9 @@ class GenerateDocScreenshots extends Command
 
                     $browser->visit($route);
                     $browser->pause($pause);
+
+                    // Hide the testing indicator dot
+                    $browser->script("document.querySelector('.fixed.bottom-4.right-4.z-50')?.remove()");
 
                     // Execute custom script if needed (e.g. click a tab)
                     $script = $screenshot['script'] ?? null;

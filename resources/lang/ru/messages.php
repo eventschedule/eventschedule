@@ -2495,7 +2495,7 @@ return [
     'sponsors' => 'Спонсоры',
     'our_sponsors' => 'Наши Спонсоры',
     'sponsor_name' => 'Название спонсора',
-    'sponsor_url_optional' => 'URL сайта (необязательно)',
+    'sponsor_url' => 'URL сайта',
     'add_sponsor' => 'Добавить спонсора',
     'sponsor_logos_help' => 'Загрузите логотипы ваших спонсоров и партнёров для отображения на странице календаря.',
     'sponsor_section_title' => 'Заголовок раздела',

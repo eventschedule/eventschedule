@@ -4,7 +4,7 @@
   <link rel="stylesheet" href="{{ asset('vendor/intl-tel-input/css/intlTelInput.css') }}">
   <style {!! nonce_attr() !!}>
   .iti { display: block; }
-  .iti input.iti__tel-input { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+  .iti input.iti__tel-input { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; font-size: 1rem !important; line-height: 1.5rem !important; height: auto !important; }
   .dark .iti { --iti-dropdown-bg: #1e1e1e; --iti-hover-color: #2d2d30; --iti-border-color: #2d2d30; --iti-dialcode-color: #9ca3af; --iti-arrow-color: #d1d5db; }
   .dark .iti__dropdown-content { color: #d1d5db; }
   .dark .iti__selected-dial-code { color: #d1d5db; }

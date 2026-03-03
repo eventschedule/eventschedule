@@ -2475,7 +2475,7 @@ return [
     'sponsors' => 'Sponsors',
     'our_sponsors' => 'Onze Sponsors',
     'sponsor_name' => 'Naam van de Sponsor',
-    'sponsor_url_optional' => 'Website-URL (optioneel)',
+    'sponsor_url' => 'Website-URL',
     'add_sponsor' => 'Sponsor Toevoegen',
     'sponsor_logos_help' => 'Upload de logo\'s van uw sponsors en partners om ze op uw agendapagina weer te geven.',
     'sponsor_section_title' => 'Sectietitel',

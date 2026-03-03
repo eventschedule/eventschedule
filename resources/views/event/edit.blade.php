@@ -912,7 +912,7 @@
                             {{ __('messages.clone_event') }}
                         </div>
                     </a>
-                    @if ($event->user_id == $user->id)
+                    @can('delete', $event)
                     <div class="py-2" role="none">
                         <div class="border-t border-gray-100 dark:border-gray-700"></div>
                     </div>
@@ -928,7 +928,7 @@
                             </div>
                         </button>
                     </form>
-                    @endif
+                    @endcan
                 </div>
             </div>
         </div>
@@ -1004,7 +1004,7 @@
                     </svg>
                     <div>{{ __('messages.clone_event') }}</div>
                 </a>
-                @if ($event->user_id == $user->id)
+                @can('delete', $event)
                 <div class="py-2" role="none">
                     <div class="border-t border-gray-100 dark:border-gray-700"></div>
                 </div>
@@ -1014,7 +1014,7 @@
                     </svg>
                     <div>{{ __('messages.delete_event') }}</div>
                 </button>
-                @endif
+                @endcan
             </div>
         </div>
     </div>
@@ -1173,20 +1173,20 @@
                                 @if ($role->isEnterprise())
                                     <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'ai-event-details')"
                                         class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600"
-                                        title="{{ __('messages.ai_details_generator') }}">
+                                        title="{{ __('messages.ai_generator') }}">
                                         <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                                         </svg>
-                                        {{ __('messages.ai') }}
+                                        {{ __('messages.ai_generator') }}
                                     </button>
                                 @elseif (config('app.hosted'))
                                     <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-details')"
                                         class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 opacity-75"
-                                        title="{{ __('messages.ai_details_generator') }}">
+                                        title="{{ __('messages.ai_generator') }}">
                                         <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                                         </svg>
-                                        {{ __('messages.ai') }}
+                                        {{ __('messages.ai_generator') }}
                                     </button>
                                 @endif
                             @endif
@@ -1303,36 +1303,8 @@
                                         </svg>
                                         {{ __('messages.choose_file') }}
                                     </button>
-                                    @if ($event->exists && config('services.google.gemini_key'))
-                                        @if ($role->isEnterprise())
-                                            <button type="button" @click="generateFlyer"
-                                                v-bind:disabled="generatingFlyer"
-                                                class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600 disabled:opacity-50">
-                                                <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"></path>
-                                                </svg>
-                                                <span v-if="generatingFlyer">{{ __('messages.generating') }}</span>
-                                                <span v-else>{{ __('messages.generate_ai_flyer') }}</span>
-                                            </button>
-                                        @elseif (config('app.hosted'))
-                                            <button type="button" onclick="Livewire.dispatch('openModal', {component: 'upgrade-modal', arguments: {name: 'upgrade-ai-flyer'}})"
-                                                class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-sm font-medium rounded-md border border-gray-300 dark:border-gray-600 opacity-75">
-                                                <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"></path>
-                                                </svg>
-                                                {{ __('messages.generate_ai_flyer') }}
-                                            </button>
-                                        @endif
-                                    @endif
                                     <span id="flyer_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
                                 </div>
-                                @if ($event->exists && config('services.google.gemini_key') && $role->isEnterprise())
-                                    <div class="mt-2">
-                                        <input type="text" maxlength="500" v-model="flyerStyleInstructions"
-                                            placeholder="{{ __('messages.flyer_style_placeholder') }}"
-                                            class="w-full max-w-md text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]" />
-                                    </div>
-                                @endif
                                 <x-input-error class="mt-2" :messages="$errors->get('flyer_image')" />
                                 <p id="image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
                                     {{ __('messages.image_size_warning') }}
@@ -1358,22 +1330,6 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
                                 </button>
-                                @if (config('services.google.gemini_key') && $role->isEnterprise())
-                                    <div class="mt-2">
-                                        <input type="text" maxlength="500" v-model="flyerStyleInstructions"
-                                            placeholder="{{ __('messages.flyer_style_placeholder') }}"
-                                            class="w-full max-w-md text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]" />
-                                    </div>
-                                    <button type="button" @click="generateFlyer"
-                                        v-bind:disabled="generatingFlyer"
-                                        class="mt-2 inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600 disabled:opacity-50">
-                                        <svg class="w-3 h-3 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"></path>
-                                        </svg>
-                                        <span v-if="generatingFlyer">{{ __('messages.generating') }}</span>
-                                        <span v-else>{{ __('messages.regenerate_ai_flyer') }}</span>
-                                    </button>
-                                @endif
                             </div>
                             @endif
                         </div>
@@ -3280,7 +3236,7 @@
                                             </button>
                                         </div>
                                         <div class="flex items-center justify-between mt-1">
-                                            <button v-if="poll.options.length < 10" type="button" @click="poll.options.push('')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1">
+                                            <button v-if="poll.options.length < 10" type="button" @click="poll.options.push('')" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8] flex items-center gap-1">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                                                 {{ __('messages.add_option') }}
                                             </button>
@@ -3363,7 +3319,7 @@
 
                         {{-- Add Poll Link --}}
                         <button type="button" @click="polls.push({hash: null, question: '', options: ['', ''], is_active: true, allow_user_options: false, require_option_approval: false, pending_options: [], votes_count: 0, results: []})" v-if="polls.length < 5"
-                                class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1">
+                                class="text-sm text-[#4E81FA] hover:text-[#3D6FE8] flex items-center gap-1">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                             </svg>
@@ -3795,8 +3751,6 @@
         @endphp
         polls: @json($pollsJson),
         eventExists: @json($event->exists),
-        generatingFlyer: false,
-        flyerStyleInstructions: '',
         pollSubmitting: false,
         pollMessage: '',
         pollError: '',
@@ -3807,103 +3761,6 @@
       }
     },
     methods: {
-      generateFlyer() {
-        var vm = this;
-        this.generatingFlyer = true;
-        fetch('{{ url('/' . $subdomain . '/generate-flyer') }}', {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify({
-            event_id: '{{ $event->exists ? \App\Utils\UrlUtils::encodeId($event->id) : '' }}',
-            style_instructions: this.flyerStyleInstructions,
-          }),
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            var existingDiv = document.getElementById('flyer_image_existing');
-            if (existingDiv) {
-              var img = document.getElementById('flyer_preview');
-              if (img) {
-                img.src = data.flyer_image_url;
-              }
-            } else {
-              var container = document.createElement('div');
-              container.id = 'flyer_image_existing';
-              container.className = 'relative inline-block mt-4 pt-1';
-
-              var img = document.createElement('img');
-              img.src = data.flyer_image_url;
-              img.alt = @json(__('messages.flyer_image'));
-              img.style.maxHeight = '120px';
-              img.className = 'rounded-md border border-gray-200 dark:border-gray-600';
-              img.id = 'flyer_preview';
-              container.appendChild(img);
-
-              var deleteBtn = document.createElement('button');
-              deleteBtn.type = 'button';
-              deleteBtn.id = 'delete-flyer-btn';
-              deleteBtn.dataset.url = data.delete_url;
-              deleteBtn.dataset.hash = '{{ $event->exists ? \App\Utils\UrlUtils::encodeId($event->id) : '' }}';
-              deleteBtn.dataset.token = '{{ csrf_token() }}';
-              deleteBtn.style.cssText = 'width: 20px; height: 20px; min-width: 20px; min-height: 20px;';
-              deleteBtn.className = 'absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center';
-              deleteBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
-              deleteBtn.addEventListener('click', function() {
-                deleteFlyer(this.dataset.url, this.dataset.hash, this.dataset.token, this.parentElement);
-              });
-              container.appendChild(deleteBtn);
-
-              @if (config('services.google.gemini_key') && $role->isEnterprise())
-              var styleDiv = document.createElement('div');
-              styleDiv.className = 'mt-2';
-              var styleInput = document.createElement('input');
-              styleInput.type = 'text';
-              styleInput.maxLength = 500;
-              styleInput.placeholder = @json(__('messages.flyer_style_placeholder'));
-              styleInput.className = 'w-full max-w-md text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]';
-              styleInput.value = vm.flyerStyleInstructions;
-              styleInput.addEventListener('input', function(e) {
-                vm.flyerStyleInstructions = e.target.value;
-              });
-              styleDiv.appendChild(styleInput);
-              container.appendChild(styleDiv);
-
-              var regenBtn = document.createElement('button');
-              regenBtn.type = 'button';
-              regenBtn.className = 'mt-2 inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600 disabled:opacity-50';
-              regenBtn.innerHTML = '<svg class="w-3 h-3 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"></path></svg>' +
-                '<span>' + @json(__('messages.regenerate_ai_flyer')) + '</span>';
-              regenBtn.addEventListener('click', function() {
-                if (!vm.generatingFlyer) vm.generateFlyer();
-              });
-              container.appendChild(regenBtn);
-              @endif
-
-              var flyerSection = document.getElementById('flyer_image_choose');
-              if (flyerSection) {
-                flyerSection.parentNode.insertBefore(container, flyerSection.nextSibling);
-              }
-            }
-            var chooseDiv = document.getElementById('flyer_image_choose');
-            if (chooseDiv) {
-              chooseDiv.style.display = 'none';
-            }
-          } else {
-            alert(data.error || @json(__('messages.ai_flyer_generation_failed')));
-          }
-        })
-        .catch(() => {
-          alert(@json(__('messages.ai_flyer_generation_failed')));
-        })
-        .finally(() => {
-          this.generatingFlyer = false;
-        });
-      },
       showBoostError() {
         alert(this.boostDynamicReason);
       },
@@ -5774,25 +5631,29 @@ function deleteFlyer(url, hash, token, element) {
     {{ __('messages.upgrade_feature_description_privacy') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-ai-flyer" tier="enterprise" :subdomain="$subdomain" docsUrl="{{ route('marketing.docs.creating_events') }}#ai-flyer">
-    {{ __('messages.upgrade_feature_description_ai_flyer') }}
-</x-upgrade-modal>
-
 @if (config('services.google.gemini_key') && !is_demo_mode() && $role->isEnterprise())
-<x-ai-generate-modal
-    name="ai-event-details"
-    :title="__('messages.ai_details_generator')"
-    :description="__('messages.ai_details_description')"
-    :fields="[
+@php
+    $aiFields = [
         ['key' => 'category_id', 'label' => __('messages.category'), 'has_value' => (bool)$event->category_id],
         ['key' => 'short_description', 'label' => __('messages.short_description'), 'has_value' => (bool)$event->short_description],
         ['key' => 'description', 'label' => __('messages.description'), 'has_value' => (bool)$event->description],
-    ]"
+    ];
+    if ($event->exists) {
+        $aiFields[] = ['key' => 'flyer_image', 'label' => __('messages.flyer_image'), 'has_value' => (bool)$event->flyer_image_url];
+    }
+@endphp
+<x-ai-generate-modal
+    name="ai-event-details"
+    :title="__('messages.ai_generator')"
+    :description="__('messages.ai_details_description')"
+    :fields="$aiFields"
     endpoint="{{ url('/'.$subdomain.'/generate-event-details') }}"
     successCallback="handleAiEventDetailsResults"
     extraDataCallback="getEventDetailsExtraData"
+    checkValuesCallback="getEventDetailsCurrentValues"
     :showInstructions="false"
     :errorMessage="__('messages.ai_details_generation_failed')"
+    :partialErrorMessage="__('messages.ai_flyer_generation_failed')"
 />
 
 <script {!! nonce_attr() !!}>
@@ -5804,8 +5665,24 @@ window.getEventDetailsExtraData = function() {
         short_description: document.getElementById('short_description').value,
         schedule_name: @json($role->name),
         schedule_type: @json($role->type),
-        description: descValue
+        description: descValue,
+        event_id: @json($event->exists ? \App\Utils\UrlUtils::encodeId($event->id) : '')
     };
+};
+
+window.getEventDetailsCurrentValues = function() {
+    var values = [];
+    var categorySelect = document.getElementById('category_id');
+    if (categorySelect && categorySelect.value) values.push('category_id');
+    var shortDesc = document.getElementById('short_description');
+    if (shortDesc && shortDesc.value.trim()) values.push('short_description');
+    var descTextarea = document.getElementById('description');
+    var descValue = descTextarea && descTextarea._easyMDE ? descTextarea._easyMDE.value() : (descTextarea ? descTextarea.value : '');
+    if (descValue.trim()) values.push('description');
+    var flyerExisting = document.getElementById('flyer_image_existing');
+    var flyerFileInput = document.getElementById('flyer_image');
+    if (flyerExisting || (flyerFileInput && flyerFileInput.files && flyerFileInput.files.length > 0)) values.push('flyer_image');
+    return values;
 };
 
 window.handleAiEventDetailsResults = function(data) {
@@ -5826,6 +5703,46 @@ window.handleAiEventDetailsResults = function(data) {
         } else {
             textarea.value = data.description;
         }
+    }
+    if (data.flyer_image_url) {
+        var existingDiv = document.getElementById('flyer_image_existing');
+        if (existingDiv) {
+            var img = document.getElementById('flyer_preview');
+            if (img) img.src = data.flyer_image_url;
+        } else {
+            var container = document.createElement('div');
+            container.id = 'flyer_image_existing';
+            container.className = 'relative inline-block mt-4 pt-1';
+
+            var img = document.createElement('img');
+            img.src = data.flyer_image_url;
+            img.alt = @json(__('messages.flyer_image'));
+            img.style.maxHeight = '120px';
+            img.className = 'rounded-md border border-gray-200 dark:border-gray-600';
+            img.id = 'flyer_preview';
+            container.appendChild(img);
+
+            var deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.id = 'delete-flyer-btn';
+            deleteBtn.dataset.url = data.delete_url;
+            deleteBtn.dataset.hash = @json($event->exists ? \App\Utils\UrlUtils::encodeId($event->id) : '');
+            deleteBtn.dataset.token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            deleteBtn.style.cssText = 'width: 20px; height: 20px; min-width: 20px; min-height: 20px;';
+            deleteBtn.className = 'absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center';
+            deleteBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+            deleteBtn.addEventListener('click', function() {
+                deleteFlyer(this.dataset.url, this.dataset.hash, this.dataset.token, this.parentElement);
+            });
+            container.appendChild(deleteBtn);
+
+            var flyerSection = document.getElementById('flyer_image_choose');
+            if (flyerSection) {
+                flyerSection.parentNode.insertBefore(container, flyerSection.nextSibling);
+            }
+        }
+        var chooseDiv = document.getElementById('flyer_image_choose');
+        if (chooseDiv) chooseDiv.style.display = 'none';
     }
 };
 </script>

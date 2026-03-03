@@ -34,7 +34,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ marketing_url('/referral-program') }}" class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                        <a href="{{ route('marketing.docs.referral_program') }}" class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                             Referral Program
                         </a>
                     </li>

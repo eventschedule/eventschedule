@@ -210,7 +210,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/boost/{hash}/cancel', [BoostController::class, 'cancel'])->name('boost.cancel');
 
     // Referral routes (hosted only)
-    if (config('app.hosted')) {
+    if (config('app.hosted') || config('app.is_testing')) {
         Route::get('/referrals', [ReferralController::class, 'index'])->name('referrals');
         Route::post('/referrals/apply-credit', [ReferralController::class, 'applyCredit'])->name('referrals.apply_credit');
     }
@@ -451,7 +451,6 @@ if (config('app.is_nexus')) {
         // TODO: Re-enable search when there are more events worldwide
         // Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
         Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
-        Route::get('/referral-program', [MarketingController::class, 'referralProgram'])->name('marketing.referral_program');
         Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
         Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
         Route::get('/features/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
@@ -569,6 +568,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/boost', [MarketingController::class, 'docsBoost'])->name('marketing.docs.boost');
         Route::get('/docs/ai-import', [MarketingController::class, 'docsAiImport'])->name('marketing.docs.ai_import');
         Route::get('/docs/scan-agenda', [MarketingController::class, 'docsScanAgenda'])->name('marketing.docs.scan_agenda');
+        Route::get('/docs/referral-program', [MarketingController::class, 'docsReferralProgram'])->name('marketing.docs.referral_program');
         Route::get('/docs/fan-content', fn () => redirect('/docs/creating-events#fan-content', 301))->name('marketing.docs.fan_content');
         Route::get('/docs/polls', fn () => redirect('/docs/creating-events#polls', 301))->name('marketing.docs.polls');
         // Selfhost section
@@ -606,7 +606,6 @@ if (config('app.is_nexus')) {
             // TODO: Re-enable search when there are more events worldwide
             // Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
             Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
-            Route::get('/referral-program', [MarketingController::class, 'referralProgram'])->name('marketing.referral_program');
             Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
             Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
             Route::get('/features/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
@@ -726,6 +725,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/boost', [MarketingController::class, 'docsBoost'])->name('marketing.docs.boost');
             Route::get('/docs/ai-import', [MarketingController::class, 'docsAiImport'])->name('marketing.docs.ai_import');
             Route::get('/docs/scan-agenda', [MarketingController::class, 'docsScanAgenda'])->name('marketing.docs.scan_agenda');
+            Route::get('/docs/referral-program', [MarketingController::class, 'docsReferralProgram'])->name('marketing.docs.referral_program');
             Route::get('/docs/fan-content', fn () => redirect('/docs/creating-events#fan-content', 301))->name('marketing.docs.fan_content');
             Route::get('/docs/polls', fn () => redirect('/docs/creating-events#polls', 301))->name('marketing.docs.polls');
             // Selfhost section
@@ -908,7 +908,7 @@ if (config('app.is_nexus')) {
     Route::get('/examples', fn () => redirect()->route('home'));
     Route::get('/search', fn () => redirect()->route('home'));
     Route::get('/faq', fn () => redirect()->route('home'));
-    Route::get('/referral-program', fn () => redirect()->route('home'));
+    Route::get('/referral-program', fn () => redirect('/docs/referral-program', 301));
     Route::get('/features/ticketing', fn () => redirect()->route('home'));
     Route::get('/features/ai', fn () => redirect()->route('home'));
     Route::get('/features/calendar-sync', fn () => redirect()->route('home'));

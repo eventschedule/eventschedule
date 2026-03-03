@@ -2515,7 +2515,7 @@ return [
     'sponsors' => 'Sponsori',
     'our_sponsors' => 'Sponsorii Noștri',
     'sponsor_name' => 'Numele Sponsorului',
-    'sponsor_url_optional' => 'URL-ul site-ului (opțional)',
+    'sponsor_url' => 'URL-ul site-ului',
     'add_sponsor' => 'Adaugă Sponsor',
     'sponsor_logos_help' => 'Încărcați logo-urile sponsorilor și partenerilor pentru a le afișa pe pagina calendarului.',
     'sponsor_section_title' => 'Titlul Secțiunii',

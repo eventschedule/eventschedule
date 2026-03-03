@@ -63,6 +63,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'guest' => RedirectIfAuthenticated::class,
             'admin' => EnsureUserIsAdmin::class,
+            'throttle' => \App\Http\Middleware\ThrottleRequests::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

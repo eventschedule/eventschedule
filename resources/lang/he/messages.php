@@ -2470,7 +2470,7 @@ return [
     'sponsors' => 'נותני חסות',
     'our_sponsors' => 'נותני החסות שלנו',
     'sponsor_name' => 'שם נותן החסות',
-    'sponsor_url_optional' => 'כתובת אתר (אופציונלי)',
+    'sponsor_url' => 'כתובת אתר',
     'add_sponsor' => 'הוסף נותן חסות',
     'sponsor_logos_help' => 'העלו לוגואים של נותני החסות והשותפים שלכם להצגה בדף לוח השנה.',
     'sponsor_section_title' => 'כותרת הקטע',

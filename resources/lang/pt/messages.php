@@ -2475,7 +2475,7 @@ return [
     'sponsors' => 'Patrocinadores',
     'our_sponsors' => 'Nossos Patrocinadores',
     'sponsor_name' => 'Nome do Patrocinador',
-    'sponsor_url_optional' => 'URL do site (opcional)',
+    'sponsor_url' => 'URL do site',
     'add_sponsor' => 'Adicionar Patrocinador',
     'sponsor_logos_help' => 'Carregue os logotipos dos seus patrocinadores e parceiros para exibi-los na sua página de calendário.',
     'sponsor_section_title' => 'Título da Seção',

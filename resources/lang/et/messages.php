@@ -2492,7 +2492,7 @@ return [
     'sponsors' => 'Sponsorid',
     'our_sponsors' => 'Meie Sponsorid',
     'sponsor_name' => 'Sponsori Nimi',
-    'sponsor_url_optional' => 'Veebilehe URL (valikuline)',
+    'sponsor_url' => 'Veebilehe URL',
     'add_sponsor' => 'Lisa Sponsor',
     'sponsor_logos_help' => 'Laadige üles oma sponsorite ja partnerite logod, et neid oma kalendrilehel kuvada.',
     'sponsor_section_title' => 'Jaotise Pealkiri',

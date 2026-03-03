@@ -148,7 +148,7 @@
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>{{ url('/referral-program') }}</loc>
+        <loc>{{ url('/docs/referral-program') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>

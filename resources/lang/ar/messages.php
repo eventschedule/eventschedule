@@ -2478,7 +2478,7 @@ return [
     'sponsors' => 'الرعاة',
     'our_sponsors' => 'رعاتنا',
     'sponsor_name' => 'اسم الراعي',
-    'sponsor_url_optional' => 'رابط الموقع (اختياري)',
+    'sponsor_url' => 'رابط الموقع',
     'add_sponsor' => 'إضافة راعٍ',
     'sponsor_logos_help' => 'قم بتحميل شعارات الرعاة والشركاء لعرضها على صفحة التقويم الخاصة بك.',
     'sponsor_section_title' => 'عنوان القسم',

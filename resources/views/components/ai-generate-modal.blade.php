@@ -6,6 +6,7 @@
     'endpoint',
     'successCallback',
     'extraDataCallback' => null,
+    'checkValuesCallback' => null,
     'showInstructions' => true,
     'slowGeneration' => false,
     'errorMessage',
@@ -32,9 +33,7 @@
                     <input type="checkbox" :checked="elements.includes('{{ $field['key'] }}')" @change="toggleElement('{{ $field['key'] }}')"
                         class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
                     <span class="text-sm text-gray-700 dark:text-gray-300">{{ $field['label'] }}</span>
-                    @if ($field['has_value'])
-                    <span class="w-2 h-2 rounded-full bg-[#4E81FA]" title="{{ __('messages.has_existing_value') }}"></span>
-                    @endif
+                    <span x-show="fieldsWithValues.includes('{{ $field['key'] }}')" x-cloak class="w-2 h-2 rounded-full bg-[#4E81FA]" title="{{ __('messages.has_existing_value') }}"></span>
                 </label>
                 @endforeach
             </div>
@@ -92,6 +91,7 @@ document.addEventListener('alpine:init', function() {
     Alpine.data('aiGenerateModal_{{ Str::camel($name) }}', function() {
         return {
             generating: false,
+            allFields: @json(collect($fields)->pluck('key')->values()),
             defaultElements: @json(collect($fields)->where('has_value', false)->pluck('key')->values()),
             elements: @json(collect($fields)->where('has_value', false)->pluck('key')->values()),
             fieldsWithValues: @json(collect($fields)->where('has_value', true)->pluck('key')->values()),
@@ -104,6 +104,15 @@ document.addEventListener('alpine:init', function() {
                 var self = this;
                 window.addEventListener('open-modal', function(e) {
                     if (e.detail === @json($name)) {
+                        @if ($checkValuesCallback)
+                        var currentValues = window[{!! json_encode($checkValuesCallback) !!}]();
+                        if (currentValues) {
+                            self.fieldsWithValues = currentValues;
+                            self.defaultElements = self.allFields.filter(function(key) {
+                                return !currentValues.includes(key);
+                            });
+                        }
+                        @endif
                         self.elements = [...self.defaultElements];
                         self.styleInstructions = '';
                     }

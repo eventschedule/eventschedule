@@ -2518,7 +2518,7 @@ return [
     'sponsors' => 'Sponsors',
     'our_sponsors' => 'Our Sponsors',
     'sponsor_name' => 'Sponsor Name',
-    'sponsor_url_optional' => 'Website URL (optional)',
+    'sponsor_url' => 'Website URL',
     'add_sponsor' => 'Add Sponsor',
     'sponsor_logos_help' => 'Upload logos of your sponsors and partners to display on your schedule page.',
     'sponsor_section_title' => 'Section Title',

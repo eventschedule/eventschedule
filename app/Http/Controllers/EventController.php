@@ -1388,27 +1388,105 @@ class EventController extends Controller
 
         $request->validate([
             'elements' => 'required|array|min:1',
-            'elements.*' => 'in:category_id,short_description,description',
+            'elements.*' => 'in:category_id,short_description,description,flyer_image',
             'name' => 'required|string',
+            'event_id' => 'nullable|string',
         ]);
 
+        $allElements = $request->input('elements');
+        $textElements = array_values(array_filter($allElements, fn ($el) => $el !== 'flyer_image'));
+        $wantsFlyer = in_array('flyer_image', $allElements);
+
+        $results = [];
+        $imageError = false;
+
         try {
-            $results = GeminiUtils::generateEventDetails(
-                $request->input('name'),
-                $request->input('short_description'),
-                $request->input('schedule_name', $role->name),
-                $request->input('schedule_type', $role->type),
-                $request->input('elements'),
-                $request->input('description')
-            );
+            if (! empty($textElements)) {
+                $textResults = GeminiUtils::generateEventDetails(
+                    $request->input('name'),
+                    $request->input('short_description'),
+                    $request->input('schedule_name', $role->name),
+                    $request->input('schedule_type', $role->type),
+                    $textElements,
+                    $request->input('description')
+                );
+
+                if (empty($textResults)) {
+                    if (! $wantsFlyer) {
+                        return response()->json(['error' => __('messages.ai_details_generation_failed')], 500);
+                    }
+                } else {
+                    $results = $textResults;
+                    UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_EVENT_DETAILS, $role->id);
+                }
+            }
+
+            if ($wantsFlyer) {
+                $eventId = UrlUtils::decodeId($request->input('event_id'));
+                $event = Event::with(['roles', 'tickets'])->findOrFail($eventId);
+
+                if ($request->user()->cannot('update', $event)) {
+                    return response()->json(['error' => __('messages.not_authorized')], 403);
+                }
+
+                if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
+                    return response()->json(['error' => __('messages.not_authorized')], 404);
+                }
+
+                try {
+                    $imageData = GeminiUtils::generateEventFlyer($event);
+
+                    if ($imageData) {
+                        if ($event->flyer_image_url) {
+                            $path = $event->getAttributes()['flyer_image_url'];
+                            if (config('filesystems.default') == 'local') {
+                                $path = 'public/'.$path;
+                            }
+                            Storage::delete($path);
+                        }
+
+                        $filename = ImageUtils::saveImageData($imageData, 'generated_flyer.png', 'flyer_');
+                        $event->flyer_image_url = $filename;
+                        $event->save();
+
+                        UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_FLYER, $role->id);
+
+                        if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                            $flyerUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
+                        } elseif (config('filesystems.default') == 'local') {
+                            $flyerUrl = url('/storage/'.$filename);
+                        } else {
+                            $flyerUrl = $filename;
+                        }
+
+                        $results['flyer_image_url'] = $flyerUrl;
+                        $results['delete_url'] = route('event.delete_image', ['subdomain' => $subdomain]);
+                    } else {
+                        $imageError = true;
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('AI flyer generation failed: '.$e->getMessage(), [
+                        'role_id' => $role->id,
+                        'event_id' => $event->id,
+                    ]);
+                    $imageError = true;
+                }
+
+                if ($imageError && empty($results)) {
+                    return response()->json(['error' => __('messages.ai_flyer_generation_failed')], 500);
+                }
+            }
 
             if (empty($results)) {
                 return response()->json(['error' => __('messages.ai_details_generation_failed')], 500);
             }
 
-            UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_EVENT_DETAILS, $role->id);
+            $results['success'] = true;
+            if ($imageError) {
+                $results['image_error'] = true;
+            }
 
-            return response()->json(array_merge(['success' => true], $results));
+            return response()->json($results);
         } catch (\Illuminate\Database\QueryException $e) {
             report($e);
 
@@ -1653,6 +1731,7 @@ class EventController extends Controller
             'venue_city' => ['nullable', 'string', 'max:255'],
             'venue_state' => ['nullable', 'string', 'max:255'],
             'venue_postal_code' => ['nullable', 'string', 'max:20'],
+            'event_url' => ['nullable', 'url', 'max:500'],
         ];
 
         if (! auth()->check()) {
@@ -1730,7 +1809,7 @@ class EventController extends Controller
         $event->name = $request->event_name ?: __('messages.booking_request');
         $event->description = $request->description;
         $event->starts_at = $startsAt;
-        $event->event_url = $isOnline ? 'online' : null;
+        $event->event_url = $isOnline ? ($request->event_url ?: 'online') : null;
 
         $user = $user ?: $role->user;
         $event->user_id = $user->id;

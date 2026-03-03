@@ -728,27 +728,33 @@
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center mb-6">
                 {{ $role->translatedSponsorSectionTitle() }}
             </h3>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 items-center justify-items-center">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8 place-content-center">
                 @foreach ($sponsorLogos as $sponsor)
                     @php
-                        $sizeClasses = match($sponsor['tier'] ?? '') {
-                            'gold' => 'max-h-20 max-w-[160px]',
-                            'silver' => 'max-h-16 max-w-[130px]',
-                            default => 'max-h-12 max-w-[100px]',
-                        };
+                        $sizeStyles = 'max-height: 5rem; max-width: 160px;';
                     @endphp
-                    <div class="flex flex-col items-center gap-2">
+                    <div class="flex flex-col items-center text-center">
                         @if (!empty($sponsor['url']))
-                            <a href="{{ $sponsor['url'] }}" target="_blank" rel="noopener noreferrer nofollow" class="hover:opacity-80 transition-opacity">
+                            <a href="{{ $sponsor['url'] }}" target="_blank" rel="noopener noreferrer nofollow" class="flex flex-col items-center text-center w-full hover:opacity-80 transition-opacity">
                         @endif
-                        @if (!empty($sponsor['logo_url']))
-                            <img src="{{ $sponsor['logo_url'] }}"
-                                alt="{{ $sponsor['display_name'] }}"
-                                class="{{ $sizeClasses }} object-contain"
-                                loading="lazy" />
-                        @endif
+                        <div class="h-24 w-full flex items-end justify-center pb-2 overflow-hidden">
+                            @if (!empty($sponsor['logo_url']))
+                                <img src="{{ $sponsor['logo_url'] }}"
+                                    alt="{{ $sponsor['display_name'] }}"
+                                    style="{{ $sizeStyles }}"
+                                    class="object-contain"
+                                    loading="lazy" />
+                            @endif
+                        </div>
                         @if (!empty($sponsor['display_name']))
-                            <span class="text-xs text-gray-600 dark:text-gray-400 text-center truncate max-w-full">{{ $sponsor['display_name'] }}</span>
+                            <span class="text-xs text-gray-600 dark:text-gray-400 truncate max-w-full">{{ $sponsor['display_name'] }}</span>
+                        @endif
+                        @if (!empty($sponsor['tier']))
+                            <span class="inline-block text-xs px-1.5 py-0.5 rounded mt-0.5
+                                {{ $sponsor['tier'] === 'gold' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' : '' }}
+                                {{ $sponsor['tier'] === 'silver' ? 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300' : '' }}
+                                {{ $sponsor['tier'] === 'bronze' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300' : '' }}
+                            ">{{ __('messages.' . $sponsor['tier']) }}</span>
                         @endif
                         @if (!empty($sponsor['url']))
                             </a>

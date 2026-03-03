@@ -1718,23 +1718,23 @@
                         <!-- Tab Navigation -->
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
-                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="subschedules">
-                                    {{ __('messages.subschedules') }}
-                                </button>
-                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
+                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="custom-fields">
                                     {{ __('messages.custom_fields') }}
-                                </button>
-                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="sponsors">
-                                    {{ __('messages.sponsors') }}
                                 </button>
                                 <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-labels">
                                     {{ __('messages.custom_labels') }}
+                                </button>
+                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="subschedules">
+                                    {{ __('messages.subschedules') }}
+                                </button>
+                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="sponsors">
+                                    {{ __('messages.sponsors') }}
                                 </button>
                             </nav>
                         </div>
 
                         <!-- Tab Content: Sub-schedules -->
-                        <div id="customize-tab-subschedules" class="customize-tab-content">
+                        <div id="customize-tab-subschedules" class="customize-tab-content hidden">
 
                         <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.subschedules_help') }}</p>
                         <div class="mb-6">
@@ -1815,7 +1815,7 @@
                         <!-- End Tab Content: Sub-schedules -->
 
                         <!-- Tab Content: Custom Fields -->
-                        <div id="customize-tab-custom-fields" class="customize-tab-content hidden">
+                        <div id="customize-tab-custom-fields" class="customize-tab-content">
                         @if ($role->isPro())
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                             {{ __('messages.event_custom_fields_help') }}
@@ -1932,27 +1932,27 @@
 
                             <div id="sponsors-list" class="space-y-3 mb-6">
                                 @foreach ($existingSponsors as $index => $sponsor)
-                                <div class="sponsor-item flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg" data-sponsor='@json($sponsor)'>
+                                @php
+                                    $logoUrl = '';
+                                    if (!empty($sponsor['logo'])) {
+                                        if (str_starts_with($sponsor['logo'], 'demo_')) {
+                                            $logoUrl = url('/images/demo/' . $sponsor['logo']);
+                                        } elseif (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                                            $logoUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $sponsor['logo'];
+                                        } elseif (config('filesystems.default') == 'local') {
+                                            $logoUrl = url('/storage/' . $sponsor['logo']);
+                                        } else {
+                                            $logoUrl = $sponsor['logo'];
+                                        }
+                                    }
+                                @endphp
+                                <div class="sponsor-item flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg" data-sponsor='@json($sponsor)' data-logo-url="{{ $logoUrl }}">
                                     <div class="drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
                                         </svg>
                                     </div>
-                                    @php
-                                        $logoUrl = '';
-                                        if (!empty($sponsor['logo'])) {
-                                            if (str_starts_with($sponsor['logo'], 'demo_')) {
-                                                $logoUrl = url('/images/demo/' . $sponsor['logo']);
-                                            } elseif (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
-                                                $logoUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $sponsor['logo'];
-                                            } elseif (config('filesystems.default') == 'local') {
-                                                $logoUrl = url('/storage/' . $sponsor['logo']);
-                                            } else {
-                                                $logoUrl = $sponsor['logo'];
-                                            }
-                                        }
-                                    @endphp
-                                    <div class="w-16 h-12 flex-shrink-0 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden">
+                                    <div class="flex-shrink-0 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden" style="width: 120px; height: 80px;">
                                         @if ($logoUrl)
                                             <img src="{{ $logoUrl }}" alt="{{ $sponsor['name'] ?? '' }}" class="max-w-full max-h-full object-contain" />
                                         @endif
@@ -1970,6 +1970,11 @@
                                             <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $sponsor['url'] }}</div>
                                         @endif
                                     </div>
+                                    <button type="button" data-action="edit-sponsor" class="flex-shrink-0 text-gray-400 hover:text-[#4E81FA] dark:hover:text-[#4E81FA] transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                        </svg>
+                                    </button>
                                     <button type="button" data-action="remove-sponsor" class="flex-shrink-0 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -1999,7 +2004,7 @@
                                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm" />
                                         </div>
                                         <div>
-                                            <x-input-label for="new_sponsor_url_input" :value="__('messages.sponsor_url_optional')" />
+                                            <x-input-label for="new_sponsor_url_input" :value="__('messages.sponsor_url')" />
                                             <input type="url" id="new_sponsor_url_input" maxlength="500"
                                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm" />
                                         </div>
@@ -2016,18 +2021,26 @@
                                             </select>
                                         </div>
                                         <div>
-                                            <x-input-label :value="__('messages.logo')" />
+                                            <x-input-label id="sponsor-logo-label" :value="__('messages.logo') . ' *'" />
                                             <input type="file" id="new_sponsor_logo_input" accept="image/*"
-                                                class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#4E81FA] file:text-white hover:file:bg-blue-600" />
+                                                class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#4E81FA] file:text-white hover:file:bg-blue-600"
+                                                />
+                                            <img id="sponsor_logo_preview" src="#" alt="Logo Preview" style="max-height:120px; display:none;" class="mt-2 rounded-md border border-gray-200 dark:border-gray-600" />
                                         </div>
                                     </div>
-                                    <button type="button" data-action="add-sponsor"
-                                        class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[#4E81FA] rounded-md hover:bg-blue-600 transition-colors">
-                                        <svg class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                        </svg>
-                                        {{ __('messages.add_sponsor') }}
-                                    </button>
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" data-action="add-sponsor" id="sponsor-action-btn"
+                                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[#4E81FA] rounded-md hover:bg-blue-600 transition-colors">
+                                            <svg id="sponsor-action-icon" class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                            </svg>
+                                            <span id="sponsor-action-text">{{ __('messages.add_sponsor') }}</span>
+                                        </button>
+                                        <button type="button" data-action="cancel-edit-sponsor" id="cancel-edit-sponsor-btn"
+                                            class="hidden inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                            {{ __('messages.cancel') }}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -4275,7 +4288,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (document.getElementById('customize-tab-' + savedCustomizeTab)) {
                 switchCustomizeTab(savedCustomizeTab);
             } else {
-                switchCustomizeTab('subschedules');
+                switchCustomizeTab('custom-fields');
             }
         }
     }
@@ -4933,6 +4946,7 @@ function deleteRoleImage(url, token, element) {
 // Sponsor logo management
 // ============================================================
 var sponsorFileCounter = 0;
+var editingSponsorItem = null;
 
 function updateSponsorHiddenInput() {
     var items = document.querySelectorAll('#sponsors-list .sponsor-item');
@@ -4955,18 +4969,233 @@ function updateSponsorLimitVisibility() {
     if (addForm) addForm.classList.toggle('hidden', count >= 12);
 }
 
+function previewSponsorLogo(input) {
+    var preview = document.getElementById('sponsor_logo_preview');
+    if (!input || !input.files || !input.files[0]) {
+        if (preview) { preview.style.display = 'none'; preview.src = '#'; }
+        return;
+    }
+    var reader = new FileReader();
+    reader.onloadend = function() {
+        preview.src = reader.result;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
+function buildSponsorCardHTML(name, tierBadge, urlDisplay, logoSrc) {
+    return '<div class="drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></div>' +
+        '<div class="flex-shrink-0 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden" style="width: 120px; height: 80px;">' + (logoSrc ? '<img src="' + logoSrc + '" class="max-w-full max-h-full object-contain" />' : '') + '</div>' +
+        '<div class="flex-1 min-w-0"><div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">' + escapeHtml(name) + '</div>' + tierBadge + urlDisplay + '</div>' +
+        '<button type="button" data-action="edit-sponsor" class="flex-shrink-0 text-gray-400 hover:text-[#4E81FA] dark:hover:text-[#4E81FA] transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>' +
+        '<button type="button" data-action="remove-sponsor" class="flex-shrink-0 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>';
+}
+
+function buildTierBadge(tier) {
+    if (tier === 'gold') return '<span class="inline-block text-xs px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">' + @json(__('messages.gold')) + '</span>';
+    if (tier === 'silver') return '<span class="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300">' + @json(__('messages.silver')) + '</span>';
+    if (tier === 'bronze') return '<span class="inline-block text-xs px-1.5 py-0.5 rounded bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300">' + @json(__('messages.bronze')) + '</span>';
+    return '';
+}
+
+function editSponsor(btn) {
+    var item = btn.closest('.sponsor-item');
+    if (!item) return;
+
+    // Reset any previous edit state
+    resetSponsorEditState();
+
+    var sponsorData = JSON.parse(item.dataset.sponsor);
+    editingSponsorItem = item;
+
+    // Populate form fields
+    var nameInput = document.getElementById('new_sponsor_name_input');
+    var urlInput = document.getElementById('new_sponsor_url_input');
+    var tierInput = document.getElementById('new_sponsor_tier_input');
+    var fileInput = document.getElementById('new_sponsor_logo_input');
+
+    if (nameInput) nameInput.value = sponsorData.name || '';
+    if (urlInput) urlInput.value = sponsorData.url || '';
+    if (tierInput) tierInput.value = sponsorData.tier || '';
+    if (fileInput) fileInput.value = '';
+
+    // Highlight the card being edited
+    item.classList.add('ring-2', 'ring-[#4E81FA]');
+
+    // Switch button to Save mode
+    var actionText = document.getElementById('sponsor-action-text');
+    var actionIcon = document.getElementById('sponsor-action-icon');
+    if (actionText) actionText.textContent = @json(__('messages.save'));
+    if (actionIcon) actionIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />';
+
+    // Show cancel button
+    var cancelBtn = document.getElementById('cancel-edit-sponsor-btn');
+    if (cancelBtn) cancelBtn.classList.remove('hidden');
+
+    // Remove asterisk from logo label (logo optional when editing)
+    var logoLabel = document.getElementById('sponsor-logo-label');
+    if (logoLabel) logoLabel.textContent = logoLabel.textContent.replace(' *', '');
+
+    // Scroll form into view
+    var form = document.getElementById('add-sponsor-form');
+    if (form) form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetSponsorEditState() {
+    if (editingSponsorItem) {
+        editingSponsorItem.classList.remove('ring-2', 'ring-[#4E81FA]');
+    }
+    editingSponsorItem = null;
+
+    // Clear form
+    var nameInput = document.getElementById('new_sponsor_name_input');
+    var urlInput = document.getElementById('new_sponsor_url_input');
+    var tierInput = document.getElementById('new_sponsor_tier_input');
+    var fileInput = document.getElementById('new_sponsor_logo_input');
+    if (nameInput) nameInput.value = '';
+    if (urlInput) urlInput.value = '';
+    if (tierInput) tierInput.value = '';
+    if (fileInput) fileInput.value = '';
+    var logoPreview = document.getElementById('sponsor_logo_preview');
+    if (logoPreview) { logoPreview.style.display = 'none'; logoPreview.src = '#'; }
+
+    // Restore Add mode
+    var actionText = document.getElementById('sponsor-action-text');
+    var actionIcon = document.getElementById('sponsor-action-icon');
+    if (actionText) actionText.textContent = @json(__('messages.add_sponsor'));
+    if (actionIcon) actionIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />';
+
+    // Hide cancel button
+    var cancelBtn = document.getElementById('cancel-edit-sponsor-btn');
+    if (cancelBtn) cancelBtn.classList.add('hidden');
+
+    // Restore asterisk on logo label
+    var logoLabel = document.getElementById('sponsor-logo-label');
+    if (logoLabel && logoLabel.textContent.indexOf('*') === -1) {
+        logoLabel.textContent = logoLabel.textContent + ' *';
+    }
+}
+
+function cancelEditSponsor() {
+    resetSponsorEditState();
+}
+
 function addSponsor() {
     var nameInput = document.getElementById('new_sponsor_name_input');
     var urlInput = document.getElementById('new_sponsor_url_input');
     var tierInput = document.getElementById('new_sponsor_tier_input');
     var fileInput = document.getElementById('new_sponsor_logo_input');
 
-    if (!fileInput || !fileInput.files.length) return;
-
-    var file = fileInput.files[0];
     var name = nameInput ? nameInput.value.trim() : '';
     var url = urlInput ? urlInput.value.trim() : '';
     var tier = tierInput ? tierInput.value : '';
+    var hasNewFile = fileInput && fileInput.files.length > 0;
+
+    // If editing an existing sponsor
+    if (editingSponsorItem) {
+        var item = editingSponsorItem;
+        var tierBadge = buildTierBadge(tier);
+        var urlDisplay = url ? '<div class="text-xs text-gray-500 dark:text-gray-400 truncate">' + escapeHtml(url) + '</div>' : '';
+
+        if (item.dataset.newIdx !== undefined) {
+            // Editing a new (unsaved) sponsor: update hidden inputs
+            var idx = item.dataset.newIdx;
+            var container = document.getElementById('new-sponsor-inputs-container');
+            var nameHidden = container.querySelector('[name="new_sponsor_names[' + idx + ']"]');
+            var urlHidden = container.querySelector('[name="new_sponsor_urls[' + idx + ']"]');
+            var tierHidden = container.querySelector('[name="new_sponsor_tiers[' + idx + ']"]');
+            if (nameHidden) nameHidden.value = name;
+            if (urlHidden) urlHidden.value = url;
+            if (tierHidden) tierHidden.value = tier;
+
+            if (hasNewFile) {
+                var dt = new DataTransfer();
+                dt.items.add(fileInput.files[0]);
+                var fileHidden = container.querySelector('[name="new_sponsor_logos[' + idx + ']"]');
+                if (fileHidden) fileHidden.files = dt.files;
+            }
+
+            // Update card display
+            var oldSponsorData = JSON.parse(item.dataset.sponsor);
+            item.dataset.sponsor = JSON.stringify({name: name, logo: oldSponsorData.logo, url: url || null, tier: tier});
+
+            if (hasNewFile) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    item.dataset.logoUrl = e.target.result;
+                    item.innerHTML = buildSponsorCardHTML(name, tierBadge, urlDisplay, e.target.result);
+                    resetSponsorEditState();
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                var logoSrc = item.dataset.logoUrl || '';
+                item.innerHTML = buildSponsorCardHTML(name, tierBadge, urlDisplay, logoSrc);
+                resetSponsorEditState();
+            }
+        } else {
+            // Editing an existing (saved) sponsor
+            if (hasNewFile) {
+                // Convert to "new" sponsor with hidden file inputs
+                var oldSponsorData = JSON.parse(item.dataset.sponsor);
+                var idx = sponsorFileCounter++;
+                var container = document.getElementById('new-sponsor-inputs-container');
+
+                var dt = new DataTransfer();
+                dt.items.add(fileInput.files[0]);
+
+                var fileHidden = document.createElement('input');
+                fileHidden.type = 'file';
+                fileHidden.name = 'new_sponsor_logos[' + idx + ']';
+                fileHidden.style.display = 'none';
+                fileHidden.files = dt.files;
+                container.appendChild(fileHidden);
+
+                var nameHidden = document.createElement('input');
+                nameHidden.type = 'hidden';
+                nameHidden.name = 'new_sponsor_names[' + idx + ']';
+                nameHidden.value = name;
+                container.appendChild(nameHidden);
+
+                var urlHidden = document.createElement('input');
+                urlHidden.type = 'hidden';
+                urlHidden.name = 'new_sponsor_urls[' + idx + ']';
+                urlHidden.value = url;
+                container.appendChild(urlHidden);
+
+                var tierHidden = document.createElement('input');
+                tierHidden.type = 'hidden';
+                tierHidden.name = 'new_sponsor_tiers[' + idx + ']';
+                tierHidden.value = tier;
+                container.appendChild(tierHidden);
+
+                item.dataset.newIdx = idx;
+                item.dataset.sponsor = JSON.stringify({name: name, logo: '', url: url || null, tier: tier});
+
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    item.dataset.logoUrl = e.target.result;
+                    item.innerHTML = buildSponsorCardHTML(name, tierBadge, urlDisplay, e.target.result);
+                    resetSponsorEditState();
+                    updateSponsorHiddenInput();
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                // No new logo: just update data-sponsor JSON
+                var oldSponsorData = JSON.parse(item.dataset.sponsor);
+                item.dataset.sponsor = JSON.stringify({name: name, logo: oldSponsorData.logo, url: url || null, tier: tier});
+                var logoSrc = item.dataset.logoUrl || '';
+                item.innerHTML = buildSponsorCardHTML(name, tierBadge, urlDisplay, logoSrc);
+                resetSponsorEditState();
+                updateSponsorHiddenInput();
+            }
+        }
+        return;
+    }
+
+    // Adding a new sponsor
+    if (!fileInput || !hasNewFile) return;
+
+    var file = fileInput.files[0];
 
     var count = document.querySelectorAll('#sponsors-list .sponsor-item').length;
     if (count >= 12) return;
@@ -5006,21 +5235,15 @@ function addSponsor() {
     // Create preview card
     var reader = new FileReader();
     reader.onload = function(e) {
-        var tierBadge = '';
-        if (tier === 'gold') tierBadge = '<span class="inline-block text-xs px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">' + @json(__('messages.gold')) + '</span>';
-        if (tier === 'silver') tierBadge = '<span class="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300">' + @json(__('messages.silver')) + '</span>';
-        if (tier === 'bronze') tierBadge = '<span class="inline-block text-xs px-1.5 py-0.5 rounded bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300">' + @json(__('messages.bronze')) + '</span>';
-
+        var tierBadge = buildTierBadge(tier);
         var urlDisplay = url ? '<div class="text-xs text-gray-500 dark:text-gray-400 truncate">' + escapeHtml(url) + '</div>' : '';
 
         var div = document.createElement('div');
         div.className = 'sponsor-item flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg';
         div.dataset.sponsor = JSON.stringify({name: name, logo: '', url: url || null, tier: tier});
         div.dataset.newIdx = idx;
-        div.innerHTML = '<div class="drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></div>' +
-            '<div class="w-16 h-12 flex-shrink-0 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden"><img src="' + e.target.result + '" class="max-w-full max-h-full object-contain" /></div>' +
-            '<div class="flex-1 min-w-0"><div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">' + escapeHtml(name) + '</div>' + tierBadge + urlDisplay + '</div>' +
-            '<button type="button" data-action="remove-sponsor" class="flex-shrink-0 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>';
+        div.dataset.logoUrl = e.target.result;
+        div.innerHTML = buildSponsorCardHTML(name, tierBadge, urlDisplay, e.target.result);
 
         document.getElementById('sponsors-list').appendChild(div);
         updateSponsorLimitVisibility();
@@ -5037,6 +5260,11 @@ function addSponsor() {
 function removeSponsor(btn) {
     var item = btn.closest('.sponsor-item');
     if (!item) return;
+
+    // If removing the item being edited, reset edit state first
+    if (editingSponsorItem === item) {
+        resetSponsorEditState();
+    }
 
     // If it's a new (not yet saved) sponsor, remove its hidden file inputs
     if (item.dataset.newIdx !== undefined) {
@@ -5067,6 +5295,14 @@ document.addEventListener('DOMContentLoaded', function() {
             onEnd: function() {
                 updateSponsorHiddenInput();
             }
+        });
+    }
+
+    // --- Sponsor logo preview ---
+    var sponsorLogoInput = document.getElementById('new_sponsor_logo_input');
+    if (sponsorLogoInput) {
+        sponsorLogoInput.addEventListener('change', function() {
+            previewSponsorLogo(this);
         });
     }
 
@@ -5175,6 +5411,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'remove-sponsor':
                 removeSponsor(btn);
+                break;
+            case 'edit-sponsor':
+                editSponsor(btn);
+                break;
+            case 'cancel-edit-sponsor':
+                cancelEditSponsor();
                 break;
             case 'add-custom-label':
                 addCustomLabel();

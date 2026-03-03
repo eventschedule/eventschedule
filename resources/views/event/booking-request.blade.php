@@ -3,6 +3,8 @@
 @php
   $hasHeaderImage = ($role->header_image && $role->header_image !== 'none') || $role->header_image_url;
   $use24hr = get_use_24_hour_time($role);
+  $accentColor = $role->accent_color ?? '#4E81FA';
+  $contrastColor = accent_contrast_color($accentColor);
 @endphp
 
   <style {!! nonce_attr() !!}>
@@ -56,29 +58,29 @@
 
   <main>
     <div>
-      <div class="container mx-auto pt-7 pb-20 px-5 max-w-3xl">
-        <div class="bg-white dark:bg-gray-800 mb-4 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} rounded-lg shadow-md">
+      <div class="container mx-auto pt-7 pb-20 px-5">
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm mb-4 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} rounded-2xl max-w-4xl mx-auto">
           <div
-            class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0"
+            class="relative overflow-hidden rounded-t-xl before:block before:absolute before:bg-[#00000033] before:-inset-0 before:rounded-t-xl"
           >
             @if ($role->header_image && $role->header_image !== 'none')
             <picture>
               <source srcset="{{ asset('images/headers') }}/{{ $role->header_image }}.webp" type="image/webp">
               <img
-                class="block max-h-72 w-full object-cover rounded-t-2xl"
+                class="block max-h-72 w-full object-cover"
                 src="{{ asset('images/headers') }}/{{ $role->header_image }}.png"
               />
             </picture>
             @elseif ($role->header_image_url)
             <img
-              class="block max-h-72 w-full object-cover rounded-t-2xl"
+              class="block max-h-72 w-full object-cover"
               src="{{ $role->header_image_url }}"
             />
             @endif
           </div>
-          <div class="px-4 sm:px-8 pb-4 relative z-10">
+          <div class="px-6 sm:px-8 lg:px-16 pb-1 md:pb-4 relative z-10">
             @if ($role->profile_image_url)
-            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] -ms-1 mb-6 bg-white dark:bg-gray-800 flex items-center justify-center">
+            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] -ms-1 mb-6 bg-white dark:bg-gray-900 flex items-center justify-center">
               <img
                 class="rounded-lg w-[120px] h-[120px] object-cover"
                 src="{{ $role->profile_image_url }}"
@@ -126,7 +128,7 @@
         </div>
 
         {{-- Booking Request Form --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-8">
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-6 sm:p-8 lg:p-16 lg:px-20 pt-6 lg:pt-8 max-w-4xl mx-auto">
           <form id="booking-request-form" method="POST" action="{{ route('event.booking_request.store', ['subdomain' => $role->subdomain]) }}">
             @csrf
 
@@ -151,7 +153,7 @@
                 <div class="relative">
                   <input type="text" id="event_start_time"
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
-                    placeholder="{{ __('messages.start_time') }}" autocomplete="off" aria-label="{{ __('messages.start_time') }}" />
+                    autocomplete="off" aria-label="{{ __('messages.start_time') }}" />
                   <div class="time-dropdown" id="start_time_dropdown"></div>
                 </div>
                 <input type="hidden" name="start_time" id="hidden_start_time" />
@@ -160,7 +162,7 @@
 
             <div class="mb-6">
               <x-input-label for="event_description" :value="__('messages.description')" />
-              <textarea id="event_description" name="description" rows="4" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+              <textarea id="event_description" name="description" rows="4" class="html-editor mt-1 block w-full"></textarea>
             </div>
 
             {{-- Location Section --}}
@@ -171,21 +173,28 @@
                 <div class="flex items-center space-x-6">
                   <div class="flex items-center">
                     <input id="in_person" type="checkbox" checked
-                      class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                      onchange="toggleLocationFields()">
+                      class="h-4 w-4 border-gray-300 rounded"
+                      style="accent-color: {{ $accentColor }}">
                     <label for="in_person" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                       {{ __('messages.in_person') }}
                     </label>
                   </div>
                   <div class="flex items-center ps-3">
                     <input id="is_online" name="is_online" value="1" type="checkbox"
-                      class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                      class="h-4 w-4 border-gray-300 rounded"
+                      style="accent-color: {{ $accentColor }}">
                     <label for="is_online" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                       {{ __('messages.online') }}
                     </label>
                   </div>
                 </div>
               </fieldset>
+            </div>
+
+            <div id="online-url-field" class="mb-4 hidden">
+              <x-input-label for="event_url" :value="__('messages.event_url')" />
+              <x-text-input id="event_url" name="event_url" type="url" class="mt-1 block w-full" autocomplete="off" />
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.event_url_help') }}</p>
             </div>
 
             <div id="location-fields">
@@ -241,7 +250,7 @@
               {{-- Create Account Option --}}
               <div class="mb-4 mt-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
                 <label class="inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="create_account" name="create_account" value="1" class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ $role->require_account ? 'checked disabled' : '' }} onchange="toggleAccountFields()">
+                  <input type="checkbox" id="create_account" name="create_account" value="1" class="rounded border-gray-300 dark:border-gray-600 shadow-sm" style="accent-color: {{ $accentColor }}" {{ $role->require_account ? 'checked disabled' : '' }}>
                   <span class="ms-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.create_an_account') }}</span>
                 </label>
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 {{ is_rtl() ? 'me-6' : 'ms-6' }}">{{ __('messages.create_account_benefits') }}</p>
@@ -264,7 +273,7 @@
               <a href="{{ $role->getGuestUrl() }}" class="px-4 py-3 text-base text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200">
                 {{ __('messages.cancel') }}
               </a>
-              <button type="submit" id="submit-btn" class="px-4 py-3 text-base bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-all duration-200 disabled:opacity-50">
+              <button type="submit" id="submit-btn" class="px-4 py-3 text-base rounded-md transition-all duration-200 disabled:opacity-50" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
                 {{ __('messages.submit') }}
               </button>
             </div>
@@ -458,6 +467,15 @@
       }
     }
 
+    function toggleOnlineUrl() {
+      var isOnline = document.getElementById('is_online').checked;
+      var urlField = document.getElementById('online-url-field');
+      urlField.classList.toggle('hidden', !isOnline);
+      if (!isOnline) {
+        document.getElementById('event_url').value = '';
+      }
+    }
+
     function toggleAccountFields() {
       var createAccount = document.getElementById('create_account').checked;
       var accountFields = document.getElementById('account-fields');
@@ -465,6 +483,14 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+      // Bind checkbox handlers
+      document.getElementById('in_person').addEventListener('change', toggleLocationFields);
+      document.getElementById('is_online').addEventListener('change', toggleOnlineUrl);
+      var createAccountEl = document.getElementById('create_account');
+      if (createAccountEl) {
+        createAccountEl.addEventListener('change', toggleAccountFields);
+      }
+
       // Init Flatpickr date picker
       var dateInput = document.getElementById('event_date');
       var hiddenDate = document.getElementById('hidden_date');
@@ -505,6 +531,11 @@
       messageDiv.classList.add('hidden');
 
       var formData = new FormData(form);
+
+      var descEl = document.getElementById('event_description');
+      if (descEl._easyMDE) {
+        formData.set('description', descEl._easyMDE.value());
+      }
 
       fetch(form.action, {
         method: 'POST',

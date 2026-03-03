@@ -41,11 +41,11 @@ class MarketingController extends Controller
     }
 
     /**
-     * About page
+     * Referral Program docs page
      */
-    public function referralProgram()
+    public function docsReferralProgram()
     {
-        return view('marketing.referral-program');
+        return view('marketing.docs.referral-program', $this->getDocNavigation('marketing.docs.referral_program'));
     }
 
     public function about()
@@ -3243,6 +3243,7 @@ class MarketingController extends Controller
             ['route' => 'marketing.docs.schedule_styling', 'title' => 'Schedule Styling'],
             ['route' => 'marketing.docs.analytics', 'title' => 'Analytics'],
             ['route' => 'marketing.docs.account_settings', 'title' => 'Account Settings'],
+            ['route' => 'marketing.docs.referral_program', 'title' => 'Referral Program'],
         ];
 
         $currentIndex = null;
@@ -3597,7 +3598,7 @@ class MarketingController extends Controller
             'developer_webhooks' => route('marketing.docs.developer.webhooks'),
             'embed_calendar_feature' => route('marketing.embed_calendar'),
             'embed_tickets_feature' => route('marketing.embed_tickets'),
-            'referral_program' => route('marketing.referral_program'),
+            'referral_program' => route('marketing.docs.referral_program'),
         ];
 
         return [
@@ -3930,7 +3931,13 @@ class MarketingController extends Controller
             ['page' => 'Webhooks', 'section' => 'Testing', 'description' => 'Test webhook endpoints and payloads.', 'url' => $r['developer_webhooks'].'#testing', 'category' => 'Developer', 'keywords' => 'test debug webhook'],
 
             // ===== REFERRAL PROGRAM =====
-            ['page' => 'Referral Program', 'section' => 'Referral Program', 'description' => 'Earn free months by referring other event organizers.', 'url' => $r['referral_program'], 'category' => 'Product', 'keywords' => 'referral refer earn free credit discount'],
+            ['page' => 'Referral Program', 'section' => 'Overview', 'description' => 'Earn free months by referring other event organizers.', 'url' => $r['referral_program'].'#overview', 'category' => 'User Guide', 'keywords' => 'referral refer earn free credit discount'],
+            ['page' => 'Referral Program', 'section' => 'How It Works', 'description' => 'Share your link, they subscribe, earn your credit.', 'url' => $r['referral_program'].'#how-it-works', 'category' => 'User Guide', 'keywords' => 'referral steps share link subscribe'],
+            ['page' => 'Referral Program', 'section' => 'Your Referral Link', 'description' => 'Find and share your unique referral link.', 'url' => $r['referral_program'].'#referral-link', 'category' => 'User Guide', 'keywords' => 'referral link copy share'],
+            ['page' => 'Referral Program', 'section' => 'Rewards', 'description' => 'Pro ($5) and Enterprise ($15) referral credits.', 'url' => $r['referral_program'].'#rewards', 'category' => 'User Guide', 'keywords' => 'referral reward credit pro enterprise free month'],
+            ['page' => 'Referral Program', 'section' => 'Applying Credits', 'description' => 'Apply qualified referral credits to your schedules.', 'url' => $r['referral_program'].'#applying-credits', 'category' => 'User Guide', 'keywords' => 'apply credit schedule referral'],
+            ['page' => 'Referral Program', 'section' => 'Referral Statuses', 'description' => 'Pending, Subscribed, Qualified, Credited, and Expired statuses.', 'url' => $r['referral_program'].'#statuses', 'category' => 'User Guide', 'keywords' => 'referral status pending subscribed qualified credited expired'],
+            ['page' => 'Referral Program', 'section' => 'Referral History', 'description' => 'View all your referrals and their current status.', 'url' => $r['referral_program'].'#history', 'category' => 'User Guide', 'keywords' => 'referral history table list'],
         ];
     }
 }
