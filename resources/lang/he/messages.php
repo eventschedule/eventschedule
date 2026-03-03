@@ -826,6 +826,7 @@ return [
     'field_type' => 'סוג',
     'field_options' => 'אפשרויות',
     'field_required' => 'חובה',
+    'country_code' => 'קידומת מדינה',
     'type_string' => 'טקסט',
     'type_multiline_string' => 'טקסט מרובה שורות',
     'type_switch' => 'כן/לא',

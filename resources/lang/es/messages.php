@@ -831,6 +831,7 @@ return [
     'field_type' => 'Tipo',
     'field_options' => 'Opciones',
     'field_required' => 'Obligatorio',
+    'country_code' => 'Código de país',
     'type_string' => 'Texto',
     'type_multiline_string' => 'Texto Multilínea',
     'type_switch' => 'Sí/No',

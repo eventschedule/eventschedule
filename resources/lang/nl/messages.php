@@ -831,6 +831,7 @@ return [
     'field_type' => 'Type',
     'field_options' => 'Opties',
     'field_required' => 'Verplicht',
+    'country_code' => 'Landcode',
     'type_string' => 'Tekst',
     'type_multiline_string' => 'Meerregelige Tekst',
     'type_switch' => 'Ja/Nee',

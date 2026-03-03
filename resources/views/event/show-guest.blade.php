@@ -1426,7 +1426,7 @@
             $myEventLevelPendingPhotos = $myEventLevelPendingPhotos->filter(fn($p) => $p->event_date === $date || $p->event_date === null);
           }
         @endphp
-        @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $eventLevelPhotos->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $myEventLevelPendingPhotos->count() > 0 || ($role->isPro() && $event->polls->count() > 0) || $allPhotoUrls->count() > 0 || $event->parts->count() == 0))
+        @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $eventLevelPhotos->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $myEventLevelPendingPhotos->count() > 0 || ($role->isPro() && $event->polls->count() > 0) || $allPhotoUrls->count() > 0 || ($event->parts->count() == 0 && $event->isFanContentEnabled())))
         <div id="event-media-section" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
 
           {{-- Polls --}}

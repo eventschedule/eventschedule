@@ -1236,18 +1236,18 @@
                     </h2>
 
                     <!-- Sub-Tab Navigation -->
-                    <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
-                        <nav class="-mb-px flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide">
+                    <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                        <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                             <button type="button" data-style-tab="branding" id="style-tab-branding"
-                                class="style-tab-button text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-[#4E81FA] text-[#4E81FA]">
+                                class="style-tab-button text-center whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium border-[#4E81FA] text-[#4E81FA]">
                                 {{ __('messages.branding') }}
                             </button>
                             <button type="button" data-style-tab="background" id="style-tab-background"
-                                class="style-tab-button text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
+                                class="style-tab-button text-center whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
                                 {{ __('messages.background') }}
                             </button>
                             <button type="button" data-style-tab="advanced" id="style-tab-advanced"
-                                class="style-tab-button text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
+                                class="style-tab-button text-center whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
                                 {{ __('messages.advanced') }}
                             </button>
                         </nav>

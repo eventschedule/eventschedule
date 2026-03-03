@@ -859,6 +859,7 @@ return [
     'field_type' => 'Tip',
     'field_options' => 'Opțiuni',
     'field_required' => 'Obligatoriu',
+    'country_code' => 'Cod de țară',
     'type_string' => 'Text',
     'type_multiline_string' => 'Text Multi-linie',
     'type_switch' => 'Da/Nu',

@@ -145,6 +145,9 @@ class Role extends Model implements MustVerifyEmail
      */
     protected $attributes = [
         'header_image' => 'none',
+        'fan_comments_enabled' => true,
+        'fan_photos_enabled' => true,
+        'fan_videos_enabled' => true,
     ];
 
     protected static function boot()

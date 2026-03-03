@@ -834,6 +834,7 @@ return [
     'field_type' => 'Tipo',
     'field_options' => 'Opzioni',
     'field_required' => 'Obbligatorio',
+    'country_code' => 'Prefisso internazionale',
     'type_string' => 'Testo',
     'type_multiline_string' => 'Testo Multilinea',
     'type_switch' => 'Sì/No',

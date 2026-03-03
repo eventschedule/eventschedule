@@ -1,5 +1,15 @@
 <x-slot name="head">
   <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
+  @if ($event->country_code_phone)
+  <link rel="stylesheet" href="{{ asset('vendor/intl-tel-input/css/intlTelInput.css') }}">
+  <style {!! nonce_attr() !!}>
+  .dark .iti { --iti-dropdown-bg: #1e1e1e; --iti-hover-color: #2d2d30; --iti-border-color: #2d2d30; --iti-dialcode-color: #9ca3af; --iti-arrow-color: #d1d5db; }
+  .dark .iti__dropdown-content { color: #d1d5db; }
+  .dark .iti__selected-dial-code { color: #d1d5db; }
+  .dark .iti__search-input { background: #1e1e1e; color: #d1d5db; border-color: #2d2d30; }
+  </style>
+  <script src="{{ asset('vendor/intl-tel-input/js/intlTelInput.min.js') }}" {!! nonce_attr() !!}></script>
+  @endif
   @if (\App\Utils\TurnstileUtils::isEnabled())
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer {!! nonce_attr() !!}></script>
   @endif
@@ -27,6 +37,7 @@
                     phone: @json(old('phone', '')),
                     askPhone: @json((bool) $event->ask_phone),
                     requirePhone: @json((bool) $event->require_phone),
+                    countryCodePhone: @json((bool) $event->country_code_phone),
                     password: @json(old('password', '')),
                     totalTicketsMode: @json($event->total_tickets_mode ?? 'individual'),
                     turnstileEnabled: @json(\App\Utils\TurnstileUtils::isEnabled()),
@@ -398,9 +409,15 @@
         </div>
 
         <div class="mb-6" v-if="askPhone">
-            <label for="phone" class="text-gray-900 dark:text-gray-100">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
-            <input type="tel" name="phone" id="phone" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+            <label for="phone_input" class="text-gray-900 dark:text-gray-100">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
+            @if ($event->country_code_phone)
+            <input type="hidden" name="phone" id="phone_hidden" v-model="phone">
+            <input type="tel" id="phone_input" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+                :required="requirePhone" autocomplete="tel" />
+            @else
+            <input type="tel" name="phone" id="phone_input" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
                 v-model="phone" :required="requirePhone" autocomplete="tel" />
+            @endif
             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
         </div>
 

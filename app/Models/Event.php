@@ -57,6 +57,7 @@ class Event extends Model
         'fan_videos_enabled',
         'ask_phone',
         'require_phone',
+        'country_code_phone',
     ];
 
     protected $hidden = ['event_password'];
@@ -77,6 +78,7 @@ class Event extends Model
         'fan_videos_enabled' => 'boolean',
         'ask_phone' => 'boolean',
         'require_phone' => 'boolean',
+        'country_code_phone' => 'boolean',
     ];
 
     protected static function boot()

@@ -835,6 +835,7 @@ return [
     'field_type' => 'Typ',
     'field_options' => 'Optionen',
     'field_required' => 'Erforderlich',
+    'country_code' => 'Ländervorwahl',
     'type_string' => 'Text',
     'type_multiline_string' => 'Mehrzeiliger Text',
     'type_switch' => 'Ja/Nein',

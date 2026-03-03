@@ -94,7 +94,6 @@ class RoleUpdateRequest extends FormRequest
             'new_sponsor_names.*' => ['nullable', 'string', 'max:100'],
             'new_sponsor_urls.*' => ['nullable', 'url', 'max:500'],
             'new_sponsor_tiers.*' => ['nullable', 'string', 'in:gold,silver,bronze'],
-            'sponsor_section_title' => ['nullable', 'string', 'max:100'],
             'custom_labels' => ['nullable', 'array', 'max:30'],
             'custom_labels.*.value' => ['required_with:custom_labels', 'string', 'max:200'],
             'custom_labels.*.value_en' => ['nullable', 'string', 'max:200'],

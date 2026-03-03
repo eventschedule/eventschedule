@@ -832,6 +832,7 @@ return [
     'field_type' => 'النوع',
     'field_options' => 'الخيارات',
     'field_required' => 'مطلوب',
+    'country_code' => 'رمز الدولة',
     'type_string' => 'نص',
     'type_multiline_string' => 'نص متعدد الأسطر',
     'type_switch' => 'نعم/لا',

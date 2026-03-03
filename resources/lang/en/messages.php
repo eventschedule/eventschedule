@@ -858,6 +858,7 @@ return [
     'field_type' => 'Type',
     'field_options' => 'Options',
     'field_required' => 'Required',
+    'country_code' => 'Country code',
     'type_string' => 'Text',
     'type_multiline_string' => 'Multi-line Text',
     'type_switch' => 'Yes/No',

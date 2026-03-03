@@ -831,6 +831,7 @@ return [
     'field_type' => 'Type',
     'field_options' => 'Options',
     'field_required' => 'Obligatoire',
+    'country_code' => 'Indicatif pays',
     'type_string' => 'Texte',
     'type_multiline_string' => 'Texte multiligne',
     'type_switch' => 'Oui/Non',

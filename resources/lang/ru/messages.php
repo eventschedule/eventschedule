@@ -856,6 +856,7 @@ return [
     'field_type' => 'Тип',
     'field_options' => 'Параметры',
     'field_required' => 'Необходимый',
+    'country_code' => 'Код страны',
     'type_string' => 'Текст',
     'type_multiline_string' => 'Многострочный текст',
     'type_switch' => 'Да/Нет',

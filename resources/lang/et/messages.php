@@ -855,6 +855,7 @@ return [
     'field_type' => 'Tüüp',
     'field_options' => 'Valikud',
     'field_required' => 'Nõutav',
+    'country_code' => 'Riigikood',
     'type_string' => 'Tekst',
     'type_multiline_string' => 'Mitmerealine tekst',
     'type_switch' => 'Jah/ei',
