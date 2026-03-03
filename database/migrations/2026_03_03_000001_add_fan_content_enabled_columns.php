@@ -9,11 +9,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('roles', function (Blueprint $table) {
-            $table->boolean('fan_content_enabled')->default(true)->after('feedback_delay_hours');
+            $table->boolean('fan_content_enabled')->default(true);
         });
 
         Schema::table('events', function (Blueprint $table) {
-            $table->boolean('fan_content_enabled')->nullable()->after('feedback_enabled');
+            $table->boolean('fan_content_enabled')->nullable();
         });
     }
 
