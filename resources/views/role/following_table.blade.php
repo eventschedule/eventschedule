@@ -142,12 +142,76 @@
                                     target="_blank" class="hover:underline">{{ App\Utils\UrlUtils::clean($role->website) }}</a>
                             </td>
                             <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
-                                <button type="button"
-                                    data-confirm="{{ __('messages.are_you_sure') }}"
-                                    data-href="{{ route('role.unfollow', ['subdomain' => $role->subdomain]) }}"
-                                    class="btn-confirm-navigate inline-flex items-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                    {{ $role->email ? __('messages.unfollow') : __('messages.delete') }}
-                                </button>
+                                <div class="relative inline-block" x-data="{
+                                    open: false,
+                                    positionDropdown() {
+                                        if (!this.open) return;
+                                        const button = this.$refs.button;
+                                        const dropdown = this.$refs.dropdown;
+                                        const rect = button.getBoundingClientRect();
+
+                                        dropdown.style.position = 'fixed';
+                                        dropdown.style.top = `${rect.bottom + 4}px`;
+                                        dropdown.style.zIndex = '1000';
+
+                                        const isRtl = document.documentElement.dir === 'rtl';
+                                        if (isRtl) {
+                                            dropdown.style.left = `${rect.left}px`;
+                                        } else {
+                                            dropdown.style.right = `${window.innerWidth - rect.right}px`;
+                                        }
+                                    }
+                                }">
+                                    <button @click="open = !open; $nextTick(() => positionDropdown())"
+                                            x-ref="button"
+                                            type="button"
+                                            class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                        {{ __('messages.actions') }}
+                                        <svg class="-me-1 ms-2 h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+
+                                    <div x-show="open"
+                                         x-ref="dropdown"
+                                         @click.away="open = false"
+                                         class="w-48 origin-top-right rounded-md bg-white dark:bg-gray-800 py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-700 focus:outline-none"
+                                         role="menu"
+                                         x-cloak
+                                         aria-orientation="vertical">
+
+                                        @if($role->isClaimed())
+                                        <button @click="open = false; copyFeedUrl('{{ route('feed.ical', ['subdomain' => $role->subdomain]) }}', $el)"
+                                                class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
+                                                role="menuitem">
+                                            <svg class="w-4 h-4 me-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                            <span>{{ __('messages.copy_ical_feed') }}</span>
+                                        </button>
+
+                                        <button @click="open = false; copyFeedUrl('{{ route('feed.rss', ['subdomain' => $role->subdomain]) }}', $el)"
+                                                class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
+                                                role="menuitem">
+                                            <svg class="w-4 h-4 me-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
+                                            </svg>
+                                            <span>{{ __('messages.copy_rss_feed') }}</span>
+                                        </button>
+
+                                        <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                                        @endif
+
+                                        <button @click="open = false; if (confirm('{{ __('messages.are_you_sure') }}')) location.href = '{{ route('role.unfollow', ['subdomain' => $role->subdomain]) }}'"
+                                                class="flex items-center px-4 py-2 text-sm text-red-700 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
+                                                role="menuitem">
+                                            <svg class="w-4 h-4 me-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                            <span>{{ $role->email ? __('messages.unfollow') : __('messages.delete') }}</span>
+                                        </button>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         @endforeach
@@ -168,13 +232,20 @@
 @endif
 
 <script {!! nonce_attr() !!}>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.btn-confirm-navigate').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            if (confirm(this.getAttribute('data-confirm'))) {
-                location.href = this.getAttribute('data-href');
-            }
-        });
-    });
-});
+function copyFeedUrl(url, button) {
+    navigator.clipboard.writeText(url).then(() => {
+        const span = button.querySelector('span');
+        const originalText = span.textContent;
+        span.textContent = '{{ __('messages.copied') }}';
+        const svg = button.querySelector('svg');
+        const originalSvg = svg.innerHTML;
+        svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>';
+        svg.classList.add('text-green-500');
+        setTimeout(() => {
+            span.textContent = originalText;
+            svg.innerHTML = originalSvg;
+            svg.classList.remove('text-green-500');
+        }, 2000);
+    }).catch(() => {});
+}
 </script>

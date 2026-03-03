@@ -3260,7 +3260,7 @@
                                         </label>
                                         <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.allow_user_options') }}</span>
                                     </div>
-                                    <div v-if="poll.allow_user_options" class="flex items-center gap-3 ms-6">
+                                    <div v-if="poll.allow_user_options" class="flex items-center gap-3">
                                         <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
                                             <input type="checkbox" :checked="poll.require_option_approval"
                                                 @change="poll.require_option_approval = $event.target.checked"
@@ -5635,12 +5635,10 @@ function deleteFlyer(url, hash, token, element) {
 @php
     $aiFields = [
         ['key' => 'category_id', 'label' => __('messages.category'), 'has_value' => (bool)$event->category_id],
+        ['key' => 'flyer_image', 'label' => __('messages.flyer_image'), 'has_value' => (bool)$event->flyer_image_url],
         ['key' => 'short_description', 'label' => __('messages.short_description'), 'has_value' => (bool)$event->short_description],
         ['key' => 'description', 'label' => __('messages.description'), 'has_value' => (bool)$event->description],
     ];
-    if ($event->exists) {
-        $aiFields[] = ['key' => 'flyer_image', 'label' => __('messages.flyer_image'), 'has_value' => (bool)$event->flyer_image_url];
-    }
 @endphp
 <x-ai-generate-modal
     name="ai-event-details"
@@ -5651,7 +5649,7 @@ function deleteFlyer(url, hash, token, element) {
     successCallback="handleAiEventDetailsResults"
     extraDataCallback="getEventDetailsExtraData"
     checkValuesCallback="getEventDetailsCurrentValues"
-    :showInstructions="false"
+    :showInstructions="true"
     :errorMessage="__('messages.ai_details_generation_failed')"
     :partialErrorMessage="__('messages.ai_flyer_generation_failed')"
 />

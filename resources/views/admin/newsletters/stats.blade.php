@@ -6,7 +6,6 @@
     <div class="space-y-6">
         @include('admin.partials._navigation', ['active' => 'newsletters'])
 
-    <div class="max-w-7xl mx-auto">
         <div class="flex justify-between items-center mb-6">
             <div>
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $newsletter->subject }}</h2>
@@ -124,7 +123,6 @@
                 {{ $recipients->links() }}
             </div>
         </div>
-    </div>
     </div>
 
     <script {!! nonce_attr() !!}>

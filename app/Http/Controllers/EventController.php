@@ -1391,6 +1391,7 @@ class EventController extends Controller
             'elements.*' => 'in:category_id,short_description,description,flyer_image',
             'name' => 'required|string',
             'event_id' => 'nullable|string',
+            'style_instructions' => 'nullable|string|max:500',
         ]);
 
         $allElements = $request->input('elements');
@@ -1423,6 +1424,10 @@ class EventController extends Controller
 
             if ($wantsFlyer) {
                 $eventId = UrlUtils::decodeId($request->input('event_id'));
+
+                if (! $eventId) {
+                    $imageError = true;
+                } else {
                 $event = Event::with(['roles', 'tickets'])->findOrFail($eventId);
 
                 if ($request->user()->cannot('update', $event)) {
@@ -1434,7 +1439,7 @@ class EventController extends Controller
                 }
 
                 try {
-                    $imageData = GeminiUtils::generateEventFlyer($event);
+                    $imageData = GeminiUtils::generateEventFlyer($event, $request->input('style_instructions'));
 
                     if ($imageData) {
                         if ($event->flyer_image_url) {
@@ -1470,6 +1475,8 @@ class EventController extends Controller
                         'event_id' => $event->id,
                     ]);
                     $imageError = true;
+                }
+
                 }
 
                 if ($imageError && empty($results)) {
@@ -3030,8 +3037,9 @@ class EventController extends Controller
             ->findOrFail(UrlUtils::decodeId($pollHash));
 
         $label = trim($request->input('label'));
+        $eventDate = $event->days_of_week ? ($request->input('event_date') ?: '') : '';
 
-        $result = DB::transaction(function () use ($poll, $label) {
+        $result = DB::transaction(function () use ($poll, $label, $eventDate) {
             $poll = EventPoll::lockForUpdate()->find($poll->id);
 
             if (! $poll || ! $poll->is_active || ! $poll->allow_user_options) {
@@ -3065,6 +3073,21 @@ class EventController extends Controller
                 $options[] = $label;
                 $poll->update(['options' => $options]);
 
+                // Auto-vote for the suggested option
+                $optionIndex = count($options) - 1;
+                try {
+                    EventPollVote::create([
+                        'event_poll_id' => $poll->id,
+                        'user_id' => auth()->id(),
+                        'option_index' => $optionIndex,
+                        'event_date' => $eventDate,
+                    ]);
+                } catch (\Illuminate\Database\QueryException $e) {
+                    if ($e->errorInfo[1] !== 1062) {
+                        throw $e;
+                    }
+                }
+
                 return ['success' => true, 'options' => $options, 'message' => __('messages.option_suggested')];
             }
 
@@ -3072,6 +3095,7 @@ class EventController extends Controller
             $pendingOptions[] = [
                 'label' => $label,
                 'user_id' => auth()->id(),
+                'event_date' => $eventDate,
                 'created_at' => now()->toIso8601String(),
             ];
             $poll->update(['pending_options' => $pendingOptions]);
@@ -3132,6 +3156,24 @@ class EventController extends Controller
                 'options' => $options,
                 'pending_options' => empty($pendingOptions) ? null : array_values($pendingOptions),
             ]);
+
+            // Auto-vote for the user who suggested this option
+            if (! empty($approved['user_id'])) {
+                $newOptionIndex = count($options) - 1;
+                $approvedEventDate = $approved['event_date'] ?? '';
+                try {
+                    EventPollVote::create([
+                        'event_poll_id' => $poll->id,
+                        'user_id' => $approved['user_id'],
+                        'option_index' => $newOptionIndex,
+                        'event_date' => $approvedEventDate,
+                    ]);
+                } catch (\Illuminate\Database\QueryException $e) {
+                    if ($e->errorInfo[1] !== 1062) {
+                        throw $e;
+                    }
+                }
+            }
 
             return [
                 'success' => true,

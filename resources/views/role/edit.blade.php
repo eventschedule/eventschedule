@@ -2073,15 +2073,19 @@
                         <div class="flex gap-2 mb-6">
                             <select id="custom-label-select" data-searchable class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                 <option value="">{{ __('messages.select_label_to_customize') }}</option>
-                                @php $existingLabelKeys = array_keys($role->custom_labels ?? []); @endphp
-                                @foreach(\App\Models\Role::getCustomizableLabels() as $labelKey => $labelDefault)
-                                    @if(!in_array($labelKey, $existingLabelKeys))
-                                    <option value="{{ $labelKey }}">{{ __('messages.' . $labelKey) }}</option>
-                                    @endif
+                                @php
+                                    $existingLabelKeys = array_keys($role->custom_labels ?? []);
+                                    $availableLabels = collect(\App\Models\Role::getCustomizableLabels())
+                                        ->filter(fn($v, $k) => !in_array($k, $existingLabelKeys))
+                                        ->mapWithKeys(fn($v, $k) => [$k => __('messages.' . $k)])
+                                        ->sort(SORT_LOCALE_STRING);
+                                @endphp
+                                @foreach($availableLabels as $labelKey => $labelTranslated)
+                                    <option value="{{ $labelKey }}">{{ $labelTranslated }}</option>
                                 @endforeach
                             </select>
-                            <button type="button" data-action="add-custom-label"
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[#4E81FA] rounded-md hover:bg-blue-600 transition-colors">
+                            <button type="button" data-action="add-custom-label" disabled
+                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[#4E81FA] rounded-md hover:bg-blue-600 transition-colors opacity-50 cursor-not-allowed">
                                 <svg class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                 </svg>
@@ -2090,7 +2094,7 @@
                         </div>
 
                         <div id="custom-labels-list" class="space-y-3">
-                            @foreach(($role->custom_labels ?? []) as $labelKey => $labelData)
+                            @foreach(collect($role->custom_labels ?? [])->sortBy(fn($v, $k) => __('messages.' . $k), SORT_LOCALE_STRING) as $labelKey => $labelData)
                             <div class="custom-label-item p-4 border border-gray-200 dark:border-gray-700 rounded-lg" data-label-key="{{ $labelKey }}">
                                 <div class="flex items-center justify-between mb-3">
                                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.' . $labelKey) }}</span>
@@ -2100,7 +2104,6 @@
                                 </div>
                                 <div class="space-y-3">
                                     <div>
-                                        <x-input-label :value="__('messages.custom_value')" class="text-sm" />
                                         <x-text-input type="text" name="custom_labels[{{ $labelKey }}][value]"
                                             value="{{ $labelData['value'] ?? '' }}"
                                             class="mt-1 block w-full"
@@ -4840,8 +4843,21 @@ function updateEventCustomFieldButton() {
     }
 }
 
+@if ($role->isPro())
 var customLabelDefaults = @json(collect(\App\Models\Role::getCustomizableLabels())->mapWithKeys(fn($v, $k) => [$k => __('messages.' . $k)]));
 var showEnField = {{ ($role->language_code !== 'en') ? 'true' : 'false' }};
+
+// Enable/disable Add button based on select value
+document.getElementById('custom-label-select').addEventListener('change', function() {
+    var btn = document.querySelector('[data-action="add-custom-label"]');
+    if (this.value) {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    } else {
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+});
 
 function addCustomLabel() {
     var select = document.getElementById('custom-label-select');
@@ -4865,33 +4881,52 @@ function addCustomLabel() {
             </div>`;
     }
 
-    var html = `
-        <div class="custom-label-item p-4 border border-gray-200 dark:border-gray-700 rounded-lg" data-label-key="${key}">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">${displayName}</span>
-                <button type="button" data-action="remove-custom-label" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                    {!! __('messages.remove') !!}
-                </button>
+    var newItem = document.createElement('div');
+    newItem.className = 'custom-label-item p-4 border border-gray-200 dark:border-gray-700 rounded-lg';
+    newItem.dataset.labelKey = key;
+    newItem.innerHTML = `
+        <div class="flex items-center justify-between mb-3">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">${displayName}</span>
+            <button type="button" data-action="remove-custom-label" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                {!! __('messages.remove') !!}
+            </button>
+        </div>
+        <div class="space-y-3">
+            <div>
+                <input type="text" name="custom_labels[${key}][value]"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                    placeholder="${displayName}"
+                    maxlength="200" />
             </div>
-            <div class="space-y-3">
-                <div>
-                    <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.custom_value') !!}</label>
-                    <input type="text" name="custom_labels[${key}][value]"
-                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
-                        placeholder="${displayName}"
-                        maxlength="200" />
-                </div>
-                ${enFieldHtml}
-            </div>
+            ${enFieldHtml}
         </div>
     `;
 
-    document.getElementById('custom-labels-list').insertAdjacentHTML('beforeend', html);
+    // Insert in alphabetical order
+    var list = document.getElementById('custom-labels-list');
+    var items = list.querySelectorAll('.custom-label-item');
+    var inserted = false;
+    for (var i = 0; i < items.length; i++) {
+        var itemName = items[i].querySelector('span').textContent.trim();
+        if (displayName.localeCompare(itemName) < 0) {
+            list.insertBefore(newItem, items[i]);
+            inserted = true;
+            break;
+        }
+    }
+    if (!inserted) {
+        list.appendChild(newItem);
+    }
 
     // Remove option from select
     var option = select.querySelector('option[value="' + key + '"]');
     if (option) option.remove();
     select.value = '';
+
+    // Disable Add button
+    var btn = document.querySelector('[data-action="add-custom-label"]');
+    btn.disabled = true;
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
 }
 
 function removeCustomLabel(btn) {
@@ -4901,15 +4936,28 @@ function removeCustomLabel(btn) {
     var key = item.dataset.labelKey;
     var displayName = customLabelDefaults[key] || key;
 
-    // Restore option to select
+    // Restore option to select in sorted position
     var select = document.getElementById('custom-label-select');
     var option = document.createElement('option');
     option.value = key;
     option.textContent = displayName;
-    select.appendChild(option);
+
+    var options = select.querySelectorAll('option');
+    var inserted = false;
+    for (var i = 1; i < options.length; i++) { // skip first placeholder option
+        if (displayName.localeCompare(options[i].textContent) < 0) {
+            select.insertBefore(option, options[i]);
+            inserted = true;
+            break;
+        }
+    }
+    if (!inserted) {
+        select.appendChild(option);
+    }
 
     item.remove();
 }
+@endif
 
 function deleteRoleImage(url, token, element) {
     if (!confirm(@json(__('messages.are_you_sure'), JSON_UNESCAPED_UNICODE))) {

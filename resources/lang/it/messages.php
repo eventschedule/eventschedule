@@ -2504,4 +2504,6 @@ return [
     'rss_feed' => 'Feed RSS',
     'rss_feed_description' => 'Iscriviti nel tuo lettore RSS per ricevere gli aggiornamenti degli eventi.',
     'save_schedule_first_for_feeds' => 'Salva prima il calendario per vedere gli URL dei feed.',
+    'copy_ical_feed' => 'Copia feed iCal',
+    'copy_rss_feed' => 'Copia feed RSS',
 ];

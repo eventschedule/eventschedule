@@ -2498,4 +2498,6 @@ return [
     'rss_feed' => 'פיד RSS',
     'rss_feed_description' => 'הירשם בקורא ה-RSS שלך כדי לקבל עדכוני אירועים.',
     'save_schedule_first_for_feeds' => 'שמור את לוח הזמנים קודם כדי לראות את כתובות הפיד.',
+    'copy_ical_feed' => 'העתק פיד iCal',
+    'copy_rss_feed' => 'העתק פיד RSS',
 ];

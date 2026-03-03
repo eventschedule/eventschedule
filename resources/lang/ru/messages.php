@@ -2523,4 +2523,6 @@ return [
     'rss_feed' => 'Лента RSS',
     'rss_feed_description' => 'Подпишитесь в RSS-ридере, чтобы получать обновления мероприятий.',
     'save_schedule_first_for_feeds' => 'Сначала сохраните расписание, чтобы увидеть URL-адреса лент.',
+    'copy_ical_feed' => 'Копировать iCal-ленту',
+    'copy_rss_feed' => 'Копировать RSS-ленту',
 ];

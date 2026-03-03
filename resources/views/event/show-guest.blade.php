@@ -14,15 +14,19 @@
             : ($role->accent_color ?? '#4E81FA'));
     $contrastColor = accent_contrast_color($accentColor);
 
-    // Collect all approved photo URLs for lightbox navigation
-    $allPhotoUrls = collect();
+    // Collect all approved photo data for lightbox navigation
+    $allPhotoData = collect();
     foreach ($event->parts as $part) {
       $partPhotos = $part->approvedPhotos;
       if ($event->days_of_week && isset($date) && $date) {
         $partPhotos = $partPhotos->filter(fn($p) => $p->event_date === $date || $p->event_date === null);
       }
       foreach ($partPhotos as $photo) {
-        $allPhotoUrls->push($photo->photo_url);
+        $allPhotoData->push([
+          'url' => $photo->photo_url,
+          'name' => $photo->user?->first_name ?? $photo->user?->name ?? __('messages.user'),
+          'date' => $photo->created_at->format('M j, Y g:ia'),
+        ]);
       }
     }
     $eventPhotos = $event->approvedPhotos->whereNull('event_part_id');
@@ -30,7 +34,11 @@
       $eventPhotos = $eventPhotos->filter(fn($p) => $p->event_date === $date || $p->event_date === null);
     }
     foreach ($eventPhotos as $photo) {
-      $allPhotoUrls->push($photo->photo_url);
+      $allPhotoData->push([
+        'url' => $photo->photo_url,
+        'name' => $photo->user?->first_name ?? $photo->user?->name ?? __('messages.user'),
+        'date' => $photo->created_at->format('M j, Y g:ia'),
+      ]);
     }
     @endphp
 
@@ -345,7 +353,7 @@
                     {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->venue->translatedDescription()) !!}
                   </div>
                   <button x-show="!expanded && needsExpand" :aria-expanded="expanded" @click="expanded = true" class="text-sm font-medium hover:underline mt-1 text-blue-600 dark:text-blue-400">
-                    {{ __('messages.read_more') }}
+                    {{ $role->customLabel('read_more') }}
                   </button>
                   <button x-show="expanded" x-cloak :aria-expanded="expanded" @click="expanded = false" class="text-sm font-medium hover:underline mt-1 text-blue-600 dark:text-blue-400">
                     {{ __('messages.show_less') }}
@@ -410,7 +418,7 @@
                     class="calendar-card-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                     style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
                     aria-expanded="true" aria-haspopup="true">
-                  {{ __('messages.add_to_calendar') }}
+                  {{ $role->customLabel('add_to_calendar') }}
                   <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                   </svg>
@@ -463,7 +471,7 @@
               class="calendar-card-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
               style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
               aria-expanded="true" aria-haspopup="true">
-            {{ __('messages.add_to_calendar') }}
+            {{ $role->customLabel('add_to_calendar') }}
             <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
             </svg>
@@ -554,7 +562,7 @@
         @endphp
         <nav aria-label="Breadcrumb" class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 {{ $role->isRtl() ? 'rtl' : '' }}">
           <a href="{{ $backUrl }}" class="px-3 py-2 -mx-3 hover:underline hover:text-gray-700 dark:hover:text-gray-200">
-            {{ $role->isRtl() ? '→' : '←' }} {{ __('messages.back_to_schedule') }}
+            {{ $role->isRtl() ? '→' : '←' }} {{ $role->customLabel('back_to_schedule') }}
           </a>
           @if (auth()->user() && auth()->user()->canEditEvent($event))
             <span>|</span>
@@ -751,7 +759,7 @@
               @if ($event->isRsvpFull($date))
                 {{ __('messages.registration_full') }}
               @else
-                {{ __('messages.register') }}
+                {{ $role->customLabel('register') }}
               @endif
             </button>
         @elseif ($event->canSellTickets($date) || ($event->registration_url && !$event->tickets_enabled && !$event->rsvp_enabled))
@@ -763,7 +771,7 @@
               @if ($event->allTicketsSoldOut($date))
                 {{ __('messages.join_waitlist') }}
               @else
-                {{ $event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets') }}
+                {{ $event->areTicketsFree() ? $role->customLabel('get_tickets') : $role->customLabel('buy_tickets') }}
               @endif
             </button>
           @else
@@ -786,7 +794,7 @@
                   class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
                   id="menu-button" aria-expanded="true" aria-haspopup="true">
-              {{ __('messages.add_to_calendar') }}
+              {{ $role->customLabel('add_to_calendar') }}
               <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
               </svg>
@@ -796,7 +804,7 @@
                   class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
                   id="menu-button" aria-expanded="true" aria-haspopup="true">
-              {{ __('messages.add_to_calendar') }}
+              {{ $role->customLabel('add_to_calendar') }}
               <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
               </svg>
@@ -842,7 +850,7 @@
                   }
                 "
                 class="flex-shrink-0 w-[42px] h-[42px] inline-flex items-center justify-center rounded-xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                :title="shareState === 'copied' ? '{{ __('messages.copied') }}' : '{{ __('messages.share') }}'">
+                :title="shareState === 'copied' ? '{{ __('messages.copied') }}' : '{{ $role->customLabel('share') }}'">
           <template x-if="shareState !== 'copied'">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" /></svg>
           </template>
@@ -897,7 +905,7 @@
               <div class="flex-1">
                 <div class="flex flex-col gap-4">
                   <h2 class="text-[28px] leading-snug text-gray-900 dark:text-gray-100">
-                    {{ __('messages.register') }}
+                    {{ $role->customLabel('register') }}
                   </h2>
                   <div class="text-base text-gray-700 dark:text-gray-300">
                     @include('event.rsvp', ['event' => $event, 'subdomain' => $subdomain])
@@ -1000,7 +1008,7 @@
         @if ($translation ? $translation->description_translated : $event->translatedDescription())
         <article class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8">
           <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
-            {{ __('messages.about') }}
+            {{ $role->customLabel('about') }}
           </h2>
           <div class="{{ $role->isRtl() || ($translation && $translation->role?->isRtl()) ? 'rtl' : '' }}">
             <div class="text-gray-700 dark:text-gray-300 text-base custom-content">
@@ -1014,7 +1022,7 @@
         @if ($event->agenda_image_url)
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
           <img src="{{ $event->agenda_image_url }}"
-            alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.agenda') }}"
+            alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ $role->customLabel('agenda') }}"
             class="w-full" loading="lazy" decoding="async"/>
         </div>
         @endif
@@ -1069,7 +1077,7 @@
                   <div class="mt-2 flex flex-wrap gap-2">
                     @foreach ($partPhotos as $photo)
                     <div class="flex flex-col">
-                      <button @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
+                      <button x-data @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
                         <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto max-w-full rounded-lg object-cover" loading="lazy">
                       </button>
                       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->user?->first_name ?? $photo->user?->name ?? __('messages.user') }}</p>
@@ -1256,7 +1264,7 @@
                   <div class="mt-2 flex flex-wrap gap-2">
                     @foreach ($partPhotos as $photo)
                     <div class="flex flex-col">
-                      <button @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
+                      <button x-data @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
                         <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto max-w-full rounded-lg object-cover" loading="lazy">
                       </button>
                       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->user?->first_name ?? $photo->user?->name ?? __('messages.user') }}</p>
@@ -1426,7 +1434,7 @@
             $myEventLevelPendingPhotos = $myEventLevelPendingPhotos->filter(fn($p) => $p->event_date === $date || $p->event_date === null);
           }
         @endphp
-        @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $eventLevelPhotos->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $myEventLevelPendingPhotos->count() > 0 || ($role->isPro() && $event->polls->count() > 0) || $allPhotoUrls->count() > 0 || ($event->parts->count() == 0 && $event->isFanContentEnabled())))
+        @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $eventLevelPhotos->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $myEventLevelPendingPhotos->count() > 0 || ($role->isPro() && $event->polls->count() > 0) || $allPhotoData->count() > 0 || ($event->parts->count() == 0 && $event->isFanContentEnabled())))
         <div id="event-media-section" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
 
           {{-- Polls --}}
@@ -1598,7 +1606,7 @@
           <div class="flex flex-wrap gap-3 mb-4">
             @foreach ($eventLevelPhotos as $photo)
             <div class="flex flex-col">
-              <button @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
+              <button x-data @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
                 <img src="{{ $photo->photo_url }}" alt="{{ $event->translatedName() }}" class="h-32 sm:h-40 w-auto max-w-full rounded-lg object-cover" loading="lazy">
               </button>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->user?->first_name ?? $photo->user?->name ?? __('messages.user') }}</p>
@@ -1606,9 +1614,9 @@
             @endforeach
           </div>
           @endif
-          @if ($allPhotoUrls->count() > 0)
+          @if ($allPhotoData->count() > 0)
           <div class="mb-4">
-            <a href="{{ $event->getPhotoGalleryUrl($subdomain, $date) }}" class="inline-flex items-center gap-1 text-sm font-medium transition-colors hover:opacity-80" style="color: {{ $accentColor }};">
+            <a href="{{ $event->getPhotoGalleryUrl($subdomain, $date) }}" class="inline-flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
               {{ __('messages.view_photo_gallery') }}
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 {{ $role->isRtl() ? 'rotate-180' : '' }}" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
             </a>
@@ -1749,15 +1757,15 @@
   </div>
 
   {{-- Shared photo lightbox --}}
-  @if ($allPhotoUrls->count() > 0)
+  @if ($allPhotoData->count() > 0)
   <div x-data="{
          lbOpen: false,
-         lbPhotos: {{ $allPhotoUrls->values()->toJson() }},
+         lbPhotos: {{ Js::from($allPhotoData->values()) }},
          lbIndex: 0,
          lbTouchStartX: 0,
          lbRtl: {{ $role->isRtl() ? 'true' : 'false' }},
          openAt(url) {
-           let idx = this.lbPhotos.indexOf(url);
+           let idx = this.lbPhotos.findIndex(p => p.url === url);
            this.lbIndex = idx >= 0 ? idx : 0;
            this.lbOpen = true;
            document.body.style.overflow = 'hidden';
@@ -1803,7 +1811,12 @@
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
         </button>
         {{-- Image --}}
-        <img :src="lbPhotos[lbIndex]" class="max-w-[96vw] max-h-[90vh] object-contain pointer-events-none" alt="">
+        <img :src="lbPhotos[lbIndex].url" class="max-w-[96vw] max-h-[90vh] object-contain pointer-events-none" alt="">
+        {{-- Caption --}}
+        <div class="absolute bottom-0 inset-x-0 flex items-center justify-between px-4 py-3 text-sm text-white/80 z-10" @click.stop>
+          <span x-text="lbPhotos[lbIndex].name"></span>
+          <span x-text="lbPhotos[lbIndex].date"></span>
+        </div>
       </div>
     </template>
   </div>
@@ -1841,7 +1854,8 @@
       @if ($userSale)
         <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $userSale->secret]) }}"
            target="_blank"
-           class="flex-shrink-0 inline-flex items-center justify-center rounded-md px-4 py-3 text-sm font-semibold border transition-colors border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400">
+           class="flex-shrink-0 inline-flex items-center justify-center rounded-md px-4 py-3 text-sm font-semibold border transition-colors hover:opacity-80"
+           style="border-color: {{ $accentColor }}; color: {{ $accentColor }};">
           {{ __('messages.view_ticket') }}
         </a>
       @endif
@@ -1854,7 +1868,7 @@
             @if ($event->isRsvpFull($date))
               {{ __('messages.registration_full') }}
             @else
-              {{ __('messages.register') }}
+              {{ $role->customLabel('register') }}
             @endif
           </button>
       @elseif ($event->canSellTickets($date) || ($event->registration_url && !$event->tickets_enabled && !$event->rsvp_enabled))
@@ -1866,7 +1880,7 @@
             @if ($event->allTicketsSoldOut($date))
               {{ __('messages.join_waitlist') }}
             @else
-              {{ $event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets') }}
+              {{ $event->areTicketsFree() ? $role->customLabel('get_tickets') : $role->customLabel('buy_tickets') }}
             @endif
           </button>
         @else
@@ -1892,7 +1906,7 @@
             id="mobile-calendar-cta"
             class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
             style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
-          {{ __('messages.add_to_calendar') }}
+          {{ $role->customLabel('add_to_calendar') }}
         </button>
       @endif
     </div>
@@ -1970,7 +1984,7 @@
             var resp = await fetch('{{ route('event.suggest_poll_option', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id), 'poll_hash' => 'POLL_HASH']) }}'.replace('POLL_HASH', pollHash), {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
-              body: JSON.stringify({ label: label }),
+              body: JSON.stringify({ label: label, event_date: '{{ ($event->days_of_week && $date) ? $date : '' }}' }),
             });
             if (resp.status === 401) {
               window.location.href = '{{ app_url("/login") }}';

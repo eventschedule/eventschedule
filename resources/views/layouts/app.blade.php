@@ -499,7 +499,7 @@
 
         /* Undo Tailwind preflight for markdown content */
         .custom-content ul, .custom-content ol { list-style: revert; margin: revert; padding: revert; }
-        .custom-content a { color: revert; text-decoration: revert; }
+        .custom-content a { color: #2563EB; text-decoration: revert; }
         .custom-content blockquote { margin: revert; }
         .custom-content hr { border: revert; height: revert; }
         .custom-content table, .custom-content th, .custom-content td { border: revert; padding: revert; }

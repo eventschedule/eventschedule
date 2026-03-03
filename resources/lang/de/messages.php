@@ -2509,4 +2509,6 @@ return [
     'rss_feed' => 'RSS-Feed',
     'rss_feed_description' => 'Abonnieren Sie in Ihrem RSS-Reader, um Veranstaltungsaktualisierungen zu erhalten.',
     'save_schedule_first_for_feeds' => 'Speichern Sie den Zeitplan zuerst, um die Feed-URLs zu sehen.',
+    'copy_ical_feed' => 'iCal-Feed kopieren',
+    'copy_rss_feed' => 'RSS-Feed kopieren',
 ];

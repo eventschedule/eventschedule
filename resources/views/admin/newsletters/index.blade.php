@@ -2,8 +2,7 @@
     <div class="space-y-6">
         @include('admin.partials._navigation', ['active' => 'newsletters'])
 
-        <div class="max-w-7xl mx-auto">
-            <div class="flex justify-between items-center mb-6">
+        <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.admin_newsletters') }}</h2>
                 <div class="flex gap-3">
                     <x-secondary-link href="{{ route('admin.newsletters.segments') }}">
@@ -120,7 +119,6 @@
                 </div>
             </div>
             @endif
-        </div>
     </div>
 
     <script {!! nonce_attr() !!}>

@@ -2506,4 +2506,6 @@ return [
     'rss_feed' => 'خلاصة RSS',
     'rss_feed_description' => 'اشترك في قارئ RSS لتلقي تحديثات الفعاليات.',
     'save_schedule_first_for_feeds' => 'احفظ الجدول أولاً لرؤية روابط الخلاصات.',
+    'copy_ical_feed' => 'نسخ خلاصة iCal',
+    'copy_rss_feed' => 'نسخ خلاصة RSS',
 ];

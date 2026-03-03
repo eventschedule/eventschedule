@@ -2,7 +2,6 @@
     <div class="space-y-6">
         @include('admin.partials._navigation', ['active' => 'newsletters'])
 
-    <div class="max-w-4xl mx-auto">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.edit_segment') }}</h2>
             <a href="{{ route('admin.newsletters.segments') }}"
@@ -160,7 +159,6 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_subscribers') }}</p>
             @endif
         </div>
-    </div>
     </div>
 
     <script {!! nonce_attr() !!}>

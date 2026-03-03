@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts" :otherRole="$otherRole" :galleryMode="true">
+<x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts" :otherRole="$otherRole" :galleryMode="true" :showMobileBackground="true">
 
   <main>
     @php
@@ -6,10 +6,15 @@
         ? ($otherRole->accent_color ?? '#4E81FA')
         : ($role->accent_color ?? '#4E81FA');
     $contrastColor = accent_contrast_color($accentColor);
-    $allPhotoUrls = $allPhotos->pluck('photo_url')->values();
+    $allPhotoData = $allPhotos->map(fn($p) => [
+        'url' => $p->photo_url,
+        'name' => $p->user?->first_name ?? $p->user?->name ?? __('messages.user'),
+        'date' => $p->created_at->format('M j, Y g:ia'),
+    ])->values();
     @endphp
 
   <div class="container mx-auto max-w-5xl px-4 sm:px-5 pt-4 pb-20 sm:pb-8">
+    <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5 sm:p-6">
 
     {{-- Header --}}
     <div class="mb-6">
@@ -19,14 +24,14 @@
       </a>
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('messages.photo_gallery') }}</h1>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $role->customLabel('photo_gallery') }}</h1>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ trans_choice('messages.photo_count', $allPhotos->count(), ['count' => $allPhotos->count()]) }}</p>
         </div>
         <div class="flex items-center gap-2">
           {{-- Share button (desktop) --}}
           <div x-data="{ shareState: 'idle' }" class="hidden sm:block">
             <button type="button"
-                    data-share-title="{{ $event->translatedName() }} - {{ __('messages.photo_gallery') }}"
+                    data-share-title="{{ $event->translatedName() }} - {{ $role->customLabel('photo_gallery') }}"
                     @click="
                       if (shareState !== 'idle') return;
                       if (navigator.share) {
@@ -45,7 +50,7 @@
               <template x-if="shareState === 'copied'">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-green-600 dark:text-green-400" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
               </template>
-              <span x-text="shareState === 'copied' ? '{{ __('messages.copied') }}' : '{{ __('messages.share') }}'"></span>
+              <span x-text="shareState === 'copied' ? '{{ __('messages.copied') }}' : '{{ $role->customLabel('share') }}'"></span>
             </button>
           </div>
           @if ($role->isPro() && $allPhotos->count() > 0)
@@ -114,9 +119,11 @@
     </div>
     @endif
 
+    </div>
+
     {{-- Pending photos --}}
     @if ($myPendingPhotos->count() > 0)
-    <div class="mb-6">
+    <div class="mt-6 mb-6">
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 opacity-60">
         @foreach ($myPendingPhotos as $photo)
         <div id="pending-photo-{{ $photo->id }}" class="relative aspect-square rounded-lg overflow-hidden">
@@ -130,9 +137,9 @@
 
     {{-- Photo grid or empty state --}}
     @if ($allPhotos->count() > 0)
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+    <div class="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
       @foreach ($allPhotos as $photo)
-      <button @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })"
+      <button x-data @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })"
               class="group relative aspect-square rounded-lg overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900" style="--tw-ring-color: {{ $accentColor }};">
         <img src="{{ $photo->photo_url }}" alt="{{ $event->translatedName() }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy">
         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -145,7 +152,7 @@
     </div>
     @else
     {{-- Empty state --}}
-    <div class="flex flex-col items-center justify-center py-20 text-center">
+    <div class="mt-6 flex flex-col items-center justify-center py-20 text-center">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
       <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">{{ __('messages.no_photos_yet') }}</h2>
       <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-sm">{{ __('messages.be_first_to_share') }}</p>
@@ -163,15 +170,15 @@
   </div>
 
   {{-- Shared photo lightbox --}}
-  @if ($allPhotoUrls->count() > 0)
+  @if ($allPhotoData->count() > 0)
   <div x-data="{
          lbOpen: false,
-         lbPhotos: {{ $allPhotoUrls->toJson() }},
+         lbPhotos: {{ Js::from($allPhotoData) }},
          lbIndex: 0,
          lbTouchStartX: 0,
          lbRtl: {{ $role->isRtl() ? 'true' : 'false' }},
          openAt(url) {
-           let idx = this.lbPhotos.indexOf(url);
+           let idx = this.lbPhotos.findIndex(p => p.url === url);
            this.lbIndex = idx >= 0 ? idx : 0;
            this.lbOpen = true;
            document.body.style.overflow = 'hidden';
@@ -217,7 +224,12 @@
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
         </button>
         {{-- Image --}}
-        <img :src="lbPhotos[lbIndex]" class="max-w-[96vw] max-h-[90vh] object-contain pointer-events-none" alt="">
+        <img :src="lbPhotos[lbIndex].url" class="max-w-[96vw] max-h-[90vh] object-contain pointer-events-none" alt="">
+        {{-- Caption --}}
+        <div class="absolute bottom-0 inset-x-0 flex items-center justify-between px-4 py-3 text-sm text-white/80 z-10" @click.stop>
+          <span x-text="lbPhotos[lbIndex].name"></span>
+          <span x-text="lbPhotos[lbIndex].date"></span>
+        </div>
       </div>
     </template>
   </div>
@@ -231,7 +243,7 @@
     <div class="flex items-center gap-3 {{ $role->isRtl() ? 'rtl' : '' }}">
       {{-- Mobile share button --}}
       <button type="button"
-              data-share-title="{{ $event->translatedName() }} - {{ __('messages.photo_gallery') }}"
+              data-share-title="{{ $event->translatedName() }} - {{ $role->customLabel('photo_gallery') }}"
               @click="
                 if (shareState !== 'idle') return;
                 if (navigator.share) {

@@ -2546,4 +2546,6 @@ return [
     'rss_feed' => 'RSS Feed',
     'rss_feed_description' => 'Subscribe in your RSS reader to receive event updates.',
     'save_schedule_first_for_feeds' => 'Save the schedule first to see feed URLs.',
+    'copy_ical_feed' => 'Copy iCal Feed',
+    'copy_rss_feed' => 'Copy RSS Feed',
 ];

@@ -2520,4 +2520,6 @@ return [
     'rss_feed' => 'RSS-voog',
     'rss_feed_description' => 'Telli oma RSS-lugejas, et saada sündmuste uuendusi.',
     'save_schedule_first_for_feeds' => 'Salvesta ajakava esmalt, et näha voo-URL-e.',
+    'copy_ical_feed' => 'Kopeeri iCal-voog',
+    'copy_rss_feed' => 'Kopeeri RSS-voog',
 ];

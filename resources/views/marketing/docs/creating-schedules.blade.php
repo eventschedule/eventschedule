@@ -114,6 +114,7 @@
                                 <a href="#integrations-email" class="doc-nav-link">Email</a>
                                 <a href="#integrations-google" class="doc-nav-link">Google Calendar</a>
                                 <a href="#integrations-caldav" class="doc-nav-link">CalDAV</a>
+                                <a href="#integrations-feeds" class="doc-nav-link">Feeds</a>
                             </div>
                         </div>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
@@ -879,6 +880,24 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Once connected, the integration status shows your server host. You can disconnect at any time to stop syncing.
                             </p>
+
+                            <!-- Feeds -->
+                            <h3 id="integrations-feeds" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Feeds</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">The Feeds tab provides read-only feed URLs that let others subscribe to your schedule's events from external applications.</p>
+
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">iCal Feed</strong> - Subscribe to your schedule's events from any calendar app (Google Calendar, Apple Calendar, Outlook, etc.). The calendar will automatically stay up to date as you add or change events.</li>
+                                <li><strong class="text-gray-900 dark:text-white">RSS Feed</strong> - Follow your schedule's events using any RSS reader. Useful for staying notified about new events.</li>
+                            </ul>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Each feed has a <strong class="text-gray-900 dark:text-white">copy</strong> button to quickly copy the URL to your clipboard for sharing or pasting into another app.
+                            </p>
+
+                            <div class="doc-callout doc-callout-info mb-6">
+                                <div class="doc-callout-title">Note</div>
+                                <p>Feed URLs are only available after the schedule has been saved. Create and save your schedule first, then return to the Feeds tab to find your URLs.</p>
+                            </div>
                         </section>
 
                         <!-- See Also -->

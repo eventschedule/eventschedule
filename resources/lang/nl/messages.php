@@ -2503,4 +2503,6 @@ return [
     'rss_feed' => 'RSS-feed',
     'rss_feed_description' => 'Abonneer je in je RSS-lezer om evenementupdates te ontvangen.',
     'save_schedule_first_for_feeds' => 'Sla de agenda eerst op om de feed-URL\'s te zien.',
+    'copy_ical_feed' => 'iCal-feed kopiëren',
+    'copy_rss_feed' => 'RSS-feed kopiëren',
 ];
