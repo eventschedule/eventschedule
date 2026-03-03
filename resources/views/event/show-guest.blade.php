@@ -1126,6 +1126,7 @@
                     @endforeach
                   </div>
                   @endif
+                  @if ($event->isFanContentEnabled())
                   <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
                     @if (! $photoLimitReached)
                     <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
@@ -1203,6 +1204,7 @@
                       </form>
                     </div>
                   </div>
+                  @endif
                   @endif
                 </div>
               </div>
@@ -1303,6 +1305,7 @@
                     @endforeach
                   </div>
                   @endif
+                  @if ($event->isFanContentEnabled())
                   <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
                     @if (! $photoLimitReached)
                     <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
@@ -1380,6 +1383,7 @@
                       </form>
                     </div>
                   </div>
+                  @endif
                   @endif
                 </div>
               </div>
@@ -1604,7 +1608,7 @@
             @endforeach
           </div>
           @endif
-          @if ($event->parts->count() == 0)
+          @if ($event->parts->count() == 0 && $event->isFanContentEnabled())
           <div class="flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
             @if (! $photoLimitReached)
             <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">

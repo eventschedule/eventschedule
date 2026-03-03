@@ -157,12 +157,13 @@ class GenerateDocScreenshots extends Command
             'creating-schedules' => [
                 ['id' => 'creating-schedules--section-details', 'route' => '/simpsons/edit', 'section' => 'section-details'],
                 ['id' => 'creating-schedules--section-address', 'route' => $venueRole ? '/demo-moestavern/edit' : null, 'section' => 'section-address'],
-                ['id' => 'creating-schedules--section-contact-info', 'route' => '/simpsons/edit', 'section' => 'section-contact-info'],
+                ['id' => 'creating-schedules--section-contact-info', 'route' => '/simpsons/edit', 'script' => "document.querySelector('a[data-section=\"section-details\"]').click(); document.querySelector('.details-tab[data-tab=\"contact\"]').click()"],
                 ['id' => 'creating-schedules--section-subschedules', 'route' => '/simpsons/edit', 'section' => 'section-subschedules'],
                 ['id' => 'creating-schedules--section-settings', 'route' => '/simpsons/edit', 'section' => 'section-settings'],
+                ['id' => 'creating-schedules--section-engagement', 'route' => '/simpsons/edit', 'section' => 'section-engagement'],
                 ['id' => 'creating-schedules--section-auto-import', 'route' => '/simpsons/edit', 'section' => 'section-auto-import'],
                 ['id' => 'creating-schedules--section-integrations', 'route' => '/simpsons/edit', 'section' => 'section-integrations'],
-                ['id' => 'creating-schedules--section-email-settings', 'route' => '/simpsons/edit', 'section' => 'section-email-settings'],
+                ['id' => 'creating-schedules--section-email-settings', 'route' => '/simpsons/edit', 'script' => "document.querySelector('a[data-section=\"section-integrations\"]').click(); document.querySelector('.integration-tab[data-tab=\"email\"]').click()"],
             ],
             'creating-events' => [
                 ['id' => 'creating-events--schedule-tab', 'route' => '/simpsons/schedule'],

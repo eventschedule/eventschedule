@@ -2052,7 +2052,7 @@
     {{ __('messages.upgrade_feature_description_ai_prompt') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-email-scheduling" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.creating_schedules') }}#email-settings">
+<x-upgrade-modal name="upgrade-email-scheduling" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.creating_schedules') }}#integrations-email">
     {{ __('messages.upgrade_feature_description_email_scheduling') }}
 </x-upgrade-modal>
 

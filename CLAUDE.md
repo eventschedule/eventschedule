@@ -34,6 +34,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Keep doc search index up-to-date** - When adding, removing, or renaming doc sections, update `getDocSearchIndex()` in `MarketingController` so the docs search stays accurate
 - **Never expose raw exception messages to users** - In catch blocks that handle user-facing responses, catch `QueryException` (and other system exceptions) separately and show a generic error message. Use `report($e)` to send to Sentry. Only show `$e->getMessage()` for intentional business logic exceptions.
 - **Always translate new language keys** - When adding a key to non-English `resources/lang/` files, use proper translations (check existing similar keys in the file for reference), never copy the English string
+- **Use bordered panels for AP warnings** - Never use plain colored text for warnings. Use `bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3` with a warning triangle SVG icon (`w-5 h-5 text-amber-600 dark:text-amber-400`) inside a flex layout
 
 ## Terminology
 

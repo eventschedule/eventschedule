@@ -504,6 +504,12 @@ class EventRepo
             $event->feedback_enabled = $val === '' || $val === null ? null : (bool) $val;
         }
 
+        // Handle nullable fan_content_enabled (empty string = null = use schedule default)
+        if ($request->has('fan_content_enabled')) {
+            $val = $request->input('fan_content_enabled');
+            $event->fan_content_enabled = $val === '' || $val === null ? null : (bool) $val;
+        }
+
         $event->save();
 
         if ($venue) {

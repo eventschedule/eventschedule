@@ -70,9 +70,16 @@
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
                         <a href="#schedule-types" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Schedule Types</a>
-                        <a href="#details" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Details</a>
+                        <div class="doc-nav-group">
+                            <a href="#details" class="doc-nav-group-header doc-nav-link">Details <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
+                            <div class="doc-nav-group-items">
+                                <a href="#details-general" class="doc-nav-link">General</a>
+                                <a href="#details-localization" class="doc-nav-link">Localization</a>
+                                <a href="#contact-info" class="doc-nav-link">Contact Info</a>
+                            </div>
+                        </div>
+                        <a href="#ai-details-generator" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">AI Details Generator</a>
                         <a href="#address" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Address</a>
-                        <a href="#contact-info" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Contact Info</a>
                         <a href="#style" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Style</a>
                         <a href="#subschedules" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Sub-schedules</a>
                         <div class="doc-nav-group">
@@ -81,19 +88,27 @@
                                 <a href="#settings-general" class="doc-nav-link">General</a>
                                 <a href="#custom-domain" class="doc-nav-link">Custom Domain</a>
                                 <a href="#settings-custom-fields" class="doc-nav-link">Custom Fields</a>
-                                <a href="#settings-requests" class="doc-nav-link">Requests</a>
+                                <a href="#settings-notifications" class="doc-nav-link">Notifications</a>
                                 <a href="#settings-advanced" class="doc-nav-link">Advanced</a>
+                            </div>
+                        </div>
+                        <div class="doc-nav-group">
+                            <a href="#engagement" class="doc-nav-group-header doc-nav-link">Engagement <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
+                            <div class="doc-nav-group-items">
+                                <a href="#engagement-requests" class="doc-nav-link">Requests</a>
+                                <a href="#engagement-fan-content" class="doc-nav-link">Fan Content</a>
+                                <a href="#engagement-feedback" class="doc-nav-link">Feedback</a>
                             </div>
                         </div>
                         <a href="#auto-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Auto Import</a>
                         <div class="doc-nav-group">
                             <a href="#integrations" class="doc-nav-group-header doc-nav-link">Integrations <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
                             <div class="doc-nav-group-items">
+                                <a href="#integrations-email" class="doc-nav-link">Email</a>
                                 <a href="#integrations-google" class="doc-nav-link">Google Calendar</a>
                                 <a href="#integrations-caldav" class="doc-nav-link">CalDAV</a>
                             </div>
                         </div>
-                        <a href="#email-settings" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Email Settings</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
                 </aside>
@@ -139,10 +154,12 @@
                         <!-- Details -->
                         <section id="details" class="doc-section">
                             <h2 class="doc-heading">Details</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Configure your schedule's core identity in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Configure your schedule's core identity in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong>. Details are organized into three tabs: General, Localization, and Contact Info.</p>
 
                             <x-doc-screenshot id="creating-schedules--section-details" alt="Schedule details settings" loading="eager" />
 
+                            <!-- General Tab -->
+                            <h3 id="details-general" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">General</h3>
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Schedule Name</h4>
@@ -160,6 +177,42 @@
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Description</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">A bio or description of your schedule. Supports <strong class="text-gray-900 dark:text-white">Markdown formatting</strong> for links, bold text, lists, and more. Tell visitors what you're about and what kind of events they can expect.</p>
                                 </div>
+                            </div>
+
+                            <!-- Localization Tab -->
+                            <h3 id="details-localization" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Localization</h3>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Language</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose from 11 supported languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, and Russian. This affects the interface language on your schedule page.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Timezone</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Set your schedule's timezone. All event times are displayed in this timezone. Important for audiences in multiple regions.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Time Format</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose between 12-hour (2:00 PM) or 24-hour (14:00) time format based on your audience's preference.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- AI Details Generator -->
+                        <section id="ai-details-generator" class="doc-section">
+                            <h2 class="doc-heading">AI Details Generator <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span></h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Let AI generate a short description and description for your schedule based on its name and type.</p>
+                            <div class="space-y-3 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How It Works</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Click the <strong class="text-gray-900 dark:text-white">AI</strong> button in the Details section header, select which fields to generate, and the AI will create content based on your schedule's name and type.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Generated Fields</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Short description</strong> and <strong class="text-gray-900 dark:text-white">description</strong>. Fields with existing values show a blue dot indicator; generating will replace their content.</p>
+                                </div>
+                            </div>
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6">
+                                <p class="text-sm text-blue-800 dark:text-blue-300"><strong>Note:</strong> Selfhosted installations require a <x-link href="https://ai.google.dev/" target="_blank">Gemini API key</x-link> configured in the environment settings for AI features to work.</p>
                             </div>
                         </section>
 
@@ -194,7 +247,7 @@
                         <!-- Contact Info -->
                         <section id="contact-info" class="doc-section">
                             <h2 class="doc-heading">Contact Info</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Add contact details in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong> so visitors can reach you. These appear on your public schedule page.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Add contact details in the <strong class="text-gray-900 dark:text-white">Details &rarr; Contact Info</strong> tab so visitors can reach you. These appear on your public schedule page.</p>
 
                             <x-doc-screenshot id="creating-schedules--section-contact-info" alt="Schedule contact information settings" />
 
@@ -271,18 +324,6 @@
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Custom Domain <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-1">Enterprise</span></h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Use your own domain (e.g., <code class="doc-inline-code">events.yourbrand.com</code>) instead of a subdomain. A custom domain gives your <a href="{{ route('marketing.docs.sharing') }}#schedule-url" class="text-cyan-400 hover:text-cyan-300">shared schedule URL</a> a more professional look.</p>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">There are two modes: <strong class="text-gray-900 dark:text-white">Direct mode</strong> and <strong class="text-gray-900 dark:text-white">Redirect mode</strong>. See <a href="#custom-domain" class="text-cyan-400 hover:text-cyan-300">setup instructions</a> below.</p>
-                                </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Language</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose from 11 supported languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, and Russian. This affects the interface language on your schedule page.</p>
-                                </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Timezone</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Set your schedule's timezone. All event times are displayed in this timezone. Important for audiences in multiple regions.</p>
-                                </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Time Format</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose between 12-hour (2:00 PM) or 24-hour (14:00) time format based on your audience's preference.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Event URL Pattern</h4>
@@ -571,13 +612,65 @@
                                 <p>All variable values are automatically converted to URL-safe slugs: lowercase letters, numbers, and dashes only. For example, "Summer Concert" becomes "summer-concert" and "New York" becomes "new-york".</p>
                             </div>
 
+                            <!-- Notifications Tab -->
+                            <h3 id="settings-notifications" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Notifications</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Configure which email notifications you receive for schedule activity.</p>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Notify New Request</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Receive an email when someone submits a new event request to your schedule.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Notify New Fan Content</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Receive an email when someone submits fan content (photos or videos) to one of your events.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Notify New Sale</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Receive an email when a ticket sale is completed for one of your events.</p>
+                                </div>
+                            </div>
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Email Settings Required</div>
+                                <p>On the hosted platform, notification emails require <a href="#integrations-email" class="text-cyan-400 hover:text-cyan-300">Email settings</a> to be configured. Without SMTP settings, notifications will be disabled.</p>
+                            </div>
+
+                            <!-- Advanced Tab -->
+                            <h3 id="settings-advanced" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Advanced</h3>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">First Day of Week</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose whether your calendar starts on Sunday or Monday.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Import Form Fields</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Customize which fields are shown on the event request form. This lets you control what information submitters provide when requesting events.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Link Directly to Registration</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">When enabled, clicking events on the calendar or scanning QR codes in event graphics will link directly to the event's registration URL instead of showing the event detail page first. Only affects events that have a registration URL configured.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Unlisted Schedule <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-1">Enterprise</span></h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Make your schedule private - it won't appear in search results or public listings. Only people with the direct link can access it. For per-event privacy with password protection, see <a href="{{ route('marketing.docs.creating_events') }}#privacy" class="text-cyan-400 hover:text-cyan-300">Privacy</a>.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Engagement -->
+                        <section id="engagement" class="doc-section">
+                            <h2 class="doc-heading">Engagement</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Configure how visitors interact with your schedule through event requests, fan content, and feedback.</p>
+
+                            <x-doc-screenshot id="creating-schedules--section-engagement" alt="Schedule engagement settings" />
+
                             <!-- Requests Tab -->
-                            <h3 id="settings-requests" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Requests</h3>
+                            <h3 id="engagement-requests" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Requests</h3>
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Accept Event Requests</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Allow others to submit events to your schedule. Submitted events can be reviewed in the <a href="{{ route('marketing.docs.creating_events') }}#manual" class="text-cyan-400 hover:text-cyan-300">pending queue</a>. Perfect for:</p>
                                     <ul class="text-sm text-gray-500 dark:text-gray-400 list-disc list-inside space-y-1">
+                                        <li><strong class="text-gray-900 dark:text-white">Talent:</strong> Allow others to request to book you for events</li>
                                         <li><strong class="text-gray-900 dark:text-white">Venues:</strong> Accept booking requests from bands and performers</li>
                                         <li><strong class="text-gray-900 dark:text-white">Curators:</strong> Let the community submit local events</li>
                                         <li><strong class="text-gray-900 dark:text-white">Organizations:</strong> Collect event submissions from members</li>
@@ -601,25 +694,31 @@
                                 </div>
                             </div>
 
-                            <!-- Advanced Tab -->
-                            <h3 id="settings-advanced" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Advanced</h3>
+                            <!-- Fan Content Tab -->
+                            <h3 id="engagement-fan-content" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Fan Content</h3>
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">First Day of Week</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose whether your calendar starts on Sunday or Monday.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Enable Fan Content</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Allow visitors to submit photos and videos to your events. Submitted content requires your approval before appearing publicly on the event page.</p>
+                                </div>
+                            </div>
+
+                            <!-- Feedback Tab -->
+                            <h3 id="engagement-feedback" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Feedback</h3>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Enable Feedback</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Automatically send feedback requests to attendees after events end. Attendees receive an email asking them to rate the event and leave comments.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Import Form Fields</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Customize which fields are shown on the event request form. This lets you control what information submitters provide when requesting events.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Feedback Delay</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Set how long after an event ends before feedback requests are sent. Choose from 1 hour to 48 hours depending on your preference.</p>
                                 </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Link Directly to Registration</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">When enabled, clicking events on the calendar or scanning QR codes in event graphics will link directly to the event's registration URL instead of showing the event detail page first. Only affects events that have a registration URL configured.</p>
-                                </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Unlisted Schedule <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-1">Enterprise</span></h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Make your schedule private - it won't appear in search results or public listings. Only people with the direct link can access it. For per-event privacy with password protection, see <a href="{{ route('marketing.docs.creating_events') }}#privacy" class="text-cyan-400 hover:text-cyan-300">Privacy</a>.</p>
-                                </div>
+                            </div>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Email Settings Required</div>
+                                <p>On the hosted platform, feedback emails require <a href="#integrations-email" class="text-cyan-400 hover:text-cyan-300">Email settings</a> to be configured.</p>
                             </div>
                         </section>
 
@@ -652,7 +751,7 @@
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
-                                <p>Auto-imported events go to your pending queue if you have <a href="#settings-requests" class="text-cyan-400 hover:text-cyan-300">Require Approval</a> enabled, so you can review them before they appear publicly.</p>
+                                <p>Auto-imported events go to your pending queue if you have <a href="#engagement-requests" class="text-cyan-400 hover:text-cyan-300">Require Approval</a> enabled, so you can review them before they appear publicly.</p>
                             </div>
                         </section>
 
@@ -669,6 +768,39 @@
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Choose one-way sync (import only or export only) or two-way sync to keep both calendars in perfect harmony.</p>
                                 </div>
                             </div>
+
+                            <!-- Email -->
+                            <h3 id="integrations-email" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Email</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Configure email delivery for your schedule's notifications and communications.</p>
+
+                            <x-doc-screenshot id="creating-schedules--section-email-settings" alt="Email settings" />
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Availability</div>
+                                <p>Custom email settings are available for selfhosted installations and Pro plans.</p>
+                            </div>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">SMTP Configuration</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Configure your own SMTP server for sending emails. This gives you full control over deliverability and lets you use your email provider.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Custom Sender Address</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Send emails from your own domain (e.g., <code class="doc-inline-code">events@yourdomain.com</code>) instead of the default Event Schedule address.</p>
+                                </div>
+                            </div>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Custom email settings also apply to <a href="{{ route('marketing.docs.newsletters') }}" class="text-cyan-400 hover:text-cyan-300">newsletters</a> sent from your schedule.</p>
+
+                            <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-4">Setting Up Custom Email</h4>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong></li>
+                                <li>Navigate to the <strong class="text-gray-900 dark:text-white">Integrations</strong> section and select the <strong class="text-gray-900 dark:text-white">Email</strong> tab</li>
+                                <li>Enter your SMTP server details (host, port, username, password)</li>
+                                <li>Set your custom sender name and email address</li>
+                                <li>Send a test email to verify the configuration</li>
+                            </ol>
 
                             <!-- Google Calendar -->
                             <h3 id="integrations-google" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Google Calendar</h3>
@@ -703,41 +835,6 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Once connected, the integration status shows your server host. You can disconnect at any time to stop syncing.
                             </p>
-                        </section>
-
-                        <!-- Email Settings -->
-                        <section id="email-settings" class="doc-section">
-                            <h2 class="doc-heading">Email Settings</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Configure email delivery for your schedule's notifications and communications.</p>
-
-                            <x-doc-screenshot id="creating-schedules--section-email-settings" alt="Email settings" />
-
-                            <div class="doc-callout doc-callout-info">
-                                <div class="doc-callout-title">Availability</div>
-                                <p>Custom email settings are available for selfhosted installations and Pro plans.</p>
-                            </div>
-
-                            <div class="space-y-4 mb-6">
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">SMTP Configuration</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Configure your own SMTP server for sending emails. This gives you full control over deliverability and lets you use your email provider.</p>
-                                </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Custom Sender Address</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Send emails from your own domain (e.g., <code class="doc-inline-code">events@yourdomain.com</code>) instead of the default Event Schedule address.</p>
-                                </div>
-                            </div>
-
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">Custom email settings also apply to <a href="{{ route('marketing.docs.newsletters') }}" class="text-cyan-400 hover:text-cyan-300">newsletters</a> sent from your schedule.</p>
-
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Setting Up Custom Email</h3>
-                            <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong></li>
-                                <li>Scroll to <strong class="text-gray-900 dark:text-white">Email Settings</strong></li>
-                                <li>Enter your SMTP server details (host, port, username, password)</li>
-                                <li>Set your custom sender name and email address</li>
-                                <li>Send a test email to verify the configuration</li>
-                            </ol>
                         </section>
 
                         <!-- See Also -->

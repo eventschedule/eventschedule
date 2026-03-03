@@ -87,6 +87,7 @@ class Role extends Model implements MustVerifyEmail
         'direct_registration',
         'feedback_enabled',
         'feedback_delay_hours',
+        'fan_content_enabled',
         'first_day_of_week',
         'approved_subdomains',
         'default_curator_ids',
@@ -106,6 +107,7 @@ class Role extends Model implements MustVerifyEmail
         'last_translated_at' => 'datetime',
         'direct_registration' => 'boolean',
         'feedback_enabled' => 'boolean',
+        'fan_content_enabled' => 'boolean',
         'boost_credit' => 'decimal:2',
         'boost_max_budget' => 'decimal:2',
         'phone_verified_at' => 'datetime',
@@ -880,11 +882,6 @@ class Role extends Model implements MustVerifyEmail
             return true;
         }
 
-        // Admins get all features
-        if (auth()->check() && auth()->user()->isAdmin()) {
-            return true;
-        }
-
         // Check if user has an active Stripe subscription
         if ($this->hasActiveSubscription()) {
             return true;
@@ -907,10 +904,6 @@ class Role extends Model implements MustVerifyEmail
     public function scopeWherePro($query)
     {
         if (! config('app.hosted') || config('app.is_testing')) {
-            return $query;
-        }
-
-        if (auth()->check() && auth()->user()->isAdmin()) {
             return $query;
         }
 
@@ -941,11 +934,6 @@ class Role extends Model implements MustVerifyEmail
         }
 
         if (config('app.is_testing')) {
-            return true;
-        }
-
-        // Admins get all features
-        if (auth()->check() && auth()->user()->isAdmin()) {
             return true;
         }
 

@@ -332,6 +332,18 @@
         <input type="hidden" name="embed" value="true">
         @endif
 
+        @if (session('error'))
+        <div class="mb-6 p-3 rounded-lg text-sm bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
+            {{ session('error') }}
+        </div>
+        @endif
+
+        @if ($errors->any() && !$errors->has('name') && !$errors->has('email') && !$errors->has('password') && !$errors->has('cf-turnstile-response'))
+        <div class="mb-6 p-3 rounded-lg text-sm bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
+            {{ __('messages.error') }}
+        </div>
+        @endif
+
         <div class="mb-6">
             <label for="name" class="text-gray-900 dark:text-gray-100">{{ __('messages.name') . ' *' }}</label>
             <input type="text" name="name" id="name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"

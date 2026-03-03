@@ -11,6 +11,15 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class TicketCheckoutRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('tickets')) {
+            $this->merge([
+                'tickets' => array_filter($this->tickets, fn ($qty) => $qty > 0),
+            ]);
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *

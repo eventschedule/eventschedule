@@ -1119,7 +1119,6 @@
                                 {{ __('messages.settings') }}
                             </a>
                             @endif
-                            @if ($role->isPro() || $event->exists)
                             @php $fanContentPendingCount = $event->exists ? (($pendingVideos->count() ?? 0) + ($pendingComments->count() ?? 0) + ($pendingPhotos->count() ?? 0)) : 0; @endphp
                             <a href="#section-engagement" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-engagement">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -1130,7 +1129,6 @@
                                 <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $fanContentPendingCount }}</span>
                                 @endif
                             </a>
-                            @endif
                         </nav>
                         <!-- Sidebar Save Button -->
                         <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
@@ -3145,7 +3143,6 @@
                     </div>
                 @endif
 
-            @if ($role->isPro() || $event->exists)
             <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-engagement">
                 <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -3169,35 +3166,33 @@
                     <!-- Engagement Tabs -->
                     <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
                         <nav class="-mb-px flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide">
-                            @if ($role->isPro())
                             <button type="button" @click="activeEngagementTab = 'polls'"
                                 :class="activeEngagementTab === 'polls' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
                                 class="engagement-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="polls">
                                 {{ __('messages.polls') }}
+                            </button>
+                            <button type="button" @click="activeEngagementTab = 'fan_content'"
+                                :class="activeEngagementTab === 'fan_content' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
+                                class="engagement-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="fan_content">
+                                {{ __('messages.fan_content') }}
+                                @if ($event->exists)
+                                @php $fanContentPendingCount = ($pendingVideos->count() ?? 0) + ($pendingComments->count() ?? 0) + ($pendingPhotos->count() ?? 0); @endphp
+                                @if ($fanContentPendingCount > 0)
+                                <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full ms-1">{{ $fanContentPendingCount }}</span>
+                                @endif
+                                @endif
                             </button>
                             <button type="button" @click="activeEngagementTab = 'feedback'"
                                 :class="activeEngagementTab === 'feedback' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
                                 class="engagement-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="feedback">
                                 {{ __('messages.feedback') }}
                             </button>
-                            @endif
-                            @if ($event->exists)
-                            <button type="button" @click="activeEngagementTab = 'fan_content'"
-                                :class="activeEngagementTab === 'fan_content' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                class="engagement-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="fan_content">
-                                {{ __('messages.fan_content') }}
-                                @php $fanContentPendingCount = ($pendingVideos->count() ?? 0) + ($pendingComments->count() ?? 0) + ($pendingPhotos->count() ?? 0); @endphp
-                                @if ($fanContentPendingCount > 0)
-                                <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full ms-1">{{ $fanContentPendingCount }}</span>
-                                @endif
-                            </button>
-                            @endif
                         </nav>
                     </div>
 
                     <!-- Polls Tab -->
-                    @if ($role->isPro())
                     <div v-show="activeEngagementTab === 'polls'">
+                    @if ($role->isPro())
                         {{-- Poll message/error --}}
                         <div v-if="pollMessage" class="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-700 dark:text-green-400">
                             @{{ pollMessage }}
@@ -3289,25 +3284,31 @@
                             </svg>
                             {{ __('messages.add_poll') }}
                         </button>
-                    </div>
-
-                    <!-- Feedback Tab -->
-                    <div v-show="activeEngagementTab === 'feedback'">
-                        <div class="mb-6">
-                            <x-input-label for="feedback_enabled" value="{{ __('messages.feedback_override') }}" />
-                            <select id="feedback_enabled" name="feedback_enabled" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
-                                <option value="" {{ is_null($event->feedback_enabled) ? 'selected' : '' }}>{{ __('messages.use_schedule_default') }}</option>
-                                <option value="1" {{ $event->feedback_enabled === true ? 'selected' : '' }}>{{ __('messages.enabled') }}</option>
-                                <option value="0" {{ $event->feedback_enabled === false && !is_null($event->feedback_enabled) ? 'selected' : '' }}>{{ __('messages.disabled') }}</option>
-                            </select>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.feedback_override_help') }}</p>
-                        </div>
-                    </div>
+                    @else
+                        <p class="text-gray-500 dark:text-gray-400 mb-2">{{ __('messages.polls_pro_only') }}</p>
+                        @if (config('app.hosted'))
+                        <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-polls')"
+                            class="text-sm text-[#4E81FA] hover:underline font-medium">
+                            {{ __('messages.upgrade') }} &rarr;
+                        </button>
+                        @endif
                     @endif
+                    </div>
 
                     <!-- Fan Content Tab -->
-                    @if ($event->exists)
                     <div v-show="activeEngagementTab === 'fan_content'">
+                    @if ($role->isPro())
+                        <div class="mb-6">
+                            <x-input-label for="fan_content_enabled" value="{{ __('messages.fan_content_override') }}" />
+                            <select id="fan_content_enabled" name="fan_content_enabled" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                                <option value="" {{ is_null($event->fan_content_enabled) ? 'selected' : '' }}>{{ __('messages.use_schedule_default') }}</option>
+                                <option value="1" {{ $event->fan_content_enabled === true ? 'selected' : '' }}>{{ __('messages.enabled') }}</option>
+                                <option value="0" {{ $event->fan_content_enabled === false && !is_null($event->fan_content_enabled) ? 'selected' : '' }}>{{ __('messages.disabled') }}</option>
+                            </select>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.fan_content_override_help') }}</p>
+                        </div>
+                    @endif
+                    @if ($event->exists)
                         @if ($pendingVideos->count() == 0 && $pendingComments->count() == 0 && $pendingPhotos->count() == 0 && $approvedVideos->count() == 0 && $approvedComments->count() == 0 && $approvedPhotos->count() == 0)
                         <p class="text-gray-500 dark:text-gray-400">{{ __('messages.no_fan_content') }}</p>
                         @else
@@ -3452,11 +3453,36 @@
                         @endif
 
                         @endif
-                    </div>
+                    @else
+                        <p class="text-gray-500 dark:text-gray-400">{{ __('messages.fan_content_save_first') }}</p>
                     @endif
+                    </div>
+
+                    <!-- Feedback Tab -->
+                    <div v-show="activeEngagementTab === 'feedback'">
+                    @if ($role->isPro())
+                        <div class="mb-6">
+                            <x-input-label for="feedback_enabled" value="{{ __('messages.feedback_override') }}" />
+                            <select id="feedback_enabled" name="feedback_enabled" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                                <option value="" {{ is_null($event->feedback_enabled) ? 'selected' : '' }}>{{ __('messages.use_schedule_default') }}</option>
+                                <option value="1" {{ $event->feedback_enabled === true ? 'selected' : '' }}>{{ __('messages.enabled') }}</option>
+                                <option value="0" {{ $event->feedback_enabled === false && !is_null($event->feedback_enabled) ? 'selected' : '' }}>{{ __('messages.disabled') }}</option>
+                            </select>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.feedback_override_help') }}</p>
+                        </div>
+                    @else
+                        <p class="text-gray-500 dark:text-gray-400 mb-2">{{ __('messages.feedback_pro_only') }}</p>
+                        @if (config('app.hosted'))
+                        <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-feedback')"
+                            class="text-sm text-[#4E81FA] hover:underline font-medium">
+                            {{ __('messages.upgrade') }} &rarr;
+                        </button>
+                        @endif
+                    @endif
+                    </div>
+
                 </div>
             </div>
-            @endif
 
                 </div> <!-- End of main content area -->
             </div> <!-- End of grid container -->
@@ -3586,7 +3612,7 @@
         isInvoiceNinjaPaymentLink: @json($user->invoiceninja_api_key && $user->invoiceninja_mode === 'payment_link'),
         activeTicketTab: @json($event->rsvp_enabled ? 'options' : 'tickets'),
         activeSettingsTab: 'privacy',
-        activeEngagementTab: @json($role->isPro() ? 'polls' : ($event->exists ? 'fan_content' : 'polls')),
+        activeEngagementTab: 'polls',
         promoCodes: (() => {
           var pcs = @json($event->promoCodes ?? []).map(pc => ({
             ...pc,
@@ -5343,8 +5369,8 @@ document.addEventListener('DOMContentLoaded', function() {
         syncMobileHeaders(sectionId);
 
         // Update URL hash
-        if (history.pushState) {
-            history.pushState(null, null, '#' + sectionId);
+        if (history.replaceState) {
+            history.replaceState(null, null, '#' + sectionId);
         } else {
             window.location.hash = sectionId;
         }
@@ -5553,6 +5579,14 @@ function deleteFlyer(url, hash, token, element) {
 }
 </script>
 
+<x-upgrade-modal name="upgrade-polls" tier="pro" :subdomain="$subdomain">
+    {{ __('messages.polls_pro_only') }}
+</x-upgrade-modal>
+
+<x-upgrade-modal name="upgrade-feedback" tier="pro" :subdomain="$subdomain">
+    {{ __('messages.feedback_pro_only') }}
+</x-upgrade-modal>
+
 <x-upgrade-modal name="upgrade-boost" tier="pro" :subdomain="$subdomain" docsUrl="{{ route('marketing.docs.boost') }}">
     {{ __('messages.upgrade_feature_description_boost') }}
 </x-upgrade-modal>
@@ -5565,7 +5599,7 @@ function deleteFlyer(url, hash, token, element) {
     {{ __('messages.upgrade_feature_description_privacy') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-ai-flyer" tier="enterprise" :subdomain="$subdomain">
+<x-upgrade-modal name="upgrade-ai-flyer" tier="enterprise" :subdomain="$subdomain" docsUrl="{{ route('marketing.docs.creating_events') }}#ai-flyer">
     {{ __('messages.upgrade_feature_description_ai_flyer') }}
 </x-upgrade-modal>
 
@@ -5622,7 +5656,7 @@ window.handleAiEventDetailsResults = function(data) {
 </script>
 @endif
 
-<x-upgrade-modal name="upgrade-ai-details" tier="enterprise" :subdomain="$subdomain">
+<x-upgrade-modal name="upgrade-ai-details" tier="enterprise" :subdomain="$subdomain" docsUrl="{{ route('marketing.docs.creating_events') }}#ai-details-generator">
     {{ __('messages.upgrade_feature_description_ai_details') }}
 </x-upgrade-modal>
 

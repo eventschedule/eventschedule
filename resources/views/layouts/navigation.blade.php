@@ -363,6 +363,7 @@
             var tabSources = [
                 { key: 'detailsActiveTab', prefix: 'details-tab-' },
                 { key: 'settingsActiveTab', prefix: 'settings-tab-' },
+                { key: 'engagementActiveTab', prefix: 'engagement-tab-' },
                 { key: 'integrationActiveTab', prefix: 'integration-tab-' },
                 { key: 'paymentActiveTab', prefix: 'payment-tab-' },
             ];
@@ -412,6 +413,14 @@
             var settingsTab = e.target.closest('.settings-tab');
             if (settingsTab) {
                 var tabKey = 'settings-tab-' + settingsTab.getAttribute('data-tab');
+                if (anchorMap[tabKey]) {
+                    updateHelpLinks(anchorMap[tabKey]);
+                }
+            }
+
+            var engagementTab = e.target.closest('.engagement-tab');
+            if (engagementTab) {
+                var tabKey = 'engagement-tab-' + engagementTab.getAttribute('data-tab');
                 if (anchorMap[tabKey]) {
                     updateHelpLinks(anchorMap[tabKey]);
                 }

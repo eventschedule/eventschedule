@@ -115,6 +115,11 @@
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Automatic Translations</h4>
                                     <p class="text-gray-600 dark:text-gray-400 text-sm">AI-powered translation of event details, schedule names, sub-schedule names, and custom fields into multiple languages.</p>
                                 </div>
+
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">AI Details Generator</h4>
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm">Generate short descriptions and full descriptions for your schedules and events using AI, based on the name and context.</p>
+                                </div>
                             </div>
                         </section>
 

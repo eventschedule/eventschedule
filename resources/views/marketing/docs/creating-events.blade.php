@@ -70,6 +70,7 @@
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
                         <a href="#manual" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Creating Events Manually</a>
                         <a href="#details" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Details</a>
+                        <a href="#ai-details-generator" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">AI Details Generator</a>
                         <a href="#venue" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Venue</a>
                         <a href="#participants" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Participants</a>
                         <a href="#recurring" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Recurring</a>
@@ -122,7 +123,7 @@
 
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Pending Events</div>
-                                <p>If you have <a href="{{ route('marketing.docs.creating_schedules') }}#settings-requests" class="text-cyan-400 hover:text-cyan-300">Require Approval</a> enabled, submitted events appear in a pending queue. Review them in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong> and approve or reject each one.</p>
+                                <p>If you have <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests" class="text-cyan-400 hover:text-cyan-300">Require Approval</a> enabled, submitted events appear in a pending queue. Review them in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong> and approve or reject each one.</p>
                             </div>
                         </section>
 
@@ -174,6 +175,25 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                            </div>
+                        </section>
+
+                        <!-- AI Details Generator -->
+                        <section id="ai-details-generator" class="doc-section">
+                            <h2 class="doc-heading">AI Details Generator <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span></h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Let AI generate a sub-schedule, short description, and description for your event based on its name and your schedule's context.</p>
+                            <div class="space-y-3 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How It Works</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Click the <strong class="text-gray-900 dark:text-white">AI</strong> button in the Details tab header, select which fields to generate, and the AI will create content based on your event's name and your schedule's context.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Generated Fields</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Sub-schedule</strong>, <strong class="text-gray-900 dark:text-white">short description</strong>, and <strong class="text-gray-900 dark:text-white">description</strong>. Fields with existing values show a blue dot indicator; generating will replace their content.</p>
+                                </div>
+                            </div>
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6">
+                                <p class="text-sm text-blue-800 dark:text-blue-300"><strong>Note:</strong> Selfhosted installations require a <x-link href="https://ai.google.dev/" target="_blank">Gemini API key</x-link> configured in the environment settings for AI features to work.</p>
                             </div>
                         </section>
 

@@ -302,6 +302,14 @@ class EventController extends Controller
             }
         }
 
+        // Pre-populate pending request talent as a member
+        if (session('pending_request')) {
+            $pendingRole = Role::whereSubdomain(session('pending_request'))->first();
+            if ($pendingRole && $pendingRole->isTalent() && ! in_array($pendingRole->id, array_column($selectedMembers, 'id'))) {
+                $selectedMembers[] = $pendingRole->toData();
+            }
+        }
+
         if ($request->date) {
             // Parse the date in the user's timezone and set default time to 20:00
             $event->starts_at = Carbon::createFromFormat('Y-m-d', $request->date, $user->timezone)
@@ -1145,6 +1153,10 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        if (! $role->isEnterprise()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
         try {
             $parsed = GeminiUtils::parseEvent($role, $details, $file);
 
@@ -1167,7 +1179,7 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! auth()->user()->isAdmin() && ! $role->isEnterprise()) {
+        if (! $role->isEnterprise()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
@@ -1271,7 +1283,7 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! auth()->user()->isAdmin() && ! $role->isEnterprise()) {
+        if (! $role->isEnterprise()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
@@ -1348,7 +1360,7 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! auth()->user()->isAdmin() && ! $role->isEnterprise()) {
+        if (! $role->isEnterprise()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
@@ -1401,6 +1413,10 @@ class EventController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $role->isEnterprise()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
 
         try {
             $parsed = GeminiUtils::parseEvent($role, $details, $file);
@@ -1683,10 +1699,14 @@ class EventController extends Controller
         }
 
         $event_id = UrlUtils::decodeId($event_hash);
-        $event = Event::with('parts')->findOrFail($event_id);
+        $event = Event::with('parts', 'roles')->findOrFail($event_id);
 
         if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
             abort(404);
+        }
+
+        if (! $event->isFanContentEnabled()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $user = auth()->user();
@@ -1787,10 +1807,14 @@ class EventController extends Controller
         }
 
         $event_id = UrlUtils::decodeId($event_hash);
-        $event = Event::with('parts')->findOrFail($event_id);
+        $event = Event::with('parts', 'roles')->findOrFail($event_id);
 
         if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
             abort(404);
+        }
+
+        if (! $event->isFanContentEnabled()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $user = auth()->user();
@@ -1923,10 +1947,14 @@ class EventController extends Controller
         }
 
         $event_id = UrlUtils::decodeId($event_hash);
-        $event = Event::with('parts')->findOrFail($event_id);
+        $event = Event::with('parts', 'roles')->findOrFail($event_id);
 
         if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
             abort(404);
+        }
+
+        if (! $event->isFanContentEnabled()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         if (! $role->canUploadPhoto()) {
@@ -2054,7 +2082,7 @@ class EventController extends Controller
     {
         $role = Role::where('subdomain', $subdomain)->firstOrFail();
 
-        if (! $role->isPro() && ! $request->user()->isAdmin()) {
+        if (! $role->isPro()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -2123,7 +2151,7 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! auth()->user()->isAdmin() && ! $role->isEnterprise()) {
+        if (! $role->isEnterprise()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -2184,7 +2212,7 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! auth()->user()->isAdmin() && ! $role->isEnterprise()) {
+        if (! $role->isEnterprise()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 

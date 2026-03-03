@@ -36,7 +36,9 @@ class GeneralTest extends DuskTestCase
             $this->createTestVenue($browser);
             $browser->clickLink('Edit Schedule')
                 ->assertPathIs('/venue/edit')
-                ->click('a[data-section="section-contact-info"]')
+                ->click('a[data-section="section-details"]')
+                ->pause(500)
+                ->click('.details-tab[data-tab="contact"]')
                 ->waitFor('#website', 5)
                 ->type('website', 'https://google.com')
                 ->scrollIntoView('button[type="submit"]')
@@ -48,7 +50,9 @@ class GeneralTest extends DuskTestCase
             $this->createTestTalent($browser);
             $browser->clickLink('Edit Schedule')
                 ->assertPathIs('/talent/edit')
-                ->click('a[data-section="section-contact-info"]')
+                ->click('a[data-section="section-details"]')
+                ->pause(500)
+                ->click('.details-tab[data-tab="contact"]')
                 ->waitFor('#website', 5)
                 ->type('website', 'https://google.com')
                 ->scrollIntoView('button[type="submit"]')

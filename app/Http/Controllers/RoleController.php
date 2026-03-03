@@ -294,13 +294,23 @@ class RoleController extends Controller
         session()->forget('pending_follow');
 
         if ($subdomain = session('pending_request')) {
-            if ($user->talents()->count() == 0) {
-                return redirect(app_url(route('new', ['type' => 'talent'], false)));
+            $pendingRole = Role::whereSubdomain($subdomain)->first();
+
+            if ($pendingRole && $pendingRole->isTalent()) {
+                // Requesting a talent - need a venue schedule
+                if ($user->venues()->count() == 0) {
+                    return redirect(app_url(route('new', ['type' => 'venue'], false)));
+                }
+                $redirectRole = $user->venues()->first();
+            } else {
+                // Requesting a venue/curator - need a talent schedule
+                if ($user->talents()->count() == 0) {
+                    return redirect(app_url(route('new', ['type' => 'talent'], false)));
+                }
+                $redirectRole = $user->talents()->first();
             }
 
-            $role = $user->talents()->first();
-
-            return redirect(app_url(route('event.create', ['subdomain' => $role->subdomain], false)));
+            return redirect(app_url(route('event.create', ['subdomain' => $redirectRole->subdomain], false)));
 
         } else {
             return redirect(app_url(route('following', [], false)))
@@ -2360,7 +2370,7 @@ class RoleController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! auth()->user()->isAdmin() && ! $role->isEnterprise()) {
+        if (! $role->isEnterprise()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
@@ -2443,7 +2453,7 @@ class RoleController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! auth()->user()->isAdmin() && ! $role->isEnterprise()) {
+        if (! $role->isEnterprise()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
@@ -2776,13 +2786,21 @@ class RoleController extends Controller
             $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
         }
 
-        if ($user->talents()->count() == 0) {
-            return redirect(app_url(route('new', ['type' => 'talent'], false)));
+        if ($role->isTalent()) {
+            // Requesting a talent - need a venue schedule
+            if ($user->venues()->count() == 0) {
+                return redirect(app_url(route('new', ['type' => 'venue'], false)));
+            }
+            $redirectRole = $user->venues()->first();
+        } else {
+            // Requesting a venue/curator - need a talent schedule
+            if ($user->talents()->count() == 0) {
+                return redirect(app_url(route('new', ['type' => 'talent'], false)));
+            }
+            $redirectRole = $user->talents()->first();
         }
 
-        $role = $user->talents()->first();
-
-        return redirect(app_url(route('event.create', ['subdomain' => $role->subdomain], false)));
+        return redirect(app_url(route('event.create', ['subdomain' => $redirectRole->subdomain], false)));
     }
 
     public function validateAddress(Request $request)

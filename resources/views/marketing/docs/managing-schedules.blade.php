@@ -192,7 +192,7 @@
                             </ul>
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                To configure the public sign-up link and request settings, see <x-link href="{{ route('marketing.docs.creating_schedules') }}#settings-requests">Creating Schedules: Requests</x-link>.
+                                To configure the public sign-up link and request settings, see <x-link href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests">Creating Schedules: Requests</x-link>.
                             </p>
                         </section>
 

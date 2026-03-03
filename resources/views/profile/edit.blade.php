@@ -306,8 +306,8 @@
             syncMobileHeaders(sectionId);
 
             // Update URL hash
-            if (history.pushState) {
-                history.pushState(null, null, '#' + sectionId);
+            if (history.replaceState) {
+                history.replaceState(null, null, '#' + sectionId);
             } else {
                 window.location.hash = sectionId;
             }

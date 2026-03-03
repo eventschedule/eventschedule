@@ -52,6 +52,7 @@ class Event extends Model
         'last_translated_at',
         'last_notified_fan_content_count',
         'feedback_enabled',
+        'fan_content_enabled',
     ];
 
     protected $hidden = ['event_password'];
@@ -67,6 +68,7 @@ class Event extends Model
         'recurring_include_dates' => 'array',
         'recurring_exclude_dates' => 'array',
         'feedback_enabled' => 'boolean',
+        'fan_content_enabled' => 'boolean',
     ];
 
     protected static function boot()
@@ -429,6 +431,17 @@ class Event extends Model
         $role = $this->roles->first(fn ($role) => $role->isTalent()) ?? $this->roles->first();
 
         return $role ? (bool) $role->feedback_enabled : false;
+    }
+
+    public function isFanContentEnabled()
+    {
+        if (! is_null($this->fan_content_enabled)) {
+            return (bool) $this->fan_content_enabled;
+        }
+
+        $role = $this->roles->first(fn ($role) => $role->isTalent()) ?? $this->roles->first();
+
+        return $role ? (bool) $role->fan_content_enabled : true;
     }
 
     public function getAverageRating($eventDate = null)

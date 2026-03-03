@@ -125,18 +125,21 @@
                     'Music & Entertainment' => '<svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>',
                     'Community & Recreation' => '<svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>',
                     'Creative & Workshops' => '<svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>',
+                    'Springfield' => '<svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>',
                 ];
                 $categoryColors = [
                     'Fitness & Wellness' => 'bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400',
                     'Music & Entertainment' => 'bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400',
                     'Community & Recreation' => 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400',
                     'Creative & Workshops' => 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400',
+                    'Springfield' => 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400',
                 ];
                 $categoryHoverColors = [
                     'Fitness & Wellness' => 'hover:shadow-rose-500/20 hover:border-rose-400/50 dark:hover:border-rose-400/30',
                     'Music & Entertainment' => 'hover:shadow-sky-500/20 hover:border-sky-400/50 dark:hover:border-sky-400/30',
                     'Community & Recreation' => 'hover:shadow-emerald-500/20 hover:border-emerald-400/50 dark:hover:border-emerald-400/30',
                     'Creative & Workshops' => 'hover:shadow-amber-500/20 hover:border-amber-400/50 dark:hover:border-amber-400/30',
+                    'Springfield' => 'hover:shadow-yellow-500/20 hover:border-yellow-400/50 dark:hover:border-yellow-400/30',
                 ];
                 $scheduleLabels = [
                     // Fitness & Wellness
@@ -155,9 +158,19 @@
                     'nateswoodworkingshop' => 'Crafts',
                     'painting' => 'Art Studio',
                     'pagesbooknookshop' => 'Bookshop',
+                    // Springfield
+                    'simpsons' => 'Curator',
+                    'demo-moestavern' => 'Bar',
+                    'demo-amphitheater' => 'Venue',
+                    'demo-bowlarama' => 'Bowling',
+                    'demo-aztectheater' => 'Cinema',
+                    'demo-lardlad' => 'Donuts',
                 ];
             @endphp
             @foreach($categories as $categoryName => $schedules)
+            @if($categoryName === 'Springfield')
+                @continue
+            @endif
             <div class="mb-16 last:mb-0 pt-8 first:pt-0 border-t first:border-t-0 border-gray-200 dark:border-white/10">
                 <div class="flex items-center gap-3 mb-8">
                     <div class="p-2.5 rounded-xl {{ $categoryColors[$categoryName] ?? 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400' }}">
@@ -271,6 +284,119 @@
             @endif
         </div>
     </section>
+
+    {{-- Springfield Demo Town Section --}}
+    @if(isset($categories['Springfield']))
+    <section class="bg-gray-50 dark:bg-[#0d0d14] pb-24" aria-labelledby="springfield-heading">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="pt-12 border-t border-gray-200 dark:border-white/10">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-2.5 rounded-xl bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400">
+                        <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    </div>
+                    <h2 id="springfield-heading" class="text-2xl font-bold text-gray-900 dark:text-white">Springfield Demo Town</h2>
+                </div>
+                <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-2xl">Simpsons-themed demo schedules showing how the platform works for a fictional town's venues and businesses.</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" role="list">
+                @foreach($categories['Springfield'] as $schedule)
+                <article role="listitem">
+                    <a href="{{ $schedule['url'] }}"
+                       target="_blank"
+                       rel="noopener"
+                       aria-label="View {{ $schedule['name'] }} schedule"
+                       class="group block relative overflow-hidden rounded-3xl border border-gray-200 dark:border-white/10 shadow-md hover:scale-[1.02] hover:shadow-2xl hover:shadow-yellow-500/20 hover:border-yellow-400/50 dark:hover:border-yellow-400/30 transition-all duration-300 ease-out h-full">
+
+                        {{-- Category badge --}}
+                        <div class="absolute top-4 left-4 z-10">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-white/95 dark:bg-gray-900/95 text-gray-700 dark:text-gray-200 shadow-sm backdrop-blur-md">
+                                {{ $scheduleLabels[$schedule['subdomain']] ?? 'Demo' }}
+                            </span>
+                        </div>
+
+                        @if($schedule['header_image_url'] ?? false)
+                            {{-- Header image background --}}
+                            <div class="absolute inset-0 overflow-hidden">
+                                <picture class="absolute inset-0">
+                                    <source srcset="{{ url(webp_path($schedule['header_image_url'])) }}" type="image/webp">
+                                    <img src="{{ url($schedule['header_image_url']) }}"
+                                         alt="{{ $schedule['name'] }} header image"
+                                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                         loading="lazy"
+                                         decoding="async"
+                                         width="400"
+                                         height="280">
+                                </picture>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"></div>
+                            </div>
+
+                            {{-- Content overlay --}}
+                            <div class="relative p-8 min-h-[280px] flex flex-col justify-end">
+                                @if($schedule['profile_image_url'] ?? false)
+                                    <picture class="w-16 h-16 mb-4 ring-4 ring-white/30 shadow-lg rounded-full overflow-hidden transition-transform duration-300 group-hover:-translate-y-1">
+                                        <source srcset="{{ url(webp_path($schedule['profile_image_url'])) }}" type="image/webp">
+                                        <img src="{{ url($schedule['profile_image_url']) }}"
+                                             alt="{{ $schedule['name'] }} logo"
+                                             class="w-full h-full object-cover"
+                                             loading="lazy"
+                                             decoding="async"
+                                             width="64"
+                                             height="64">
+                                    </picture>
+                                @else
+                                    <div class="w-16 h-16 rounded-full mb-4 flex items-center justify-center text-white text-xl font-bold bg-[#4E81FA] ring-4 ring-white/30 shadow-lg"
+                                         aria-hidden="true">
+                                        {{ strtoupper(substr($schedule['name'], 0, 1)) }}
+                                    </div>
+                                @endif
+                                <h4 class="text-2xl font-bold text-white mb-2">{{ $schedule['name'] }}</h4>
+                                @if($schedule['description'] ?? false)
+                                    <p class="text-sm text-white/70">{{ $schedule['description'] }}</p>
+                                @endif
+                            </div>
+                        @else
+                            {{-- Fallback gradient background --}}
+                            <div class="bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900/50 dark:to-amber-900/50 h-full">
+                                <div class="p-8 min-h-[280px] flex flex-col justify-end">
+                                    @if($schedule['profile_image_url'] ?? false)
+                                        <picture class="w-16 h-16 mb-4 ring-4 ring-gray-200 dark:ring-white/20 shadow-lg rounded-full overflow-hidden transition-transform duration-300 group-hover:-translate-y-1">
+                                            <source srcset="{{ url(webp_path($schedule['profile_image_url'])) }}" type="image/webp">
+                                            <img src="{{ url($schedule['profile_image_url']) }}"
+                                                 alt="{{ $schedule['name'] }} logo"
+                                                 class="w-full h-full object-cover"
+                                                 loading="lazy"
+                                                 decoding="async"
+                                                 width="64"
+                                                 height="64">
+                                        </picture>
+                                    @else
+                                        <div class="w-16 h-16 rounded-full mb-4 flex items-center justify-center text-white text-xl font-bold bg-[#4E81FA] ring-4 ring-gray-200 dark:ring-white/20 shadow-lg"
+                                             aria-hidden="true">
+                                            {{ strtoupper(substr($schedule['name'], 0, 1)) }}
+                                        </div>
+                                    @endif
+                                    <h4 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ $schedule['name'] }}</h4>
+                                    @if($schedule['description'] ?? false)
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $schedule['description'] }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- External link indicator --}}
+                        <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg class="w-5 h-5 {{ ($schedule['header_image_url'] ?? false) ? 'text-white' : 'text-gray-600 dark:text-white' }} drop-shadow-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </div>
+                    </a>
+                </article>
+                @endforeach
+                </div>
+            </div>
+        </div>
+    </section>
+    @endif
 
     <div class="h-24 section-fade-to-white"></div>
 

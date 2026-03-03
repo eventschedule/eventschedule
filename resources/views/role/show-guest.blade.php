@@ -186,7 +186,7 @@
                 {{-- Action buttons --}}
                 @if (config('app.hosted') || config('app.is_testing'))
                 <div class="flex flex-row flex-wrap gap-3 items-center justify-center">
-                  @if (($role->isCurator() || $role->isVenue()) && $role->accept_requests)
+                  @if (($role->isCurator() || $role->isVenue() || $role->isTalent()) && $role->accept_requests)
                   <a
                     href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}"
                     class="inline-flex items-center justify-center"
@@ -196,7 +196,7 @@
                       style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
                       class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
-                      {{ __('messages.submit_event') }}
+                      {{ $role->isTalent() ? __('messages.request_to_book') : __('messages.submit_event') }}
                     </button>
                   </a>
                   @endif
@@ -337,7 +337,7 @@
                 {{-- Action buttons --}}
                 @if (config('app.hosted') || config('app.is_testing'))
                 <div class="flex flex-row flex-wrap gap-3 items-center flex-shrink-0">
-                  @if (($role->isCurator() || $role->isVenue()) && $role->accept_requests)
+                  @if (($role->isCurator() || $role->isVenue() || $role->isTalent()) && $role->accept_requests)
                   <a
                     href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}"
                     class="inline-flex items-center justify-center flex-shrink-0"
@@ -347,7 +347,7 @@
                       style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
                       class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
-                      {{ __('messages.submit_event') }}
+                      {{ $role->isTalent() ? __('messages.request_to_book') : __('messages.submit_event') }}
                     </button>
                   </a>
                   @endif

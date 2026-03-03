@@ -3381,6 +3381,56 @@ class MarketingController extends Controller
                     'header_image_url' => 'images/examples/header_pagesbooknookshop.png',
                 ],
             ],
+            'Springfield' => [
+                [
+                    'subdomain' => 'simpsons',
+                    'name' => 'Springfield Events',
+                    'description' => 'Community events across Springfield venues',
+                    'url' => 'https://simpsons.eventschedule.com/',
+                    'profile_image_url' => 'images/demo/demo_profile_donuts.jpg',
+                    'header_image_url' => 'images/demo/demo_header_town.jpg',
+                ],
+                [
+                    'subdomain' => 'demo-moestavern',
+                    'name' => "Moe's Tavern",
+                    'description' => 'Live music, trivia, and open mic nights',
+                    'url' => 'https://demo-moestavern.eventschedule.com/',
+                    'profile_image_url' => 'images/demo/demo_profile_beer.jpg',
+                    'header_image_url' => 'images/demo/demo_header_bar.jpg',
+                ],
+                [
+                    'subdomain' => 'demo-amphitheater',
+                    'name' => 'Springfield Amphitheater',
+                    'description' => 'Outdoor concerts and performances',
+                    'url' => 'https://demo-amphitheater.eventschedule.com/',
+                    'profile_image_url' => 'images/demo/demo_profile_amphitheater.jpg',
+                    'header_image_url' => 'images/demo/demo_header_concert.jpg',
+                ],
+                [
+                    'subdomain' => 'demo-bowlarama',
+                    'name' => "Barney's Bowl-A-Rama",
+                    'description' => 'Bowling leagues, tournaments, and cosmic bowling nights',
+                    'url' => 'https://demo-bowlarama.eventschedule.com/',
+                    'profile_image_url' => 'images/demo/demo_profile_bowling.jpg',
+                    'header_image_url' => 'images/demo/demo_header_bowling.jpg',
+                ],
+                [
+                    'subdomain' => 'demo-aztectheater',
+                    'name' => 'The Aztec Theater',
+                    'description' => "Classic films and premieres at Springfield's art deco cinema",
+                    'url' => 'https://demo-aztectheater.eventschedule.com/',
+                    'profile_image_url' => 'images/demo/demo_profile_popcorn.jpg',
+                    'header_image_url' => 'images/demo/demo_header_theater.jpg',
+                ],
+                [
+                    'subdomain' => 'demo-lardlad',
+                    'name' => 'Lard Lad Donuts',
+                    'description' => 'Donut tastings, coffee events, and sweet celebrations',
+                    'url' => 'https://demo-lardlad.eventschedule.com/',
+                    'profile_image_url' => 'images/demo/demo_profile_donut_box.jpg',
+                    'header_image_url' => 'images/demo/demo_header_donuts.jpg',
+                ],
+            ],
         ];
     }
 
@@ -3566,13 +3616,18 @@ class MarketingController extends Controller
             ['page' => 'Creating Schedules', 'section' => 'General Settings', 'description' => 'Timezone, language, and default settings.', 'url' => $r['creating_schedules'].'#settings-general', 'category' => 'User Guide', 'keywords' => 'timezone language defaults'],
             ['page' => 'Creating Schedules', 'section' => 'Custom Domain', 'description' => 'Set up a custom domain for your schedule using Direct (CNAME) or Redirect (Cloudflare) mode.', 'url' => $r['creating_schedules'].'#custom-domain', 'category' => 'User Guide', 'keywords' => 'custom domain cname dns branded url'],
             ['page' => 'Creating Schedules', 'section' => 'Custom Fields', 'description' => 'Add custom fields to your events.', 'url' => $r['creating_schedules'].'#settings-custom-fields', 'category' => 'User Guide', 'keywords' => 'custom fields metadata'],
-            ['page' => 'Creating Schedules', 'section' => 'Requests Settings', 'description' => 'Configure public event request submissions.', 'url' => $r['creating_schedules'].'#settings-requests', 'category' => 'User Guide', 'keywords' => 'submissions public requests'],
+            ['page' => 'Creating Schedules', 'section' => 'Notifications', 'description' => 'Configure email notification preferences for schedule activity.', 'url' => $r['creating_schedules'].'#settings-notifications', 'category' => 'User Guide', 'keywords' => 'notifications email alerts'],
             ['page' => 'Creating Schedules', 'section' => 'Advanced Settings', 'description' => 'Advanced schedule options and configuration.', 'url' => $r['creating_schedules'].'#settings-advanced', 'category' => 'User Guide', 'keywords' => 'advanced options'],
+            ['page' => 'Creating Schedules', 'section' => 'Engagement', 'description' => 'Configure visitor interaction features for your schedule.', 'url' => $r['creating_schedules'].'#engagement', 'category' => 'User Guide', 'keywords' => 'engagement interaction community'],
+            ['page' => 'Creating Schedules', 'section' => 'Requests', 'description' => 'Configure public event request submissions.', 'url' => $r['creating_schedules'].'#engagement-requests', 'category' => 'User Guide', 'keywords' => 'submissions public requests'],
+            ['page' => 'Creating Schedules', 'section' => 'Fan Content', 'description' => 'Allow visitors to submit photos and videos to events.', 'url' => $r['creating_schedules'].'#engagement-fan-content', 'category' => 'User Guide', 'keywords' => 'fan content photos videos submissions'],
+            ['page' => 'Creating Schedules', 'section' => 'Feedback', 'description' => 'Send feedback requests to attendees after events.', 'url' => $r['creating_schedules'].'#engagement-feedback', 'category' => 'User Guide', 'keywords' => 'feedback reviews ratings attendees'],
             ['page' => 'Creating Schedules', 'section' => 'Auto Import', 'description' => 'Automatically import events from external sources.', 'url' => $r['creating_schedules'].'#auto-import', 'category' => 'User Guide', 'keywords' => 'import automatic feed ical'],
             ['page' => 'Creating Schedules', 'section' => 'Integrations', 'description' => 'Connect with calendar and third-party services.', 'url' => $r['creating_schedules'].'#integrations', 'category' => 'User Guide', 'keywords' => 'connect sync third-party'],
+            ['page' => 'Creating Schedules', 'section' => 'Email Settings', 'description' => 'Configure email delivery for your schedule.', 'url' => $r['creating_schedules'].'#integrations-email', 'category' => 'User Guide', 'keywords' => 'email smtp sender notifications'],
             ['page' => 'Creating Schedules', 'section' => 'Google Calendar', 'description' => 'Set up Google Calendar sync for your schedule.', 'url' => $r['creating_schedules'].'#integrations-google', 'category' => 'User Guide', 'keywords' => 'google calendar sync'],
             ['page' => 'Creating Schedules', 'section' => 'CalDAV', 'description' => 'Set up CalDAV protocol integration.', 'url' => $r['creating_schedules'].'#integrations-caldav', 'category' => 'User Guide', 'keywords' => 'caldav ical protocol'],
-            ['page' => 'Creating Schedules', 'section' => 'Email Settings', 'description' => 'Configure email notifications for your schedule.', 'url' => $r['creating_schedules'].'#email-settings', 'category' => 'User Guide', 'keywords' => 'email notifications sender'],
+            ['page' => 'Creating Schedules', 'section' => 'AI Details Generator', 'description' => 'Use AI to generate schedule descriptions (Enterprise).', 'url' => $r['creating_schedules'].'#ai-details-generator', 'category' => 'User Guide', 'keywords' => 'ai generate details description automatic'],
 
             // Schedule Styling
             ['page' => 'Schedule Styling', 'section' => 'Overview', 'description' => 'Introduction to schedule styling options.', 'url' => $r['schedule_styling'].'#overview', 'category' => 'User Guide', 'keywords' => 'design appearance theme'],
@@ -3615,6 +3670,7 @@ class MarketingController extends Controller
             ['page' => 'Creating Events', 'section' => 'Feedback', 'description' => 'Control per-event feedback override settings.', 'url' => $r['creating_events'].'#feedback', 'category' => 'User Guide', 'keywords' => 'feedback rating review post-event override'],
             ['page' => 'Creating Events', 'section' => 'Fan Content', 'description' => 'Manage user-submitted videos and content.', 'url' => $r['creating_events'].'#fan-content', 'category' => 'User Guide', 'keywords' => 'user content videos submissions ugc'],
             ['page' => 'Creating Events', 'section' => 'AI Flyer Generation', 'description' => 'Generate event flyer images using AI (Enterprise).', 'url' => $r['creating_events'].'#ai-flyer', 'category' => 'User Guide', 'keywords' => 'ai flyer image generate poster design'],
+            ['page' => 'Creating Events', 'section' => 'AI Details Generator', 'description' => 'Use AI to generate event descriptions and sub-schedule (Enterprise).', 'url' => $r['creating_events'].'#ai-details-generator', 'category' => 'User Guide', 'keywords' => 'ai generate details description automatic'],
 
             // AI Import
             ['page' => 'AI Import', 'section' => 'Overview', 'description' => 'Use AI to automatically import events.', 'url' => $r['ai_import'].'#ai-import', 'category' => 'User Guide', 'keywords' => 'ai artificial intelligence import parse'],

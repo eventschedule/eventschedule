@@ -122,11 +122,17 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.webhook_events') }}</label>
-                                <div class="grid grid-cols-2 gap-2">
+                                <div class="grid grid-cols-2 gap-3">
                                     @foreach (\App\Models\Webhook::EVENT_TYPES as $type)
-                                        <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                                            <input type="checkbox" name="event_types[]" value="{{ $type }}" {{ empty($webhook->event_types) || in_array($type, $webhook->event_types) ? 'checked' : '' }} class="rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[#4E81FA]">
-                                            {{ $type }}
+                                        <label class="relative flex items-center gap-3 cursor-pointer">
+                                            <span class="relative w-11 h-6 flex-shrink-0">
+                                                <input type="checkbox" name="event_types[]" value="{{ $type }}"
+                                                    {{ empty($webhook->event_types) || in_array($type, $webhook->event_types) ? 'checked' : '' }}
+                                                    class="sr-only peer">
+                                                <span class="block w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></span>
+                                                <span class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></span>
+                                            </span>
+                                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ $type }}</span>
                                         </label>
                                     @endforeach
                                 </div>
@@ -174,11 +180,16 @@
 
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.webhook_events') }}</label>
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-2 gap-3">
                 @foreach (\App\Models\Webhook::EVENT_TYPES as $type)
-                    <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                        <input type="checkbox" name="event_types[]" value="{{ $type }}" checked class="rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[#4E81FA]">
-                        {{ $type }}
+                    <label class="relative flex items-center gap-3 cursor-pointer">
+                        <span class="relative w-11 h-6 flex-shrink-0">
+                            <input type="checkbox" name="event_types[]" value="{{ $type }}" checked
+                                class="sr-only peer">
+                            <span class="block w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></span>
+                            <span class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></span>
+                        </span>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ $type }}</span>
                     </label>
                 @endforeach
             </div>

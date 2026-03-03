@@ -199,15 +199,6 @@
                 });
             }
 
-            const notificationNewRequestSection = document.getElementById('notification_new_request_section');
-
-            if (acceptRequestsCheckbox && notificationNewRequestSection) {
-                notificationNewRequestSection.style.display = acceptRequestsCheckbox.checked ? 'block' : 'none';
-                acceptRequestsCheckbox.addEventListener('change', function() {
-                    notificationNewRequestSection.style.display = this.checked ? 'block' : 'none';
-                });
-            }
-
             const requireApprovalCheckbox = document.querySelector('input[name="require_approval"][type="checkbox"]');
             const approvedSubdomainsSection = document.getElementById('approved_subdomains_section');
 
@@ -811,12 +802,6 @@
                                 {{ __('messages.venue_address') }}
                             </a>
                             @endif
-                            <a href="#section-contact-info" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-contact-info">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                                </svg>
-                                {{ __('messages.contact_info') }}
-                            </a>
                             <a href="#section-style" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-style">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 3 3 0 005.78-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
@@ -836,6 +821,12 @@
                                 </svg>
                                 {{ __('messages.schedule_settings') }}
                             </a>
+                            <a href="#section-engagement" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-engagement">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                                </svg>
+                                {{ __('messages.engagement') }}
+                            </a>
                             @if (! config('app.hosted'))
                             <a href="#section-auto-import" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-auto-import">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -844,22 +835,12 @@
                                 {{ __('messages.auto_import_settings') }}
                             </a>
                             @endif
-                            @if (! $role->exists || $role->user_id == auth()->user()->id)
                             <a href="#section-integrations" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-integrations">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                                 </svg>
                                 {{ __('messages.integrations') }}
                             </a>
-                            @endif
-                            @if (config('app.hosted'))
-                            <a href="#section-email-settings" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-email-settings">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                                </svg>
-                                {{ __('messages.email_settings') }}
-                            </a>
-                            @endif
                         </nav>
                         <!-- Sidebar Save Button -->
                         <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
@@ -934,6 +915,9 @@
                                 </button>
                                 <button type="button" class="details-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="localization">
                                     {{ __('messages.localization') }}
+                                </button>
+                                <button type="button" class="details-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="contact">
+                                    {{ __('messages.contact_info') }}
                                 </button>
                             </nav>
                         </div>
@@ -1019,103 +1003,9 @@
                         </div>
 
                         </div>
-                    </div>
-                </div>
 
-                @if ($role->isVenue())
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-address">
-                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                        </svg>
-                        {{ __('messages.venue_address') }}
-                    </span>
-                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div id="section-address" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
-                    <div class="max-w-xl">
-
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                            </svg>
-                            {{ __('messages.venue_address') }}
-                        </h2>
-
-                        <div class="mb-6">
-                            <x-input-label for="address1" :value="__('messages.street_address') . ' *'" />
-                            <x-text-input id="address1" name="address1" type="text" class="mt-1 block w-full"
-                                :value="old('address1', $role->address1)" autocomplete="off" required />
-                            <x-input-error class="mt-2" :messages="$errors->get('address1')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="city" :value="__('messages.city')" />
-                            <x-text-input id="city" name="city" type="text" class="mt-1 block w-full"
-                                :value="old('city', $role->city)" autocomplete="off" />
-                            <x-input-error class="mt-2" :messages="$errors->get('city')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="state" :value="__('messages.state_province')" />
-                            <x-text-input id="state" name="state" type="text" class="mt-1 block w-full"
-                                :value="old('state', $role->state)" autocomplete="off" />
-                            <x-input-error class="mt-2" :messages="$errors->get('state')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="postal_code" :value="__('messages.postal_code')" />
-                            <x-text-input id="postal_code" name="postal_code" type="text" class="mt-1 block w-full"
-                                :value="old('postal_code', $role->postal_code)" autocomplete="off" />
-                            <x-input-error class="mt-2" :messages="$errors->get('postal_code')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="country_code" :value="__('messages.country')" />
-                            <x-country-input id="country_code" name="country_code" :value="old('country_code', $role->country_code)" />
-                            <x-input-error class="mt-2" :messages="$errors->get('country_code')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <div class="flex items-center space-x-4">
-                                <x-secondary-button id="view_map_button">{{ __('messages.view_map') }}</x-secondary-button>
-                                @if (config('services.google.backend'))
-                                <x-secondary-button id="validate_button">{{ __('messages.validate_address') }}</x-secondary-button>
-                                <x-secondary-button id="accept_button" class="hidden">{{ __('messages.accept') }}</x-secondary-button>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div id="address_response" class="mb-6 hidden text-gray-900 dark:text-gray-100"></div>
-
-                    </div>
-                </div>
-                @endif
-
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-contact-info">
-                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                        </svg>
-                        {{ __('messages.contact_info') }}
-                    </span>
-                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div id="section-contact-info" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
-                    <div class="max-w-xl">
-
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                            </svg>
-                            {{ __('messages.contact_info') }}
-                        </h2>
+                        <!-- Tab Content: Contact Info -->
+                        <div id="details-tab-contact" class="details-tab-content hidden">
 
                         <div class="mb-6">
                             <x-input-label for="email" :value="__('messages.email') . ' *'" />
@@ -1196,9 +1086,83 @@
                         </div>
                         @endif
 
+                        </div>
+                    </div>
+                </div>
+
+                @if ($role->isVenue())
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-address">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                        </svg>
+                        {{ __('messages.venue_address') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="section-address" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                    <div class="max-w-xl">
+
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                            </svg>
+                            {{ __('messages.venue_address') }}
+                        </h2>
+
+                        <div class="mb-6">
+                            <x-input-label for="address1" :value="__('messages.street_address') . ' *'" />
+                            <x-text-input id="address1" name="address1" type="text" class="mt-1 block w-full"
+                                :value="old('address1', $role->address1)" autocomplete="off" required />
+                            <x-input-error class="mt-2" :messages="$errors->get('address1')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="city" :value="__('messages.city')" />
+                            <x-text-input id="city" name="city" type="text" class="mt-1 block w-full"
+                                :value="old('city', $role->city)" autocomplete="off" />
+                            <x-input-error class="mt-2" :messages="$errors->get('city')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="state" :value="__('messages.state_province')" />
+                            <x-text-input id="state" name="state" type="text" class="mt-1 block w-full"
+                                :value="old('state', $role->state)" autocomplete="off" />
+                            <x-input-error class="mt-2" :messages="$errors->get('state')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="postal_code" :value="__('messages.postal_code')" />
+                            <x-text-input id="postal_code" name="postal_code" type="text" class="mt-1 block w-full"
+                                :value="old('postal_code', $role->postal_code)" autocomplete="off" />
+                            <x-input-error class="mt-2" :messages="$errors->get('postal_code')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="country_code" :value="__('messages.country')" />
+                            <x-country-input id="country_code" name="country_code" :value="old('country_code', $role->country_code)" />
+                            <x-input-error class="mt-2" :messages="$errors->get('country_code')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <div class="flex items-center space-x-4">
+                                <x-secondary-button id="view_map_button">{{ __('messages.view_map') }}</x-secondary-button>
+                                @if (config('services.google.backend'))
+                                <x-secondary-button id="validate_button">{{ __('messages.validate_address') }}</x-secondary-button>
+                                <x-secondary-button id="accept_button" class="hidden">{{ __('messages.accept') }}</x-secondary-button>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div id="address_response" class="mb-6 hidden text-gray-900 dark:text-gray-100"></div>
 
                     </div>
                 </div>
+                @endif
 
                 <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-style">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -1213,6 +1177,9 @@
                 </button>
                 <div id="section-style" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div>
+
+                    <div class="flex flex-col xl:flex-row xl:gap-12">
+                        <div class="w-full xl:w-1/2">
 
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -1241,9 +1208,6 @@
                             @endif
                         @endif
                     </h2>
-
-                    <div class="flex flex-col xl:flex-row xl:gap-12">
-                        <div class="w-full xl:w-1/2">
 
                     <!-- Sub-Tab Navigation -->
                     <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
@@ -1679,7 +1643,14 @@
                                 </p>
                                 @endif
                                 @if (is_demo_mode())
-                                <p class="mt-1 text-sm text-yellow-600 dark:text-yellow-400">{{ __('messages.demo_mode_settings_disabled') }}</p>
+                                <div class="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                                    <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                        <span>{{ __('messages.demo_mode_settings_disabled') }}</span>
+                                    </p>
+                                </div>
                                 @endif
                             </div>
                     </div>
@@ -1833,11 +1804,6 @@
                                 <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
                                     {{ __('messages.custom_fields') }}
                                 </button>
-                                @if ($role->isCurator() || ((config('app.hosted') || config('app.is_testing')) && $role->isVenue()))
-                                <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="requests">
-                                    {{ __('messages.requests') }}
-                                </button>
-                                @endif
                                 <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="notifications">
                                     {{ __('messages.notifications') }}
                                 </button>
@@ -2108,67 +2074,6 @@
                         </div>
                         <!-- End Tab Content: Custom Fields -->
 
-                        <!-- Tab Content: Requests -->
-                        @if ($role->isCurator() || ((config('app.hosted') || config('app.is_testing')) && $role->isVenue()))
-                        <div id="settings-tab-requests" class="settings-tab-content hidden">
-
-                        @if ((config('app.hosted') || config('app.is_testing')) && ($role->isVenue() || $role->isCurator()))
-                        <div class="mb-6">
-                            <x-toggle name="accept_requests"
-                                label="{{ __('messages.accept_requests') }}"
-                                checked="{{ old('accept_requests', $role->accept_requests) }}"
-                                help="{{ __('messages.accept_requests_help') }}" />
-                            <x-input-error class="mt-2" :messages="$errors->get('accept_requests')" />
-                        </div>
-                        <div class="mb-6" id="require_account_section">
-                            <x-toggle name="require_account"
-                                label="{{ __('messages.require_account') }}"
-                                checked="{{ old('require_account', $role->exists ? $role->require_account : true) }}"
-                                help="{{ __('messages.require_account_help') }}" />
-                            <x-input-error class="mt-2" :messages="$errors->get('require_account')" />
-                        </div>
-                        <div class="mb-6" id="require_approval_section">
-                            <x-toggle name="require_approval"
-                                label="{{ __('messages.require_approval') }}"
-                                checked="{{ old('require_approval', $role->exists ? $role->require_approval : true) }}"
-                                help="{{ __('messages.require_approval_help') }}" />
-                            <x-input-error class="mt-2" :messages="$errors->get('require_approval')" />
-                        </div>
-                        <div class="mb-6" id="approved_subdomains_section">
-                            <x-input-label :value="__('messages.approved_schedules')" />
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.approved_schedules_help') }}</p>
-                            <div id="approved-subdomains-items">
-                                @foreach(old('approved_subdomains', $role->approved_subdomains ?? []) as $i => $subdomain)
-                                    <div class="mb-2 relative">
-                                        <div class="flex items-center">
-                                            <input type="text" data-subdomain-search value="{{ isset($approvedSubdomainNames[$subdomain]) ? $approvedSubdomainNames[$subdomain] . ' (' . $subdomain . ')' : $subdomain }}" placeholder="{{ __('messages.search_schedules_autocomplete') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
-                                            <button type="button" data-action="remove-parent-item"
-                                                class="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
-                                        </div>
-                                        <input type="hidden" name="approved_subdomains[]" value="{{ $subdomain }}" />
-                                        <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50"></div>
-                                    </div>
-                                @endforeach
-                            </div>
-                            <button type="button" data-action="add-approved-subdomain" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
-                                + {{ __('messages.add_schedule') }}
-                            </button>
-                        </div>
-                        <div class="mb-6" id="request_terms_section">
-                            <x-input-label for="request_terms" :value="__('messages.request_terms')" />
-                            <textarea id="request_terms" name="request_terms"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
-                                rows="4"
-                                dir="auto"
-                                placeholder="{{ __('messages.enter_request_terms') }}">{{ old('request_terms', $role->request_terms) }}</textarea>
-                            <x-input-error class="mt-2" :messages="$errors->get('request_terms')" />
-                        </div>
-                        @endif
-
-                        </div>
-                        @endif
-                        <!-- End Tab Content: Requests -->
-
                         <!-- Tab Content: Notifications -->
                         <div id="settings-tab-notifications" class="settings-tab-content hidden">
 
@@ -2193,9 +2098,14 @@
                         @if ($emailDisabled)
                             <hr class="my-6 border-gray-200 dark:border-gray-700">
                             <div class="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
-                                <p class="text-sm text-amber-800 dark:text-amber-200">
-                                    {{ __('messages.notification_requires_email_settings') }}
-                                    <a href="#section-email-settings" class="text-[#4E81FA] hover:underline font-medium">{{ __('messages.configure_email_settings') }}</a>
+                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span>
+                                        {{ __('messages.notification_requires_email_settings') }}
+                                        <a href="#section-integrations" class="js-email-settings-link text-[#4E81FA] hover:underline font-medium">{{ __('messages.configure_email_settings') }}</a>
+                                    </span>
                                 </p>
                             </div>
                         @endif
@@ -2208,26 +2118,6 @@
                                 :disabled="$emailDisabled" />
                         </div>
 
-                        @if ($role->isPro())
-                        <div class="mb-6">
-                            <x-toggle name="feedback_enabled"
-                                label="{{ __('messages.feedback_enabled') }}"
-                                checked="{{ old('feedback_enabled', $role->feedback_enabled) }}"
-                                help="{{ __('messages.feedback_enabled_help') }}"
-                                :disabled="$emailDisabled" />
-                        </div>
-
-                        <div class="mb-6" id="feedback-delay-wrapper" style="{{ $role->feedback_enabled && ! $emailDisabled ? '' : 'display: none;' }}">
-                            <x-input-label for="feedback_delay_hours" value="{{ __('messages.feedback_delay') }}" />
-                            <select id="feedback_delay_hours" name="feedback_delay_hours" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" {{ $emailDisabled ? 'disabled' : '' }}>
-                                @foreach ([1, 2, 6, 12, 24, 48] as $hours)
-                                <option value="{{ $hours }}" {{ old('feedback_delay_hours', $role->feedback_delay_hours ?? 24) == $hours ? 'selected' : '' }}>
-                                    {{ $hours }} {{ __('messages.feedback_hours') }}
-                                </option>
-                                @endforeach
-                            </select>
-                        </div>
-
                         <div class="mb-6">
                             <x-toggle name="notification_new_feedback"
                                 label="{{ __('messages.notify_new_feedback') }}"
@@ -2235,7 +2125,6 @@
                                 help="{{ __('messages.notify_new_feedback_help') }}"
                                 :disabled="$emailDisabled" />
                         </div>
-                        @endif
 
                         </div>
                         <!-- End Tab Content: Notifications -->
@@ -2333,6 +2222,160 @@
                     </div>
                 </div>
 
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-engagement">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                        </svg>
+                        {{ __('messages.engagement') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="section-engagement" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                    <div class="max-w-2xl">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                            </svg>
+                            {{ __('messages.engagement') }}
+                        </h2>
+
+                        @php $showRequestsTab = $role->isCurator() || ((config('app.hosted') || config('app.is_testing')) && ($role->isVenue() || $role->isTalent())); @endphp
+
+                        <!-- Tab Navigation -->
+                        <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                            <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
+                                @if ($showRequestsTab)
+                                <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="requests">
+                                    {{ __('messages.requests') }}
+                                </button>
+                                @endif
+                                <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 {{ $showRequestsTab ? 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' : 'border-[#4E81FA] text-[#4E81FA]' }}" data-tab="fan_content">
+                                    {{ __('messages.fan_content') }}
+                                </button>
+                                <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="feedback">
+                                    {{ __('messages.feedback') }}
+                                </button>
+                            </nav>
+                        </div>
+
+                        <!-- Tab Content: Requests -->
+                        @if ($showRequestsTab)
+                        <div id="engagement-tab-requests" class="engagement-tab-content">
+
+                        @if ((config('app.hosted') || config('app.is_testing')) && ($role->isVenue() || $role->isCurator() || $role->isTalent()))
+                        <div class="mb-6">
+                            <x-toggle name="accept_requests"
+                                label="{{ __('messages.accept_requests') }}"
+                                checked="{{ old('accept_requests', $role->accept_requests) }}"
+                                help="{{ __($role->isTalent() ? 'messages.accept_requests_help_talent' : 'messages.accept_requests_help') }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('accept_requests')" />
+                        </div>
+                        <div class="mb-6" id="require_account_section">
+                            <x-toggle name="require_account"
+                                label="{{ __('messages.require_account') }}"
+                                checked="{{ old('require_account', $role->exists ? $role->require_account : true) }}"
+                                help="{{ __('messages.require_account_help') }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('require_account')" />
+                        </div>
+                        <div class="mb-6" id="require_approval_section">
+                            <x-toggle name="require_approval"
+                                label="{{ __('messages.require_approval') }}"
+                                checked="{{ old('require_approval', $role->exists ? $role->require_approval : true) }}"
+                                help="{{ __('messages.require_approval_help') }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('require_approval')" />
+                        </div>
+                        <div class="mb-6" id="approved_subdomains_section">
+                            <x-input-label :value="__('messages.approved_schedules')" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.approved_schedules_help') }}</p>
+                            <div id="approved-subdomains-items">
+                                @foreach(old('approved_subdomains', $role->approved_subdomains ?? []) as $i => $subdomain)
+                                    <div class="mb-2 relative">
+                                        <div class="flex items-center">
+                                            <input type="text" data-subdomain-search value="{{ isset($approvedSubdomainNames[$subdomain]) ? $approvedSubdomainNames[$subdomain] . ' (' . $subdomain . ')' : $subdomain }}" placeholder="{{ __('messages.search_schedules_autocomplete') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
+                                            <button type="button" data-action="remove-parent-item"
+                                                class="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
+                                        </div>
+                                        <input type="hidden" name="approved_subdomains[]" value="{{ $subdomain }}" />
+                                        <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50"></div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <button type="button" data-action="add-approved-subdomain" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
+                                + {{ __('messages.add_schedule') }}
+                            </button>
+                        </div>
+                        <div class="mb-6" id="request_terms_section">
+                            <x-input-label for="request_terms" :value="__('messages.request_terms')" />
+                            <textarea id="request_terms" name="request_terms"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                rows="4"
+                                dir="auto"
+                                placeholder="{{ __('messages.enter_request_terms') }}">{{ old('request_terms', $role->request_terms) }}</textarea>
+                            <x-input-error class="mt-2" :messages="$errors->get('request_terms')" />
+                        </div>
+                        @endif
+
+                        </div>
+                        @endif
+                        <!-- End Tab Content: Requests -->
+
+                        <!-- Tab Content: Fan Content -->
+                        <div id="engagement-tab-fan_content" class="engagement-tab-content {{ $showRequestsTab ? 'hidden' : '' }}">
+                            <div class="mb-6">
+                                <x-toggle name="fan_content_enabled"
+                                    label="{{ __('messages.fan_content_enabled') }}"
+                                    checked="{{ old('fan_content_enabled', $role->fan_content_enabled) }}"
+                                    help="{{ __('messages.fan_content_enabled_help') }}" />
+                            </div>
+                        </div>
+                        <!-- End Tab Content: Fan Content -->
+
+                        <!-- Tab Content: Feedback -->
+                        <div id="engagement-tab-feedback" class="engagement-tab-content hidden">
+
+                        @php $emailDisabled = config('app.hosted') && ! $role->hasEmailSettings(); @endphp
+
+                        @if ($emailDisabled)
+                            <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span>
+                                        {{ __('messages.notification_requires_email_settings') }}
+                                        <a href="#section-integrations" class="js-email-settings-link text-[#4E81FA] hover:underline font-medium">{{ __('messages.configure_email_settings') }}</a>
+                                    </span>
+                                </p>
+                            </div>
+                        @endif
+
+                        <div class="mb-6">
+                            <x-toggle name="feedback_enabled"
+                                label="{{ __('messages.feedback_enabled') }}"
+                                checked="{{ old('feedback_enabled', $role->feedback_enabled) }}"
+                                help="{{ __('messages.feedback_enabled_help') }}"
+                                :disabled="$emailDisabled" />
+                        </div>
+
+                        <div class="mb-6" id="feedback-delay-wrapper" style="{{ $role->feedback_enabled && ! $emailDisabled ? '' : 'display: none;' }}">
+                            <x-input-label for="feedback_delay_hours" value="{{ __('messages.feedback_delay') }}" />
+                            <select id="feedback_delay_hours" name="feedback_delay_hours" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" {{ $emailDisabled ? 'disabled' : '' }}>
+                                @foreach ([1, 2, 6, 12, 24, 48] as $hours)
+                                <option value="{{ $hours }}" {{ old('feedback_delay_hours', $role->feedback_delay_hours ?? 24) == $hours ? 'selected' : '' }}>
+                                    {{ $hours }} {{ __('messages.feedback_hours') }}
+                                </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        </div>
+                        <!-- End Tab Content: Feedback -->
+                    </div>
+                </div>
+
                 @if (! config('app.hosted'))
                 <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-auto-import">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -2423,7 +2466,6 @@
                 </div>
                 @endif
 
-                @if (! $role->exists || $role->user_id == auth()->user()->id)
                 <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-integrations">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -2456,7 +2498,12 @@
                         <!-- Tab Navigation -->
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
-                                <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="google">
+                                @if (config('app.hosted'))
+                                <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="email">
+                                    {{ __('messages.email_settings') }}
+                                </button>
+                                @endif
+                                <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 {{ config('app.hosted') ? 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' : 'border-[#4E81FA] text-[#4E81FA]' }}" data-tab="google">
                                     Google Calendar
                                 </button>
                                 <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="caldav">
@@ -2465,8 +2512,91 @@
                             </nav>
                         </div>
 
+                        @if (config('app.hosted'))
+                        <!-- Tab Content: Email Settings -->
+                        <div id="integration-tab-email" class="integration-tab-content">
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.email_settings_help') }}</p>
+
+                            @if (is_demo_mode())
+                            <div class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">
+                                {{ __('messages.demo_mode_settings_disabled') }}
+                            </div>
+                            @endif
+
+                            <div class="{{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+
+                            @php
+                                $emailSettings = $role->getEmailSettings();
+                            @endphp
+
+                            <div class="mb-6">
+                                <x-input-label for="email_settings_host" :value="__('messages.smtp_host')" />
+                                <x-text-input id="email_settings_host" name="email_settings[host]" type="text" class="mt-1 block w-full"
+                                    :value="old('email_settings.host', $emailSettings['host'] ?? '')" />
+                                <x-input-error class="mt-2" :messages="$errors->get('email_settings.host')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="email_settings_port" :value="__('messages.smtp_port')" />
+                                <x-text-input id="email_settings_port" name="email_settings[port]" type="number" class="mt-1 block w-full"
+                                    :value="old('email_settings.port', $emailSettings['port'] ?? '')" />
+                                <x-input-error class="mt-2" :messages="$errors->get('email_settings.port')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="email_settings_encryption" :value="__('messages.encryption')" />
+                                <select id="email_settings_encryption" name="email_settings[encryption]" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                    <option value="">{{ __('messages.none') }}</option>
+                                    <option value="tls" {{ old('email_settings.encryption', $emailSettings['encryption'] ?? '') == 'tls' ? 'selected' : '' }}>TLS</option>
+                                    <option value="ssl" {{ old('email_settings.encryption', $emailSettings['encryption'] ?? '') == 'ssl' ? 'selected' : '' }}>SSL</option>
+                                </select>
+                                <x-input-error class="mt-2" :messages="$errors->get('email_settings.encryption')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="email_settings_username" :value="__('messages.smtp_username')" />
+                                <x-text-input id="email_settings_username" name="email_settings[username]" type="text" class="mt-1 block w-full"
+                                    :value="old('email_settings.username', $emailSettings['username'] ?? '')" autocomplete="off" />
+                                <x-input-error class="mt-2" :messages="$errors->get('email_settings.username')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="email_settings_password" :value="__('messages.smtp_password')" />
+                                <x-password-input id="email_settings_password" name="email_settings[password]" class="mt-1 block w-full"
+                                    :value="old('email_settings.password', !empty($emailSettings['password']) ? '••••••••••' : '')"
+                                    autocomplete="new-password" />
+                                <x-input-error class="mt-2" :messages="$errors->get('email_settings.password')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="email_settings_from_address" :value="__('messages.from_address')" />
+                                <x-text-input id="email_settings_from_address" name="email_settings[from_address]" type="email" class="mt-1 block w-full"
+                                    :value="old('email_settings.from_address', $emailSettings['from_address'] ?? '')" />
+                                <x-input-error class="mt-2" :messages="$errors->get('email_settings.from_address')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="email_settings_from_name" :value="__('messages.from_name')" />
+                                <x-text-input id="email_settings_from_name" name="email_settings[from_name]" type="text" class="mt-1 block w-full"
+                                    :value="old('email_settings.from_name', $emailSettings['from_name'] ?? '')" />
+                                <x-input-error class="mt-2" :messages="$errors->get('email_settings.from_name')" />
+                            </div>
+
+                            @if ($role->exists && $role->subdomain)
+                            <div class="mb-6">
+                                <x-primary-button type="button" id="send-test-email-btn">
+                                    {{ __('messages.send_test_email') }}
+                                </x-primary-button>
+                                <div id="test-email-result" class="mt-2 hidden"></div>
+                            </div>
+                            @endif
+
+                            </div>
+                        </div>
+                        @endif
+
                         <!-- Tab Content: Google Calendar -->
-                        <div id="integration-tab-google" class="integration-tab-content">
+                        <div id="integration-tab-google" class="integration-tab-content {{ config('app.hosted') ? 'hidden' : '' }}">
                             <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
                                 {{ __('messages.sync_events_between_schedules') }}
                             </p>
@@ -2726,109 +2856,7 @@
                         </div>
                     </div>
                 </div>
-                @endif
 
-                @if (config('app.hosted'))
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-email-settings">
-                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                        </svg>
-                        {{ __('messages.email_settings') }}
-                    </span>
-                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div id="section-email-settings" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
-                    <div class="max-w-xl">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                    </svg>
-                    {{ __('messages.email_settings') }}
-                </h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 -mt-4 mb-6">{{ __('messages.email_settings_help') }}</p>
-
-                @if (is_demo_mode())
-                <div class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">
-                    {{ __('messages.demo_mode_settings_disabled') }}
-                </div>
-                @endif
-
-                <div class="{{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
-
-                @php
-                    $emailSettings = $role->getEmailSettings();
-                @endphp
-
-                <div class="mb-6">
-                    <x-input-label for="email_settings_host" :value="__('messages.smtp_host')" />
-                    <x-text-input id="email_settings_host" name="email_settings[host]" type="text" class="mt-1 block w-full"
-                        :value="old('email_settings.host', $emailSettings['host'] ?? '')" />
-                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.host')" />
-                </div>
-
-                <div class="mb-6">
-                    <x-input-label for="email_settings_port" :value="__('messages.smtp_port')" />
-                    <x-text-input id="email_settings_port" name="email_settings[port]" type="number" class="mt-1 block w-full"
-                        :value="old('email_settings.port', $emailSettings['port'] ?? '')" />
-                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.port')" />
-                </div>
-
-                <div class="mb-6">
-                    <x-input-label for="email_settings_encryption" :value="__('messages.encryption')" />
-                    <select id="email_settings_encryption" name="email_settings[encryption]" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                        <option value="">{{ __('messages.none') }}</option>
-                        <option value="tls" {{ old('email_settings.encryption', $emailSettings['encryption'] ?? '') == 'tls' ? 'selected' : '' }}>TLS</option>
-                        <option value="ssl" {{ old('email_settings.encryption', $emailSettings['encryption'] ?? '') == 'ssl' ? 'selected' : '' }}>SSL</option>
-                    </select>
-                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.encryption')" />
-                </div>
-
-                <div class="mb-6">
-                    <x-input-label for="email_settings_username" :value="__('messages.smtp_username')" />
-                    <x-text-input id="email_settings_username" name="email_settings[username]" type="text" class="mt-1 block w-full"
-                        :value="old('email_settings.username', $emailSettings['username'] ?? '')" autocomplete="off" />
-                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.username')" />
-                </div>
-
-                <div class="mb-6">
-                    <x-input-label for="email_settings_password" :value="__('messages.smtp_password')" />
-                    <x-password-input id="email_settings_password" name="email_settings[password]" class="mt-1 block w-full"
-                        :value="old('email_settings.password', !empty($emailSettings['password']) ? '••••••••••' : '')"
-                        autocomplete="new-password" />
-                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.password')" />
-                </div>
-
-                <div class="mb-6">
-                    <x-input-label for="email_settings_from_address" :value="__('messages.from_address')" />
-                    <x-text-input id="email_settings_from_address" name="email_settings[from_address]" type="email" class="mt-1 block w-full"
-                        :value="old('email_settings.from_address', $emailSettings['from_address'] ?? '')" />
-                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.from_address')" />
-                </div>
-
-                <div class="mb-6">
-                    <x-input-label for="email_settings_from_name" :value="__('messages.from_name')" />
-                    <x-text-input id="email_settings_from_name" name="email_settings[from_name]" type="text" class="mt-1 block w-full"
-                        :value="old('email_settings.from_name', $emailSettings['from_name'] ?? '')" />
-                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.from_name')" />
-                </div>
-
-                @if ($role->exists && $role->subdomain)
-                <div class="mb-6">
-                    <x-primary-button type="button" id="send-test-email-btn">
-                        {{ __('messages.send_test_email') }}
-                    </x-primary-button>
-                    <div id="test-email-result" class="mt-2 hidden"></div>
-                </div>
-                @endif
-
-                </div>
-                    </div>
-                </div>
-                @endif
-                    
                 </div> <!-- End of main content area -->
             </div> <!-- End of grid container -->
 
@@ -3604,8 +3632,8 @@ document.addEventListener('DOMContentLoaded', function() {
         syncMobileHeaders(sectionId);
 
         // Update URL hash
-        if (history.pushState) {
-            history.pushState(null, null, '#' + sectionId);
+        if (history.replaceState) {
+            history.replaceState(null, null, '#' + sectionId);
         } else {
             window.location.hash = sectionId;
         }
@@ -3796,7 +3824,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Restore active tab from localStorage
     const savedTab = localStorage.getItem('integrationActiveTab');
-    if (savedTab) {
+    if (savedTab && document.getElementById('integration-tab-' + savedTab)) {
         switchIntegrationTab(savedTab);
     }
 
@@ -3823,6 +3851,76 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update tab contents
         integrationTabContents.forEach(content => {
             const contentId = content.id.replace('integration-tab-', '');
+            if (contentId === tabName) {
+                content.classList.remove('hidden');
+            } else {
+                content.classList.add('hidden');
+            }
+        });
+    }
+
+    // Email settings link handler
+    document.querySelectorAll('.js-email-settings-link').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            var emailTab = document.querySelector('.integration-tab[data-tab="email"]');
+            if (emailTab) {
+                switchIntegrationTab('email');
+                localStorage.setItem('integrationActiveTab', 'email');
+            }
+            // Navigate to integrations section
+            var section = document.getElementById('section-integrations');
+            if (section) {
+                document.querySelectorAll('.section-nav-link').forEach(function(navLink) {
+                    if (navLink.dataset.section === 'section-integrations') {
+                        navLink.click();
+                    }
+                });
+            }
+        });
+    });
+});
+
+// Engagement tabs switching
+document.addEventListener('DOMContentLoaded', function() {
+    const engagementTabs = document.querySelectorAll('.engagement-tab');
+    const engagementTabContents = document.querySelectorAll('.engagement-tab-content');
+
+    if (engagementTabs.length === 0) return;
+
+    // Restore active tab from localStorage
+    const savedEngagementTab = localStorage.getItem('engagementActiveTab');
+    if (savedEngagementTab) {
+        if (document.getElementById('engagement-tab-' + savedEngagementTab)) {
+            switchEngagementTab(savedEngagementTab);
+        } else {
+            switchEngagementTab(document.querySelector('.engagement-tab').dataset.tab);
+        }
+    }
+
+    engagementTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabName = this.dataset.tab;
+            switchEngagementTab(tabName);
+            localStorage.setItem('engagementActiveTab', tabName);
+        });
+    });
+
+    function switchEngagementTab(tabName) {
+        // Update tab buttons
+        engagementTabs.forEach(tab => {
+            if (tab.dataset.tab === tabName) {
+                tab.classList.add('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
+            } else {
+                tab.classList.remove('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
+            }
+        });
+
+        // Update tab contents
+        engagementTabContents.forEach(content => {
+            const contentId = content.id.replace('engagement-tab-', '');
             if (contentId === tabName) {
                 content.classList.remove('hidden');
             } else {
@@ -4708,7 +4806,7 @@ document.addEventListener('DOMContentLoaded', function() {
     :fields="[
         ['key' => 'profile_image', 'label' => __('messages.profile_image'), 'has_value' => (bool)$role->profile_image_url],
         ['key' => 'header_image', 'label' => __('messages.header_image'), 'has_value' => (bool)$role->header_image_url],
-        ['key' => 'accent_color', 'label' => __('messages.accent_color'), 'has_value' => $role->accent_color !== '#007bff'],
+        ['key' => 'accent_color', 'label' => __('messages.accent_color'), 'has_value' => strtolower($role->accent_color) !== '#007bff'],
         ['key' => 'font', 'label' => __('messages.font_family'), 'has_value' => $role->font_family !== 'Roboto'],
         ['key' => 'background_image', 'label' => __('messages.background_image'), 'has_value' => (bool)$role->background_image_url],
     ]"
@@ -4842,7 +4940,7 @@ window.handleAiStyleResults = function(data) {
 </script>
 @endif
 
-<x-upgrade-modal name="upgrade-ai-style" tier="enterprise" :subdomain="$role->subdomain">
+<x-upgrade-modal name="upgrade-ai-style" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.schedule_styling') }}#ai-style-generator">
     {{ __('messages.upgrade_feature_description_ai_style') }}
 </x-upgrade-modal>
 
@@ -4892,7 +4990,7 @@ window.handleAiScheduleDetailsResults = function(data) {
 </script>
 @endif
 
-<x-upgrade-modal name="upgrade-ai-details" tier="enterprise" :subdomain="$role->subdomain">
+<x-upgrade-modal name="upgrade-ai-details" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.creating_schedules') }}#ai-details-generator">
     {{ __('messages.upgrade_feature_description_ai_details') }}
 </x-upgrade-modal>
 
