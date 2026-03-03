@@ -133,6 +133,9 @@ return [
     'create_account' => 'Loo konto',
     'continue_as_guest' => 'Jätka külalisena',
     'event_created_guest' => 'Sündmus edukalt loodud! Nüüd saate seda ajakavast vaadata.',
+    'booking_request' => 'Broneerimispäring',
+    'booking_request_submitted' => 'Teie broneerimispäring on esitatud.',
+    'logged_in_as' => 'Sisse logitud kui',
     'create_schedule' => 'Loo ajakava',
     'create_event' => 'Loo sündmus',
     'add' => 'Lisa',
@@ -1888,7 +1891,8 @@ return [
     'deleted_event' => 'Kustutatud sündmus',
 
     // Phone verification
-    'phone_number' => 'Phone Number',
+    'phone_number' => 'Telefoninumber',
+    'ask_for_phone_number' => 'Küsi telefoninumbrit',
     'show_phone_number' => 'Show phone number',
     'your_phone_is_unverified' => 'Your phone number is unverified.',
     'click_here_to_verify_phone' => 'Click here to verify your phone',

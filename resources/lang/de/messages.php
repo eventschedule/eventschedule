@@ -381,6 +381,9 @@ return [
     'create_account' => 'Konto erstellen',
     'continue_as_guest' => 'Als Gast fortfahren',
     'event_created_guest' => 'Veranstaltung erfolgreich erstellt! Sie können sie jetzt im Zeitplan ansehen.',
+    'booking_request' => 'Buchungsanfrage',
+    'booking_request_submitted' => 'Ihre Buchungsanfrage wurde eingereicht.',
+    'logged_in_as' => 'Angemeldet als',
     'sold' => 'Verkauft',
     'sold_out' => 'Ausverkauft',
     'event' => 'Veranstaltung',
@@ -1876,7 +1879,8 @@ return [
     'deleted_event' => 'Gelöschte Veranstaltung',
 
     // Phone verification
-    'phone_number' => 'Phone Number',
+    'phone_number' => 'Telefonnummer',
+    'ask_for_phone_number' => 'Telefonnummer abfragen',
     'show_phone_number' => 'Show phone number',
     'your_phone_is_unverified' => 'Your phone number is unverified.',
     'click_here_to_verify_phone' => 'Click here to verify your phone',

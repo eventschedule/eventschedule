@@ -7,6 +7,9 @@
 
 @endif
 {{ __('messages.buyer') }}: {{ $sale->name }} ({{ $sale->email }})
+@if ($sale->phone)
+{{ __('messages.phone_number') }}: {{ $sale->phone }}
+@endif
 
 @foreach ($sale->saleTickets as $saleTicket)
 {{ $saleTicket->ticket->name }} x {{ $saleTicket->quantity }}

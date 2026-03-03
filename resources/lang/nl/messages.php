@@ -223,6 +223,9 @@ return [
     'create_account' => 'Account aanmaken',
     'continue_as_guest' => 'Doorgaan als Gast',
     'event_created_guest' => 'Evenement succesvol aangemaakt! Je kunt het nu bekijken in de agenda.',
+    'booking_request' => 'Boekingsverzoek',
+    'booking_request_submitted' => 'Uw boekingsverzoek is ingediend.',
+    'logged_in_as' => 'Ingelogd als',
     'sold' => 'Verkocht',
     'sold_out' => 'Uitverkocht',
     'event' => 'Evenement',
@@ -1870,7 +1873,8 @@ return [
     'deleted_event' => 'Verwijderd evenement',
 
     // Phone verification
-    'phone_number' => 'Phone Number',
+    'phone_number' => 'Telefoonnummer',
+    'ask_for_phone_number' => 'Telefoonnummer opvragen',
     'show_phone_number' => 'Show phone number',
     'your_phone_is_unverified' => 'Your phone number is unverified.',
     'click_here_to_verify_phone' => 'Click here to verify your phone',

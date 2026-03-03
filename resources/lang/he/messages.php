@@ -218,6 +218,9 @@ return [
     'create_account' => 'צור חשבון',
     'continue_as_guest' => 'המשך כאורח',
     'event_created_guest' => 'האירוע נוצר בהצלחה! עכשיו תוכל לראות אותו בלוח הזמנים.',
+    'booking_request' => 'בקשת הזמנה',
+    'booking_request_submitted' => 'בקשת ההזמנה שלך נשלחה.',
+    'logged_in_as' => 'מחובר כ',
     'sold' => 'נמכר',
     'sold_out' => 'אזלו הכרטיסים',
     'tickets_not_available' => 'כרטיסים לאירוע זה אינם זמינים',
@@ -1865,7 +1868,8 @@ return [
     'deleted_event' => 'אירוע שנמחק',
 
     // Phone verification
-    'phone_number' => 'Phone Number',
+    'phone_number' => 'מספר טלפון',
+    'ask_for_phone_number' => 'בקש מספר טלפון',
     'show_phone_number' => 'Show phone number',
     'your_phone_is_unverified' => 'Your phone number is unverified.',
     'click_here_to_verify_phone' => 'Click here to verify your phone',

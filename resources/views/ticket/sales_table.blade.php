@@ -81,6 +81,9 @@
                                         <div class="flex flex-col">
                                             <span class="font-semibold">{{ $sale->name }}</span>
                                             <a href="mailto:{{ $sale->email }}" class="text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8] hover:underline text-xs">{{ $sale->email }}</a>
+                                            @if ($sale->phone)
+                                            <a href="tel:{{ $sale->phone }}" class="text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8] hover:underline text-xs">{{ $sale->phone }}</a>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>
@@ -300,6 +303,9 @@
                     <div class="flex-1">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ $sale->name }}</h3>
                         <a href="mailto:{{ $sale->email }}" class="text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8] text-sm">{{ $sale->email }}</a>
+                        @if ($sale->phone)
+                        <br><a href="tel:{{ $sale->phone }}" class="text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8] text-sm">{{ $sale->phone }}</a>
+                        @endif
                     </div>
                     <div class="ms-4">
                         @if($sale->status === 'paid')

@@ -374,6 +374,9 @@ return [
     'create_account' => 'إنشاء حساب',
     'continue_as_guest' => 'المتابعة كضيف',
     'event_created_guest' => 'تم إنشاء الحدث بنجاح! يمكنك الآن مشاهدته في الجدول الزمني.',
+    'booking_request' => 'طلب حجز',
+    'booking_request_submitted' => 'تم إرسال طلب الحجز الخاص بك.',
+    'logged_in_as' => 'مسجل الدخول باسم',
     'sold' => 'تم البيع',
     'sold_out' => 'نفذت الكمية',
     'event' => 'الحدث',
@@ -1873,7 +1876,8 @@ return [
     'deleted_event' => 'حدث محذوف',
 
     // Phone verification
-    'phone_number' => 'Phone Number',
+    'phone_number' => 'رقم الهاتف',
+    'ask_for_phone_number' => 'طلب رقم الهاتف',
     'show_phone_number' => 'Show phone number',
     'your_phone_is_unverified' => 'Your phone number is unverified.',
     'click_here_to_verify_phone' => 'Click here to verify your phone',

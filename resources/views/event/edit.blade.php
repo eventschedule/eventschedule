@@ -2562,6 +2562,32 @@
 
                                 <!-- Options Tab -->
                                 <div v-show="activeTicketTab === 'options' || event.rsvp_enabled">
+
+                                <!-- Phone Number -->
+                                <div class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input id="ask_phone_checkbox" type="checkbox"
+                                                v-model="event.ask_phone"
+                                                class="sr-only peer"
+                                                @change="event.ask_phone || (event.require_phone = false)">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="ask_phone_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.ask_for_phone_number') }}
+                                        </label>
+                                    </div>
+                                    <div class="mt-3 ms-14" v-if="event.ask_phone">
+                                        <div class="flex items-center">
+                                            <input type="checkbox" v-model="event.require_phone" id="require_phone_checkbox" class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                            <label for="require_phone_checkbox" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="ask_phone" :value="event.ask_phone ? 1 : 0">
+                                    <input type="hidden" name="require_phone" :value="event.require_phone ? 1 : 0">
+                                </div>
+
                                 <!-- Event-level Custom Fields -->
                                 <div class="mb-6">
                                     <x-input-label :value="__('messages.custom_fields') . ' (' . __('messages.per_order') . ')'" class="mb-3" />
@@ -3557,6 +3583,8 @@
           recurring_end_value: @json($event->recurring_end_value ?? null),
           recurring_frequency: @json($event->recurring_frequency ?? 'weekly'),
           recurring_interval: @json($event->recurring_interval ?? 2),
+          ask_phone: {{ $event->ask_phone ? 'true' : 'false' }},
+          require_phone: {{ $event->require_phone ? 'true' : 'false' }},
         },
         ticketMode: @json($event->tickets_enabled ? 'tickets' : ($event->rsvp_enabled ? 'rsvp' : 'external')),
         venues: @json($venues),

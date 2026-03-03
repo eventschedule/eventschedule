@@ -13,6 +13,7 @@ class Sale extends Model
         'user_id',
         'name',
         'email',
+        'phone',
         'secret',
         'event_date',
         'subdomain',
@@ -137,6 +138,7 @@ class Sale extends Model
         $data->subdomain = $this->subdomain;
         $data->name = $this->name;
         $data->email = $this->email;
+        $data->phone = $this->phone;
         $data->event_date = $this->event_date;
         $data->status = $this->status;
         $data->payment_method = $this->payment_method;

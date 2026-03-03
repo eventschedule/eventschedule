@@ -24,6 +24,9 @@
                     eventMultiselectValues: {},
                     name: @json(old('name', auth()->check() ? auth()->user()->name : '')),
                     email: @json(old('email', auth()->check() ? auth()->user()->email : '')),
+                    phone: @json(old('phone', '')),
+                    askPhone: @json((bool) $event->ask_phone),
+                    requirePhone: @json((bool) $event->require_phone),
                     password: @json(old('password', '')),
                     totalTicketsMode: @json($event->total_tickets_mode ?? 'individual'),
                     turnstileEnabled: @json(\App\Utils\TurnstileUtils::isEnabled()),
@@ -116,6 +119,7 @@
                     return Math.max(0, this.subtotalAmount - this.discountAmount);
                 },
                 hasSelectedTickets() {
+                    if (this.requirePhone && this.phone.trim() === '') return false;
                     if (this.isPaymentLinkMode) {
                         return this.name.trim() !== '' && this.email.trim() !== '';
                     }
@@ -338,7 +342,7 @@
         </div>
         @endif
 
-        @if ($errors->any() && !$errors->has('name') && !$errors->has('email') && !$errors->has('password') && !$errors->has('cf-turnstile-response'))
+        @if ($errors->any() && !$errors->has('name') && !$errors->has('email') && !$errors->has('phone') && !$errors->has('password') && !$errors->has('cf-turnstile-response'))
         <div class="mb-6 p-3 rounded-lg text-sm bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
             {{ __('messages.error') }}
         </div>
@@ -391,6 +395,13 @@
                     </div>
                 </div>
             @endif
+        </div>
+
+        <div class="mb-6" v-if="askPhone">
+            <label for="phone" class="text-gray-900 dark:text-gray-100">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
+            <input type="tel" name="phone" id="phone" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+                v-model="phone" :required="requirePhone" autocomplete="tel" />
+            <x-input-error class="mt-2" :messages="$errors->get('phone')" />
         </div>
 
         <!-- Event-level Custom Fields -->

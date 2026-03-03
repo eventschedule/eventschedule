@@ -50,6 +50,8 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::get('/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
         Route::post('/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import.store');
+        Route::get('/booking-request', [EventController::class, 'showBookingRequest'])->name('event.booking_request');
+        Route::post('/booking-request', [EventController::class, 'bookingRequest'])->name('event.booking_request.store');
         Route::post('/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse')->middleware('throttle:10,1');
         Route::post('/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image')->middleware('throttle:20,1');
         Route::get('/guest-search-youtube', [RoleController::class, 'guestSearchYouTube'])->name('role.guest_search_youtube');
@@ -1026,6 +1028,8 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     Route::get('/{subdomain}/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
     Route::post('/{subdomain}/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import.store');
+    Route::get('/{subdomain}/booking-request', [EventController::class, 'showBookingRequest'])->name('event.booking_request');
+    Route::post('/{subdomain}/booking-request', [EventController::class, 'bookingRequest'])->name('event.booking_request.store');
     Route::post('/{subdomain}/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse')->middleware('throttle:10,1');
     Route::post('/{subdomain}/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image')->middleware('throttle:20,1');
     Route::get('/{subdomain}/guest-search-youtube', [RoleController::class, 'guestSearchYouTube'])->name('role.guest_search_youtube');

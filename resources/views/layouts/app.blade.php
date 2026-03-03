@@ -511,7 +511,7 @@
         .custom-content sup { vertical-align: revert; font-size: revert; }
 
         .dark .custom-content a { color: #60a5fa; }
-        .dark .custom-content a:visited { color: #a78bfa; }
+        .dark .custom-content a:visited { color: #60a5fa; }
         .dark .custom-content a:hover { color: #93c5fd; }
 
         /* Heading sizes and spacing */

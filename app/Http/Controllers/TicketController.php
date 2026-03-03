@@ -120,6 +120,7 @@ class TicketController extends Controller
                     ->orWhere('transaction_reference', 'LIKE', "%{$filter}%")
                     ->orWhere('email', 'LIKE', "%{$filter}%")
                     ->orWhere('name', 'LIKE', "%{$filter}%")
+                    ->orWhere('phone', 'LIKE', "%{$filter}%")
                     ->orWhereHas('event', function ($q) use ($filter) {
                         $q->where('name', 'LIKE', "%{$filter}%");
                     });
@@ -206,7 +207,7 @@ class TicketController extends Controller
             fwrite($handle, "\xEF\xBB\xBF");
 
             // Header row
-            $headers = ['Name', 'Email', 'Event', 'Event Date', 'Tickets', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Transaction Reference', 'Payment Method', 'Status', 'Date'];
+            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Transaction Reference', 'Payment Method', 'Status', 'Date'];
             $headers = array_merge($headers, $customFieldNames);
             fputcsv($handle, $headers);
 
@@ -219,6 +220,7 @@ class TicketController extends Controller
                 $row = [
                     $sale->name,
                     $sale->email,
+                    $sale->phone,
                     $sale->event->name,
                     $sale->event_date,
                     $tickets,
@@ -397,6 +399,7 @@ class TicketController extends Controller
                 $sale = new Sale;
                 $sale->name = $request->input('name');
                 $sale->email = $request->input('email');
+                $sale->phone = $request->input('phone') ? strip_tags(trim($request->input('phone'))) : null;
                 $sale->event_date = $request->input('event_date');
                 $sale->subdomain = $subdomain;
                 $sale->event_id = $event->id;
@@ -571,12 +574,21 @@ class TicketController extends Controller
 
     public function rsvp(Request $request, $subdomain)
     {
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'event_id' => 'required|string',
             'event_date' => 'required|date_format:Y-m-d',
-        ]);
+        ];
+
+        $event = Event::find(UrlUtils::decodeId($request->event_id));
+        if ($event && $event->ask_phone) {
+            $rules['phone'] = $event->require_phone
+                ? 'required|string|max:50'
+                : 'nullable|string|max:50';
+        }
+
+        $request->validate($rules);
 
         // Turnstile CAPTCHA validation
         if (\App\Utils\TurnstileUtils::isEnabled()) {
@@ -590,7 +602,9 @@ class TicketController extends Controller
             }
         }
 
-        $event = Event::findOrFail(UrlUtils::decodeId($request->event_id));
+        if (! $event) {
+            abort(404);
+        }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
         if (! $event->roles()->wherePivot('role_id', $role->id)->exists()) {
@@ -663,6 +677,7 @@ class TicketController extends Controller
                 $sale = new Sale;
                 $sale->name = $request->input('name');
                 $sale->email = $request->input('email');
+                $sale->phone = $request->input('phone') ? strip_tags(trim($request->input('phone'))) : null;
                 $sale->event_date = $request->input('event_date');
                 $sale->subdomain = $subdomain;
                 $sale->event_id = $event->id;

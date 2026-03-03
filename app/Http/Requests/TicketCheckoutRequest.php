@@ -33,8 +33,15 @@ class TicketCheckoutRequest extends FormRequest
             'cf-turnstile-response' => [new ValidTurnstile],
         ];
 
-        // Payment link mode: tickets are selected on Invoice Ninja, not here
         $event = Event::find(UrlUtils::decodeId($this->event_id));
+
+        if ($event && $event->ask_phone) {
+            $rules['phone'] = $event->require_phone
+                ? ['required', 'string', 'max:50']
+                : ['nullable', 'string', 'max:50'];
+        }
+
+        // Payment link mode: tickets are selected on Invoice Ninja, not here
         $isPaymentLink = $event
             && $event->payment_method === 'invoiceninja'
             && $event->user->invoiceninja_mode === 'payment_link';

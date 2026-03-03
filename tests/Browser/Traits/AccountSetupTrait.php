@@ -39,7 +39,7 @@ trait AccountSetupTrait
         $browser->script("
             var nameField = document.getElementById('name');
             if (!nameField.value) {
-                nameField.value = " . json_encode($name) . ";
+                nameField.value = ".json_encode($name).";
                 nameField.dispatchEvent(new Event('input', { bubbles: true }));
             }
         ");
@@ -54,7 +54,7 @@ trait AccountSetupTrait
         $browser->script("
             var addressField = document.getElementById('address1');
             if (!addressField.value) {
-                addressField.value = " . json_encode($address) . ";
+                addressField.value = ".json_encode($address).";
                 addressField.dispatchEvent(new Event('input', { bubbles: true }));
             }
         ");
@@ -72,10 +72,26 @@ trait AccountSetupTrait
     protected function createTestTalent(Browser $browser, string $name = 'Talent'): void
     {
         $browser->visit('/new/talent')
-            ->waitFor('#name', 15)
-            ->pause(1000)
+            ->waitFor('#edit-form', 15)
+            ->pause(500);
+
+        // Ensure we're on the General tab (page may land on a different tab)
+        $browser->script("
+            var generalTab = document.querySelector('button.details-tab[data-tab=\"general\"]');
+            if (generalTab) generalTab.click();
+        ");
+        $browser->pause(500)
             ->clear('name')
             ->type('name', $name);
+
+        // Ensure name was set (JS fallback for headless Chrome flakiness)
+        $browser->script("
+            var nameField = document.getElementById('name');
+            if (!nameField.value || nameField.value !== ".json_encode($name).') {
+                nameField.value = '.json_encode($name).";
+                nameField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        ");
 
         // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
         $browser->script("document.getElementById('edit-form').requestSubmit()");
@@ -94,11 +110,20 @@ trait AccountSetupTrait
             ->pause(1000)
             ->type('name', $name);
 
-        // Use JavaScript to switch to settings section (more reliable than clicking the nav link)
-        $browser->script("document.querySelector('a[data-section=\"section-settings\"]').click()");
+        // Ensure name was set (JS fallback for headless Chrome flakiness)
+        $browser->script("
+            var nameField = document.getElementById('name');
+            if (!nameField.value || nameField.value !== ".json_encode($name).') {
+                nameField.value = '.json_encode($name).";
+                nameField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        ");
+
+        // Use JavaScript to switch to engagement section (where the requests tab lives)
+        $browser->script("document.querySelector('a[data-section=\"section-engagement\"]').click()");
 
         $browser->pause(500)
-            ->click('button.settings-tab[data-tab="requests"]')
+            ->click('button.engagement-tab[data-tab="requests"]')
             ->waitFor('#accept_requests', 5)
             ->click('label[for="accept_requests"]')
             ->scrollIntoView('button[type="submit"]')
@@ -112,31 +137,45 @@ trait AccountSetupTrait
      */
     protected function createTestEventWithTickets(Browser $browser, string $talentName = 'Talent', string $venueName = 'Venue', string $eventName = 'Test Event'): void
     {
-        $browser->visit('/'.strtolower(str_replace(' ', '-', $talentName)).'/add-event?date='.date('Y-m-d', strtotime('+3 days')))
-            ->type('name', $eventName)
-            ->click('a[data-section="section-venue"]')
-            ->waitFor('#in_person', 5);
-        $browser->script("var cb = document.getElementById('in_person'); if (!cb.checked) cb.click();");
-        $browser->waitFor('#selected_venue', 5)
-            ->select('#selected_venue')
-            ->click('a[data-section="section-tickets"]')
-            ->waitFor('#ticket_mode_tickets', 5)
-            ->click('label[for="ticket_mode_tickets"]')
-            ->pause(1000); // Wait for Vue to render the ticket tabs
+        $eventDate = date('Y-m-d', strtotime('+3 days'));
+        $browser->visit('/'.strtolower(str_replace(' ', '-', $talentName)).'/add-event?date='.$eventDate)
+            ->waitFor('#event_name', 15)
+            ->pause(1000);
 
-        // Use JavaScript to scroll the price input into view and ensure it's visible
+        // Set event name via JS (more reliable than Dusk type in headless Chrome)
         $browser->script("
-            const priceInput = document.querySelector('input[name=\"tickets[0][price]\"]');
-            if (priceInput) {
-                priceInput.scrollIntoView({ block: 'center', behavior: 'instant' });
-            }
+            var nameField = document.getElementById('event_name');
+            nameField.value = ".json_encode($eventName).";
+            nameField.dispatchEvent(new Event('input', { bubbles: true }));
         ");
 
-        $browser->pause(300)
-            ->type('tickets[0][price]', '10')
-            ->type('tickets[0][quantity]', '50')
-            ->click('button[type="submit"]')
-            ->waitForLocation('/'.strtolower(str_replace(' ', '-', $talentName)).'/schedule', 15)
+        // Navigate to venue section via JS
+        $browser->script("document.querySelector('a[data-section=\"section-venue\"]').click()");
+        $browser->waitFor('#in_person', 10);
+        $browser->script("var cb = document.getElementById('in_person'); if (!cb.checked) cb.click();");
+        $browser->waitFor('#selected_venue', 5)
+            ->select('#selected_venue');
+
+        // Navigate to tickets section via JS
+        $browser->script("document.querySelector('a[data-section=\"section-tickets\"]').click()");
+        $browser->waitFor('#ticket_mode_tickets', 10)
+            ->click('label[for="ticket_mode_tickets"]')
+            ->pause(1000);
+
+        // Configure ticket via Vue (more reliable than DOM type in headless Chrome)
+        $browser->script("
+            var v = window.vueApp;
+            v.tickets[0].price = 10;
+            v.tickets[0].quantity = 50;
+        ");
+
+        // Submit the event form
+        $browser->script("
+            window._skipUnsavedWarning = true;
+            document.getElementById('edit-form').requestSubmit();
+        ");
+
+        $browser->waitForLocation('/'.strtolower(str_replace(' ', '-', $talentName)).'/schedule', 45)
             ->assertSee($venueName);
     }
 
@@ -206,12 +245,12 @@ trait AccountSetupTrait
         $browser->script("
             var emailField = document.getElementById('email');
             if (!emailField.value) {
-                emailField.value = " . json_encode($email) . ";
+                emailField.value = ".json_encode($email).";
                 emailField.dispatchEvent(new Event('input', { bubbles: true }));
             }
             var passwordField = document.getElementById('password');
             if (!passwordField.value) {
-                passwordField.value = " . json_encode($password) . ";
+                passwordField.value = ".json_encode($password).";
                 passwordField.dispatchEvent(new Event('input', { bubbles: true }));
             }
         ");

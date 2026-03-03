@@ -133,6 +133,9 @@ return [
     'create_account' => 'Create Account',
     'continue_as_guest' => 'Continue as Guest',
     'event_created_guest' => 'Event created successfully! You can now view it on the schedule.',
+    'booking_request' => 'Booking Request',
+    'booking_request_submitted' => 'Your booking request has been submitted.',
+    'logged_in_as' => 'Logged in as',
     'create_schedule' => 'Create Schedule',
     'create_event' => 'Create Event',
     'add' => 'Add',
@@ -1898,6 +1901,7 @@ return [
 
     // Phone verification
     'phone_number' => 'Phone Number',
+    'ask_for_phone_number' => 'Ask for phone number',
     'phone_number_required' => 'Phone number is required',
     'show_phone_number' => 'Show phone number',
     'your_phone_is_unverified' => 'Your phone number is unverified.',

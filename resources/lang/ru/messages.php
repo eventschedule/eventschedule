@@ -133,6 +133,9 @@ return [
     'create_account' => 'Создать акаунт',
     'continue_as_guest' => 'Продолжить как гость',
     'event_created_guest' => 'Событие успешно создано! Теперь вы можете просмотреть его в расписании.',
+    'booking_request' => 'Запрос на бронирование',
+    'booking_request_submitted' => 'Ваш запрос на бронирование отправлен.',
+    'logged_in_as' => 'Вы вошли как',
     'create_schedule' => 'Создать расписание',
     'create_event' => 'Создать событие',
     'add' => 'Добавить',
@@ -1891,7 +1894,8 @@ return [
     'deleted_event' => 'Удалённое событие',
 
     // Phone verification
-    'phone_number' => 'Phone Number',
+    'phone_number' => 'Номер телефона',
+    'ask_for_phone_number' => 'Запросить номер телефона',
     'show_phone_number' => 'Show phone number',
     'your_phone_is_unverified' => 'Your phone number is unverified.',
     'click_here_to_verify_phone' => 'Click here to verify your phone',

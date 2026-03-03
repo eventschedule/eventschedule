@@ -133,6 +133,9 @@ return [
     'create_account' => 'Creează Cont',
     'continue_as_guest' => 'Continuă ca Vizitator',
     'event_created_guest' => 'Eveniment creat cu succes! Acum îl puteți vedea în program.',
+    'booking_request' => 'Cerere de Rezervare',
+    'booking_request_submitted' => 'Cererea dumneavoastră de rezervare a fost trimisă.',
+    'logged_in_as' => 'Conectat ca',
     'create_schedule' => 'Creează Program',
     'create_event' => 'Creează Eveniment',
     'add' => 'Adaugă',
@@ -1899,6 +1902,7 @@ return [
 
     // Phone verification
     'phone_number' => 'Număr de Telefon',
+    'ask_for_phone_number' => 'Solicită numărul de telefon',
     'phone_number_required' => 'Numărul de telefon este obligatoriu',
     'show_phone_number' => 'Arată numărul de telefon',
     'your_phone_is_unverified' => 'Numărul tău de telefon nu este verificat.',

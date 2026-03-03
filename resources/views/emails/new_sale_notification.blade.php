@@ -29,6 +29,11 @@
             <p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">
                 <strong>{{ __('messages.buyer') }}:</strong> {{ $sale->name }} ({{ $sale->email }})
             </p>
+            @if ($sale->phone)
+            <p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">
+                <strong>{{ __('messages.phone_number') }}:</strong> {{ $sale->phone }}
+            </p>
+            @endif
 
             <hr style="border: none; border-top: 1px solid #eee; margin: 15px 0;">
 

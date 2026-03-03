@@ -16,6 +16,9 @@
                     eventMultiselectValues: {},
                     name: @json(old('name', auth()->check() ? auth()->user()->name : '')),
                     email: @json(old('email', auth()->check() ? auth()->user()->email : '')),
+                    phone: @json(old('phone', '')),
+                    askPhone: @json((bool) $event->ask_phone),
+                    requirePhone: @json((bool) $event->require_phone),
                     password: @json(old('password', '')),
                     turnstileEnabled: @json(\App\Utils\TurnstileUtils::isEnabled()),
                     turnstileSiteKey: @json(\App\Utils\TurnstileUtils::getSiteKey()),
@@ -61,6 +64,7 @@
             },
             computed: {
                 canSubmit() {
+                    if (this.requirePhone && this.phone.trim() === '') return false;
                     return this.name.trim() !== '' && this.email.trim() !== '' && !this.rsvpFull;
                 },
                 hasEventCustomFields() {
@@ -162,6 +166,13 @@
                     </div>
                 </div>
             @endif
+        </div>
+
+        <div class="mb-6" v-if="askPhone">
+            <label for="phone" class="text-gray-900 dark:text-gray-100">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
+            <input type="tel" name="phone" id="phone" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+                v-model="phone" :required="requirePhone" autocomplete="tel" />
+            <x-input-error class="mt-2" :messages="$errors->get('phone')" />
         </div>
 
         <!-- Event-level Custom Fields -->

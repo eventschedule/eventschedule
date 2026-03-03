@@ -25,12 +25,14 @@
         #preview {
             border: 1px solid #dbdbdb;
             border-radius: 8px;
-            height: 140px;
+            height: 210px;
             width: 100%;
             overflow: hidden;
             background-size: cover;
             background-position: center;
-            padding: 1rem;
+            padding: 10px;
+            display: flex;
+            align-items: flex-start;
         }
 
         .dark #preview {
@@ -449,46 +451,68 @@
 
             if (! name) {
                 name = @json(__('messages.preview'), JSON_UNESCAPED_UNICODE);
-            } else if (name.length > 20) {
-                name = name.substring(0, 20) + '...';
+            } else if (name.length > 25) {
+                name = name.substring(0, 25) + '...';
             }
 
             $('#font_preview').text(name);
 
+            // Resolve header image URL
+            var headerUrl = '';
+            if (headerImage && headerImage !== 'none' && headerImage !== '') {
+                headerUrl = "{{ asset('images/headers/thumbs') }}" + '/' + headerImage + '.jpg';
+            } else if (headerImage === '') {
+                headerUrl = $('#header_image_url_preview').attr('src') || '{{ $role->header_image_url }}';
+            }
+
             // Build header image HTML
             var headerHtml = '';
-            if (headerImage && headerImage !== 'none' && headerImage !== '') {
-                var headerUrl = "{{ asset('images/headers/thumbs') }}" + '/' + headerImage + '.jpg';
-                headerHtml = '<div class="w-full h-16 bg-cover bg-center rounded-t-lg" style="background-image: url(\'' + headerUrl + '\')"></div>';
-            } else if (headerImage === '') {
-                // Custom header image
-                var customHeaderUrl = $('#header_image_url_preview').attr('src') || '{{ $role->header_image_url }}';
-                if (customHeaderUrl) {
-                    headerHtml = '<div class="w-full h-16 bg-cover bg-center rounded-t-lg" style="background-image: url(\'' + customHeaderUrl + '\')"></div>';
-                }
+            if (headerUrl) {
+                headerHtml = '<div style="position: relative; width: 100%; height: 90px; border-radius: 12px 12px 0 0; overflow: hidden; flex-shrink: 0;">' +
+                    '<div style="width: 100%; height: 100%; background-image: url(\'' + headerUrl + '\'); background-size: cover; background-position: center;"></div>' +
+                    '<div style="position: absolute; inset: 0; background: rgba(0,0,0,0.2); border-radius: 12px 12px 0 0;"></div>' +
+                '</div>';
             }
+
+            // Resolve profile image
+            var profileSrc = profileImagePreview && profileImagePreview !== '#' ? profileImagePreview : existingProfileImage;
 
             // Build profile image HTML
             var profileHtml = '';
-            var profileSrc = profileImagePreview && profileImagePreview !== '#' ? profileImagePreview : existingProfileImage;
-            if (profileSrc) {
-                var marginTop = headerHtml ? '-mt-6' : '-mt-8';
-                var profileBg = isDark ? '#1e1e1e' : '#F5F9FE';
-                var profileAlign = isRtl ? ' ml-auto' : '';
-                profileHtml = '<div class="' + marginTop + ' mb-2' + profileAlign + '"><div class="w-12 h-12 rounded-lg p-0.5 shadow-sm" style="background-color: ' + profileBg + '"><img src="' + profileSrc + '" class="w-full h-full object-cover rounded-lg" /></div></div>';
+            var profileBorderColor = isDark ? '#1e1e1e' : '#ffffff';
+            if (profileSrc && headerUrl) {
+                // Overlapping profile image (matches GP -mt-[100px] scaled down)
+                var profileAlign = isRtl ? 'margin-left: auto; margin-right: 0;' : 'margin-right: auto; margin-left: 0;';
+                profileHtml = '<div style="margin-top: -26px; margin-bottom: 4px; ' + profileAlign + '">' +
+                    '<div style="width: 38px; height: 38px; border-radius: 6px; background-color: ' + profileBorderColor + '; display: flex; align-items: center; justify-content: center;">' +
+                        '<img src="' + profileSrc + '" style="width: 34px; height: 34px; border-radius: 5px; object-fit: cover;" />' +
+                    '</div>' +
+                '</div>';
+            } else if (profileSrc) {
+                // No header image: profile with spacer above (matches GP pt-16)
+                var profileAlign = isRtl ? 'margin-left: auto; margin-right: 0;' : 'margin-right: auto; margin-left: 0;';
+                profileHtml = '<div style="padding-top: 10px;"></div>' +
+                    '<div style="margin-bottom: 4px; ' + profileAlign + '">' +
+                    '<div style="width: 38px; height: 38px; border-radius: 6px; background-color: ' + profileBorderColor + '; display: flex; align-items: center; justify-content: center;">' +
+                        '<img src="' + profileSrc + '" style="width: 34px; height: 34px; border-radius: 5px; object-fit: cover;" />' +
+                    '</div>' +
+                '</div>';
             }
 
-            // Build content HTML with accent color elements
-            var contentTopPadding = !profileSrc && !headerHtml ? 'pt-3' : '';
-            var cardBg = isDark ? '#1e1e1e' : '#F5F9FE';
+            // Card background (semi-transparent to show background through edges)
+            var cardBg = isDark ? 'rgba(30,30,30,0.95)' : 'rgba(255,255,255,0.95)';
+
+            // Build content HTML
+            var contentTopPadding = !profileSrc && !headerUrl ? 'padding-top: 10px;' : '';
+            var textAlign = isRtl ? 'text-align: right;' : 'text-align: left;';
             var contentHtml =
-                '<div dir="' + (isRtl ? 'rtl' : 'ltr') + '" class="rounded-lg flex flex-col ' + (profileSrc && !headerHtml ? 'mt-8' : '') + '" style="background-color: ' + cardBg + '">' +
+                '<div dir="' + (isRtl ? 'rtl' : 'ltr') + '" style="width: 100%; border-radius: 16px; background-color: ' + cardBg + '; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; flex-direction: column; overflow: hidden;">' +
                     headerHtml +
-                    '<div class="px-3 pb-3 flex flex-col">' +
+                    '<div style="padding: 8px 10px 10px; display: flex; flex-direction: column; ' + contentTopPadding + '">' +
                         profileHtml +
-                        '<div class="flex items-center justify-between gap-2 ' + contentTopPadding + '">' +
-                            '<div class="text-sm font-semibold text-[#151B26]" style="color: ' + fontColor + "; font-family: '" + fontFamily + "';\">" + name + '</div>' +
-                            '<div class="rounded-md px-2.5 py-1 text-xs font-semibold shadow-sm" style="background-color: ' + accentColor + '; color: ' + getContrastColor(accentColor) + '">' +
+                        '<div style="font-size: 13px; font-weight: 600; color: ' + fontColor + '; font-family: \'' + fontFamily + '\', sans-serif; ' + textAlign + ' line-height: 1.3; margin-bottom: 6px;">' + name + '</div>' +
+                        '<div>' +
+                            '<div style="display: inline-block; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 600; background-color: ' + accentColor + '; color: ' + getContrastColor(accentColor) + '; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">' +
                                 followText +
                             '</div>' +
                         '</div>' +
@@ -498,6 +522,9 @@
             // Apply content to preview container
             var $preview = $('#preview');
             $preview.html(contentHtml);
+
+            // Reset background styles before applying new ones
+            $preview.css('background-color', '').css('background-image', '');
 
             // Apply background styles
             if (background == 'gradient') {
@@ -514,10 +541,7 @@
                 }
 
                 var gradient = 'linear-gradient(' + backgroundRotation + 'deg, ' + backgroundColors + ')';
-
-                $preview
-                    .css('background-color', '')
-                    .css('background-image', gradient);
+                $preview.css('background-image', gradient);
             } else if (background == 'image') {
 
                 var backgroundImageUrl = $('#background_image').find(':selected').val();
@@ -527,12 +551,9 @@
                     backgroundImageUrl = $('#background_image_preview').attr('src') || "{{ $role->background_image_url }}";
                 }
 
-                $preview
-                    .css('background-color', '')
-                    .css('background-image', 'url("' + backgroundImageUrl + '")');
+                $preview.css('background-image', 'url("' + backgroundImageUrl + '")');
             } else {
-                $preview.css('background-image', '')
-                    .css('background-color', backgroundColor);
+                $preview.css('background-color', backgroundColor);
             }
         }
 
@@ -1504,23 +1525,23 @@
                                         <img id="background_image_preview" src="" alt="Background Image Preview" style="max-height:120px;" class="rounded-md border border-gray-200 dark:border-gray-600" />
                                         <button type="button" data-clear-file-input="background_image_url" data-clear-preview="background_image_preview" data-clear-filename="background_image_url_filename" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                                     </div>
-
-                                    @if ($role->background_image_url)
-                                    <div id="background_image_existing" class="relative inline-block mt-4 pt-1">
-                                        <img src="{{ $role->background_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
-                                        <button type="button"
-                                            data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}"
-                                            data-delete-image-token="{{ csrf_token() }}"
-                                            data-delete-image-parent="true"
-                                            style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
-                                            class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    @endif
                                 </div>
+
+                                @if ($role->background_image_url)
+                                <div id="background_image_existing" class="relative inline-block mt-4 pt-1">
+                                    <img src="{{ $role->background_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                                    <button type="button"
+                                        data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}"
+                                        data-delete-image-token="{{ csrf_token() }}"
+                                        data-delete-image-parent="true"
+                                        style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
+                                        class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                @endif
                             </div>
 
                             <div id="style_background_gradient" style="display:none">
@@ -1660,7 +1681,7 @@
                         <!-- Preview (always visible, right column on desktop) -->
                         <div class="w-full xl:w-1/2 mt-6 xl:mt-0">
                             <x-input-label :value="__('messages.preview')" />
-                            <div id="preview" class="h-[140px] w-full"></div>
+                            <div id="preview" class="h-[210px] w-full"></div>
                         </div>
                     </div>
 

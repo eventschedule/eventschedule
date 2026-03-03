@@ -33,6 +33,7 @@ use App\Services\BoostBillingService;
 use App\Services\MetaAdsService;
 use App\Services\UsageTrackingService;
 use App\Services\WebhookService;
+use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\ImageUtils;
 use App\Utils\MoneyUtils;
@@ -279,6 +280,8 @@ class EventController extends Controller
                 $event->ticket_notes = $defaultTickets['ticket_notes'] ?? null;
                 $event->terms_url = $defaultTickets['terms_url'] ?? null;
                 $event->total_tickets_mode = $defaultTickets['total_tickets_mode'] ?? 'individual';
+                $event->ask_phone = $defaultTickets['ask_phone'] ?? false;
+                $event->require_phone = $defaultTickets['require_phone'] ?? false;
                 $event->custom_fields = $defaultTickets['custom_fields'] ?? null;
                 $event->tickets = $defaultTickets['tickets'] ?? [new Ticket];
                 $defaultPromoCodes = $defaultTickets['promo_codes'] ?? [];
@@ -662,6 +665,8 @@ class EventController extends Controller
                 'ticket_notes' => $event->ticket_notes,
                 'terms_url' => $event->terms_url,
                 'total_tickets_mode' => $event->total_tickets_mode,
+                'ask_phone' => $event->ask_phone,
+                'require_phone' => $event->require_phone,
                 'custom_fields' => $event->custom_fields,
                 'tickets' => $event->tickets->map(function ($ticket) {
                     return [
@@ -910,6 +915,8 @@ class EventController extends Controller
                 'ticket_notes' => $event->ticket_notes,
                 'terms_url' => $event->terms_url,
                 'total_tickets_mode' => $event->total_tickets_mode,
+                'ask_phone' => $event->ask_phone,
+                'require_phone' => $event->require_phone,
                 'custom_fields' => $event->custom_fields,
                 'tickets' => $event->tickets->map(function ($ticket) {
                     return [
@@ -1568,6 +1575,178 @@ class EventController extends Controller
         Auth::login($user);
 
         return $user;
+    }
+
+    public function showBookingRequest(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $role->isTalent() || ! $role->acceptEventRequests()) {
+            abort(404);
+        }
+
+        if (! auth()->check()) {
+            session()->put('pending_request', $subdomain);
+        }
+
+        // Store guest language for auth flow
+        if (session()->has('translate')) {
+            session()->put('guest_language', 'en');
+        } elseif ($request->lang && is_valid_language_code($request->lang)) {
+            session()->put('guest_language', $request->lang);
+        } elseif (is_valid_language_code($role->language_code)) {
+            session()->put('guest_language', $role->language_code);
+        }
+
+        if ($request->lang) {
+            if (is_valid_language_code($request->lang)) {
+                app()->setLocale($request->lang);
+
+                if ($request->lang == 'en') {
+                    session()->put('translate', true);
+                } else {
+                    session()->forget('translate');
+                }
+            } else {
+                return redirect(request()->url());
+            }
+        } elseif (session()->has('translate')) {
+            app()->setLocale('en');
+        } else {
+            if (is_valid_language_code($role->language_code)) {
+                app()->setLocale($role->language_code);
+            }
+        }
+
+        return view('event.booking-request', ['role' => $role]);
+    }
+
+    public function bookingRequest(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $role->isTalent() || ! $role->acceptEventRequests()) {
+            abort(403, __('messages.not_authorized'));
+        }
+
+        // Validate form input
+        $rules = [
+            'event_name' => ['required', 'string', 'max:255'],
+            'date' => ['required', 'date'],
+            'start_time' => ['required', 'date_format:H:i'],
+            'duration' => ['nullable', 'numeric', 'min:0.5'],
+            'description' => ['nullable', 'string', 'max:5000'],
+            'is_online' => ['nullable'],
+            'venue_name' => ['nullable', 'string', 'max:255'],
+            'venue_country_code' => ['nullable', 'string', 'max:2'],
+            'venue_address1' => ['nullable', 'string', 'max:255'],
+            'venue_city' => ['nullable', 'string', 'max:255'],
+            'venue_state' => ['nullable', 'string', 'max:255'],
+            'venue_postal_code' => ['nullable', 'string', 'max:20'],
+        ];
+
+        if (! auth()->check()) {
+            $rules['contact_name'] = ['required', 'string', 'max:255'];
+            $rules['contact_email'] = ['required', 'string', 'email', 'max:255'];
+        }
+
+        $request->validate($rules);
+
+        // Handle user creation if requested
+        // Map contact fields to account fields for createAndLoginUser
+        if ($request->input('create_account') && ! auth()->check()) {
+            if (! $request->has('name') || ! $request->input('name')) {
+                $request->merge(['name' => $request->input('contact_name')]);
+            }
+            if (! $request->has('email') || ! $request->input('email')) {
+                $request->merge(['email' => $request->input('contact_email')]);
+            }
+            $this->createAndLoginUser($request);
+        }
+
+        $user = auth()->user();
+
+        // Create venue Role with location info
+        $venue = null;
+        $isOnline = $request->input('is_online');
+
+        if (! $isOnline && ($request->venue_name || $request->venue_address1 || $request->venue_city)) {
+            $venue = new Role;
+            $venue->name = $request->venue_name ?? null;
+            $venue->subdomain = Role::generateSubdomain($request->venue_name);
+            $venue->type = 'venue';
+            $venue->address1 = $request->venue_address1;
+            $venue->city = $request->venue_city;
+            $venue->state = $request->venue_state;
+            $venue->postal_code = $request->venue_postal_code;
+            $countryCode = $request->venue_country_code ?: $role->country_code;
+            $venue->country_code = $countryCode ? strtolower($countryCode) : null;
+            $venue->language_code = $role->language_code;
+            $venue->timezone = $role->timezone;
+            $venue->background_colors = ColorUtils::randomGradient();
+            $venue->background_rotation = rand(0, 359);
+            $venue->font_color = '#ffffff';
+            $venue->save();
+            $venue->refresh();
+
+            if ($user) {
+                $venue->user_id = $user->id;
+                $venue->email_verified_at = $user->email_verified_at;
+                $venue->save();
+
+                $user->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
+            } elseif ($request->contact_email) {
+                $matchingUser = User::whereEmail($request->contact_email)->first();
+                if ($matchingUser) {
+                    $venue->user_id = $matchingUser->id;
+                    $venue->email_verified_at = $matchingUser->email_verified_at;
+                    $venue->save();
+                    $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
+                }
+            }
+        }
+
+        // Build starts_at from date + time
+        $timezone = $user ? $user->timezone : ($role->timezone ?? 'America/New_York');
+        $startsAt = Carbon::createFromFormat('Y-m-d H:i', $request->date.' '.$request->start_time, $timezone)
+            ->setTimezone('UTC')
+            ->format('Y-m-d H:i:s');
+
+        // Create the event
+        $event = new Event;
+        $event->name = $request->event_name;
+        $event->description = $request->description;
+        $event->starts_at = $startsAt;
+        $event->duration = $request->duration;
+        $event->event_url = $isOnline ? 'online' : null;
+
+        $user = $user ?: $role->user;
+        $event->user_id = $user->id;
+
+        $event->slug = Str::slug($request->event_name).'-'.strtolower(Str::random(6));
+        $event->save();
+
+        // Attach talent role
+        $isAccepted = ! $role->require_approval;
+        $event->roles()->attach($role->id, ['is_accepted' => $isAccepted]);
+
+        // Attach venue role if created
+        if ($venue) {
+            $event->roles()->attach($venue->id, ['is_accepted' => true]);
+        }
+
+        // Auto-curate event
+        $role->autoCurateEvent($event);
+
+        // Clear the pending request session
+        session()->forget('pending_request');
+        session()->forget('pending_request_allow_guest');
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.booking_request_submitted'),
+            'redirect_url' => $role->getGuestUrl(),
+        ]);
     }
 
     public function uploadImage(Request $request, $subdomain)

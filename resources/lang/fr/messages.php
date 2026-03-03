@@ -387,6 +387,9 @@ return [
     'create_account' => 'Créer un compte',
     'continue_as_guest' => 'Continuer en tant qu\'invité',
     'event_created_guest' => 'Événement créé avec succès ! Vous pouvez maintenant le voir dans le programme.',
+    'booking_request' => 'Demande de Réservation',
+    'booking_request_submitted' => 'Votre demande de réservation a été soumise.',
+    'logged_in_as' => 'Connecté en tant que',
     'sold' => 'Vendu',
     'sold_out' => 'Épuisé',
     'event' => 'Événement',
@@ -1872,7 +1875,8 @@ return [
     'deleted_event' => 'Événement supprimé',
 
     // Phone verification
-    'phone_number' => 'Phone Number',
+    'phone_number' => 'Numéro de téléphone',
+    'ask_for_phone_number' => 'Demander le numéro de téléphone',
     'show_phone_number' => 'Show phone number',
     'your_phone_is_unverified' => 'Your phone number is unverified.',
     'click_here_to_verify_phone' => 'Click here to verify your phone',

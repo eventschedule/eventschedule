@@ -53,6 +53,8 @@ class Event extends Model
         'last_notified_fan_content_count',
         'feedback_enabled',
         'fan_content_enabled',
+        'ask_phone',
+        'require_phone',
     ];
 
     protected $hidden = ['event_password'];
@@ -69,6 +71,8 @@ class Event extends Model
         'recurring_exclude_dates' => 'array',
         'feedback_enabled' => 'boolean',
         'fan_content_enabled' => 'boolean',
+        'ask_phone' => 'boolean',
+        'require_phone' => 'boolean',
     ];
 
     protected static function boot()

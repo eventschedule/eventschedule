@@ -78,3 +78,7 @@
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
     background-size: 200% 100%;
 }
+
+/* Keep visited links blue (prevent browser default purple) */
+a.text-blue-600:visited { color: rgb(37 99 235); }
+.dark a.text-blue-400:visited { color: rgb(96 165 250); }
