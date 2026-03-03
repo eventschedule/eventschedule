@@ -1340,6 +1340,56 @@ class EventController extends Controller
         }
     }
 
+    public function generateEventDetails(Request $request, $subdomain)
+    {
+        if (! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! auth()->user()->isAdmin() && ! $role->isEnterprise()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (is_demo_mode()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'elements' => 'required|array|min:1',
+            'elements.*' => 'in:category_id,short_description,description',
+            'name' => 'required|string',
+        ]);
+
+        try {
+            $results = GeminiUtils::generateEventDetails(
+                $request->input('name'),
+                $request->input('short_description'),
+                $request->input('schedule_name', $role->name),
+                $request->input('schedule_type', $role->type),
+                $request->input('elements'),
+                $request->input('description')
+            );
+
+            if (empty($results)) {
+                return response()->json(['error' => __('messages.ai_details_generation_failed')], 500);
+            }
+
+            UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_EVENT_DETAILS, $role->id);
+
+            return response()->json(array_merge(['success' => true], $results));
+        } catch (\Illuminate\Database\QueryException $e) {
+            report($e);
+
+            return response()->json(['error' => __('messages.ai_details_generation_failed')], 500);
+        } catch (\Exception $e) {
+            \Log::error('AI event details generation failed: '.$e->getMessage(), ['role_id' => $role->id]);
+
+            return response()->json(['error' => __('messages.ai_details_generation_failed')], 500);
+        }
+    }
+
     public function guestParse(EventParseRequest $request, $subdomain)
     {
         $details = request()->input('event_details');

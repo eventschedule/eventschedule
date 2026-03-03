@@ -1162,19 +1162,21 @@ class Role extends Model implements MustVerifyEmail
 
     public function newslettersSentThisMonth(): int
     {
-        return $this->newsletters()
-            ->whereIn('status', ['sending', 'sent'])
-            ->where(function ($query) {
-                $query->where(function ($q) {
-                    $q->whereNotNull('sent_at')
-                        ->where('sent_at', '>=', now()->startOfMonth());
-                })->orWhere(function ($q) {
-                    $q->whereNull('sent_at')
-                        ->where('status', 'sending')
-                        ->where('created_at', '>=', now()->startOfMonth());
-                });
-            })
-            ->count();
+        // Count emails from fully sent newsletters via sent_count
+        $sentEmails = (int) $this->newsletters()
+            ->where('status', 'sent')
+            ->where('sent_at', '>=', now()->startOfMonth())
+            ->sum('sent_count');
+
+        // Count emails from currently sending newsletters via recipient records
+        $sendingEmails = (int) NewsletterRecipient::whereIn('newsletter_id',
+            $this->newsletters()
+                ->where('status', 'sending')
+                ->where('updated_at', '>=', now()->startOfMonth())
+                ->select('id')
+        )->count();
+
+        return $sentEmails + $sendingEmails;
     }
 
     public function canSendNewsletter(): bool

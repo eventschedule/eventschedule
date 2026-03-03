@@ -437,7 +437,7 @@
             var langCode = $('#language_code').val();
             var isRtl = (langCode === 'ar' || langCode === 'he');
             var followTranslations = {
-                @foreach(config('app.supported_languages') as $lang)
+                @foreach(array_keys(config('app.supported_languages')) as $lang)
                     '{{ $lang }}': @json(__('messages.follow', [], $lang), JSON_UNESCAPED_UNICODE),
                 @endforeach
             };
@@ -890,12 +890,47 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                             </svg>
                             {{ __('messages.details') }}
+                            @if (config('services.google.gemini_key') && !is_demo_mode())
+                                @if ($role->isEnterprise())
+                                    <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'ai-schedule-details')"
+                                        class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600"
+                                        title="{{ __('messages.ai_details_generator') }}">
+                                        <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                                        </svg>
+                                        {{ __('messages.ai') }}
+                                    </button>
+                                @elseif (config('app.hosted'))
+                                    <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-details')"
+                                        class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 opacity-75"
+                                        title="{{ __('messages.ai_details_generator') }}">
+                                        <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                                        </svg>
+                                        {{ __('messages.ai') }}
+                                    </button>
+                                @endif
+                            @endif
                         </h2>
 
                         @if(! $role->exists)
                         <input type="hidden" name="type" value="{{ $role->type }}"/>
                         @endif
 
+                        <!-- Tab Navigation -->
+                        <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                            <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
+                                <button type="button" class="details-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="general">
+                                    {{ __('messages.general') }}
+                                </button>
+                                <button type="button" class="details-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="localization">
+                                    {{ __('messages.localization') }}
+                                </button>
+                            </nav>
+                        </div>
+
+                        <!-- Tab Content: General -->
+                        <div id="details-tab-general" class="details-tab-content">
 
                         <div class="mb-6">
                             <x-input-label for="name" :value="__('messages.schedule_name') . ' *'" />
@@ -936,24 +971,17 @@
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
 
+                        </div>
+
+                        <!-- Tab Content: Localization -->
+                        <div id="details-tab-localization" class="details-tab-content hidden">
+
                         <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
                             <x-input-label for="language_code" :value="__('messages.language') " />
                             <select name="language_code" id="language_code" required {{ is_demo_mode() ? 'disabled' : '' }}
                                 data-action="language-change"
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                @foreach([
-                                'ar' => 'arabic',
-                                'en' => 'english',
-                                'nl' => 'dutch',
-                                'fr' => 'french',
-                                'de' => 'german',
-                                'he' => 'hebrew',
-                                'it' => 'italian',
-                                'pt' => 'portuguese',
-                                'es' => 'spanish',
-                                'et' => 'estonian',
-                                'ru' => 'russian',
-                                ] as $key => $value)
+                                @foreach(config('app.supported_languages') as $key => $value)
                                 <option value="{{ $key }}" {{ $role->language_code == $key ? 'SELECTED' : '' }}>
                                     {{ __('messages.' . $value) }}
                                 </option>
@@ -979,6 +1007,8 @@
                             <x-toggle name="use_24_hour_time" label="{{ __('messages.use_24_hour_time_format') }}"
                                 checked="{{ old('use_24_hour_time', $role->use_24_hour_time) }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('use_24_hour_time')" />
+                        </div>
+
                         </div>
                     </div>
                 </div>
@@ -1125,11 +1155,13 @@
                             @endif
                         </div>
 
+                        @if (old('phone', $role->phone))
                         <div class="mb-6">
                             <x-toggle name="show_phone" label="{{ __('messages.show_phone_number') }}"
                                 checked="{{ old('show_phone', $role->show_phone) }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('show_phone')" />
                         </div>
+                        @endif
 
                         <div class="mb-6">
                             <x-input-label for="website" :value="__('messages.website')" />
@@ -3820,6 +3852,53 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Details tabs switching
+document.addEventListener('DOMContentLoaded', function() {
+    const detailsTabs = document.querySelectorAll('.details-tab');
+    const detailsTabContents = document.querySelectorAll('.details-tab-content');
+
+    // Restore active tab from localStorage
+    const savedDetailsTab = localStorage.getItem('detailsActiveTab');
+    if (savedDetailsTab) {
+        if (document.getElementById('details-tab-' + savedDetailsTab)) {
+            switchDetailsTab(savedDetailsTab);
+        } else {
+            switchDetailsTab('general');
+        }
+    }
+
+    detailsTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabName = this.dataset.tab;
+            switchDetailsTab(tabName);
+            localStorage.setItem('detailsActiveTab', tabName);
+        });
+    });
+
+    function switchDetailsTab(tabName) {
+        // Update tab buttons
+        detailsTabs.forEach(tab => {
+            if (tab.dataset.tab === tabName) {
+                tab.classList.add('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
+            } else {
+                tab.classList.remove('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
+            }
+        });
+
+        // Update tab contents
+        detailsTabContents.forEach(content => {
+            const contentId = content.id.replace('details-tab-', '');
+            if (contentId === tabName) {
+                content.classList.remove('hidden');
+            } else {
+                content.classList.add('hidden');
+            }
+        });
+    }
+});
+
 // CalDAV integration functions
 document.addEventListener('DOMContentLoaded', function() {
     const caldavTestBtn = document.getElementById('caldav-test-btn');
@@ -4593,6 +4672,199 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
+
+@if (config('services.google.gemini_key') && !is_demo_mode() && $role->isEnterprise())
+<x-ai-generate-modal
+    name="ai-style-generator"
+    :title="__('messages.ai_style_generator')"
+    :description="__('messages.ai_style_description')"
+    :fields="[
+        ['key' => 'profile_image', 'label' => __('messages.profile_image'), 'has_value' => (bool)$role->profile_image_url],
+        ['key' => 'header_image', 'label' => __('messages.header_image'), 'has_value' => (bool)$role->header_image_url],
+        ['key' => 'accent_color', 'label' => __('messages.accent_color'), 'has_value' => $role->accent_color !== '#007bff'],
+        ['key' => 'font', 'label' => __('messages.font_family'), 'has_value' => $role->font_family !== 'Roboto'],
+        ['key' => 'background_image', 'label' => __('messages.background_image'), 'has_value' => (bool)$role->background_image_url],
+    ]"
+    endpoint="{{ url('/'.$role->subdomain.'/generate-style') }}"
+    successCallback="handleAiStyleResults"
+    extraDataCallback="getStyleExtraData"
+    :slowGeneration="true"
+    :errorMessage="__('messages.ai_style_generation_failed')"
+    :partialErrorMessage="__('messages.ai_style_image_partial_error')"
+/>
+
+<script {!! nonce_attr() !!}>
+window.getStyleExtraData = function() {
+    return {
+        accent_color: document.getElementById('accent_color') ? document.getElementById('accent_color').value : '',
+        font_family: document.getElementById('font_family') ? document.getElementById('font_family').value : ''
+    };
+};
+
+window.handleAiStyleResults = function(data) {
+    // Apply accent color
+    if (data.accent_color) {
+        var accentInput = document.getElementById('accent_color');
+        if (accentInput) {
+            accentInput.value = data.accent_color;
+            accentInput.dispatchEvent(new Event('input', { bubbles: true }));
+            accentInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }
+
+    // Apply font
+    if (data.font_family) {
+        var fontSelect = document.getElementById('font_family');
+        if (fontSelect) {
+            fontSelect.value = data.font_family;
+            fontSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            var fontAction = fontSelect.getAttribute('data-action');
+            if (fontAction) {
+                fontSelect.dispatchEvent(new CustomEvent('action', { detail: fontAction, bubbles: true }));
+            }
+        }
+    }
+
+    // Apply profile image
+    if (data.profile_image_url && data.profile_image_filename) {
+        var existingAiProfile = document.getElementById('ai_profile_image');
+        if (existingAiProfile) existingAiProfile.remove();
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'ai_profile_image';
+        input.id = 'ai_profile_image';
+        input.value = data.profile_image_filename;
+        document.getElementById('edit-form').appendChild(input);
+
+        var previewClear = document.getElementById('profile_image_preview_clear');
+        var previewImg = document.getElementById('profile_image_preview');
+        if (previewImg && previewClear) {
+            previewImg.src = data.profile_image_url;
+            previewClear.style.display = '';
+        }
+        var chooseDiv = document.getElementById('profile_image_choose');
+        if (chooseDiv) chooseDiv.style.display = 'none';
+        var existingDiv = document.getElementById('profile_image_existing');
+        if (existingDiv) existingDiv.style.display = 'none';
+    }
+
+    // Apply header image
+    if (data.header_image_url && data.header_image_filename) {
+        var existingAiHeader = document.getElementById('ai_header_image');
+        if (existingAiHeader) existingAiHeader.remove();
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'ai_header_image';
+        input.id = 'ai_header_image';
+        input.value = data.header_image_filename;
+        document.getElementById('edit-form').appendChild(input);
+
+        var headerSelect = document.getElementById('header_image');
+        if (headerSelect) {
+            headerSelect.value = '';
+            headerSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        var customHeaderInput = document.getElementById('custom_header_input');
+        if (customHeaderInput) customHeaderInput.style.display = '';
+        var headerPreviewClear = document.getElementById('header_image_url_preview_clear');
+        var headerPreviewImg = document.getElementById('header_image_url_preview');
+        if (headerPreviewImg && headerPreviewClear) {
+            headerPreviewImg.src = data.header_image_url;
+            headerPreviewClear.style.display = '';
+        }
+    }
+
+    // Apply background image
+    if (data.background_image_url && data.background_image_filename) {
+        var existingAiBg = document.getElementById('ai_background_image');
+        if (existingAiBg) existingAiBg.remove();
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'ai_background_image';
+        input.id = 'ai_background_image';
+        input.value = data.background_image_filename;
+        document.getElementById('edit-form').appendChild(input);
+
+        var bgRadio = document.getElementById('background_type_image');
+        if (bgRadio) {
+            bgRadio.checked = true;
+            bgRadio.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        var bgSelect = document.getElementById('background_image');
+        if (bgSelect) {
+            bgSelect.value = '';
+            bgSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        var customImageInput = document.getElementById('custom_image_input');
+        if (customImageInput) customImageInput.style.display = '';
+        var bgPreviewClear = document.getElementById('background_image_preview_clear');
+        var bgPreviewImg = document.getElementById('background_image_preview');
+        if (bgPreviewImg && bgPreviewClear) {
+            bgPreviewImg.src = data.background_image_url;
+            bgPreviewClear.style.display = '';
+        }
+    }
+
+    // Switch to branding tab
+    var brandingTab = document.querySelector('[data-style-tab="branding"]');
+    if (brandingTab) brandingTab.click();
+};
+</script>
+@endif
+
+<x-upgrade-modal name="upgrade-ai-style" tier="enterprise" :subdomain="$role->subdomain">
+    {{ __('messages.upgrade_feature_description_ai_style') }}
+</x-upgrade-modal>
+
+@if (config('services.google.gemini_key') && !is_demo_mode() && $role->isEnterprise())
+<x-ai-generate-modal
+    name="ai-schedule-details"
+    :title="__('messages.ai_details_generator')"
+    :description="__('messages.ai_details_description')"
+    :fields="[
+        ['key' => 'short_description', 'label' => __('messages.short_description'), 'has_value' => (bool)$role->short_description],
+        ['key' => 'description', 'label' => __('messages.description'), 'has_value' => (bool)$role->description],
+    ]"
+    endpoint="{{ url('/'.$role->subdomain.'/generate-schedule-details') }}"
+    successCallback="handleAiScheduleDetailsResults"
+    extraDataCallback="getScheduleDetailsExtraData"
+    :showInstructions="false"
+    :errorMessage="__('messages.ai_details_generation_failed')"
+/>
+
+<script {!! nonce_attr() !!}>
+window.getScheduleDetailsExtraData = function() {
+    var descTextarea = document.getElementById('description');
+    var descValue = descTextarea && descTextarea._easyMDE ? descTextarea._easyMDE.value() : (descTextarea ? descTextarea.value : '');
+    return {
+        name: document.getElementById('name').value,
+        short_description: document.getElementById('short_description').value,
+        type: document.querySelector('input[name="type"]') ? document.querySelector('input[name="type"]').value : (document.querySelector('select[name="type"]') ? document.querySelector('select[name="type"]').value : ''),
+        description: descValue
+    };
+};
+
+window.handleAiScheduleDetailsResults = function(data) {
+    if (data.short_description) {
+        var el = document.getElementById('short_description');
+        el.value = data.short_description;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    if (data.description) {
+        var textarea = document.getElementById('description');
+        if (textarea._easyMDE) {
+            textarea._easyMDE.value(data.description);
+        } else {
+            textarea.value = data.description;
+        }
+    }
+};
+</script>
+@endif
+
+<x-upgrade-modal name="upgrade-ai-details" tier="enterprise" :subdomain="$role->subdomain">
+    {{ __('messages.upgrade_feature_description_ai_details') }}
+</x-upgrade-modal>
 
 <x-upgrade-modal name="upgrade-custom-css" tier="pro" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.schedule_styling') }}#custom-css">
     {{ __('messages.upgrade_feature_description_custom_css') }}

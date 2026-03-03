@@ -194,7 +194,7 @@
                 var referrer = document.referrer;
                 var currentBase = location.origin + location.pathname + location.search;
                 if (referrer && referrer.indexOf(location.origin) === 0 && referrer !== currentBase) {
-                    window.location = referrer;
+                    history.back();
                 } else if (fallback) {
                     window.location = fallback;
                 }

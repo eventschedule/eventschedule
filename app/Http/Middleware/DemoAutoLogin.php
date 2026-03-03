@@ -134,7 +134,7 @@ class DemoAutoLogin
             return; // Preserve existing selection
         }
 
-        $supportedLanguages = config('app.supported_languages', ['en']);
+        $supportedLanguages = array_keys(config('app.supported_languages', ['en' => 'english']));
         $browserLanguage = $request->getPreferredLanguage($supportedLanguages);
         $request->session()->put('demo_language', $browserLanguage ?? 'en');
     }

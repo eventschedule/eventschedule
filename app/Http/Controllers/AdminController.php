@@ -866,6 +866,33 @@ class AdminController extends Controller
             ];
         });
 
+        // Top newsletter senders using platform email (no custom SMTP)
+        $topNewsletterSenders = UsageDaily::inDateRange($startDate, $endDate)
+            ->where('operation', 'email_newsletter')
+            ->where('role_id', '>', 0)
+            ->select('role_id', DB::raw('SUM(`count`) as total'))
+            ->groupBy('role_id')
+            ->orderByDesc('total')
+            ->limit(20)
+            ->get();
+
+        $nlRoleIds = $topNewsletterSenders->pluck('role_id')->toArray();
+        $nlRoles = Role::whereIn('id', $nlRoleIds)
+            ->get(['id', 'subdomain', 'email_settings', 'plan_tier', 'stripe_plan'])
+            ->keyBy('id');
+
+        $topNewsletterData = $topNewsletterSenders->map(function ($row) use ($nlRoles) {
+            $role = $nlRoles->get($row->role_id);
+
+            return [
+                'role_id' => $row->role_id,
+                'subdomain' => $role?->subdomain ?? 'unknown',
+                'total' => $row->total,
+                'has_smtp' => $role?->hasEmailSettings() ?? false,
+                'plan_tier' => $role?->actualPlanTier() ?? 'free',
+            ];
+        });
+
         // Today's anomalies
         $anomalies = [];
         foreach ($categorySummaries as $key => $cat) {
@@ -960,6 +987,7 @@ class AdminController extends Controller
             'categorySummaries',
             'operationBreakdown',
             'topRolesData',
+            'topNewsletterData',
             'anomalies',
             'stuckRoles',
             'stuckEvents',

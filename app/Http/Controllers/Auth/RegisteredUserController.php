@@ -240,7 +240,7 @@ class RegisteredUserController extends Controller
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
             'password' => ['required', 'string', 'min:8'],
-            'language_code' => ['nullable', 'string', 'in:'.implode(',', config('app.supported_languages', ['en']))],
+            'language_code' => ['nullable', 'string', 'in:'.implode(',', array_keys(config('app.supported_languages', ['en' => 'english'])))],
             'cf-turnstile-response' => [new ValidTurnstile],
         ];
 

@@ -163,18 +163,18 @@ return [
     */
 
     'supported_languages' => [
-        'en', // English
-        'ar', // Arabic
-        'de', // German
-        'es', // Spanish
-        'fr', // French
-        'he', // Hebrew
-        'it', // Italian
-        'nl', // Dutch
-        'pt', // Portuguese
-        'et', // Estonian
-        'ru', // Russian
-        'ro', // Romanian
+        'ar' => 'arabic',
+        'de' => 'german',
+        'en' => 'english',
+        'es' => 'spanish',
+        'et' => 'estonian',
+        'fr' => 'french',
+        'he' => 'hebrew',
+        'it' => 'italian',
+        'nl' => 'dutch',
+        'pt' => 'portuguese',
+        'ro' => 'romanian',
+        'ru' => 'russian',
     ],
 
 ];

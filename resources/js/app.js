@@ -118,6 +118,8 @@ document.addEventListener('DOMContentLoaded', () => {
             status: false,
         });
 
+        element._easyMDE = easyMDE;
+
         easyMDE.codemirror.on('change', function() {
             element.dispatchEvent(new Event('change', { bubbles: true }));
         });

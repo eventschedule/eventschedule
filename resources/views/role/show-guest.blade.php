@@ -263,13 +263,14 @@
 
             {{-- Desktop layout (>= sm): horizontal with spacer --}}
             <div class="hidden sm:flex flex-col gap-3 mb-3">
-              {{-- Name/Location left, Social icons + Action buttons right --}}
-              <div class="flex flex-wrap items-center gap-3">
-                {{-- Name/Location --}}
-                <div class="min-w-0">
-                  <h1 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2" style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
-                    {!! str_replace(' , ', '<br>', e($role->translatedName())) !!}
-                  </h1>
+              {{-- Row 1: Name (full width) --}}
+              <h1 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
+                {!! str_replace(' , ', '<br>', e($role->translatedName())) !!}
+              </h1>
+              {{-- Row 2: Description/Location/Social left, Action buttons right --}}
+              <div class="flex items-start gap-3">
+                {{-- Description/Location/Social --}}
+                <div class="min-w-0 flex-1">
                   @if($role->translatedShortDescription())
                   <p class="text-sm text-[#33383C] dark:text-gray-300 mb-2">
                     {{ $role->translatedShortDescription() }}
@@ -332,9 +333,6 @@
                   </div>
                   @endif
                 </div>
-
-                {{-- Spacer --}}
-                <div class="flex-grow"></div>
 
                 {{-- Action buttons --}}
                 @if (config('app.hosted') || config('app.is_testing'))

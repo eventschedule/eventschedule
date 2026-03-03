@@ -75,6 +75,7 @@
     @endif
 
     function onPopUpClick(id, event) {
+        if (typeof $ === 'undefined') return;
         event.stopPropagation();
         var menu = $('#' + id);
         if (menu.is(':hidden')) {
@@ -110,21 +111,24 @@
     }
 
     function hidePopUp() {
+        if (typeof $ === 'undefined') return;
         $('.pop-up-menu').hide();
         $(document).off('click', hidePopUp);
     }
 
-    $(document).on('click', '.pop-up-menu', function(event) {
-        event.stopPropagation();
-    });
+    if (typeof $ !== 'undefined') {
+        $(document).on('click', '.pop-up-menu', function(event) {
+            event.stopPropagation();
+        });
 
-    $(document).on('click', '.popup-toggle[data-popup-target]', function(e) {
-        onPopUpClick($(this).attr('data-popup-target'), e);
-    });
+        $(document).on('click', '.popup-toggle[data-popup-target]', function(e) {
+            onPopUpClick($(this).attr('data-popup-target'), e);
+        });
 
-    $(document).on('click', 'div[data-popup-target]', function(e) {
-        onPopUpClick($(this).attr('data-popup-target'), e);
-    });
+        $(document).on('click', 'div[data-popup-target]', function(e) {
+            onPopUpClick($(this).attr('data-popup-target'), e);
+        });
+    }
     </script>
 
     <script {!! nonce_attr() !!}>

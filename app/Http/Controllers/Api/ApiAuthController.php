@@ -103,7 +103,7 @@ class ApiAuthController extends Controller
             ),
             'password' => ['required', 'string', 'min:8'],
             'timezone' => ['nullable', 'string', 'max:100'],
-            'language_code' => ['nullable', 'string', 'in:'.implode(',', config('app.supported_languages', ['en']))],
+            'language_code' => ['nullable', 'string', 'in:'.implode(',', array_keys(config('app.supported_languages', ['en' => 'english'])))],
         ];
 
         // Require verification code in hosted mode

@@ -23,7 +23,13 @@ class ProcessScheduledNewsletters
         foreach ($newsletters as $newsletter) {
             try {
                 Log::info('Processing scheduled newsletter', ['newsletter_id' => $newsletter->id]);
-                $service->send($newsletter);
+                $result = $service->send($newsletter);
+                if (is_array($result) && $result[0] === 'limit_exceeded') {
+                    Log::warning('Scheduled newsletter exceeded email limit', [
+                        'newsletter_id' => $newsletter->id,
+                        'role_id' => $newsletter->role_id,
+                    ]);
+                }
             } catch (\Exception $e) {
                 Log::error('Failed to process scheduled newsletter: '.$e->getMessage(), [
                     'newsletter_id' => $newsletter->id,

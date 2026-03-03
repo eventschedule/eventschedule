@@ -36,7 +36,7 @@
                 "name": "How many newsletters can I send?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "The free plan includes 10 newsletters per month per schedule. The Pro plan increases this to 100 newsletters per month, giving you plenty of capacity for regular audience communication."
+                    "text": "The free plan includes 10 newsletter emails per month per schedule. The Pro plan increases this to 100 newsletter emails per month, giving you plenty of capacity for regular audience communication."
                 }
             },
             {
@@ -462,7 +462,7 @@
                     </button>
                     <div x-show="open === 2" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            The free plan includes 10 newsletters per month per schedule. The Pro plan increases this to 100 newsletters per month, giving you plenty of capacity for regular audience communication.
+                            The free plan includes 10 newsletter emails per month per schedule. The Pro plan increases this to 100 newsletter emails per month, giving you plenty of capacity for regular audience communication.
                         </p>
                     </div>
                 </div>

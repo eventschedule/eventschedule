@@ -1171,6 +1171,27 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                             </svg>
                             {{ __('messages.details') }}
+                            @if (config('services.google.gemini_key') && !is_demo_mode())
+                                @if ($role->isEnterprise())
+                                    <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'ai-event-details')"
+                                        class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600"
+                                        title="{{ __('messages.ai_details_generator') }}">
+                                        <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                                        </svg>
+                                        {{ __('messages.ai') }}
+                                    </button>
+                                @elseif (config('app.hosted'))
+                                    <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-details')"
+                                        class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 opacity-75"
+                                        title="{{ __('messages.ai_details_generator') }}">
+                                        <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                                        </svg>
+                                        {{ __('messages.ai') }}
+                                    </button>
+                                @endif
+                            @endif
                         </h2>
 
                         <div class="mb-6">
@@ -5546,6 +5567,63 @@ function deleteFlyer(url, hash, token, element) {
 
 <x-upgrade-modal name="upgrade-ai-flyer" tier="enterprise" :subdomain="$subdomain">
     {{ __('messages.upgrade_feature_description_ai_flyer') }}
+</x-upgrade-modal>
+
+@if (config('services.google.gemini_key') && !is_demo_mode() && $role->isEnterprise())
+<x-ai-generate-modal
+    name="ai-event-details"
+    :title="__('messages.ai_details_generator')"
+    :description="__('messages.ai_details_description')"
+    :fields="[
+        ['key' => 'category_id', 'label' => __('messages.category'), 'has_value' => (bool)$event->category_id],
+        ['key' => 'short_description', 'label' => __('messages.short_description'), 'has_value' => (bool)$event->short_description],
+        ['key' => 'description', 'label' => __('messages.description'), 'has_value' => (bool)$event->description],
+    ]"
+    endpoint="{{ url('/'.$subdomain.'/generate-event-details') }}"
+    successCallback="handleAiEventDetailsResults"
+    extraDataCallback="getEventDetailsExtraData"
+    :showInstructions="false"
+    :errorMessage="__('messages.ai_details_generation_failed')"
+/>
+
+<script {!! nonce_attr() !!}>
+window.getEventDetailsExtraData = function() {
+    var descTextarea = document.getElementById('description');
+    var descValue = descTextarea && descTextarea._easyMDE ? descTextarea._easyMDE.value() : (descTextarea ? descTextarea.value : '');
+    return {
+        name: document.getElementById('event_name').value,
+        short_description: document.getElementById('short_description').value,
+        schedule_name: @json($role->name),
+        schedule_type: @json($role->type),
+        description: descValue
+    };
+};
+
+window.handleAiEventDetailsResults = function(data) {
+    if (data.category_id) {
+        var select = document.getElementById('category_id');
+        select.value = data.category_id;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    if (data.short_description) {
+        var el = document.getElementById('short_description');
+        el.value = data.short_description;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    if (data.description) {
+        var textarea = document.getElementById('description');
+        if (textarea._easyMDE) {
+            textarea._easyMDE.value(data.description);
+        } else {
+            textarea.value = data.description;
+        }
+    }
+};
+</script>
+@endif
+
+<x-upgrade-modal name="upgrade-ai-details" tier="enterprise" :subdomain="$subdomain">
+    {{ __('messages.upgrade_feature_description_ai_details') }}
 </x-upgrade-modal>
 
 @if ($event->exists && $role->isPro() && !$event->is_private)

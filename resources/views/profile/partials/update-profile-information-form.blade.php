@@ -184,20 +184,7 @@
                 <x-input-label for="language_code" :value="__('messages.language')" />
                 <select name="language_code" id="language_code" required {{ is_demo_mode() ? 'disabled' : '' }}
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                    @foreach([
-                    'ar' => 'arabic',
-                    'en' => 'english',
-                    'nl' => 'dutch',
-                    'fr' => 'french',
-                    'de' => 'german',
-                    'he' => 'hebrew',
-                    'it' => 'italian',
-                    'pt' => 'portuguese',
-                    'es' => 'spanish',
-                    'et' => 'estonian',
-                    'ro' => 'romanian',
-                    'ru' => 'russian',
-                    ] as $key => $value)
+                    @foreach(config('app.supported_languages') as $key => $value)
                     <option value="{{ $key }}" {{ $user->language_code == $key ? 'SELECTED' : '' }}>{{ __('messages.' . $value) }}
                     </option>
                     @endforeach

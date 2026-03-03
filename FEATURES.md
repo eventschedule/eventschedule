@@ -41,7 +41,7 @@ All users get these features with no subscription required.
 | iCal download | Download .ics files for individual events and recurring event dates |
 | Fan photos on events (25 per schedule) | User-submitted photos with approval workflow; upgrade prompt at limit |
 | Event cloning | Duplicate an existing event as a starting point for a new one |
-| 10 newsletters per month | Basic newsletter sending limit |
+| 10 newsletter emails per month | Basic newsletter email sending limit (counts each recipient as one email) |
 
 ## Pro Features
 
@@ -67,7 +67,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Embed ticket widget | `edit.blade.php`, `$role->isPro()` | Embed ticket purchase or RSVP form on external websites via iframe |
 | Promo/discount codes | `PromoCodeController`, tied to ticketing gate | Percentage or fixed discounts with usage limits and expiration dates |
 | Invoice Ninja integration | `InvoiceNinjaController` | Alternative payment processing via Invoice Ninja |
-| 100 newsletters per month | `$role->newsletterLimit()` | Increased sending limit |
+| 100 newsletter emails per month | `$role->newsletterLimit()` | Increased email sending limit (counts each recipient as one email) |
 | Unlimited fan photos + bulk download | `EventController`, `$role->isPro()` | No per-schedule photo cap; download all event photos as zip |
 
 ## Enterprise Features
@@ -78,6 +78,9 @@ Gated by `$role->isEnterprise()`.
 |---------|--------------|-------|
 | AI event parsing | `EventController:1019`, `$role->isEnterprise()` | Parse event details from text/images via Gemini |
 | AI flyer generation | `EventController`, `$role->isEnterprise()` | Generate event flyer images from event details via Gemini |
+| AI style generation | `RoleController`, `$role->isEnterprise()` | Generate cohesive schedule branding (profile/header/background images, accent color, font) via Gemini |
+| AI schedule details generation | `RoleController::generateScheduleDetails`, `$role->isEnterprise()` | Generate schedule short description and description via Gemini |
+| AI event details generation | `EventController::generateEventDetails`, `$role->isEnterprise()` | Generate event category, short description, and description via Gemini |
 | Agenda scanning | `EventController:1594`, `$role->isEnterprise()` | Scan agendas to auto-create event parts |
 | Save parsed event parts | `EventController:1654`, `$role->isEnterprise()` | Save AI-parsed event data |
 | AI text processing on graphics | `GraphicController:298`, `$role->isEnterprise()` | AI prompt for graphic text via Gemini |
@@ -86,7 +89,7 @@ Gated by `$role->isEnterprise()`.
 | Private & password-protected events | `EventRepo`, `$role->isEnterprise()` | Restrict event visibility |
 | Multiple team members | `RoleController:1210,1229`, `$role->isEnterprise()` | Add/manage multiple team members |
 | Availability management | `RoleController:2413`, `$role->isEnterprise()` | Team member availability tracking |
-| 1,000 newsletters per month | `$role->newsletterLimit()` | Highest sending limit |
+| 1,000 newsletter emails per month | `$role->newsletterLimit()` | Highest email sending limit (counts each recipient as one email) |
 | WhatsApp event creation | `WhatsAppWebhookController`, `$role->isEnterprise()` | Create events via WhatsApp messages/images with AI parsing |
 | Priority support | Not code-gated | Service-level commitment |
 
@@ -99,12 +102,12 @@ Available only when `IS_HOSTED=false` (selfhosted deployments).
 | Auto import from URLs/cities | `resources/views/role/edit.blade.php:830`, `!config('app.hosted')` | AI-powered event import from external URLs and city search |
 | App update | `app/Http/Controllers/AppController.php:19`, `!config('app.hosted')` | One-click application updates |
 
-## Newsletter Limits
+## Newsletter Email Limits
 
-Managed by `Role::newsletterLimit()` (`app/Models/Role.php`):
+Managed by `Role::newsletterLimit()` (`app/Models/Role.php`). Limits count individual email recipients, not newsletters. A newsletter sent to 100 followers uses 100 of the monthly allowance.
 
-| Tier | Monthly limit |
-|------|--------------|
+| Tier | Monthly email limit |
+|------|---------------------|
 | Free | 10 |
 | Pro | 100 |
 | Enterprise | 1,000 |

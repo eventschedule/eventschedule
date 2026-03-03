@@ -24,7 +24,7 @@ class ProfileUpdateRequest extends FormRequest
             ),
             'phone' => ['nullable', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/', Rule::unique(User::class)->ignore($this->user()->id)],
             'timezone' => ['required', 'string', 'max:255'],
-            'language_code' => ['required', 'string', 'in:'.implode(',', config('app.supported_languages', ['en']))],
+            'language_code' => ['required', 'string', 'in:'.implode(',', array_keys(config('app.supported_languages', ['en' => 'english'])))],
             'profile_image' => ['image', 'max:2500'],
             'use_24_hour_time' => ['nullable', 'boolean'],
             'default_role_id' => ['nullable', 'integer', 'exists:roles,id'],

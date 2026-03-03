@@ -361,6 +361,7 @@
         // On page load, check localStorage for active tabs to restore the correct help URL
         document.addEventListener('DOMContentLoaded', function() {
             var tabSources = [
+                { key: 'detailsActiveTab', prefix: 'details-tab-' },
                 { key: 'settingsActiveTab', prefix: 'settings-tab-' },
                 { key: 'integrationActiveTab', prefix: 'integration-tab-' },
                 { key: 'paymentActiveTab', prefix: 'payment-tab-' },
@@ -395,6 +396,14 @@
             var tab = e.target.closest('.payment-tab');
             if (tab) {
                 var tabKey = 'payment-tab-' + tab.getAttribute('data-tab');
+                if (anchorMap[tabKey]) {
+                    updateHelpLinks(anchorMap[tabKey]);
+                }
+            }
+
+            var detailsTab = e.target.closest('.details-tab');
+            if (detailsTab) {
+                var tabKey = 'details-tab-' + detailsTab.getAttribute('data-tab');
                 if (anchorMap[tabKey]) {
                     updateHelpLinks(anchorMap[tabKey]);
                 }

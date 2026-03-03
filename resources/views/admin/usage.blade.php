@@ -116,6 +116,53 @@
             @endif
         </div>
 
+        {{-- Top Newsletter Senders --}}
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Top Newsletter Senders</h3>
+            @if ($topNewsletterData->count() > 0)
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.schedule')</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Emails Sent</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">SMTP</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Plan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach ($topNewsletterData as $nlData)
+                        <tr class="{{ !$nlData['has_smtp'] && $nlData['total'] > 50 ? 'bg-red-50 dark:bg-red-900/20' : '' }}">
+                            <td class="px-4 py-3 text-sm">
+                                <a href="{{ route('role.view_guest', ['subdomain' => $nlData['subdomain']]) }}" class="text-[#4E81FA] hover:underline" target="_blank">{{ $nlData['subdomain'] }}</a>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-end font-medium text-gray-900 dark:text-white">{{ number_format($nlData['total']) }}</td>
+                            <td class="px-4 py-3 text-sm text-end">
+                                @if ($nlData['has_smtp'])
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Custom</span>
+                                @else
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">Platform</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3 text-sm text-end">
+                                @if ($nlData['plan_tier'] === 'enterprise')
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">Enterprise</span>
+                                @elseif ($nlData['plan_tier'] === 'pro')
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">Pro</span>
+                                @else
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">Free</span>
+                                @endif
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @else
+            <p class="text-sm text-gray-500 dark:text-gray-400">No newsletter email data for this period.</p>
+            @endif
+        </div>
+
         {{-- Stuck Translation Records --}}
         @php
             $hasStuckRecords = $stuckRoles->count() > 0 || $stuckEvents->count() > 0 || $stuckEventParts->count() > 0 || $stuckEventRoles->count() > 0;

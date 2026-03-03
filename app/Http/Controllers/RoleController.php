@@ -29,6 +29,7 @@ use App\Services\DigitalOceanService;
 use App\Services\EmailService;
 use App\Services\MetaAdsService;
 use App\Services\SmsService;
+use App\Services\UsageTrackingService;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\UrlUtils;
@@ -708,7 +709,7 @@ class RoleController extends Controller
                     ->where('is_deleted', false)
                     ->where(function ($q) {
                         $q->where('user_id', auth()->id())
-                          ->orWhere('email', auth()->user()->email);
+                            ->orWhere('email', auth()->user()->email);
                     })
                     ->when($date, fn ($q, $d) => $q->where('event_date', $d))
                     ->first();
@@ -2304,10 +2305,183 @@ class RoleController extends Controller
             $role->save();
         }
 
+        // Handle AI-generated images (already saved to storage by generateStyle endpoint)
+        if ($request->input('ai_profile_image') && ! $request->hasFile('profile_image')) {
+            if ($role->profile_image_url) {
+                $path = $role->getAttributes()['profile_image_url'];
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/'.$path;
+                }
+                Storage::delete($path);
+            }
+            $role->profile_image_url = $request->input('ai_profile_image');
+            $role->save();
+        }
+
+        if ($request->input('ai_header_image') && ! $request->hasFile('header_image_url')) {
+            if ($role->header_image_url) {
+                $path = $role->getAttributes()['header_image_url'];
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/'.$path;
+                }
+                Storage::delete($path);
+            }
+            $role->header_image_url = $request->input('ai_header_image');
+            $role->save();
+        }
+
+        if ($request->input('ai_background_image') && ! $request->hasFile('background_image_url')) {
+            if ($role->background_image_url) {
+                $path = $role->getAttributes()['background_image_url'];
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/'.$path;
+                }
+                Storage::delete($path);
+            }
+            $role->background_image_url = $request->input('ai_background_image');
+            $role->background = 'image';
+            $role->background_image = null;
+            $role->save();
+        }
+
         AuditService::log(AuditService::SCHEDULE_UPDATE, auth()->id(), 'Role', $role->id, null, null, $role->name);
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))
             ->with('message', __('messages.updated_schedule'));
+    }
+
+    public function generateStyle(Request $request, $subdomain)
+    {
+        set_time_limit(300);
+
+        if (! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! auth()->user()->isAdmin() && ! $role->isEnterprise()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (is_demo_mode()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'style_instructions' => 'nullable|string|max:500',
+            'elements' => 'required|array|min:1',
+            'elements.*' => 'in:profile_image,header_image,accent_color,font,background_image',
+        ]);
+
+        $currentValues = [
+            'accent_color' => $request->input('accent_color'),
+            'font_family' => $request->input('font_family'),
+        ];
+
+        try {
+            $results = GeminiUtils::generateScheduleStyle(
+                $role,
+                $request->input('elements'),
+                $request->input('style_instructions'),
+                $currentValues
+            );
+
+            if (empty($results) || (isset($results['text_error']) && isset($results['image_error']) && count($results) === 2)) {
+                return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
+            }
+
+            UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_STYLE, $role->id);
+
+            // Build full URLs for generated images
+            $response = ['success' => true];
+
+            foreach (['profile_image', 'header_image', 'background_image'] as $imageField) {
+                if (isset($results[$imageField])) {
+                    $filename = $results[$imageField];
+                    if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                        $response[$imageField.'_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
+                    } elseif (config('filesystems.default') == 'local') {
+                        $response[$imageField.'_url'] = url('/storage/'.$filename);
+                    } else {
+                        $response[$imageField.'_url'] = $filename;
+                    }
+                    $response[$imageField.'_filename'] = $filename;
+                }
+            }
+
+            if (isset($results['accent_color'])) {
+                $response['accent_color'] = $results['accent_color'];
+            }
+            if (isset($results['font_family'])) {
+                $response['font_family'] = $results['font_family'];
+            }
+            if (isset($results['image_error'])) {
+                $response['image_error'] = true;
+            }
+            if (isset($results['text_error'])) {
+                $response['text_error'] = true;
+            }
+
+            return response()->json($response);
+        } catch (\Illuminate\Database\QueryException $e) {
+            report($e);
+
+            return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
+        } catch (\Exception $e) {
+            \Log::error('AI style generation failed: '.$e->getMessage(), ['role_id' => $role->id]);
+
+            return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
+        }
+    }
+
+    public function generateScheduleDetails(Request $request, $subdomain)
+    {
+        if (! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! auth()->user()->isAdmin() && ! $role->isEnterprise()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (is_demo_mode()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'elements' => 'required|array|min:1',
+            'elements.*' => 'in:short_description,description',
+            'name' => 'required|string',
+        ]);
+
+        try {
+            $results = GeminiUtils::generateScheduleDetails(
+                $request->input('name'),
+                $request->input('type') ?: $role->type,
+                $request->input('short_description'),
+                $request->input('elements'),
+                $request->input('description')
+            );
+
+            if (empty($results)) {
+                return response()->json(['error' => __('messages.ai_details_generation_failed')], 500);
+            }
+
+            UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_SCHEDULE_DETAILS, $role->id);
+
+            return response()->json(array_merge(['success' => true], $results));
+        } catch (\Illuminate\Database\QueryException $e) {
+            report($e);
+
+            return response()->json(['error' => __('messages.ai_details_generation_failed')], 500);
+        } catch (\Exception $e) {
+            \Log::error('AI schedule details generation failed: '.$e->getMessage(), ['role_id' => $role->id]);
+
+            return response()->json(['error' => __('messages.ai_details_generation_failed')], 500);
+        }
     }
 
     public function updateLinks(RoleLinkUpdateRequest $request, $subdomain): RedirectResponse

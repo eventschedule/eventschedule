@@ -58,14 +58,14 @@
         $canonicalPath = $basePath;
         $langParam = request()->get('lang');
         $validLangs = config('app.supported_languages');
-        if ($langParam && in_array($langParam, $validLangs)) {
+        if ($langParam && array_key_exists($langParam, $validLangs)) {
             $canonicalPath = $basePath . '?lang=' . $langParam;
         }
     @endphp
     <link rel="canonical" href="{{ $canonicalPath }}">
     <!-- Hreflang tags -->
     <link rel="alternate" hreflang="x-default" href="{{ $basePath }}">
-    @foreach (config('app.supported_languages') as $lang)
+    @foreach (array_keys(config('app.supported_languages')) as $lang)
     <link rel="alternate" hreflang="{{ $lang }}" href="{{ $basePath }}?lang={{ $lang }}">
     @endforeach
     <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">

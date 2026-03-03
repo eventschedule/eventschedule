@@ -63,9 +63,9 @@ if (! function_exists('is_valid_language_code')) {
             return false;
         }
 
-        $supportedLanguages = config('app.supported_languages', ['en']);
+        $supportedLanguages = config('app.supported_languages', ['en' => 'english']);
 
-        return in_array($languageCode, $supportedLanguages, true);
+        return array_key_exists($languageCode, $supportedLanguages);
     }
 }
 

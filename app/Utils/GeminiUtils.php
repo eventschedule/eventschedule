@@ -1207,7 +1207,7 @@ class GeminiUtils
         return array_slice($sortedVideos, 0, 6);
     }
 
-    private static function sendImageGenerationRequest($prompt)
+    private static function sendImageGenerationRequest($prompt, $aspectRatio = '3:4')
     {
         $model = 'gemini-2.5-flash-image';
 
@@ -1222,7 +1222,7 @@ class GeminiUtils
             ],
             'generationConfig' => [
                 'responseModalities' => ['TEXT', 'IMAGE'],
-                'imageConfig' => ['aspectRatio' => '3:4'],
+                'imageConfig' => ['aspectRatio' => $aspectRatio],
             ],
         ];
 
@@ -1362,7 +1362,7 @@ class GeminiUtils
 
         $ticket = $event->tickets->first();
         if ($ticket && $ticket->price > 0) {
-            $prompt .= 'Ticket price: ' . MoneyUtils::format($ticket->price, $event->ticket_currency_code) . "\n";
+            $prompt .= 'Ticket price: '.MoneyUtils::format($ticket->price, $event->ticket_currency_code)."\n";
         }
 
         $prompt .= "\nDesign directives:\n";
@@ -1379,6 +1379,457 @@ class GeminiUtils
         }
 
         return $prompt;
+    }
+
+    public static function generateScheduleStyle(Role $role, array $elements, ?string $styleInstructions, array $currentValues): array
+    {
+        $results = [];
+        $textElements = array_intersect($elements, ['accent_color', 'font']);
+        $imageElements = array_intersect($elements, ['profile_image', 'header_image', 'background_image']);
+
+        $accentColor = $currentValues['accent_color'] ?? $role->accent_color;
+
+        // Step 1: Generate text-based style (accent color, font) via single prompt
+        if (! empty($textElements)) {
+            try {
+                $textResults = self::generateStyleText($role, $textElements, $styleInstructions, $currentValues);
+                if ($textResults) {
+                    $results = array_merge($results, $textResults);
+                    if (isset($textResults['accent_color'])) {
+                        $accentColor = $textResults['accent_color'];
+                    }
+                }
+            } catch (\Exception $e) {
+                \Log::error('AI style text generation failed: '.$e->getMessage(), ['role_id' => $role->id]);
+                $results['text_error'] = true;
+            }
+        }
+
+        // Step 2: Generate images in parallel, passing accent color for cohesive results
+        if (! empty($imageElements)) {
+            try {
+                $imageRequests = [];
+                foreach ($imageElements as $element) {
+                    if ($element === 'profile_image') {
+                        $prompt = self::buildProfileImagePrompt($role, $accentColor, $styleInstructions);
+                        $imageRequests[$element] = self::prepareImageGenerationRequest($prompt, '1:1');
+                    } elseif ($element === 'header_image') {
+                        $prompt = self::buildHeaderImagePrompt($role, $accentColor, $styleInstructions);
+                        $imageRequests[$element] = self::prepareImageGenerationRequest($prompt, '16:9');
+                    } elseif ($element === 'background_image') {
+                        $prompt = self::buildBackgroundImagePrompt($role, $accentColor, $styleInstructions);
+                        $imageRequests[$element] = self::prepareImageGenerationRequest($prompt, '16:9');
+                    }
+                }
+
+                $imageResponses = self::executeParallelImageRequests($imageRequests);
+
+                foreach ($imageResponses as $element => $imageData) {
+                    if ($imageData) {
+                        $prefix = str_replace('_image', '_', $element);
+                        $filename = ImageUtils::saveImageData($imageData, 'generated_style.png', $prefix);
+                        $results[$element] = $filename;
+                    } else {
+                        $results['image_error'] = true;
+                    }
+                }
+            } catch (\Exception $e) {
+                \Log::error('AI style image generation failed: '.$e->getMessage(), ['role_id' => $role->id]);
+                $results['image_error'] = true;
+            }
+        }
+
+        return $results;
+    }
+
+    public static function generateScheduleDetails(string $name, string $type, ?string $shortDescription, array $elements, ?string $description = null): ?array
+    {
+        $scheduleType = $type === 'talent' ? 'talent' : ($type === 'venue' ? 'venue' : 'curator');
+
+        $prompt = "You are writing content for an event schedule platform. Generate the requested fields for a schedule with these details:\n\n";
+        $prompt .= "- Schedule name: {$name}\n";
+        $prompt .= "- Schedule type: {$scheduleType} (talent = performer/artist, venue = location/place, curator = event organizer)\n";
+        $prompt .= '- Existing short description: '.($shortDescription ?: 'none')."\n";
+
+        if (in_array('description', $elements) && ! empty($description)) {
+            $prompt .= "- Existing description: {$description}\n";
+        }
+
+        $prompt .= "\nReturn a JSON object with only the requested fields:\n";
+
+        if (in_array('short_description', $elements)) {
+            $prompt .= "- \"short_description\": Write a concise, engaging summary in under 150 characters. Capture what makes this schedule unique.\n";
+        }
+
+        if (in_array('description', $elements)) {
+            if (! empty($description)) {
+                $prompt .= "- \"description\": Improve and enhance the existing description rather than writing from scratch. Use rich markdown formatting: include a few subheadings (##), bullet or numbered lists where appropriate, and bold text for emphasis. Include a few relevant emojis to make it visually appealing. Do not use em-dashes. Do not include the schedule name as a top-level heading. Keep it concise, around 150 to 300 words.\n";
+            } else {
+                $prompt .= "- \"description\": Write an engaging description in markdown. Use rich formatting: include a few subheadings (##), bullet or numbered lists where appropriate, and bold text for emphasis. Include a few relevant emojis to make it visually appealing. Describe what visitors can expect. Do not use em-dashes. Do not include the schedule name as a top-level heading. Keep it concise, around 150 to 300 words.\n";
+            }
+        }
+
+        if (in_array('short_description', $elements) && in_array('description', $elements) && empty($shortDescription)) {
+            $prompt .= "\nSince no short description exists yet, generate the short_description first and use it as context when writing the description.";
+        }
+
+        $data = self::sendRequest($prompt);
+
+        if ($data === null || empty($data)) {
+            return null;
+        }
+
+        $result = is_array($data) && isset($data[0]) ? $data[0] : $data;
+        $output = [];
+
+        if (in_array('short_description', $elements) && isset($result['short_description'])) {
+            $output['short_description'] = substr($result['short_description'], 0, 200);
+        }
+
+        if (in_array('description', $elements) && isset($result['description'])) {
+            $output['description'] = $result['description'];
+        }
+
+        return ! empty($output) ? $output : null;
+    }
+
+    public static function generateEventDetails(string $name, ?string $shortDescription, string $scheduleName, string $scheduleType, array $elements, ?string $description = null): ?array
+    {
+        $type = $scheduleType === 'talent' ? 'talent' : ($scheduleType === 'venue' ? 'venue' : 'curator');
+
+        $prompt = "You are writing content for an event on an event schedule platform. Generate the requested fields for an event with these details:\n\n";
+        $prompt .= "- Event name: {$name}\n";
+        $prompt .= "- Schedule name: {$scheduleName}\n";
+        $prompt .= "- Schedule type: {$type} (talent = performer/artist, venue = location/place, curator = event organizer)\n";
+        $prompt .= '- Existing short description: '.($shortDescription ?: 'none')."\n";
+
+        if (in_array('description', $elements) && ! empty($description)) {
+            $prompt .= "- Existing description: {$description}\n";
+        }
+
+        $prompt .= "\nReturn a JSON object with only the requested fields:\n";
+
+        if (in_array('category_id', $elements)) {
+            $prompt .= "- \"category_id\": Choose the single best-fitting category ID from this list:\n";
+            $prompt .= "1=Art & Culture, 2=Business Networking, 3=Community, 4=Concerts, 5=Education,\n";
+            $prompt .= "6=Food & Drink, 7=Health & Fitness, 8=Parties & Festivals, 9=Personal Growth,\n";
+            $prompt .= "10=Sports, 11=Spirituality, 12=Tech\n";
+            $prompt .= "Return just the integer ID.\n";
+        }
+
+        if (in_array('short_description', $elements)) {
+            $prompt .= "- \"short_description\": Write a concise, engaging summary in under 150 characters.\n";
+        }
+
+        if (in_array('description', $elements)) {
+            if (! empty($description)) {
+                $prompt .= "- \"description\": Improve and enhance the existing description rather than writing from scratch. Use rich markdown formatting: include a few subheadings (##), bullet or numbered lists where appropriate, and bold text for emphasis. Include a few relevant emojis to make it visually appealing. Do not use em-dashes. Do not include the event name as a top-level heading. Keep it concise, around 150 to 300 words.\n";
+            } else {
+                $prompt .= "- \"description\": Write an engaging description in markdown. Use rich formatting: include a few subheadings (##), bullet or numbered lists where appropriate, and bold text for emphasis. Include a few relevant emojis to make it visually appealing. Describe what attendees can expect. Do not use em-dashes. Do not include the event name as a top-level heading. Keep it concise, around 150 to 300 words.\n";
+            }
+        }
+
+        if (in_array('short_description', $elements) && in_array('description', $elements) && empty($shortDescription)) {
+            $prompt .= "\nSince no short description exists yet, generate the short_description first and use it as context when writing the description.";
+        }
+
+        $data = self::sendRequest($prompt);
+
+        if ($data === null || empty($data)) {
+            return null;
+        }
+
+        $result = is_array($data) && isset($data[0]) ? $data[0] : $data;
+        $output = [];
+
+        if (in_array('category_id', $elements) && isset($result['category_id'])) {
+            $categoryId = (int) $result['category_id'];
+            if ($categoryId >= 1 && $categoryId <= 12) {
+                $output['category_id'] = $categoryId;
+            }
+        }
+
+        if (in_array('short_description', $elements) && isset($result['short_description'])) {
+            $output['short_description'] = substr($result['short_description'], 0, 200);
+        }
+
+        if (in_array('description', $elements) && isset($result['description'])) {
+            $output['description'] = $result['description'];
+        }
+
+        return ! empty($output) ? $output : null;
+    }
+
+    private static function generateStyleText(Role $role, array $elements, ?string $styleInstructions, array $currentValues): ?array
+    {
+        $scheduleType = $role->type === 'talent' ? 'talent' : ($role->type === 'venue' ? 'venue' : 'curator');
+
+        // Read fonts once for reuse
+        $fonts = in_array('font', $elements) ? json_decode(file_get_contents(base_path('storage/fonts.json'))) : null;
+
+        $prompt = "You are a branding expert. Generate style properties for a schedule called '{$role->name}'.";
+        $prompt .= "\nSchedule type: {$scheduleType}";
+
+        if ($role->short_description) {
+            $prompt .= "\nDescription: ".substr($role->short_description, 0, 300);
+        }
+
+        $categories = $role->events()->wherePivot('is_accepted', true)->pluck('category_id')->filter()->unique()->values();
+        if ($categories->isNotEmpty()) {
+            $categoryNames = $categories->map(fn ($id) => config('app.event_categories.'.$id))->filter()->implode(', ');
+            if ($categoryNames) {
+                $prompt .= "\nEvent categories: {$categoryNames}";
+            }
+        }
+
+        // Include existing values for context
+        if (! in_array('accent_color', $elements) && ! empty($currentValues['accent_color'])) {
+            $prompt .= "\nThe schedule already uses accent color {$currentValues['accent_color']} - ensure your choices complement it.";
+        }
+        if (! in_array('font', $elements) && ! empty($currentValues['font_family'])) {
+            $prompt .= "\nThe schedule already uses the font '{$currentValues['font_family']}' - ensure your choices complement it.";
+        }
+
+        $prompt .= "\n\nReturn a JSON object with ONLY the requested fields:\n";
+
+        if (in_array('accent_color', $elements)) {
+            $prompt .= "- \"accent_color\": a hex color code (e.g. \"#4E81FA\") that fits the schedule's theme and type. Choose a vibrant, professional color.\n";
+        }
+
+        if ($fonts) {
+            $fontNames = array_map(fn ($f) => $f->value, $fonts);
+            $prompt .= '- "font_family": choose ONE font from this exact list: '.implode(', ', $fontNames).". Pick a font that matches the schedule's personality and type.\n";
+        }
+
+        if ($styleInstructions) {
+            $prompt .= "\nUser's style preferences: {$styleInstructions}";
+        }
+
+        $data = self::sendRequest($prompt);
+
+        if ($data === null || empty($data)) {
+            return null;
+        }
+
+        $result = is_array($data) && isset($data[0]) ? $data[0] : $data;
+        $output = [];
+
+        if (in_array('accent_color', $elements) && isset($result['accent_color'])) {
+            $color = $result['accent_color'];
+            if (preg_match('/^#[0-9A-Fa-f]{6}$/', $color)) {
+                $output['accent_color'] = $color;
+            }
+        }
+
+        if ($fonts && isset($result['font_family'])) {
+            $validFonts = array_map(fn ($f) => $f->value, $fonts);
+            if (in_array($result['font_family'], $validFonts)) {
+                $output['font_family'] = $result['font_family'];
+            }
+        }
+
+        return ! empty($output) ? $output : null;
+    }
+
+    private static function buildScheduleImageContext(Role $role): string
+    {
+        $scheduleType = $role->type === 'talent' ? 'talent' : ($role->type === 'venue' ? 'venue' : 'curator');
+        $context = "Schedule name: '{$role->name}', type: {$scheduleType}";
+
+        if ($role->short_description) {
+            $context .= ', description: '.substr($role->short_description, 0, 200);
+        }
+
+        $categories = $role->events()->wherePivot('is_accepted', true)->pluck('category_id')->filter()->unique()->values();
+        if ($categories->isNotEmpty()) {
+            $categoryNames = $categories->map(fn ($id) => config('app.event_categories.'.$id))->filter()->implode(', ');
+            if ($categoryNames) {
+                $context .= ", event categories: {$categoryNames}";
+            }
+        }
+
+        return $context;
+    }
+
+    private static function buildProfileImagePrompt(Role $role, string $accentColor, ?string $styleInstructions): string
+    {
+        $context = self::buildScheduleImageContext($role);
+
+        $prompt = "Create an abstract, decorative brand icon/logo for a schedule called '{$role->name}'. {$context}. ";
+        $prompt .= 'The image should be purely visual - no text, no letters, no words, no people, no faces. ';
+        $prompt .= 'Use shapes, patterns, and colors that evoke the theme. ';
+        $prompt .= "Primary color: {$accentColor}. Clean, modern design. This image will be displayed as a rounded square, so avoid circular designs - fill the full square canvas with your design rather than centering a circle in the middle.";
+
+        if ($styleInstructions) {
+            $prompt .= " Style preferences: {$styleInstructions}";
+        }
+
+        return $prompt;
+    }
+
+    private static function buildHeaderImagePrompt(Role $role, string $accentColor, ?string $styleInstructions): string
+    {
+        $context = self::buildScheduleImageContext($role);
+
+        $prompt = "Create an abstract, decorative wide banner image for a schedule called '{$role->name}'. {$context}. ";
+        $prompt .= 'The image should be purely visual - no text, no letters, no words, no people, no faces. ';
+        $prompt .= 'Use abstract patterns, gradients, or decorative elements that evoke the theme. ';
+        $prompt .= "Color palette based on {$accentColor}. Professional and modern.";
+
+        if ($styleInstructions) {
+            $prompt .= " Style preferences: {$styleInstructions}";
+        }
+
+        return $prompt;
+    }
+
+    private static function buildBackgroundImagePrompt(Role $role, string $accentColor, ?string $styleInstructions): string
+    {
+        $context = self::buildScheduleImageContext($role);
+
+        $prompt = "Create an abstract, decorative background image for a schedule called '{$role->name}'. {$context}. ";
+        $prompt .= 'The image should be a subtle, non-distracting background suitable for displaying text and event listings over it. ';
+        $prompt .= 'Purely visual - no text, no letters, no words, no people, no faces. ';
+        $prompt .= "Color palette based on {$accentColor}. Soft, muted tones that won't compete with foreground content.";
+
+        if ($styleInstructions) {
+            $prompt .= " Style preferences: {$styleInstructions}";
+        }
+
+        return $prompt;
+    }
+
+    private static function prepareImageGenerationRequest(string $prompt, string $aspectRatio = '3:4'): array
+    {
+        $model = 'gemini-2.5-flash-image';
+
+        $apiKey = config('services.google.gemini_key');
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=".$apiKey;
+
+        $data = [
+            'contents' => [
+                [
+                    'parts' => [['text' => $prompt]],
+                ],
+            ],
+            'generationConfig' => [
+                'responseModalities' => ['TEXT', 'IMAGE'],
+                'imageConfig' => ['aspectRatio' => $aspectRatio],
+            ],
+        ];
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            CURLOPT_POSTFIELDS => json_encode($data),
+            CURLOPT_TIMEOUT => 60,
+        ]);
+
+        return [$ch, $prompt];
+    }
+
+    private static function processImageGenerationResponse(string $response, int $httpCode, string $prompt): ?string
+    {
+        if ($httpCode !== 200) {
+            \Log::error('Gemini image generation API error response: '.$response);
+
+            $errorData = json_decode($response, true);
+            if (json_last_error() === JSON_ERROR_NONE && isset($errorData['error']['message'])) {
+                $errorMessage = $errorData['error']['message'];
+                $errorStatus = $errorData['error']['status'] ?? null;
+
+                if (str_contains($errorMessage, 'quota') || str_contains($errorMessage, 'Quota exceeded')) {
+                    \Log::error('Gemini image generation API quota exceeded: '.$errorMessage);
+
+                    return null;
+                }
+
+                if ($httpCode === 503 ||
+                    $errorStatus === 'UNAVAILABLE' ||
+                    str_contains(strtolower($errorMessage), 'overloaded') ||
+                    str_contains(strtolower($errorMessage), 'overload')) {
+                    \Log::error('Gemini image generation API model overloaded: '.$errorMessage);
+
+                    return null;
+                }
+            }
+
+            return null;
+        }
+
+        $data = json_decode($response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            \Log::error('Failed to parse Gemini image generation API response: '.$response);
+
+            return null;
+        }
+
+        $parts = $data['candidates'][0]['content']['parts'] ?? [];
+        foreach ($parts as $part) {
+            if (isset($part['inlineData']['data'])) {
+                return base64_decode($part['inlineData']['data']);
+            }
+        }
+
+        \Log::error('No image data in Gemini image generation response: '.json_encode($data));
+
+        return null;
+    }
+
+    private static function executeParallelImageRequests(array $requests): array
+    {
+        $mh = curl_multi_init();
+        $handles = [];
+
+        foreach ($requests as $key => [$ch, $prompt]) {
+            curl_multi_add_handle($mh, $ch);
+            $handles[$key] = ['ch' => $ch, 'prompt' => $prompt];
+        }
+
+        $running = null;
+        do {
+            curl_multi_exec($mh, $running);
+            if ($running > 0) {
+                curl_multi_select($mh);
+            }
+        } while ($running > 0);
+
+        $results = [];
+        foreach ($handles as $key => ['ch' => $ch, 'prompt' => $prompt]) {
+            $response = curl_multi_getcontent($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_multi_remove_handle($mh, $ch);
+            curl_close($ch);
+
+            $results[$key] = self::processImageGenerationResponse($response, $httpCode, $prompt);
+        }
+
+        curl_multi_close($mh);
+
+        return $results;
+    }
+
+    public static function generateScheduleProfileImage(Role $role, string $accentColor, ?string $styleInstructions): ?string
+    {
+        $prompt = self::buildProfileImagePrompt($role, $accentColor, $styleInstructions);
+
+        return self::sendImageGenerationRequest($prompt, '1:1');
+    }
+
+    public static function generateScheduleHeaderImage(Role $role, string $accentColor, ?string $styleInstructions): ?string
+    {
+        $prompt = self::buildHeaderImagePrompt($role, $accentColor, $styleInstructions);
+
+        return self::sendImageGenerationRequest($prompt, '16:9');
+    }
+
+    public static function generateScheduleBackgroundImage(Role $role, string $accentColor, ?string $styleInstructions): ?string
+    {
+        $prompt = self::buildBackgroundImagePrompt($role, $accentColor, $styleInstructions);
+
+        return self::sendImageGenerationRequest($prompt, '16:9');
     }
 
     public static function generateBlogPost($topic, $parentPageUrl = null, $parentPageTitle = null, $features = [])
@@ -1432,6 +1883,7 @@ class GeminiUtils
         - Make it relevant to event scheduling and ticketing
         {$featuresRequirement}
         - Ensure the content is original and valuable
+        - Use natural, search-friendly language in the title and headings (the kind of phrasing people type into search engines)
         - Make it SEO-friendly with relevant keywords
         - Always maintain a professional tone
         {$linksRequirement}
@@ -1494,18 +1946,25 @@ class GeminiUtils
     {
         $titlesText = ! empty($recentTitles) ? implode("\n- ", $recentTitles) : 'No recent posts';
 
+        $styles = [
+            "Phrase as a 'how to' question targeting a specific problem event organizers search for (e.g., 'How to sell event tickets without paying platform fees', 'How to sync your event calendar with Google Calendar')",
+            "Phrase as a practical tips post (e.g., '5 Ways to Boost Event Attendance', '7 Mistakes to Avoid When Planning Your First Event')",
+            'Is relevant to event planning, community building, or hosting successful events',
+        ];
+        $style = $styles[array_rand($styles)];
+
         $prompt = "You are a content strategist for Event Schedule, an event management platform.
 
 Recent blog post titles:
 - {$titlesText}
 
 Suggest ONE new blog post topic that:
-1. Is relevant to event planning, community building, or hosting successful events
+1. {$style}
 2. Is different from the recent posts listed above
 3. Would be interesting to event organizers and community managers
 
 Return a JSON object with just one field:
-{\"topic\": \"your topic phrase here (5-10 words)\"}";
+{\"topic\": \"your topic phrase here (5-15 words)\"}";
 
         try {
             $data = self::sendRequest($prompt);

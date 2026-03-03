@@ -34,6 +34,12 @@ class UsageTrackingService
 
     const GEMINI_GENERATE_FLYER = 'gemini_generate_flyer';
 
+    const GEMINI_GENERATE_STYLE = 'gemini_generate_style';
+
+    const GEMINI_GENERATE_SCHEDULE_DETAILS = 'gemini_generate_schedule_details';
+
+    const GEMINI_GENERATE_EVENT_DETAILS = 'gemini_generate_event_details';
+
     // YouTube
     const YOUTUBE_SEARCH = 'youtube_search';
 

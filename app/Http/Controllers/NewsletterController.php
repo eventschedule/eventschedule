@@ -150,7 +150,7 @@ class NewsletterController extends Controller
             'blocks' => $blocks,
             'template' => $validated['template'],
             'style_settings' => $this->sanitizeStyleSettings($validated['style_settings'] ?? null),
-            'segment_ids' => !empty($validated['segment_ids']) ? array_map('intval', $validated['segment_ids']) : null,
+            'segment_ids' => ! empty($validated['segment_ids']) ? array_map('intval', $validated['segment_ids']) : null,
             'status' => 'draft',
             'type' => 'schedule',
         ]);
@@ -216,7 +216,7 @@ class NewsletterController extends Controller
             'blocks' => $blocks,
             'template' => $validated['template'],
             'style_settings' => $this->sanitizeStyleSettings($validated['style_settings'] ?? null),
-            'segment_ids' => !empty($validated['segment_ids']) ? array_map('intval', $validated['segment_ids']) : null,
+            'segment_ids' => ! empty($validated['segment_ids']) ? array_map('intval', $validated['segment_ids']) : null,
         ]);
 
         // Derive event_ids from blocks
@@ -265,7 +265,19 @@ class NewsletterController extends Controller
             return back()->with('error', __('messages.newsletter_limit_reached', ['used' => $used, 'limit' => $limit]));
         }
 
-        $service->send($newsletter);
+        $result = $service->send($newsletter);
+
+        if (is_array($result) && $result[0] === 'limit_exceeded') {
+            $recipientCount = $result[1];
+            $limit = $role->newsletterLimit();
+            $used = $role->newslettersSentThisMonth();
+            $remaining = max(0, $limit - $used);
+
+            return back()->with('error', __('messages.newsletter_email_limit_exceeded', [
+                'count' => $recipientCount,
+                'remaining' => $remaining,
+            ]));
+        }
 
         return redirect()->route('newsletter.index', $this->roleIdParam($role))
             ->with('status', __('messages.newsletter_sending'));
@@ -840,6 +852,21 @@ class NewsletterController extends Controller
             return back()->with('error', __('messages.no_recipients'));
         }
 
+        // Check if total recipients would exceed the email limit
+        $limit = $role->newsletterLimit();
+        if ($limit !== null) {
+            $used = $role->newslettersSentThisMonth();
+            if ($used + $allRecipients->count() > $limit) {
+                $abTest->update(['status' => 'pending']);
+                $remaining = max(0, $limit - $used);
+
+                return back()->with('error', __('messages.newsletter_email_limit_exceeded', [
+                    'count' => $allRecipients->count(),
+                    'remaining' => $remaining,
+                ]));
+            }
+        }
+
         $sampleSize = (int) ceil($allRecipients->count() * ($abTest->sample_percentage / 100));
         $sample = $allRecipients->random(min($sampleSize, $allRecipients->count()));
 
@@ -979,5 +1006,4 @@ class NewsletterController extends Controller
         return redirect()->route('newsletter.segments', $this->roleIdParam($role))
             ->with('status', __('messages.emails_imported', ['count' => $imported]));
     }
-
 }

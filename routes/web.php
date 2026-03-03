@@ -285,6 +285,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse');
     Route::post('/{subdomain}/parse-event-parts', [EventController::class, 'parseEventParts'])->name('event.parse_parts');
     Route::post('/{subdomain}/generate-flyer', [EventController::class, 'generateFlyer'])->name('event.generate_flyer')->middleware('throttle:5,1');
+    Route::post('/{subdomain}/generate-style', [RoleController::class, 'generateStyle'])->name('role.generate_style')->middleware('throttle:5,1');
+    Route::post('/{subdomain}/generate-schedule-details', [RoleController::class, 'generateScheduleDetails'])->name('role.generate_schedule_details')->middleware('throttle:5,1');
+    Route::post('/{subdomain}/generate-event-details', [EventController::class, 'generateEventDetails'])->name('event.generate_event_details')->middleware('throttle:5,1');
     Route::post('/{subdomain}/import', [EventController::class, 'import'])->name('event.import');
     Route::post('/{subdomain}/test-import', [RoleController::class, 'testImport'])->name('role.test_import');
     Route::get('/{subdomain}/search-youtube', [RoleController::class, 'searchYouTube'])->name('role.search_youtube');

@@ -10,6 +10,8 @@ class HelpUtils
             'doc' => '/docs/creating-schedules',
             'anchors' => [
                 'section-details' => '/docs/creating-schedules#details',
+                'details-tab-general' => '/docs/creating-schedules#details',
+                'details-tab-localization' => '/docs/creating-schedules#details',
                 'section-address' => '/docs/creating-schedules#address',
                 'section-contact-info' => '/docs/creating-schedules#contact-info',
                 'section-style' => '/docs/schedule-styling#overview',

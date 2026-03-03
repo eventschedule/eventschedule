@@ -302,7 +302,7 @@
                                 <li>View your <strong>current plan</strong> (Free, Pro, or Enterprise) and <strong>subscription status</strong> (Active, Trial, Cancelled, Past Due)</li>
                                 <li>See your <strong>trial status</strong> and remaining trial days</li>
                                 <li>View your <strong>payment method</strong> on file</li>
-                                <li>Track <strong>newsletter usage</strong> with a progress bar showing how many you've sent this month relative to your plan limit</li>
+                                <li>Track <strong>newsletter email usage</strong> with a progress bar showing how many newsletter emails you've sent this month relative to your plan limit</li>
                                 <li><strong>Upgrade</strong> to Pro or Enterprise</li>
                                 <li><strong>Manage subscription</strong> through the Stripe portal, switch between <strong>monthly and yearly</strong> billing, or <strong>cancel</strong> your subscription</li>
                                 <li><strong>Resume</strong> your subscription during a cancellation grace period</li>

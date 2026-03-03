@@ -18,7 +18,7 @@ use Illuminate\Support\Str;
 
 class NewsletterService
 {
-    public function send(Newsletter $newsletter): bool
+    public function send(Newsletter $newsletter): bool|array
     {
         $role = $newsletter->role;
         if (! $newsletter->isAdmin() && (! $role || ! $role->canSendNewsletter())) {
@@ -45,6 +45,19 @@ class NewsletterService
             $newsletter->update(['status' => 'sent', 'sent_at' => now(), 'sent_count' => 0]);
 
             return true;
+        }
+
+        // Check if sending to these recipients would exceed the email limit
+        if (! $newsletter->isAdmin() && $role) {
+            $limit = $role->newsletterLimit();
+            if ($limit !== null) {
+                $used = $role->newslettersSentThisMonth();
+                if ($used + $recipients->count() > $limit) {
+                    $newsletter->update(['status' => 'draft', 'send_token' => null]);
+
+                    return ['limit_exceeded', $recipients->count()];
+                }
+            }
         }
 
         $recipientIds = [];
