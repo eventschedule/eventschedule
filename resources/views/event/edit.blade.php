@@ -2942,6 +2942,7 @@
                                 </div>
 
                                 <!-- Phone Number -->
+                                <div v-show="activeTicketTab === 'options' || event.rsvp_enabled">
                                 <div class="mt-6">
                                     <div class="flex items-center gap-3">
                                         <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
@@ -2955,11 +2956,13 @@
                                         <label for="ask_phone_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                                             {{ __('messages.ask_for_phone_number') }}
                                         </label>
-                                        <div class="flex items-center" v-if="event.ask_phone">
+                                    </div>
+                                    <div class="flex items-center gap-4 mt-2 ms-14" v-if="event.ask_phone">
+                                        <div class="flex items-center">
                                             <input type="checkbox" v-model="event.require_phone" id="require_phone_checkbox" class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
                                             <label for="require_phone_checkbox" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
                                         </div>
-                                        <div class="flex items-center" v-if="event.ask_phone">
+                                        <div class="flex items-center">
                                             <input type="checkbox" v-model="event.country_code_phone" id="country_code_phone_checkbox" class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
                                             <label for="country_code_phone_checkbox" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.country_code') }}</label>
                                         </div>
@@ -2968,8 +2971,11 @@
                                     <input type="hidden" name="require_phone" :value="event.require_phone ? 1 : 0">
                                     <input type="hidden" name="country_code_phone" :value="event.country_code_phone ? 1 : 0">
                                 </div>
+                                </div>
 
                             </div>
+
+                            <hr class="my-4 border-gray-200 dark:border-gray-700">
 
                             @if ($user->isMember($subdomain))
                             <div class="flex items-center gap-3 mt-3">

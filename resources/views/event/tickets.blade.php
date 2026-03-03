@@ -3,6 +3,8 @@
   @if ($event->country_code_phone)
   <link rel="stylesheet" href="{{ asset('vendor/intl-tel-input/css/intlTelInput.css') }}">
   <style {!! nonce_attr() !!}>
+  .iti { display: block; }
+  .iti input.iti__tel-input { padding-top: 0.5rem; padding-bottom: 0.5rem; }
   .dark .iti { --iti-dropdown-bg: #1e1e1e; --iti-hover-color: #2d2d30; --iti-border-color: #2d2d30; --iti-dialcode-color: #9ca3af; --iti-arrow-color: #d1d5db; }
   .dark .iti__dropdown-content { color: #d1d5db; }
   .dark .iti__selected-dial-code { color: #d1d5db; }
@@ -119,6 +121,36 @@
                         window.addEventListener('event-form-shown', () => renderTurnstile(), { once: true });
                     }
                 }
+                @if ($event->country_code_phone)
+                const initIntlTel = () => {
+                    const input = document.getElementById('phone_input');
+                    const hidden = document.getElementById('phone_hidden');
+                    if (!input || !hidden) return;
+                    const iti = window.intlTelInput(input, {
+                        utilsScript: '{{ asset('vendor/intl-tel-input/js/utils.js') }}',
+                        initialCountry: '{{ strtolower($role->country_code ?? 'us') }}',
+                        separateDialCode: true,
+                        strictMode: true,
+                        nationalMode: false,
+                        autoPlaceholder: 'off',
+                    });
+                    const vm = this;
+                    function updateHidden() {
+                        var number = iti.getNumber();
+                        hidden.value = number || '';
+                        vm.phone = number || '';
+                    }
+                    input.addEventListener('change', updateHidden);
+                    input.addEventListener('input', updateHidden);
+                    input.addEventListener('countrychange', updateHidden);
+                };
+                const phoneEl = document.getElementById('phone_input');
+                if (phoneEl && phoneEl.offsetParent !== null) {
+                    initIntlTel();
+                } else {
+                    window.addEventListener('event-form-shown', () => this.$nextTick(() => initIntlTel()), { once: true });
+                }
+                @endif
             },
             computed: {
                 subtotalAmount() {
@@ -409,7 +441,7 @@
         </div>
 
         <div class="mb-6" v-if="askPhone">
-            <label for="phone_input" class="text-gray-900 dark:text-gray-100">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
+            <label for="phone_input" class="block text-gray-900 dark:text-gray-100">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
             @if ($event->country_code_phone)
             <input type="hidden" name="phone" id="phone_hidden" v-model="phone">
             <input type="tel" id="phone_input" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"

@@ -1642,10 +1642,9 @@ class EventController extends Controller
 
         // Validate form input
         $rules = [
-            'event_name' => ['required', 'string', 'max:255'],
-            'date' => ['required', 'date'],
-            'start_time' => ['required', 'date_format:H:i'],
-            'duration' => ['nullable', 'numeric', 'min:0.5'],
+            'event_name' => ['nullable', 'string', 'max:255'],
+            'date' => ['nullable', 'date'],
+            'start_time' => ['nullable', 'date_format:H:i'],
             'description' => ['nullable', 'string', 'max:5000'],
             'is_online' => ['nullable'],
             'venue_name' => ['nullable', 'string', 'max:255'],
@@ -1681,7 +1680,7 @@ class EventController extends Controller
         $venue = null;
         $isOnline = $request->input('is_online');
 
-        if (! $isOnline && ($request->venue_name || $request->venue_address1 || $request->venue_city)) {
+        if ($request->venue_name || $request->venue_address1 || $request->venue_city) {
             $venue = new Role;
             $venue->name = $request->venue_name ?? null;
             $venue->subdomain = Role::generateSubdomain($request->venue_name);
@@ -1718,27 +1717,30 @@ class EventController extends Controller
         }
 
         // Build starts_at from date + time
-        $timezone = $user ? $user->timezone : ($role->timezone ?? 'America/New_York');
-        $startsAt = Carbon::createFromFormat('Y-m-d H:i', $request->date.' '.$request->start_time, $timezone)
-            ->setTimezone('UTC')
-            ->format('Y-m-d H:i:s');
+        $startsAt = null;
+        if ($request->date && $request->start_time) {
+            $timezone = $user ? $user->timezone : ($role->timezone ?? 'America/New_York');
+            $startsAt = Carbon::createFromFormat('Y-m-d H:i', $request->date.' '.$request->start_time, $timezone)
+                ->setTimezone('UTC')
+                ->format('Y-m-d H:i:s');
+        }
 
         // Create the event
         $event = new Event;
-        $event->name = $request->event_name;
+        $event->name = $request->event_name ?: __('messages.booking_request');
         $event->description = $request->description;
         $event->starts_at = $startsAt;
-        $event->duration = $request->duration;
         $event->event_url = $isOnline ? 'online' : null;
 
         $user = $user ?: $role->user;
         $event->user_id = $user->id;
 
-        $event->slug = Str::slug($request->event_name).'-'.strtolower(Str::random(6));
+        $eventName = $request->event_name ?: __('messages.booking_request');
+        $event->slug = Str::slug($eventName).'-'.strtolower(Str::random(6));
         $event->save();
 
         // Attach talent role
-        $isAccepted = ! $role->require_approval;
+        $isAccepted = $role->require_approval ? null : true;
         $event->roles()->attach($role->id, ['is_accepted' => $isAccepted]);
 
         // Attach venue role if created

@@ -442,6 +442,14 @@ class RoleController extends Controller
                 $event = $this->eventRepo->getEvent($subdomain, $slug, $date, $eventIdParam, $role);
             }
 
+            // Fallback: allow schedule members to view pending (not yet accepted) events
+            if (! $event && $eventIdParam && $user && $user->isMember($subdomain)) {
+                $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
+                    ->where('id', $eventIdParam)
+                    ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->whereNull('is_accepted'))
+                    ->first();
+            }
+
             if ($event) {
                 // Block direct URL access to private events for non-members
                 // Only enforce if the schedule still has Enterprise access

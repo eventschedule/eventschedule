@@ -7,9 +7,11 @@
 </style>
 <div class="flex h-full flex-col" id="calendar-app">
 @php
+    $role = $role ?? null;
+    $label = fn($key) => $role ? $role->customLabel($key) : __('messages.' . $key);
     $isAdminRoute = $route == 'admin';
     $stickyBleedClass = ($route === 'guest' && !(isset($embed) && $embed)) ? '-mx-5 px-5' : '-mx-4 px-4';
-    $firstDay = $role->first_day_of_week ?? 0;
+    $firstDay = $role?->first_day_of_week ?? 0;
     $lastDay = ($firstDay + 6) % 7;
     $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek($firstDay);
     $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek($lastDay);
@@ -23,7 +25,6 @@
         ? Carbon\Carbon::now(auth()->user()->timezone)->startOfDay()
         : Carbon\Carbon::now()->startOfDay();
 
-    $role = $role ?? null;
     $subdomain = $subdomain ?? null;
 
     if (request()->graphic) {
@@ -351,7 +352,7 @@
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3H19C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z"/>
                         </svg>
-                        {{ $role->customLabel('filters') }}
+                        {{ $label('filters') }}
                         <span v-if="activeFilterCount > 0"
                               class="ms-1 px-1.5 py-0.5 text-xs bg-[#4E81FA] text-white rounded-full">
                             @{{ activeFilterCount }}
@@ -383,7 +384,7 @@
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3H19C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z"/>
                     </svg>
-                    {{ $role->customLabel('filters') }}
+                    {{ $label('filters') }}
                     {{-- Active filter count badge --}}
                     <span v-if="activeFilterCount > 0"
                           class="ms-1 px-1.5 py-0.5 text-xs bg-[#4E81FA] text-white rounded-full">
@@ -609,7 +610,7 @@
         <div v-show="currentView === 'calendar' && !isLoadingEvents" class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
             <div v-if="mobileEventsList.length">
                 <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden mb-4 w-full text-center">
-                    {{ $role->customLabel('show_past_events') }}
+                    {{ $label('show_past_events') }}
                 </button>
                 <div id="mobileEventsList" class="space-y-6">
                     <template v-for="(group, groupIndex) in eventsGroupedByDate" :key="'date-' + group.date">
@@ -643,7 +644,7 @@
             <div v-else-if="!isLoadingEvents && {{ $tab != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
-                        {{ $role->customLabel('no_scheduled_events') }}
+                        {{ $label('no_scheduled_events') }}
                     </div>
                 </div>
             </div>
@@ -701,7 +702,7 @@
                          class="py-4 flex items-center gap-4">
                         <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
                         <span class="text-sm font-semibold text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-full px-4 py-1 bg-white dark:bg-gray-900">
-                            {{ $role->customLabel('past_events') }}
+                            {{ $label('past_events') }}
                         </span>
                         <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
                     </div>
@@ -768,7 +769,7 @@
                                                 </svg>
                                             </div>
                                             <div class="flex flex-col">
-                                                <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $role->customLabel('free_entry') }}</span>
+                                                <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $label('free_entry') }}</span>
                                             </div>
                                         </div>
 
@@ -781,7 +782,7 @@
                                             </div>
                                             <div class="flex flex-col">
                                                 <span class="text-lg font-semibold text-gray-900 dark:text-white">
-                                                    <span v-if="event.ticket_price == 0">{{ $role->customLabel('free_entry') }}</span>
+                                                    <span v-if="event.ticket_price == 0">{{ $label('free_entry') }}</span>
                                                     <span v-else v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span>
                                                 </span>
                                                 <span v-if="event.coupon_code" class="text-sm text-gray-500 dark:text-gray-400">
@@ -956,19 +957,19 @@
                                                         class="hover-accent inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md border"
                                                         style="border-color: {{ $accentColor }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
-                                                    {{ $role->customLabel('add_photo') }}
+                                                    {{ $label('add_photo') }}
                                                 </button>
                                                 <button v-if="event.fan_videos_enabled" @click.stop="toggleVideoForm(event, $event)"
                                                         class="hover-accent inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md border"
                                                         style="border-color: {{ $accentColor }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
-                                                    {{ $role->customLabel('add_video') }}
+                                                    {{ $label('add_video') }}
                                                 </button>
                                                 <button v-if="event.fan_comments_enabled" @click.stop="toggleCommentForm(event, $event)"
                                                         class="hover-accent inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md border"
                                                         style="border-color: {{ $accentColor }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
-                                                    {{ $role->customLabel('add_comment') }}
+                                                    {{ $label('add_comment') }}
                                                 </button>
                                         </div>
 
@@ -1124,7 +1125,7 @@
                                             </svg>
                                         </div>
                                         <div class="flex flex-col">
-                                            <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $role->customLabel('free_entry') }}</span>
+                                            <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $label('free_entry') }}</span>
                                         </div>
                                     </div>
 
@@ -1137,7 +1138,7 @@
                                         </div>
                                         <div class="flex flex-col">
                                             <span class="text-lg font-semibold text-gray-900 dark:text-white">
-                                                <span v-if="event.ticket_price == 0">{{ $role->customLabel('free_entry') }}</span>
+                                                <span v-if="event.ticket_price == 0">{{ $label('free_entry') }}</span>
                                                 <span v-else v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span>
                                             </span>
                                             <span v-if="event.coupon_code" class="text-sm text-gray-500 dark:text-gray-400">
@@ -1312,19 +1313,19 @@
                                                     class="hover-accent inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 border"
                                                     style="border-color: {{ $accentColor }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
-                                                {{ $role->customLabel('add_photo') }}
+                                                {{ $label('add_photo') }}
                                             </button>
                                             <button v-if="event.fan_videos_enabled" @click.stop="toggleVideoForm(event, $event)"
                                                     class="hover-accent inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 border"
                                                     style="border-color: {{ $accentColor }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
-                                                {{ $role->customLabel('add_video') }}
+                                                {{ $label('add_video') }}
                                             </button>
                                             <button v-if="event.fan_comments_enabled" @click.stop="toggleCommentForm(event, $event)"
                                                     class="hover-accent inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 border"
                                                     style="border-color: {{ $accentColor }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
-                                                {{ $role->customLabel('add_comment') }}
+                                                {{ $label('add_comment') }}
                                             </button>
                                     </div>
 
@@ -1423,7 +1424,7 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    {{ $role->customLabel('load_more') }}
+                    {{ $label('load_more') }}
                 </button>
             </div>
 
@@ -1432,7 +1433,7 @@
             <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
-                        {{ $role->customLabel('no_scheduled_events') }}
+                        {{ $label('no_scheduled_events') }}
                     </div>
                 </div>
             </div>
@@ -1487,7 +1488,7 @@
                          class="py-1 flex items-center gap-4">
                         <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
                         <span class="text-sm font-semibold text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-full px-4 py-1 bg-white dark:bg-gray-900">
-                            {{ $role->customLabel('past_events') }}
+                            {{ $label('past_events') }}
                         </span>
                         <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
                     </div>
@@ -1524,7 +1525,7 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    {{ $role->customLabel('load_more') }}
+                    {{ $label('load_more') }}
                 </button>
             </div>
 
@@ -1532,7 +1533,7 @@
             <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0 && {{ ($tab ?? '') != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
-                        {{ $role->customLabel('no_scheduled_events') }}
+                        {{ $label('no_scheduled_events') }}
                     </div>
                 </div>
             </div>
@@ -1550,22 +1551,22 @@
     <div class="fixed inset-x-0 bottom-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl max-h-[80vh] overflow-y-auto {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
         {{-- Header --}}
         <div class="px-6 pt-5 pb-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $role->customLabel('filters') }}</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $label('filters') }}</h3>
             <button v-if="activeFilterCount > 0"
                     @click="clearFilters"
                     class="text-sm text-[#4E81FA] hover:text-[#3d6fd9] font-medium">
-                {{ $role->customLabel('clear_filters') }}
+                {{ $label('clear_filters') }}
             </button>
         </div>
 
         {{-- Schedule Filter --}}
         @if(isset($role) && $role->groups && $role->groups->count() > 1)
         <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $role->customLabel('schedule') }}</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('schedule') }}</label>
             <select v-model="selectedGroup" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-                <option value="">{{ $role->customLabel('show_all') }} (@{{ eventCountByGroup[''] }})</option>
+                <option value="">{{ $label('show_all') }} (@{{ eventCountByGroup[''] }})</option>
                 <option v-for="group in groups" :key="group.slug" :value="group.slug">
                     @{{ group.name }} (@{{ eventCountByGroup[group.slug] || 0 }})
                 </option>
@@ -1575,11 +1576,11 @@
 
         {{-- Category Filter --}}
         <div v-if="availableCategories.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $role->customLabel('category') }}</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('category') }}</label>
             <select v-model="selectedCategory" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                <option value="">{{ $role->customLabel('show_all') }} (@{{ eventCountByCategory[''] }})</option>
+                <option value="">{{ $label('show_all') }} (@{{ eventCountByCategory[''] }})</option>
                 <option v-for="category in availableCategories" :key="category.id" :value="category.id">
                     @{{ category.name }} (@{{ eventCountByCategory[category.id] || 0 }})
                 </option>
@@ -1588,11 +1589,11 @@
 
         {{-- Venue Filter --}}
         <div v-if="uniqueVenues.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $role->customLabel('venue') }}</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('venue') }}</label>
             <select v-model="selectedVenue" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                <option value="">{{ $role->customLabel('show_all') }} (@{{ eventCountByVenue[''] }})</option>
+                <option value="">{{ $label('show_all') }} (@{{ eventCountByVenue[''] }})</option>
                 <option v-for="venue in uniqueVenues" :key="venue.subdomain" :value="venue.subdomain">
                     @{{ venue.name }} (@{{ eventCountByVenue[venue.subdomain] || 0 }})
                 </option>
@@ -1609,7 +1610,7 @@
                 <select v-model="selectedCustomFields[field.key]" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                    <option value="">{{ $role->customLabel('show_all') }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
+                    <option value="">{{ $label('show_all') }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
                     <option v-for="opt in availableCustomFieldOptions[field.key]" :key="opt" :value="opt">
                         @{{ field.optionsMap[opt] || opt }} (@{{ (eventCountByCustomField[field.key] || {})[opt] || 0 }})
                     </option>
@@ -1620,7 +1621,7 @@
         {{-- Price Filter --}}
         <div v-if="hasFreeEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <div @click="showFreeOnly = !showFreeOnly" class="flex items-center justify-between cursor-pointer">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $role->customLabel('free_entry') }}</span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $label('free_entry') }}</span>
                 <button role="switch" :aria-checked="showFreeOnly.toString()"
                         class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
                         :class="showFreeOnly ? 'bg-[#4E81FA]' : 'bg-gray-300 dark:bg-gray-600'">
@@ -1633,7 +1634,7 @@
         {{-- Online Filter --}}
         <div v-if="hasOnlineEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <div @click="showOnlineOnly = !showOnlineOnly" class="flex items-center justify-between cursor-pointer">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $role->customLabel('online') }}</span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $label('online') }}</span>
                 <button role="switch" :aria-checked="showOnlineOnly.toString()"
                         class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
                         :class="showOnlineOnly ? 'bg-[#4E81FA]' : 'bg-gray-300 dark:bg-gray-600'">
@@ -1646,7 +1647,7 @@
         {{-- Done button --}}
         <div class="px-6 py-4">
                 <x-brand-button @click="showFiltersDrawer = false" class="w-full">
-                {{ $role->customLabel('done') }}
+                {{ $label('done') }}
             </x-brand-button>
         </div>
     </div>
@@ -1665,22 +1666,22 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto pointer-events-auto {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Header --}}
             <div class="px-6 py-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $role->customLabel('filters') }}</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $label('filters') }}</h3>
                 <button v-if="activeFilterCount > 0"
                         @click="clearFilters"
                         class="text-sm text-[#4E81FA] hover:text-[#3d6fd9] font-medium">
-                    {{ $role->customLabel('clear_filters') }}
+                    {{ $label('clear_filters') }}
                 </button>
             </div>
 
             {{-- Schedule Filter --}}
             @if(isset($role) && $role->groups && $role->groups->count() > 1)
             <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $role->customLabel('schedule') }}</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('schedule') }}</label>
                 <select v-model="selectedGroup" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-                    <option value="">{{ $role->customLabel('show_all') }} (@{{ eventCountByGroup[''] }})</option>
+                    <option value="">{{ $label('show_all') }} (@{{ eventCountByGroup[''] }})</option>
                     <option v-for="group in groups" :key="group.slug" :value="group.slug">
                         @{{ group.name }} (@{{ eventCountByGroup[group.slug] || 0 }})
                     </option>
@@ -1690,11 +1691,11 @@
 
             {{-- Category Filter --}}
             <div v-if="availableCategories.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $role->customLabel('category') }}</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('category') }}</label>
                 <select v-model="selectedCategory" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                    <option value="">{{ $role->customLabel('show_all') }} (@{{ eventCountByCategory[''] }})</option>
+                    <option value="">{{ $label('show_all') }} (@{{ eventCountByCategory[''] }})</option>
                     <option v-for="category in availableCategories" :key="category.id" :value="category.id">
                         @{{ category.name }} (@{{ eventCountByCategory[category.id] || 0 }})
                     </option>
@@ -1703,11 +1704,11 @@
 
             {{-- Venue Filter --}}
             <div v-if="uniqueVenues.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $role->customLabel('venue') }}</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('venue') }}</label>
                 <select v-model="selectedVenue" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                    <option value="">{{ $role->customLabel('show_all') }} (@{{ eventCountByVenue[''] }})</option>
+                    <option value="">{{ $label('show_all') }} (@{{ eventCountByVenue[''] }})</option>
                     <option v-for="venue in uniqueVenues" :key="venue.subdomain" :value="venue.subdomain">
                         @{{ venue.name }} (@{{ eventCountByVenue[venue.subdomain] || 0 }})
                     </option>
@@ -1724,7 +1725,7 @@
                     <select v-model="selectedCustomFields[field.key]" style="font-family: sans-serif"
                             class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                    bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                        <option value="">{{ $role->customLabel('show_all') }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
+                        <option value="">{{ $label('show_all') }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
                         <option v-for="opt in availableCustomFieldOptions[field.key]" :key="opt" :value="opt">
                             @{{ field.optionsMap[opt] || opt }} (@{{ (eventCountByCustomField[field.key] || {})[opt] || 0 }})
                         </option>
@@ -1735,7 +1736,7 @@
             {{-- Price Filter --}}
             <div v-if="hasFreeEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                 <div @click="showFreeOnly = !showFreeOnly" class="flex items-center justify-between cursor-pointer">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $role->customLabel('free_entry') }}</span>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $label('free_entry') }}</span>
                     <button role="switch" :aria-checked="showFreeOnly.toString()"
                             class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
                             :class="showFreeOnly ? 'bg-[#4E81FA]' : 'bg-gray-300 dark:bg-gray-600'">
@@ -1748,7 +1749,7 @@
             {{-- Online Filter --}}
             <div v-if="hasOnlineEvents" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                 <div @click="showOnlineOnly = !showOnlineOnly" class="flex items-center justify-between cursor-pointer">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $role->customLabel('online') }}</span>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $label('online') }}</span>
                     <button role="switch" :aria-checked="showOnlineOnly.toString()"
                             class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
                             :class="showOnlineOnly ? 'bg-[#4E81FA]' : 'bg-gray-300 dark:bg-gray-600'">
@@ -1761,7 +1762,7 @@
             {{-- Done button --}}
             <div class="px-6 py-4">
                 <x-brand-button @click="showDesktopFiltersModal = false" class="w-full">
-                    {{ $role->customLabel('done') }}
+                    {{ $label('done') }}
                 </x-brand-button>
             </div>
         </div>
@@ -3139,7 +3140,7 @@ const calendarApp = createApp({
             if (priceEl && priceTextEl) {
                 if (popupData.registration_url && popupData.ticket_price != null) {
                     priceTextEl.textContent = popupData.ticket_price == 0
-                        ? @json($role->customLabel('free_entry'))
+                        ? @json($label('free_entry'))
                         : this.formatPrice(popupData.ticket_price, popupData.ticket_currency_code);
                     priceEl.style.display = 'flex';
                 } else {
@@ -3619,7 +3620,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <ul>
         @foreach ($events as $noscriptEvent)
         <li style="margin-bottom: 1rem;">
-            <a href="{{ $noscriptEvent->getGuestUrl($role->subdomain) }}">
+            <a href="{{ $noscriptEvent->getGuestUrl($role?->subdomain ?? $noscriptEvent->roles->first()?->subdomain) }}">
                 <strong>{{ $noscriptEvent->translatedName() }}</strong>
             </a>
             <br>

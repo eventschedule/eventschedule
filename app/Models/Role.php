@@ -541,7 +541,7 @@ class Role extends Model implements MustVerifyEmail
             $isAccepted = ! $curator->require_approval
                 || ($curator->approved_subdomains && in_array($this->subdomain, $curator->approved_subdomains));
 
-            $event->roles()->attach($curator->id, ['is_accepted' => $isAccepted]);
+            $event->roles()->attach($curator->id, ['is_accepted' => $isAccepted ?: null]);
         }
     }
 

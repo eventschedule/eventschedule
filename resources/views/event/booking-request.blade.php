@@ -2,7 +2,53 @@
 
 @php
   $hasHeaderImage = ($role->header_image && $role->header_image !== 'none') || $role->header_image_url;
+  $use24hr = get_use_24_hour_time($role);
 @endphp
+
+  <style {!! nonce_attr() !!}>
+    .time-dropdown {
+      display: none;
+      position: absolute;
+      z-index: 50;
+      width: 100%;
+      max-height: 200px;
+      overflow-y: auto;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
+      margin-top: 2px;
+    }
+    .dark .time-dropdown {
+      background: #1e1e1e;
+      border-color: #2d2d30;
+    }
+    .time-dropdown.open {
+      display: block;
+    }
+    .time-dropdown-item {
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      color: #111827;
+    }
+    .dark .time-dropdown-item {
+      color: #d1d5db;
+    }
+    .time-dropdown-item:hover,
+    .time-dropdown-item.highlighted {
+      background: #e5e7eb;
+      color: #111827;
+    }
+    .dark .time-dropdown-item:hover,
+    .dark .time-dropdown-item.highlighted {
+      background: #2d2d30;
+      color: #fff;
+    }
+    .time-dropdown-item.hidden {
+      display: none;
+    }
+  </style>
 
   @if ($role->profile_image_url && !$hasHeaderImage && $role->language_code == 'en')
   <div class="pt-8"></div>
@@ -89,23 +135,27 @@
 
             <div class="mb-4">
               <x-input-label for="event_name" :value="__('messages.event_name')" />
-              <x-text-input id="event_name" name="event_name" type="text" class="mt-1 block w-full" required />
+              <x-text-input id="event_name" name="event_name" type="text" class="mt-1 block w-full" />
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <x-input-label for="event_date" :value="__('messages.date')" />
-                <x-text-input id="event_date" name="date" type="date" class="mt-1 block w-full" required />
+                <input type="text" id="event_date"
+                  class="datepicker-date mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
+                  autocomplete="off" aria-label="{{ __('messages.date') }}" />
+                <input type="hidden" name="date" id="hidden_date" />
               </div>
               <div>
                 <x-input-label for="event_start_time" :value="__('messages.start_time')" />
-                <x-text-input id="event_start_time" name="start_time" type="time" class="mt-1 block w-full" required />
+                <div class="relative">
+                  <input type="text" id="event_start_time"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
+                    placeholder="{{ __('messages.start_time') }}" autocomplete="off" aria-label="{{ __('messages.start_time') }}" />
+                  <div class="time-dropdown" id="start_time_dropdown"></div>
+                </div>
+                <input type="hidden" name="start_time" id="hidden_start_time" />
               </div>
-            </div>
-
-            <div class="mb-4">
-              <x-input-label for="event_duration" :value="__('messages.duration_in_hours')" />
-              <x-text-input id="event_duration" name="duration" type="number" step="0.5" min="0.5" class="mt-1 block w-full sm:w-1/2" />
             </div>
 
             <div class="mb-6">
@@ -117,10 +167,25 @@
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.location') }}</h3>
 
             <div class="mb-4">
-              <label class="inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="is_online" name="is_online" value="1" class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 shadow-sm focus:ring-indigo-500" onchange="toggleLocationFields()">
-                <span class="ms-2 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.online') }}</span>
-              </label>
+              <fieldset>
+                <div class="flex items-center space-x-6">
+                  <div class="flex items-center">
+                    <input id="in_person" type="checkbox" checked
+                      class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      onchange="toggleLocationFields()">
+                    <label for="in_person" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                      {{ __('messages.in_person') }}
+                    </label>
+                  </div>
+                  <div class="flex items-center ps-3">
+                    <input id="is_online" name="is_online" value="1" type="checkbox"
+                      class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <label for="is_online" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                      {{ __('messages.online') }}
+                    </label>
+                  </div>
+                </div>
+              </fieldset>
             </div>
 
             <div id="location-fields">
@@ -182,14 +247,6 @@
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 {{ is_rtl() ? 'me-6' : 'ms-6' }}">{{ __('messages.create_account_benefits') }}</p>
 
                 <div id="account-fields" class="{{ $role->require_account ? '' : 'hidden' }} mt-4">
-                  <div class="mb-4">
-                    <x-input-label for="account_name" :value="__('messages.name')" />
-                    <x-text-input id="account_name" name="name" type="text" class="mt-1 block w-full" />
-                  </div>
-                  <div class="mb-4">
-                    <x-input-label for="account_email" :value="__('messages.email')" />
-                    <x-text-input id="account_email" name="email" type="email" class="mt-1 block w-full" />
-                  </div>
                   <div>
                     <x-input-label for="account_password" :value="__('messages.password')" />
                     <x-text-input id="account_password" name="password" type="password" class="mt-1 block w-full" />
@@ -221,10 +278,184 @@
   </main>
 
   <script {!! nonce_attr() !!}>
+    var use24hr = {{ $use24hr ? 'true' : 'false' }};
+
+    function parseTimeToMinutes(timeStr) {
+        if (!timeStr) return null;
+        timeStr = timeStr.trim();
+        var match24 = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+        if (match24 && use24hr) {
+            var h = parseInt(match24[1], 10);
+            var m = parseInt(match24[2], 10);
+            if (h >= 0 && h <= 23 && m >= 0 && m <= 59) return h * 60 + m;
+        }
+        var match12 = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)$/i);
+        if (match12) {
+            var h = parseInt(match12[1], 10);
+            var m = parseInt(match12[2], 10);
+            var period = match12[3].toUpperCase();
+            if (h >= 1 && h <= 12 && m >= 0 && m <= 59) {
+                if (period === 'AM' && h === 12) h = 0;
+                else if (period === 'PM' && h !== 12) h += 12;
+                return h * 60 + m;
+            }
+        }
+        var matchShort = timeStr.match(/^(\d{1,2})\s*(AM|PM|am|pm)$/i);
+        if (matchShort) {
+            var h = parseInt(matchShort[1], 10);
+            var period = matchShort[2].toUpperCase();
+            if (h >= 1 && h <= 12) {
+                if (period === 'AM' && h === 12) h = 0;
+                else if (period === 'PM' && h !== 12) h += 12;
+                return h * 60;
+            }
+        }
+        if (!use24hr && match24) {
+            var h = parseInt(match24[1], 10);
+            var m = parseInt(match24[2], 10);
+            if (h >= 0 && h <= 23 && m >= 0 && m <= 59) return h * 60 + m;
+        }
+        return null;
+    }
+
+    function formatMinutesToTime(minutes) {
+        var h = Math.floor(minutes / 60) % 24;
+        var m = minutes % 60;
+        if (use24hr) {
+            return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+        } else {
+            var period = h < 12 ? 'AM' : 'PM';
+            var h12 = h % 12 || 12;
+            return h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + period;
+        }
+    }
+
+    function initPartTimePicker(inputEl, dropdownEl) {
+        if (inputEl._timepickerInit) return;
+        inputEl._timepickerInit = true;
+        var timeOptions = [];
+        for (var m = 0; m < 1440; m += 30) {
+            timeOptions.push(formatMinutesToTime(m));
+        }
+        timeOptions.forEach(function(label) {
+            var div = document.createElement('div');
+            div.className = 'time-dropdown-item';
+            div.textContent = label;
+            div.setAttribute('data-value', label);
+            div.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                inputEl.value = label;
+                closeDropdown();
+                inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+            dropdownEl.appendChild(div);
+        });
+        var highlightedIndex = -1;
+        function getVisibleItems() {
+            return Array.from(dropdownEl.querySelectorAll('.time-dropdown-item:not(.hidden)'));
+        }
+        function setHighlight(idx) {
+            var items = getVisibleItems();
+            items.forEach(function(el, i) {
+                el.classList.toggle('highlighted', i === idx);
+            });
+            highlightedIndex = idx;
+            if (idx >= 0 && idx < items.length) {
+                items[idx].scrollIntoView({ block: 'nearest' });
+            }
+        }
+        function showAllItems() {
+            var items = dropdownEl.querySelectorAll('.time-dropdown-item');
+            items.forEach(function(el) { el.classList.remove('hidden'); });
+            highlightedIndex = -1;
+        }
+        function openDropdown() {
+            showAllItems();
+            dropdownEl.classList.add('open');
+            scrollToNearest();
+        }
+        function closeDropdown() {
+            dropdownEl.classList.remove('open');
+            highlightedIndex = -1;
+        }
+        function filterItems() {
+            var query = inputEl.value.trim().toLowerCase();
+            var items = dropdownEl.querySelectorAll('.time-dropdown-item');
+            items.forEach(function(el) {
+                var val = el.getAttribute('data-value').toLowerCase();
+                if (!query || val.indexOf(query) !== -1) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+            highlightedIndex = -1;
+        }
+        function scrollToNearest() {
+            var minutes = parseTimeToMinutes(inputEl.value);
+            if (minutes === null) minutes = 540;
+            var closest = Math.round(minutes / 30) * 30;
+            if (closest >= 1440) closest = 0;
+            var target = formatMinutesToTime(closest);
+            var items = getVisibleItems();
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].getAttribute('data-value') === target) {
+                    items[i].scrollIntoView({ block: 'center' });
+                    setHighlight(i);
+                    return;
+                }
+            }
+        }
+        inputEl.addEventListener('focus', function() { openDropdown(); });
+        inputEl.addEventListener('click', function() {
+            if (!dropdownEl.classList.contains('open')) openDropdown();
+        });
+        inputEl.addEventListener('input', function() {
+            filterItems();
+            if (dropdownEl.classList.contains('open')) {
+                var visible = getVisibleItems();
+                if (visible.length > 0) setHighlight(0);
+            }
+        });
+        inputEl.addEventListener('blur', function() { closeDropdown(); });
+        inputEl.addEventListener('keydown', function(e) {
+            if (!dropdownEl.classList.contains('open')) return;
+            var items = getVisibleItems();
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                var next = highlightedIndex + 1;
+                if (next >= items.length) next = 0;
+                setHighlight(next);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                var prev = highlightedIndex - 1;
+                if (prev < 0) prev = items.length - 1;
+                setHighlight(prev);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (highlightedIndex >= 0 && highlightedIndex < items.length) {
+                    inputEl.value = items[highlightedIndex].getAttribute('data-value');
+                    closeDropdown();
+                    inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            } else if (e.key === 'Escape' || e.key === 'Tab') {
+                closeDropdown();
+            }
+        });
+        document.addEventListener('mousedown', function(e) {
+            if (!inputEl.contains(e.target) && !dropdownEl.contains(e.target)) {
+                closeDropdown();
+            }
+        });
+    }
+
     function toggleLocationFields() {
-      var isOnline = document.getElementById('is_online').checked;
+      var isInPerson = document.getElementById('in_person').checked;
       var locationFields = document.getElementById('location-fields');
-      locationFields.style.display = isOnline ? 'none' : 'block';
+      locationFields.style.display = isInPerson ? 'block' : 'none';
+      if (!isInPerson) {
+        locationFields.querySelectorAll('input, select').forEach(function(el) { el.value = ''; });
+      }
     }
 
     function toggleAccountFields() {
@@ -232,6 +463,35 @@
       var accountFields = document.getElementById('account-fields');
       accountFields.classList.toggle('hidden', !createAccount);
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Init Flatpickr date picker
+      var dateInput = document.getElementById('event_date');
+      var hiddenDate = document.getElementById('hidden_date');
+      flatpickr(dateInput, {
+        altInput: true,
+        altFormat: 'M j, Y',
+        dateFormat: 'Y-m-d',
+        onChange: function(selectedDates, dateStr) {
+          hiddenDate.value = dateStr;
+        }
+      });
+
+      // Init custom time picker
+      var timeInput = document.getElementById('event_start_time');
+      var timeDropdown = document.getElementById('start_time_dropdown');
+      var hiddenTime = document.getElementById('hidden_start_time');
+      initPartTimePicker(timeInput, timeDropdown);
+
+      timeInput.addEventListener('change', function() {
+        var minutes = parseTimeToMinutes(timeInput.value);
+        if (minutes !== null) {
+          var h = Math.floor(minutes / 60);
+          var m = minutes % 60;
+          hiddenTime.value = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+        }
+      });
+    });
 
     document.getElementById('booking-request-form').addEventListener('submit', function(e) {
       e.preventDefault();
