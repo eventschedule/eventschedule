@@ -128,7 +128,7 @@
         </div>
 
         {{-- Booking Request Form --}}
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-6 sm:p-8 lg:p-16 lg:px-20 pt-6 lg:pt-8 max-w-4xl mx-auto">
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-6 sm:p-8 lg:p-16 pt-6 lg:pt-8 max-w-4xl mx-auto">
           <form id="booking-request-form" method="POST" action="{{ route('event.booking_request.store', ['subdomain' => $role->subdomain]) }}">
             @csrf
 
