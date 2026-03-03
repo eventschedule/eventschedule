@@ -408,7 +408,7 @@
 
         <!-- Tabs at small breakpoint and up -->
         <div class="hidden md:block">
-            <nav class="-mb-px flex gap-x-8">
+            <nav class="-mb-px flex gap-x-8 overflow-x-auto scrollbar-hide">
                 <a href="{{ route('role.view_admin', ((now()->year == $year && now()->month == $month) || $tab == 'schedule') ? ['subdomain' => $role->subdomain, 'tab' => 'schedule'] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'month' => $month] : ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => $year, 'month' => $month])) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-[#4E81FA] px-3 pb-5 text-base font-medium text-[#4E81FA]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.schedule') }}</a>
                 @if ($role->isCurator())
