@@ -1,5 +1,5 @@
 <x-app-admin-layout>
-    <div class="max-w-[1400px] mx-auto">
+    <div class="space-y-6">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.edit_newsletter') }}</h2>
             <a href="{{ route('newsletter.index', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"

@@ -33,12 +33,24 @@
 
                 @foreach ($schedules as $each)
                 <li>
-                    <a href="{{ route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => $each->subdomain == request()->subdomain ? 'schedule' : (request()->tab ? request()->tab : 'schedule')]) }}"
-                        class="group flex gap-x-4 items-center rounded-md p-2 text-lg font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($each->subdomain) || request()->is($each->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
-                        <span
-                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($each->subdomain) || request()->is($each->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($each->name, 0, 1)) }}</span>
-                        <span class="truncate">{{ $each->name }}</span>
-                    </a>
+                    <div class="group flex items-center rounded-md p-2 text-lg font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($each->subdomain) || request()->is($each->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
+                        <a href="{{ route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => $each->subdomain == request()->subdomain ? 'schedule' : (request()->tab ? request()->tab : 'schedule')]) }}"
+                            class="flex gap-x-4 items-center min-w-0 flex-1">
+                            <span
+                                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($each->subdomain) || request()->is($each->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($each->name, 0, 1)) }}</span>
+                            <span class="truncate">{{ $each->name }}</span>
+                        </a>
+                        <div class="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a href="{{ route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => 'schedule']) }}" title="{{ __('messages.edit') }}" class="p-1 rounded hover:bg-gray-700">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/></svg>
+                            </a>
+                            @if ($each->isClaimed())
+                            <a href="{{ $each->getGuestUrl() }}" target="_blank" title="{{ __('messages.view') }}" class="p-1 rounded hover:bg-gray-700">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"/></svg>
+                            </a>
+                            @endif
+                        </div>
+                    </div>
                 </li>
                 @endforeach
 
@@ -54,12 +66,24 @@
 
                 @foreach ($venues as $venue)
                 <li>
-                    <a href="{{ route('role.view_admin', ['subdomain' => $venue->subdomain, 'tab' => $venue->subdomain == request()->subdomain ? 'schedule' : (request()->tab ? request()->tab : 'schedule')]) }}"
-                        class="group flex gap-x-4 items-center rounded-md p-2 text-lg font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($venue->subdomain) || request()->is($venue->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
-                        <span
-                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($venue->subdomain) || request()->is($venue->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($venue->name, 0, 1)) }}</span>
-                        <span class="truncate">{{ $venue->name }}</span>
-                    </a>
+                    <div class="group flex items-center rounded-md p-2 text-lg font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($venue->subdomain) || request()->is($venue->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
+                        <a href="{{ route('role.view_admin', ['subdomain' => $venue->subdomain, 'tab' => $venue->subdomain == request()->subdomain ? 'schedule' : (request()->tab ? request()->tab : 'schedule')]) }}"
+                            class="flex gap-x-4 items-center min-w-0 flex-1">
+                            <span
+                                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($venue->subdomain) || request()->is($venue->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($venue->name, 0, 1)) }}</span>
+                            <span class="truncate">{{ $venue->name }}</span>
+                        </a>
+                        <div class="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a href="{{ route('role.view_admin', ['subdomain' => $venue->subdomain, 'tab' => 'schedule']) }}" title="{{ __('messages.edit') }}" class="p-1 rounded hover:bg-gray-700">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/></svg>
+                            </a>
+                            @if ($venue->isClaimed())
+                            <a href="{{ $venue->getGuestUrl() }}" target="_blank" title="{{ __('messages.view') }}" class="p-1 rounded hover:bg-gray-700">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"/></svg>
+                            </a>
+                            @endif
+                        </div>
+                    </div>
                 </li>
                 @endforeach
 
@@ -75,12 +99,24 @@
 
                 @foreach ($curators as $curator)
                 <li>
-                    <a href="{{ route('role.view_admin', ['subdomain' => $curator->subdomain, 'tab' => $curator->subdomain == request()->subdomain ? 'schedule' : (request()->tab ? request()->tab : 'schedule')]) }}"
-                        class="group flex gap-x-4 items-center rounded-md p-2 text-lg font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($curator->subdomain) || request()->is($curator->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
-                        <span
-                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($curator->subdomain) || request()->is($curator->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($curator->name, 0, 1)) }}</span>
-                        <span class="truncate">{{ $curator->name }}</span>
-                    </a>
+                    <div class="group flex items-center rounded-md p-2 text-lg font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($curator->subdomain) || request()->is($curator->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
+                        <a href="{{ route('role.view_admin', ['subdomain' => $curator->subdomain, 'tab' => $curator->subdomain == request()->subdomain ? 'schedule' : (request()->tab ? request()->tab : 'schedule')]) }}"
+                            class="flex gap-x-4 items-center min-w-0 flex-1">
+                            <span
+                                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($curator->subdomain) || request()->is($curator->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($curator->name, 0, 1)) }}</span>
+                            <span class="truncate">{{ $curator->name }}</span>
+                        </a>
+                        <div class="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a href="{{ route('role.view_admin', ['subdomain' => $curator->subdomain, 'tab' => 'schedule']) }}" title="{{ __('messages.edit') }}" class="p-1 rounded hover:bg-gray-700">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/></svg>
+                            </a>
+                            @if ($curator->isClaimed())
+                            <a href="{{ $curator->getGuestUrl() }}" target="_blank" title="{{ __('messages.view') }}" class="p-1 rounded hover:bg-gray-700">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"/></svg>
+                            </a>
+                            @endif
+                        </div>
+                    </div>
                 </li>
                 @endforeach
 

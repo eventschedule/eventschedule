@@ -4,8 +4,7 @@
         <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
     </x-slot>
 
-    <div class="max-w-7xl mx-auto">
-        <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('messages.boost') }}</h1>
 
             <div class="flex items-center gap-3">
@@ -60,7 +59,6 @@
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.boost_empty_description') }}</p>
         </div>
         @endif
-    </div>
 
     <script {!! nonce_attr() !!}>
         document.getElementById('role-filter')?.addEventListener('change', function() {

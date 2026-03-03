@@ -1,6 +1,5 @@
 <x-app-admin-layout>
-    <div class="max-w-4xl mx-auto">
-        <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.edit_segment') }}</h2>
             <a href="{{ route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
                 class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
@@ -168,7 +167,6 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_subscribers') }}</p>
             @endif
         </div>
-    </div>
     <script {!! nonce_attr() !!}>
         document.addEventListener('submit', function(e) {
             var form = e.target.closest('.js-confirm-form');

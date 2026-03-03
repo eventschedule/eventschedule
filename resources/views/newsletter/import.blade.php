@@ -1,5 +1,5 @@
 <x-app-admin-layout>
-    <div class="max-w-4xl mx-auto" x-data="importEmails()">
+    <div x-data="importEmails()">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.import_emails') }}</h2>
             <a href="{{ route('newsletter.index', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"

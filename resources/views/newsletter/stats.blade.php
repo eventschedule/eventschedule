@@ -3,8 +3,7 @@
         <script src="{{ asset('js/chart.min.js') }}" {!! nonce_attr() !!}></script>
     </x-slot>
 
-    <div class="max-w-7xl mx-auto">
-        <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-center mb-6">
             <div>
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $newsletter->subject }}</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -155,7 +154,6 @@
                 {{ $recipients->links() }}
             </div>
         </div>
-    </div>
 
     <script {!! nonce_attr() !!}>
         function initCharts() {

@@ -1,6 +1,5 @@
 <x-app-admin-layout>
-    <div class="max-w-7xl mx-auto">
-        @if ($roles->isNotEmpty())
+    @if ($roles->isNotEmpty())
         <div class="flex justify-between items-center mb-6">
             {{-- Schedule Selector --}}
             <div class="min-w-[200px] max-w-xs">
@@ -163,7 +162,6 @@
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.create_schedule_first') }}</p>
         </div>
         @endif
-    </div>
 
     <script {!! nonce_attr() !!}>
         document.getElementById('role-filter').addEventListener('change', function() {
