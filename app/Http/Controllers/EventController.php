@@ -1392,6 +1392,9 @@ class EventController extends Controller
             'name' => 'required|string',
             'event_id' => 'nullable|string',
             'style_instructions' => 'nullable|string|max:500',
+            'starts_at' => 'nullable|string',
+            'duration' => 'nullable|numeric',
+            'category_id' => 'nullable|integer',
         ]);
 
         $allElements = $request->input('elements');
@@ -1425,34 +1428,45 @@ class EventController extends Controller
             if ($wantsFlyer) {
                 $eventId = UrlUtils::decodeId($request->input('event_id'));
 
-                if (! $eventId) {
-                    $imageError = true;
+                if ($eventId) {
+                    $event = Event::with(['roles', 'tickets'])->findOrFail($eventId);
+
+                    if ($request->user()->cannot('update', $event)) {
+                        return response()->json(['error' => __('messages.not_authorized')], 403);
+                    }
+
+                    if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
+                        return response()->json(['error' => __('messages.not_authorized')], 404);
+                    }
                 } else {
-                $event = Event::with(['roles', 'tickets'])->findOrFail($eventId);
-
-                if ($request->user()->cannot('update', $event)) {
-                    return response()->json(['error' => __('messages.not_authorized')], 403);
-                }
-
-                if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
-                    return response()->json(['error' => __('messages.not_authorized')], 404);
+                    $event = new Event;
+                    $event->name = $request->input('name');
+                    $event->starts_at = $request->input('starts_at');
+                    $event->duration = $request->input('duration');
+                    $event->short_description = $request->input('short_description');
+                    $event->category_id = $request->input('category_id');
+                    $event->setRelation('roles', collect([]));
+                    $event->setRelation('tickets', collect([]));
                 }
 
                 try {
                     $imageData = GeminiUtils::generateEventFlyer($event, $request->input('style_instructions'));
 
                     if ($imageData) {
-                        if ($event->flyer_image_url) {
-                            $path = $event->getAttributes()['flyer_image_url'];
-                            if (config('filesystems.default') == 'local') {
-                                $path = 'public/'.$path;
-                            }
-                            Storage::delete($path);
-                        }
-
                         $filename = ImageUtils::saveImageData($imageData, 'generated_flyer.png', 'flyer_');
-                        $event->flyer_image_url = $filename;
-                        $event->save();
+
+                        if ($eventId) {
+                            if ($event->flyer_image_url) {
+                                $path = $event->getAttributes()['flyer_image_url'];
+                                if (config('filesystems.default') == 'local') {
+                                    $path = 'public/'.$path;
+                                }
+                                Storage::delete($path);
+                            }
+
+                            $event->flyer_image_url = $filename;
+                            $event->save();
+                        }
 
                         UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_FLYER, $role->id);
 
@@ -1466,17 +1480,18 @@ class EventController extends Controller
 
                         $results['flyer_image_url'] = $flyerUrl;
                         $results['delete_url'] = route('event.delete_image', ['subdomain' => $subdomain]);
+
+                        if (! $eventId) {
+                            $results['flyer_image_filename'] = $filename;
+                        }
                     } else {
                         $imageError = true;
                     }
                 } catch (\Exception $e) {
                     \Log::error('AI flyer generation failed: '.$e->getMessage(), [
                         'role_id' => $role->id,
-                        'event_id' => $event->id,
                     ]);
                     $imageError = true;
-                }
-
                 }
 
                 if ($imageError && empty($results)) {

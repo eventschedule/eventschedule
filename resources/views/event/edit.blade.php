@@ -5593,6 +5593,15 @@ function deleteFlyer(url, hash, token, element) {
         return;
     }
 
+    if (!hash) {
+        element.remove();
+        var aiInput = document.getElementById('ai_flyer_image');
+        if (aiInput) aiInput.remove();
+        var chooseSection = document.getElementById('flyer_image_choose');
+        if (chooseSection) chooseSection.style.display = '';
+        return;
+    }
+
     fetch(url + '?hash=' + hash + '&image_type=flyer', {
         method: 'DELETE',
         headers: {
@@ -5658,13 +5667,19 @@ function deleteFlyer(url, hash, token, element) {
 window.getEventDetailsExtraData = function() {
     var descTextarea = document.getElementById('description');
     var descValue = descTextarea && descTextarea._easyMDE ? descTextarea._easyMDE.value() : (descTextarea ? descTextarea.value : '');
+    var startsAt = document.getElementById('starts_at');
+    var duration = document.getElementById('duration');
+    var categoryId = document.getElementById('category_id');
     return {
         name: document.getElementById('event_name').value,
         short_description: document.getElementById('short_description').value,
         schedule_name: @json($role->name),
         schedule_type: @json($role->type),
         description: descValue,
-        event_id: @json($event->exists ? \App\Utils\UrlUtils::encodeId($event->id) : '')
+        event_id: @json($event->exists ? \App\Utils\UrlUtils::encodeId($event->id) : ''),
+        starts_at: startsAt ? startsAt.value : '',
+        duration: duration ? duration.value : '',
+        category_id: categoryId ? categoryId.value : ''
     };
 };
 
@@ -5741,6 +5756,17 @@ window.handleAiEventDetailsResults = function(data) {
         }
         var chooseDiv = document.getElementById('flyer_image_choose');
         if (chooseDiv) chooseDiv.style.display = 'none';
+
+        if (data.flyer_image_filename) {
+            var existingInput = document.getElementById('ai_flyer_image');
+            if (existingInput) existingInput.remove();
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ai_flyer_image';
+            input.id = 'ai_flyer_image';
+            input.value = data.flyer_image_filename;
+            document.getElementById('edit-form').appendChild(input);
+        }
     }
 };
 </script>

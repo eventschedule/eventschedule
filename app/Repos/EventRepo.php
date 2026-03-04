@@ -604,6 +604,21 @@ class EventRepo
             $event->save();
         }
 
+        if (! $request->hasFile('flyer_image') && $request->input('ai_flyer_image')) {
+            $aiFilename = $request->input('ai_flyer_image');
+            if (preg_match('/^flyer_[a-z0-9]+\.png$/', $aiFilename)) {
+                if ($event->flyer_image_url) {
+                    $path = $event->getAttributes()['flyer_image_url'];
+                    if (config('filesystems.default') == 'local') {
+                        $path = 'public/'.$path;
+                    }
+                    Storage::delete($path);
+                }
+                $event->flyer_image_url = $aiFilename;
+                $event->save();
+            }
+        }
+
         if (config('app.hosted')) {
             $sendEmailToMembers = $request->input('send_email_to_members', []);
 
