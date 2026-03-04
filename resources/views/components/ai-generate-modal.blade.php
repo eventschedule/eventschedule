@@ -11,6 +11,9 @@
     'slowGeneration' => false,
     'errorMessage',
     'partialErrorMessage' => null,
+    'promptEndpoint' => null,
+    'instructionsLabel' => null,
+    'instructionsPlaceholder' => null,
 ])
 
 <x-modal :name="$name" maxWidth="md">
@@ -39,11 +42,39 @@
             </div>
         </div>
 
+        @if ($promptEndpoint)
+        <div class="mb-4">
+            <button type="button" @click="togglePromptEditor()" class="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors">
+                <svg class="w-4 h-4 transition-transform" :class="promptExpanded ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                <span>{{ __('messages.ai_view_edit_prompt') }}</span>
+            </button>
+
+            <div x-show="promptExpanded" x-cloak class="mt-2">
+                <div x-show="promptLoading" class="flex items-center justify-center py-8">
+                    <svg class="animate-spin h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+                <div x-show="!promptLoading" x-cloak>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{{ __('messages.ai_prompt_edit_hint') }}</p>
+                    <textarea x-model="customPrompt" rows="10" maxlength="5000"
+                        class="w-full font-mono text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]"></textarea>
+                    <button type="button" x-show="promptEdited" x-cloak @click="resetPrompt()" class="mt-1 text-xs text-[#4E81FA] hover:underline">
+                        {{ __('messages.ai_prompt_reset') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+        @endif
+
         @if ($showInstructions)
         <div class="mb-4">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.ai_style_instructions') }}</label>
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $instructionsLabel ?: __('messages.ai_style_instructions') }}</label>
             <textarea x-model="styleInstructions" maxlength="500" rows="2"
-                placeholder="{{ __('messages.ai_style_instructions_placeholder') }}"
+                placeholder="{{ $instructionsPlaceholder ?: __('messages.ai_style_instructions_placeholder') }}"
                 class="mt-1 w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]"></textarea>
         </div>
         @endif
@@ -97,6 +128,16 @@ document.addEventListener('alpine:init', function() {
             fieldsWithValues: @json(collect($fields)->where('has_value', true)->pluck('key')->values()),
             styleInstructions: '',
             generatingText: @json(__('messages.generating')),
+            @if ($promptEndpoint)
+            customPrompt: '',
+            defaultPrompt: '',
+            promptExpanded: false,
+            promptLoading: false,
+            promptFetched: false,
+            get promptEdited() {
+                return this.customPrompt !== this.defaultPrompt;
+            },
+            @endif
             get hasCheckedWithValue() {
                 return this.elements.some(el => this.fieldsWithValues.includes(el));
             },
@@ -115,6 +156,13 @@ document.addEventListener('alpine:init', function() {
                         @endif
                         self.elements = [...self.defaultElements];
                         self.styleInstructions = '';
+                        @if ($promptEndpoint)
+                        self.customPrompt = '';
+                        self.defaultPrompt = '';
+                        self.promptExpanded = false;
+                        self.promptLoading = false;
+                        self.promptFetched = false;
+                        @endif
                     }
                 });
             },
@@ -122,6 +170,53 @@ document.addEventListener('alpine:init', function() {
                 var idx = this.elements.indexOf(el);
                 if (idx > -1) { this.elements.splice(idx, 1); } else { this.elements.push(el); }
             },
+            @if ($promptEndpoint)
+            togglePromptEditor: function() {
+                this.promptExpanded = !this.promptExpanded;
+                if (this.promptExpanded && !this.promptFetched) {
+                    this.fetchPrompt();
+                }
+            },
+            fetchPrompt: function() {
+                this.promptLoading = true;
+                var self = this;
+
+                var body = {
+                    elements: this.elements.filter(function(el) { return el !== 'flyer_image'; })
+                };
+
+                @if ($extraDataCallback)
+                var extraData = window[{!! json_encode($extraDataCallback) !!}]();
+                if (extraData) {
+                    Object.assign(body, extraData);
+                }
+                @endif
+
+                fetch(@json($promptEndpoint), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                })
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        self.defaultPrompt = data.prompt;
+                        self.customPrompt = data.prompt;
+                        self.promptFetched = true;
+                    }
+                })
+                .finally(function() {
+                    self.promptLoading = false;
+                });
+            },
+            resetPrompt: function() {
+                this.customPrompt = this.defaultPrompt;
+            },
+            @endif
             generate: function() {
                 if (this.elements.length === 0) return;
                 this.generating = true;
@@ -133,6 +228,12 @@ document.addEventListener('alpine:init', function() {
 
                 @if ($showInstructions)
                 body.style_instructions = this.styleInstructions;
+                @endif
+
+                @if ($promptEndpoint)
+                if (this.promptEdited && this.customPrompt) {
+                    body.custom_prompt = this.customPrompt;
+                }
                 @endif
 
                 @if ($extraDataCallback)

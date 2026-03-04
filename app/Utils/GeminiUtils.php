@@ -1500,44 +1500,57 @@ class GeminiUtils
         return ! empty($output) ? $output : null;
     }
 
-    public static function generateEventDetails(string $name, ?string $shortDescription, string $scheduleName, string $scheduleType, array $elements, ?string $description = null): ?array
+    public static function buildEventDetailsPrompt(string $name, ?string $shortDescription, string $scheduleName, string $scheduleType, array $elements, ?string $description = null): string
     {
+        $config = config('ai_prompts.event_details');
         $type = $scheduleType === 'talent' ? 'talent' : ($scheduleType === 'venue' ? 'venue' : 'curator');
 
-        $prompt = "You are writing content for an event on an event schedule platform. Generate the requested fields for an event with these details:\n\n";
-        $prompt .= "- Event name: {$name}\n";
-        $prompt .= "- Schedule name: {$scheduleName}\n";
-        $prompt .= "- Schedule type: {$type} (talent = performer/artist, venue = location/place, curator = event organizer)\n";
-        $prompt .= '- Existing short description: '.($shortDescription ?: 'none')."\n";
+        $prompt = str_replace(
+            [':event_name', ':schedule_name', ':schedule_type', ':short_description'],
+            [$name, $scheduleName, $type, $shortDescription ?: 'none'],
+            $config['base']
+        );
+        $prompt .= "\n";
 
         if (in_array('description', $elements) && ! empty($description)) {
-            $prompt .= "- Existing description: {$description}\n";
+            $prompt .= str_replace(':description', $description, $config['existing_description_line'])."\n";
         }
 
-        $prompt .= "\nReturn a JSON object with only the requested fields:\n";
+        $prompt .= $config['return_instruction'];
 
         if (in_array('category_id', $elements)) {
-            $prompt .= "- \"category_id\": Choose the single best-fitting category ID from this list:\n";
-            $prompt .= "1=Art & Culture, 2=Business Networking, 3=Community, 4=Concerts, 5=Education,\n";
-            $prompt .= "6=Food & Drink, 7=Health & Fitness, 8=Parties & Festivals, 9=Personal Growth,\n";
-            $prompt .= "10=Sports, 11=Spirituality, 12=Tech\n";
-            $prompt .= "Return just the integer ID.\n";
+            $prompt .= $config['elements']['category_id'];
         }
 
         if (in_array('short_description', $elements)) {
-            $prompt .= "- \"short_description\": Write a concise, engaging summary in under 150 characters.\n";
+            $prompt .= $config['elements']['short_description'];
         }
 
         if (in_array('description', $elements)) {
             if (! empty($description)) {
-                $prompt .= "- \"description\": Improve and enhance the existing description rather than writing from scratch. Use rich markdown formatting: include a few subheadings (##), bullet or numbered lists where appropriate, and bold text for emphasis. Include a few relevant emojis to make it visually appealing. Do not use em-dashes. Do not include the event name as a top-level heading. Keep it concise, around 150 to 300 words.\n";
+                $prompt .= $config['elements']['description_existing'];
             } else {
-                $prompt .= "- \"description\": Write an engaging description in markdown. Use rich formatting: include a few subheadings (##), bullet or numbered lists where appropriate, and bold text for emphasis. Include a few relevant emojis to make it visually appealing. Describe what attendees can expect. Do not use em-dashes. Do not include the event name as a top-level heading. Keep it concise, around 150 to 300 words.\n";
+                $prompt .= $config['elements']['description_new'];
             }
         }
 
         if (in_array('short_description', $elements) && in_array('description', $elements) && empty($shortDescription)) {
-            $prompt .= "\nSince no short description exists yet, generate the short_description first and use it as context when writing the description.";
+            $prompt .= $config['short_description_first'];
+        }
+
+        return $prompt;
+    }
+
+    public static function generateEventDetails(string $name, ?string $shortDescription, string $scheduleName, string $scheduleType, array $elements, ?string $description = null, ?string $customPrompt = null, ?string $additionalInstructions = null): ?array
+    {
+        if ($customPrompt) {
+            $prompt = $customPrompt;
+        } else {
+            $prompt = self::buildEventDetailsPrompt($name, $shortDescription, $scheduleName, $scheduleType, $elements, $description);
+        }
+
+        if ($additionalInstructions) {
+            $prompt .= "\n\nAdditional instructions: {$additionalInstructions}";
         }
 
         $data = self::sendRequest($prompt);

@@ -1370,6 +1370,36 @@ class EventController extends Controller
         }
     }
 
+    public function getEventDetailsPrompt(Request $request, $subdomain)
+    {
+        if (! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $role->isEnterprise()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'elements' => 'required|array|min:1',
+            'elements.*' => 'in:category_id,short_description,description',
+            'name' => 'required|string',
+        ]);
+
+        $prompt = GeminiUtils::buildEventDetailsPrompt(
+            $request->input('name'),
+            $request->input('short_description'),
+            $request->input('schedule_name', $role->name),
+            $request->input('schedule_type', $role->type),
+            $request->input('elements'),
+            $request->input('description')
+        );
+
+        return response()->json(['success' => true, 'prompt' => $prompt]);
+    }
+
     public function generateEventDetails(Request $request, $subdomain)
     {
         if (! auth()->user()->isEditor($subdomain)) {
@@ -1392,6 +1422,7 @@ class EventController extends Controller
             'name' => 'required|string',
             'event_id' => 'nullable|string',
             'style_instructions' => 'nullable|string|max:500',
+            'custom_prompt' => 'nullable|string|max:5000',
             'starts_at' => 'nullable|string',
             'duration' => 'nullable|numeric',
             'category_id' => 'nullable|integer',
@@ -1412,7 +1443,9 @@ class EventController extends Controller
                     $request->input('schedule_name', $role->name),
                     $request->input('schedule_type', $role->type),
                     $textElements,
-                    $request->input('description')
+                    $request->input('description'),
+                    $request->input('custom_prompt'),
+                    $request->input('style_instructions')
                 );
 
                 if (empty($textResults)) {

@@ -5661,6 +5661,9 @@ function deleteFlyer(url, hash, token, element) {
     :showInstructions="true"
     :errorMessage="__('messages.ai_details_generation_failed')"
     :partialErrorMessage="__('messages.ai_flyer_generation_failed')"
+    promptEndpoint="{{ url('/'.$subdomain.'/get-event-details-prompt') }}"
+    :instructionsLabel="__('messages.ai_additional_instructions')"
+    :instructionsPlaceholder="__('messages.ai_additional_instructions_placeholder')"
 />
 
 <script {!! nonce_attr() !!}>
