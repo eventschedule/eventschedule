@@ -550,6 +550,8 @@ if (config('app.is_nexus')) {
         Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
         Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
         Route::get('/selfhost', [MarketingController::class, 'selfHost'])->name('marketing.selfhost');
+        Route::get('/self-host-event-schedule', fn () => redirect()->route('marketing.selfhost', [], 301));
+        Route::get('/self-host-event-schedule/', fn () => redirect()->route('marketing.selfhost', [], 301));
         Route::get('/saas', [MarketingController::class, 'saas'])->name('marketing.saas');
         Route::get('/docs', [MarketingController::class, 'docsIndex'])->name('marketing.docs');
         // User Guide (at root level)
@@ -707,6 +709,8 @@ if (config('app.is_nexus')) {
             Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
             Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
             Route::get('/selfhost', [MarketingController::class, 'selfHost'])->name('marketing.selfhost');
+            Route::get('/self-host-event-schedule', fn () => redirect()->route('marketing.selfhost', [], 301));
+            Route::get('/self-host-event-schedule/', fn () => redirect()->route('marketing.selfhost', [], 301));
             Route::get('/saas', [MarketingController::class, 'saas'])->name('marketing.saas');
             Route::get('/docs', [MarketingController::class, 'docsIndex'])->name('marketing.docs');
             // User Guide (at root level)
@@ -854,6 +858,8 @@ if (config('app.is_nexus')) {
             Route::get('/terms-of-service', fn () => redirect('https://eventschedule.com/terms-of-service', 301));
             Route::get('/self-hosting-terms-of-service', fn () => redirect('https://eventschedule.com/self-hosting-terms-of-service', 301));
             Route::get('/selfhost', fn () => redirect('https://eventschedule.com/selfhost', 301));
+            Route::get('/self-host-event-schedule', fn () => redirect('https://eventschedule.com/selfhost', 301));
+            Route::get('/self-host-event-schedule/', fn () => redirect('https://eventschedule.com/selfhost', 301));
             Route::get('/saas', fn () => redirect('https://eventschedule.com/saas', 301));
             Route::get('/docs', fn () => redirect('https://eventschedule.com/docs', 301));
             // User Guide
