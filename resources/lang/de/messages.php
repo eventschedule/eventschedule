@@ -417,6 +417,7 @@ return [
     'sold_reserved' => 'Verkauft/Reserviert',
     'guests' => 'Gäste',
     'scan_for_entry' => 'Scannen zum Eintreten',
+    'invalid_ticket_qr_code' => 'Ungültiger Ticket-QR-Code',
     'this_ticket_is_not_valid' => 'Dieses Ticket ist nicht gültig',
     'this_ticket_is_not_valid_for_today' => 'Dieses Ticket ist heute nicht gültig',
     'you_are_not_authorized_to_scan_this_ticket' => 'Sie sind nicht berechtigt, dieses Ticket zu scannen',

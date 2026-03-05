@@ -410,6 +410,7 @@ return [
     'sold_reserved' => 'مباع/محجوز',
     'guests' => 'الضيوف',
     'scan_for_entry' => 'امسح للدخول',
+    'invalid_ticket_qr_code' => 'رمز QR للتذكرة غير صالح',
     'this_ticket_is_not_valid' => 'هذه التذكرة غير صالحة',
     'this_ticket_is_not_valid_for_today' => 'هذه التذكرة غير صالحة لهذا اليوم',
     'you_are_not_authorized_to_scan_this_ticket' => 'غير مصرح لك بمسح هذه التذكرة',

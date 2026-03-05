@@ -259,6 +259,7 @@ return [
     'sold_reserved' => 'Verkocht/Gereserveerd',
     'guests' => 'Gasten',
     'scan_for_entry' => 'Scan voor toegang',
+    'invalid_ticket_qr_code' => 'Ongeldige ticket-QR-code',
     'this_ticket_is_not_valid' => 'Dit ticket is niet geldig',
     'this_ticket_is_not_valid_for_today' => 'Dit ticket is niet geldig voor vandaag',
     'you_are_not_authorized_to_scan_this_ticket' => 'Je bent niet geautoriseerd om dit ticket te scannen',

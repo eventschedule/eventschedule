@@ -133,11 +133,26 @@
                 onScanSuccess(decodedText, decodedResult) {
                     this.qrScanner.clear();
                     this.scanResult = decodedText;
+                    this.errorMessage = null;
 
+                    let url;
+                    try {
+                        url = new URL(decodedText);
+                    } catch (e) {
+                        this.errorMessage = @json(__('messages.invalid_ticket_qr_code'));
+                        return;
+                    }
+                    if (!/^\/ticket\/view\/[^/]+\/[^/]+/.test(url.pathname)) {
+                        this.errorMessage = @json(__('messages.invalid_ticket_qr_code'));
+                        return;
+                    }
+
+                    const scanUrl = window.location.origin + url.pathname;
                     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-                    fetch(decodedText, {
+                    fetch(scanUrl, {
                         method: 'POST',
+                        credentials: 'same-origin',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': token

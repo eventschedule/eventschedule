@@ -473,6 +473,7 @@ return [
     'attendee' => 'Osaleja',
     'guests' => 'Külalised',
     'scan_for_entry' => 'Skanni sisenemiseks',
+    'invalid_ticket_qr_code' => 'Kehtetu piletite QR-kood',
     'this_ticket_is_not_valid' => 'See pilet ei kehti',
     'this_ticket_is_not_valid_for_today' => 'See pilet täna ei kehti',
     'you_are_not_authorized_to_scan_this_ticket' => 'Teil ei ole õigust seda piletit skannida',

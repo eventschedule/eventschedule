@@ -228,6 +228,7 @@ return [
     'sold_reserved' => 'נמכר/שמור',
     'guests' => 'אורחים',
     'scan_for_entry' => 'סרוק לכניסה',
+    'invalid_ticket_qr_code' => 'קוד QR של הכרטיס לא חוקי',
     'this_ticket_is_not_valid' => 'כרטיס זה לא חוקי',
     'this_ticket_is_not_valid_for_today' => 'כרטיס זה לא חוקי להיום',
     'you_are_not_authorized_to_scan_this_ticket' => 'אין לך הרשאה לסרוק כרטיס זה',

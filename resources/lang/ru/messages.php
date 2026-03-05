@@ -474,6 +474,7 @@ return [
     'attendee' => 'Посетитель',
     'guests' => 'Гости',
     'scan_for_entry' => 'Сканировать для входа',
+    'invalid_ticket_qr_code' => 'Недействительный QR-код билета',
     'this_ticket_is_not_valid' => 'Этот билет недействителен',
     'this_ticket_is_not_valid_for_today' => 'Этот билет не действителен на сегодня',
     'you_are_not_authorized_to_scan_this_ticket' => 'У вас нет прав для сканирования этого билета.',
