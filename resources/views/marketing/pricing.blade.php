@@ -59,7 +59,7 @@
                 "price": "15.00",
                 "priceCurrency": "USD",
                 "billingIncrement": "MON",
-                "description": "Everything in Pro plus custom domains, private events, AI event parsing, WhatsApp event creation, email scheduling, agenda scanning, AI flyer generation, AI style generation, AI details generation, availability management, multiple team members, 1,000 newsletter emails per month, and priority support.",
+                "description": "Everything in Pro plus custom domains, private events, AI event parsing, WhatsApp event creation, email scheduling, agenda scanning, AI-powered content generation, availability management, multiple team members, 1,000 newsletter emails per month, and priority support.",
                 "availability": "https://schema.org/InStock",
                 "priceSpecification": [
                     {
@@ -293,14 +293,6 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-600 dark:text-gray-300">Online events</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg aria-hidden="true" class="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
                             <span class="text-gray-600 dark:text-gray-300">Free event registration</span>
                         </li>
                         <li class="flex items-start gap-3">
@@ -470,14 +462,6 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-600 dark:text-gray-300">Sale notification emails</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <div class="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg aria-hidden="true" class="w-3 h-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
                             <span class="text-gray-600 dark:text-gray-300">Sales CSV export</span>
                         </li>
                         <li class="flex items-start gap-3">
@@ -591,23 +575,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <span class="text-gray-600 dark:text-gray-300">AI flyer generation</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <div class="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg aria-hidden="true" class="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <span class="text-gray-600 dark:text-gray-300">AI style generation</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <div class="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg aria-hidden="true" class="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <span class="text-gray-600 dark:text-gray-300">AI details generation</span>
+                            <span class="text-gray-600 dark:text-gray-300">AI-powered content generation</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <div class="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">

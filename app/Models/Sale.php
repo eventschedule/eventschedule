@@ -64,13 +64,27 @@ class Sale extends Model
                         ->where('id', '!=', $sale->id)
                         ->where('status', '!=', 'paid')
                         ->update(['status' => 'paid']);
+
+                    // Clear waitlist entries for guest emails (raw update above skips booted hooks)
+                    $guestEmails = Sale::where('group_id', $sale->group_id)
+                        ->where('id', '!=', $sale->id)
+                        ->pluck('email');
+                    if ($guestEmails->isNotEmpty()) {
+                        TicketWaitlist::where('event_id', $sale->event_id)
+                            ->where('event_date', $sale->event_date)
+                            ->whereIn('email', $guestEmails)
+                            ->whereIn('status', ['waiting', 'notified'])
+                            ->update(['status' => 'purchased']);
+                    }
                 }
             }
 
             if ($sale->isDirty('status') && in_array($sale->status, ['cancelled', 'refunded', 'expired'])) {
                 if ($sale->payment_method === 'rsvp') {
                     $sale->event->updateRsvpSold($sale->event_date, -1);
-                    AnalyticsEventsDaily::decrementSale($sale->event_id, 0);
+                    if (! $sale->group_id || $sale->isPrimarySale()) {
+                        AnalyticsEventsDaily::decrementSale($sale->event_id, 0);
+                    }
                 } else {
                     foreach ($sale->saleTickets as $saleTicket) {
                         $saleTicket->ticket->updateSold($sale->event_date, -$saleTicket->quantity);

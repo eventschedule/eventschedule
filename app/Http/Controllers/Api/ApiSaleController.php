@@ -141,6 +141,10 @@ class ApiSaleController extends Controller
             ], 422);
         }
 
+        if ($sale->group_id && ! $sale->isPrimarySale()) {
+            return response()->json(['error' => 'Cannot modify non-primary grouped sales'], 403);
+        }
+
         $previousStatus = $sale->status;
         $actionPerformed = false;
 
@@ -165,10 +169,12 @@ class ApiSaleController extends Controller
                         $sale->status = 'refunded';
                         $sale->save();
 
-                        AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+                        if ($sale->payment_method !== 'rsvp') {
+                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
 
-                        if ($sale->discount_amount > 0) {
-                            AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                            if ($sale->discount_amount > 0) {
+                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                            }
                         }
                     });
                     $actionPerformed = true;
@@ -184,7 +190,7 @@ class ApiSaleController extends Controller
                     });
                     $actionPerformed = true;
 
-                    if ($wasPaid) {
+                    if ($wasPaid && $sale->payment_method !== 'rsvp') {
                         AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
 
                         if ($sale->discount_amount > 0) {
@@ -247,6 +253,10 @@ class ApiSaleController extends Controller
             return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
         }
 
+        if ($sale->group_id && ! $sale->isPrimarySale()) {
+            return response()->json(['error' => 'Cannot delete non-primary grouped sales'], 403);
+        }
+
         $previousStatus = $sale->status;
 
         DB::transaction(function () use ($sale) {
@@ -256,15 +266,23 @@ class ApiSaleController extends Controller
                 $sale->status = 'cancelled';
                 $sale->save();
 
-                AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+                if ($sale->payment_method !== 'rsvp') {
+                    AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
 
-                if ($sale->discount_amount > 0) {
-                    AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                    if ($sale->discount_amount > 0) {
+                        AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                    }
                 }
             }
 
             $sale->is_deleted = true;
             $sale->save();
+
+            if ($sale->group_id && $sale->isPrimarySale()) {
+                Sale::where('group_id', $sale->group_id)
+                    ->where('id', '!=', $sale->id)
+                    ->update(['is_deleted' => true]);
+            }
         });
 
         AuditService::log(AuditService::SALE_CHECKIN, auth()->id(), 'Sale', $sale->id,
