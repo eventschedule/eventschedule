@@ -1326,7 +1326,7 @@ return [
     'view_notifications' => 'Просмотр уведомлений',
     'search_placeholder' => 'Поиск...',
 
-    // Misc AP/CP strings
+    // Misc AP/GP strings
     'placeholder_city' => 'Нью-Йорк',
     'drop_files_here' => 'Перетащите сюда файлы',
     'failed_to_delete_image' => 'Не удалось удалить изображение',
@@ -2532,4 +2532,10 @@ return [
     'save_schedule_first_for_feeds' => 'Сначала сохраните расписание, чтобы увидеть URL-адреса лент.',
     'copy_ical_feed' => 'Копировать iCal-ленту',
     'copy_rss_feed' => 'Копировать RSS-ленту',
+    'individual_tickets' => 'Индивидуальные билеты',
+    'individual_tickets_description' => 'Соберите данные каждого участника отдельно. Каждый участник получит собственное подтверждение и QR-код.',
+    'guest_information' => 'Информация о госте',
+    'guest_n' => 'Гость :n',
+    'number_of_guests' => 'Количество гостей',
+    'you' => 'Вы',
 ];

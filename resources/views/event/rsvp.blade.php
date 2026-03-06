@@ -12,7 +12,7 @@
   </style>
   <script src="{{ asset('vendor/intl-tel-input/js/intlTelInput.min.js') }}" {!! nonce_attr() !!}></script>
   @endif
-  @if (\App\Utils\TurnstileUtils::isEnabled())
+  @if (\App\Utils\TurnstileUtils::isActiveForRequest())
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer {!! nonce_attr() !!}></script>
   @endif
   <script {!! nonce_attr() !!}>
@@ -33,13 +33,16 @@
                     requirePhone: @json((bool) $event->require_phone),
                     countryCodePhone: @json((bool) $event->country_code_phone),
                     password: @json(old('password', '')),
-                    turnstileEnabled: @json(\App\Utils\TurnstileUtils::isEnabled()),
+                    turnstileEnabled: @json(\App\Utils\TurnstileUtils::isActiveForRequest()),
                     turnstileSiteKey: @json(\App\Utils\TurnstileUtils::getSiteKey()),
                     turnstileToken: '',
                     turnstileWidgetId: null,
                     isSubmitting: false,
                     rsvpFull: @json($event->isRsvpFull($date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d'))),
                     showPassword: false,
+                    individualTickets: @json((bool) $event->individual_tickets),
+                    rsvpQuantity: 1,
+                    guests: [],
                 };
             },
             created() {
@@ -107,17 +110,46 @@
             },
             computed: {
                 canSubmit() {
+                    if (this.rsvpFull) return false;
+                    if (this.showGuestForms) {
+                        return this.guests.every(g => g.name.trim() !== '' && g.email.trim() !== '' && (!this.requirePhone || g.phone.trim() !== ''));
+                    }
                     if (this.requirePhone && this.phone.trim() === '') return false;
-                    return this.name.trim() !== '' && this.email.trim() !== '' && !this.rsvpFull;
+                    return this.name.trim() !== '' && this.email.trim() !== '';
                 },
                 hasEventCustomFields() {
                     return this.eventCustomFields && Object.keys(this.eventCustomFields).length > 0;
+                },
+                showGuestForms() {
+                    return this.individualTickets && this.rsvpQuantity > 1;
+                },
+                maxRsvpQuantity() {
+                    const remaining = @json($event->rsvp_limit ? $event->rsvpRemaining($date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d')) : null);
+                    const max = remaining !== null ? Math.min(20, remaining) : 20;
+                    return Math.max(1, max);
+                },
+            },
+            watch: {
+                rsvpQuantity(val) {
+                    this.rebuildGuests();
                 },
             },
             methods: {
                 hideForm() {
                     window.dispatchEvent(new CustomEvent('hide-event-form'));
                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+                rebuildGuests() {
+                    const qty = parseInt(this.rsvpQuantity) || 1;
+                    const newGuests = [];
+                    for (let i = 0; i < qty; i++) {
+                        if (i < this.guests.length) {
+                            newGuests.push({ name: this.guests[i].name, email: this.guests[i].email, phone: this.guests[i].phone });
+                        } else {
+                            newGuests.push({ name: i === 0 ? this.name : '', email: i === 0 ? this.email : '', phone: i === 0 ? this.phone : '' });
+                        }
+                    }
+                    this.guests = newGuests;
                 },
                 validateForm(e) {
                     if (!this.canSubmit) {
@@ -151,6 +183,7 @@
         <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
         <input type="hidden" name="event_date" value="{{ $date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d') }}">
         <input type="hidden" name="subdomain" value="{{ $subdomain }}">
+        <div class="hidden"><input type="text" name="website" autocomplete="off" tabindex="-1"></div>
         @if (request()->embed)
         <input type="hidden" name="embed" value="true">
         @endif
@@ -162,6 +195,19 @@
         </div>
         @endif
 
+        @if ($event->individual_tickets)
+        <div class="mb-6">
+            <label for="rsvp_quantity" class="text-gray-900 dark:text-gray-100">{{ __('messages.number_of_guests') }}</label>
+            <select id="rsvp_quantity" name="rsvp_quantity" v-model="rsvpQuantity"
+                class="mt-1 block w-32 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                <template v-for="n in maxRsvpQuantity">
+                    <option :value="n">@{{ n }}</option>
+                </template>
+            </select>
+        </div>
+        @endif
+
+        <div v-show="!showGuestForms">
         <div class="mb-6">
             <label for="name" class="text-gray-900 dark:text-gray-100">{{ __('messages.name') . ' *' }}</label>
             <input type="text" name="name" id="name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
@@ -222,6 +268,63 @@
                 v-model="phone" :required="requirePhone" autocomplete="tel" />
             @endif
             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+        </div>
+        </div>
+
+        <!-- Per-Guest Forms (Individual Tickets for RSVP) -->
+        <div v-if="showGuestForms">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.guest_information') }}</h3>
+            <div v-for="(guest, gIndex) in guests" :key="gIndex" class="mb-4 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-600">
+                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                    {{ __('messages.guest_n', ['n' => '']) }}@{{ gIndex + 1 }}
+                    <span v-if="gIndex === 0" class="text-xs text-gray-500 dark:text-gray-400"> - {{ __('messages.you') }}</span>
+                </h4>
+                <div class="mb-3">
+                    <label :for="'guest_name_' + gIndex" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.name') }} *</label>
+                    <input type="text" :id="'guest_name_' + gIndex" v-model="guest.name" required
+                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm" />
+                    <input type="hidden" :name="'guests[' + gIndex + '][name]'" :value="guest.name">
+                </div>
+                <div class="mb-3">
+                    <label :for="'guest_email_' + gIndex" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.email') }} *</label>
+                    <input type="email" :id="'guest_email_' + gIndex" v-model="guest.email" required
+                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm" />
+                    <input type="hidden" :name="'guests[' + gIndex + '][email]'" :value="guest.email">
+                </div>
+                <div class="mb-3" v-if="askPhone">
+                    <label :for="'guest_phone_' + gIndex" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
+                    <input type="tel" :id="'guest_phone_' + gIndex" v-model="guest.phone" :required="requirePhone"
+                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm" />
+                    <input type="hidden" :name="'guests[' + gIndex + '][phone]'" :value="guest.phone">
+                </div>
+
+                @if (! auth()->check() && config('app.hosted') && ! request()->embed)
+                <div v-if="gIndex === 0" class="mt-3">
+                    <div class="flex items-center">
+                        <input id="create_account_rsvp_guest" name="create_account" type="checkbox"
+                            v-model="createAccount" value="1"
+                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                        <label for="create_account_rsvp_guest" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                            {{ __('messages.create_account') }}
+                        </label>
+                    </div>
+                    <div class="mt-3" v-if="createAccount">
+                        <label for="password_rsvp_guest" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.password') }} *</label>
+                        <div class="relative mt-1">
+                            <input :type="showPassword ? 'text' : 'password'" name="password" id="password_rsvp_guest" class="block w-full pe-10 text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+                                v-model="password" required autocomplete="new-password" />
+                            <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                <svg v-show="!showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                <svg v-show="showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            </div>
+            <input type="hidden" name="name" :value="guests.length > 0 ? guests[0].name : name">
+            <input type="hidden" name="email" :value="guests.length > 0 ? guests[0].email : email">
+            <input type="hidden" name="phone" :value="guests.length > 0 ? guests[0].phone : phone">
         </div>
 
         <!-- Event-level Custom Fields -->

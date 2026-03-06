@@ -39,11 +39,14 @@ class Sale extends Model
         'promo_code_id',
         'discount_amount',
         'feedback_sent_at',
+        'group_id',
     ];
 
     protected $casts = [
         'feedback_sent_at' => 'datetime',
     ];
+
+    protected static bool $cascadingGroup = false;
 
     protected static function booted()
     {
@@ -54,6 +57,14 @@ class Sale extends Model
                     ->where('email', $sale->email)
                     ->whereIn('status', ['waiting', 'notified'])
                     ->update(['status' => 'purchased']);
+
+                // Cascade paid status to grouped sales
+                if ($sale->group_id && $sale->isPrimarySale()) {
+                    Sale::where('group_id', $sale->group_id)
+                        ->where('id', '!=', $sale->id)
+                        ->where('status', '!=', 'paid')
+                        ->update(['status' => 'paid']);
+                }
             }
 
             if ($sale->isDirty('status') && in_array($sale->status, ['cancelled', 'refunded', 'expired'])) {
@@ -72,7 +83,27 @@ class Sale extends Model
                         ->decrement('times_used');
                 }
 
-                NotifyWaitlist::dispatch($sale->event_id, $sale->event_date);
+                // Only dispatch waitlist notification from primary or ungrouped sales
+                if (! $sale->group_id || $sale->isPrimarySale()) {
+                    NotifyWaitlist::dispatch($sale->event_id, $sale->event_date);
+                }
+
+                // Cascade cancel/refund/expired to grouped sales
+                if ($sale->group_id && $sale->isPrimarySale() && ! static::$cascadingGroup) {
+                    static::$cascadingGroup = true;
+                    try {
+                        $groupedSales = Sale::where('group_id', $sale->group_id)
+                            ->where('id', '!=', $sale->id)
+                            ->whereNotIn('status', ['cancelled', 'refunded', 'expired'])
+                            ->get();
+                        foreach ($groupedSales as $groupSale) {
+                            $groupSale->status = $sale->status;
+                            $groupSale->save();
+                        }
+                    } finally {
+                        static::$cascadingGroup = false;
+                    }
+                }
             }
         });
     }
@@ -100,6 +131,16 @@ class Sale extends Model
     public function feedback()
     {
         return $this->hasOne(EventFeedback::class);
+    }
+
+    public function groupedSales()
+    {
+        return $this->hasMany(Sale::class, 'group_id', 'group_id');
+    }
+
+    public function isPrimarySale()
+    {
+        return $this->group_id && $this->group_id === $this->id;
     }
 
     public function isRsvp()

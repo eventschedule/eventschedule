@@ -56,6 +56,17 @@ class TicketCheckoutRequest extends FormRequest
             $rules['password'] = ['required', 'string', 'min:8'];
         }
 
+        // Individual tickets: validate guest data
+        if ($event && $event->individual_tickets && $this->has('guests') && is_array($this->guests) && count($this->guests) > 1) {
+            $rules['guests.*.name'] = ['required', 'string', 'max:255'];
+            $rules['guests.*.email'] = ['required', 'string', 'email', 'max:255'];
+            if ($event->ask_phone) {
+                $rules['guests.*.phone'] = $event->require_phone
+                    ? ['required', 'string', 'max:50']
+                    : ['nullable', 'string', 'max:50'];
+            }
+        }
+
         return $rules;
     }
 }

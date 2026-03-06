@@ -35,6 +35,16 @@
             </p>
             @endif
 
+            @if (!empty($groupedSales) && $groupedSales->count() > 0)
+            <hr style="border: none; border-top: 1px solid #eee; margin: 15px 0;">
+            <p style="margin: 0 0 5px 0; font-size: 14px; color: #333; font-weight: bold;">{{ __('messages.guests') }}:</p>
+            @foreach ($groupedSales as $guestSale)
+            <p style="margin: 0 0 3px 0; font-size: 13px; color: #666;">
+                {{ $guestSale->name }} ({{ $guestSale->email }})@if ($guestSale->phone) - {{ $guestSale->phone }}@endif
+            </p>
+            @endforeach
+            @endif
+
             <hr style="border: none; border-top: 1px solid #eee; margin: 15px 0;">
 
             @foreach ($sale->saleTickets as $saleTicket)

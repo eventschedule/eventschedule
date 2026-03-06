@@ -1311,7 +1311,7 @@ return [
     'view_notifications' => 'Ver notificaciones',
     'search_placeholder' => 'Buscar...',
 
-    // Misc AP/CP strings
+    // Misc AP/GP strings
     'placeholder_city' => 'Nueva York',
     'drop_files_here' => 'Suelta los archivos aqui',
     'failed_to_delete_image' => 'Error al eliminar la imagen',
@@ -2513,4 +2513,10 @@ return [
     'save_schedule_first_for_feeds' => 'Guarda el calendario primero para ver las URLs de los feeds.',
     'copy_ical_feed' => 'Copiar feed iCal',
     'copy_rss_feed' => 'Copiar feed RSS',
+    'individual_tickets' => 'Entradas individuales',
+    'individual_tickets_description' => 'Recopila los datos de cada asistente por separado. Cada asistente recibe su propia confirmación y código QR.',
+    'guest_information' => 'Información del invitado',
+    'guest_n' => 'Invitado :n',
+    'number_of_guests' => 'Número de invitados',
+    'you' => 'Tú',
 ];

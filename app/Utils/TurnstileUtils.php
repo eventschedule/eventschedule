@@ -16,6 +16,23 @@ class TurnstileUtils
     }
 
     /**
+     * Check if Turnstile should be active for the current request.
+     * Disabled on custom domains since the site key is registered for eventschedule.com.
+     */
+    public static function isActiveForRequest(): bool
+    {
+        if (! self::isEnabled()) {
+            return false;
+        }
+
+        if (request()->attributes->get('custom_domain_host')) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Get the site key for frontend use
      */
     public static function getSiteKey(): ?string

@@ -1318,7 +1318,7 @@ return [
     'view_notifications' => 'Meldingen bekijken',
     'search_placeholder' => 'Zoeken...',
 
-    // Misc AP/CP strings
+    // Misc AP/GP strings
     'placeholder_city' => 'Amsterdam',
     'drop_files_here' => 'Sleep bestanden hierheen',
     'failed_to_delete_image' => 'Afbeelding verwijderen mislukt',
@@ -2512,4 +2512,10 @@ return [
     'save_schedule_first_for_feeds' => 'Sla de agenda eerst op om de feed-URL\'s te zien.',
     'copy_ical_feed' => 'iCal-feed kopiëren',
     'copy_rss_feed' => 'RSS-feed kopiëren',
+    'individual_tickets' => 'Individuele tickets',
+    'individual_tickets_description' => 'Verzamel gegevens van elke deelnemer afzonderlijk. Elke deelnemer ontvangt een eigen bevestiging en QR-code.',
+    'guest_information' => 'Gastgegevens',
+    'guest_n' => 'Gast :n',
+    'number_of_guests' => 'Aantal gasten',
+    'you' => 'Jij',
 ];

@@ -67,6 +67,10 @@ class SendFeedbackRequests extends Command
                     ->where('is_deleted', false)
                     ->whereNull('feedback_sent_at')
                     ->whereDoesntHave('feedback')
+                    ->where(function ($q) {
+                        $q->whereNull('group_id')
+                            ->orWhereColumn('group_id', 'id');
+                    })
                     ->get();
 
                 foreach ($sales as $sale) {

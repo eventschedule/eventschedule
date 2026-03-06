@@ -1315,7 +1315,7 @@ return [
     'view_notifications' => 'Benachrichtigungen anzeigen',
     'search_placeholder' => 'Suchen...',
 
-    // Misc AP/CP strings
+    // Misc AP/GP strings
     'placeholder_city' => 'Berlin',
     'drop_files_here' => 'Dateien hier ablegen',
     'failed_to_delete_image' => 'Bild konnte nicht gelöscht werden',
@@ -2518,4 +2518,10 @@ return [
     'save_schedule_first_for_feeds' => 'Speichern Sie den Zeitplan zuerst, um die Feed-URLs zu sehen.',
     'copy_ical_feed' => 'iCal-Feed kopieren',
     'copy_rss_feed' => 'RSS-Feed kopieren',
+    'individual_tickets' => 'Einzeltickets',
+    'individual_tickets_description' => 'Erfassen Sie die Daten jedes Teilnehmers einzeln. Jeder Teilnehmer erhält eine eigene Bestätigung und einen eigenen QR-Code.',
+    'guest_information' => 'Gastinformationen',
+    'guest_n' => 'Gast :n',
+    'number_of_guests' => 'Anzahl der Gäste',
+    'you' => 'Sie',
 ];

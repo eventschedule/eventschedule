@@ -69,6 +69,9 @@
     <link rel="alternate" hreflang="{{ $lang }}" href="{{ $basePath }}?lang={{ $lang }}">
     @endforeach
     <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">
+    @if(isset($keywords))
+    <meta name="keywords" content="{{ $keywords }}">
+    @endif
     <meta name="robots" content="{{ $robots ?? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' }}">
     <meta name="author" content="Event Schedule">
 
@@ -211,6 +214,9 @@
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
         } elseif (str_ends_with($path, '-alternative')) {
             $breadcrumbs[] = ['name' => 'Compare', 'url' => url('/compare')];
+            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+        } elseif (str_ends_with($path, '-replacement')) {
+            $breadcrumbs[] = ['name' => 'Replace', 'url' => url('/replace')];
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
         } elseif (str_starts_with($path, 'blog/')) {
             $breadcrumbs[] = ['name' => 'Blog', 'url' => url('/blog')];

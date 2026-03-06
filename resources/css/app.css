@@ -81,4 +81,4 @@
 
 /* Keep visited links blue (prevent browser default purple) */
 a.text-blue-600:visited { color: rgb(37 99 235); }
-.dark a.text-blue-400:visited { color: rgb(96 165 250); }
+.dark a.text-blue-600:visited { color: rgb(96 165 250); }

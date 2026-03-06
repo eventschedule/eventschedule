@@ -1335,7 +1335,7 @@ return [
     'view_notifications' => 'Vezi notificările',
     'search_placeholder' => 'Caută...',
 
-    // Misc AP/CP strings
+    // Misc AP/GP strings
     'placeholder_city' => 'București',
     'drop_files_here' => 'Plasează fișierele aici',
     'failed_to_delete_image' => 'Ștergerea imaginii a eșuat',
@@ -2553,4 +2553,10 @@ return [
     'save_schedule_first_for_feeds' => 'Salvează programul mai întâi pentru a vedea URL-urile fluxurilor.',
     'copy_ical_feed' => 'Copiază fluxul iCal',
     'copy_rss_feed' => 'Copiază fluxul RSS',
+    'individual_tickets' => 'Bilete individuale',
+    'individual_tickets_description' => 'Colectează datele fiecărui participant separat. Fiecare participant primește propria confirmare și cod QR.',
+    'guest_information' => 'Informații despre oaspete',
+    'guest_n' => 'Oaspete :n',
+    'number_of_guests' => 'Număr de oaspeți',
+    'you' => 'Tu',
 ];

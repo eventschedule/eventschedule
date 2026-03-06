@@ -1313,7 +1313,7 @@ return [
     'view_notifications' => 'צפה בהתראות',
     'search_placeholder' => 'חיפוש...',
 
-    // Misc AP/CP strings
+    // Misc AP/GP strings
     'placeholder_city' => 'תל אביב',
     'drop_files_here' => 'שחרר קבצים כאן',
     'failed_to_delete_image' => 'מחיקת התמונה נכשלה',
@@ -2507,4 +2507,10 @@ return [
     'save_schedule_first_for_feeds' => 'שמור את לוח הזמנים קודם כדי לראות את כתובות הפיד.',
     'copy_ical_feed' => 'העתק פיד iCal',
     'copy_rss_feed' => 'העתק פיד RSS',
+    'individual_tickets' => 'כרטיסים אישיים',
+    'individual_tickets_description' => 'אסוף פרטים עבור כל משתתף בנפרד. כל משתתף מקבל אישור וקוד QR משלו.',
+    'guest_information' => 'פרטי האורח',
+    'guest_n' => 'אורח :n',
+    'number_of_guests' => 'מספר האורחים',
+    'you' => 'אתה',
 ];

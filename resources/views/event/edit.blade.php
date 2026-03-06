@@ -2929,6 +2929,26 @@
                                 </div>
                                 </div>
 
+                                <!-- Individual Tickets -->
+                                <div v-show="activeTicketTab === 'options' || event.rsvp_enabled">
+                                <div class="mt-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input id="individual_tickets_checkbox" type="checkbox"
+                                                v-model="event.individual_tickets"
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="individual_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.individual_tickets') }}
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.individual_tickets_description') }}</p>
+                                    <input type="hidden" name="individual_tickets" :value="event.individual_tickets ? 1 : 0">
+                                </div>
+                                </div>
+
                             </div>
 
                             <hr class="my-4 border-gray-200 dark:border-gray-700">
@@ -3620,6 +3640,7 @@
           ask_phone: {{ $event->ask_phone ? 'true' : 'false' }},
           require_phone: {{ $event->require_phone ? 'true' : 'false' }},
           country_code_phone: {{ $event->country_code_phone ? 'true' : 'false' }},
+          individual_tickets: {{ $event->individual_tickets ? 'true' : 'false' }},
         },
         ticketMode: @json($event->tickets_enabled ? 'tickets' : ($event->rsvp_enabled ? 'rsvp' : 'external')),
         venues: @json($venues),

@@ -35,7 +35,9 @@
   html[data-es-view="list"] #toggle-calendar-btn { background-color: transparent !important; color: inherit !important; }
   html[data-es-view="calendar"] #toggle-calendar-btn { background-color: {{ $accentColor }} !important; color: {{ $contrastColor }} !important; }
   html[data-es-view="calendar"] #toggle-list-btn { background-color: transparent !important; color: inherit !important; }
-  html[data-es-view="list"] #calendar-panel-wrapper {
+  html[data-es-view="list"] #month-year-title { display: none !important; }
+html[data-es-view="list"] #month-nav-controls { display: none !important; }
+html[data-es-view="list"] #calendar-panel-wrapper {
       background: transparent !important;
       backdrop-filter: none !important;
       border-radius: 0 !important;

@@ -32,7 +32,11 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                             @foreach ($sales as $sale)
-                            <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                            @php
+                                $isGroupedNonPrimary = $sale->group_id && $sale->group_id !== $sale->id;
+                                $isGroupedPrimary = $sale->group_id && $sale->group_id === $sale->id;
+                            @endphp
+                            <tr class="{{ $isGroupedNonPrimary ? 'bg-gray-50 dark:bg-gray-800/50' : 'bg-white dark:bg-gray-800' }} hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                                 @php
                                     $hasEventCustomFields = $sale->event->custom_fields && count($sale->event->custom_fields) > 0;
                                     $hasTicketCustomFields = false;
@@ -79,7 +83,18 @@
                                             </button>
                                         @endif
                                         <div class="flex flex-col">
-                                            <span class="font-semibold">{{ $sale->name }}</span>
+                                            <div class="flex items-center gap-2">
+                                                @if ($isGroupedNonPrimary)
+                                                <span class="text-gray-400 dark:text-gray-500">&#8627;</span>
+                                                @endif
+                                                <span class="font-semibold">{{ $sale->name }}</span>
+                                                @if ($isGroupedPrimary)
+                                                @php $groupCount = \App\Models\Sale::where('group_id', $sale->id)->count(); @endphp
+                                                <span class="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
+                                                    {{ $groupCount }} {{ __('messages.guests') }}
+                                                </span>
+                                                @endif
+                                            </div>
                                             <a href="mailto:{{ $sale->email }}" class="text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8] hover:underline text-xs">{{ $sale->email }}</a>
                                             @if ($sale->phone)
                                             <a href="tel:{{ $sale->phone }}" class="text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8] hover:underline text-xs">{{ $sale->phone }}</a>
@@ -93,7 +108,9 @@
                                     </a>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    @if ($sale->isRsvp())
+                                    @if ($isGroupedNonPrimary)
+                                    <span class="text-gray-400 dark:text-gray-500">-</span>
+                                    @elseif ($sale->isRsvp())
                                     <span class="font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.registered') }}</span>
                                     @else
                                     <span class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format($sale->payment_amount, 2, '.', ',') }}</span>
@@ -296,12 +313,27 @@
     <!-- Mobile List View -->
     <div class="md:hidden space-y-4">
         @foreach ($sales as $sale)
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow duration-200">
+        @php
+            $isGroupedNonPrimaryMobile = $sale->group_id && $sale->group_id !== $sale->id;
+            $isGroupedPrimaryMobile = $sale->group_id && $sale->group_id === $sale->id;
+        @endphp
+        <div class="{{ $isGroupedNonPrimaryMobile ? 'bg-gray-50 dark:bg-gray-800/50 ms-4 border-s-2 border-blue-300 dark:border-blue-700' : 'bg-white dark:bg-gray-800' }} rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow duration-200">
             <div class="space-y-4">
                 <!-- Header with Status -->
                 <div class="flex items-start justify-between">
                     <div class="flex-1">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ $sale->name }}</h3>
+                        <div class="flex items-center gap-2 mb-1">
+                            @if ($isGroupedNonPrimaryMobile)
+                            <span class="text-gray-400 dark:text-gray-500">&#8627;</span>
+                            @endif
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $sale->name }}</h3>
+                            @if ($isGroupedPrimaryMobile)
+                            @php $groupCountMobile = \App\Models\Sale::where('group_id', $sale->id)->count(); @endphp
+                            <span class="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
+                                {{ $groupCountMobile }} {{ __('messages.guests') }}
+                            </span>
+                            @endif
+                        </div>
                         <a href="mailto:{{ $sale->email }}" class="text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8] text-sm">{{ $sale->email }}</a>
                         @if ($sale->phone)
                         <br><a href="tel:{{ $sale->phone }}" class="text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8] text-sm">{{ $sale->phone }}</a>

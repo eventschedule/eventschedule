@@ -531,6 +531,19 @@
                     </span>
                 </a>
             </div>
+
+            <!-- Cross-link to Replace -->
+            <div class="max-w-3xl mx-auto mt-16 text-center p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Using general-purpose tools for events? See what Event Schedule can replace.
+                </p>
+                <a href="{{ route('marketing.replace') }}" class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors">
+                    View tools we replace
+                    <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
         </div>
     </section>
 

@@ -58,6 +58,7 @@ class Event extends Model
         'ask_phone',
         'require_phone',
         'country_code_phone',
+        'individual_tickets',
     ];
 
     protected $hidden = ['event_password'];
@@ -79,6 +80,7 @@ class Event extends Model
         'ask_phone' => 'boolean',
         'require_phone' => 'boolean',
         'country_code_phone' => 'boolean',
+        'individual_tickets' => 'boolean',
     ];
 
     protected static function boot()

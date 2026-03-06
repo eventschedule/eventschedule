@@ -1319,7 +1319,7 @@ return [
     'view_notifications' => 'Ver notificações',
     'search_placeholder' => 'Pesquisar...',
 
-    // Misc AP/CP strings
+    // Misc AP/GP strings
     'placeholder_city' => 'São Paulo',
     'drop_files_here' => 'Solte os arquivos aqui',
     'failed_to_delete_image' => 'Falha ao excluir imagem',
@@ -2512,4 +2512,10 @@ return [
     'save_schedule_first_for_feeds' => 'Guarde o calendário primeiro para ver os URLs dos feeds.',
     'copy_ical_feed' => 'Copiar feed iCal',
     'copy_rss_feed' => 'Copiar feed RSS',
+    'individual_tickets' => 'Bilhetes individuais',
+    'individual_tickets_description' => 'Recolha os dados de cada participante separadamente. Cada participante recebe a sua própria confirmação e código QR.',
+    'guest_information' => 'Informações do convidado',
+    'guest_n' => 'Convidado :n',
+    'number_of_guests' => 'Número de convidados',
+    'you' => 'Você',
 ];

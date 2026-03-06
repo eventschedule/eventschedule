@@ -238,7 +238,7 @@
     <div class="flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between gap-4">
 
         {{-- Month and Year Title: Always visible and positioned first (hidden in list view). --}}
-        <h1 v-show="currentView === 'calendar'" class="text-2xl font-semibold leading-6 flex-shrink-0 {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:block' }} text-gray-900 dark:text-gray-100">
+        <h1 id="month-year-title" v-show="currentView === 'calendar'" class="text-2xl font-semibold leading-6 flex-shrink-0 {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:block' }} text-gray-900 dark:text-gray-100" {!! ($eventLayout ?? 'calendar') === 'list' ? 'style="display:none"' : '' !!}>
             @if ($route === 'guest' && !request()->graphic)
             <time :datetime="monthYearDatetime" v-text="monthYearLabel"></time>
             @else
@@ -251,7 +251,7 @@
         <div class="flex {{ ($tab ?? '') == 'availability' ? 'flex-row flex-wrap items-center' : 'flex-col' }} md:flex-row md:flex-nowrap md:items-center md:ms-auto gap-3">
 
             {{-- Month Navigation Controls --}}
-            <div v-show="currentView === 'calendar'" class="flex items-center bg-white/95 dark:bg-gray-900/95 rounded-md shadow-sm {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:flex' }}">
+            <div id="month-nav-controls" v-show="currentView === 'calendar'" class="flex items-center bg-white/95 dark:bg-gray-900/95 rounded-md shadow-sm {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:flex' }}" {!! ($eventLayout ?? 'calendar') === 'list' ? 'style="display:none"' : '' !!}>
                 @if ($route === 'guest' && !request()->graphic)
                 <button @click="navigateMonth(-1)" class="flex h-11 w-14 items-center justify-center rounded-s-md border-s border-y border-gray-300 dark:border-gray-600 pe-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:pe-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700">
                     <span class="sr-only">{{ __('messages.previous_month') }}</span>
@@ -3548,7 +3548,7 @@ calendarApp.config.globalProperties.FileReader = FileReader;
 const calendarAppInstance = calendarApp.mount('#calendar-app');
 window.calendarVueApp = calendarAppInstance;
 
-// Update hero filters button visibility and badge (for CP/guest view)
+// Update hero filters button visibility and badge (for GP/guest view)
 function updateHeroFiltersButton() {
     const btn = document.getElementById('hero-filters-btn');
     const badge = document.getElementById('hero-filters-badge');

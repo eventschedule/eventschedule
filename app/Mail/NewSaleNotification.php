@@ -27,6 +27,8 @@ class NewSaleNotification extends Mailable
 
     protected $recipient;
 
+    protected $groupedSales;
+
     /**
      * Create a new message instance.
      */
@@ -38,6 +40,13 @@ class NewSaleNotification extends Mailable
         $this->recipient = $recipient;
 
         $this->sale->loadMissing('saleTickets.ticket');
+
+        // Load grouped guest sales for admin notification
+        if ($sale->group_id && $sale->group_id === $sale->id) {
+            $this->groupedSales = Sale::where('group_id', $sale->group_id)
+                ->where('id', '!=', $sale->id)
+                ->get();
+        }
     }
 
     /**
@@ -91,6 +100,7 @@ class NewSaleNotification extends Mailable
                 'salesUrl' => $salesUrl,
                 'total' => $total,
                 'paymentStatus' => __($statusKey),
+                'groupedSales' => $this->groupedSales,
                 'unsubscribeUrl' => $this->role ? route('role.unsubscribe', ['subdomain' => $this->role->subdomain]) : '',
             ]
         );

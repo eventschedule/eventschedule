@@ -51,6 +51,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 |---------|--------------|-------|
 | Remove Event Schedule branding | `$role->isWhiteLabeled()` / `$role->showBranding()` | White-label, removes "Powered by" |
 | Ticketing & QR code check-ins | `$event->isPro()` in views and controllers | Create ticket types, scan QR codes |
+| Individual tickets | Tied to ticketing gate, `$event->individual_tickets` | Collect per-attendee details; each guest gets own confirmation email and QR code |
 | Sell online via Stripe | Tied to ticketing gate | Stripe Connect payments, no platform fees |
 | Generate event graphics | `GraphicController`, `$role->isPro()` | Auto-generated shareable images |
 | REST API access | All `Api/*Controller.php`, `$role->isPro()` | Full CRUD API for events, schedules, sales, sub-schedules |

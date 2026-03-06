@@ -74,7 +74,7 @@ class TicketController extends Controller
         $query = $this->salesQuery($filter);
 
         $count = $query->count();
-        $sales = $query->orderBy('created_at', 'DESC')
+        $sales = $query->orderByRaw('COALESCE(group_id, id) DESC, id ASC')
             ->paginate(50, ['*'], 'page');
 
         if (request()->ajax()) {
@@ -207,7 +207,7 @@ class TicketController extends Controller
             fwrite($handle, "\xEF\xBB\xBF");
 
             // Header row
-            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Transaction Reference', 'Payment Method', 'Status', 'Date'];
+            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Transaction Reference', 'Payment Method', 'Status', 'Date', 'Group ID'];
             $headers = array_merge($headers, $customFieldNames);
             fputcsv($handle, $headers);
 
@@ -233,6 +233,7 @@ class TicketController extends Controller
                     $sale->payment_method,
                     $sale->status,
                     $sale->created_at->format('Y-m-d H:i'),
+                    $sale->group_id ? UrlUtils::encodeId($sale->group_id) : '',
                 ];
 
                 // Build custom field values
@@ -293,6 +294,10 @@ class TicketController extends Controller
 
     public function checkout(TicketCheckoutRequest $request, $subdomain)
     {
+        if ($request->filled('website')) {
+            return back();
+        }
+
         $event = Event::findOrFail(UrlUtils::decodeId($request->event_id));
 
         $role = Role::subdomain($subdomain)->firstOrFail();
@@ -454,47 +459,74 @@ class TicketController extends Controller
                     // Payment link mode: quantities selected on IN, SaleTickets created by webhook
                     $sale->payment_amount = 0;
                 } else {
-                    // Store ticket-level custom field values
-                    $ticketCustomValues = $request->input('ticket_custom_values', []);
+                    // Check if individual tickets mode is active
+                    $guests = $request->input('guests', []);
+                    $isIndividualTickets = $event->individual_tickets && count($guests) > 1;
 
-                    foreach ($request->tickets as $ticketId => $quantity) {
-                        if ($quantity > 0) {
-                            $ticketModel = $event->tickets()->findOrFail(UrlUtils::decodeId($ticketId));
-                            $ticketCustomFields = $ticketModel->custom_fields ?? [];
-
-                            $saleTicketData = [
-                                'sale_id' => $sale->id,
-                                'ticket_id' => UrlUtils::decodeId($ticketId),
-                                'quantity' => $quantity,
-                                'seats' => json_encode(array_fill(1, $quantity, null)),
-                            ];
-
-                            // Store ticket-level custom field values using stable indices
-                            // Fallback to iteration order for backward compatibility with fields without index
-                            $ticketFallbackIndex = 1;
-                            foreach ($ticketCustomFields as $fieldKey => $fieldConfig) {
-                                $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
-                                $ticketFallbackIndex++;
-                                if ($index >= 1 && $index <= 10) {
-                                    $value = $ticketCustomValues[$ticketId][$fieldKey] ?? null;
-                                    // Handle multiselect values (submitted as array)
-                                    if (is_array($value)) {
-                                        $value = implode(', ', array_map('trim', $value));
-                                    }
-                                    // Sanitize custom field values to prevent stored XSS
-                                    if ($value !== null) {
-                                        $value = trim(strip_tags($value));
-                                    }
-                                    $saleTicketData["custom_value{$index}"] = $value;
+                    if ($isIndividualTickets) {
+                        // Build flat list of ticket assignments for guests
+                        $ticketAssignments = [];
+                        $subtotal = 0;
+                        foreach ($request->tickets as $ticketId => $quantity) {
+                            if ($quantity > 0) {
+                                $decodedId = UrlUtils::decodeId($ticketId);
+                                $ticketModel = $event->tickets()->findOrFail($decodedId);
+                                $subtotal += $ticketModel->price * $quantity;
+                                for ($i = 0; $i < $quantity; $i++) {
+                                    $ticketAssignments[] = $decodedId;
                                 }
                             }
-
-                            $sale->saleTickets()->create($saleTicketData);
                         }
-                    }
 
-                    $subtotal = $sale->calculateTotal();
-                    $sale->payment_amount = $subtotal;
+                        // Primary sale gets the first ticket (qty=1)
+                        $sale->saleTickets()->create([
+                            'ticket_id' => $ticketAssignments[0],
+                            'quantity' => 1,
+                            'seats' => json_encode([1 => null]),
+                        ]);
+
+                        $sale->group_id = $sale->id;
+                        $sale->payment_amount = $subtotal;
+                    } else {
+                        // Standard flow: create SaleTickets with full quantities
+                        $ticketCustomValues = $request->input('ticket_custom_values', []);
+
+                        foreach ($request->tickets as $ticketId => $quantity) {
+                            if ($quantity > 0) {
+                                $ticketModel = $event->tickets()->findOrFail(UrlUtils::decodeId($ticketId));
+                                $ticketCustomFields = $ticketModel->custom_fields ?? [];
+
+                                $saleTicketData = [
+                                    'sale_id' => $sale->id,
+                                    'ticket_id' => UrlUtils::decodeId($ticketId),
+                                    'quantity' => $quantity,
+                                    'seats' => json_encode(array_fill(1, $quantity, null)),
+                                ];
+
+                                // Store ticket-level custom field values using stable indices
+                                $ticketFallbackIndex = 1;
+                                foreach ($ticketCustomFields as $fieldKey => $fieldConfig) {
+                                    $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
+                                    $ticketFallbackIndex++;
+                                    if ($index >= 1 && $index <= 10) {
+                                        $value = $ticketCustomValues[$ticketId][$fieldKey] ?? null;
+                                        if (is_array($value)) {
+                                            $value = implode(', ', array_map('trim', $value));
+                                        }
+                                        if ($value !== null) {
+                                            $value = trim(strip_tags($value));
+                                        }
+                                        $saleTicketData["custom_value{$index}"] = $value;
+                                    }
+                                }
+
+                                $sale->saleTickets()->create($saleTicketData);
+                            }
+                        }
+
+                        $subtotal = $sale->calculateTotal();
+                        $sale->payment_amount = $subtotal;
+                    }
 
                     // Apply promo code if provided
                     if ($request->promo_code) {
@@ -504,12 +536,64 @@ class TicketController extends Controller
                             ->first();
 
                         if ($promoCode && $promoCode->isValid()) {
-                            $discountAmount = $promoCode->calculateDiscount($sale->saleTickets);
+                            if ($isIndividualTickets) {
+                                // Calculate discount from all ticket selections
+                                $sale->load('saleTickets.ticket');
+                                $allSaleTickets = collect();
+                                foreach ($request->tickets as $ticketId => $quantity) {
+                                    if ($quantity > 0) {
+                                        $decodedId = UrlUtils::decodeId($ticketId);
+                                        $ticketModel = $event->tickets()->find($decodedId);
+                                        $fakeSaleTicket = new \App\Models\SaleTicket(['ticket_id' => $decodedId, 'quantity' => $quantity]);
+                                        $fakeSaleTicket->setRelation('ticket', $ticketModel);
+                                        $allSaleTickets->push($fakeSaleTicket);
+                                    }
+                                }
+                                $discountAmount = $promoCode->calculateDiscount($allSaleTickets);
+                            } else {
+                                $discountAmount = $promoCode->calculateDiscount($sale->saleTickets);
+                            }
                             if ($discountAmount > 0) {
                                 $sale->promo_code_id = $promoCode->id;
                                 $sale->discount_amount = $discountAmount;
                                 $sale->payment_amount = max(0, $subtotal - $discountAmount);
                                 $promoCode->increment('times_used');
+                            }
+                        }
+                    }
+
+                    // Create guest sales for individual tickets
+                    if ($isIndividualTickets) {
+                        for ($g = 1; $g < count($guests); $g++) {
+                            $guestData = $guests[$g];
+                            $guestSale = new Sale;
+                            $guestSale->name = strip_tags(trim($guestData['name'] ?? ''));
+                            $guestSale->email = strip_tags(trim($guestData['email'] ?? ''));
+                            $guestSale->phone = ! empty($guestData['phone']) ? strip_tags(trim($guestData['phone'])) : null;
+                            $guestSale->event_date = $sale->event_date;
+                            $guestSale->subdomain = $subdomain;
+                            $guestSale->event_id = $event->id;
+                            $guestSale->user_id = null;
+                            $guestSale->secret = strtolower(Str::random(32));
+                            $guestSale->payment_method = $sale->payment_method;
+                            $guestSale->payment_amount = 0;
+                            $guestSale->status = $sale->status ?? 'unpaid';
+                            $guestSale->group_id = $sale->id;
+
+                            // Copy event-level custom values from primary sale
+                            for ($cv = 1; $cv <= 10; $cv++) {
+                                $guestSale->{"custom_value{$cv}"} = $sale->{"custom_value{$cv}"};
+                            }
+
+                            $guestSale->save();
+
+                            // Assign ticket to guest
+                            if (isset($ticketAssignments[$g])) {
+                                $guestSale->saleTickets()->create([
+                                    'ticket_id' => $ticketAssignments[$g],
+                                    'quantity' => 1,
+                                    'seats' => json_encode([1 => null]),
+                                ]);
                             }
                         }
                     }
@@ -529,8 +613,15 @@ class TicketController extends Controller
 
         $total = $sale->payment_amount;
 
-        // Send email when sale is created
-        $this->sendTicketPurchaseEmail($sale, $event);
+        // Send emails
+        if ($event->individual_tickets && $sale->group_id) {
+            $groupedSales = Sale::where('group_id', $sale->id)->get();
+            foreach ($groupedSales as $groupSale) {
+                $this->sendTicketPurchaseEmail($groupSale, $event);
+            }
+        } else {
+            $this->sendTicketPurchaseEmail($sale, $event);
+        }
         $this->sendNewSaleNotification($sale, $event);
 
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'event_id:'.$event->id);
@@ -574,6 +665,10 @@ class TicketController extends Controller
 
     public function rsvp(Request $request, $subdomain)
     {
+        if ($request->filled('website')) {
+            return back();
+        }
+
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -591,7 +686,7 @@ class TicketController extends Controller
         $request->validate($rules);
 
         // Turnstile CAPTCHA validation
-        if (\App\Utils\TurnstileUtils::isEnabled()) {
+        if (\App\Utils\TurnstileUtils::isActiveForRequest()) {
             $request->validate([
                 'cf-turnstile-response' => 'required',
             ]);
@@ -657,7 +752,9 @@ class TicketController extends Controller
                 $event = Event::lockForUpdate()->find($event->id);
 
                 // Check capacity
-                if ($event->rsvp_limit && $event->rsvpSoldCount($request->event_date) >= $event->rsvp_limit) {
+                $rsvpQuantity = $event->individual_tickets ? max(1, (int) $request->input('rsvp_quantity', 1)) : 1;
+                $rsvpSoldCount = $event->rsvpSoldCount($request->event_date);
+                if ($event->rsvp_limit && ($rsvpSoldCount + $rsvpQuantity) > $event->rsvp_limit) {
                     throw new \Exception(__('messages.rsvp_full'));
                 }
 
@@ -727,8 +824,39 @@ class TicketController extends Controller
 
                 $sale->save();
 
+                // Individual RSVP: create guest sales
+                $guests = $request->input('guests', []);
+                if ($event->individual_tickets && $rsvpQuantity > 1 && count($guests) > 1) {
+                    $sale->group_id = $sale->id;
+                    $sale->save();
+
+                    for ($g = 1; $g < count($guests); $g++) {
+                        $guestData = $guests[$g];
+                        $guestSale = new Sale;
+                        $guestSale->name = strip_tags(trim($guestData['name'] ?? ''));
+                        $guestSale->email = strip_tags(trim($guestData['email'] ?? ''));
+                        $guestSale->phone = ! empty($guestData['phone']) ? strip_tags(trim($guestData['phone'])) : null;
+                        $guestSale->event_date = $sale->event_date;
+                        $guestSale->subdomain = $subdomain;
+                        $guestSale->event_id = $event->id;
+                        $guestSale->user_id = null;
+                        $guestSale->secret = strtolower(Str::random(32));
+                        $guestSale->payment_method = 'rsvp';
+                        $guestSale->payment_amount = 0;
+                        $guestSale->status = 'paid';
+                        $guestSale->group_id = $sale->id;
+
+                        // Copy event-level custom values from primary sale
+                        for ($cv = 1; $cv <= 10; $cv++) {
+                            $guestSale->{"custom_value{$cv}"} = $sale->{"custom_value{$cv}"};
+                        }
+
+                        $guestSale->save();
+                    }
+                }
+
                 // Increment RSVP sold count
-                $event->updateRsvpSold($request->event_date, 1);
+                $event->updateRsvpSold($request->event_date, $rsvpQuantity);
 
                 return $sale;
             });
@@ -741,7 +869,14 @@ class TicketController extends Controller
         }
 
         // Send confirmation email and admin notification
-        $this->sendTicketPurchaseEmail($sale, $event);
+        if ($event->individual_tickets && $sale->group_id) {
+            $groupedSales = Sale::where('group_id', $sale->id)->get();
+            foreach ($groupedSales as $groupSale) {
+                $this->sendTicketPurchaseEmail($groupSale, $event);
+            }
+        } else {
+            $this->sendTicketPurchaseEmail($sale, $event);
+        }
         $this->sendNewSaleNotification($sale, $event);
 
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'rsvp:event_id:'.$event->id);
@@ -766,10 +901,38 @@ class TicketController extends Controller
         $promoCode = $sale->promo_code_id ? $sale->promoCode : null;
         $discount = $sale->discount_amount ?? 0;
 
+        // For grouped sales, aggregate SaleTickets across all sales in the group
+        if ($sale->group_id && $sale->isPrimarySale()) {
+            $allGroupSales = Sale::where('group_id', $sale->group_id)->with('saleTickets.ticket')->get();
+            $aggregatedTickets = [];
+            foreach ($allGroupSales as $gs) {
+                foreach ($gs->saleTickets as $st) {
+                    $tid = $st->ticket_id;
+                    if (isset($aggregatedTickets[$tid])) {
+                        $aggregatedTickets[$tid]['quantity'] += $st->quantity;
+                    } else {
+                        $aggregatedTickets[$tid] = [
+                            'ticket_id' => $tid,
+                            'quantity' => $st->quantity,
+                            'ticket' => $st->ticket,
+                        ];
+                    }
+                }
+            }
+            $stripeSaleTickets = collect($aggregatedTickets)->map(function ($item) {
+                $st = new \App\Models\SaleTicket(['ticket_id' => $item['ticket_id'], 'quantity' => $item['quantity']]);
+                $st->setRelation('ticket', $item['ticket']);
+
+                return $st;
+            });
+        } else {
+            $stripeSaleTickets = $sale->saleTickets;
+        }
+
         // Calculate discount ratio for eligible tickets
         $eligibleSubtotal = 0;
         if ($promoCode && $discount > 0) {
-            foreach ($sale->saleTickets as $saleTicket) {
+            foreach ($stripeSaleTickets as $saleTicket) {
                 if ($promoCode->appliesToTicket($saleTicket->ticket_id)) {
                     $eligibleSubtotal += $saleTicket->ticket->price * $saleTicket->quantity;
                 }
@@ -783,7 +946,7 @@ class TicketController extends Controller
         $totalCents = 0;
         $lastEligibleIndex = null;
 
-        foreach ($sale->saleTickets as $index => $saleTicket) {
+        foreach ($stripeSaleTickets as $index => $saleTicket) {
             $unitPrice = $saleTicket->ticket->price;
             if ($promoCode && $discount > 0 && $promoCode->appliesToTicket($saleTicket->ticket_id)) {
                 $unitPrice = $unitPrice * $discountRatio;

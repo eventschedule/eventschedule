@@ -142,7 +142,7 @@
                     </a>
                 </div>
 
-                <!-- Client Portal -->
+                <!-- Guest Portal -->
                 <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 border border-gray-200 dark:border-white/10 p-8 flex flex-col">
                     <div class="flex items-center gap-4 mb-4">
                         <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -150,13 +150,13 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Client Portal</h3>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Guest Portal</h3>
                     </div>
                     <p class="text-gray-600 dark:text-white/80 mb-6 flex-grow">
                         The public-facing calendar your attendees see. Browse events, purchase tickets, and subscribe to updates.
                     </p>
                     <a href="https://simpsons.eventschedule.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 rounded-xl text-white font-medium transition-colors">
-                        Open Client Demo
+                        Open Guest Demo
                         <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>

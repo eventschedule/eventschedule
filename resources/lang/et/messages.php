@@ -1324,7 +1324,7 @@ return [
     'view_notifications' => 'Kuva teated',
     'search_placeholder' => 'Otsi...',
 
-    // Misc AP/CP strings
+    // Misc AP/GP strings
     'placeholder_city' => 'New York',
     'drop_files_here' => 'Lohistage failid siia',
     'failed_to_delete_image' => 'Pildi kustutamine ebaõnnestus',
@@ -2529,4 +2529,10 @@ return [
     'save_schedule_first_for_feeds' => 'Salvesta ajakava esmalt, et näha voo-URL-e.',
     'copy_ical_feed' => 'Kopeeri iCal-voog',
     'copy_rss_feed' => 'Kopeeri RSS-voog',
+    'individual_tickets' => 'Individuaalsed piletid',
+    'individual_tickets_description' => 'Kogu iga osaleja andmed eraldi. Iga osaleja saab oma kinnituse ja QR-koodi.',
+    'guest_information' => 'Külalise andmed',
+    'guest_n' => 'Külaline :n',
+    'number_of_guests' => 'Külaliste arv',
+    'you' => 'Sina',
 ];

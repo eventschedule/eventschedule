@@ -69,6 +69,23 @@ class ResolveCustomDomain
             }
         }
 
+        // Replace subdomain URLs in JSON responses (e.g. calendar data)
+        if ($this->isJsonResponse($response)) {
+            $content = $response->getContent();
+            if ($content) {
+                // JSON encodes forward slashes as \/, so replace the escaped versions
+                $escapedSubdomainUrl = str_replace('/', '\\/', $subdomainUrl);
+                $escapedCustomDomainUrl = str_replace('/', '\\/', $customDomainUrl);
+                $content = str_replace($escapedSubdomainUrl, $escapedCustomDomainUrl, $content);
+
+                $escapedHttpSubdomain = str_replace('/', '\\/', "http://{$role->subdomain}.{$baseDomain}");
+                $escapedHttpCustom = str_replace('/', '\\/', $customDomainUrl);
+                $content = str_replace($escapedHttpSubdomain, $escapedHttpCustom, $content);
+
+                $response->setContent($content);
+            }
+        }
+
         // Rewrite Location header on redirect responses
         if ($response->isRedirection() && $response->headers->has('Location')) {
             $location = $response->headers->get('Location');
@@ -85,5 +102,12 @@ class ResolveCustomDomain
         $contentType = $response->headers->get('Content-Type', '');
 
         return str_contains($contentType, 'text/html') && $response->getStatusCode() < 400;
+    }
+
+    protected function isJsonResponse(Response $response): bool
+    {
+        $contentType = $response->headers->get('Content-Type', '');
+
+        return str_contains($contentType, 'application/json') && $response->getStatusCode() < 400;
     }
 }

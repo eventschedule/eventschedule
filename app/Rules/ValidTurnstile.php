@@ -21,6 +21,11 @@ class ValidTurnstile implements Rule
             return true;
         }
 
+        // Skip validation on custom domains (site key only works on eventschedule.com)
+        if (request()->attributes->get('custom_domain_host')) {
+            return true;
+        }
+
         // Skip validation in testing environment
         if (config('app.is_testing')) {
             return true;

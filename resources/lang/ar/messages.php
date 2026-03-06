@@ -1312,7 +1312,7 @@ return [
     'view_notifications' => 'عرض الإشعارات',
     'search_placeholder' => 'بحث...',
 
-    // Misc AP/CP strings
+    // Misc AP/GP strings
     'placeholder_city' => 'نيويورك',
     'drop_files_here' => 'أفلت الملفات هنا',
     'failed_to_delete_image' => 'فشل حذف الصورة',
@@ -2515,4 +2515,10 @@ return [
     'save_schedule_first_for_feeds' => 'احفظ الجدول أولاً لرؤية روابط الخلاصات.',
     'copy_ical_feed' => 'نسخ خلاصة iCal',
     'copy_rss_feed' => 'نسخ خلاصة RSS',
+    'individual_tickets' => 'تذاكر فردية',
+    'individual_tickets_description' => 'اجمع بيانات كل حاضر على حدة. يحصل كل حاضر على تأكيد ورمز QR خاص به.',
+    'guest_information' => 'معلومات الضيف',
+    'guest_n' => 'الضيف :n',
+    'number_of_guests' => 'عدد الضيوف',
+    'you' => 'أنت',
 ];
