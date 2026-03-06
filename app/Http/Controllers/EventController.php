@@ -1308,19 +1308,40 @@ class EventController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
-        $request->validate([
-            'style_instructions' => 'nullable|string|max:500',
-        ]);
-
-        $eventId = UrlUtils::decodeId($request->input('event_id'));
-        $event = Event::with(['roles', 'tickets'])->findOrFail($eventId);
-
-        if ($request->user()->cannot('update', $event)) {
+        if (is_demo_mode()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
-        if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
-            return response()->json(['error' => __('messages.not_authorized')], 404);
+        $request->validate([
+            'style_instructions' => 'nullable|string|max:500',
+            'name' => 'nullable|string',
+            'starts_at' => 'nullable|string',
+            'duration' => 'nullable|numeric',
+            'short_description' => 'nullable|string',
+            'category_id' => 'nullable|integer',
+        ]);
+
+        $eventId = UrlUtils::decodeId($request->input('event_id'));
+
+        if ($eventId) {
+            $event = Event::with(['roles', 'tickets'])->findOrFail($eventId);
+
+            if ($request->user()->cannot('update', $event)) {
+                return response()->json(['error' => __('messages.not_authorized')], 403);
+            }
+
+            if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
+                return response()->json(['error' => __('messages.not_authorized')], 404);
+            }
+        } else {
+            $event = new Event;
+            $event->name = $request->input('name');
+            $event->starts_at = $request->input('starts_at');
+            $event->duration = $request->input('duration');
+            $event->short_description = $request->input('short_description');
+            $event->category_id = $request->input('category_id');
+            $event->setRelation('roles', collect([]));
+            $event->setRelation('tickets', collect([]));
         }
 
         try {
@@ -1330,18 +1351,21 @@ class EventController extends Controller
                 return response()->json(['error' => __('messages.ai_flyer_generation_failed')], 500);
             }
 
-            // Delete old flyer from storage if exists
-            if ($event->flyer_image_url) {
-                $path = $event->getAttributes()['flyer_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/'.$path;
-                }
-                Storage::delete($path);
-            }
-
             $filename = ImageUtils::saveImageData($imageData, 'generated_flyer.png', 'flyer_');
-            $event->flyer_image_url = $filename;
-            $event->save();
+
+            if ($eventId) {
+                // Delete old flyer from storage if exists
+                if ($event->flyer_image_url) {
+                    $path = $event->getAttributes()['flyer_image_url'];
+                    if (config('filesystems.default') == 'local') {
+                        $path = 'public/'.$path;
+                    }
+                    Storage::delete($path);
+                }
+
+                $event->flyer_image_url = $filename;
+                $event->save();
+            }
 
             UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_FLYER, $role->id);
 
@@ -1354,11 +1378,17 @@ class EventController extends Controller
                 $flyerUrl = $filename;
             }
 
-            return response()->json([
+            $response = [
                 'success' => true,
                 'flyer_image_url' => $flyerUrl,
                 'delete_url' => route('event.delete_image', ['subdomain' => $subdomain]),
-            ]);
+            ];
+
+            if (! $eventId) {
+                $response['flyer_image_filename'] = $filename;
+            }
+
+            return response()->json($response);
         } catch (\Illuminate\Database\QueryException $e) {
             report($e);
 
@@ -1366,7 +1396,6 @@ class EventController extends Controller
         } catch (\Exception $e) {
             \Log::error('AI flyer generation failed: '.$e->getMessage(), [
                 'role_id' => $role->id,
-                'event_id' => $event->id,
             ]);
 
             return response()->json(['error' => __('messages.ai_flyer_generation_failed')], 500);

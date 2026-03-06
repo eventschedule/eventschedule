@@ -3993,9 +3993,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function resetToFirstTab(sectionId) {
         const section = document.getElementById(sectionId);
         if (section && section.style.display === 'block') {
-            const firstTab = section.querySelector('[data-tab]');
-            if (firstTab) {
-                firstTab.click();
+            const tabs = section.querySelectorAll('[data-tab]');
+            for (const tab of tabs) {
+                if (tab.offsetParent !== null) {
+                    tab.click();
+                    break;
+                }
             }
             return true;
         }
@@ -5731,6 +5734,7 @@ document.addEventListener('DOMContentLoaded', function() {
     promptEndpoint="{{ $role->exists ? url('/'.$role->subdomain.'/get-style-prompt') : url('/get-style-prompt') }}"
     successCallback="handleAiStyleResults"
     extraDataCallback="getStyleExtraData"
+    checkValuesCallback="getStyleCurrentValues"
     :showPresets="true"
     savedInstructions="{{ $role->ai_style_instructions }}"
     saveInstructionsField="ai_style_instructions"
@@ -5746,6 +5750,24 @@ window.getStyleExtraData = function() {
         type: document.querySelector('input[name="type"]') ? document.querySelector('input[name="type"]').value : (document.querySelector('select[name="type"]') ? document.querySelector('select[name="type"]').value : ''),
         short_description: document.getElementById('short_description') ? document.getElementById('short_description').value : ''
     };
+};
+
+window.getStyleCurrentValues = function() {
+    var values = [];
+    var accentColor = document.getElementById('accent_color');
+    if (accentColor && accentColor.value.toLowerCase() !== '#007bff') values.push('accent_color');
+    var fontFamily = document.getElementById('font_family');
+    if (fontFamily && fontFamily.value !== 'Roboto') values.push('font');
+    var profileExisting = document.getElementById('profile_image_existing');
+    var profileFileInput = document.getElementById('profile_image');
+    if (profileExisting || (profileFileInput && profileFileInput.files && profileFileInput.files.length > 0)) values.push('profile_image');
+    var headerExisting = document.getElementById('delete_header_image_button');
+    var headerFileInput = document.getElementById('header_image_url');
+    if ((headerExisting && headerExisting.style.display !== 'none') || (headerFileInput && headerFileInput.files && headerFileInput.files.length > 0)) values.push('header_image');
+    var bgExisting = document.getElementById('background_image_existing');
+    var bgFileInput = document.getElementById('background_image_url');
+    if (bgExisting || (bgFileInput && bgFileInput.files && bgFileInput.files.length > 0)) values.push('background_image');
+    return values;
 };
 
 window.handleAiStyleResults = function(data) {
@@ -5876,6 +5898,7 @@ window.handleAiStyleResults = function(data) {
     promptEndpoint="{{ $role->exists ? url('/'.$role->subdomain.'/get-schedule-details-prompt') : url('/get-schedule-details-prompt') }}"
     successCallback="handleAiScheduleDetailsResults"
     extraDataCallback="getScheduleDetailsExtraData"
+    checkValuesCallback="getScheduleDetailsCurrentValues"
     :showInstructions="true"
     :showPresets="true"
     :instructionsLabel="__('messages.ai_additional_instructions')"
@@ -5895,6 +5918,16 @@ window.getScheduleDetailsExtraData = function() {
         type: document.querySelector('input[name="type"]') ? document.querySelector('input[name="type"]').value : (document.querySelector('select[name="type"]') ? document.querySelector('select[name="type"]').value : ''),
         description: descValue
     };
+};
+
+window.getScheduleDetailsCurrentValues = function() {
+    var values = [];
+    var shortDesc = document.getElementById('short_description');
+    if (shortDesc && shortDesc.value.trim()) values.push('short_description');
+    var descTextarea = document.getElementById('description');
+    var descValue = descTextarea && descTextarea._easyMDE ? descTextarea._easyMDE.value() : (descTextarea ? descTextarea.value : '');
+    if (descValue.trim()) values.push('description');
+    return values;
 };
 
 window.handleAiScheduleDetailsResults = function(data) {
