@@ -84,7 +84,7 @@
         </div>
 
         {{-- Activity Stats --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_users_7_days')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeUsers7Days) }}</p>
@@ -93,12 +93,6 @@
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_users_30_days')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeUsers30Days) }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.avg_events_per_schedule')</p>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ $avgEventsPerSchedule }}</p>
-            </div>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.upcoming_online_events')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($upcomingOnlineEvents) }}</p>
@@ -113,6 +107,10 @@
         {{-- Boost & Newsletter Stats --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.stripe_paid')</p>
+                <p class="mt-2 text-2xl font-bold text-green-600 dark:text-green-400">{{ number_format($stripePaidCount) }}</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_boost_campaigns')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeBoostCampaigns) }}</p>
             </div>
@@ -120,10 +118,6 @@
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.boost_markup_revenue')</p>
                 <p class="mt-2 text-2xl font-bold text-green-600 dark:text-green-400">${{ number_format($boostMarkupRevenue, 2) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.in_period')</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.admin_newsletters_sent')</p>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($adminNewslettersSent) }}</p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.newsletter_subscribers')</p>
@@ -162,6 +156,37 @@
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.growth_trends')</h3>
             <div class="h-64">
                 <canvas id="trendsChart"></canvas>
+            </div>
+        </div>
+
+        {{-- Recent Signups --}}
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">@lang('messages.recent_signups')</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.name')</th>
+                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.date')</th>
+                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.source')</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @forelse ($recentSignups as $signup)
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ $signup->name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $signup->created_at->diffForHumans() }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $signup->utm_source ?? '-' }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">@lang('messages.no_users_yet')</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -241,6 +266,141 @@
                             @lang('messages.no_events_yet')
                         </div>
                     @endforelse
+                </div>
+            </div>
+        </div>
+
+        {{-- Signups by Method (Selected Period) --}}
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ms-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.email_signups')</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($emailUsersInPeriod) }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.in_period')</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 bg-red-100 dark:bg-red-900 rounded-full">
+                            <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ms-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.google_signups')</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($googleUsersInPeriod) }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.in_period')</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 bg-purple-100 dark:bg-purple-900 rounded-full">
+                            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ms-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.hybrid_signups')</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($hybridUsersInPeriod) }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.in_period')</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Domains --}}
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ms-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_custom_domains')</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalCustomDomains) }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 bg-green-100 dark:bg-green-900 rounded-full">
+                            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ms-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_domains')</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeCount) }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-full">
+                            <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ms-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.pending_domains')</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($pendingCount) }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Queue Health --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ms-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.pending_jobs')</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($pendingJobsCount) }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 bg-red-100 dark:bg-red-900 rounded-full">
+                            <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ms-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.failed_jobs')</p>
+                        <p class="text-2xl font-bold {{ $failedJobsCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">{{ number_format($failedJobsCount) }}</p>
+                    </div>
                 </div>
             </div>
         </div>

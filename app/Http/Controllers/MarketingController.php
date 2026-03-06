@@ -3417,7 +3417,7 @@ class MarketingController extends Controller
                 'name' => 'Google Forms',
                 'tagline' => 'Stop building event registration forms from scratch.',
                 'description' => 'Replace Google Forms for event registration with Event Schedule. Get built-in ticketing, payments, public event pages, and attendee management.',
-                'keywords' => 'Google Forms replacement, event registration form, Google Forms alternative for events, event signup form',
+                'keywords' => 'Google Forms alternative for events, Google Forms replacement, event registration form, event signup form',
                 'about' => 'Google Forms is a free form builder used by many event organizers to collect RSVPs and registrations. While it works for basic data collection, it was never designed for event management - leaving organizers to manually handle payments, confirmations, and attendee tracking outside the form.',
                 'tool_strengths' => [
                     'Free and easy to set up for basic data collection',
@@ -3438,22 +3438,43 @@ class MarketingController extends Controller
                     ['title' => 'Calendar Sync', 'description' => 'Two-way Google Calendar sync keeps your events updated everywhere, automatically.', 'icon' => 'calendar', 'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30', 'border' => 'border-rose-200 dark:border-rose-500/20', 'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20', 'icon_color' => 'text-rose-600 dark:text-rose-400'],
                     ['title' => 'Newsletters', 'description' => 'Send event updates to your audience with built-in newsletters and A/B testing. No separate email tool needed.', 'icon' => 'mail', 'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30', 'border' => 'border-violet-200 dark:border-violet-500/20', 'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20', 'icon_color' => 'text-violet-600 dark:text-violet-400'],
                 ],
+                'why_switch' => [
+                    'intro' => 'Google Forms collects data, but Event Schedule manages your entire event workflow from registration to check-in day.',
+                    'points' => [
+                        'Built-in ticketing with Stripe payments and zero platform fees',
+                        'Public event pages with all details, not just a form link',
+                        'Automatic confirmation emails and QR code tickets',
+                        'Two-way Google Calendar sync keeps everything in one place',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Create your schedule', 'description' => 'Sign up free and create your first schedule in under a minute.'],
+                    ['title' => 'Add your events', 'description' => 'Paste your event details and AI imports them, or create events manually with custom fields.'],
+                    ['title' => 'Share your event page', 'description' => 'Share the event link instead of a form link. Attendees register and pay in one step.'],
+                ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Google Forms to Event Schedule?', 'answer' => 'Yes. You can set up your first event in minutes. Paste your event details and AI will extract dates, times, and descriptions automatically. There is no data migration needed since Google Forms does not store event data in a structured way.'],
                     ['question' => 'Is Event Schedule really free?', 'answer' => 'Yes. The free plan includes unlimited events, Google Calendar sync, newsletters, and fan engagement features. Ticketing with zero platform fees is available on the Pro plan for $5/month. No credit card required to start.'],
                     ['question' => 'Can Event Schedule handle custom registration fields like Google Forms?', 'answer' => 'Yes. Pro plan includes custom fields on ticket forms so you can collect any information you need from attendees. Unlike Google Forms, the data is automatically connected to your attendee records and ticket sales.'],
+                    ['question' => 'Is Event Schedule open source?', 'answer' => 'Yes. Event Schedule is fully open source and can be selfhosted on your own server for complete control over your data. The hosted version at eventschedule.com is also available if you prefer a managed solution.'],
+                    ['question' => 'Can I collect RSVPs for free events without Google Forms?', 'answer' => 'Yes. Event Schedule supports free RSVPs with automatic confirmation emails. Attendees register through your event page and you get a real attendee list with check-in tools, not just form responses.'],
                 ],
                 'cross_links' => [
                     ['name' => 'SurveyMonkey', 'route' => 'marketing.replace_surveymonkey'],
                     ['name' => 'Google Sheets', 'route' => 'marketing.replace_google_sheets'],
                     ['name' => 'Mailchimp', 'route' => 'marketing.replace_mailchimp'],
                 ],
+                'related_features' => [
+                    ['name' => 'Ticketing', 'route' => 'marketing.ticketing', 'description' => 'Sell tickets with QR codes and zero platform fees.'],
+                    ['name' => 'Custom Fields', 'route' => 'marketing.custom_fields', 'description' => 'Collect attendee information with custom form fields.'],
+                    ['name' => 'AI Import', 'route' => 'marketing.ai', 'description' => 'Paste event details and let AI create your events.'],
+                ],
             ],
             'mailchimp' => [
                 'name' => 'Mailchimp',
                 'tagline' => 'Your event emails and ticketing in one place.',
                 'description' => 'Replace Mailchimp for event communications with Event Schedule. Built-in newsletters with A/B testing, attendee management, and ticketing.',
-                'keywords' => 'Mailchimp replacement, event email marketing, event newsletter, Mailchimp alternative for events',
+                'keywords' => 'Mailchimp alternative for events, Mailchimp replacement, event email marketing, event newsletter',
                 'about' => 'Mailchimp is a popular email marketing platform that many event organizers use to promote events and communicate with attendees. However, using Mailchimp means managing a separate tool alongside your event platform, manually syncing attendee lists, and paying for email marketing on top of your event tools.',
                 'tool_strengths' => [
                     'Powerful email automation and drip campaigns',
@@ -3474,22 +3495,43 @@ class MarketingController extends Controller
                     ['title' => 'Public Schedule Page', 'description' => 'A shareable page with all your events. Visitors can subscribe to updates and buy tickets in one place.', 'icon' => 'globe', 'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30', 'border' => 'border-rose-200 dark:border-rose-500/20', 'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20', 'icon_color' => 'text-rose-600 dark:text-rose-400'],
                     ['title' => 'Open Source & Selfhosted', 'description' => 'Full source code access and selfhosting option. Own your event platform completely, no vendor lock-in.', 'icon' => 'code', 'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30', 'border' => 'border-violet-200 dark:border-violet-500/20', 'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20', 'icon_color' => 'text-violet-600 dark:text-violet-400'],
                 ],
+                'why_switch' => [
+                    'intro' => 'Mailchimp handles email, but Event Schedule combines newsletters, ticketing, and attendee management so you never juggle separate tools.',
+                    'points' => [
+                        'Newsletters with A/B testing built into your event platform',
+                        'Subscriber lists that sync automatically with ticket buyers',
+                        'Zero platform fees on ticket sales, saving the cost of Mailchimp plus a ticketing tool',
+                        'Open source with selfhosting option for full data ownership',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Create your schedule', 'description' => 'Sign up free and set up your schedule with events, branding, and ticket options.'],
+                    ['title' => 'Import your subscribers', 'description' => 'Your attendees subscribe directly through your schedule page. New ticket buyers are added automatically.'],
+                    ['title' => 'Send your first newsletter', 'description' => 'Write and send event updates with the built-in newsletter builder. A/B test subject lines to maximize engagement.'],
+                ],
                 'faq' => [
                     ['question' => 'Can Event Schedule replace Mailchimp for event emails?', 'answer' => 'Yes. Event Schedule includes built-in newsletters with A/B testing, subscriber management, and automatic attendee data integration. You can send event announcements and updates directly from your schedule without a separate email tool.'],
                     ['question' => 'How much does Event Schedule cost compared to Mailchimp?', 'answer' => 'Event Schedule is free for newsletters, subscriber management, and unlimited events. The Pro plan at $5/month adds ticketing with zero platform fees. Mailchimp charges based on subscriber count and can cost $20 or more per month for similar email features alone.'],
                     ['question' => 'Does Event Schedule support email automation like Mailchimp?', 'answer' => 'Event Schedule focuses on event-specific communications: newsletters to subscribers, sale confirmations, and event updates. While it does not have Mailchimp-style drip campaigns, it covers the email needs of most event organizers without requiring a separate platform.'],
+                    ['question' => 'Is Event Schedule open source?', 'answer' => 'Yes. Event Schedule is fully open source and can be selfhosted on your own server for complete control over your data and subscriber lists. The hosted version at eventschedule.com is also available if you prefer a managed solution.'],
+                    ['question' => 'Can I send newsletters to people who bought tickets?', 'answer' => 'Yes. Ticket buyers are automatically part of your subscriber base. You can send newsletters to all subscribers or target specific segments without manually importing attendee lists.'],
                 ],
                 'cross_links' => [
                     ['name' => 'Google Forms', 'route' => 'marketing.replace_google_forms'],
                     ['name' => 'Canva', 'route' => 'marketing.replace_canva'],
                     ['name' => 'Linktree', 'route' => 'marketing.replace_linktree'],
                 ],
+                'related_features' => [
+                    ['name' => 'Newsletters', 'route' => 'marketing.newsletters', 'description' => 'Send event updates with A/B testing built in.'],
+                    ['name' => 'Ticketing', 'route' => 'marketing.ticketing', 'description' => 'Sell tickets with QR codes and zero platform fees.'],
+                    ['name' => 'Event Graphics', 'route' => 'marketing.event_graphics', 'description' => 'Auto-generate shareable graphics for promotion.'],
+                ],
             ],
             'canva' => [
                 'name' => 'Canva',
                 'tagline' => 'Event graphics that create themselves.',
                 'description' => 'Replace Canva for event flyers and graphics with Event Schedule. AI-generated event graphics and shareable flyers are created automatically from your event details.',
-                'keywords' => 'Canva replacement, event flyer maker, event graphic generator, Canva alternative for events',
+                'keywords' => 'Canva alternative for events, Canva replacement, event flyer maker, event graphic generator',
                 'about' => 'Canva is a popular graphic design platform that event organizers use to create flyers, social media posts, and promotional graphics. While Canva offers great design flexibility, creating event graphics manually takes time and requires updating multiple designs whenever event details change.',
                 'tool_strengths' => [
                     'Extensive template library for many design needs',
@@ -3510,22 +3552,43 @@ class MarketingController extends Controller
                     ['title' => 'Schedule Graphics', 'description' => 'Generate graphics for your entire schedule, not just individual events. Perfect for sharing on social media.', 'icon' => 'globe', 'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30', 'border' => 'border-rose-200 dark:border-rose-500/20', 'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20', 'icon_color' => 'text-rose-600 dark:text-rose-400'],
                     ['title' => 'Zero Platform Fees', 'description' => 'Sell tickets without platform fees. Only pay standard Stripe processing. Save the cost of Canva Pro plus a separate ticketing tool.', 'icon' => 'dollar', 'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30', 'border' => 'border-violet-200 dark:border-violet-500/20', 'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20', 'icon_color' => 'text-violet-600 dark:text-violet-400'],
                 ],
+                'why_switch' => [
+                    'intro' => 'Canva makes beautiful designs, but Event Schedule generates event graphics automatically so you can focus on running your events.',
+                    'points' => [
+                        'AI-generated flyers and graphics created from your event details in seconds',
+                        'Graphics always stay in sync when event details change',
+                        'Event pages and ticket sales are connected to every graphic',
+                        'One platform for graphics, ticketing, newsletters, and calendar sync',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Create your events', 'description' => 'Add event details including dates, venue, and description. AI can import them automatically.'],
+                    ['title' => 'Generate graphics', 'description' => 'Event graphics and AI flyers are created automatically from your event details. No design work needed.'],
+                    ['title' => 'Share and sell', 'description' => 'Share graphics on social media that link directly to your event pages where people can buy tickets.'],
+                ],
                 'faq' => [
                     ['question' => 'Can Event Schedule generate event graphics like Canva?', 'answer' => 'Yes. Event Schedule auto-generates shareable event graphics from your event details and also offers AI-powered flyer generation. Graphics update automatically when event details change, so you never have outdated flyers.'],
                     ['question' => 'Is Event Schedule free for event graphics?', 'answer' => 'Event graphics generation is included in the Pro plan at $5/month, which also includes ticketing, QR check-in, and more. The free plan includes unlimited events, public event pages, and Google Calendar sync.'],
                     ['question' => 'How do Event Schedule graphics compare to Canva designs?', 'answer' => 'Canva offers more design flexibility for general-purpose graphics. Event Schedule graphics are purpose-built for events, automatically pulling in dates, times, locations, and descriptions. They are designed for quick social media sharing and are always in sync with your event data.'],
+                    ['question' => 'Is Event Schedule open source?', 'answer' => 'Yes. Event Schedule is fully open source and can be selfhosted on your own server. You get complete control over your platform, data, and branding without vendor lock-in.'],
+                    ['question' => 'Can I still use Canva alongside Event Schedule?', 'answer' => 'Of course. Many organizers use Event Schedule for automatic event graphics and Canva for custom brand materials. Event Schedule handles the event-specific graphics so you spend less time in Canva for routine event promotion.'],
                 ],
                 'cross_links' => [
                     ['name' => 'QR Code Generators', 'route' => 'marketing.replace_qr_code_generators'],
                     ['name' => 'Linktree', 'route' => 'marketing.replace_linktree'],
                     ['name' => 'Squarespace', 'route' => 'marketing.replace_squarespace'],
                 ],
+                'related_features' => [
+                    ['name' => 'Event Graphics', 'route' => 'marketing.event_graphics', 'description' => 'Auto-generate shareable graphics from event details.'],
+                    ['name' => 'AI Features', 'route' => 'marketing.ai', 'description' => 'AI-powered flyer generation and event import.'],
+                    ['name' => 'Newsletters', 'route' => 'marketing.newsletters', 'description' => 'Promote events with built-in email newsletters.'],
+                ],
             ],
             'linktree' => [
                 'name' => 'Linktree',
                 'tagline' => 'A shareable page that actually sells tickets.',
                 'description' => 'Replace Linktree for event promotion with Event Schedule. Get a branded schedule page with events, ticket sales, and subscriber signups.',
-                'keywords' => 'Linktree replacement, event link in bio, Linktree alternative for events, event landing page',
+                'keywords' => 'Linktree alternative for events, Linktree replacement, event link in bio, event landing page',
                 'about' => 'Linktree is a link-in-bio tool that event organizers use to share multiple event links from a single URL. While it solves the "one link" problem on social media, it is just a list of links with no event context, ticketing, or scheduling functionality.',
                 'tool_strengths' => [
                     'Simple setup for sharing multiple links from one URL',
@@ -3546,22 +3609,43 @@ class MarketingController extends Controller
                     ['title' => 'Embeddable Widget', 'description' => 'Embed your event calendar on any website. Show your schedule wherever your audience is.', 'icon' => 'code', 'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30', 'border' => 'border-rose-200 dark:border-rose-500/20', 'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20', 'icon_color' => 'text-rose-600 dark:text-rose-400'],
                     ['title' => 'Zero Platform Fees', 'description' => 'Sell tickets without platform fees. Only pay standard Stripe processing. No hidden costs or premium upsells.', 'icon' => 'dollar', 'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30', 'border' => 'border-violet-200 dark:border-violet-500/20', 'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20', 'icon_color' => 'text-violet-600 dark:text-violet-400'],
                 ],
+                'why_switch' => [
+                    'intro' => 'Linktree gives you a list of links. Event Schedule gives you a full event hub with ticket sales, subscriber signups, and auto-updating event details.',
+                    'points' => [
+                        'A schedule page with event details, not just a list of URLs',
+                        'Inline ticket purchasing without redirecting to another platform',
+                        'Events update automatically so your link in bio is always current',
+                        'Subscriber signups and newsletters to build your audience',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Create your schedule', 'description' => 'Sign up free and create your branded schedule page with your name, logo, and colors.'],
+                    ['title' => 'Add your events', 'description' => 'Add events with full details, images, and ticket options. AI can import them automatically.'],
+                    ['title' => 'Use as your link in bio', 'description' => 'Share your schedule URL as your link in bio. It updates automatically as you add events.'],
+                ],
                 'faq' => [
                     ['question' => 'How is Event Schedule better than Linktree for events?', 'answer' => 'Linktree is a list of links. Event Schedule gives you a full schedule page with event details, dates, ticket purchasing, and subscriber signups. Your audience sees a rich event experience, not just a link directory.'],
                     ['question' => 'Does Event Schedule have a free plan?', 'answer' => 'Yes. The free plan includes unlimited events, a public schedule page, Google Calendar sync, newsletters, and embeddable widgets. Ticketing with zero platform fees is available on the Pro plan for $5/month.'],
                     ['question' => 'Can I use Event Schedule as my link in bio?', 'answer' => 'Yes. Your schedule page URL works perfectly as a link in bio. It shows all your upcoming events with full details and ticket links, updating automatically as you add or change events. No manual link management needed.'],
+                    ['question' => 'Is Event Schedule open source?', 'answer' => 'Yes. Event Schedule is fully open source and can be selfhosted on your own server. You get a branded event page with your own domain, complete data ownership, and no vendor lock-in.'],
+                    ['question' => 'Can visitors subscribe to my events from the schedule page?', 'answer' => 'Yes. Your schedule page includes a subscribe button so visitors can sign up for email updates. You can then send newsletters about upcoming events directly from Event Schedule.'],
                 ],
                 'cross_links' => [
                     ['name' => 'Squarespace', 'route' => 'marketing.replace_squarespace'],
                     ['name' => 'Canva', 'route' => 'marketing.replace_canva'],
                     ['name' => 'Mailchimp', 'route' => 'marketing.replace_mailchimp'],
                 ],
+                'related_features' => [
+                    ['name' => 'Embed Calendar', 'route' => 'marketing.embed_calendar', 'description' => 'Embed your event calendar on any website.'],
+                    ['name' => 'Ticketing', 'route' => 'marketing.ticketing', 'description' => 'Sell tickets with QR codes and zero platform fees.'],
+                    ['name' => 'Newsletters', 'route' => 'marketing.newsletters', 'description' => 'Send event updates to your subscribers.'],
+                ],
             ],
             'google-sheets' => [
                 'name' => 'Google Sheets',
                 'tagline' => 'Stop tracking event data in spreadsheets.',
                 'description' => 'Replace Google Sheets for event tracking with Event Schedule. Get attendee management, ticket sales tracking, and event organization.',
-                'keywords' => 'Google Sheets replacement, event tracking spreadsheet, Excel alternative for events, event management spreadsheet',
+                'keywords' => 'Google Sheets alternative for events, Google Sheets replacement, event tracking spreadsheet, Excel alternative for events',
                 'about' => 'Google Sheets is a go-to tool for event organizers who need to track attendees, manage guest lists, and organize event details. But spreadsheets were not built for event management - they require manual data entry, have no attendee-facing features, and become unwieldy as events grow.',
                 'tool_strengths' => [
                     'Flexible data structure for any type of tracking',
@@ -3582,22 +3666,43 @@ class MarketingController extends Controller
                     ['title' => 'REST API', 'description' => 'Need custom integrations? Use the REST API to connect Event Schedule with your other tools programmatically.', 'icon' => 'code', 'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30', 'border' => 'border-rose-200 dark:border-rose-500/20', 'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20', 'icon_color' => 'text-rose-600 dark:text-rose-400'],
                     ['title' => 'Newsletters', 'description' => 'Send event updates to your audience with built-in newsletters and A/B testing. No separate email tool needed.', 'icon' => 'mail', 'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30', 'border' => 'border-violet-200 dark:border-violet-500/20', 'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20', 'icon_color' => 'text-violet-600 dark:text-violet-400'],
                 ],
+                'why_switch' => [
+                    'intro' => 'Spreadsheets require manual data entry for every sale and attendee. Event Schedule tracks everything automatically with a live dashboard.',
+                    'points' => [
+                        'Automatic tracking of ticket sales, attendees, and check-ins',
+                        'CSV export when you need spreadsheet-format data for analysis',
+                        'REST API for custom integrations with your other tools',
+                        'Live check-in dashboard instead of a static spreadsheet',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Create your events', 'description' => 'Set up events with ticket types and pricing. AI can import event details automatically.'],
+                    ['title' => 'Sell tickets', 'description' => 'Attendees buy tickets online. Sales, attendee lists, and revenue are tracked automatically.'],
+                    ['title' => 'Check in and export', 'description' => 'Use QR check-in on event day and export data to CSV anytime for custom reporting.'],
+                ],
                 'faq' => [
                     ['question' => 'Can Event Schedule replace Google Sheets for attendee tracking?', 'answer' => 'Yes. Event Schedule automatically tracks ticket sales, attendee lists, and check-ins. You get a live dashboard instead of a static spreadsheet, and you can export to CSV anytime for custom analysis.'],
                     ['question' => 'Is there a free plan for Event Schedule?', 'answer' => 'Yes. The free plan includes unlimited events, Google Calendar sync, newsletters, and fan engagement features. Ticketing with automatic tracking and zero platform fees is available on the Pro plan for $5/month.'],
                     ['question' => 'Can I still export data to a spreadsheet?', 'answer' => 'Yes. Pro plan includes CSV export of your sales data, so you can use spreadsheets for custom analysis when needed. The difference is that data collection and tracking happens automatically instead of through manual entry.'],
+                    ['question' => 'Is Event Schedule open source?', 'answer' => 'Yes. Event Schedule is fully open source and can be selfhosted on your own server. You have complete control over your data, and the REST API lets you build custom integrations.'],
+                    ['question' => 'Does Event Schedule have a REST API for custom integrations?', 'answer' => 'Yes. The Pro plan includes a REST API that lets you pull event data, attendee lists, and sales information programmatically. Connect Event Schedule with your CRM, accounting software, or any other tool.'],
                 ],
                 'cross_links' => [
                     ['name' => 'Google Forms', 'route' => 'marketing.replace_google_forms'],
                     ['name' => 'SurveyMonkey', 'route' => 'marketing.replace_surveymonkey'],
                     ['name' => 'Doodle', 'route' => 'marketing.replace_doodle'],
                 ],
+                'related_features' => [
+                    ['name' => 'Analytics', 'route' => 'marketing.analytics', 'description' => 'Track event performance and attendee data.'],
+                    ['name' => 'Integrations', 'route' => 'marketing.integrations', 'description' => 'REST API and webhooks for custom workflows.'],
+                    ['name' => 'Ticketing', 'route' => 'marketing.ticketing', 'description' => 'Sell tickets with automatic sales tracking.'],
+                ],
             ],
             'calendly' => [
                 'name' => 'Calendly',
                 'tagline' => 'Event scheduling built for audiences, not one-on-ones.',
                 'description' => 'Replace Calendly for event scheduling with Event Schedule. Manage public events, sell tickets, and share a schedule page - not just appointment slots.',
-                'keywords' => 'Calendly replacement, event scheduling tool, Calendly alternative for events, public event scheduling',
+                'keywords' => 'Calendly alternative for events, Calendly replacement, event scheduling tool, public event scheduling',
                 'about' => 'Calendly is a scheduling tool designed for booking one-on-one meetings and appointments. Some event organizers use it to schedule events, but it lacks public event pages, ticketing, and the ability to share a calendar of events with an audience.',
                 'tool_strengths' => [
                     'Excellent for one-on-one and small group scheduling',
@@ -3618,22 +3723,43 @@ class MarketingController extends Controller
                     ['title' => 'Audience Building', 'description' => 'Subscribers, newsletters, and fan engagement tools help you build an audience. Calendly focuses on individual scheduling.', 'icon' => 'mail', 'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30', 'border' => 'border-rose-200 dark:border-rose-500/20', 'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20', 'icon_color' => 'text-rose-600 dark:text-rose-400'],
                     ['title' => 'Open Source & Selfhosted', 'description' => 'Full source code access and selfhosting option. Own your event platform completely, no vendor lock-in.', 'icon' => 'code', 'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30', 'border' => 'border-violet-200 dark:border-violet-500/20', 'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20', 'icon_color' => 'text-violet-600 dark:text-violet-400'],
                 ],
+                'why_switch' => [
+                    'intro' => 'Calendly schedules meetings. Event Schedule manages public events with ticket sales, audience building, and promotional tools.',
+                    'points' => [
+                        'Public event pages with full details, images, and ticket purchasing',
+                        'Ticketing with multiple types, promo codes, and zero platform fees',
+                        'Two-way Google Calendar sync included free',
+                        'Newsletters and subscriber management to grow your audience',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Create your schedule', 'description' => 'Sign up free and create your public schedule. Connect Google Calendar for two-way sync.'],
+                    ['title' => 'Publish your events', 'description' => 'Add events with details, images, and ticket options. Share your schedule page with your audience.'],
+                    ['title' => 'Sell tickets and grow', 'description' => 'Attendees buy tickets and subscribe for updates. Build your audience with every event.'],
+                ],
                 'faq' => [
                     ['question' => 'How is Event Schedule different from Calendly for events?', 'answer' => 'Calendly is built for one-on-one appointment scheduling. Event Schedule is built for public events with audiences. You get public event pages, ticket sales, a shareable schedule, newsletters, and event graphics that Calendly does not offer.'],
                     ['question' => 'Does Event Schedule have a free plan?', 'answer' => 'Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and fan engagement features. Ticketing with zero platform fees is available on the Pro plan for $5/month.'],
                     ['question' => 'Does Event Schedule sync with Google Calendar like Calendly?', 'answer' => 'Yes. Event Schedule includes two-way Google Calendar sync on the free plan. Events you create sync to your Google Calendar, and Google Calendar events can sync back. CalDAV sync is also supported.'],
+                    ['question' => 'Is Event Schedule open source?', 'answer' => 'Yes. Event Schedule is fully open source and can be selfhosted on your own server. Unlike Calendly, you have complete control over your platform and data with no vendor lock-in.'],
+                    ['question' => 'Can I use Event Schedule for recurring events?', 'answer' => 'Yes. Event Schedule supports recurring events with flexible scheduling patterns. Each occurrence can have its own ticket types and attendee limits, which is something Calendly cannot handle for public events.'],
                 ],
                 'cross_links' => [
                     ['name' => 'Doodle', 'route' => 'marketing.replace_doodle'],
                     ['name' => 'Google Forms', 'route' => 'marketing.replace_google_forms'],
                     ['name' => 'Linktree', 'route' => 'marketing.replace_linktree'],
                 ],
+                'related_features' => [
+                    ['name' => 'Calendar Sync', 'route' => 'marketing.calendar_sync', 'description' => 'Two-way Google Calendar and CalDAV sync.'],
+                    ['name' => 'Recurring Events', 'route' => 'marketing.recurring_events', 'description' => 'Flexible recurring event scheduling.'],
+                    ['name' => 'Ticketing', 'route' => 'marketing.ticketing', 'description' => 'Sell tickets with QR codes and zero platform fees.'],
+                ],
             ],
             'surveymonkey' => [
                 'name' => 'SurveyMonkey',
                 'tagline' => 'Event registration without the survey overhead.',
                 'description' => 'Replace SurveyMonkey for event registration with Event Schedule. Purpose-built event signup with ticketing, payments, and attendee management.',
-                'keywords' => 'SurveyMonkey replacement, event registration, SurveyMonkey alternative for events, event signup',
+                'keywords' => 'SurveyMonkey alternative for events, SurveyMonkey replacement, event registration, event signup',
                 'about' => 'SurveyMonkey is a survey platform that some event organizers repurpose for event registration and feedback collection. While it offers form building capabilities, it was designed for surveys and research - not for managing events, selling tickets, or handling attendee logistics.',
                 'tool_strengths' => [
                     'Advanced survey logic and branching questions',
@@ -3654,22 +3780,43 @@ class MarketingController extends Controller
                     ['title' => 'Open Source', 'description' => 'Fully open source with a selfhosting option. Own your data and your platform, no vendor lock-in.', 'icon' => 'code', 'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30', 'border' => 'border-rose-200 dark:border-rose-500/20', 'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20', 'icon_color' => 'text-rose-600 dark:text-rose-400'],
                     ['title' => 'Newsletters', 'description' => 'Send event updates to subscribers with built-in newsletters and A/B testing. No separate email marketing tool needed.', 'icon' => 'mail', 'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30', 'border' => 'border-violet-200 dark:border-violet-500/20', 'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20', 'icon_color' => 'text-violet-600 dark:text-violet-400'],
                 ],
+                'why_switch' => [
+                    'intro' => 'SurveyMonkey was built for surveys, not events. Event Schedule gives you purpose-built registration with ticketing, payments, and check-in tools.',
+                    'points' => [
+                        'Event registration with ticket types, limits, and waitlists',
+                        'Zero platform fees at $5/month vs SurveyMonkey at $25+/month',
+                        'Attendee records with check-in tools, not survey responses',
+                        'Public event pages that look professional, not like questionnaires',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Create your events', 'description' => 'Set up events with ticket types, pricing, and custom fields for attendee information.'],
+                    ['title' => 'Share your event page', 'description' => 'Share a professional event page instead of a survey link. Attendees register and pay in one step.'],
+                    ['title' => 'Manage attendees', 'description' => 'Track registrations, check attendees in with QR codes, and send follow-up newsletters.'],
+                ],
                 'faq' => [
                     ['question' => 'Can Event Schedule handle event registration like SurveyMonkey?', 'answer' => 'Yes, and better. Event Schedule provides purpose-built event registration with ticket types, attendee limits, waitlists, and automatic confirmations. Unlike SurveyMonkey, registrations are connected to ticketing, payments, and check-in tools.'],
                     ['question' => 'How much does Event Schedule cost compared to SurveyMonkey?', 'answer' => 'Event Schedule is free for unlimited events, newsletters, and Google Calendar sync. The Pro plan at $5/month adds ticketing with zero platform fees. SurveyMonkey charges $25 or more per month for features like payment collection and custom branding.'],
                     ['question' => 'Does Event Schedule support post-event surveys?', 'answer' => 'Event Schedule includes post-event feedback collection on the Pro plan. While it does not have SurveyMonkey-style branching logic, it covers the feedback needs of most event organizers with integrated attendee data.'],
+                    ['question' => 'Is Event Schedule open source?', 'answer' => 'Yes. Event Schedule is fully open source and can be selfhosted on your own server. You own your attendee data completely with no vendor lock-in or surprise price increases.'],
+                    ['question' => 'Can I collect custom information from attendees?', 'answer' => 'Yes. Pro plan includes custom fields on ticket forms so you can collect any information you need during registration. The data is connected to attendee records and available for export.'],
                 ],
                 'cross_links' => [
                     ['name' => 'Google Forms', 'route' => 'marketing.replace_google_forms'],
                     ['name' => 'Doodle', 'route' => 'marketing.replace_doodle'],
                     ['name' => 'Google Sheets', 'route' => 'marketing.replace_google_sheets'],
                 ],
+                'related_features' => [
+                    ['name' => 'Ticketing', 'route' => 'marketing.ticketing', 'description' => 'Sell tickets with QR codes and zero platform fees.'],
+                    ['name' => 'Custom Fields', 'route' => 'marketing.custom_fields', 'description' => 'Collect attendee information with custom form fields.'],
+                    ['name' => 'Polls', 'route' => 'marketing.polls', 'description' => 'Collect attendee feedback with built-in event polls.'],
+                ],
             ],
             'doodle' => [
                 'name' => 'Doodle',
                 'tagline' => 'Go from polling dates to publishing events.',
                 'description' => 'Replace Doodle for event scheduling with Event Schedule. Move beyond date polling to a full event platform with public pages, ticketing, and a shareable calendar.',
-                'keywords' => 'Doodle replacement, event scheduling poll, Doodle alternative for events, event date scheduling',
+                'keywords' => 'Doodle alternative for events, Doodle replacement, event scheduling poll, event date scheduling',
                 'about' => 'Doodle is a scheduling poll tool that helps groups find a common time to meet. Event organizers sometimes use it to pick event dates, but Doodle stops at the poll - it does not help you create, promote, or manage the actual event once a date is chosen.',
                 'tool_strengths' => [
                     'Simple interface for group date polling',
@@ -3690,22 +3837,44 @@ class MarketingController extends Controller
                     ['title' => 'AI Event Import', 'description' => 'Paste event details in any format and AI parses them into structured events. Faster than manual event creation.', 'icon' => 'ai', 'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30', 'border' => 'border-rose-200 dark:border-rose-500/20', 'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20', 'icon_color' => 'text-rose-600 dark:text-rose-400'],
                     ['title' => 'Event Graphics', 'description' => 'Generate shareable event graphics and AI flyers automatically. Promote events visually without separate design tools.', 'icon' => 'image', 'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30', 'border' => 'border-violet-200 dark:border-violet-500/20', 'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20', 'icon_color' => 'text-violet-600 dark:text-violet-400'],
                 ],
+                'why_switch' => [
+                    'intro' => 'Doodle stops at picking a date. Event Schedule takes you from event creation through promotion, ticketing, and check-in day.',
+                    'points' => [
+                        'Full event management from creation to check-in, not just date polling',
+                        'Public schedule page with all your events shareable from one URL',
+                        'Ticketing and RSVPs with automatic confirmations',
+                        'Two-way Google Calendar sync keeps everything updated',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Create your events', 'description' => 'Add events with dates, details, and ticket options. Use AI to import event details automatically.'],
+                    ['title' => 'Share your schedule', 'description' => 'Share one URL that shows all your upcoming events. Attendees see a full calendar, not a date poll.'],
+                    ['title' => 'Sell and manage', 'description' => 'Sell tickets or collect RSVPs. Check attendees in with QR codes on event day.'],
+                ],
                 'faq' => [
                     ['question' => 'How is Event Schedule better than Doodle for events?', 'answer' => 'Doodle stops at picking a date. Event Schedule takes you from event creation through promotion and ticketing to check-in day. You get public event pages, ticket sales, Google Calendar sync, and newsletters in one platform.'],
                     ['question' => 'Is Event Schedule free to use?', 'answer' => 'Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and fan engagement features. Ticketing with zero platform fees is available on the Pro plan for $5/month.'],
                     ['question' => 'Does Event Schedule have scheduling or polling features like Doodle?', 'answer' => 'Event Schedule includes event polls on the Pro plan for collecting attendee preferences. For date selection, you create events with set dates and share them through your public schedule page. It is designed for publishing events, not polling for availability.'],
+                    ['question' => 'Is Event Schedule open source?', 'answer' => 'Yes. Event Schedule is fully open source and can be selfhosted on your own server. You get a complete event platform with no vendor lock-in or dependency on a third-party service.'],
+                    ['question' => 'Can I collect RSVPs for free events?', 'answer' => 'Yes. Event Schedule supports free RSVPs with automatic confirmation emails. Attendees register through your event page and you get a real attendee list with check-in tools.'],
                 ],
                 'cross_links' => [
                     ['name' => 'Calendly', 'route' => 'marketing.replace_calendly'],
                     ['name' => 'Google Forms', 'route' => 'marketing.replace_google_forms'],
                     ['name' => 'Google Sheets', 'route' => 'marketing.replace_google_sheets'],
                 ],
+                'related_features' => [
+                    ['name' => 'Calendar Sync', 'route' => 'marketing.calendar_sync', 'description' => 'Two-way Google Calendar and CalDAV sync.'],
+                    ['name' => 'Polls', 'route' => 'marketing.polls', 'description' => 'Collect attendee preferences with event polls.'],
+                    ['name' => 'AI Import', 'route' => 'marketing.ai', 'description' => 'Paste event details and let AI create your events.'],
+                ],
             ],
             'qr-code-generators' => [
                 'name' => 'QR Code Generators',
+                'short_name' => 'QR Code',
                 'tagline' => 'QR codes that are built into every ticket.',
                 'description' => 'Replace standalone QR code generators for events with Event Schedule. Every ticket includes a scannable QR code for check-in, with a live attendance dashboard.',
-                'keywords' => 'QR code generator replacement, event QR code, QR code check-in, event ticket QR code',
+                'keywords' => 'QR code alternative for events, QR code generator replacement, event QR code, QR code check-in',
                 'about' => 'QR code generators are standalone tools that event organizers use to create scannable codes for event check-in, links to event pages, or ticket verification. Using a separate QR tool means manually creating codes, linking them to attendee data, and building your own check-in process.',
                 'tool_strengths' => [
                     'Simple generation of QR codes for any URL or data',
@@ -3726,22 +3895,43 @@ class MarketingController extends Controller
                     ['title' => 'Complete Event Platform', 'description' => 'QR check-in is just one part. Get event pages, calendar sync, newsletters, and AI tools in one platform.', 'icon' => 'globe', 'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30', 'border' => 'border-rose-200 dark:border-rose-500/20', 'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20', 'icon_color' => 'text-rose-600 dark:text-rose-400'],
                     ['title' => 'Open Source & Selfhosted', 'description' => 'Full source code access and selfhosting option. Own your event platform and data completely.', 'icon' => 'code', 'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30', 'border' => 'border-violet-200 dark:border-violet-500/20', 'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20', 'icon_color' => 'text-violet-600 dark:text-violet-400'],
                 ],
+                'why_switch' => [
+                    'intro' => 'Standalone QR generators create codes, but Event Schedule builds QR check-in into every ticket with automatic validation and a live dashboard.',
+                    'points' => [
+                        'Every ticket includes a unique QR code automatically',
+                        'Built-in scanning that validates tickets and prevents duplicates',
+                        'Live check-in dashboard with real-time attendance tracking',
+                        'Complete event platform with ticketing, not just QR codes',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Create tickets', 'description' => 'Set up ticket types for your event. Every ticket automatically includes a unique QR code.'],
+                    ['title' => 'Sell online', 'description' => 'Attendees buy tickets and receive their QR codes via email. No manual code generation needed.'],
+                    ['title' => 'Scan at the door', 'description' => 'Use any smartphone to scan QR codes. The live dashboard tracks check-ins in real time.'],
+                ],
                 'faq' => [
                     ['question' => 'Does Event Schedule replace standalone QR code generators?', 'answer' => 'Yes. Every ticket sold through Event Schedule includes a unique QR code automatically. No need for a separate QR generation tool. QR codes are linked to attendee data for instant validation at the door.'],
                     ['question' => 'How much does QR code ticketing cost?', 'answer' => 'QR code tickets are included in the Pro plan at $5/month with zero platform fees. You only pay standard Stripe processing fees (typically 2.9% + $0.30 per transaction). The free plan includes unlimited events without ticketing.'],
                     ['question' => 'How does the QR check-in system work?', 'answer' => 'Each ticket includes a unique QR code emailed to the buyer. At the event, use any smartphone to scan QR codes and check attendees in. The system validates tickets, prevents duplicate scans, and tracks attendance on a live dashboard in real time.'],
+                    ['question' => 'Is Event Schedule open source?', 'answer' => 'Yes. Event Schedule is fully open source and can be selfhosted on your own server. You get complete control over your ticketing and check-in system with no vendor lock-in.'],
+                    ['question' => 'Do I need special hardware to scan QR codes?', 'answer' => 'No. Any smartphone with a web browser can scan tickets. Open the check-in page on your phone, point it at the QR code, and the attendee is checked in instantly. No app download required.'],
                 ],
                 'cross_links' => [
                     ['name' => 'Canva', 'route' => 'marketing.replace_canva'],
                     ['name' => 'Google Forms', 'route' => 'marketing.replace_google_forms'],
                     ['name' => 'Google Sheets', 'route' => 'marketing.replace_google_sheets'],
                 ],
+                'related_features' => [
+                    ['name' => 'Ticketing', 'route' => 'marketing.ticketing', 'description' => 'Sell tickets with QR codes and zero platform fees.'],
+                    ['name' => 'Analytics', 'route' => 'marketing.analytics', 'description' => 'Track check-ins and attendance in real time.'],
+                    ['name' => 'Event Graphics', 'route' => 'marketing.event_graphics', 'description' => 'Auto-generate shareable graphics for promotion.'],
+                ],
             ],
             'squarespace' => [
                 'name' => 'Squarespace',
                 'tagline' => 'An event platform, not a website builder.',
                 'description' => 'Replace Squarespace for event websites with Event Schedule. Get purpose-built event pages, integrated ticketing, and a shareable schedule without building a full website.',
-                'keywords' => 'Squarespace replacement, event website builder, Squarespace alternative for events, event landing page',
+                'keywords' => 'Squarespace alternative for events, Squarespace replacement, event website builder, event landing page',
                 'about' => 'Squarespace is a general website builder that some event organizers use to create event pages and sell tickets through third-party integrations. While it produces beautiful websites, building event functionality on top of a website builder means extra complexity, plugins, and ongoing maintenance for features that should be built in.',
                 'tool_strengths' => [
                     'Beautiful, professionally designed website templates',
@@ -3762,22 +3952,43 @@ class MarketingController extends Controller
                     ['title' => 'All-in-one Platform', 'description' => 'Ticketing, newsletters, calendar sync, AI tools, and event graphics in one platform. No plugins or integrations to manage.', 'icon' => 'ai', 'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30', 'border' => 'border-rose-200 dark:border-rose-500/20', 'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20', 'icon_color' => 'text-rose-600 dark:text-rose-400'],
                     ['title' => 'AI Event Import', 'description' => 'Paste event details in any format and AI extracts dates, times, and descriptions automatically. No manual page building.', 'icon' => 'ai', 'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30', 'border' => 'border-violet-200 dark:border-violet-500/20', 'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20', 'icon_color' => 'text-violet-600 dark:text-violet-400'],
                 ],
+                'why_switch' => [
+                    'intro' => 'Squarespace builds websites. Event Schedule builds event experiences with ticketing, newsletters, and audience tools included.',
+                    'points' => [
+                        'Professional event pages generated automatically, no page building needed',
+                        'Integrated ticketing with zero platform fees, no third-party plugins',
+                        'Embeddable widget if you already have a Squarespace site',
+                        'Open source with selfhosting option, no vendor lock-in',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Create your schedule', 'description' => 'Sign up free and create your branded schedule page. No website building required.'],
+                    ['title' => 'Add events and tickets', 'description' => 'Create events with all details and ticket options. AI can import events automatically.'],
+                    ['title' => 'Share or embed', 'description' => 'Share your schedule URL directly or embed the calendar widget on your existing website.'],
+                ],
                 'faq' => [
                     ['question' => 'Can Event Schedule replace my Squarespace events page?', 'answer' => 'Yes. Event Schedule provides ready-made event pages with all event details, ticket purchasing, and a shareable schedule. No website building, plugins, or custom page design required. You can also embed the calendar widget on your existing Squarespace site.'],
                     ['question' => 'How does Event Schedule pricing compare to Squarespace?', 'answer' => 'Event Schedule is free for unlimited events and a public schedule page. The Pro plan at $5/month adds ticketing with zero platform fees. Squarespace costs $16 or more per month for a basic website, plus additional fees for third-party ticketing integrations.'],
                     ['question' => 'Do I still need a website if I use Event Schedule?', 'answer' => 'Not necessarily. Your Event Schedule page works as a standalone event website with a custom URL, all your events, ticket sales, and subscriber signups. If you already have a website, you can embed the Event Schedule calendar widget on it.'],
+                    ['question' => 'Is Event Schedule open source?', 'answer' => 'Yes. Event Schedule is fully open source and can be selfhosted on your own server. Unlike Squarespace, you own your platform and data completely. If you stop paying, your events and data are still yours.'],
+                    ['question' => 'Can I embed Event Schedule on my Squarespace site?', 'answer' => 'Yes. The embeddable calendar widget works on any website including Squarespace. Add a code block to your Squarespace page and paste the embed snippet to show your event calendar.'],
                 ],
                 'cross_links' => [
                     ['name' => 'Linktree', 'route' => 'marketing.replace_linktree'],
                     ['name' => 'Canva', 'route' => 'marketing.replace_canva'],
                     ['name' => 'Mailchimp', 'route' => 'marketing.replace_mailchimp'],
                 ],
+                'related_features' => [
+                    ['name' => 'Embed Calendar', 'route' => 'marketing.embed_calendar', 'description' => 'Embed your event calendar on any website.'],
+                    ['name' => 'Ticketing', 'route' => 'marketing.ticketing', 'description' => 'Sell tickets with QR codes and zero platform fees.'],
+                    ['name' => 'White Label', 'route' => 'marketing.white_label', 'description' => 'Remove branding for a fully custom experience.'],
+                ],
             ],
             'notion' => [
                 'name' => 'Notion',
                 'tagline' => 'Event management that faces your audience, not just your team.',
                 'description' => 'Replace Notion for event planning with Event Schedule. Get public event pages, built-in ticketing, and Google Calendar sync instead of internal workspace databases.',
-                'keywords' => 'Notion replacement, Notion event planning, Notion alternative for events, event management workspace',
+                'keywords' => 'Notion alternative for events, Notion replacement, Notion event planning, event management workspace',
                 'about' => 'Notion is a workspace and productivity tool that some event organizers use to plan events with databases, calendars, and shared pages. While Notion is excellent for internal project management, it has no public-facing event pages, no ticketing or RSVP functionality, and a steep learning curve for setting up event workflows.',
                 'tool_strengths' => [
                     'Flexible workspace with databases, docs, and wikis',
@@ -3798,22 +4009,43 @@ class MarketingController extends Controller
                     ['title' => 'Team Collaboration', 'description' => 'Invite team members to manage events together with role-based access. Built for event teams, not generic workspace collaboration.', 'icon' => 'globe', 'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30', 'border' => 'border-rose-200 dark:border-rose-500/20', 'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20', 'icon_color' => 'text-rose-600 dark:text-rose-400'],
                     ['title' => 'Newsletters', 'description' => 'Send event updates to subscribers with built-in newsletters and A/B testing. No separate email tool needed.', 'icon' => 'mail', 'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30', 'border' => 'border-violet-200 dark:border-violet-500/20', 'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20', 'icon_color' => 'text-violet-600 dark:text-violet-400'],
                 ],
+                'why_switch' => [
+                    'intro' => 'Notion organizes your internal planning. Event Schedule faces your audience with public event pages, ticketing, and subscriber tools.',
+                    'points' => [
+                        'Public event pages your audience can see, not internal workspace docs',
+                        'Built-in ticketing with payments and zero platform fees',
+                        'Two-way Google Calendar sync instead of a disconnected internal calendar',
+                        'AI event import that is faster than building Notion database entries',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Create your schedule', 'description' => 'Sign up free and set up your public schedule page. No databases or templates to configure.'],
+                    ['title' => 'Import your events', 'description' => 'Paste event details and AI creates structured events automatically. Much faster than Notion database entries.'],
+                    ['title' => 'Go public', 'description' => 'Share your schedule page with your audience. They can view events, buy tickets, and subscribe for updates.'],
+                ],
                 'faq' => [
                     ['question' => 'Can Event Schedule replace Notion for event planning?', 'answer' => 'Yes, for the event management side. Event Schedule handles everything Notion cannot: public event pages, ticket sales, attendee management, Google Calendar sync, and newsletters. You may still use Notion for internal project notes, but Event Schedule replaces it for audience-facing event work.'],
                     ['question' => 'Is Event Schedule free like Notion?', 'answer' => 'Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and team collaboration. The Pro plan at $5/month adds ticketing with zero platform fees, event graphics, and more.'],
                     ['question' => 'Does Event Schedule support team collaboration like Notion?', 'answer' => 'Yes. You can invite team members to manage events together with role-based access on the Enterprise plan. Unlike Notion, collaboration is purpose-built for event management with tools like shared schedules, sub-schedules, and delegated event editing.'],
+                    ['question' => 'Is Event Schedule open source?', 'answer' => 'Yes. Event Schedule is fully open source and can be selfhosted on your own server. You get complete control over your event data, unlike Notion where your data lives on their servers.'],
+                    ['question' => 'Can I use Event Schedule alongside Notion?', 'answer' => 'Yes. Many organizers use Notion for internal project planning and Event Schedule for the audience-facing side: public event pages, ticket sales, newsletters, and attendee management. The REST API can also connect Event Schedule data with your Notion workflows.'],
                 ],
                 'cross_links' => [
                     ['name' => 'Trello', 'route' => 'marketing.replace_trello'],
                     ['name' => 'Google Sheets', 'route' => 'marketing.replace_google_sheets'],
                     ['name' => 'Calendly', 'route' => 'marketing.replace_calendly'],
                 ],
+                'related_features' => [
+                    ['name' => 'Team Scheduling', 'route' => 'marketing.team_scheduling', 'description' => 'Collaborate with your team on event management.'],
+                    ['name' => 'AI Import', 'route' => 'marketing.ai', 'description' => 'Paste event details and let AI create your events.'],
+                    ['name' => 'Calendar Sync', 'route' => 'marketing.calendar_sync', 'description' => 'Two-way Google Calendar and CalDAV sync.'],
+                ],
             ],
             'trello' => [
                 'name' => 'Trello',
                 'tagline' => 'From task boards to ticket sales.',
                 'description' => 'Replace Trello for event management with Event Schedule. Get public event pages, built-in ticketing, payments, and a shareable schedule.',
-                'keywords' => 'Trello replacement, Trello event planning, Trello alternative for events, event management board',
+                'keywords' => 'Trello alternative for events, Trello replacement, Trello event planning, event management board',
                 'about' => 'Trello is a kanban-style project management tool that some event organizers use to track event planning tasks. While Trello is great for organizing workflows with boards and cards, it has no attendee-facing features, no registration or ticketing, and task boards do not map well to the event lifecycle of creating, promoting, and managing events.',
                 'tool_strengths' => [
                     'Visual kanban boards for task management',
@@ -3834,15 +4066,36 @@ class MarketingController extends Controller
                     ['title' => 'AI Event Import', 'description' => 'Paste event details in any format and AI extracts structured event data automatically. Faster than creating Trello cards.', 'icon' => 'ai', 'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30', 'border' => 'border-rose-200 dark:border-rose-500/20', 'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20', 'icon_color' => 'text-rose-600 dark:text-rose-400'],
                     ['title' => 'Auto-generated Graphics', 'description' => 'Generate shareable event graphics and AI flyers automatically. Promote events visually without separate design tools.', 'icon' => 'image', 'gradient' => 'from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30', 'border' => 'border-violet-200 dark:border-violet-500/20', 'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20', 'icon_color' => 'text-violet-600 dark:text-violet-400'],
                 ],
+                'why_switch' => [
+                    'intro' => 'Trello tracks internal tasks. Event Schedule handles the full event lifecycle your audience actually sees: event pages, ticket sales, and promotion.',
+                    'points' => [
+                        'Public event pages your audience can visit and buy tickets from',
+                        'Built-in ticketing with Stripe payments and zero platform fees',
+                        'Team collaboration purpose-built for event management workflows',
+                        'AI event import and auto-generated graphics for fast promotion',
+                    ],
+                ],
+                'switch_steps' => [
+                    ['title' => 'Create your events', 'description' => 'Add events with details, images, and ticket options. AI can import event details from any format.'],
+                    ['title' => 'Invite your team', 'description' => 'Add team members with role-based access to manage events together.'],
+                    ['title' => 'Publish and sell', 'description' => 'Share your public schedule page. Attendees see events, buy tickets, and subscribe for updates.'],
+                ],
                 'faq' => [
                     ['question' => 'Can Event Schedule replace Trello for event management?', 'answer' => 'Yes, for the event management side. Event Schedule handles what Trello cannot: public event pages, ticket sales, attendee management, and event promotion. You may still use Trello for internal task tracking, but Event Schedule replaces it for the full event lifecycle.'],
                     ['question' => 'Is Event Schedule free like Trello?', 'answer' => 'Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and fan engagement features. The Pro plan at $5/month adds ticketing with zero platform fees, event graphics, and more.'],
                     ['question' => 'Does Event Schedule have task management like Trello?', 'answer' => 'Event Schedule is not a task management tool. It replaces Trello specifically for event management workflows: creating events, publishing them, selling tickets, and managing attendees. For internal planning tasks, you can continue using any project management tool you prefer.'],
+                    ['question' => 'Is Event Schedule open source?', 'answer' => 'Yes. Event Schedule is fully open source and can be selfhosted on your own server. You get complete control over your event platform and data with no vendor lock-in.'],
+                    ['question' => 'Can I use Event Schedule alongside Trello?', 'answer' => 'Yes. Use Trello for internal planning tasks and Event Schedule for the audience-facing event lifecycle: creating events, selling tickets, managing attendees, and sending newsletters. The two tools complement each other well.'],
                 ],
                 'cross_links' => [
                     ['name' => 'Notion', 'route' => 'marketing.replace_notion'],
                     ['name' => 'Doodle', 'route' => 'marketing.replace_doodle'],
                     ['name' => 'Google Forms', 'route' => 'marketing.replace_google_forms'],
+                ],
+                'related_features' => [
+                    ['name' => 'Team Scheduling', 'route' => 'marketing.team_scheduling', 'description' => 'Collaborate with your team on event management.'],
+                    ['name' => 'Ticketing', 'route' => 'marketing.ticketing', 'description' => 'Sell tickets with QR codes and zero platform fees.'],
+                    ['name' => 'AI Import', 'route' => 'marketing.ai', 'description' => 'Paste event details and let AI create your events.'],
                 ],
             ],
         ];

@@ -2946,6 +2946,24 @@
                                     </div>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.individual_tickets_description') }}</p>
                                     <input type="hidden" name="individual_tickets" :value="event.individual_tickets ? 1 : 0">
+
+                                    <!-- Individual Ticket Fields sub-toggle -->
+                                    <div v-show="event.individual_tickets" class="mt-3 ms-14">
+                                        <div class="flex items-center gap-3">
+                                            <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                                <input id="individual_ticket_fields_checkbox" type="checkbox"
+                                                    v-model="event.individual_ticket_fields"
+                                                    class="sr-only peer">
+                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
+                                                <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                            </label>
+                                            <label for="individual_ticket_fields_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                                {{ __('messages.individual_ticket_fields') }}
+                                            </label>
+                                        </div>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.individual_ticket_fields_description') }}</p>
+                                        <input type="hidden" name="individual_ticket_fields" :value="event.individual_ticket_fields ? 1 : 0">
+                                    </div>
                                 </div>
                                 </div>
 
@@ -3641,6 +3659,7 @@
           require_phone: {{ $event->require_phone ? 'true' : 'false' }},
           country_code_phone: {{ $event->country_code_phone ? 'true' : 'false' }},
           individual_tickets: {{ $event->individual_tickets ? 'true' : 'false' }},
+          individual_ticket_fields: {{ $event->individual_ticket_fields ? 'true' : 'false' }},
         },
         ticketMode: @json($event->tickets_enabled ? 'tickets' : ($event->rsvp_enabled ? 'rsvp' : 'external')),
         venues: @json($venues),

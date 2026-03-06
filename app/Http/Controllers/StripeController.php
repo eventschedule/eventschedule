@@ -191,6 +191,11 @@ class StripeController extends Controller
                         $this->sendMetaConversion($sale, $webhookAmount);
 
                         WebhookService::dispatch('sale.paid', $sale);
+                        if ($sale->group_id && $sale->isPrimarySale()) {
+                            foreach (Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->get() as $gs) {
+                                WebhookService::dispatch('sale.paid', $gs);
+                            }
+                        }
                     });
                 }
                 break;
@@ -261,6 +266,11 @@ class StripeController extends Controller
                             $this->sendMetaConversion($sale, $sale->payment_amount);
 
                             WebhookService::dispatch('sale.paid', $sale);
+                            if ($sale->group_id && $sale->isPrimarySale()) {
+                                foreach (Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->get() as $gs) {
+                                    WebhookService::dispatch('sale.paid', $gs);
+                                }
+                            }
                         });
                     }
                 }

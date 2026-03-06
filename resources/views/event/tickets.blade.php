@@ -60,6 +60,7 @@
                     waitlistSuccess: false,
                     showPassword: false,
                     individualTickets: @json((bool) $event->individual_tickets),
+                    individualTicketFields: @json((bool) $event->individual_ticket_fields),
                     guests: [],
                 };
             },
@@ -164,17 +165,6 @@
                 totalAmount() {
                     return Math.max(0, this.subtotalAmount - this.discountAmount);
                 },
-                hasSelectedTickets() {
-                    if (this.isPaymentLinkMode) {
-                        return this.name.trim() !== '' && this.email.trim() !== '';
-                    }
-                    if (!this.tickets.some(ticket => ticket.selectedQty > 0)) return false;
-                    if (this.showGuestForms) {
-                        return this.guests.every(g => g.name.trim() !== '' && g.email.trim() !== '' && (!this.requirePhone || g.phone.trim() !== ''));
-                    }
-                    if (this.requirePhone && this.phone.trim() === '') return false;
-                    return this.name.trim() !== '' && this.email.trim() !== '';
-                },
                 showGuestForms() {
                     return this.individualTickets && this.totalSelectedTickets > 1;
                 },
@@ -216,7 +206,7 @@
                     }).format(price);
                 },
                 validateForm(e) {
-                    if (!this.hasSelectedTickets) {
+                    if (!this.isPaymentLinkMode && !this.tickets.some(t => t.selectedQty > 0)) {
                         e.preventDefault();
                         alert(@json(__('messages.please_select_ticket')));
                         return;
@@ -260,6 +250,9 @@
                         this.applyPromoCode();
                     }
                 },
+                getTicketById(id) {
+                    return this.tickets.find(t => t.id === id) || null;
+                },
                 rebuildGuests() {
                     if (!this.individualTickets) return;
                     const newGuests = [];
@@ -270,14 +263,35 @@
                     });
                     // Preserve existing guest data where possible
                     for (let i = 0; i < newGuests.length; i++) {
-                        if (i < this.guests.length) {
+                        if (i < this.guests.length && this.guests[i].ticketId === newGuests[i].ticketId) {
                             newGuests[i].name = this.guests[i].name;
                             newGuests[i].email = this.guests[i].email;
                             newGuests[i].phone = this.guests[i].phone;
+                            newGuests[i].ticketCustomValues = this.guests[i].ticketCustomValues || {};
+                            newGuests[i].ticketMultiselectValues = this.guests[i].ticketMultiselectValues || {};
+                        } else if (i < this.guests.length) {
+                            newGuests[i].name = this.guests[i].name;
+                            newGuests[i].email = this.guests[i].email;
+                            newGuests[i].phone = this.guests[i].phone;
+                            newGuests[i].ticketCustomValues = {};
+                            newGuests[i].ticketMultiselectValues = {};
                         } else {
                             newGuests[i].name = i === 0 ? this.name : '';
                             newGuests[i].email = i === 0 ? this.email : '';
                             newGuests[i].phone = i === 0 ? this.phone : '';
+                            newGuests[i].ticketCustomValues = {};
+                            newGuests[i].ticketMultiselectValues = {};
+                        }
+                        // Initialize multiselect arrays for ticket custom fields
+                        if (this.individualTicketFields) {
+                            const ticket = this.getTicketById(newGuests[i].ticketId);
+                            if (ticket && ticket.custom_fields) {
+                                Object.entries(ticket.custom_fields).forEach(([key, field]) => {
+                                    if (field.type === 'multiselect' && !newGuests[i].ticketMultiselectValues[key]) {
+                                        newGuests[i].ticketMultiselectValues[key] = [];
+                                    }
+                                });
+                            }
                         }
                     }
                     this.guests = newGuests;
@@ -475,6 +489,23 @@
                         </div>
                         <x-input-error class="mt-2" :messages="$errors->get('password')" />
                     </div>
+
+                    <div class="mt-3">
+                        <div class="relative flex items-start">
+                            <div class="flex h-6 items-center">
+                                <input id="terms" name="terms" type="checkbox" required
+                                    class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[#4E81FA] focus:ring-[#4E81FA]">
+                            </div>
+                            <div class="ms-3 text-sm leading-6">
+                                <label for="terms" class="font-medium text-gray-900 dark:text-gray-300">
+                                    {!! str_replace([':terms', ':privacy'], [
+                                        '<a href="' . marketing_url('/terms-of-service') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
+                                        '<a href="' . marketing_url('/privacy') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
+                                    ], __('messages.i_accept_the_terms_and_privacy')) !!}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             @endif
         </div>
@@ -521,6 +552,67 @@
                     <input type="hidden" :name="'guests[' + gIndex + '][phone]'" :value="guest.phone">
                 </div>
 
+                <!-- Per-guest ticket-level custom fields -->
+                <template v-if="individualTicketFields && getTicketById(guest.ticketId) && getTicketById(guest.ticketId).custom_fields && Object.keys(getTicketById(guest.ticketId).custom_fields).length > 0">
+                    <div v-for="(field, fieldKey) in getTicketById(guest.ticketId).custom_fields" :key="fieldKey" class="mb-3">
+                        <label :for="`guest_ticket_custom_${gIndex}_${fieldKey}`" class="text-sm text-gray-900 dark:text-gray-100">
+                            @{{ field.name }}@{{ field.required ? ' *' : '' }}
+                        </label>
+                        <!-- Text input -->
+                        <input v-if="field.type === 'string'" type="text"
+                            :id="`guest_ticket_custom_${gIndex}_${fieldKey}`"
+                            v-model="guest.ticketCustomValues[fieldKey]"
+                            :required="field.required"
+                            class="mt-1 block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
+                        <!-- Multiline text -->
+                        <textarea v-else-if="field.type === 'multiline_string'"
+                            :id="`guest_ticket_custom_${gIndex}_${fieldKey}`"
+                            v-model="guest.ticketCustomValues[fieldKey]"
+                            :required="field.required"
+                            rows="2" dir="auto"
+                            class="mt-1 block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"></textarea>
+                        <!-- Yes/No switch -->
+                        <div v-else-if="field.type === 'switch'" class="mt-1">
+                            <select :id="`guest_ticket_custom_${gIndex}_${fieldKey}`"
+                                v-model="guest.ticketCustomValues[fieldKey]"
+                                :required="field.required"
+                                class="block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                                <option value="">{{ __('messages.please_select') }}</option>
+                                <option value="Yes">{{ __('messages.yes') }}</option>
+                                <option value="No">{{ __('messages.no') }}</option>
+                            </select>
+                        </div>
+                        <!-- Date picker -->
+                        <input v-else-if="field.type === 'date'" type="date"
+                            :id="`guest_ticket_custom_${gIndex}_${fieldKey}`"
+                            v-model="guest.ticketCustomValues[fieldKey]"
+                            :required="field.required"
+                            class="mt-1 block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
+                        <!-- Dropdown -->
+                        <select v-else-if="field.type === 'dropdown'"
+                            :id="`guest_ticket_custom_${gIndex}_${fieldKey}`"
+                            v-model="guest.ticketCustomValues[fieldKey]"
+                            :required="field.required"
+                            class="mt-1 block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                            <option value="">{{ __('messages.please_select') }}</option>
+                            <option v-for="option in (field.options || '').split(',')" :key="option.trim()" :value="option.trim()">@{{ option.trim() }}</option>
+                        </select>
+                        <!-- Multi-select -->
+                        <div v-else-if="field.type === 'multiselect'" class="mt-1 space-y-1">
+                            <label v-for="option in (field.options || '').split(',')" :key="option.trim()" class="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100">
+                                <input type="checkbox" :value="option.trim()"
+                                    v-model="guest.ticketMultiselectValues[fieldKey]"
+                                    class="h-4 w-4 border-gray-300 rounded"
+                                    style="accent-color: {{ $accentColor }}" />
+                                @{{ option.trim() }}
+                            </label>
+                        </div>
+                        <!-- Hidden inputs for submission -->
+                        <input type="hidden" :name="`guest_ticket_custom_values[${gIndex}][${fieldKey}]`"
+                            :value="field.type === 'multiselect' ? (guest.ticketMultiselectValues[fieldKey] || []).join(', ') : (guest.ticketCustomValues[fieldKey] || '')">
+                    </div>
+                </template>
+
                 @if (! auth()->check() && config('app.hosted') && ! request()->embed)
                 <div v-if="gIndex === 0" class="mt-3">
                     <div class="flex items-center">
@@ -540,6 +632,23 @@
                                 <svg v-show="!showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                 <svg v-show="showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
                             </button>
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="relative flex items-start">
+                                <div class="flex h-6 items-center">
+                                    <input id="terms_guest" name="terms" type="checkbox" required
+                                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                </div>
+                                <div class="ms-3 text-sm leading-6">
+                                    <label for="terms_guest" class="font-medium text-gray-900 dark:text-gray-300">
+                                        {!! str_replace([':terms', ':privacy'], [
+                                            '<a href="' . marketing_url('/terms-of-service') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
+                                            '<a href="' . marketing_url('/privacy') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
+                                        ], __('messages.i_accept_the_terms_and_privacy')) !!}
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -641,8 +750,8 @@
                 </div>
             </div>
 
-            <!-- Ticket-level Custom Fields (shown when ticket is selected) -->
-            <div v-if="ticket.selectedQty > 0 && ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0" class="mt-4 ps-4 border-s-2 border-gray-200 dark:border-gray-600">
+            <!-- Ticket-level Custom Fields (shown when ticket is selected, hidden when per-guest fields are active) -->
+            <div v-if="ticket.selectedQty > 0 && ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0 && !(showGuestForms && individualTicketFields)" class="mt-4 ps-4 border-s-2 border-gray-200 dark:border-gray-600">
                 <div v-for="(field, fieldKey) in ticket.custom_fields" :key="fieldKey" class="mb-3">
                     <label :for="`ticket_custom_${ticket.id}_${fieldKey}`" class="text-sm text-gray-900 dark:text-gray-100">
                         @{{ field.name }}@{{ field.required ? ' *' : '' }}
@@ -798,7 +907,7 @@
             @endif
 
             <button type="submit"
-                v-bind:disabled="!hasSelectedTickets || isSubmitting"
+                v-bind:disabled="isSubmitting"
                 class="mt-4 inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-md font-semibold text-lg shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
                 style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
                 <span v-if="isSubmitting">{{ strtoupper(__('messages.processing')) }}</span>

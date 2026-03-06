@@ -82,9 +82,7 @@ class Sale extends Model
             if ($sale->isDirty('status') && in_array($sale->status, ['cancelled', 'refunded', 'expired'])) {
                 if ($sale->payment_method === 'rsvp') {
                     $sale->event->updateRsvpSold($sale->event_date, -1);
-                    if (! $sale->group_id || $sale->isPrimarySale()) {
-                        AnalyticsEventsDaily::decrementSale($sale->event_id, 0);
-                    }
+                    AnalyticsEventsDaily::decrementSale($sale->event_id, 0);
                 } else {
                     foreach ($sale->saleTickets as $saleTicket) {
                         $saleTicket->ticket->updateSold($sale->event_date, -$saleTicket->quantity);

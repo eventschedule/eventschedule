@@ -263,6 +263,60 @@ class AdminController extends Controller
             ->whereNull('admin_newsletter_unsubscribed_at')
             ->count();
 
+        // Signups by method (selected period)
+        $emailUsersInPeriod = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('password')
+            ->whereNull('google_oauth_id')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
+        $googleUsersInPeriod = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('google_oauth_id')
+            ->whereNull('password')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
+        $hybridUsersInPeriod = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotNull('password')
+            ->whereNotNull('google_oauth_id')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
+        // Recent signups
+        $recentSignups = User::whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get(['name', 'created_at', 'utm_source']);
+
+        // Stripe paid count
+        $validSubscriptionScope = function ($sq) {
+            $sq->where(function ($q) {
+                $q->active();
+            })->orWhere(function ($q) {
+                $q->onTrial();
+            })->orWhere(function ($q) {
+                $q->onGracePeriod();
+            });
+        };
+        $stripePaidCount = Role::whereHas('subscriptions', $validSubscriptionScope)
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
+            ->count();
+
+        // Domains overview
+        $totalCustomDomains = Role::whereNotNull('custom_domain')->count();
+        $directCount = Role::where('custom_domain_mode', 'direct')->count();
+        $activeCount = Role::where('custom_domain_mode', 'direct')->where('custom_domain_status', 'active')->count();
+        $pendingCount = Role::where('custom_domain_mode', 'direct')->where('custom_domain_status', 'pending')->count();
+
+        // Queue health
+        $pendingJobsCount = DB::table('jobs')->count();
+        $failedJobsCount = DB::table('failed_jobs')->count();
+
         return view('admin.dashboard', compact(
             'totalUsers',
             'totalSchedules',
@@ -288,6 +342,17 @@ class AdminController extends Controller
             'boostMarkupRevenue',
             'adminNewslettersSent',
             'newsletterSubscribers',
+            'emailUsersInPeriod',
+            'googleUsersInPeriod',
+            'hybridUsersInPeriod',
+            'recentSignups',
+            'stripePaidCount',
+            'totalCustomDomains',
+            'directCount',
+            'activeCount',
+            'pendingCount',
+            'pendingJobsCount',
+            'failedJobsCount',
         ));
     }
 
@@ -879,7 +944,7 @@ class AdminController extends Controller
 
         $nlRoleIds = $topNewsletterSenders->pluck('role_id')->toArray();
         $nlRoles = Role::whereIn('id', $nlRoleIds)
-            ->get(['id', 'subdomain', 'email_settings', 'plan_tier', 'stripe_plan'])
+            ->get(['id', 'subdomain', 'email_settings'])
             ->keyBy('id');
 
         $topNewsletterData = $topNewsletterSenders->map(function ($row) use ($nlRoles) {

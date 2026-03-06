@@ -77,6 +77,15 @@ class TicketController extends Controller
         $sales = $query->orderByRaw('COALESCE(group_id, id) DESC, id ASC')
             ->paginate(50, ['*'], 'page');
 
+        // Pre-compute guest counts per group to avoid N+1 queries
+        $groupIds = $sales->pluck('id')->filter();
+        $groupCounts = Sale::where('is_deleted', false)
+            ->whereNotNull('group_id')
+            ->whereIn('group_id', $groupIds)
+            ->select('group_id', DB::raw('count(*) - 1 as guest_count'))
+            ->groupBy('group_id')
+            ->pluck('guest_count', 'group_id');
+
         if (request()->ajax()) {
             $tab = request()->query('tab');
             if ($tab === 'feedback') {
@@ -89,7 +98,7 @@ class TicketController extends Controller
                 return view('ticket.feedback_table', $this->getFeedbackData());
             }
 
-            return view('ticket.sales_table', compact('sales'));
+            return view('ticket.sales_table', compact('sales', 'groupCounts'));
         } else {
             $user = auth()->user();
             $waitlistCount = TicketWaitlist::whereHas('event', function ($q) use ($user) {
@@ -100,7 +109,7 @@ class TicketController extends Controller
 
             $hasPro = $user->roles()->get()->contains(fn ($role) => $role->isPro());
 
-            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries', 'hasPro'));
+            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries', 'hasPro', 'groupCounts'));
         }
     }
 
@@ -484,11 +493,35 @@ class TicketController extends Controller
                         }
 
                         // Primary sale gets the first ticket (qty=1)
-                        $sale->saleTickets()->create([
+                        $primarySaleTicketData = [
                             'ticket_id' => $ticketAssignments[0],
                             'quantity' => 1,
                             'seats' => json_encode([1 => null]),
-                        ]);
+                        ];
+
+                        // Store per-guest ticket custom fields for primary guest
+                        if ($event->individual_ticket_fields) {
+                            $guestTicketCustomValues = $request->input('guest_ticket_custom_values', []);
+                            $primaryTicketModel = $event->tickets()->find($ticketAssignments[0]);
+                            $primaryTicketCustomFields = $primaryTicketModel->custom_fields ?? [];
+                            $ticketFallbackIndex = 1;
+                            foreach ($primaryTicketCustomFields as $fieldKey => $fieldConfig) {
+                                $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
+                                $ticketFallbackIndex++;
+                                if ($index >= 1 && $index <= 10) {
+                                    $value = $guestTicketCustomValues[0][$fieldKey] ?? null;
+                                    if (is_array($value)) {
+                                        $value = implode(', ', array_map('trim', $value));
+                                    }
+                                    if ($value !== null) {
+                                        $value = trim(strip_tags($value));
+                                    }
+                                    $primarySaleTicketData["custom_value{$index}"] = $value;
+                                }
+                            }
+                        }
+
+                        $sale->saleTickets()->create($primarySaleTicketData);
 
                         $sale->group_id = $sale->id;
                         $sale->payment_amount = $subtotal;
@@ -594,11 +627,35 @@ class TicketController extends Controller
 
                             // Assign ticket to guest
                             if (isset($ticketAssignments[$g])) {
-                                $guestSale->saleTickets()->create([
+                                $guestSaleTicketData = [
                                     'ticket_id' => $ticketAssignments[$g],
                                     'quantity' => 1,
                                     'seats' => json_encode([1 => null]),
-                                ]);
+                                ];
+
+                                // Store per-guest ticket custom fields
+                                if ($event->individual_ticket_fields) {
+                                    $guestTicketCustomValues = $request->input('guest_ticket_custom_values', []);
+                                    $guestTicketModel = $event->tickets()->find($ticketAssignments[$g]);
+                                    $guestTicketCustomFields = $guestTicketModel->custom_fields ?? [];
+                                    $guestTicketFallbackIndex = 1;
+                                    foreach ($guestTicketCustomFields as $fieldKey => $fieldConfig) {
+                                        $index = $fieldConfig['index'] ?? $guestTicketFallbackIndex;
+                                        $guestTicketFallbackIndex++;
+                                        if ($index >= 1 && $index <= 10) {
+                                            $value = $guestTicketCustomValues[$g][$fieldKey] ?? null;
+                                            if (is_array($value)) {
+                                                $value = implode(', ', array_map('trim', $value));
+                                            }
+                                            if ($value !== null) {
+                                                $value = trim(strip_tags($value));
+                                            }
+                                            $guestSaleTicketData["custom_value{$index}"] = $value;
+                                        }
+                                    }
+                                }
+
+                                $guestSale->saleTickets()->create($guestSaleTicketData);
                             }
                         }
                     }
@@ -633,6 +690,11 @@ class TicketController extends Controller
 
         // Dispatch sale.created webhook (outside transaction)
         WebhookService::dispatch('sale.created', $sale);
+        if ($sale->group_id && $sale->isPrimarySale()) {
+            foreach (Sale::where('group_id', $sale->id)->where('id', '!=', $sale->id)->get() as $gs) {
+                WebhookService::dispatch('sale.created', $gs);
+            }
+        }
 
         $isEmbed = $request->boolean('embed');
 
@@ -641,12 +703,22 @@ class TicketController extends Controller
             $sale->save();
 
             // Record free ticket sale in analytics (0 revenue)
-            AnalyticsEventsDaily::incrementSale($event->id, 0);
+            $analyticsCount = ($sale->group_id && $sale->isPrimarySale())
+                ? Sale::where('group_id', $sale->id)->count()
+                : 1;
+            for ($i = 0; $i < $analyticsCount; $i++) {
+                AnalyticsEventsDaily::incrementSale($event->id, 0);
+            }
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($event->id, $sale->discount_amount);
             }
 
             WebhookService::dispatch('sale.paid', $sale);
+            if ($sale->group_id && $sale->isPrimarySale()) {
+                foreach (Sale::where('group_id', $sale->id)->where('id', '!=', $sale->id)->get() as $gs) {
+                    WebhookService::dispatch('sale.paid', $gs);
+                }
+            }
 
             $ticketViewUrl = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
             if ($isEmbed) {
@@ -688,6 +760,16 @@ class TicketController extends Controller
                 : 'nullable|string|max:50';
         }
 
+        if ($event && $event->individual_tickets && $request->has('guests') && is_array($request->input('guests')) && count($request->input('guests')) > 1) {
+            $rules['guests.*.name'] = ['required', 'string', 'max:255'];
+            $rules['guests.*.email'] = ['required', 'string', 'email', 'max:255'];
+            if ($event->ask_phone) {
+                $rules['guests.*.phone'] = $event->require_phone
+                    ? ['required', 'string', 'max:50']
+                    : ['nullable', 'string', 'max:50'];
+            }
+        }
+
         $request->validate($rules);
 
         // Turnstile CAPTCHA validation
@@ -725,6 +807,7 @@ class TicketController extends Controller
             $request->validate([
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class, new NoFakeEmail],
                 'password' => ['required', 'string', 'min:8'],
+                'terms' => ['accepted'],
             ]);
 
             $utmParams = session('utm_params', []);
@@ -778,6 +861,25 @@ class TicketController extends Controller
 
                 if ($duplicate) {
                     throw new \Exception(__('messages.rsvp_already_registered'));
+                }
+
+                // Check for duplicate guest registrations
+                if ($event->individual_tickets && count($guests) > 1) {
+                    $guestEmails = collect($guests)->pluck('email')->filter()->map(fn ($e) => strtolower(trim($e)));
+                    if ($guestEmails->count() !== $guestEmails->unique()->count()) {
+                        throw new \Exception(__('messages.duplicate_guest_emails'));
+                    }
+                    $duplicateGuests = Sale::where('event_id', $event->id)
+                        ->where('event_date', $request->event_date)
+                        ->whereIn('email', $guestEmails)
+                        ->where('payment_method', 'rsvp')
+                        ->where('status', 'paid')
+                        ->where('is_deleted', false)
+                        ->exists();
+
+                    if ($duplicateGuests) {
+                        throw new \Exception(__('messages.rsvp_already_registered'));
+                    }
                 }
 
                 $sale = new Sale;
@@ -889,12 +991,23 @@ class TicketController extends Controller
 
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'rsvp:event_id:'.$event->id);
 
-        // Record in analytics (0 revenue)
-        AnalyticsEventsDaily::incrementSale($event->id, 0);
+        // Record in analytics (0 revenue) - count each attendee
+        $rsvpAnalyticsCount = ($sale->group_id && $sale->isPrimarySale())
+            ? Sale::where('group_id', $sale->id)->count()
+            : 1;
+        for ($i = 0; $i < $rsvpAnalyticsCount; $i++) {
+            AnalyticsEventsDaily::incrementSale($event->id, 0);
+        }
 
         // Dispatch webhooks
         WebhookService::dispatch('sale.created', $sale);
         WebhookService::dispatch('sale.paid', $sale);
+        if ($sale->group_id && $sale->isPrimarySale()) {
+            foreach (Sale::where('group_id', $sale->id)->where('id', '!=', $sale->id)->get() as $gs) {
+                WebhookService::dispatch('sale.created', $gs);
+                WebhookService::dispatch('sale.paid', $gs);
+            }
+        }
 
         $ticketViewUrl = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
         if ($request->boolean('embed')) {
@@ -1106,8 +1219,36 @@ class TicketController extends Controller
                 $sendEmail = true;
             }
 
+            // For grouped sales, aggregate SaleTickets across all sales in the group
+            if ($sale->group_id && $sale->isPrimarySale()) {
+                $allGroupSales = Sale::where('group_id', $sale->group_id)->with('saleTickets.ticket')->get();
+                $aggregatedTickets = [];
+                foreach ($allGroupSales as $gs) {
+                    foreach ($gs->saleTickets as $st) {
+                        $tid = $st->ticket_id;
+                        if (isset($aggregatedTickets[$tid])) {
+                            $aggregatedTickets[$tid]['quantity'] += $st->quantity;
+                        } else {
+                            $aggregatedTickets[$tid] = [
+                                'ticket_id' => $tid,
+                                'quantity' => $st->quantity,
+                                'ticket' => $st->ticket,
+                            ];
+                        }
+                    }
+                }
+                $invoiceSaleTickets = collect($aggregatedTickets)->map(function ($item) {
+                    $st = new \App\Models\SaleTicket(['ticket_id' => $item['ticket_id'], 'quantity' => $item['quantity']]);
+                    $st->setRelation('ticket', $item['ticket']);
+
+                    return $st;
+                });
+            } else {
+                $invoiceSaleTickets = $sale->saleTickets;
+            }
+
             $lineItems = [];
-            foreach ($sale->saleTickets as $saleTicket) {
+            foreach ($invoiceSaleTickets as $saleTicket) {
                 $lineItems[] = [
                     'product_key' => $saleTicket->ticket->type,
                     'notes' => $saleTicket->ticket->description ?: $saleTicket->ticket->type,
@@ -1556,6 +1697,12 @@ class TicketController extends Controller
                     if ($sale->discount_amount > 0) {
                         AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
                     }
+                    if ($sale->group_id && $sale->isPrimarySale()) {
+                        $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
+                        for ($i = 0; $i < $guestCount; $i++) {
+                            AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
+                        }
+                    }
                 }
                 break;
 
@@ -1650,6 +1797,11 @@ class TicketController extends Controller
             };
             if ($webhookEvent) {
                 WebhookService::dispatch($webhookEvent, $sale);
+                if ($sale->group_id && $sale->isPrimarySale()) {
+                    foreach (Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->get() as $gs) {
+                        WebhookService::dispatch($webhookEvent, $gs);
+                    }
+                }
             }
         }
 
@@ -1703,6 +1855,11 @@ class TicketController extends Controller
 
         if ($cancelled) {
             WebhookService::dispatch('sale.cancelled', $sale);
+            if ($sale->group_id && $sale->isPrimarySale()) {
+                foreach (Sale::where('group_id', $sale->id)->where('id', '!=', $sale->id)->get() as $gs) {
+                    WebhookService::dispatch('sale.cancelled', $gs);
+                }
+            }
         }
 
         return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);

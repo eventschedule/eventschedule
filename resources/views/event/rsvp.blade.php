@@ -109,14 +109,6 @@
                 @endif
             },
             computed: {
-                canSubmit() {
-                    if (this.rsvpFull) return false;
-                    if (this.showGuestForms) {
-                        return this.guests.every(g => g.name.trim() !== '' && g.email.trim() !== '' && (!this.requirePhone || g.phone.trim() !== ''));
-                    }
-                    if (this.requirePhone && this.phone.trim() === '') return false;
-                    return this.name.trim() !== '' && this.email.trim() !== '';
-                },
                 hasEventCustomFields() {
                     return this.eventCustomFields && Object.keys(this.eventCustomFields).length > 0;
                 },
@@ -158,10 +150,6 @@
                     }
                 },
                 validateForm(e) {
-                    if (!this.canSubmit) {
-                        e.preventDefault();
-                        return;
-                    }
                     if (this.turnstileEnabled && !this.turnstileToken) {
                         e.preventDefault();
                         alert(@json(__('messages.turnstile_verification_failed')));
@@ -202,7 +190,7 @@
         @endif
 
         @if ($event->individual_tickets)
-        <div class="mb-6">
+        <div class="mb-6" v-if="maxRsvpQuantity > 1">
             <label for="rsvp_quantity" class="text-gray-900 dark:text-gray-100">{{ __('messages.number_of_guests') }}</label>
             <select id="rsvp_quantity" name="rsvp_quantity" v-model="rsvpQuantity"
                 class="mt-1 block w-32 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
@@ -258,6 +246,23 @@
                             </button>
                         </div>
                         <x-input-error class="mt-2" :messages="$errors->get('password')" />
+
+                        <div class="mt-3">
+                            <div class="relative flex items-start">
+                                <div class="flex h-6 items-center">
+                                    <input id="terms" name="terms" type="checkbox" required
+                                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                </div>
+                                <div class="ms-3 text-sm leading-6">
+                                    <label for="terms" class="font-medium text-gray-900 dark:text-gray-300">
+                                        {!! str_replace([':terms', ':privacy'], [
+                                            '<a href="' . marketing_url('/terms-of-service') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
+                                            '<a href="' . marketing_url('/privacy') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
+                                        ], __('messages.i_accept_the_terms_and_privacy')) !!}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             @endif
@@ -323,6 +328,23 @@
                                 <svg v-show="!showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                 <svg v-show="showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
                             </button>
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="relative flex items-start">
+                                <div class="flex h-6 items-center">
+                                    <input id="terms_rsvp_guest" name="terms" type="checkbox" required
+                                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                </div>
+                                <div class="ms-3 text-sm leading-6">
+                                    <label for="terms_rsvp_guest" class="font-medium text-gray-900 dark:text-gray-300">
+                                        {!! str_replace([':terms', ':privacy'], [
+                                            '<a href="' . marketing_url('/terms-of-service') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
+                                            '<a href="' . marketing_url('/privacy') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
+                                        ], __('messages.i_accept_the_terms_and_privacy')) !!}
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -421,7 +443,7 @@
             </button>
             @endif
             <button type="submit"
-                :disabled="!canSubmit || isSubmitting"
+                :disabled="isSubmitting"
                 class="inline-flex items-center justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
                 <span v-if="isSubmitting">...</span>

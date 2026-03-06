@@ -89,9 +89,8 @@
                                                 @endif
                                                 <span class="font-semibold">{{ $sale->name }}</span>
                                                 @if ($isGroupedPrimary)
-                                                @php $groupCount = \App\Models\Sale::where('group_id', $sale->id)->where('id', '!=', $sale->id)->count(); @endphp
                                                 <span class="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
-                                                    + {{ $groupCount }} {{ __('messages.guests') }}
+                                                    + {{ $groupCounts[$sale->id] ?? 0 }} {{ __('messages.guests') }}
                                                 </span>
                                                 @endif
                                             </div>
@@ -330,9 +329,8 @@
                             @endif
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $sale->name }}</h3>
                             @if ($isGroupedPrimaryMobile)
-                            @php $groupCountMobile = \App\Models\Sale::where('group_id', $sale->id)->where('id', '!=', $sale->id)->count(); @endphp
                             <span class="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
-                                + {{ $groupCountMobile }} {{ __('messages.guests') }}
+                                + {{ $groupCounts[$sale->id] ?? 0 }} {{ __('messages.guests') }}
                             </span>
                             @endif
                         </div>

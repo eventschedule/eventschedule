@@ -347,7 +347,7 @@
         @endif
 
         {{-- Cancel Registration / Free Ticket --}}
-        @if ($sale->status === 'paid' && ($sale->isRsvp() || $sale->payment_amount == 0))
+        @if ($sale->status === 'paid' && ($sale->isRsvp() || $sale->payment_amount == 0) && (!$sale->group_id || $sale->isPrimarySale()))
         <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50 print:hidden flex items-center justify-between">
           <a href="{{ $event->getGuestUrl() }}" target="_blank" class="text-[13px] text-violet-400 hover:text-violet-300 transition-colors font-medium">
             {{ __('messages.view_event') }}
