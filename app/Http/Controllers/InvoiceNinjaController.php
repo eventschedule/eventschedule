@@ -130,6 +130,12 @@ class InvoiceNinjaController extends Controller
             $sale->save();
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
+            if ($sale->group_id && $sale->isPrimarySale()) {
+                $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
+                for ($i = 0; $i < $guestCount; $i++) {
+                    AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
+                }
+            }
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
             }
@@ -175,6 +181,12 @@ class InvoiceNinjaController extends Controller
             $sale->save();
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+            if ($sale->group_id && $sale->isPrimarySale()) {
+                $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
+                for ($i = 0; $i < $guestCount; $i++) {
+                    AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
+                }
+            }
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
             }
@@ -291,11 +303,22 @@ class InvoiceNinjaController extends Controller
             $sale->save();
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+            if ($sale->group_id && $sale->isPrimarySale()) {
+                $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
+                for ($i = 0; $i < $guestCount; $i++) {
+                    AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
+                }
+            }
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
             }
 
             WebhookService::dispatch('sale.paid', $sale);
+            if ($sale->group_id && $sale->isPrimarySale()) {
+                foreach (Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->get() as $gs) {
+                    WebhookService::dispatch('sale.paid', $gs);
+                }
+            }
         });
 
         return response()->json(['status' => 'success']);

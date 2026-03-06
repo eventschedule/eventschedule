@@ -222,6 +222,8 @@ class Sale extends Model
         })->values();
 
         $data->total_quantity = $this->quantity();
+        $data->group_id = $this->group_id ? UrlUtils::encodeId($this->group_id) : null;
+        $data->is_primary = $this->isPrimarySale();
 
         return $data;
     }

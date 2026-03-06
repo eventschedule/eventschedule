@@ -32,6 +32,9 @@ class ReleaseTickets extends Command
         $driver = config("database.connections.{$connection}.driver");
 
         $expiredSales = Sale::where('status', 'unpaid')
+            ->where(function ($q) {
+                $q->whereNull('group_id')->orWhereColumn('group_id', 'id');
+            })
             ->whereHas('event', function ($query) use ($driver) {
                 $query->where('events.expire_unpaid_tickets', '>', 0);
                 if ($driver === 'sqlite') {
