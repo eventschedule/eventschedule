@@ -127,33 +127,11 @@
                     }
                 }
                 @if ($event->country_code_phone)
-                const initIntlTel = () => {
-                    const input = document.getElementById('phone_input');
-                    const hidden = document.getElementById('phone_hidden');
-                    if (!input || !hidden) return;
-                    const iti = window.intlTelInput(input, {
-                        utilsScript: '{{ asset('vendor/intl-tel-input/js/utils.js') }}',
-                        initialCountry: '{{ strtolower($role->country_code ?? 'us') }}',
-                        separateDialCode: true,
-                        strictMode: true,
-                        nationalMode: false,
-                        autoPlaceholder: 'off',
-                    });
-                    const vm = this;
-                    function updateHidden() {
-                        var number = iti.getNumber();
-                        hidden.value = number || '';
-                        vm.phone = number || '';
-                    }
-                    input.addEventListener('change', updateHidden);
-                    input.addEventListener('input', updateHidden);
-                    input.addEventListener('countrychange', updateHidden);
-                };
                 const phoneEl = document.getElementById('phone_input');
                 if (phoneEl && phoneEl.offsetParent !== null) {
-                    initIntlTel();
+                    this.initPrimaryIntlTel();
                 } else {
-                    window.addEventListener('event-form-shown', () => this.$nextTick(() => initIntlTel()), { once: true });
+                    window.addEventListener('event-form-shown', () => this.$nextTick(() => this.initPrimaryIntlTel()), { once: true });
                 }
                 @endif
             },
@@ -304,6 +282,31 @@
                     }
                 },
                 @if ($event->country_code_phone)
+                initPrimaryIntlTel() {
+                    const input = document.getElementById('phone_input');
+                    const hidden = document.getElementById('phone_hidden');
+                    if (!input || !hidden) return;
+                    const iti = window.intlTelInput(input, {
+                        utilsScript: '{{ asset('vendor/intl-tel-input/js/utils.js') }}',
+                        initialCountry: '{{ strtolower($role->country_code ?? 'us') }}',
+                        separateDialCode: true,
+                        strictMode: true,
+                        nationalMode: false,
+                        autoPlaceholder: 'off',
+                    });
+                    const vm = this;
+                    function updateHidden() {
+                        var number = iti.getNumber();
+                        hidden.value = number || '';
+                        vm.phone = number || '';
+                    }
+                    input.addEventListener('change', updateHidden);
+                    input.addEventListener('input', updateHidden);
+                    input.addEventListener('countrychange', updateHidden);
+                    if (this.phone) {
+                        iti.setNumber(this.phone);
+                    }
+                },
                 initGuestIntlTel() {
                     // Destroy previous instances
                     this.guestItiInstances.forEach(iti => iti.destroy());
@@ -448,8 +451,12 @@
                     }
                 },
                 @if ($event->country_code_phone)
-                showGuestForms() {
-                    this.$nextTick(() => this.initGuestIntlTel());
+                showGuestForms(newVal) {
+                    if (newVal) {
+                        this.$nextTick(() => this.initGuestIntlTel());
+                    } else {
+                        this.$nextTick(() => this.initPrimaryIntlTel());
+                    }
                 },
                 'guests.length'() {
                     this.$nextTick(() => this.initGuestIntlTel());

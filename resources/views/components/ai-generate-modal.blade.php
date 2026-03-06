@@ -8,7 +8,6 @@
     'extraDataCallback' => null,
     'checkValuesCallback' => null,
     'showInstructions' => true,
-    'slowGeneration' => false,
     'errorMessage',
     'partialErrorMessage' => null,
     'promptEndpoint' => null,
@@ -175,6 +174,7 @@ document.addEventListener('alpine:init', function() {
             elementStatus: {},
             pendingRequests: 0,
             imageElementKeys: @json($imageElements),
+            generationId: 0,
             @if ($promptEndpoint)
             customPrompt: '',
             defaultPrompt: '',
@@ -207,6 +207,7 @@ document.addEventListener('alpine:init', function() {
                         self.elementStatus = {};
                         self.generationStarted = false;
                         self.pendingRequests = 0;
+                        self.generating = false;
                         @if ($promptEndpoint)
                         self.customPrompt = '';
                         self.defaultPrompt = '';
@@ -222,6 +223,9 @@ document.addEventListener('alpine:init', function() {
                 if (idx > -1) { this.elements.splice(idx, 1); } else { this.elements.push(el); }
             },
             cancelGeneration: function() {
+                this.generationId++;
+                this.generating = false;
+                this.generationStarted = false;
                 window.dispatchEvent(new CustomEvent('close-modal', { detail: @json($name) }));
             },
             getBaseBody: function() {
@@ -303,23 +307,19 @@ document.addEventListener('alpine:init', function() {
                 this.customPrompt = this.defaultPrompt;
             },
             @endif
-            markElements: function(keys, status) {
-                var self = this;
-                keys.forEach(function(key) {
-                    self.elementStatus[key] = status;
-                });
-            },
             checkComplete: function() {
                 if (this.pendingRequests <= 0) {
                     this.generating = false;
                     var hasErrors = Object.values(this.elementStatus).some(function(s) { return s === 'error'; });
                     if (!hasErrors) {
+                        this.generationStarted = false;
                         window.dispatchEvent(new CustomEvent('close-modal', { detail: @json($name) }));
                     }
                 }
             },
             fireImageRequest: function(imageKey, extraBody) {
                 var self = this;
+                var genId = self.generationId;
                 self.pendingRequests++;
                 self.elementStatus[imageKey] = 'generating';
 
@@ -327,6 +327,7 @@ document.addEventListener('alpine:init', function() {
 
                 self.makeRequest(@json($imageEndpoint ?? ''), body)
                 .then(function(data) {
+                    if (genId !== self.generationId) return;
                     if (data.success) {
                         window[{!! json_encode($successCallback) !!}](data);
                         self.elementStatus[imageKey] = 'complete';
@@ -335,15 +336,18 @@ document.addEventListener('alpine:init', function() {
                     }
                 })
                 .catch(function() {
+                    if (genId !== self.generationId) return;
                     self.elementStatus[imageKey] = 'error';
                 })
                 .finally(function() {
+                    if (genId !== self.generationId) return;
                     self.pendingRequests--;
                     self.checkComplete();
                 });
             },
             retryElement: function(key) {
                 if (!this.imageElementKeys.includes(key)) return;
+                if (this.elementStatus[key] === 'generating') return;
                 this.generating = true;
                 this.generationStarted = true;
 
@@ -361,6 +365,7 @@ document.addEventListener('alpine:init', function() {
                 this.generationStarted = true;
                 this.elementStatus = {};
                 var self = this;
+                var genId = ++this.generationId;
 
                 var hasImageEndpoint = @json(!empty($imageEndpoint));
                 var selectedImages = this.elements.filter(function(el) { return self.imageElementKeys.includes(el); });
@@ -373,6 +378,7 @@ document.addEventListener('alpine:init', function() {
 
                     this.makeRequest(@json($endpoint), body)
                     .then(function(data) {
+                        if (genId !== self.generationId) return;
                         if (data.success) {
                             window[{!! json_encode($successCallback) !!}](data);
                             self.elements.forEach(function(el) { self.elementStatus[el] = 'complete'; });
@@ -390,6 +396,7 @@ document.addEventListener('alpine:init', function() {
                         }
                     })
                     .catch(function(err) {
+                        if (genId !== self.generationId) return;
                         self.elements.forEach(function(el) { self.elementStatus[el] = 'error'; });
                         if (err.message === 'rate_limit') {
                             alert(@json(__('messages.ai_rate_limit')));
@@ -398,6 +405,7 @@ document.addEventListener('alpine:init', function() {
                         }
                     })
                     .finally(function() {
+                        if (genId !== self.generationId) return;
                         self.generating = false;
                         self.generationStarted = false;
                     });
@@ -419,11 +427,11 @@ document.addEventListener('alpine:init', function() {
                 };
 
                 if (textElements.length > 0) {
-                    self.pendingRequests++;
                     var body = Object.assign({}, this.getBaseBody(), { elements: textElements });
 
                     this.makeRequest(@json($endpoint), body)
                     .then(function(data) {
+                        if (genId !== self.generationId) return;
                         if (data.success) {
                             window[{!! json_encode($successCallback) !!}](data);
                             textElements.forEach(function(el) { self.elementStatus[el] = 'complete'; });
@@ -446,6 +454,7 @@ document.addEventListener('alpine:init', function() {
                         }
                     })
                     .catch(function(err) {
+                        if (genId !== self.generationId) return;
                         textElements.forEach(function(el) { self.elementStatus[el] = 'error'; });
                         if (err.message === 'rate_limit') {
                             alert(@json(__('messages.ai_rate_limit')));
@@ -457,9 +466,6 @@ document.addEventListener('alpine:init', function() {
                         if (accentInput) imageExtra.accent_color = accentInput.value;
                         @endif
                         fireImages(imageExtra);
-                    })
-                    .finally(function() {
-                        self.pendingRequests--;
                     });
                 } else {
                     // Only images selected, no text request needed
