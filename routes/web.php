@@ -304,9 +304,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/{subdomain}/parse-event-parts', [EventController::class, 'parseEventParts'])->name('event.parse_parts');
     Route::post('/{subdomain}/generate-flyer', [EventController::class, 'generateFlyer'])->name('event.generate_flyer')->middleware('throttle:5,1');
     Route::post('/{subdomain}/generate-style', [RoleController::class, 'generateStyle'])->name('role.generate_style')->middleware('throttle:5,1');
+    Route::post('/{subdomain}/generate-style-image', [RoleController::class, 'generateStyleImage'])->name('role.generate_style_image')->middleware('throttle:5,1');
     Route::post('/{subdomain}/generate-schedule-details', [RoleController::class, 'generateScheduleDetails'])->name('role.generate_schedule_details')->middleware('throttle:5,1');
+    Route::post('/{subdomain}/get-style-prompt', [RoleController::class, 'getStylePrompt'])->name('role.get_style_prompt')->middleware('throttle:30,1');
+    Route::post('/{subdomain}/get-schedule-details-prompt', [RoleController::class, 'getScheduleDetailsPrompt'])->name('role.get_schedule_details_prompt')->middleware('throttle:30,1');
     Route::post('/generate-style', [RoleController::class, 'generateStyleNew'])->name('role.generate_style_new')->middleware('throttle:5,1');
+    Route::post('/generate-style-image', [RoleController::class, 'generateStyleImageNew'])->name('role.generate_style_image_new')->middleware('throttle:5,1');
     Route::post('/generate-schedule-details', [RoleController::class, 'generateScheduleDetailsNew'])->name('role.generate_schedule_details_new')->middleware('throttle:5,1');
+    Route::post('/get-style-prompt', [RoleController::class, 'getStylePromptNew'])->name('role.get_style_prompt_new')->middleware('throttle:30,1');
+    Route::post('/get-schedule-details-prompt', [RoleController::class, 'getScheduleDetailsPromptNew'])->name('role.get_schedule_details_prompt_new')->middleware('throttle:30,1');
     Route::post('/{subdomain}/generate-event-details', [EventController::class, 'generateEventDetails'])->name('event.generate_event_details')->middleware('throttle:5,1');
     Route::post('/{subdomain}/get-event-details-prompt', [EventController::class, 'getEventDetailsPrompt'])->name('event.get_event_details_prompt')->middleware('throttle:30,1');
     Route::post('/{subdomain}/import', [EventController::class, 'import'])->name('event.import');

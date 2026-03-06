@@ -62,6 +62,7 @@
                     individualTickets: @json((bool) $event->individual_tickets),
                     individualTicketFields: @json((bool) $event->individual_ticket_fields),
                     guests: [],
+                    guestItiInstances: [],
                 };
             },
             created() {
@@ -302,6 +303,39 @@
                         this.phone = this.guests[0].phone || this.phone;
                     }
                 },
+                @if ($event->country_code_phone)
+                initGuestIntlTel() {
+                    // Destroy previous instances
+                    this.guestItiInstances.forEach(iti => iti.destroy());
+                    this.guestItiInstances = [];
+                    if (!this.showGuestForms) return;
+                    this.guests.forEach((guest, gIndex) => {
+                        const input = document.getElementById('guest_phone_' + gIndex);
+                        if (!input) return;
+                        const iti = window.intlTelInput(input, {
+                            utilsScript: '{{ asset('vendor/intl-tel-input/js/utils.js') }}',
+                            initialCountry: '{{ strtolower($role->country_code ?? 'us') }}',
+                            separateDialCode: true,
+                            strictMode: true,
+                            nationalMode: false,
+                            autoPlaceholder: 'off',
+                        });
+                        const vm = this;
+                        function updateHidden() {
+                            var number = iti.getNumber();
+                            vm.guests[gIndex].phone = number || '';
+                        }
+                        input.addEventListener('change', updateHidden);
+                        input.addEventListener('input', updateHidden);
+                        input.addEventListener('countrychange', updateHidden);
+                        // Set initial value if guest already has a phone number
+                        if (guest.phone) {
+                            iti.setNumber(guest.phone);
+                        }
+                        vm.guestItiInstances.push(iti);
+                    });
+                },
+                @endif
                 applyPromoCode() {
                     if (!this.promoCode.trim() || this.isValidatingPromo) return;
 
@@ -412,7 +446,15 @@
                             this.applyPromoCode();
                         }
                     }
-                }
+                },
+                @if ($event->country_code_phone)
+                showGuestForms() {
+                    this.$nextTick(() => this.initGuestIntlTel());
+                },
+                'guests.length'() {
+                    this.$nextTick(() => this.initGuestIntlTel());
+                },
+                @endif
             },
         }).mount('#ticket-selector');
     });
@@ -547,9 +589,15 @@
                 </div>
                 <div class="mb-3" v-if="askPhone">
                     <label :for="'guest_phone_' + gIndex" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
+                    @if ($event->country_code_phone)
+                    <input type="tel" :id="'guest_phone_' + gIndex" :required="requirePhone"
+                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm guest-phone-intl" />
+                    <input type="hidden" :name="'guests[' + gIndex + '][phone]'" :value="guest.phone">
+                    @else
                     <input type="tel" :id="'guest_phone_' + gIndex" v-model="guest.phone" :required="requirePhone"
                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm" />
                     <input type="hidden" :name="'guests[' + gIndex + '][phone]'" :value="guest.phone">
+                    @endif
                 </div>
 
                 <!-- Per-guest ticket-level custom fields -->
@@ -751,7 +799,7 @@
             </div>
 
             <!-- Ticket-level Custom Fields (shown when ticket is selected, hidden when per-guest fields are active) -->
-            <div v-if="ticket.selectedQty > 0 && ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0 && !(showGuestForms && individualTicketFields)" class="mt-4 ps-4 border-s-2 border-gray-200 dark:border-gray-600">
+            <div v-if="ticket.selectedQty > 0 && ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0 && !showGuestForms" class="mt-4 ps-4 border-s-2 border-gray-200 dark:border-gray-600">
                 <div v-for="(field, fieldKey) in ticket.custom_fields" :key="fieldKey" class="mb-3">
                     <label :for="`ticket_custom_${ticket.id}_${fieldKey}`" class="text-sm text-gray-900 dark:text-gray-100">
                         @{{ field.name }}@{{ field.required ? ' *' : '' }}

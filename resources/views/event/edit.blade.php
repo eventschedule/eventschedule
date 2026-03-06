@@ -5712,15 +5712,19 @@ function deleteFlyer(url, hash, token, element) {
     :description="__('messages.ai_details_description')"
     :fields="$aiFields"
     endpoint="{{ url('/'.$subdomain.'/generate-event-details') }}"
+    imageEndpoint="{{ url('/'.$subdomain.'/generate-flyer') }}"
+    :imageElements="['flyer_image']"
     successCallback="handleAiEventDetailsResults"
     extraDataCallback="getEventDetailsExtraData"
     checkValuesCallback="getEventDetailsCurrentValues"
     :showInstructions="true"
+    :showPresets="true"
     :errorMessage="__('messages.ai_details_generation_failed')"
-    :partialErrorMessage="__('messages.ai_flyer_generation_failed')"
     promptEndpoint="{{ url('/'.$subdomain.'/get-event-details-prompt') }}"
     :instructionsLabel="__('messages.ai_additional_instructions')"
     :instructionsPlaceholder="__('messages.ai_additional_instructions_placeholder')"
+    savedInstructions="{{ $role->ai_content_instructions }}"
+    saveInstructionsField="ai_content_instructions"
 />
 
 <script {!! nonce_attr() !!}>

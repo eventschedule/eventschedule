@@ -97,6 +97,8 @@ class Role extends Model implements MustVerifyEmail
         'sponsor_section_title',
         'sponsor_section_title_en',
         'custom_labels',
+        'ai_style_instructions',
+        'ai_content_instructions',
     ];
 
     /**

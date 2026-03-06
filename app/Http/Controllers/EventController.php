@@ -1429,6 +1429,7 @@ class EventController extends Controller
             'starts_at' => 'nullable|string',
             'duration' => 'nullable|numeric',
             'category_id' => 'nullable|integer',
+            'save_instructions' => 'nullable|boolean',
         ]);
 
         $allElements = $request->input('elements');
@@ -1537,6 +1538,10 @@ class EventController extends Controller
 
             if (empty($results)) {
                 return response()->json(['error' => __('messages.ai_details_generation_failed')], 500);
+            }
+
+            if ($request->input('save_instructions')) {
+                $role->update(['ai_content_instructions' => $request->input('style_instructions', '')]);
             }
 
             $results['success'] = true;

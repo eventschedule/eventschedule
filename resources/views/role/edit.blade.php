@@ -5726,11 +5726,15 @@ document.addEventListener('DOMContentLoaded', function() {
         ['key' => 'background_image', 'label' => __('messages.background_image'), 'has_value' => (bool)$role->background_image_url],
     ]"
     endpoint="{{ $role->exists ? url('/'.$role->subdomain.'/generate-style') : url('/generate-style') }}"
+    imageEndpoint="{{ $role->exists ? url('/'.$role->subdomain.'/generate-style-image') : url('/generate-style-image') }}"
+    :imageElements="['profile_image', 'header_image', 'background_image']"
+    promptEndpoint="{{ $role->exists ? url('/'.$role->subdomain.'/get-style-prompt') : url('/get-style-prompt') }}"
     successCallback="handleAiStyleResults"
     extraDataCallback="getStyleExtraData"
-    :slowGeneration="true"
+    :showPresets="true"
+    savedInstructions="{{ $role->ai_style_instructions }}"
+    saveInstructionsField="ai_style_instructions"
     :errorMessage="__('messages.ai_style_generation_failed')"
-    :partialErrorMessage="__('messages.ai_style_image_partial_error')"
 />
 
 <script {!! nonce_attr() !!}>
@@ -5869,9 +5873,15 @@ window.handleAiStyleResults = function(data) {
         ['key' => 'description', 'label' => __('messages.description'), 'has_value' => (bool)$role->description],
     ]"
     endpoint="{{ $role->exists ? url('/'.$role->subdomain.'/generate-schedule-details') : url('/generate-schedule-details') }}"
+    promptEndpoint="{{ $role->exists ? url('/'.$role->subdomain.'/get-schedule-details-prompt') : url('/get-schedule-details-prompt') }}"
     successCallback="handleAiScheduleDetailsResults"
     extraDataCallback="getScheduleDetailsExtraData"
-    :showInstructions="false"
+    :showInstructions="true"
+    :showPresets="true"
+    :instructionsLabel="__('messages.ai_additional_instructions')"
+    :instructionsPlaceholder="__('messages.ai_additional_instructions_placeholder')"
+    savedInstructions="{{ $role->ai_content_instructions }}"
+    saveInstructionsField="ai_content_instructions"
     :errorMessage="__('messages.ai_details_generation_failed')"
 />
 

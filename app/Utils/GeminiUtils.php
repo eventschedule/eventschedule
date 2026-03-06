@@ -302,7 +302,8 @@ class GeminiUtils
         }
 
         // Build prompt from fields
-        $prompt = 'Parse the event details from this '.($imageData ? 'image and ' : '')."message to the following fields, take your time and do the best job possible:\n";
+        $config = config('ai_prompts.event_parse');
+        $prompt = str_replace(':source', $imageData ? 'image and ' : '', $config['base']);
         foreach ($fields as $field => $note) {
             $prompt .= $field.($note ? " ({$note})" : '').",\n";
         }
@@ -310,19 +311,13 @@ class GeminiUtils
 
         $now = Carbon::now(auth()->user() ? auth()->user()->timezone : 'UTC');
         $thisMonth = $now->format('M Y');
+        $nextMonth = $now->copy()->addMonth()->format('M Y');
 
-        $prompt .= "\nThe date today is {$now->format('M d, Y')}.";
-
-        if ($now->format('n') == 12) {
-            $nextMonth = $now->copy()->addMonth()->format('M Y');
-            $prompt .= "\nThe event date is either {$thisMonth} or {$nextMonth}.";
-        } else {
-            $nextMonth = $now->copy()->addMonth()->format('M Y');
-            $prompt .= "\nThe event date is either {$thisMonth} or {$nextMonth}.";
-        }
-
-        $prompt .= "\nIf there is no time, use 8pm as the default time.";
-        $prompt .= "\nIf there are multiple performers create multiple events.";
+        $prompt .= str_replace(
+            [':today', ':this_month', ':next_month'],
+            [$now->format('M d, Y'), $thisMonth, $nextMonth],
+            $config['footer']
+        );
 
         // Use gemini-1.5-flash for both text and image inputs
         $data = self::sendRequest($prompt, $imageData);
@@ -840,29 +835,16 @@ class GeminiUtils
 
     public static function parseEventParts($imageData = null, $textDescription = null, $aiPrompt = null)
     {
-        $prompt = 'Extract the agenda items, schedule parts, or setlist songs from this ';
-        if ($imageData && $textDescription) {
-            $prompt .= 'image and text';
-        } elseif ($imageData) {
-            $prompt .= 'image';
-        } else {
-            $prompt .= 'text';
-        }
-        $prompt .= ".\n\n";
-        $prompt .= "Return a JSON array of objects, each with these keys:\n";
-        $prompt .= "- name: the title or name of the part/song/session (required)\n";
-        $prompt .= "- description: optional details or speaker name\n";
-        $prompt .= "- start_time: in HH:MM 24-hour format, or null if no times are shown\n";
-        $prompt .= "- end_time: in HH:MM 24-hour format, or null if no times are shown\n\n";
-        $prompt .= "If the content is a setlist or numbered list without times, set start_time and end_time to null for all items.\n";
-        $prompt .= "Preserve the original order. Return only the JSON array.\n";
+        $config = config('ai_prompts.event_parts');
+        $source = ($imageData && $textDescription) ? 'image and text' : ($imageData ? 'image' : 'text');
+        $prompt = str_replace(':source', $source, $config['base']);
 
         if ($aiPrompt) {
-            $prompt .= "\nAdditional instructions: ".$aiPrompt."\n";
+            $prompt .= str_replace(':instructions', $aiPrompt, $config['additional_instructions']);
         }
 
         if ($textDescription) {
-            $prompt .= "\nText:\n".$textDescription;
+            $prompt .= str_replace(':text', $textDescription, $config['text_section']);
         }
 
         $data = self::sendRequest($prompt, $imageData);
@@ -905,16 +887,17 @@ class GeminiUtils
             return '';
         }
 
+        $config = config('ai_prompts.translate');
         $glossaryInstruction = '';
         if (! empty($glossary)) {
             $glossaryLines = [];
             foreach ($glossary as $original => $translation) {
-                $glossaryLines[] = "- \"{$original}\" => \"{$translation}\"";
+                $glossaryLines[] = str_replace([':original', ':translation'], [$original, $translation], $config['glossary_line']);
             }
-            $glossaryInstruction = " Use these exact translations for the following terms:\n".implode("\n", $glossaryLines)."\n";
+            $glossaryInstruction = $config['glossary_header'].implode("\n", $glossaryLines)."\n";
         }
 
-        $prompt = "Translate this text from {$from} to {$to}.{$glossaryInstruction} Return only the translation as a JSON string:\n{$text}";
+        $prompt = str_replace([':from', ':to', ':glossary'], [$from, $to, $glossaryInstruction], $config['base'])."\n{$text}";
 
         $response = self::sendRequest($prompt);
 
@@ -965,8 +948,7 @@ class GeminiUtils
         }
 
         // Create a single prompt for batch translation
-        $prompt = "Translate these group names from {$fromLanguage} to English. Return a JSON object where each key is the original name and the value is the English translation:\n";
-        $prompt .= json_encode($groupNames);
+        $prompt = str_replace([':from', ':names'], [$fromLanguage, json_encode($groupNames)], config('ai_prompts.translate_group_names.base'));
 
         try {
             $response = self::sendRequest($prompt);
@@ -1004,8 +986,7 @@ class GeminiUtils
         }
 
         // Create a single prompt for batch translation
-        $prompt = "Translate these form field names from {$fromLanguage} to English. Return a JSON object where each key is the original name and the value is the English translation:\n";
-        $prompt .= json_encode($fieldNames);
+        $prompt = str_replace([':from', ':names'], [$fromLanguage, json_encode($fieldNames)], config('ai_prompts.translate_custom_field_names.base'));
 
         try {
             $response = self::sendRequest($prompt);
@@ -1042,8 +1023,7 @@ class GeminiUtils
             return [];
         }
 
-        $prompt = "Translate these dropdown option values from {$fromLanguage} to English. Return a JSON object where each key is the original value and the value is the English translation:\n";
-        $prompt .= json_encode($optionValues);
+        $prompt = str_replace([':from', ':values'], [$fromLanguage, json_encode($optionValues)], config('ai_prompts.translate_custom_field_options.base'));
 
         try {
             $response = self::sendRequest($prompt);
@@ -1321,10 +1301,9 @@ class GeminiUtils
 
     private static function buildFlyerPrompt(Event $event, ?string $styleInstructions): string
     {
-        $prompt = "Create a professional event flyer/poster. Every piece of text must exactly match the details provided below.\n\n";
+        $config = config('ai_prompts.event_flyer');
 
-        $prompt .= "EVENT DETAILS:\n";
-        $prompt .= "Event name: {$event->name}\n";
+        $prompt = str_replace(':event_name', $event->name, $config['intro']);
 
         if ($event->starts_at) {
             $prompt .= 'Date: '.Carbon::parse($event->starts_at)->format('l, F j, Y')."\n";
@@ -1368,27 +1347,17 @@ class GeminiUtils
             $prompt .= 'Ticket price: '.MoneyUtils::format($ticket->price, $event->ticket_currency_code)."\n";
         }
 
-        $prompt .= "\nLAYOUT (top to bottom):\n";
-        $prompt .= "- Top third: event name in large, bold type (at least 3x larger than body text).\n";
-        $prompt .= "- Middle: date, time, and venue in medium type.\n";
-        $prompt .= "- Bottom third: remaining details (description, performers, ticket price) in smaller type.\n";
-
-        $prompt .= "\nDESIGN DIRECTIVES:\n";
-        $prompt .= '- Background: rich color or gradient inspired by the event category'.($categoryName ? " ({$categoryName})" : '').". Not plain white.\n";
-        $prompt .= "- Use category-appropriate decorative elements (abstract shapes, icons) to set the mood.\n";
-        $prompt .= "- All text must be clearly legible with strong contrast against the background.\n";
-        $prompt .= "- Professional typography with generous spacing.\n";
-        $prompt .= "- Do not include AI-generated photos of people.\n";
-        $prompt .= "- Suitable for digital sharing on social media.\n";
+        $prompt .= $config['layout'];
+        $prompt .= str_replace(':category_hint', $categoryName ? " ({$categoryName})" : '', $config['design']);
 
         if ($styleInstructions) {
-            $prompt .= "\nCustom style instructions: {$styleInstructions}\n";
+            $prompt .= str_replace(':instructions', $styleInstructions, $config['style_instructions']);
         }
 
         return $prompt;
     }
 
-    public static function generateScheduleStyle(Role $role, array $elements, ?string $styleInstructions, array $currentValues): array
+    public static function generateScheduleStyle(Role $role, array $elements, ?string $styleInstructions, array $currentValues, ?string $customPrompt = null): array
     {
         $results = [];
         $textElements = array_intersect($elements, ['accent_color', 'font']);
@@ -1399,7 +1368,7 @@ class GeminiUtils
         // Step 1: Generate text-based style (accent color, font) via single prompt
         if (! empty($textElements)) {
             try {
-                $textResults = self::generateStyleText($role, $textElements, $styleInstructions, $currentValues);
+                $textResults = self::generateStyleText($role, $textElements, $styleInstructions, $currentValues, $customPrompt);
                 if ($textResults) {
                     $results = array_merge($results, $textResults);
                     if (isset($textResults['accent_color'])) {
@@ -1449,35 +1418,53 @@ class GeminiUtils
         return $results;
     }
 
-    public static function generateScheduleDetails(string $name, string $type, ?string $shortDescription, array $elements, ?string $description = null): ?array
+    public static function buildScheduleDetailsPrompt(string $name, string $type, ?string $shortDescription, array $elements, ?string $description = null): string
     {
+        $config = config('ai_prompts.schedule_details');
         $scheduleType = $type === 'talent' ? 'talent' : ($type === 'venue' ? 'venue' : 'curator');
 
-        $prompt = "You are writing content for an event schedule platform. Generate the requested fields for a schedule with these details:\n\n";
-        $prompt .= "- Schedule name: {$name}\n";
-        $prompt .= "- Schedule type: {$scheduleType} (talent = performer/artist, venue = location/place, curator = event organizer)\n";
-        $prompt .= '- Existing short description: '.($shortDescription ?: 'none')."\n";
+        $prompt = str_replace(
+            [':name', ':schedule_type', ':short_description'],
+            [$name, $scheduleType, $shortDescription ?: 'none'],
+            $config['base']
+        );
+        $prompt .= "\n";
 
         if (in_array('description', $elements) && ! empty($description)) {
-            $prompt .= "- Existing description: {$description}\n";
+            $prompt .= str_replace(':description', $description, $config['existing_description_line'])."\n";
         }
 
-        $prompt .= "\nReturn a JSON object with only the requested fields:\n";
+        $prompt .= $config['return_instruction'];
 
         if (in_array('short_description', $elements)) {
-            $prompt .= "- \"short_description\": Write a concise, engaging summary in under 150 characters. Capture what makes this schedule unique.\n";
+            $prompt .= $config['elements']['short_description'];
         }
 
         if (in_array('description', $elements)) {
             if (! empty($description)) {
-                $prompt .= "- \"description\": Improve and enhance the existing description rather than writing from scratch. Use rich markdown formatting: include a few subheadings (##), bullet or numbered lists where appropriate, and bold text for emphasis. Include a few relevant emojis to make it visually appealing. Do not use em-dashes. Do not include the schedule name as a top-level heading. Keep it concise, around 150 to 300 words.\n";
+                $prompt .= $config['elements']['description_existing'];
             } else {
-                $prompt .= "- \"description\": Write an engaging description in markdown. Use rich formatting: include a few subheadings (##), bullet or numbered lists where appropriate, and bold text for emphasis. Include a few relevant emojis to make it visually appealing. Describe what visitors can expect. Do not use em-dashes. Do not include the schedule name as a top-level heading. Keep it concise, around 150 to 300 words.\n";
+                $prompt .= $config['elements']['description_new'];
             }
         }
 
         if (in_array('short_description', $elements) && in_array('description', $elements) && empty($shortDescription)) {
-            $prompt .= "\nSince no short description exists yet, generate the short_description first and use it as context when writing the description.";
+            $prompt .= $config['short_description_first'];
+        }
+
+        return $prompt;
+    }
+
+    public static function generateScheduleDetails(string $name, string $type, ?string $shortDescription, array $elements, ?string $description = null, ?string $customPrompt = null, ?string $additionalInstructions = null): ?array
+    {
+        if ($customPrompt) {
+            $prompt = $customPrompt;
+        } else {
+            $prompt = self::buildScheduleDetailsPrompt($name, $type, $shortDescription, $elements, $description);
+        }
+
+        if ($additionalInstructions) {
+            $prompt .= "\n\nAdditional instructions: {$additionalInstructions}";
         }
 
         $data = self::sendRequest($prompt);
@@ -1580,50 +1567,57 @@ class GeminiUtils
         return ! empty($output) ? $output : null;
     }
 
-    private static function generateStyleText(Role $role, array $elements, ?string $styleInstructions, array $currentValues): ?array
+    public static function buildScheduleStylePrompt(Role $role, array $elements, ?string $styleInstructions, array $currentValues): string
     {
+        $config = config('ai_prompts.schedule_style');
         $scheduleType = $role->type === 'talent' ? 'talent' : ($role->type === 'venue' ? 'venue' : 'curator');
 
-        // Read fonts once for reuse
-        $fonts = in_array('font', $elements) ? json_decode(file_get_contents(base_path('storage/fonts.json'))) : null;
-
-        $prompt = "You are a branding expert. Generate style properties for a schedule called '{$role->name}'.";
-        $prompt .= "\nSchedule type: {$scheduleType}";
+        $prompt = str_replace([':name', ':schedule_type'], [$role->name, $scheduleType], $config['base']);
 
         if ($role->short_description) {
-            $prompt .= "\nDescription: ".substr($role->short_description, 0, 300);
+            $prompt .= str_replace(':description', substr($role->short_description, 0, 300), $config['description_line']);
         }
 
         $categories = $role->events()->wherePivot('is_accepted', true)->pluck('category_id')->filter()->unique()->values();
         if ($categories->isNotEmpty()) {
             $categoryNames = $categories->map(fn ($id) => config('app.event_categories.'.$id))->filter()->implode(', ');
             if ($categoryNames) {
-                $prompt .= "\nEvent categories: {$categoryNames}";
+                $prompt .= str_replace(':categories', $categoryNames, $config['categories_line']);
             }
         }
 
-        // Include existing values for context
         if (! in_array('accent_color', $elements) && ! empty($currentValues['accent_color'])) {
-            $prompt .= "\nThe schedule already uses accent color {$currentValues['accent_color']} - ensure your choices complement it.";
+            $prompt .= str_replace(':accent_color', $currentValues['accent_color'], $config['existing_accent_color']);
         }
         if (! in_array('font', $elements) && ! empty($currentValues['font_family'])) {
-            $prompt .= "\nThe schedule already uses the font '{$currentValues['font_family']}' - ensure your choices complement it.";
+            $prompt .= str_replace(':font_family', $currentValues['font_family'], $config['existing_font']);
         }
 
-        $prompt .= "\n\nReturn a JSON object with ONLY the requested fields:\n";
+        $prompt .= $config['return_instruction'];
 
         if (in_array('accent_color', $elements)) {
-            $prompt .= "- \"accent_color\": a hex color code (e.g. \"#4E81FA\") that fits the schedule's theme and type. Choose a vibrant, professional color.\n";
+            $prompt .= $config['elements']['accent_color'];
         }
 
-        if ($fonts) {
+        if (in_array('font', $elements)) {
+            $fonts = json_decode(file_get_contents(base_path('storage/fonts.json')));
             $fontNames = array_map(fn ($f) => $f->value, $fonts);
-            $prompt .= '- "font_family": choose ONE font from this exact list: '.implode(', ', $fontNames).". Pick a font that matches the schedule's personality and type.\n";
+            $prompt .= str_replace(':font_list', implode(', ', $fontNames), $config['elements']['font_family']);
         }
 
         if ($styleInstructions) {
-            $prompt .= "\nUser's style preferences: {$styleInstructions}";
+            $prompt .= str_replace(':instructions', $styleInstructions, $config['style_preferences']);
         }
+
+        return $prompt;
+    }
+
+    private static function generateStyleText(Role $role, array $elements, ?string $styleInstructions, array $currentValues, ?string $customPrompt = null): ?array
+    {
+        $prompt = $customPrompt ?: self::buildScheduleStylePrompt($role, $elements, $styleInstructions, $currentValues);
+
+        // Read fonts for validation
+        $fonts = in_array('font', $elements) ? json_decode(file_get_contents(base_path('storage/fonts.json'))) : null;
 
         $data = self::sendRequest($prompt);
 
@@ -1711,32 +1705,26 @@ class GeminiUtils
 
     private static function buildProfileImagePrompt(Role $role, string $accentColor, ?string $styleInstructions): string
     {
+        $config = config('ai_prompts.profile_image');
         $v = self::getVisualDirection($role);
 
-        $prompt = "Create a flat vector illustration with clean geometric shapes and smooth gradients for a {$v['type']} schedule called '{$role->name}'.";
+        $prompt = str_replace([':type', ':name'], [$v['type'], $role->name], $config['intro']);
 
         if ($v['description']) {
-            $prompt .= " Description: {$v['description']}.";
+            $prompt .= str_replace(':description', $v['description'], $config['description']);
         }
 
-        $prompt .= "\n\nVisual mood: {$v['mood']}.";
-        $prompt .= "\nComposition: one strong central motif that fills most of the canvas. High contrast between the main element and the background so the image reads clearly at small sizes (as small as 32px).";
-        $prompt .= "\nSuggested motifs: {$v['motifs']}.";
+        $prompt .= str_replace([':mood', ':motifs'], [$v['mood'], $v['motifs']], $config['body']);
 
         if (! empty($v['accents'])) {
-            $prompt .= "\nCategory-inspired accents: ".implode(', ', $v['accents']).'.';
+            $prompt .= str_replace(':accents', implode(', ', $v['accents']), $config['accents']);
         }
 
-        $prompt .= "\nColor palette: use {$accentColor} as the dominant color with 2 to 3 tonal variations and one contrasting accent for depth.";
-
-        $prompt .= "\n\nCRITICAL CONSTRAINTS:";
-        $prompt .= "\n- Absolutely no text, letters, words, numbers, people, or faces.";
-        $prompt .= "\n- Full bleed: the design extends to every edge of the canvas with no padding, margins, or empty space.";
-        $prompt .= "\n- No border, outline, frame, or rounded corners on the image.";
-        $prompt .= "\n- Do not center a small element in the middle of empty space.";
+        $prompt .= str_replace(':accent_color', $accentColor, $config['color']);
+        $prompt .= $config['constraints'];
 
         if ($styleInstructions) {
-            $prompt .= "\n\nStyle preferences: {$styleInstructions}";
+            $prompt .= str_replace(':instructions', $styleInstructions, $config['style_preferences']);
         }
 
         return $prompt;
@@ -1744,31 +1732,26 @@ class GeminiUtils
 
     private static function buildHeaderImagePrompt(Role $role, string $accentColor, ?string $styleInstructions): string
     {
+        $config = config('ai_prompts.header_image');
         $v = self::getVisualDirection($role);
 
-        $prompt = "Create a smooth abstract illustration with flowing gradients and layered geometric shapes for a wide banner image. This is for a {$v['type']} schedule called '{$role->name}'.";
+        $prompt = str_replace([':type', ':name'], [$v['type'], $role->name], $config['intro']);
 
         if ($v['description']) {
-            $prompt .= " Description: {$v['description']}.";
+            $prompt .= str_replace(':description', $v['description'], $config['description']);
         }
 
-        $prompt .= "\n\nVisual mood: {$v['mood']}.";
-        $prompt .= "\nComposition: flows horizontally from left to right. Visual weight toward the left and right edges, with the center area simpler and lighter so overlaid text remains legible.";
-        $prompt .= "\nSuggested motifs: {$v['motifs']}.";
+        $prompt .= str_replace([':mood', ':motifs'], [$v['mood'], $v['motifs']], $config['body']);
 
         if (! empty($v['accents'])) {
-            $prompt .= "\nCategory-inspired accents: ".implode(', ', $v['accents']).'.';
+            $prompt .= str_replace(':accents', implode(', ', $v['accents']), $config['accents']);
         }
 
-        $prompt .= "\nColor palette: use {$accentColor} as the base, shifting subtly across the width through 2 to 3 related tones.";
-
-        $prompt .= "\n\nCRITICAL CONSTRAINTS:";
-        $prompt .= "\n- Absolutely no text, letters, words, numbers, people, or faces.";
-        $prompt .= "\n- Full bleed with no padding or borders.";
-        $prompt .= "\n- Professional and modern.";
+        $prompt .= str_replace(':accent_color', $accentColor, $config['color']);
+        $prompt .= $config['constraints'];
 
         if ($styleInstructions) {
-            $prompt .= "\n\nStyle preferences: {$styleInstructions}";
+            $prompt .= str_replace(':instructions', $styleInstructions, $config['style_preferences']);
         }
 
         return $prompt;
@@ -1776,26 +1759,20 @@ class GeminiUtils
 
     private static function buildBackgroundImagePrompt(Role $role, string $accentColor, ?string $styleInstructions): string
     {
+        $config = config('ai_prompts.background_image');
         $v = self::getVisualDirection($role);
 
-        $prompt = "Create a soft watercolor wash with faint geometric line work as a background image for a {$v['type']} schedule called '{$role->name}'.";
-
-        $prompt .= "\n\nPurpose: this image sits behind text and event listings, so it must be very subtle and non-distracting.";
-        $prompt .= "\nComposition: even and uniform across the entire canvas. No strong focal point. No area should be dramatically darker or lighter than another.";
-        $prompt .= "\nColor palette: very pale, washed-out tints of {$accentColor} at about 15 to 25 percent opacity. Soft, muted tones that will not compete with foreground content.";
+        $prompt = str_replace([':type', ':name'], [$v['type'], $role->name], $config['intro']);
+        $prompt .= str_replace(':accent_color', $accentColor, $config['body']);
 
         if (! empty($v['motifs'])) {
-            $prompt .= "\nOptional hint of motifs (like a watermark, barely visible): {$v['motifs']}.";
+            $prompt .= str_replace(':motifs', $v['motifs'], $config['motifs']);
         }
 
-        $prompt .= "\n\nCRITICAL CONSTRAINTS:";
-        $prompt .= "\n- Absolutely no text, letters, words, numbers, people, or faces.";
-        $prompt .= "\n- Must be subtle enough that black or dark text is easily readable over every part of the image.";
-        $prompt .= "\n- No bold shapes, no high-contrast elements, no vivid colors.";
-        $prompt .= "\n- Full bleed with no padding or borders.";
+        $prompt .= $config['constraints'];
 
         if ($styleInstructions) {
-            $prompt .= "\n\nStyle preferences: {$styleInstructions}";
+            $prompt .= str_replace(':instructions', $styleInstructions, $config['style_preferences']);
         }
 
         return $prompt;
@@ -1940,66 +1917,26 @@ class GeminiUtils
         $lengths = ['short', 'medium', 'long'];
         $length = $lengths[array_rand($lengths)];
 
+        $config = config('ai_prompts.blog_post');
+
         // Build the internal links requirement based on whether we have parent page info
         if ($parentPageUrl && $parentPageTitle) {
-            $linksRequirement = "- IMPORTANT: You MUST include exactly 2 internal links in the content:
-          1. One link to 'https://www.eventschedule.com/{$parentPageUrl}' with text like 'Event Schedule for {$parentPageTitle}' or similar contextual text
-          2. One link to 'https://www.eventschedule.com' with 'Event Schedule' as the link text
-        - Place these links naturally within the content where they add value
-        - Use proper HTML anchor tags: <a href=\"URL\">text</a>";
+            $linksRequirement = str_replace([':parent_url', ':parent_title'], [$parentPageUrl, $parentPageTitle], $config['links_with_parent']);
         } else {
-            $linksRequirement = "- Add 2 links in the text where relevant to 'https://www.eventschedule.com' with 'Event Schedule' as the text
-        - Place these links naturally within the content where they add value";
+            $linksRequirement = $config['links_without_parent'];
         }
 
         // Build features context if available
         $featuresRequirement = '';
         if (! empty($features)) {
-            $featuresList = implode(', ', $features);
-            $featuresRequirement = "- The blog post should naturally mention these Event Schedule features: {$featuresList}. Weave them into the content as practical recommendations, not as a feature list.\n        ";
+            $featuresRequirement = str_replace(':features', implode(', ', $features), $config['features_line']);
         }
 
-        $prompt = "Generate a blog post about '{$topic}' with the following specifications:
-
-        Tone: professional
-        Length: {$length} (short: 300-500 words, medium: 800-1200 words, long: 1500-2000 words)
-
-        Please return a JSON object with the following structure:
-        {
-            \"title\": \"SEO-optimized title (50-60 characters)\",
-            \"content\": \"HTML formatted content with proper headings (h1, h2, h3), paragraphs, and lists. Include practical tips, examples, and actionable advice.\",
-            \"excerpt\": \"Brief summary (150-160 characters)\",
-            \"tags\": [\"tag1\", \"tag2\", \"tag3\", \"tag4\", \"tag5\"],
-            \"meta_title\": \"SEO meta title (50-60 characters)\",
-            \"meta_description\": \"SEO meta description (150-160 characters)\",
-            \"image_category\": \"business|wellness|sports|music|networking|family|productivity|nature|arts|general\"
-        }
-
-        Requirements:
-        - Try not to seem like a robot
-        - Never use em dashes
-        - Make the content engaging and informative
-        - Include practical tips and actionable advice
-        - Use proper HTML formatting with h1, h2, h3 tags
-        - Include bullet points and numbered lists where appropriate
-        - Make it relevant to event scheduling and ticketing
-        {$featuresRequirement}
-        - Ensure the content is original and valuable
-        - Use natural, search-friendly language in the title and headings (the kind of phrasing people type into search engines)
-        - Make it SEO-friendly with relevant keywords
-        - Always maintain a professional tone
-        {$linksRequirement}
-        - For image_category, choose the most appropriate category based on the topic:
-          * business: for business, professional, corporate topics
-          * wellness: for health, wellness, meditation, yoga topics
-          * sports: for sports, fitness, athletics topics
-          * music: for music, arts, entertainment topics
-          * networking: for networking, social, community topics
-          * family: for family, children, parenting topics
-          * productivity: for productivity, time management, organization topics
-          * nature: for outdoor, nature, environmental topics
-          * arts: for creative, artistic, cultural topics
-          * general: for general topics that don't fit other categories";
+        $prompt = str_replace(
+            [':topic', ':length', ':features_requirement', ':links_requirement'],
+            [$topic, $length, $featuresRequirement, $linksRequirement],
+            $config['base']
+        );
 
         try {
             $data = self::sendRequest($prompt);
@@ -2055,18 +1992,7 @@ class GeminiUtils
         ];
         $style = $styles[array_rand($styles)];
 
-        $prompt = "You are a content strategist for Event Schedule, an event management platform.
-
-Recent blog post titles:
-- {$titlesText}
-
-Suggest ONE new blog post topic that:
-1. {$style}
-2. Is different from the recent posts listed above
-3. Would be interesting to event organizers and community managers
-
-Return a JSON object with just one field:
-{\"topic\": \"your topic phrase here (5-15 words)\"}";
+        $prompt = str_replace([':titles', ':style'], [$titlesText, $style], config('ai_prompts.blog_topic.base'));
 
         try {
             $data = self::sendRequest($prompt);

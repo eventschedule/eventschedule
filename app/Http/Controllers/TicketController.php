@@ -473,6 +473,12 @@ class TicketController extends Controller
                     $isIndividualTickets = $event->individual_tickets && count($guests) > 1;
 
                     if ($isIndividualTickets) {
+                        // Validate no duplicate emails among guests
+                        $guestEmails = collect($guests)->pluck('email')->filter()->map(fn ($e) => strtolower(trim($e)));
+                        if ($guestEmails->count() !== $guestEmails->unique()->count()) {
+                            throw new \Exception(__('messages.duplicate_guest_emails'));
+                        }
+
                         // Build flat list of ticket assignments for guests
                         $ticketAssignments = [];
                         $subtotal = 0;

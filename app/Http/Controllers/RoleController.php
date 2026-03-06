@@ -32,6 +32,7 @@ use App\Services\SmsService;
 use App\Services\UsageTrackingService;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
+use App\Utils\ImageUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Endroid\QrCode\QrCode;
@@ -2497,6 +2498,8 @@ class RoleController extends Controller
             'style_instructions' => 'nullable|string|max:500',
             'elements' => 'required|array|min:1',
             'elements.*' => 'in:profile_image,header_image,accent_color,font,background_image',
+            'custom_prompt' => 'nullable|string|max:5000',
+            'save_instructions' => 'nullable|boolean',
         ]);
 
         $currentValues = [
@@ -2509,7 +2512,8 @@ class RoleController extends Controller
                 $role,
                 $request->input('elements'),
                 $request->input('style_instructions'),
-                $currentValues
+                $currentValues,
+                $request->input('custom_prompt')
             );
 
             if (empty($results) || (isset($results['text_error']) && isset($results['image_error']) && count($results) === 2)) {
@@ -2517,6 +2521,10 @@ class RoleController extends Controller
             }
 
             UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_STYLE, $role->id);
+
+            if ($request->input('save_instructions')) {
+                $role->update(['ai_style_instructions' => $request->input('style_instructions', '')]);
+            }
 
             // Build full URLs for generated images
             $response = ['success' => true];
@@ -2560,6 +2568,264 @@ class RoleController extends Controller
         }
     }
 
+    public function getStylePrompt(Request $request, $subdomain)
+    {
+        if (! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $role->isEnterprise()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'elements' => 'required|array|min:1',
+            'elements.*' => 'in:accent_color,font',
+        ]);
+
+        $currentValues = [
+            'accent_color' => $request->input('accent_color'),
+            'font_family' => $request->input('font_family'),
+        ];
+
+        $prompt = GeminiUtils::buildScheduleStylePrompt(
+            $role,
+            $request->input('elements'),
+            $request->input('style_instructions'),
+            $currentValues
+        );
+
+        return response()->json(['success' => true, 'prompt' => $prompt]);
+    }
+
+    public function getStylePromptNew(Request $request)
+    {
+        if (is_demo_mode()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (config('app.hosted') && ! auth()->user()->isAdmin()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:talent,venue,curator',
+            'elements' => 'required|array|min:1',
+            'elements.*' => 'in:accent_color,font',
+        ]);
+
+        $tempRole = new Role;
+        $tempRole->name = $request->input('name');
+        $tempRole->type = $request->input('type');
+        $tempRole->short_description = $request->input('short_description');
+
+        $currentValues = [
+            'accent_color' => $request->input('accent_color'),
+            'font_family' => $request->input('font_family'),
+        ];
+
+        $prompt = GeminiUtils::buildScheduleStylePrompt(
+            $tempRole,
+            $request->input('elements'),
+            $request->input('style_instructions'),
+            $currentValues
+        );
+
+        return response()->json(['success' => true, 'prompt' => $prompt]);
+    }
+
+    public function getScheduleDetailsPrompt(Request $request, $subdomain)
+    {
+        if (! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $role->isEnterprise()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'elements' => 'required|array|min:1',
+            'elements.*' => 'in:short_description,description',
+            'name' => 'required|string',
+        ]);
+
+        $prompt = GeminiUtils::buildScheduleDetailsPrompt(
+            $request->input('name'),
+            $request->input('type') ?: $role->type,
+            $request->input('short_description'),
+            $request->input('elements'),
+            $request->input('description')
+        );
+
+        return response()->json(['success' => true, 'prompt' => $prompt]);
+    }
+
+    public function getScheduleDetailsPromptNew(Request $request)
+    {
+        if (is_demo_mode()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (config('app.hosted') && ! auth()->user()->isAdmin()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'elements' => 'required|array|min:1',
+            'elements.*' => 'in:short_description,description',
+        ]);
+
+        $prompt = GeminiUtils::buildScheduleDetailsPrompt(
+            $request->input('name'),
+            $request->input('type', 'talent'),
+            $request->input('short_description'),
+            $request->input('elements'),
+            $request->input('description')
+        );
+
+        return response()->json(['success' => true, 'prompt' => $prompt]);
+    }
+
+    public function generateStyleImage(Request $request, $subdomain)
+    {
+        set_time_limit(300);
+
+        if (! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $role->isEnterprise()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (is_demo_mode()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'image_type' => 'required|in:profile_image,header_image,background_image',
+            'accent_color' => 'required|string|max:7',
+            'style_instructions' => 'nullable|string|max:500',
+        ]);
+
+        $imageType = $request->input('image_type');
+        $accentColor = $request->input('accent_color');
+        $styleInstructions = $request->input('style_instructions');
+
+        try {
+            if ($imageType === 'profile_image') {
+                $imageData = GeminiUtils::generateScheduleProfileImage($role, $accentColor, $styleInstructions);
+            } elseif ($imageType === 'header_image') {
+                $imageData = GeminiUtils::generateScheduleHeaderImage($role, $accentColor, $styleInstructions);
+            } else {
+                $imageData = GeminiUtils::generateScheduleBackgroundImage($role, $accentColor, $styleInstructions);
+            }
+
+            if (! $imageData) {
+                return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
+            }
+
+            $prefix = str_replace('_image', '_', $imageType);
+            $filename = ImageUtils::saveImageData($imageData, 'generated_style.png', $prefix);
+
+            $response = ['success' => true];
+            if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                $response[$imageType.'_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
+            } elseif (config('filesystems.default') == 'local') {
+                $response[$imageType.'_url'] = url('/storage/'.$filename);
+            } else {
+                $response[$imageType.'_url'] = $filename;
+            }
+            $response[$imageType.'_filename'] = $filename;
+
+            return response()->json($response);
+        } catch (\Illuminate\Database\QueryException $e) {
+            report($e);
+
+            return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
+        } catch (\Exception $e) {
+            \Log::error('AI style image generation failed: '.$e->getMessage(), ['role_id' => $role->id]);
+
+            return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
+        }
+    }
+
+    public function generateStyleImageNew(Request $request)
+    {
+        set_time_limit(300);
+
+        if (is_demo_mode()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (config('app.hosted') && ! auth()->user()->isAdmin()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:talent,venue,curator',
+            'image_type' => 'required|in:profile_image,header_image,background_image',
+            'accent_color' => 'required|string|max:7',
+            'style_instructions' => 'nullable|string|max:500',
+        ]);
+
+        $tempRole = new Role;
+        $tempRole->name = $request->input('name');
+        $tempRole->type = $request->input('type');
+        $tempRole->short_description = $request->input('short_description');
+
+        $imageType = $request->input('image_type');
+        $accentColor = $request->input('accent_color');
+        $styleInstructions = $request->input('style_instructions');
+
+        try {
+            if ($imageType === 'profile_image') {
+                $imageData = GeminiUtils::generateScheduleProfileImage($tempRole, $accentColor, $styleInstructions);
+            } elseif ($imageType === 'header_image') {
+                $imageData = GeminiUtils::generateScheduleHeaderImage($tempRole, $accentColor, $styleInstructions);
+            } else {
+                $imageData = GeminiUtils::generateScheduleBackgroundImage($tempRole, $accentColor, $styleInstructions);
+            }
+
+            if (! $imageData) {
+                return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
+            }
+
+            $prefix = str_replace('_image', '_', $imageType);
+            $filename = ImageUtils::saveImageData($imageData, 'generated_style.png', $prefix);
+
+            $response = ['success' => true];
+            if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                $response[$imageType.'_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
+            } elseif (config('filesystems.default') == 'local') {
+                $response[$imageType.'_url'] = url('/storage/'.$filename);
+            } else {
+                $response[$imageType.'_url'] = $filename;
+            }
+            $response[$imageType.'_filename'] = $filename;
+
+            return response()->json($response);
+        } catch (\Illuminate\Database\QueryException $e) {
+            report($e);
+
+            return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
+        } catch (\Exception $e) {
+            \Log::error('AI style image generation failed: '.$e->getMessage());
+
+            return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
+        }
+    }
+
     public function generateScheduleDetails(Request $request, $subdomain)
     {
         if (! auth()->user()->isEditor($subdomain)) {
@@ -2580,6 +2846,9 @@ class RoleController extends Controller
             'elements' => 'required|array|min:1',
             'elements.*' => 'in:short_description,description',
             'name' => 'required|string',
+            'style_instructions' => 'nullable|string|max:500',
+            'custom_prompt' => 'nullable|string|max:5000',
+            'save_instructions' => 'nullable|boolean',
         ]);
 
         try {
@@ -2588,7 +2857,9 @@ class RoleController extends Controller
                 $request->input('type') ?: $role->type,
                 $request->input('short_description'),
                 $request->input('elements'),
-                $request->input('description')
+                $request->input('description'),
+                $request->input('custom_prompt'),
+                $request->input('style_instructions')
             );
 
             if (empty($results)) {
@@ -2596,6 +2867,10 @@ class RoleController extends Controller
             }
 
             UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_SCHEDULE_DETAILS, $role->id);
+
+            if ($request->input('save_instructions')) {
+                $role->update(['ai_content_instructions' => $request->input('style_instructions', '')]);
+            }
 
             return response()->json(array_merge(['success' => true], $results));
         } catch (\Illuminate\Database\QueryException $e) {
@@ -2627,6 +2902,7 @@ class RoleController extends Controller
             'style_instructions' => 'nullable|string|max:500',
             'elements' => 'required|array|min:1',
             'elements.*' => 'in:profile_image,header_image,accent_color,font,background_image',
+            'custom_prompt' => 'nullable|string|max:5000',
         ]);
 
         $tempRole = new Role;
@@ -2645,7 +2921,8 @@ class RoleController extends Controller
                 $tempRole,
                 $request->input('elements'),
                 $request->input('style_instructions'),
-                $currentValues
+                $currentValues,
+                $request->input('custom_prompt')
             );
 
             if (empty($results) || (isset($results['text_error']) && isset($results['image_error']) && count($results) === 2)) {
@@ -2707,6 +2984,8 @@ class RoleController extends Controller
             'name' => 'required|string|max:255',
             'elements' => 'required|array|min:1',
             'elements.*' => 'in:short_description,description',
+            'style_instructions' => 'nullable|string|max:500',
+            'custom_prompt' => 'nullable|string|max:5000',
         ]);
 
         try {
@@ -2715,7 +2994,9 @@ class RoleController extends Controller
                 $request->input('type', 'talent'),
                 $request->input('short_description'),
                 $request->input('elements'),
-                $request->input('description')
+                $request->input('description'),
+                $request->input('custom_prompt'),
+                $request->input('style_instructions')
             );
 
             if (empty($results)) {
