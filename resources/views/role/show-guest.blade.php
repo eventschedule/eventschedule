@@ -234,17 +234,19 @@
 
               {{-- Description below --}}
               @if($role->translatedDescription())
+              @php $descPreview = \Illuminate\Support\Str::words(strip_tags($role->translatedDescription()), 5, '...'); @endphp
               <div class="w-full mt-2">
-                <div x-data="{ expanded: false, clamped: false, collapse() { if (window.scrollY < 5) { this.expanded = false; return; } window.scrollTo({ top: 0, behavior: 'smooth' }); let f = 0; const check = () => { if (window.scrollY < 5 || f++ > 300) this.expanded = false; else requestAnimationFrame(check); }; requestAnimationFrame(check); } }"
-                     x-init="$nextTick(() => { clamped = $refs.content.scrollHeight > $refs.content.clientHeight })"
+                <div x-data="{ expanded: false, long: false, collapse() { if (window.scrollY < 5) { this.expanded = false; return; } window.scrollTo({ top: 0, behavior: 'smooth' }); let f = 0; const check = () => { if (window.scrollY < 5 || f++ > 300) this.expanded = false; else requestAnimationFrame(check); }; requestAnimationFrame(check); } }"
+                     x-init="$nextTick(() => { long = $refs.content.scrollHeight > $refs.content.clientHeight })"
                      class="text-start text-sm text-[#33383C] dark:text-gray-300">
-                  <div x-ref="content" :class="!expanded ? 'line-clamp-3' : ''" class="custom-content">
+                  <div x-show="long && !expanded" x-cloak>{{ $descPreview }}</div>
+                  <div x-ref="content" x-show="!long || expanded" :class="{ 'line-clamp-3': !long }" class="custom-content">
                     {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                   </div>
-                  <button x-show="clamped && !expanded" x-cloak @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
+                  <button x-show="long && !expanded" x-cloak @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
                     {{ $role->customLabel('show_more') }}
                   </button>
-                  <button x-show="expanded" x-cloak @click="collapse()" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
+                  <button x-show="long && expanded" x-cloak @click="collapse()" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
                     {{ $role->customLabel('show_less') }}
                   </button>
                 </div>
@@ -413,16 +415,18 @@
 
               {{-- Description below (full width) --}}
               @if($role->translatedDescription())
-              <div x-data="{ expanded: false, clamped: false, collapse() { if (window.scrollY < 5) { this.expanded = false; return; } window.scrollTo({ top: 0, behavior: 'smooth' }); let f = 0; const check = () => { if (window.scrollY < 5 || f++ > 300) this.expanded = false; else requestAnimationFrame(check); }; requestAnimationFrame(check); } }"
-                   x-init="$nextTick(() => { clamped = $refs.content.scrollHeight > $refs.content.clientHeight })"
+              @php $descPreviewDesktop = \Illuminate\Support\Str::words(strip_tags($role->translatedDescription()), 5, '...'); @endphp
+              <div x-data="{ expanded: false, long: false, collapse() { if (window.scrollY < 5) { this.expanded = false; return; } window.scrollTo({ top: 0, behavior: 'smooth' }); let f = 0; const check = () => { if (window.scrollY < 5 || f++ > 300) this.expanded = false; else requestAnimationFrame(check); }; requestAnimationFrame(check); } }"
+                   x-init="$nextTick(() => { long = $refs.content.scrollHeight > $refs.content.clientHeight })"
                    class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
-                <div x-ref="content" :class="!expanded ? 'line-clamp-3' : ''" class="custom-content">
+                <div x-show="long && !expanded" x-cloak>{{ $descPreviewDesktop }}</div>
+                <div x-ref="content" x-show="!long || expanded" :class="{ 'line-clamp-3': !long }" class="custom-content">
                   {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
                 </div>
-                <button x-show="clamped && !expanded" x-cloak @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
+                <button x-show="long && !expanded" x-cloak @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
                   {{ $role->customLabel('show_more') }}
                 </button>
-                <button x-show="expanded" x-cloak @click="collapse()" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
+                <button x-show="long && expanded" x-cloak @click="collapse()" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
                   {{ $role->customLabel('show_less') }}
                 </button>
               </div>

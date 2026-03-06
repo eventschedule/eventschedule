@@ -1168,7 +1168,7 @@
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <a href="{{ marketing_url('/features/online-events') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
+                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
@@ -1230,7 +1230,7 @@
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <a href="{{ marketing_url('/features/sub-schedules') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
@@ -1294,7 +1294,7 @@
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <a href="{{ route('marketing.custom_domain') }}" class="feature-banner group block">
-                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
+                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-sm font-medium mb-4">

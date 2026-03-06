@@ -3989,12 +3989,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Reset to first tab if the section is already active
+    function resetToFirstTab(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (section && section.style.display === 'block') {
+            const firstTab = section.querySelector('[data-tab]');
+            if (firstTab) {
+                firstTab.click();
+            }
+            return true;
+        }
+        return false;
+    }
+
     // Handle navigation link clicks
     sectionLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             const sectionId = this.getAttribute('data-section');
-            showSection(sectionId);
+            if (!resetToFirstTab(sectionId)) {
+                showSection(sectionId);
+            }
         });
     });
 
@@ -4002,7 +4017,9 @@ document.addEventListener('DOMContentLoaded', function() {
     mobileHeaders.forEach(header => {
         header.addEventListener('click', function() {
             const sectionId = this.getAttribute('data-section');
-            showSection(sectionId);
+            if (!resetToFirstTab(sectionId)) {
+                showSection(sectionId);
+            }
         });
     });
 
