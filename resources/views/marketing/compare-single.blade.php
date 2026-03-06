@@ -340,7 +340,7 @@
     </section>
 
     <!-- Transition -->
-    <div class="section-fade-from-gray h-24"></div>
+    <div class="section-fade-to-white h-24"></div>
 
     <!-- How to Switch -->
     <section class="bg-white dark:bg-[#0a0a0f] py-24">
@@ -428,7 +428,7 @@
     </section>
 
     <!-- Transition -->
-    <div class="section-fade-from-gray h-24"></div>
+    <div class="section-fade-to-white h-24"></div>
 
     <!-- Cross-links -->
     <section class="bg-white dark:bg-[#0a0a0f] py-24">

@@ -346,8 +346,8 @@
           </div>
         @endif
 
-        {{-- Cancel Registration --}}
-        @if ($sale->isRsvp() && $sale->status === 'paid')
+        {{-- Cancel Registration / Free Ticket --}}
+        @if ($sale->status === 'paid' && ($sale->isRsvp() || $sale->payment_amount == 0))
         <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50 print:hidden flex items-center justify-between">
           <a href="{{ $event->getGuestUrl() }}" target="_blank" class="text-[13px] text-violet-400 hover:text-violet-300 transition-colors font-medium">
             {{ __('messages.view_event') }}
@@ -357,7 +357,7 @@
             @csrf
             <input type="hidden" name="secret" value="{{ $sale->secret }}">
             <button type="submit" class="text-[13px] text-red-400 print:text-red-600 hover:text-red-300 transition-colors font-medium">
-              {{ __('messages.cancel_registration') }}
+              {{ $sale->isRsvp() ? __('messages.cancel_registration') : __('messages.cancel_ticket') }}
             </button>
           </form>
         </div>

@@ -258,7 +258,7 @@
     </section>
 
     <!-- Transition -->
-    <div class="section-fade-from-gray h-24"></div>
+    <div class="section-fade-to-white h-24"></div>
 
     <!-- Cross-link to Compare -->
     <section class="bg-white dark:bg-[#0a0a0f] py-24">

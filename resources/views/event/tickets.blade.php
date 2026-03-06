@@ -281,6 +281,12 @@
                         }
                     }
                     this.guests = newGuests;
+                    // Sync guest[0] back to top-level fields when switching to single form
+                    if (this.guests.length > 0) {
+                        this.name = this.guests[0].name || this.name;
+                        this.email = this.guests[0].email || this.email;
+                        this.phone = this.guests[0].phone || this.phone;
+                    }
                 },
                 applyPromoCode() {
                     if (!this.promoCode.trim() || this.isValidatingPromo) return;
@@ -423,7 +429,7 @@
         </div>
         @endif
 
-        <div v-show="!showGuestForms">
+        <div v-if="!showGuestForms">
         <div class="mb-6">
             <label for="name" class="text-gray-900 dark:text-gray-100">{{ __('messages.name') . ' *' }}</label>
             <input type="text" name="name" id="name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"

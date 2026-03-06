@@ -478,6 +478,11 @@ class TicketController extends Controller
                             }
                         }
 
+                        // Validate guest count matches ticket count
+                        if (count($ticketAssignments) !== count($guests)) {
+                            throw new \Exception(__('messages.error'));
+                        }
+
                         // Primary sale gets the first ticket (qty=1)
                         $sale->saleTickets()->create([
                             'ticket_id' => $ticketAssignments[0],
@@ -753,6 +758,10 @@ class TicketController extends Controller
 
                 // Check capacity
                 $rsvpQuantity = $event->individual_tickets ? max(1, (int) $request->input('rsvp_quantity', 1)) : 1;
+                $guests = $request->input('guests', []);
+                if ($event->individual_tickets && count($guests) > 1) {
+                    $rsvpQuantity = count($guests); // trust guest array over separate input
+                }
                 $rsvpSoldCount = $event->rsvpSoldCount($request->event_date);
                 if ($event->rsvp_limit && ($rsvpSoldCount + $rsvpQuantity) > $event->rsvp_limit) {
                     throw new \Exception(__('messages.rsvp_full'));
@@ -825,7 +834,6 @@ class TicketController extends Controller
                 $sale->save();
 
                 // Individual RSVP: create guest sales
-                $guests = $request->input('guests', []);
                 if ($event->individual_tickets && $rsvpQuantity > 1 && count($guests) > 1) {
                     $sale->group_id = $sale->id;
                     $sale->save();
@@ -1523,6 +1531,14 @@ class TicketController extends Controller
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
+        // Block status-changing actions on non-primary grouped sales
+        if ($sale->group_id && ! $sale->isPrimarySale()) {
+            $statusActions = ['mark_paid', 'refund', 'cancel', 'delete'];
+            if (in_array($request->action, $statusActions)) {
+                return response()->json(['error' => __('messages.error')], 403);
+            }
+        }
+
         $previousStatus = $sale->status;
         $actionPerformed = false;
 
@@ -1603,6 +1619,13 @@ class TicketController extends Controller
 
                     $sale->is_deleted = true;
                     $sale->save();
+
+                    // Cascade is_deleted to grouped guest sales
+                    if ($sale->group_id && $sale->isPrimarySale()) {
+                        Sale::where('group_id', $sale->group_id)
+                            ->where('id', '!=', $sale->id)
+                            ->update(['is_deleted' => true]);
+                    }
                 });
                 $actionPerformed = true;
                 break;
@@ -1661,7 +1684,7 @@ class TicketController extends Controller
             abort(403);
         }
 
-        if ($sale->payment_method !== 'rsvp') {
+        if ($sale->payment_method !== 'rsvp' && $sale->payment_amount != 0) {
             abort(403);
         }
 

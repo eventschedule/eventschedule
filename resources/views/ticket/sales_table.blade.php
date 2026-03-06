@@ -89,9 +89,9 @@
                                                 @endif
                                                 <span class="font-semibold">{{ $sale->name }}</span>
                                                 @if ($isGroupedPrimary)
-                                                @php $groupCount = \App\Models\Sale::where('group_id', $sale->id)->count(); @endphp
+                                                @php $groupCount = \App\Models\Sale::where('group_id', $sale->id)->where('id', '!=', $sale->id)->count(); @endphp
                                                 <span class="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
-                                                    {{ $groupCount }} {{ __('messages.guests') }}
+                                                    + {{ $groupCount }} {{ __('messages.guests') }}
                                                 </span>
                                                 @endif
                                             </div>
@@ -207,6 +207,7 @@
                                                             {{ __('messages.send_email') }}
                                                         </div>
                                                     </button>
+                                                    @if (! $isGroupedNonPrimary)
                                                     @if($sale->status === 'unpaid')
                                                     <button data-popup-toggle="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" data-sale-action="mark_paid" data-sale-id="{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors w-full text-start" role="menuitem" tabindex="0">
                                                         <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -249,6 +250,7 @@
                                                             {{ __('messages.delete') }}
                                                         </div>
                                                     </button>
+                                                    @endif
                                                     @endif
                                                 </div>
                                             </div>
@@ -328,9 +330,9 @@
                             @endif
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $sale->name }}</h3>
                             @if ($isGroupedPrimaryMobile)
-                            @php $groupCountMobile = \App\Models\Sale::where('group_id', $sale->id)->count(); @endphp
+                            @php $groupCountMobile = \App\Models\Sale::where('group_id', $sale->id)->where('id', '!=', $sale->id)->count(); @endphp
                             <span class="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
-                                {{ $groupCountMobile }} {{ __('messages.guests') }}
+                                + {{ $groupCountMobile }} {{ __('messages.guests') }}
                             </span>
                             @endif
                         </div>
@@ -551,36 +553,38 @@
                                 {{ __('messages.send_email') }}
                             </button>
 
+                            @if (! $isGroupedNonPrimaryMobile)
                             @if($sale->status === 'unpaid')
-                                <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')" 
-                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150" 
+                                <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')"
+                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
                                         role="menuitem">
                                     {{ __('messages.mark_paid') }}
                                 </button>
                             @endif
 
                             @if(false && $sale->status === 'paid' && $sale->payment_method != 'cash')
-                                <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'refund')" 
-                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150" 
+                                <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'refund')"
+                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
                                         role="menuitem">
                                     {{ __('messages.refund') }}
                                 </button>
                             @endif
 
                             @if(in_array($sale->status, ['unpaid', 'paid']))
-                                <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'cancel')" 
-                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150" 
+                                <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'cancel')"
+                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
                                         role="menuitem">
                                     {{ __('messages.cancel') }}
                                 </button>
                             @endif
-                            
+
                             @if(! $sale->is_deleted)
-                            <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'delete')" 
-                                    class="block px-4 py-2 text-sm text-red-700 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150" 
+                            <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'delete')"
+                                    class="block px-4 py-2 text-sm text-red-700 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
                                     role="menuitem">
                                 {{ __('messages.delete') }}
                             </button>
+                            @endif
                             @endif
                         </div>
                     </div>
