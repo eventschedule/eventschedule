@@ -2569,4 +2569,12 @@ return [
     'started_following' => 'is begonnen te volgen',
     'newsletter_sent_to' => 'verzonden naar',
     'view_analytics' => 'Analyses bekijken',
+    'customize_dashboard' => 'Aanpassen',
+    'panel_stats' => 'Statistieken',
+    'panel_upcoming_events' => 'Komende Evenementen',
+    'panel_recent_activity' => 'Recente Activiteit',
+    'panel_calendar' => 'Kalender',
+    'size_half' => 'Half',
+    'size_full' => 'Volledig',
+    'dashboard_config_saved' => 'Dashboard-indeling opgeslagen',
 ];

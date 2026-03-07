@@ -2572,4 +2572,12 @@ return [
     'started_following' => 'بدأ بالمتابعة',
     'newsletter_sent_to' => 'أُرسل إلى',
     'view_analytics' => 'عرض التحليلات',
+    'customize_dashboard' => 'تخصيص',
+    'panel_stats' => 'إحصائيات',
+    'panel_upcoming_events' => 'الفعاليات القادمة',
+    'panel_recent_activity' => 'النشاط الأخير',
+    'panel_calendar' => 'التقويم',
+    'size_half' => 'نصف',
+    'size_full' => 'كامل',
+    'dashboard_config_saved' => 'تم حفظ تخطيط لوحة المعلومات',
 ];

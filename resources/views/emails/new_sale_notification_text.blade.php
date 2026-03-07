@@ -10,9 +10,27 @@
 @if ($sale->phone)
 {{ __('messages.phone_number') }}: {{ $sale->phone }}
 @endif
+@if (!empty($groupedSales) && $groupedSales->count() > 0)
 
-@foreach ($sale->saleTickets as $saleTicket)
-{{ $saleTicket->ticket->name }} x {{ $saleTicket->quantity }}
+{{ __('messages.guests') }}:
+@foreach ($groupedSales as $guestSale)
+{{ $guestSale->name }} ({{ $guestSale->email }})@if ($guestSale->phone) - {{ $guestSale->phone }}@endif
+
+@endforeach
+@endif
+
+@php
+$allSaleTickets = $sale->saleTickets->toBase();
+if (!empty($groupedSales) && $groupedSales->count() > 0) {
+    foreach ($groupedSales as $gs) {
+        $allSaleTickets = $allSaleTickets->merge($gs->saleTickets);
+    }
+}
+$ticketSummary = $allSaleTickets->groupBy(fn($st) => $st->ticket->name)
+    ->map(fn($group) => $group->sum('quantity'));
+@endphp
+@foreach ($ticketSummary as $ticketName => $qty)
+{{ $ticketName }} x {{ $qty }}
 @endforeach
 
 {{ __('messages.total') }}: {{ $total }}

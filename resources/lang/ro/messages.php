@@ -2611,4 +2611,12 @@ return [
     'started_following' => 'a început să urmărească',
     'newsletter_sent_to' => 'trimis către',
     'view_analytics' => 'Vezi Analize',
+    'customize_dashboard' => 'Personalizează',
+    'panel_stats' => 'Statistici',
+    'panel_upcoming_events' => 'Evenimente Viitoare',
+    'panel_recent_activity' => 'Activitate Recentă',
+    'panel_calendar' => 'Calendar',
+    'size_half' => 'Jumătate',
+    'size_full' => 'Complet',
+    'dashboard_config_saved' => 'Aspectul tabloului de bord a fost salvat',
 ];

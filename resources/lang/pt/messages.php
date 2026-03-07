@@ -2570,4 +2570,12 @@ return [
     'started_following' => 'começou a seguir',
     'newsletter_sent_to' => 'enviado para',
     'view_analytics' => 'Ver Análises',
+    'customize_dashboard' => 'Personalizar',
+    'panel_stats' => 'Estatísticas',
+    'panel_upcoming_events' => 'Próximos Eventos',
+    'panel_recent_activity' => 'Atividade Recente',
+    'panel_calendar' => 'Calendário',
+    'size_half' => 'Metade',
+    'size_full' => 'Completo',
+    'dashboard_config_saved' => 'Layout do painel guardado',
 ];

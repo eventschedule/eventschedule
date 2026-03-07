@@ -2575,4 +2575,12 @@ return [
     'started_following' => 'folgt jetzt',
     'newsletter_sent_to' => 'gesendet an',
     'view_analytics' => 'Analysen anzeigen',
+    'customize_dashboard' => 'Anpassen',
+    'panel_stats' => 'Statistiken',
+    'panel_upcoming_events' => 'Bevorstehende Veranstaltungen',
+    'panel_recent_activity' => 'Letzte Aktivität',
+    'panel_calendar' => 'Kalender',
+    'size_half' => 'Halb',
+    'size_full' => 'Voll',
+    'dashboard_config_saved' => 'Dashboard-Layout gespeichert',
 ];

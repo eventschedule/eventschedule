@@ -61,6 +61,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'two_factor_confirmed_at',
         'admin_newsletter_unsubscribed_at',
         'default_role_id',
+        'dashboard_config',
     ];
 
     /**
@@ -161,6 +162,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'two_factor_recovery_codes' => EncryptedString::class,
             'two_factor_confirmed_at' => 'datetime',
             'admin_newsletter_unsubscribed_at' => 'datetime',
+            'dashboard_config' => 'array',
         ];
     }
 

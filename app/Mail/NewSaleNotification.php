@@ -45,6 +45,7 @@ class NewSaleNotification extends Mailable
         if ($sale->group_id && $sale->group_id === $sale->id) {
             $this->groupedSales = Sale::where('group_id', $sale->group_id)
                 ->where('id', '!=', $sale->id)
+                ->with('saleTickets.ticket')
                 ->get();
         }
     }

@@ -143,186 +143,146 @@
         @endif
 
         @if($roleIds->isNotEmpty())
-        {{-- Quick Actions Bar --}}
-        <div class="flex flex-wrap gap-3 mb-6">
-            <x-secondary-link :href="route('event.create_default')" class="!py-2 !text-sm">
-                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                {{ __('messages.create_event') }}
-            </x-secondary-link>
-            @php $firstSchedule = $schedules->first() ?? $venues->first() ?? $curators->first(); @endphp
-            @if($firstSchedule)
-            <x-secondary-link :href="route('role.view_guest', ['subdomain' => $firstSchedule->subdomain])" class="!py-2 !text-sm">
-                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                {{ __('messages.view_schedule') }}
-            </x-secondary-link>
-            @endif
-            <x-secondary-link :href="route('analytics')" class="!py-2 !text-sm">
-                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                {{ __('messages.view_analytics') }}
-            </x-secondary-link>
+        {{-- Customize Button --}}
+        <div class="flex justify-end mb-4">
+            <button type="button" x-data x-on:click="$dispatch('open-modal', 'customize-dashboard')" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                {{ __('messages.customize_dashboard') }}
+            </button>
         </div>
 
-        {{-- Stat Cards Row --}}
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {{-- Upcoming Events --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-200 dark:border-gray-700/50">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30">
-                        <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    </div>
-                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.upcoming_events') }}</span>
-                </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($dashboardStats['upcoming_count']) }}</p>
-            </div>
-
-            {{-- Page Views (30d) with sparkline --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-200 dark:border-gray-700/50 lg:col-span-2">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="p-2 rounded-lg bg-sky-50 dark:bg-sky-900/30">
-                                <svg class="w-5 h-5 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                            </div>
-                            <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.total_views') }} (30d)</span>
-                        </div>
-                        <div class="flex items-baseline gap-2">
-                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($dashboardStats['views_30d']) }}</p>
-                            @if($dashboardStats['views_change'] != 0)
-                            <span class="text-sm font-medium {{ $dashboardStats['views_change'] > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                                {{ $dashboardStats['views_change'] > 0 ? '+' : '' }}{{ $dashboardStats['views_change'] }}%
-                            </span>
-                            @endif
-                        </div>
-                    </div>
-                    <div class="w-24 h-12 flex-shrink-0">
-                        <canvas id="sparkline-chart" width="96" height="48"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Followers or Total Events --}}
-            @if($dashboardStats['followers_count'] > 0)
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-200 dark:border-gray-700/50">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="p-2 rounded-lg bg-green-50 dark:bg-green-900/30">
-                        <svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                    </div>
-                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.followers') }}</span>
-                </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($dashboardStats['followers_count']) }}</p>
-            </div>
-            @else
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-200 dark:border-gray-700/50">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="p-2 rounded-lg bg-green-50 dark:bg-green-900/30">
-                        <svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                    </div>
-                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.events') }}</span>
-                </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($dashboardStats['total_events_count']) }}</p>
-            </div>
-            @endif
-        </div>
-
-        {{-- Two-Column Section: Upcoming Events + Recent Activity --}}
+        {{-- Configurable Dashboard Panels --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {{-- Upcoming Events List --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700/50">
-                <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700/50">
-                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('messages.upcoming_events') }}</h3>
-                </div>
-                <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
-                    @forelse($upcomingEvents as $event)
-                    @php $eventRole = $event->roles->first(); @endphp
-                    <a href="{{ $eventRole ? route('event.edit', ['subdomain' => $eventRole->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) : '#' }}" class="flex items-center gap-4 px-5 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        @if($event->getImageUrl())
-                        <img src="{{ $event->getImageUrl() }}" alt="" class="w-12 h-12 rounded-lg object-cover flex-shrink-0">
-                        @else
-                        <div class="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-                            <svg class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        </div>
-                        @endif
-                        <div class="min-w-0 flex-1">
-                            <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ $event->name }}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                {{ $event->starts_at ? $event->starts_at->format('M j, g:i A') : '' }}
-                                @if($eventRole)
-                                <span class="mx-1">&middot;</span> {{ $eventRole->name }}
-                                @endif
-                            </p>
-                        </div>
-                        <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    </a>
-                    @empty
-                    <div class="px-5 py-8 text-center">
-                        <svg class="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_upcoming_events') }}</p>
-                        <a href="{{ route('event.create_default') }}" class="inline-block mt-3 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">{{ __('messages.create_event') }}</a>
+            @foreach($dashboardConfig['panels'] as $panel)
+                @if($panel['visible'])
+                    <div class="{{ $panel['size'] === 'full' ? 'lg:col-span-2' : '' }}">
+                        @include('home.panels.' . $panel['id'], ['size' => $panel['size']])
                     </div>
-                    @endforelse
-                </div>
-            </div>
-
-            {{-- Recent Activity Feed --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700/50">
-                <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700/50">
-                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('messages.recent_activity') }}</h3>
-                </div>
-                <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
-                    @forelse($recentActivity as $activity)
-                    <div class="flex items-start gap-3 px-5 py-3">
-                        @if($activity['type'] === 'sale')
-                        <div class="mt-1 w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>
-                        <div class="min-w-0 flex-1">
-                            <p class="text-sm text-gray-700 dark:text-gray-300">
-                                {{ __('messages.new_ticket_sale') }}
-                                @if($activity['description'])
-                                <span class="font-medium text-gray-900 dark:text-white">{{ $activity['description'] }}</span>
-                                @endif
-                                @if(!empty($activity['amount']))
-                                <span class="text-green-600 dark:text-green-400 font-medium">${{ number_format($activity['amount'], 2) }}</span>
-                                @endif
-                            </p>
-                            <p class="text-xs text-gray-400 mt-0.5">{{ $activity['date']->diffForHumans() }}</p>
-                        </div>
-                        @elseif($activity['type'] === 'follower')
-                        <div class="mt-1 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></div>
-                        <div class="min-w-0 flex-1">
-                            <p class="text-sm text-gray-700 dark:text-gray-300">
-                                @if($activity['description'])
-                                <span class="font-medium text-gray-900 dark:text-white">{{ $activity['description'] }}</span>
-                                @endif
-                                {{ __('messages.started_following') }}
-                            </p>
-                            <p class="text-xs text-gray-400 mt-0.5">{{ $activity['date']->diffForHumans() }}</p>
-                        </div>
-                        @elseif($activity['type'] === 'newsletter')
-                        <div class="mt-1 w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></div>
-                        <div class="min-w-0 flex-1">
-                            <p class="text-sm text-gray-700 dark:text-gray-300">
-                                <span class="font-medium text-gray-900 dark:text-white">{{ $activity['description'] }}</span>
-                                {{ __('messages.newsletter_sent_to') }} {{ $activity['sent_count'] ?? 0 }}
-                            </p>
-                            <p class="text-xs text-gray-400 mt-0.5">{{ $activity['date']->diffForHumans() }}</p>
-                        </div>
-                        @endif
-                    </div>
-                    @empty
-                    <div class="px-5 py-8 text-center">
-                        <svg class="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_recent_activity') }}</p>
-                    </div>
-                    @endforelse
-                </div>
-            </div>
+                @endif
+            @endforeach
         </div>
-        @endif
 
-        @include('role/partials/calendar', ['route' => 'home', 'tab' => ''])
+        {{-- Customize Dashboard Modal --}}
+        <x-modal name="customize-dashboard" maxWidth="lg">
+            <div x-data='{
+                panels: @json($dashboardConfig["panels"]),
+                labels: {
+                    stats: @json(__("messages.panel_stats")),
+                    upcoming_events: @json(__("messages.panel_upcoming_events")),
+                    recent_activity: @json(__("messages.panel_recent_activity")),
+                    calendar: @json(__("messages.panel_calendar"))
+                },
+                saving: false,
+                sortableInstance: null,
+                init() {
+                    this.$nextTick(() => {
+                        const list = this.$refs.panelList;
+                        if (list && typeof Sortable !== "undefined") {
+                            this.sortableInstance = Sortable.create(list, {
+                                handle: ".drag-handle",
+                                animation: 150,
+                                ghostClass: "opacity-50",
+                                onEnd: (evt) => {
+                                    const item = this.panels.splice(evt.oldIndex, 1)[0];
+                                    this.panels.splice(evt.newIndex, 0, item);
+                                }
+                            });
+                        }
+                    });
+                },
+                async save() {
+                    this.saving = true;
+                    try {
+                        const response = await fetch(@json(route("home.save_config")), {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": document.querySelector("meta[name=\"csrf-token\"]")?.getAttribute("content") || "",
+                                "Accept": "application/json"
+                            },
+                            body: JSON.stringify({ panels: this.panels })
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            window.location.reload();
+                        }
+                    } catch (e) {
+                        this.saving = false;
+                    }
+                }
+            }'>
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('messages.customize_dashboard') }}</h3>
+                    <button type="button" x-on:click="$dispatch('close')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <div class="p-6">
+                    <div x-ref="panelList" class="space-y-2">
+                        <template x-for="(panel, index) in panels" :key="panel.id">
+                            <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-700/50">
+                                {{-- Drag Handle --}}
+                                <div class="drag-handle cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0">
+                                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/><circle cx="9" cy="15" r="1.5"/><circle cx="15" cy="15" r="1.5"/><circle cx="9" cy="20" r="1.5"/><circle cx="15" cy="20" r="1.5"/></svg>
+                                </div>
+
+                                {{-- Toggle --}}
+                                <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                    <input type="checkbox" x-model="panel.visible" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
+                                    <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                </label>
+
+                                {{-- Label --}}
+                                <span class="flex-1 text-sm font-medium text-gray-700 dark:text-gray-300" x-text="labels[panel.id]"></span>
+
+                                {{-- Size Selector --}}
+                                <div class="flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600 flex-shrink-0">
+                                    <button type="button"
+                                        x-on:click="panel.size = 'half'"
+                                        :class="panel.size === 'half'
+                                            ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]'
+                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-650'"
+                                        class="px-3 py-1 text-xs font-medium transition-all duration-200">
+                                        {{ __('messages.size_half') }}
+                                    </button>
+                                    <div class="w-px bg-gray-200 dark:bg-white/[0.08]"></div>
+                                    <button type="button"
+                                        x-on:click="panel.size = 'full'"
+                                        :class="panel.size === 'full'
+                                            ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]'
+                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-650'"
+                                        class="px-3 py-1 text-xs font-medium transition-all duration-200">
+                                        {{ __('messages.size_full') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+                    <button type="button" x-on:click="$dispatch('close')" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200">
+                        {{ __('messages.cancel') }}
+                    </button>
+                    <button type="button" x-on:click="save()" :disabled="saving" class="px-4 py-2 text-sm font-medium text-white bg-[#4E81FA] rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-all duration-200">
+                        <span x-show="!saving">{{ __('messages.save') }}</span>
+                        <span x-show="saving" x-cloak>{{ __('messages.saving') }}...</span>
+                    </button>
+                </div>
+            </div>
+        </x-modal>
+        @endif
 
     </div>
 
+    @if($roleIds->isNotEmpty() && collect($dashboardConfig['panels'])->where('id', 'stats')->where('visible', true)->isNotEmpty())
     <script src="{{ asset('js/chart.min.js') }}" {!! nonce_attr() !!}></script>
+    @endif
+    @if($roleIds->isNotEmpty())
+    <script src="{{ asset('js/sortable.min.js') }}" {!! nonce_attr() !!}></script>
+    @endif
     <script {!! nonce_attr() !!}>
         document.addEventListener('DOMContentLoaded', function() {
             const feedbackForm = document.getElementById('feedback-form');

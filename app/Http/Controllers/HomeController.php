@@ -101,17 +101,27 @@ class HomeController extends Controller
             $events = collect();
         }
 
-        // Dashboard data
+        // Dashboard config
+        $dashboardConfig = $this->getDashboardConfig($user);
+        $visiblePanels = collect($dashboardConfig['panels'])->where('visible', true)->pluck('id')->toArray();
+
+        // Dashboard data - skip queries for hidden panels
         $dashboardStats = null;
         $upcomingEvents = collect();
         $recentActivity = collect();
         $sparklineData = [];
 
         if ($roleIds->isNotEmpty()) {
-            $dashboardStats = $this->getDashboardStats($user, $roleIds);
-            $upcomingEvents = $this->getUpcomingEvents($roleIds);
-            $recentActivity = $this->getRecentActivity($roleIds);
-            $sparklineData = $this->getSparklineData($user);
+            if (in_array('stats', $visiblePanels)) {
+                $dashboardStats = $this->getDashboardStats($user, $roleIds);
+                $sparklineData = $this->getSparklineData($user);
+            }
+            if (in_array('upcoming_events', $visiblePanels)) {
+                $upcomingEvents = $this->getUpcomingEvents($roleIds);
+            }
+            if (in_array('recent_activity', $visiblePanels)) {
+                $recentActivity = $this->getRecentActivity($roleIds);
+            }
         }
 
         return view('home', compact(
@@ -124,6 +134,7 @@ class HomeController extends Controller
             'upcomingEvents',
             'recentActivity',
             'sparklineData',
+            'dashboardConfig',
         ));
     }
 
@@ -254,6 +265,78 @@ class HomeController extends Controller
         }
     }
 
+    public function saveDashboardConfig(Request $request): JsonResponse
+    {
+        $request->validate([
+            'panels' => 'required|array',
+            'panels.*.id' => 'required|string|in:stats,upcoming_events,recent_activity,calendar',
+            'panels.*.visible' => 'required|boolean',
+            'panels.*.size' => 'required|string|in:half,full',
+        ]);
+
+        $panels = collect($request->input('panels'))->map(function ($panel) {
+            return [
+                'id' => $panel['id'],
+                'visible' => (bool) $panel['visible'],
+                'size' => $panel['size'],
+            ];
+        })->values()->toArray();
+
+        $user = $request->user();
+        $user->dashboard_config = ['panels' => $panels];
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.dashboard_config_saved'),
+        ]);
+    }
+
+    private function getDashboardConfig($user): array
+    {
+        $defaults = [
+            ['id' => 'stats', 'visible' => true, 'size' => 'full'],
+            ['id' => 'upcoming_events', 'visible' => true, 'size' => 'half'],
+            ['id' => 'recent_activity', 'visible' => true, 'size' => 'half'],
+            ['id' => 'calendar', 'visible' => true, 'size' => 'full'],
+        ];
+
+        $config = $user->dashboard_config;
+
+        if (! $config || ! isset($config['panels'])) {
+            return ['panels' => $defaults];
+        }
+
+        $validIds = ['stats', 'upcoming_events', 'recent_activity', 'calendar'];
+        $configuredIds = [];
+
+        // Keep only valid panels from config
+        $panels = [];
+        foreach ($config['panels'] as $panel) {
+            if (! isset($panel['id']) || ! in_array($panel['id'], $validIds)) {
+                continue;
+            }
+            if (in_array($panel['id'], $configuredIds)) {
+                continue;
+            }
+            $configuredIds[] = $panel['id'];
+            $panels[] = [
+                'id' => $panel['id'],
+                'visible' => (bool) ($panel['visible'] ?? true),
+                'size' => in_array($panel['size'] ?? '', ['half', 'full']) ? $panel['size'] : 'full',
+            ];
+        }
+
+        // Add any missing panels at the end (future-proofing)
+        foreach ($defaults as $default) {
+            if (! in_array($default['id'], $configuredIds)) {
+                $panels[] = $default;
+            }
+        }
+
+        return ['panels' => $panels];
+    }
+
     private function getDashboardStats($user, $roleIds): array
     {
         $analyticsService = app(AnalyticsService::class);
@@ -286,17 +369,12 @@ class HomeController extends Controller
                 ->where('is_accepted', true);
         })->count();
 
-        // Revenue (30d) - only if sales exist
-        $conversionStats = $analyticsService->getConversionStats($user, $thirtyDaysAgo, $now);
-
         return [
             'upcoming_count' => $upcomingCount,
             'views_30d' => $periodStats['period_views'] ?? 0,
             'views_change' => $momComparison['percentage_change'] ?? 0,
             'followers_count' => $followersCount,
             'total_events_count' => $totalEventsCount,
-            'total_sales' => $conversionStats['total_sales'] ?? 0,
-            'total_revenue' => $conversionStats['total_revenue'] ?? 0,
         ];
     }
 

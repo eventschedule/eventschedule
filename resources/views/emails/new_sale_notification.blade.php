@@ -47,9 +47,19 @@
 
             <hr style="border: none; border-top: 1px solid #eee; margin: 15px 0;">
 
-            @foreach ($sale->saleTickets as $saleTicket)
+            @php
+                $allSaleTickets = $sale->saleTickets->toBase();
+                if (!empty($groupedSales) && $groupedSales->count() > 0) {
+                    foreach ($groupedSales as $gs) {
+                        $allSaleTickets = $allSaleTickets->merge($gs->saleTickets);
+                    }
+                }
+                $ticketSummary = $allSaleTickets->groupBy(fn($st) => $st->ticket->name)
+                    ->map(fn($group) => $group->sum('quantity'));
+            @endphp
+            @foreach ($ticketSummary as $ticketName => $qty)
             <p style="margin: 0 0 5px 0; font-size: 14px; color: #333;">
-                {{ $saleTicket->ticket->name }} x {{ $saleTicket->quantity }}
+                {{ $ticketName }} x {{ $qty }}
             </p>
             @endforeach
 

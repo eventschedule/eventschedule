@@ -2564,4 +2564,12 @@ return [
     'started_following' => 'התחיל לעקוב',
     'newsletter_sent_to' => 'נשלח אל',
     'view_analytics' => 'הצג ניתוחים',
+    'customize_dashboard' => 'התאמה אישית',
+    'panel_stats' => 'סטטיסטיקות',
+    'panel_upcoming_events' => 'אירועים קרובים',
+    'panel_recent_activity' => 'פעילות אחרונה',
+    'panel_calendar' => 'לוח שנה',
+    'size_half' => 'חצי',
+    'size_full' => 'מלא',
+    'dashboard_config_saved' => 'פריסת לוח הבקרה נשמרה',
 ];

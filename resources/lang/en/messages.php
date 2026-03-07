@@ -2618,4 +2618,12 @@ return [
     'started_following' => 'started following',
     'newsletter_sent_to' => 'sent to',
     'view_analytics' => 'View Analytics',
+    'customize_dashboard' => 'Customize',
+    'panel_stats' => 'Stats',
+    'panel_upcoming_events' => 'Upcoming Events',
+    'panel_recent_activity' => 'Recent Activity',
+    'panel_calendar' => 'Calendar',
+    'size_half' => 'Half',
+    'size_full' => 'Full',
+    'dashboard_config_saved' => 'Dashboard layout saved',
 ];

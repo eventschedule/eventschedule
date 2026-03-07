@@ -937,11 +937,8 @@ class TicketController extends Controller
                 $event = Event::lockForUpdate()->find($event->id);
 
                 // Check capacity
-                $rsvpQuantity = $event->individual_tickets ? max(1, (int) $request->input('rsvp_quantity', 1)) : 1;
                 $guests = $request->input('guests', []);
-                if ($event->individual_tickets && count($guests) > 1) {
-                    $rsvpQuantity = count($guests); // trust guest array over separate input
-                }
+                $rsvpQuantity = $event->individual_tickets ? max(1, count($guests)) : 1;
                 $rsvpSoldCount = $event->rsvpSoldCount($request->event_date);
                 if ($event->rsvp_limit && ($rsvpSoldCount + $rsvpQuantity) > $event->rsvp_limit) {
                     throw new \Exception(__('messages.rsvp_full'));

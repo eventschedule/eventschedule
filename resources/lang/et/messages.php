@@ -2587,4 +2587,12 @@ return [
     'started_following' => 'hakkas jälgima',
     'newsletter_sent_to' => 'saadetud',
     'view_analytics' => 'Vaata analüütikat',
+    'customize_dashboard' => 'Kohanda',
+    'panel_stats' => 'Statistika',
+    'panel_upcoming_events' => 'Tulevased sündmused',
+    'panel_recent_activity' => 'Hiljutine tegevus',
+    'panel_calendar' => 'Kalender',
+    'size_half' => 'Pool',
+    'size_full' => 'Täis',
+    'dashboard_config_saved' => 'Töölaua paigutus salvestatud',
 ];

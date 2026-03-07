@@ -2571,4 +2571,12 @@ return [
     'started_following' => 'ha iniziato a seguire',
     'newsletter_sent_to' => 'inviato a',
     'view_analytics' => 'Visualizza Analisi',
+    'customize_dashboard' => 'Personalizza',
+    'panel_stats' => 'Statistiche',
+    'panel_upcoming_events' => 'Prossimi Eventi',
+    'panel_recent_activity' => 'Attività Recente',
+    'panel_calendar' => 'Calendario',
+    'size_half' => 'Metà',
+    'size_full' => 'Intero',
+    'dashboard_config_saved' => 'Layout della dashboard salvato',
 ];

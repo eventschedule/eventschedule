@@ -2590,4 +2590,12 @@ return [
     'started_following' => 'подписался',
     'newsletter_sent_to' => 'отправлено',
     'view_analytics' => 'Посмотреть аналитику',
+    'customize_dashboard' => 'Настроить',
+    'panel_stats' => 'Статистика',
+    'panel_upcoming_events' => 'Предстоящие мероприятия',
+    'panel_recent_activity' => 'Последняя активность',
+    'panel_calendar' => 'Календарь',
+    'size_half' => 'Половина',
+    'size_full' => 'Полный',
+    'dashboard_config_saved' => 'Макет панели управления сохранён',
 ];
