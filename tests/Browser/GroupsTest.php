@@ -115,9 +115,16 @@ class GroupsTest extends DuskTestCase
 
         // Create first event for "Main Shows" sub-schedule
         $browser->visit('/talent/add-event?date='.date('Y-m-d', strtotime('+7 days')))
-            ->type('name', 'Main Show Event')
-            ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($mainShows->id))
-            ->scrollIntoView('button[type="submit"]')
+            ->type('name', 'Main Show Event');
+
+        // Use JS to set searchable select value (native select is hidden by searchable-select component)
+        $browser->script("
+            var sel = document.getElementById('current_role_group_id');
+            sel.value = '".\App\Utils\UrlUtils::encodeId($mainShows->id)."';
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+        ");
+
+        $browser->scrollIntoView('button[type="submit"]')
             ->press('SAVE')
             ->waitForLocation('/talent/schedule', 15)
             ->pause(1000)
@@ -134,10 +141,16 @@ class GroupsTest extends DuskTestCase
 
         // Create second event for "Workshops" sub-schedule
         $browser->visit('/talent/add-event?date='.date('Y-m-d', strtotime('+7 days')))
-            ->type('name', 'Workshop Event')
-            ->scrollIntoView('select[name="current_role_group_id"]')
-            ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($workshops->id))
-            ->scrollIntoView('button[type="submit"]')
+            ->type('name', 'Workshop Event');
+
+        // Use JS to set searchable select value (native select is hidden by searchable-select component)
+        $browser->script("
+            var sel = document.getElementById('current_role_group_id');
+            sel.value = '".\App\Utils\UrlUtils::encodeId($workshops->id)."';
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+        ");
+
+        $browser->scrollIntoView('button[type="submit"]')
             ->press('SAVE')
             ->waitForLocation('/talent/schedule', 15)
             ->pause(1000)

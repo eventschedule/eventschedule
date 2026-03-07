@@ -275,7 +275,7 @@ class TicketTest extends DuskTestCase
                 ->assertSee('FREEPASS');
 
             // Click expand button to show custom field values (use JS for reliability)
-            $browser->script("document.querySelector('[data-toggle-custom-fields]').click()");
+            $browser->script("document.querySelector('[data-toggle-row]').click()");
             $browser->pause(1000);
 
             // Assert event-level and General Admission custom field values in expanded row
