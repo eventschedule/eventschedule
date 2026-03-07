@@ -6,7 +6,7 @@
         {{-- Row 1: Plan Breakdown --}}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {{-- Free Count --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-full">
@@ -23,7 +23,7 @@
             </div>
 
             {{-- Pro Count --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
@@ -40,7 +40,7 @@
             </div>
 
             {{-- Enterprise Count --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-purple-100 dark:bg-purple-900 rounded-full">
@@ -60,7 +60,7 @@
         {{-- Row 2: Payment/Status Breakdown --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {{-- Stripe Paid --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-green-100 dark:bg-green-900 rounded-full">
@@ -77,7 +77,7 @@
             </div>
 
             {{-- Manual --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-indigo-100 dark:bg-indigo-900 rounded-full">
@@ -94,7 +94,7 @@
             </div>
 
             {{-- On Trial --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-full">
@@ -111,7 +111,7 @@
             </div>
 
             {{-- Expiring Soon --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-amber-100 dark:bg-amber-900 rounded-full">
@@ -129,16 +129,16 @@
         </div>
 
         {{-- Filters --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
             <form method="GET" action="{{ route('admin.plans') }}" class="flex flex-col sm:flex-row gap-4">
                 <div class="flex-1 relative">
                     <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="{{ __('messages.search_schedules') }}" autocomplete="off" data-subdomain-autocomplete
-                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50"></div>
+                        class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
                 </div>
                 <div class="w-full sm:w-40">
-                    <select name="plan_type" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <select name="plan_type" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">@lang('messages.all_plans')</option>
                         <option value="free" {{ request('plan_type') === 'free' ? 'selected' : '' }}>@lang('messages.free')</option>
                         <option value="pro" {{ request('plan_type') === 'pro' ? 'selected' : '' }}>@lang('messages.pro')</option>
@@ -146,7 +146,7 @@
                     </select>
                 </div>
                 <div class="w-full sm:w-40">
-                    <select name="status" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <select name="status" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">@lang('messages.all_status')</option>
                         <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>@lang('messages.active')</option>
                         <option value="expired" {{ request('status') === 'expired' ? 'selected' : '' }}>@lang('messages.expired')</option>
@@ -154,7 +154,7 @@
                     </select>
                 </div>
                 <div class="w-full sm:w-40">
-                    <select name="source" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <select name="source" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">@lang('messages.all_sources')</option>
                         <option value="stripe" {{ request('source') === 'stripe' ? 'selected' : '' }}>@lang('messages.stripe')</option>
                         <option value="manual" {{ request('source') === 'manual' ? 'selected' : '' }}>@lang('messages.manual')</option>
@@ -162,11 +162,11 @@
                     </select>
                 </div>
                 <div class="flex gap-2">
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                         @lang('messages.filter')
                     </button>
                     @if(request('search') || request('plan_type') || request('status') || request('source'))
-                        <a href="{{ route('admin.plans') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-gray-700 dark:text-gray-200 uppercase tracking-widest hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        <a href="{{ route('admin.plans') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-600 border border-transparent rounded-lg font-semibold text-xs text-gray-700 dark:text-gray-200 uppercase tracking-widest hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                             @lang('messages.clear')
                         </a>
                     @endif
@@ -175,7 +175,7 @@
         </div>
 
         {{-- Role List Table --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">
@@ -224,7 +224,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @php
-                                        $planType = $role->plan_type ?? 'free';
+                                        $planType = $role->actualPlanTier();
                                         $badgeColors = [
                                             'free' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
                                             'pro' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',

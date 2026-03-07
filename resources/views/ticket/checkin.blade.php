@@ -50,7 +50,7 @@
         <div v-if="stats && !loading">
 
             <!-- Overall progress -->
-            <div class="bg-white dark:bg-[#1e1e1e] rounded-lg shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6 mb-6">
+            <div class="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6 mb-6">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ __('messages.checked_in') }}</h3>
                     <span class="text-2xl font-bold text-gray-800 dark:text-gray-100">
@@ -67,7 +67,7 @@
             <!-- Per ticket type cards -->
             <div v-if="stats.tickets.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <div v-for="ticket in stats.tickets" :key="ticket.type"
-                    class="bg-white dark:bg-[#1e1e1e] rounded-lg shadow-sm border border-gray-200 dark:border-[#2d2d30] p-4">
+                    class="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-sm border border-gray-200 dark:border-[#2d2d30] p-4">
                     <div class="flex items-center justify-between mb-2">
                         <h4 class="font-medium text-gray-700 dark:text-[#d1d5db]">@{{ ticket.type }}</h4>
                         <span class="text-sm font-semibold text-gray-600 dark:text-[#9ca3af]">
@@ -88,7 +88,7 @@
 
             <!-- Recent activity -->
             <div v-if="stats.recent_checkins.length > 0"
-                class="bg-white dark:bg-[#1e1e1e] rounded-lg shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6">
+                class="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{{ __('messages.recent_checkins') }}</h3>
                 <div class="divide-y divide-gray-100 dark:divide-[#2d2d30]">
                     <div v-for="(checkin, index) in stats.recent_checkins" :key="index"

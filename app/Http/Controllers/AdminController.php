@@ -1365,22 +1365,46 @@ class AdminController extends Controller
             });
         };
 
-        // Plan statistics (excluding demo roles)
-        $planCounts = Role::select('plan_type', DB::raw('COUNT(*) as count'))
-            ->whereNotNull('user_id')
-            ->where(function ($query) {
-                $query->whereNotNull('email_verified_at')
-                    ->orWhereNotNull('phone_verified_at');
-            })
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
-            ->groupBy('plan_type')
-            ->pluck('count', 'plan_type')
-            ->toArray();
+        // Plan statistics (excluding demo roles) using actualPlanTier() for accurate counts
+        $verifiedNonDemoScope = function ($query) {
+            $query->whereNotNull('user_id')
+                ->where(function ($q) {
+                    $q->whereNotNull('email_verified_at')
+                        ->orWhereNotNull('phone_verified_at');
+                })
+                ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+                ->where('subdomain', 'not like', 'demo-%');
+        };
 
-        $freeCount = $planCounts['free'] ?? 0;
-        $proCount = $planCounts['pro'] ?? 0;
-        $enterpriseCount = $planCounts['enterprise'] ?? 0;
+        $totalRoleCount = Role::where($verifiedNonDemoScope)->count();
+
+        $potentiallyPaidRoles = Role::where($verifiedNonDemoScope)
+            ->where(function ($q) use ($validSubscriptionScope) {
+                $q->whereHas('subscriptions', $validSubscriptionScope)
+                    ->orWhere(function ($q2) {
+                        $q2->whereNotNull('trial_ends_at')
+                            ->where('trial_ends_at', '>', now());
+                    })
+                    ->orWhere(function ($q2) {
+                        $q2->where('plan_type', '!=', 'free')
+                            ->whereNotNull('plan_expires')
+                            ->where('plan_expires', '>=', now()->format('Y-m-d'));
+                    });
+            })
+            ->with('subscriptions')
+            ->get();
+
+        $enterpriseCount = 0;
+        $proCount = 0;
+        foreach ($potentiallyPaidRoles as $role) {
+            $tier = $role->actualPlanTier();
+            if ($tier === 'enterprise') {
+                $enterpriseCount++;
+            } elseif ($tier === 'pro') {
+                $proCount++;
+            }
+        }
+        $freeCount = $totalRoleCount - $proCount - $enterpriseCount;
 
         // Active Stripe subscriptions (excluding demo roles)
         $stripePaidCount = Role::whereHas('subscriptions', $validSubscriptionScope)

@@ -489,7 +489,7 @@
 
         .dark .EasyMDEContainer {
             border: 1px solid #2d2d30 !important; /* gray-700 - match form inputs */
-            border-radius: 0.375rem !important; /* rounded-md */
+            border-radius: 0.5rem !important; /* rounded-lg */
         }
 
         .dark .EasyMDEContainer .CodeMirror,
@@ -765,6 +765,20 @@
     {{ $slot }}
 
     <div id="tooltip" class="hidden fixed z-50 px-3 py-2 text-sm text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg pointer-events-none max-w-xs"></div>
+
+    <div x-data="{ lightboxOpen: false, lightboxSrc: '' }"
+        @show-lightbox.window="lightboxSrc = $event.detail; lightboxOpen = true; document.body.style.overflow = 'hidden'"
+        @keydown.escape.window="if (lightboxOpen) { lightboxOpen = false; document.body.style.overflow = ''; }">
+        <template x-teleport="body">
+            <div x-show="lightboxOpen" x-cloak
+                @click.self="lightboxOpen = false; document.body.style.overflow = ''"
+                class="fixed inset-0 z-[70] flex items-center justify-center bg-black/90">
+                <button @click="lightboxOpen = false; document.body.style.overflow = ''"
+                    class="absolute top-3 ltr:right-3 rtl:left-3 text-white/80 hover:text-white text-4xl leading-none z-10 w-10 h-10 flex items-center justify-center">&times;</button>
+                <img :src="lightboxSrc" class="max-w-[96vw] max-h-[90vh] object-contain pointer-events-none" alt="">
+            </div>
+        </template>
+    </div>
 
     @if (config('app.is_testing'))
         <style {!! nonce_attr() !!}>

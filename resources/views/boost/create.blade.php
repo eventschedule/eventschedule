@@ -3,27 +3,27 @@
         <div class="flex justify-between items-center gap-6 mb-6">
             @if (is_rtl())
                 <a href="{{ route('event.edit_admin', $event->hashedId()) }}"
-                   class="js-cancel-btn inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                   class="js-cancel-btn inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                     {{ __('messages.cancel') }}
                 </a>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('messages.boost_event') }}</h1>
             @else
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('messages.boost_event') }}</h1>
                 <a href="{{ route('event.edit_admin', $event->hashedId()) }}"
-                   class="js-cancel-btn inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                   class="js-cancel-btn inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                     {{ __('messages.cancel') }}
                 </a>
             @endif
         </div>
 
         @if (session('error'))
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300">
+        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
             {{ session('error') }}
         </div>
         @endif
 
         @if ($activeCampaigns >= $maxConcurrent)
-        <div class="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-md text-yellow-700 dark:text-yellow-300">
+        <div class="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg text-yellow-700 dark:text-yellow-300">
             {{ __('messages.boost_max_concurrent') }}
         </div>
         @else
@@ -65,7 +65,7 @@
         @if (!empty($defaults['warnings']))
         <div class="mb-6 space-y-2">
             @foreach ($defaults['warnings'] as $warning)
-            <div class="p-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-md text-sm text-yellow-700 dark:text-yellow-300">
+            <div class="p-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg text-sm text-yellow-700 dark:text-yellow-300">
                 {{ $warning }}
             </div>
             @endforeach

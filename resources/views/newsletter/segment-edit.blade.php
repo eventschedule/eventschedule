@@ -2,25 +2,25 @@
     <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.edit_segment') }}</h2>
             <a href="{{ route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                class="inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                 {{ __('messages.back') }}
             </a>
         </div>
 
         @if (session('status'))
-        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-md text-green-700 dark:text-green-300">
+        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
             {{ session('status') }}
         </div>
         @endif
 
         @if (session('error'))
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300">
+        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
             {{ session('error') }}
         </div>
         @endif
 
         @if ($errors->any())
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300">
+        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
             <ul class="list-disc list-inside">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -30,7 +30,7 @@
         @endif
 
         {{-- Segment Info --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg p-6 mb-6">
+        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6 mb-6">
             <form method="POST" action="{{ route('newsletter.segment.update', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}">
                 @csrf
                 @method('PUT')
@@ -47,7 +47,7 @@
                     </div>
 
                     <div class="flex justify-end">
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600">
                             {{ __('messages.save_changes') }}
                         </button>
                     </div>
@@ -57,14 +57,14 @@
 
         {{-- Add Subscriber (manual segments only) --}}
         @if ($segment->type === 'manual')
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg p-6 mb-6">
+        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6 mb-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.add_subscriber') }}</h3>
             <form method="POST" action="{{ route('newsletter.segment.user.store', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
                 class="flex flex-col sm:flex-row gap-3">
                 @csrf
                 <x-text-input name="name" type="text" class="flex-1" :placeholder="__('messages.name')" />
                 <x-text-input name="email" type="email" class="flex-1" :placeholder="__('messages.email')" required />
-                <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600 whitespace-nowrap">
+                <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 whitespace-nowrap">
                     {{ __('messages.add_subscriber') }}
                 </button>
             </form>
@@ -77,7 +77,7 @@
         @endif
 
         {{-- Subscribers Table --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg p-6">
+        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
                 {{ __('messages.subscribers') }} ({{ number_format($recipientCount) }})
             </h3>
@@ -91,11 +91,14 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
+                            @if ($segment->type === 'manual')
+                            <x-sortable-header column="name" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.name') }}</x-sortable-header>
+                            <x-sortable-header column="email" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.email') }}</x-sortable-header>
+                            <x-sortable-header column="created_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.date_added') }}</x-sortable-header>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.actions') }}</th>
+                            @else
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.name') }}</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.email') }}</th>
-                            @if ($segment->type === 'manual')
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.date_added') }}</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.actions') }}</th>
                             @endif
                         </tr>
                     </thead>
@@ -130,10 +133,10 @@
                                     <x-text-input name="name" type="text" class="flex-1 text-sm" :value="$subscriber->name" :placeholder="__('messages.name')" />
                                     <x-text-input name="email" type="email" class="flex-1 text-sm" :value="$subscriber->email" :placeholder="__('messages.email')" required />
                                     <div class="flex gap-2">
-                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-xs text-white hover:bg-blue-600">
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-xs text-white hover:bg-blue-600">
                                             {{ __('messages.save_changes') }}
                                         </button>
-                                        <button type="button" @click="editingId = null" class="inline-flex items-center px-3 py-1.5 bg-gray-200 dark:bg-gray-700 border border-transparent rounded-md font-semibold text-xs text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600">
+                                        <button type="button" @click="editingId = null" class="inline-flex items-center px-3 py-1.5 bg-gray-200 dark:bg-gray-700 border border-transparent rounded-lg font-semibold text-xs text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600">
                                             {{ __('messages.cancel') }}
                                         </button>
                                     </div>
@@ -168,6 +171,20 @@
             @endif
         </div>
     <script {!! nonce_attr() !!}>
+        document.addEventListener('click', function(e) {
+            var header = e.target.closest('[data-sort]');
+            if (header) {
+                var url = new URL(window.location.href);
+                var currentSort = url.searchParams.get('sort_by') || 'created_at';
+                var currentDir = url.searchParams.get('sort_dir') || 'desc';
+                var sortBy = header.getAttribute('data-sort');
+                url.searchParams.set('sort_by', sortBy);
+                url.searchParams.set('sort_dir', currentSort === sortBy && currentDir === 'asc' ? 'desc' : 'asc');
+                url.searchParams.delete('page');
+                window.location.href = url.toString();
+            }
+        });
+
         document.addEventListener('submit', function(e) {
             var form = e.target.closest('.js-confirm-form');
             if (form) {

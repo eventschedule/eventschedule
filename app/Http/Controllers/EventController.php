@@ -1074,6 +1074,19 @@ class EventController extends Controller
         return back()->with('message', __('messages.uncurate_event'));
     }
 
+    public function showImportHub(Request $request, $subdomain)
+    {
+        if (! auth()->user()->isEditor($subdomain)) {
+            abort(403, __('messages.not_authorized'));
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        return view('event.import-hub', [
+            'role' => $role,
+        ]);
+    }
+
     public function showImport(Request $request, $subdomain)
     {
         if (! auth()->user()->isEditor($subdomain)) {

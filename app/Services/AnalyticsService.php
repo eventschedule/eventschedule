@@ -13,6 +13,7 @@ use App\Models\PageView;
 use App\Models\PromoCode;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Models\SaleTicket;
 use App\Models\User;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -851,6 +852,124 @@ class AnalyticsService
             'sales_count' => (int) $row->sales_count,
             'total_discount' => (float) $row->total_discount,
         ]);
+    }
+
+    /**
+     * Get check-in analytics stats
+     */
+    public function getCheckinStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null): array
+    {
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return ['has_data' => false];
+        }
+
+        $eventIds = DB::table('event_role')
+            ->whereIn('role_id', $roleIds)
+            ->pluck('event_id')
+            ->unique();
+
+        if ($eventIds->isEmpty()) {
+            return ['has_data' => false];
+        }
+
+        // Get all sale tickets for paid sales in the date range
+        $saleTickets = SaleTicket::whereHas('sale', function ($q) use ($eventIds, $start, $end) {
+            $q->whereIn('event_id', $eventIds)
+                ->where('status', 'paid')
+                ->whereBetween('event_date', [$start->toDateString(), $end->toDateString()]);
+        })
+            ->with(['sale:id,event_id,event_date', 'sale.event:id,name,name_en,start_date', 'ticket:id,type'])
+            ->get();
+
+        if ($saleTickets->isEmpty()) {
+            return ['has_data' => false];
+        }
+
+        $totalSold = 0;
+        $totalCheckedIn = 0;
+        $arrivalHours = array_fill(0, 24, 0);
+        $eventsData = [];
+        $ticketTypesData = [];
+
+        foreach ($saleTickets as $saleTicket) {
+            $event = $saleTicket->sale?->event;
+            if (! $event) {
+                continue;
+            }
+
+            $seats = json_decode($saleTicket->seats, true) ?? [];
+            $quantity = $saleTicket->quantity;
+            $checkedIn = 0;
+
+            foreach ($seats as $timestamp) {
+                if ($timestamp !== null) {
+                    $checkedIn++;
+                    $hour = (int) date('G', $timestamp);
+                    $arrivalHours[$hour]++;
+                }
+            }
+
+            $totalSold += $quantity;
+            $totalCheckedIn += $checkedIn;
+
+            // Events breakdown
+            $eventId = $saleTicket->sale->event_id;
+            if (! isset($eventsData[$eventId])) {
+                $eventsData[$eventId] = [
+                    'event_name' => $event->translatedName() ?? '',
+                    'event_date' => $event->start_date,
+                    'sold' => 0,
+                    'checked_in' => 0,
+                ];
+            }
+            $eventsData[$eventId]['sold'] += $quantity;
+            $eventsData[$eventId]['checked_in'] += $checkedIn;
+
+            // Ticket type breakdown
+            $ticketId = $saleTicket->ticket_id;
+            $ticketName = $saleTicket->ticket?->type ?? __('messages.unknown');
+            if (! isset($ticketTypesData[$ticketId])) {
+                $ticketTypesData[$ticketId] = [
+                    'name' => $ticketName,
+                    'sold' => 0,
+                    'checked_in' => 0,
+                ];
+            }
+            $ticketTypesData[$ticketId]['sold'] += $quantity;
+            $ticketTypesData[$ticketId]['checked_in'] += $checkedIn;
+        }
+
+        // Calculate rates
+        $attendanceRate = $totalSold > 0 ? round(($totalCheckedIn / $totalSold) * 100, 1) : 0;
+
+        // Sort events by date descending
+        $eventsBreakdown = collect($eventsData)->map(function ($event) {
+            $event['attendance_rate'] = $event['sold'] > 0
+                ? round(($event['checked_in'] / $event['sold']) * 100, 1) : 0;
+
+            return $event;
+        })->sortByDesc('event_date')->values()->toArray();
+
+        // Add attendance rate to ticket types
+        $ticketTypes = collect($ticketTypesData)->map(function ($type) {
+            $type['attendance_rate'] = $type['sold'] > 0
+                ? round(($type['checked_in'] / $type['sold']) * 100, 1) : 0;
+
+            return $type;
+        })->sortByDesc('sold')->values()->toArray();
+
+        return [
+            'has_data' => true,
+            'total_sold' => $totalSold,
+            'total_checked_in' => $totalCheckedIn,
+            'attendance_rate' => $attendanceRate,
+            'no_show_rate' => round(100 - $attendanceRate, 1),
+            'events_breakdown' => $eventsBreakdown,
+            'ticket_types' => $ticketTypes,
+            'arrival_hours' => $arrivalHours,
+        ];
     }
 
     /**

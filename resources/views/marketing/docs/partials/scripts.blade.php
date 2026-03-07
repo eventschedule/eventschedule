@@ -127,10 +127,15 @@
         });
         const target = document.querySelector(window.location.hash);
         if (target) {
+            // Disable CSS smooth scroll to prevent conflict with instant JS scroll
+            document.documentElement.style.scrollBehavior = 'auto';
             setTimeout(function() {
                 scrollToTarget(target, 'instant');
-                // Attach scroll listener after hash scroll settles
-                setTimeout(function() { window.addEventListener('scroll', highlightNav); }, 50);
+                // Re-enable smooth scroll and attach listener after repaint
+                requestAnimationFrame(function() {
+                    document.documentElement.style.scrollBehavior = '';
+                    window.addEventListener('scroll', highlightNav);
+                });
             }, 100);
         } else {
             window.addEventListener('scroll', highlightNav);

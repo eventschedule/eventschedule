@@ -35,6 +35,13 @@ class TicketController extends Controller
         $user = auth()->user();
         $past = request()->query('past') == 1;
 
+        $sortBy = request()->get('sort_by', 'event_date');
+        $sortDir = request()->get('sort_dir', '');
+        $allowedSortColumns = ['event_date', 'status', 'event_name'];
+        if (! in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'event_date';
+        }
+
         $query = Sale::with('event', 'saleTickets')
             ->where('user_id', $user->id)
             ->where('is_deleted', false);
@@ -46,13 +53,33 @@ class TicketController extends Controller
                         $eq->where('starts_at', '<', now()->subDay()->startOfDay());
                     });
             });
-            $sales = $query->orderBy('event_date', 'DESC')->get();
+            $defaultDir = 'desc';
+            $sortDir = $sortDir ? (strtolower($sortDir) === 'asc' ? 'asc' : 'desc') : $defaultDir;
+            if ($sortBy === 'event_name') {
+                $query->orderBy(
+                    Event::select('name')->whereColumn('events.id', 'sales.event_id'),
+                    $sortDir
+                );
+            } else {
+                $query->orderBy($sortBy, $sortDir);
+            }
+            $sales = $query->get();
         } else {
             $query->where('event_date', '>=', now()->subDay()->startOfDay())
                 ->whereHas('event', function ($eq) {
                     $eq->where('starts_at', '>=', now()->subDay()->startOfDay());
                 });
-            $sales = $query->orderBy('event_date', 'ASC')->get();
+            $defaultDir = 'asc';
+            $sortDir = $sortDir ? (strtolower($sortDir) === 'asc' ? 'asc' : 'desc') : $defaultDir;
+            if ($sortBy === 'event_name') {
+                $query->orderBy(
+                    Event::select('name')->whereColumn('events.id', 'sales.event_id'),
+                    $sortDir
+                );
+            } else {
+                $query->orderBy($sortBy, $sortDir);
+            }
+            $sales = $query->get();
 
             $hasPastTickets = Sale::where('user_id', $user->id)
                 ->where('is_deleted', false)
@@ -65,7 +92,7 @@ class TicketController extends Controller
                 ->exists();
         }
 
-        return view('ticket.index', compact('sales', 'past') + ($past ? [] : compact('hasPastTickets')));
+        return view('ticket.index', compact('sales', 'past', 'sortBy', 'sortDir') + ($past ? [] : compact('hasPastTickets')));
     }
 
     public function sales()
@@ -73,18 +100,39 @@ class TicketController extends Controller
         $filter = strtolower(request()->filter ?? '');
         $query = $this->salesQuery($filter);
 
-        $count = $query->count();
-        $sales = $query->orderByRaw('COALESCE(group_id, id) DESC, id ASC')
-            ->paginate(50, ['*'], 'page');
+        $sortBy = request()->get('sort_by', '');
+        $sortDir = strtolower(request()->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $allowedSortColumns = ['name', 'status', 'created_at', 'payment_amount', 'transaction_reference', 'event_name'];
+        if (! in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = '';
+        }
 
-        // Pre-compute guest counts per group to avoid N+1 queries
-        $groupIds = $sales->pluck('id')->filter();
-        $groupCounts = Sale::where('is_deleted', false)
-            ->whereNotNull('group_id')
-            ->whereIn('group_id', $groupIds)
-            ->select('group_id', DB::raw('count(*) - 1 as guest_count'))
-            ->groupBy('group_id')
-            ->pluck('guest_count', 'group_id');
+        $count = $query->count();
+
+        if ($sortBy) {
+            if ($sortBy === 'event_name') {
+                $query->orderBy(
+                    Event::select('name')->whereColumn('events.id', 'sales.event_id'),
+                    $sortDir
+                );
+            } else {
+                $query->orderBy($sortBy, $sortDir);
+            }
+        } else {
+            $query->orderBy('id', 'desc');
+        }
+
+        $sales = $query->paginate(50, ['*'], 'page')->withQueryString();
+
+        // Eager-load guest sales for grouped primaries
+        $sales->load(['guestSales' => function ($q) {
+            $q->where('is_deleted', false)->with('saleTickets.ticket', 'feedback');
+        }]);
+
+        // Derive group counts from eager-loaded guests
+        $groupCounts = $sales->filter(fn ($s) => $s->isPrimarySale())
+            ->mapWithKeys(fn ($s) => [$s->id => $s->guestSales->count()])
+            ->filter(fn ($count) => $count > 0);
 
         if (request()->ajax()) {
             $tab = request()->query('tab');
@@ -98,7 +146,7 @@ class TicketController extends Controller
                 return view('ticket.feedback_table', $this->getFeedbackData());
             }
 
-            return view('ticket.sales_table', compact('sales', 'groupCounts'));
+            return view('ticket.sales_table', compact('sales', 'groupCounts', 'sortBy', 'sortDir'));
         } else {
             $user = auth()->user();
             $waitlistCount = TicketWaitlist::whereHas('event', function ($q) use ($user) {
@@ -109,11 +157,11 @@ class TicketController extends Controller
 
             $hasPro = $user->roles()->get()->contains(fn ($role) => $role->isPro());
 
-            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries', 'hasPro', 'groupCounts'));
+            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries', 'hasPro', 'groupCounts', 'sortBy', 'sortDir'));
         }
     }
 
-    private function salesQuery(?string $filter)
+    private function salesQuery(?string $filter, bool $primaryOnly = true)
     {
         $user = auth()->user();
 
@@ -123,8 +171,15 @@ class TicketController extends Controller
                 $query->where('user_id', $user->id);
             });
 
+        if ($primaryOnly) {
+            $query->where(function ($q) {
+                $q->whereNull('group_id')
+                    ->orWhereColumn('group_id', 'id');
+            });
+        }
+
         if ($filter) {
-            $query->where(function ($q) use ($filter) {
+            $query->where(function ($q) use ($filter, $primaryOnly) {
                 $q->where('status', 'LIKE', "%{$filter}%")
                     ->orWhere('transaction_reference', 'LIKE', "%{$filter}%")
                     ->orWhere('email', 'LIKE', "%{$filter}%")
@@ -133,6 +188,21 @@ class TicketController extends Controller
                     ->orWhereHas('event', function ($q) use ($filter) {
                         $q->where('name', 'LIKE', "%{$filter}%");
                     });
+
+                if ($primaryOnly) {
+                    $q->orWhereExists(function ($sub) use ($filter) {
+                        $sub->select(DB::raw(1))
+                            ->from('sales as guest')
+                            ->whereColumn('guest.group_id', 'sales.id')
+                            ->whereColumn('guest.id', '!=', 'guest.group_id')
+                            ->where('guest.is_deleted', false)
+                            ->where(function ($gq) use ($filter) {
+                                $gq->where('guest.name', 'LIKE', "%{$filter}%")
+                                    ->orWhere('guest.email', 'LIKE', "%{$filter}%")
+                                    ->orWhere('guest.phone', 'LIKE', "%{$filter}%");
+                            });
+                    });
+                }
             });
         }
 
@@ -143,13 +213,34 @@ class TicketController extends Controller
     {
         $user = auth()->user();
 
-        $feedbacks = EventFeedback::whereHas('event', function ($q) use ($user) {
+        $sortBy = request()->get('sort_by', 'created_at');
+        $sortDir = strtolower(request()->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $allowedSortColumns = ['rating', 'created_at', 'event_date', 'event_name', 'attendee_name'];
+        if (! in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'created_at';
+        }
+
+        $feedbackQuery = EventFeedback::whereHas('event', function ($q) use ($user) {
             $q->where('user_id', $user->id);
         })
             ->whereHas('sale', fn ($q) => $q->where('is_deleted', false))
-            ->with(['event', 'sale'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(50, ['*'], 'feedback_page');
+            ->with(['event', 'sale']);
+
+        if ($sortBy === 'event_name') {
+            $feedbackQuery->orderBy(
+                Event::select('name')->whereColumn('events.id', 'event_feedbacks.event_id'),
+                $sortDir
+            );
+        } elseif ($sortBy === 'attendee_name') {
+            $feedbackQuery->orderBy(
+                Sale::select('name')->whereColumn('sales.id', 'event_feedbacks.sale_id'),
+                $sortDir
+            );
+        } else {
+            $feedbackQuery->orderBy($sortBy, $sortDir);
+        }
+
+        $feedbacks = $feedbackQuery->paginate(50, ['*'], 'feedback_page')->withQueryString();
 
         $stats = EventFeedback::whereHas('event', fn ($q) => $q->where('user_id', $user->id))
             ->whereHas('sale', fn ($q) => $q->where('is_deleted', false))
@@ -172,13 +263,13 @@ class TicketController extends Controller
 
         $responseRate = $totalEligibleSales > 0 ? round(($feedbackCount / $totalEligibleSales) * 100) : 0;
 
-        return compact('feedbacks', 'feedbackCount', 'averageRating', 'responseRate');
+        return compact('feedbacks', 'feedbackCount', 'averageRating', 'responseRate', 'sortBy', 'sortDir');
     }
 
     public function exportSales()
     {
         $filter = strtolower(request()->filter ?? '');
-        $sales = $this->salesQuery($filter)->orderBy('created_at', 'DESC')->get();
+        $sales = $this->salesQuery($filter, primaryOnly: false)->orderBy('created_at', 'DESC')->get();
 
         // First pass: collect unique custom field names
         $customFieldNames = [];
@@ -322,7 +413,7 @@ class TicketController extends Controller
 
         // Verify event can sell tickets (checks past dates, tickets_enabled, and Pro plan)
         if (! $event->canSellTickets($request->event_date)) {
-            return back()->with('error', __('messages.tickets_not_available'));
+            return back()->withInput()->with('error', __('messages.tickets_not_available'));
         }
 
         if (! $user && $request->create_account && config('app.hosted')) {
@@ -674,9 +765,9 @@ class TicketController extends Controller
         } catch (\Illuminate\Database\QueryException $e) {
             report($e);
 
-            return back()->with('error', __('messages.error'));
+            return back()->withInput()->with('error', __('messages.error'));
         } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+            return back()->withInput()->with('error', $e->getMessage());
         }
 
         $total = $sale->payment_amount;
@@ -786,7 +877,7 @@ class TicketController extends Controller
 
             $turnstileValid = \App\Utils\TurnstileUtils::verify($request->input('cf-turnstile-response'));
             if (! $turnstileValid) {
-                return back()->with('error', __('messages.turnstile_verification_failed'));
+                return back()->withInput()->with('error', __('messages.turnstile_verification_failed'));
             }
         }
 
@@ -806,7 +897,7 @@ class TicketController extends Controller
         }
 
         if (! $event->canAcceptRsvp($request->event_date)) {
-            return back()->with('error', __('messages.rsvp_unavailable'));
+            return back()->withInput()->with('error', __('messages.rsvp_unavailable'));
         }
 
         if (! $user && $request->create_account && config('app.hosted')) {
@@ -979,9 +1070,9 @@ class TicketController extends Controller
         } catch (\Illuminate\Database\QueryException $e) {
             report($e);
 
-            return back()->with('error', __('messages.error'));
+            return back()->withInput()->with('error', __('messages.error'));
         } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+            return back()->withInput()->with('error', $e->getMessage());
         }
 
         // Send confirmation email and admin notification

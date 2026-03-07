@@ -730,8 +730,8 @@
             <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Key features</h2>
             <div class="space-y-3">
                 <x-feature-link-card
-                    name="AI-Powered Import"
-                    description="Paste text or images to create events instantly"
+                    name="AI Features"
+                    description="Import, generate content, create brand style, and more with AI"
                     :url="marketing_url('/features/ai')"
                     icon-color="blue"
                 >

@@ -40,14 +40,14 @@
                 <div class="mt-1 relative">
                     <input type="text" id="api_key"
                            value="{{ session('new_api_key') ? session('new_api_key') : str_repeat('•', 32) }}"
-                           class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm {{ session('show_new_api_key') ? 'rounded-e-none pe-12' : '' }} font-mono"
+                           class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm {{ session('show_new_api_key') ? 'rounded-e-none pe-12' : '' }} font-mono"
                            readonly>
                     @if(session('show_new_api_key'))
                         <div class="absolute inset-y-0 end-0 flex items-center">
                             <div class="h-full w-px bg-gray-300 dark:bg-gray-600"></div>
                             <button type="button"
                                     id="copy-api-key-btn"
-                                    class="px-3 border border-s-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-e-md flex items-center justify-center group h-full"
+                                    class="px-3 border border-s-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-e-lg flex items-center justify-center group h-full"
                                     title="{{ __('Copy to clipboard') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" 
                                      class="h-5 w-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300" 

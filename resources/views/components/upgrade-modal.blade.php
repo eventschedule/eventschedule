@@ -27,11 +27,11 @@
 
         <div class="flex flex-row gap-3">
             <button type="button" x-on:click="$dispatch('close-modal', '{{ $name }}')"
-                    class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-300 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                    class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-300 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                 {{ __('messages.cancel') }}
             </button>
             <a href="{{ route('role.subscribe', ['subdomain' => $subdomain, 'tier' => $tier]) }}" target="_blank"
-               class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[#3D6FE8] focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+               class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[#3D6FE8] focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                 {{ __('messages.upgrade') }}
             </a>
         </div>

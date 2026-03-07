@@ -51,7 +51,7 @@ class MarketingController extends Controller
     public function about()
     {
         return view('marketing.about', [
-            'githubStars' => $this->getGitHubStars(),
+            'githubStars' => \App\Utils\GitHubUtils::getStars(),
         ]);
     }
 
@@ -272,7 +272,7 @@ class MarketingController extends Controller
     public function openSource()
     {
         return view('marketing.open-source', [
-            'githubStars' => $this->getGitHubStars(),
+            'githubStars' => \App\Utils\GitHubUtils::getStars(),
         ]);
     }
 
@@ -802,7 +802,7 @@ class MarketingController extends Controller
     public function contact()
     {
         return view('marketing.contact', [
-            'githubStars' => $this->getGitHubStars(),
+            'githubStars' => \App\Utils\GitHubUtils::getStars(),
         ]);
     }
 
@@ -844,7 +844,7 @@ class MarketingController extends Controller
     public function selfHost()
     {
         return view('marketing.selfhost', [
-            'githubStars' => $this->getGitHubStars(),
+            'githubStars' => \App\Utils\GitHubUtils::getStars(),
         ]);
     }
 
@@ -4419,28 +4419,6 @@ class MarketingController extends Controller
             'schedules' => $schedules,
             'events' => $events,
         ]);
-    }
-
-    private function getGitHubStars(): ?int
-    {
-        $githubStars = cache()->get('github_stars');
-        if ($githubStars === null) {
-            try {
-                $response = \Illuminate\Support\Facades\Http::withHeaders([
-                    'Accept' => 'application/vnd.github.v3+json',
-                    'User-Agent' => 'EventSchedule',
-                ])->timeout(5)->get('https://api.github.com/repos/eventschedule/eventschedule');
-
-                if ($response->successful()) {
-                    $githubStars = $response->json('stargazers_count');
-                    cache()->put('github_stars', $githubStars, 3600);
-                }
-            } catch (\Exception $e) {
-                // Silently fail - star count won't show
-            }
-        }
-
-        return $githubStars;
     }
 
     /**

@@ -7,24 +7,12 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-800">
                         <tr>
-                            <th scope="col" class="py-3.5 ps-4 pe-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 sm:ps-6">
-                                {{ __('messages.name') }}
-                            </th>
-                            <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                {{ __('messages.email') }}
-                            </th>
-                            <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                {{ __('messages.event') }}
-                            </th>
-                            <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                {{ __('messages.date') }}
-                            </th>
-                            <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                {{ __('messages.status') }}
-                            </th>
-                            <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                {{ __('messages.created_at') }}
-                            </th>
+                            <x-sortable-header column="name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'" class="py-3.5 ps-4 pe-3 sm:ps-6">{{ __('messages.name') }}</x-sortable-header>
+                            <x-sortable-header column="email" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.email') }}</x-sortable-header>
+                            <x-sortable-header column="event_name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.event') }}</x-sortable-header>
+                            <x-sortable-header column="event_date" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.date') }}</x-sortable-header>
+                            <x-sortable-header column="status" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.status') }}</x-sortable-header>
+                            <x-sortable-header column="created_at" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.created_at') }}</x-sortable-header>
                             <th scope="col" class="relative py-3.5 ps-3 pe-4 sm:pe-6">
                                 <span class="sr-only">{{ __('messages.actions') }}</span>
                             </th>
@@ -76,7 +64,7 @@
     <!-- Mobile Card View -->
     <div class="md:hidden space-y-4">
         @foreach($entries as $entry)
-        <div class="bg-white dark:bg-[#1e1e1e] rounded-lg shadow-sm border border-gray-200 dark:border-[#2d2d30] p-4">
+        <div class="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-sm border border-gray-200 dark:border-[#2d2d30] p-4">
             <div class="flex justify-between items-start mb-2">
                 <div>
                     <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $entry->name }}</p>

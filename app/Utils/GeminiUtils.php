@@ -1187,7 +1187,7 @@ class GeminiUtils
         return array_slice($sortedVideos, 0, 6);
     }
 
-    private static function sendImageGenerationRequest($prompt, $aspectRatio = '3:4')
+    public static function sendImageGenerationRequest($prompt, $aspectRatio = '3:4')
     {
         $model = 'gemini-2.5-flash-image';
 
@@ -1703,7 +1703,7 @@ class GeminiUtils
         ];
     }
 
-    private static function buildProfileImagePrompt(Role $role, string $accentColor, ?string $styleInstructions): string
+    public static function buildProfileImagePrompt(Role $role, string $accentColor, ?string $styleInstructions): string
     {
         $config = config('ai_prompts.profile_image');
         $v = self::getVisualDirection($role);
@@ -1730,7 +1730,7 @@ class GeminiUtils
         return $prompt;
     }
 
-    private static function buildHeaderImagePrompt(Role $role, string $accentColor, ?string $styleInstructions): string
+    public static function buildHeaderImagePrompt(Role $role, string $accentColor, ?string $styleInstructions): string
     {
         $config = config('ai_prompts.header_image');
         $v = self::getVisualDirection($role);
@@ -1757,7 +1757,7 @@ class GeminiUtils
         return $prompt;
     }
 
-    private static function buildBackgroundImagePrompt(Role $role, string $accentColor, ?string $styleInstructions): string
+    public static function buildBackgroundImagePrompt(Role $role, string $accentColor, ?string $styleInstructions): string
     {
         $config = config('ai_prompts.background_image');
         $v = self::getVisualDirection($role);

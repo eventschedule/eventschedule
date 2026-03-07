@@ -5,25 +5,25 @@
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.edit_segment') }}</h2>
             <a href="{{ route('admin.newsletters.segments') }}"
-                class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                class="inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                 {{ __('messages.back') }}
             </a>
         </div>
 
         @if (session('status'))
-        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-md text-green-700 dark:text-green-300">
+        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
             {{ session('status') }}
         </div>
         @endif
 
         @if (session('error'))
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300">
+        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
             {{ session('error') }}
         </div>
         @endif
 
         @if ($errors->any())
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300">
+        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
             <ul class="list-disc list-inside">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -33,7 +33,7 @@
         @endif
 
         {{-- Segment Info --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg p-6 mb-6">
+        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6 mb-6">
             <form method="POST" action="{{ route('admin.newsletters.segment.update', ['hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}">
                 @csrf
                 @method('PUT')
@@ -64,7 +64,7 @@
                     </div>
 
                     <div class="flex justify-end">
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600">
                             {{ __('messages.save_changes') }}
                         </button>
                     </div>
@@ -74,7 +74,7 @@
 
         {{-- Add Subscriber (manual segments only) --}}
         @if ($segment->type === 'manual')
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg p-6 mb-6">
+        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6 mb-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.add_subscriber') }}</h3>
             <form method="POST" action="{{ route('admin.newsletters.segment.user.store', ['hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
                 id="add-user-form" class="relative">
@@ -83,10 +83,10 @@
                 <div class="flex flex-col sm:flex-row gap-3">
                     <div class="flex-1 relative">
                         <x-text-input type="text" id="user-search-input" class="block w-full" :placeholder="__('messages.search_users')" autocomplete="off" />
-                        <div id="user-search-results" class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto hidden">
+                        <div id="user-search-results" class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto hidden">
                         </div>
                     </div>
-                    <button type="submit" id="add-user-btn" disabled class="inline-flex items-center justify-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button type="submit" id="add-user-btn" disabled class="inline-flex items-center justify-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">
                         {{ __('messages.add_subscriber') }}
                     </button>
                 </div>
@@ -95,7 +95,7 @@
         @endif
 
         {{-- Subscribers Table --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg p-6">
+        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
                 {{ __('messages.subscribers') }} ({{ number_format($recipientCount) }})
             </h3>

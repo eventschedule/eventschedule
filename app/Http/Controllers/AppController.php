@@ -225,7 +225,7 @@ class AppController extends Controller
 
     public function robots()
     {
-        $disallowRules = "User-agent: *\nDisallow: /login\nDisallow: /register\nDisallow: /password\nDisallow: /checkout\nDisallow: /home\nDisallow: /admin\n";
+        $disallowRules = "User-agent: *\nDisallow: /login\nDisallow: /sign_up\nDisallow: /reset-password\nDisallow: /update-password\nDisallow: /confirm-password\nDisallow: /verify-email\nDisallow: /two-factor-challenge\nDisallow: /auth/\nDisallow: /events\nDisallow: /settings\nDisallow: /checkout\nDisallow: /admin\n";
 
         $isAppSubdomain = config('app.hosted') && str_starts_with(request()->getHost(), 'app.');
         $content = $isAppSubdomain

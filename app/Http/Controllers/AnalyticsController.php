@@ -23,6 +23,9 @@ class AnalyticsController extends Controller
             abort(403, 'Unauthorized access to analytics');
         }
 
+        // Tab selection
+        $tab = $request->tab ?? 'web';
+
         // Date range filter
         $range = $request->range ?? 'last_30_days';
         [$start, $end] = match ($range) {
@@ -35,6 +38,49 @@ class AnalyticsController extends Controller
             'all_time' => [now()->subYears(10)->startOfDay(), now()->endOfDay()],
             default => [now()->subDays(30)->startOfDay(), now()->endOfDay()],
         };
+
+        if ($tab === 'checkins') {
+            $checkinStats = $analytics->getCheckinStats($user, $start, $end, $selectedRoleId);
+
+            return view('analytics.index', compact(
+                'roles',
+                'selectedRoleId',
+                'range',
+                'tab',
+                'checkinStats'
+            ));
+        }
+
+        if ($tab === 'revenue') {
+            // Get conversion stats
+            $conversionStats = $analytics->getConversionStats($user, $start, $end, $selectedRoleId);
+
+            // Get per-promo-code breakdown
+            $promoCodeStats = $conversionStats['promo_sales'] > 0
+                ? $analytics->getPromoCodeStats($user, $start, $end, $selectedRoleId)
+                : collect();
+
+            // Get top events by revenue
+            $topEventsByRevenue = $analytics->getTopEventsByRevenue($user, 10, $start, $end);
+
+            // Get boost stats
+            $boostStats = $analytics->getBoostStats($user, $start, $end, $selectedRoleId);
+
+            // Get newsletter stats
+            $newsletterStats = $analytics->getNewsletterStats($user, $start, $end, $selectedRoleId);
+
+            return view('analytics.index', compact(
+                'roles',
+                'selectedRoleId',
+                'range',
+                'tab',
+                'conversionStats',
+                'promoCodeStats',
+                'topEventsByRevenue',
+                'boostStats',
+                'newsletterStats'
+            ));
+        }
 
         // Period determines chart grouping
         $period = $request->period ?? 'daily';
@@ -84,35 +130,20 @@ class AnalyticsController extends Controller
             }
         }
 
-        // Get conversion stats
-        $conversionStats = $analytics->getConversionStats($user, $start, $end, $selectedRoleId);
-
-        // Get per-promo-code breakdown
-        $promoCodeStats = $conversionStats['promo_sales'] > 0
-            ? $analytics->getPromoCodeStats($user, $start, $end, $selectedRoleId)
-            : collect();
-
-        // Get top events by revenue
-        $topEventsByRevenue = $analytics->getTopEventsByRevenue($user, 10, $start, $end);
-
         // Get traffic sources
         $trafficSources = $analytics->getTrafficSources($user, $start, $end, $selectedRoleId);
 
         // Get top referrer domains
         $topReferrers = $analytics->getTopReferrerDomains($user, 10, $start, $end, $selectedRoleId);
 
-        // Get boost stats
+        // Get boost views by period for chart overlay
         $boostStats = $analytics->getBoostStats($user, $start, $end, $selectedRoleId);
-
-        // Get boost views by period for chart overlay (only if boost data exists)
         $boostViewsByPeriod = $boostStats['has_data']
             ? $analytics->getBoostViewsByPeriod($user, $period, $start, $end, $selectedRoleId)
             : collect();
 
-        // Get newsletter stats
+        // Get newsletter views by period for chart overlay
         $newsletterStats = $analytics->getNewsletterStats($user, $start, $end, $selectedRoleId);
-
-        // Get newsletter views by period for chart overlay (only if newsletter data exists)
         $newsletterViewsByPeriod = $newsletterStats['has_data']
             ? $analytics->getNewsletterViewsByPeriod($user, $period, $start, $end, $selectedRoleId)
             : collect();
@@ -132,14 +163,10 @@ class AnalyticsController extends Controller
             'topSchedulesAppearedOn',
             'period',
             'range',
-            'conversionStats',
-            'promoCodeStats',
-            'topEventsByRevenue',
+            'tab',
             'trafficSources',
             'topReferrers',
-            'boostStats',
             'boostViewsByPeriod',
-            'newsletterStats',
             'newsletterViewsByPeriod'
         ));
     }

@@ -22,6 +22,7 @@
         const app = createApp({
             data() {
                 return {
+                    hasError: @json(session('error') || $errors->any()),
                     createAccount: @json((bool) old('create_account', false)),
                     eventCustomFields: @json($event->custom_fields ?? []),
                     eventCustomValues: @json(old('event_custom_values', [])),
@@ -51,6 +52,9 @@
                         this.eventMultiselectValues[key] = [];
                     }
                 });
+                if (this.hasError) {
+                    this.restoreFormState();
+                }
             },
             mounted() {
                 if (this.turnstileEnabled && this.turnstileSiteKey) {
@@ -109,6 +113,9 @@
                 @endif
             },
             computed: {
+                storageKey() {
+                    return 'rsvp_form_' + @json(\App\Utils\UrlUtils::encodeId($event->id));
+                },
                 hasEventCustomFields() {
                     return this.eventCustomFields && Object.keys(this.eventCustomFields).length > 0;
                 },
@@ -155,10 +162,74 @@
                         alert(@json(__('messages.turnstile_verification_failed')));
                         return;
                     }
+                    this.saveFormState();
                     const url = new URL(window.location);
                     url.searchParams.set('rsvp', 'true');
                     history.replaceState(null, '', url);
                     this.isSubmitting = true;
+                },
+                saveFormState() {
+                    try {
+                        const state = {
+                            name: this.name,
+                            email: this.email,
+                            phone: this.phone,
+                            rsvpQuantity: this.rsvpQuantity,
+                            guests: this.guests.map(g => ({
+                                name: g.name,
+                                email: g.email,
+                                phone: g.phone,
+                            })),
+                            eventCustomValues: this.eventCustomValues,
+                            eventMultiselectValues: this.eventMultiselectValues,
+                            createAccount: this.createAccount,
+                            password: this.password,
+                        };
+                        sessionStorage.setItem(this.storageKey, JSON.stringify(state));
+                    } catch (e) {}
+                },
+                restoreFormState() {
+                    try {
+                        const raw = sessionStorage.getItem(this.storageKey);
+                        if (!raw) return;
+                        const state = JSON.parse(raw);
+                        sessionStorage.removeItem(this.storageKey);
+
+                        if (state.name) this.name = state.name;
+                        if (state.email) this.email = state.email;
+                        if (state.phone) this.phone = state.phone;
+                        if (state.createAccount !== undefined) this.createAccount = state.createAccount;
+                        if (state.password) this.password = state.password;
+
+                        if (state.eventCustomValues) {
+                            this.eventCustomValues = state.eventCustomValues;
+                        }
+                        if (state.eventMultiselectValues) {
+                            this.eventMultiselectValues = state.eventMultiselectValues;
+                        }
+
+                        if (state.rsvpQuantity) {
+                            this.rsvpQuantity = Math.min(state.rsvpQuantity, this.maxRsvpQuantity);
+                        }
+
+                        this.rebuildGuests();
+
+                        if (state.guests && state.guests.length) {
+                            state.guests.forEach((saved, i) => {
+                                if (i < this.guests.length) {
+                                    this.guests[i].name = saved.name || '';
+                                    this.guests[i].email = saved.email || '';
+                                    this.guests[i].phone = saved.phone || '';
+                                }
+                            });
+                        }
+
+                        if (this.guests.length > 0) {
+                            this.name = this.guests[0].name || this.name;
+                            this.email = this.guests[0].email || this.email;
+                            this.phone = this.guests[0].phone || this.phone;
+                        }
+                    } catch (e) {}
                 },
             },
         }).mount('#rsvp-form');

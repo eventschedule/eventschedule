@@ -55,6 +55,19 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - Icon accent colors (on sub-audience-cards) are decorative and exempt
 - **Dark mode grays** (custom palette, not standard Tailwind): background `#1e1e1e`, borders/hover `#2d2d30`, text `#d1d5db`, muted text `#9ca3af`. Always use these custom values in hardcoded dark mode styles (inline CSS, `<style>` blocks, CSS overrides). Never use standard Tailwind gray hex values (e.g. `#374151`, `#111827`) - our `tailwind.config.js` overrides the entire gray scale.
 
+## AP Design System
+
+The AP uses a refined dark/light design language. Follow these principles when building or modifying AP components:
+
+- **Depth through shades, not borders** - In dark mode, create visual hierarchy using subtle background shade variations (e.g. `#1A1A1A` → `#252526` → `#2d2d30`) and subtle gradients. Avoid relying on bright borders or heavy drop shadows for depth.
+- **Inset shadows for active/selected states** - Active or selected items in segmented controls, tabs, and toolbars should use an inset shadow (e.g. `box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5)`) with a slightly different background shade to create a "pressed" feel.
+- **Ultra-subtle separators** - Dividers between items in grouped controls should be barely visible: use `w-px` width with very low opacity (e.g. `bg-white/[0.08]` in dark mode, `bg-black/[0.08]` in light mode).
+- **Generous rounded corners** - Grouped controls and containers use large border radii (`rounded-xl` to `rounded-2xl`). Individual items within groups use slightly smaller radii (e.g. `rounded-lg` to `rounded-xl`).
+- **Subtle shadows** - Use `shadow-sm` for resting states and `shadow-md`/`shadow-lg` on hover. Never use heavy or colored shadows. Dark mode focus ring offset: `dark:focus:ring-offset-gray-800`.
+- **Outline-style icons** - Prefer thin stroke/outline icons (not filled) in the AP. Use consistent sizing (`h-5 w-5` or `h-6 w-6`).
+- **Smooth transitions** - All interactive elements should use `transition-all duration-200`. Hover effects can include subtle scale (`hover:scale-105`) and shadow changes.
+- **Light mode surfaces** - Use white (`bg-white`) for cards/surfaces with subtle borders (`border-gray-200`). Use `bg-gray-50`/`bg-gray-100` for secondary surfaces and hover states.
+
 ## Build & Development Commands
 
 ```bash

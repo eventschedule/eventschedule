@@ -26,7 +26,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
             <x-input-label :value="__('messages.font_family')" />
-            <select x-model="styleSettings.fontFamily" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm">
+            <select x-model="styleSettings.fontFamily" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-lg shadow-sm">
                 <option value="Arial">Arial</option>
                 <option value="Georgia">Georgia</option>
                 <option value="Verdana">Verdana</option>

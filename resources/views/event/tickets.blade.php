@@ -25,9 +25,9 @@
                     createAccount: @json((bool) old('create_account', false)),
                     tickets: @json($event->tickets->filter(fn($t) => !$t->isSalesEnded())->values()->map(function ($ticket) {
                         $data = $ticket->toData(request()->date);
-                        $data['selectedQty'] = old('tickets')[$data['id']] ?? 0;
+                        $data['selectedQty'] = (int) (old('tickets')[$data['id']] ?? 0);
                         $data['custom_fields'] = $ticket->custom_fields ?? [];
-                        $data['custom_values'] = (object) [];
+                        $data['custom_values'] = (object) (old('ticket_custom_values')[$data['id']] ?? []);
                         $data['multiselect_values'] = (object) [];
                         return $data;
                     })),
@@ -51,7 +51,6 @@
                     promoCodeMessage: '',
                     discountAmount: 0,
                     isValidatingPromo: false,
-                    promoCodeExpanded: false,
                     isPaymentLinkMode: @json($event->payment_method === 'invoiceninja' && $event->user->invoiceninja_mode === 'payment_link'),
                     isSubmitting: false,
                     allSoldOut: @json($event->allTicketsSoldOut($date ?? request()->date)),
@@ -63,6 +62,9 @@
                     individualTicketFields: @json((bool) $event->individual_ticket_fields),
                     guests: [],
                     guestItiInstances: [],
+                    oldGuests: @json(old('guests', [])),
+                    oldGuestTicketCustomValues: @json(old('guest_ticket_custom_values', [])),
+                    hasError: @json(session('error') || $errors->any()),
                 };
             },
             created() {
@@ -85,15 +87,38 @@
                         });
                     }
                 });
-                if (this.tickets.length === 1 && this.tickets[0].quantity > 0) {
+                if (this.tickets.length === 1 && this.tickets[0].quantity > 0 && !this.tickets[0].selectedQty) {
                     this.tickets[0].selectedQty = 1;
                 }
                 this.rebuildGuests();
+                if (this.oldGuests && Object.keys(this.oldGuests).length > 0) {
+                    Object.values(this.oldGuests).forEach((oldGuest, i) => {
+                        if (i < this.guests.length) {
+                            this.guests[i].name = oldGuest.name || this.guests[i].name;
+                            this.guests[i].email = oldGuest.email || this.guests[i].email;
+                            this.guests[i].phone = oldGuest.phone || this.guests[i].phone;
+                        }
+                    });
+                    if (this.guests.length > 0) {
+                        this.name = this.guests[0].name || this.name;
+                        this.email = this.guests[0].email || this.email;
+                        this.phone = this.guests[0].phone || this.phone;
+                    }
+                }
+                if (this.oldGuestTicketCustomValues && Object.keys(this.oldGuestTicketCustomValues).length > 0) {
+                    Object.entries(this.oldGuestTicketCustomValues).forEach(([gIndex, values]) => {
+                        if (this.guests[gIndex]) {
+                            this.guests[gIndex].ticketCustomValues = Object.assign(this.guests[gIndex].ticketCustomValues || {}, values);
+                        }
+                    });
+                }
+                if (this.hasError) {
+                    this.restoreFormState();
+                }
                 const urlParams = new URLSearchParams(window.location.search);
                 const promoParam = urlParams.get('promo');
                 if (promoParam) {
                     this.promoCode = promoParam;
-                    this.promoCodeExpanded = true;
                     this.$nextTick(() => {
                         if (this.tickets.some(t => t.selectedQty > 0)) {
                             this.applyPromoCode();
@@ -175,6 +200,9 @@
                 isAllSoldOut() {
                     if (this.allSoldOut) return true;
                     return this.tickets.length > 0 && this.tickets.every(t => this.getAvailableQuantity(t) === 0);
+                },
+                storageKey() {
+                    return 'checkout_form_' + @json(\App\Utils\UrlUtils::encodeId($event->id));
                 }
             },
             methods: {
@@ -195,6 +223,7 @@
                         alert(@json(__('messages.turnstile_verification_failed')));
                         return;
                     }
+                    this.saveFormState();
                     const url = new URL(window.location);
                     url.searchParams.set('tickets', 'true');
                     history.replaceState(null, '', url);
@@ -280,6 +309,95 @@
                         this.email = this.guests[0].email || this.email;
                         this.phone = this.guests[0].phone || this.phone;
                     }
+                },
+                saveFormState() {
+                    try {
+                        const state = {
+                            ticketQtys: {},
+                            name: this.name,
+                            email: this.email,
+                            phone: this.phone,
+                            guests: this.guests.map(g => ({
+                                ticketId: g.ticketId,
+                                name: g.name,
+                                email: g.email,
+                                phone: g.phone,
+                                ticketCustomValues: g.ticketCustomValues || {},
+                            })),
+                            eventCustomValues: this.eventCustomValues,
+                            ticketCustomValues: {},
+                        };
+                        this.tickets.forEach(t => {
+                            state.ticketQtys[t.id] = t.selectedQty;
+                            if (t.custom_values && Object.keys(t.custom_values).length) {
+                                state.ticketCustomValues[t.id] = t.custom_values;
+                            }
+                        });
+                        sessionStorage.setItem(this.storageKey, JSON.stringify(state));
+                    } catch (e) {}
+                },
+                restoreFormState() {
+                    try {
+                        const raw = sessionStorage.getItem(this.storageKey);
+                        if (!raw) return;
+                        const state = JSON.parse(raw);
+                        sessionStorage.removeItem(this.storageKey);
+
+                        // Restore ticket quantities
+                        if (state.ticketQtys) {
+                            this.tickets.forEach(t => {
+                                if (state.ticketQtys[t.id] !== undefined) {
+                                    t.selectedQty = Math.min(state.ticketQtys[t.id], t.quantity);
+                                }
+                            });
+                        }
+
+                        // Restore top-level fields
+                        if (state.name) this.name = state.name;
+                        if (state.email) this.email = state.email;
+                        if (state.phone) this.phone = state.phone;
+
+                        // Restore event custom values
+                        if (state.eventCustomValues) {
+                            this.eventCustomValues = state.eventCustomValues;
+                        }
+
+                        // Restore ticket-level custom values
+                        if (state.ticketCustomValues) {
+                            this.tickets.forEach(t => {
+                                if (state.ticketCustomValues[t.id]) {
+                                    t.custom_values = Object.assign(t.custom_values || {}, state.ticketCustomValues[t.id]);
+                                }
+                            });
+                        }
+
+                        // Rebuild guests with restored quantities
+                        this.rebuildGuests();
+
+                        // Overlay saved guest data
+                        if (state.guests && state.guests.length) {
+                            state.guests.forEach((saved, i) => {
+                                if (i < this.guests.length) {
+                                    this.guests[i].name = saved.name || '';
+                                    this.guests[i].email = saved.email || '';
+                                    this.guests[i].phone = saved.phone || '';
+                                    if (saved.ticketCustomValues) {
+                                        this.guests[i].ticketCustomValues = Object.assign(
+                                            this.guests[i].ticketCustomValues || {},
+                                            saved.ticketCustomValues
+                                        );
+                                    }
+                                }
+                            });
+                        }
+
+                        // Sync first guest to top-level
+                        if (this.guests.length > 0) {
+                            this.name = this.guests[0].name || this.name;
+                            this.email = this.guests[0].email || this.email;
+                            this.phone = this.guests[0].phone || this.phone;
+                        }
+                    } catch (e) {}
                 },
                 @if ($event->country_code_phone)
                 initPrimaryIntlTel() {
@@ -495,14 +613,14 @@
         <div v-if="!showGuestForms">
         <div class="mb-6">
             <label for="name" class="text-gray-900 dark:text-gray-100">{{ __('messages.name') . ' *' }}</label>
-            <input type="text" name="name" id="name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+            <input type="text" name="name" id="name" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
                 v-model="name" required autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
         <div class="mb-6">
             <label for="email" class="text-gray-900 dark:text-gray-100">{{ __('messages.email') . ' *' }}</label>
-            <input type="email" name="email" id="email" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+            <input type="email" name="email" id="email" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
                 v-model="email" required autocomplete="email" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
@@ -520,7 +638,7 @@
                     <div class="mt-6" v-if="createAccount">
                         <label for="password" class="text-gray-900 dark:text-gray-100">{{ __('messages.password') . ' *' }}</label>
                         <div class="relative mt-1">
-                            <input :type="showPassword ? 'text' : 'password'" name="password" id="password" class="block w-full pe-10 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+                            <input :type="showPassword ? 'text' : 'password'" name="password" id="password" class="block w-full pe-10 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
                                 v-model="password" required autocomplete="new-password" />
                             <button
                                 type="button"
@@ -563,10 +681,10 @@
             <label for="phone_input" class="block text-gray-900 dark:text-gray-100">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
             @if ($event->country_code_phone)
             <input type="hidden" name="phone" id="phone_hidden" v-model="phone">
-            <input type="tel" id="phone_input" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+            <input type="tel" id="phone_input" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
                 :required="requirePhone" autocomplete="tel" />
             @else
-            <input type="tel" name="phone" id="phone_input" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+            <input type="tel" name="phone" id="phone_input" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
                 v-model="phone" :required="requirePhone" autocomplete="tel" />
             @endif
             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
@@ -584,25 +702,25 @@
                 <div class="mb-3">
                     <label :for="'guest_name_' + gIndex" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.name') }} *</label>
                     <input type="text" :id="'guest_name_' + gIndex" v-model="guest.name" required
-                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm" />
+                        class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm" />
                     <input type="hidden" :name="'guests[' + gIndex + '][name]'" :value="guest.name">
                     <input type="hidden" :name="'guests[' + gIndex + '][ticket_id]'" :value="guest.ticketId">
                 </div>
                 <div class="mb-3">
                     <label :for="'guest_email_' + gIndex" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.email') }} *</label>
                     <input type="email" :id="'guest_email_' + gIndex" v-model="guest.email" required
-                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm" />
+                        class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm" />
                     <input type="hidden" :name="'guests[' + gIndex + '][email]'" :value="guest.email">
                 </div>
                 <div class="mb-3" v-if="askPhone">
                     <label :for="'guest_phone_' + gIndex" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
                     @if ($event->country_code_phone)
                     <input type="tel" :id="'guest_phone_' + gIndex" :required="requirePhone"
-                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm guest-phone-intl" />
+                        class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm guest-phone-intl" />
                     <input type="hidden" :name="'guests[' + gIndex + '][phone]'" :value="guest.phone">
                     @else
                     <input type="tel" :id="'guest_phone_' + gIndex" v-model="guest.phone" :required="requirePhone"
-                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm" />
+                        class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm" />
                     <input type="hidden" :name="'guests[' + gIndex + '][phone]'" :value="guest.phone">
                     @endif
                 </div>
@@ -618,20 +736,20 @@
                             :id="`guest_ticket_custom_${gIndex}_${fieldKey}`"
                             v-model="guest.ticketCustomValues[fieldKey]"
                             :required="field.required"
-                            class="mt-1 block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
+                            class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
                         <!-- Multiline text -->
                         <textarea v-else-if="field.type === 'multiline_string'"
                             :id="`guest_ticket_custom_${gIndex}_${fieldKey}`"
                             v-model="guest.ticketCustomValues[fieldKey]"
                             :required="field.required"
                             rows="2" dir="auto"
-                            class="mt-1 block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"></textarea>
+                            class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"></textarea>
                         <!-- Yes/No switch -->
                         <div v-else-if="field.type === 'switch'" class="mt-1">
                             <select :id="`guest_ticket_custom_${gIndex}_${fieldKey}`"
                                 v-model="guest.ticketCustomValues[fieldKey]"
                                 :required="field.required"
-                                class="block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                                class="block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                                 <option value="">{{ __('messages.please_select') }}</option>
                                 <option value="Yes">{{ __('messages.yes') }}</option>
                                 <option value="No">{{ __('messages.no') }}</option>
@@ -642,13 +760,13 @@
                             :id="`guest_ticket_custom_${gIndex}_${fieldKey}`"
                             v-model="guest.ticketCustomValues[fieldKey]"
                             :required="field.required"
-                            class="mt-1 block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
+                            class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
                         <!-- Dropdown -->
                         <select v-else-if="field.type === 'dropdown'"
                             :id="`guest_ticket_custom_${gIndex}_${fieldKey}`"
                             v-model="guest.ticketCustomValues[fieldKey]"
                             :required="field.required"
-                            class="mt-1 block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                            class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                             <option value="">{{ __('messages.please_select') }}</option>
                             <option v-for="option in (field.options || '').split(',')" :key="option.trim()" :value="option.trim()">@{{ option.trim() }}</option>
                         </select>
@@ -681,7 +799,7 @@
                     <div class="mt-3" v-if="createAccount">
                         <label for="password_guest" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.password') }} *</label>
                         <div class="relative mt-1">
-                            <input :type="showPassword ? 'text' : 'password'" name="password" id="password_guest" class="block w-full pe-10 text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+                            <input :type="showPassword ? 'text' : 'password'" name="password" id="password_guest" class="block w-full pe-10 text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
                                 v-model="password" required autocomplete="new-password" />
                             <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                                 <svg v-show="!showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
@@ -727,7 +845,7 @@
                     :id="`event_custom_${fieldKey}`"
                     v-model="eventCustomValues[fieldKey]"
                     :required="field.required"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
+                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
                 <!-- Multiline text -->
                 <textarea v-else-if="field.type === 'multiline_string'"
                     :name="`event_custom_values[${fieldKey}]`"
@@ -736,14 +854,14 @@
                     :required="field.required"
                     rows="3"
                     dir="auto"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"></textarea>
+                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"></textarea>
                 <!-- Yes/No switch -->
                 <div v-else-if="field.type === 'switch'" class="mt-1">
                     <select :name="`event_custom_values[${fieldKey}]`"
                         :id="`event_custom_${fieldKey}`"
                         v-model="eventCustomValues[fieldKey]"
                         :required="field.required"
-                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                        class="block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                         <option value="">{{ __('messages.please_select') }}</option>
                         <option value="Yes">{{ __('messages.yes') }}</option>
                         <option value="No">{{ __('messages.no') }}</option>
@@ -755,14 +873,14 @@
                     :id="`event_custom_${fieldKey}`"
                     v-model="eventCustomValues[fieldKey]"
                     :required="field.required"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
+                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
                 <!-- Dropdown -->
                 <select v-else-if="field.type === 'dropdown'"
                     :name="`event_custom_values[${fieldKey}]`"
                     :id="`event_custom_${fieldKey}`"
                     v-model="eventCustomValues[fieldKey]"
                     :required="field.required"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                     <option value="">{{ __('messages.please_select') }}</option>
                     <option v-for="option in (field.options || '').split(',')" :key="option.trim()" :value="option.trim()">@{{ option.trim() }}</option>
                 </select>
@@ -793,7 +911,7 @@
                     <select
                         v-model="ticket.selectedQty"
                         @change="onTicketChange"
-                        class="block w-24 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-center font-medium"
+                        class="block w-24 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-center font-medium"
                         :name="`tickets[${ticket.id}]`" :id="`ticket-${index}`"
                     >
                         <option :value="0">0</option>
@@ -817,7 +935,7 @@
                         :id="`ticket_custom_${ticket.id}_${fieldKey}`"
                         v-model="ticket.custom_values[fieldKey]"
                         :required="field.required"
-                        class="mt-1 block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
+                        class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
                     <!-- Multiline text -->
                     <textarea v-else-if="field.type === 'multiline_string'"
                         :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
@@ -826,14 +944,14 @@
                         :required="field.required"
                         rows="2"
                         dir="auto"
-                        class="mt-1 block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"></textarea>
+                        class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"></textarea>
                     <!-- Yes/No switch -->
                     <div v-else-if="field.type === 'switch'" class="mt-1">
                         <select :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
                             :id="`ticket_custom_${ticket.id}_${fieldKey}`"
                             v-model="ticket.custom_values[fieldKey]"
                             :required="field.required"
-                            class="block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                            class="block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                             <option value="">{{ __('messages.please_select') }}</option>
                             <option value="Yes">{{ __('messages.yes') }}</option>
                             <option value="No">{{ __('messages.no') }}</option>
@@ -845,14 +963,14 @@
                         :id="`ticket_custom_${ticket.id}_${fieldKey}`"
                         v-model="ticket.custom_values[fieldKey]"
                         :required="field.required"
-                        class="mt-1 block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
+                        class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
                     <!-- Dropdown -->
                     <select v-else-if="field.type === 'dropdown'"
                         :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
                         :id="`ticket_custom_${ticket.id}_${fieldKey}`"
                         v-model="ticket.custom_values[fieldKey]"
                         :required="field.required"
-                        class="mt-1 block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                        class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                         <option value="">{{ __('messages.please_select') }}</option>
                         <option v-for="option in (field.options || '').split(',')" :key="option.trim()" :value="option.trim()">@{{ option.trim() }}</option>
                     </select>
@@ -874,23 +992,20 @@
         <!-- Promo Code -->
         @if($event->hasActivePromoCodes())
         <div v-if="!isPaymentLinkMode && !isAllSoldOut" class="mb-6">
-            <button type="button" v-if="!promoCodeExpanded" @click="promoCodeExpanded = true" class="text-sm text-[#4E81FA] hover:text-blue-700 dark:hover:text-blue-300 font-medium">
-                {{ __('messages.have_a_promo_code') }}
-            </button>
-            <div v-if="promoCodeExpanded" class="bg-white dark:bg-gray-700/50 rounded-lg p-4">
+            <div class="bg-white dark:bg-gray-700/50 rounded-lg p-4">
                 <label class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.promo_code') }}</label>
                 <div class="flex gap-2 mt-1">
                     <input type="text" v-model="promoCode" :disabled="promoCodeValid"
-                        class="flex-1 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm"
+                        class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm"
                         :class="{'opacity-50': promoCodeValid}"
                         placeholder="{{ __('messages.enter_promo_code') }}" />
                     <button type="button" v-if="!promoCodeValid" @click="applyPromoCode" :disabled="isValidatingPromo || !promoCode.trim()"
-                        class="px-4 py-2 bg-[#4E81FA] text-white text-sm font-medium rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        class="px-4 py-2 bg-[#4E81FA] text-white text-sm font-medium rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                         <span v-if="isValidatingPromo">...</span>
                         <span v-else>{{ __('messages.apply') }}</span>
                     </button>
                     <button type="button" v-else @click="removePromoCode"
-                        class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+                        class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
                         &times;
                     </button>
                 </div>
@@ -933,13 +1048,13 @@
             </div>
             <div v-if="!waitlistSuccess" class="flex justify-end items-center pt-2 gap-8">
                 @if (! request()->embed)
-                <button type="button" @click="hideForm" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+                <button type="button" @click="hideForm" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
                     {{ strtoupper(__('messages.cancel')) }}
                 </button>
                 @endif
                 <button type="button" @click="joinWaitlist"
                     :disabled="!name.trim() || !email.trim() || waitlistSubmitting"
-                    class="mt-4 text-lg px-6 inline-flex items-center rounded-md border border-transparent py-3 font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
+                    class="mt-4 text-lg px-6 inline-flex items-center rounded-lg border border-transparent py-3 font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
                     style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
                     <span v-if="waitlistSubmitting">{{ strtoupper(__('messages.processing')) }}</span>
                     <span v-else>{{ strtoupper(__('messages.join_waitlist')) }}</span>
@@ -947,7 +1062,7 @@
             </div>
             @if (! request()->embed)
             <div v-else class="flex justify-end pt-2">
-                <button type="button" @click="hideForm" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+                <button type="button" @click="hideForm" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
                     {{ strtoupper(__('messages.back')) }}
                 </button>
             </div>
@@ -956,14 +1071,14 @@
 
         <div v-if="!isAllSoldOut" class="flex justify-end items-center pt-2 gap-8">
             @if (! request()->embed)
-            <button type="button" @click="hideForm" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+            <button type="button" @click="hideForm" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
                 {{ strtoupper(__('messages.cancel')) }}
             </button>
             @endif
 
             <button type="submit"
                 v-bind:disabled="isSubmitting"
-                class="mt-4 inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-md font-semibold text-lg shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
+                class="mt-4 inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg font-semibold text-lg shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
                 style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
                 <span v-if="isSubmitting">{{ strtoupper(__('messages.processing')) }}</span>
                 <span v-else>{{ strtoupper(__('messages.checkout')) }}</span>

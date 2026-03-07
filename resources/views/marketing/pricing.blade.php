@@ -746,7 +746,7 @@
     </section>
 
     {{-- Referral CTA --}}
-    <section class="pb-16">
+    <section class="py-16">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                 <p class="text-gray-700 dark:text-gray-300">

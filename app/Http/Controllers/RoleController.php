@@ -1140,7 +1140,26 @@ class RoleController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        $members = $role->members()->get();
+
+        if (config('app.hosted') && auth()->user()->id != $role->user_id && ! $role->isEnterprise()) {
+            return redirect()->route('home')->with('error', __('messages.enterprise_required_for_team_access'));
+        }
+
+        $teamSortBy = '';
+        $teamSortDir = 'asc';
+        $membersQuery = $role->members();
+        if ($tab == 'team') {
+            $teamSortBy = request()->get('sort_by', '');
+            $teamSortDir = strtolower(request()->get('sort_dir', 'asc')) === 'desc' ? 'desc' : 'asc';
+            $allowedTeamSortColumns = ['name', 'email'];
+            if (! in_array($teamSortBy, $allowedTeamSortColumns)) {
+                $teamSortBy = '';
+            }
+            if ($teamSortBy) {
+                $membersQuery->orderBy($teamSortBy, $teamSortDir);
+            }
+        }
+        $members = $membersQuery->get();
         $followers = $role->followers()->get();
         $followersWithRoles = [];
 
@@ -1251,6 +1270,13 @@ class RoleController extends Controller
                 }
             }
         } elseif ($tab == 'followers') {
+            $followerSortBy = request()->get('sort_by', 'pivot_created_at');
+            $followerSortDir = strtolower(request()->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+            $allowedFollowerSortColumns = ['name', 'pivot_created_at'];
+            if (! in_array($followerSortBy, $allowedFollowerSortColumns)) {
+                $followerSortBy = 'pivot_created_at';
+            }
+
             $followersWithRoles = $role->followers()
                 ->with(['roles' => function ($query) {
                     $query->wherePivotIn('level', ['owner', 'admin'])
@@ -1258,8 +1284,20 @@ class RoleController extends Controller
                         ->orderBy('role_user.created_at', 'asc')
                         ->limit(1);
                 }])
-                ->orderBy('pivot_created_at', 'desc')
-                ->paginate(10);
+                ->orderBy($followerSortBy, $followerSortDir)
+                ->paginate(10)
+                ->withQueryString();
+        }
+
+        if (isset($followerSortBy)) {
+            $sortBy = $followerSortBy;
+            $sortDir = $followerSortDir;
+        } elseif ($tab == 'team') {
+            $sortBy = $teamSortBy;
+            $sortDir = $teamSortDir;
+        } else {
+            $sortBy = '';
+            $sortDir = 'desc';
         }
 
         return view('role/show-admin', compact(
@@ -1276,6 +1314,8 @@ class RoleController extends Controller
             'startOfMonth',
             'unscheduled',
             'datesUnavailable',
+            'sortBy',
+            'sortDir',
         ));
     }
 
@@ -2581,9 +2621,13 @@ class RoleController extends Controller
         }
 
         $request->validate([
-            'elements' => 'required|array|min:1',
-            'elements.*' => 'in:accent_color,font',
+            'elements' => 'present|array',
+            'elements.*' => 'in:accent_color,font,profile_image,header_image,background_image',
         ]);
+
+        $allElements = $request->input('elements');
+        $textElements = array_values(array_filter($allElements, fn ($el) => ! in_array($el, ['profile_image', 'header_image', 'background_image'])));
+        $imageElements = array_values(array_filter($allElements, fn ($el) => in_array($el, ['profile_image', 'header_image', 'background_image'])));
 
         $currentValues = [
             'accent_color' => $request->input('accent_color'),
@@ -2592,12 +2636,26 @@ class RoleController extends Controller
 
         $prompt = GeminiUtils::buildScheduleStylePrompt(
             $role,
-            $request->input('elements'),
+            $textElements,
             $request->input('style_instructions'),
             $currentValues
         );
 
-        return response()->json(['success' => true, 'prompt' => $prompt]);
+        $imagePrompts = [];
+        $accentColor = $request->input('accent_color', '#4E81FA');
+        $styleInstructions = $request->input('style_instructions');
+
+        foreach ($imageElements as $imageEl) {
+            if ($imageEl === 'profile_image') {
+                $imagePrompts['profile_image'] = GeminiUtils::buildProfileImagePrompt($role, $accentColor, $styleInstructions);
+            } elseif ($imageEl === 'header_image') {
+                $imagePrompts['header_image'] = GeminiUtils::buildHeaderImagePrompt($role, $accentColor, $styleInstructions);
+            } elseif ($imageEl === 'background_image') {
+                $imagePrompts['background_image'] = GeminiUtils::buildBackgroundImagePrompt($role, $accentColor, $styleInstructions);
+            }
+        }
+
+        return response()->json(['success' => true, 'prompt' => $prompt, 'image_prompts' => $imagePrompts]);
     }
 
     public function getStylePromptNew(Request $request)
@@ -2613,14 +2671,18 @@ class RoleController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|in:talent,venue,curator',
-            'elements' => 'required|array|min:1',
-            'elements.*' => 'in:accent_color,font',
+            'elements' => 'present|array',
+            'elements.*' => 'in:accent_color,font,profile_image,header_image,background_image',
         ]);
 
         $tempRole = new Role;
         $tempRole->name = $request->input('name');
         $tempRole->type = $request->input('type');
         $tempRole->short_description = $request->input('short_description');
+
+        $allElements = $request->input('elements');
+        $textElements = array_values(array_filter($allElements, fn ($el) => ! in_array($el, ['profile_image', 'header_image', 'background_image'])));
+        $imageElements = array_values(array_filter($allElements, fn ($el) => in_array($el, ['profile_image', 'header_image', 'background_image'])));
 
         $currentValues = [
             'accent_color' => $request->input('accent_color'),
@@ -2629,12 +2691,26 @@ class RoleController extends Controller
 
         $prompt = GeminiUtils::buildScheduleStylePrompt(
             $tempRole,
-            $request->input('elements'),
+            $textElements,
             $request->input('style_instructions'),
             $currentValues
         );
 
-        return response()->json(['success' => true, 'prompt' => $prompt]);
+        $imagePrompts = [];
+        $accentColor = $request->input('accent_color', '#4E81FA');
+        $styleInstructions = $request->input('style_instructions');
+
+        foreach ($imageElements as $imageEl) {
+            if ($imageEl === 'profile_image') {
+                $imagePrompts['profile_image'] = GeminiUtils::buildProfileImagePrompt($tempRole, $accentColor, $styleInstructions);
+            } elseif ($imageEl === 'header_image') {
+                $imagePrompts['header_image'] = GeminiUtils::buildHeaderImagePrompt($tempRole, $accentColor, $styleInstructions);
+            } elseif ($imageEl === 'background_image') {
+                $imagePrompts['background_image'] = GeminiUtils::buildBackgroundImagePrompt($tempRole, $accentColor, $styleInstructions);
+            }
+        }
+
+        return response()->json(['success' => true, 'prompt' => $prompt, 'image_prompts' => $imagePrompts]);
     }
 
     public function getScheduleDetailsPrompt(Request $request, $subdomain)
@@ -2715,14 +2791,19 @@ class RoleController extends Controller
             'image_type' => 'required|in:profile_image,header_image,background_image',
             'accent_color' => 'required|string|max:7',
             'style_instructions' => 'nullable|string|max:500',
+            'custom_prompt' => 'nullable|string|max:5000',
         ]);
 
         $imageType = $request->input('image_type');
         $accentColor = $request->input('accent_color');
         $styleInstructions = $request->input('style_instructions');
+        $customPrompt = $request->input('custom_prompt');
 
         try {
-            if ($imageType === 'profile_image') {
+            if ($customPrompt) {
+                $aspectRatio = $imageType === 'profile_image' ? '1:1' : '16:9';
+                $imageData = GeminiUtils::sendImageGenerationRequest($customPrompt, $aspectRatio);
+            } elseif ($imageType === 'profile_image') {
                 $imageData = GeminiUtils::generateScheduleProfileImage($role, $accentColor, $styleInstructions);
             } elseif ($imageType === 'header_image') {
                 $imageData = GeminiUtils::generateScheduleHeaderImage($role, $accentColor, $styleInstructions);
@@ -2777,6 +2858,7 @@ class RoleController extends Controller
             'image_type' => 'required|in:profile_image,header_image,background_image',
             'accent_color' => 'required|string|max:7',
             'style_instructions' => 'nullable|string|max:500',
+            'custom_prompt' => 'nullable|string|max:5000',
         ]);
 
         $tempRole = new Role;
@@ -2787,9 +2869,13 @@ class RoleController extends Controller
         $imageType = $request->input('image_type');
         $accentColor = $request->input('accent_color');
         $styleInstructions = $request->input('style_instructions');
+        $customPrompt = $request->input('custom_prompt');
 
         try {
-            if ($imageType === 'profile_image') {
+            if ($customPrompt) {
+                $aspectRatio = $imageType === 'profile_image' ? '1:1' : '16:9';
+                $imageData = GeminiUtils::sendImageGenerationRequest($customPrompt, $aspectRatio);
+            } elseif ($imageType === 'profile_image') {
                 $imageData = GeminiUtils::generateScheduleProfileImage($tempRole, $accentColor, $styleInstructions);
             } elseif ($imageType === 'header_image') {
                 $imageData = GeminiUtils::generateScheduleHeaderImage($tempRole, $accentColor, $styleInstructions);

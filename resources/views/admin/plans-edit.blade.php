@@ -16,7 +16,7 @@
                     <span>{{ $role->subdomain }}</span>
                 </p>
             </div>
-            <a href="{{ route('admin.plans') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-gray-700 dark:text-gray-200 uppercase tracking-widest hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+            <a href="{{ route('admin.plans') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-600 border border-transparent rounded-lg font-semibold text-xs text-gray-700 dark:text-gray-200 uppercase tracking-widest hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                 @lang('messages.back_to_plans')
             </a>
         </div>
@@ -49,7 +49,7 @@
         </div>
 
         {{-- Edit Form --}}
-        <form method="POST" action="{{ route('admin.plans.update', ['role' => $role->encodeId()]) }}" class="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <form method="POST" action="{{ route('admin.plans.update', ['role' => $role->encodeId()]) }}" class="bg-white dark:bg-gray-800 rounded-xl shadow">
             @csrf
             @method('PUT')
 
@@ -57,7 +57,7 @@
                 {{-- Plan Type --}}
                 <div>
                     <label for="plan_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.plan_type')</label>
-                    <select name="plan_type" id="plan_type" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <select name="plan_type" id="plan_type" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="free" {{ ($role->plan_type ?? 'free') === 'free' ? 'selected' : '' }}>@lang('messages.free')</option>
                         <option value="pro" {{ $role->plan_type === 'pro' ? 'selected' : '' }}>@lang('messages.pro')</option>
                         <option value="enterprise" {{ $role->plan_type === 'enterprise' ? 'selected' : '' }}>@lang('messages.enterprise')</option>
@@ -70,7 +70,7 @@
                 {{-- Plan Term --}}
                 <div>
                     <label for="plan_term" class="block text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.plan_term')</label>
-                    <select name="plan_term" id="plan_term" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <select name="plan_term" id="plan_term" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">@lang('messages.none')</option>
                         <option value="month" {{ $role->plan_term === 'month' ? 'selected' : '' }}>@lang('messages.monthly')</option>
                         <option value="year" {{ $role->plan_term === 'year' ? 'selected' : '' }}>@lang('messages.yearly')</option>
@@ -84,23 +84,23 @@
                 <div>
                     <label for="plan_expires" class="block text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.plan_expires')</label>
                     <input type="date" name="plan_expires" id="plan_expires" value="{{ $role->plan_expires }}"
-                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     @error('plan_expires')
                         <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                     @enderror
 
                     {{-- Quick Action Buttons --}}
                     <div class="mt-3 flex flex-wrap gap-2">
-                        <button type="button" data-add-days="30" class="js-add-days inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        <button type="button" data-add-days="30" class="js-add-days inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                             @lang('messages.add_30_days')
                         </button>
-                        <button type="button" data-add-days="90" class="js-add-days inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        <button type="button" data-add-days="90" class="js-add-days inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                             @lang('messages.add_90_days')
                         </button>
-                        <button type="button" data-add-days="365" class="js-add-days inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        <button type="button" data-add-days="365" class="js-add-days inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                             @lang('messages.add_1_year')
                         </button>
-                        <button type="button" id="clear-expiration-btn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        <button type="button" id="clear-expiration-btn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                             @lang('messages.clear')
                         </button>
                     </div>
@@ -109,10 +109,10 @@
 
             {{-- Form Actions --}}
             <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 rounded-b-lg flex items-center justify-end gap-4">
-                <a href="{{ route('admin.plans') }}" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-200 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                <a href="{{ route('admin.plans') }}" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg font-semibold text-xs text-gray-700 dark:text-gray-200 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     @lang('messages.cancel')
                 </a>
-                <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     @lang('messages.save_changes')
                 </button>
             </div>

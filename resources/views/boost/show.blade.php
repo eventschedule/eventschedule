@@ -5,13 +5,13 @@
         </div>
 
         @if (session('success'))
-        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-md text-green-700 dark:text-green-300">
+        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
             {{ session('success') }}
         </div>
         @endif
 
         @if (session('error'))
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300">
+        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
             {{ session('error') }}
         </div>
         @endif
@@ -175,7 +175,7 @@
                 <form method="POST" action="{{ route('boost.cancel', ['hash' => $campaign->hashedId()]) }}"
                       onsubmit="return confirm({{ json_encode(__('messages.boost_cancel_confirm')) }})">
                     @csrf
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg">
                         {{ __('messages.cancel_campaign') }}
                     </button>
                 </form>
@@ -184,7 +184,7 @@
                 @if ($campaign->canBePaused() || $campaign->canBeResumed())
                 <form method="POST" action="{{ route('boost.toggle_pause', ['hash' => $campaign->hashedId()]) }}">
                     @csrf
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg">
                         {{ $campaign->isActive() ? __('messages.pause') : __('messages.resume') }}
                     </button>
                 </form>

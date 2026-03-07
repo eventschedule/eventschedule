@@ -210,7 +210,7 @@ class GenerateDocScreenshots extends Command
 
         $pages = [
             'getting-started' => [
-                ['id' => 'getting-started--dashboard', 'route' => '/events'],
+                ['id' => 'getting-started--dashboard', 'route' => '/dashboard'],
             ],
             'schedule-styling' => [
                 ['id' => 'schedule-styling--section-style', 'route' => '/simpsons/edit', 'section' => 'section-style'],
@@ -371,7 +371,7 @@ class GenerateDocScreenshots extends Command
                 ->type('password', self::TEMP_PASSWORD);
 
             $browser->script("document.querySelector('form[method=\"POST\"]').requestSubmit()");
-            $browser->waitForLocation('/events', 15);
+            $browser->waitForLocation('/dashboard', 15);
             $this->info('Logged in.');
 
             // Complete admin password confirmation so admin pages are accessible

@@ -19,7 +19,7 @@
         overflow-y: auto;
         background: #fff;
         border: 1px solid #d1d5db;
-        border-radius: 0.375rem;
+        border-radius: 0.5rem;
         box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
         margin-top: 2px;
     }
@@ -78,7 +78,7 @@
         </p>
 
         <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain, 'tier' => 'enterprise']) }}"
-           class="inline-flex items-center justify-center px-4 py-2.5 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[#3D6FE8] focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+           class="inline-flex items-center justify-center px-4 py-2.5 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[#3D6FE8] focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             {{ __('messages.upgrade') }}
         </a>
     </div>
@@ -101,7 +101,7 @@
                     <div class="w-full max-w-2xl md:max-w-xl lg:max-w-2xl">
                         <!-- Status header for guest users -->
                         @if (isset($isGuest) && $isGuest && ! auth()->check())
-                        <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-md">
+                        <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
                             <p class="text-sm text-blue-800 dark:text-blue-200">
                                 {!! __('messages.create_account_link', ['link' => '<a href="' . app_url('/sign_up') . '" class="font-medium underline hover:no-underline">' . __('messages.create_an_account') . '</a>']) !!}
                                 <span class="text-sm text-gray-400 dark:text-gray-500 mx-1">|</span> <a href="{{ marketing_url('/why-create-account') }}{{ request()->has('lang') && is_valid_language_code(request()->get('lang')) ? '?lang=' . request()->get('lang') : '' }}" target="_blank" class="text-blue-600 dark:text-blue-300 underline hover:no-underline">{{ __('messages.why_create_account_learn_more') }} <svg class="inline-block w-3 h-3 ml-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg></a>
@@ -127,7 +127,7 @@
                                     @drop.prevent="handleDetailsImageDrop"
                                     @dragend="dragEndDetails"
                                     autofocus {{ config('services.google.gemini_key') ? '' : 'disabled' }}
-                                    :class="['mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm transition-all duration-200', 
+                                    :class="['mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm transition-all duration-200', 
                                         isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-200 dark:ring-blue-800' : '']"
                                     dir="auto"
                                     placeholder="{{ __('messages.drag_drop_image_or_type_text') }}"></textarea>
@@ -139,7 +139,7 @@
                                      @dragleave.prevent="dragLeaveDetails"
                                      @drop.prevent="handleDetailsImageDrop"
                                      @dragend="dragEndDetails"
-                                     class="absolute inset-0 flex items-center justify-center bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-500 rounded-md z-10 transition-all duration-200 ease-in-out"
+                                     class="absolute inset-0 flex items-center justify-center bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-500 rounded-lg z-10 transition-all duration-200 ease-in-out"
                                      :class="{ 'opacity-100 scale-100': isDraggingDetails, 'opacity-0 scale-95': !isDraggingDetails }">
                                     <div class="text-center">
                                         <svg class="mx-auto h-8 w-8 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,7 +151,7 @@
                                 
                                 <!-- Image preview overlay -->
                                 <div v-if="detailsImage" 
-                                     :class="['absolute bottom-3 w-16 h-16 rounded-md overflow-hidden border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm', 
+                                     :class="['absolute bottom-3 w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm', 
                                          'start-3']">
                                     <img v-if="detailsImageUrl" 
                                          :src="detailsImageUrl" 
@@ -181,7 +181,7 @@
                                     type="button"
                                     @click="openDetailsFileSelector"
                                     :disabled="isLoading || detailsImage"
-                                    :class="['absolute p-2 rounded-md transition-all duration-200 shadow-md', 
+                                    :class="['absolute p-2 rounded-lg transition-all duration-200 shadow-md', 
                                         'end-16 bottom-3',
                                         (isLoading || detailsImage)
                                             ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed border border-gray-400 dark:border-gray-500'
@@ -197,7 +197,7 @@
                                     type="button"
                                     @click="handleSubmit"
                                     :disabled="!canSubmit || isLoading"
-                                    :class="['absolute p-2 rounded-md transition-all duration-200 shadow-md', 
+                                    :class="['absolute p-2 rounded-lg transition-all duration-200 shadow-md', 
                                         'end-5 bottom-3',
                                         canSubmit && !isLoading
                                             ? '{{ (isset($isGuest) && $isGuest) ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl' : 'bg-[#4E81FA] hover:bg-[#3D6FE8] text-white cursor-pointer border border-[#4E81FA]/30 shadow-lg hover:shadow-xl' }}'
@@ -211,7 +211,7 @@
                             <x-input-error class="mt-2" :messages="$errors->get('event_details')" />
 
                             <!-- Error message display -->
-                            <div v-if="errorMessage" class="mt-4 p-3 text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded-md">
+                            <div v-if="errorMessage" class="mt-4 p-3 text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded-lg">
                                 @{{ errorMessage }}
                             </div>
 
@@ -273,7 +273,7 @@
 
                 <!-- Action buttons - now includes Save All -->
                 <div class="flex gap-2 self-end sm:self-auto">
-                    <button @click="handleSaveAll" v-if="({{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1) && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" type="button" class="px-4 py-2 bg-[#4E81FA] text-white rounded-md hover:bg-[#3D6FE8] transition-all duration-200 hover:scale-105 hover:shadow-md">
+                    <button @click="handleSaveAll" v-if="({{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1) && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" type="button" class="px-4 py-2 bg-[#4E81FA] text-white rounded-lg hover:bg-[#3D6FE8] transition-all duration-200 hover:scale-105 hover:shadow-md">
                         {{ __('messages.save_all') }}
                     </button>
                 </div>
@@ -292,7 +292,7 @@
         <!-- Events cards - Moved outside the main div -->
         <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="space-y-6">
             <div v-for="(event, idx) in preview.parsed" :key="idx" 
-                    :class="['p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg mt-4', 
+                    :class="['p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl mt-4', 
                             savedEvents[idx] ? 'border-2 border-green-500 dark:border-green-600' : '']">
                 
                 <!-- Card header -->
@@ -321,7 +321,7 @@
                     <!-- Left column: Form fields -->
                     <div class="space-y-4">
                         <!-- Show matching event if found for this specific event -->
-                        <div v-if="preview.parsed[idx].event_url" class="p-3 text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 rounded-md">
+                        <div v-if="preview.parsed[idx].event_url" class="p-3 text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 rounded-lg">
                             <div class="flex items-center justify-between">
                                 <div>
                                     {{ __('messages.similar_event_found') }}
@@ -330,7 +330,7 @@
                                     <!-- View button -->
                                     <a :href="preview.parsed[idx].event_url"
                                         target="_blank"
-                                        class="px-4 py-2 {{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 hover:bg-blue-600' : 'bg-[#4E81FA] hover:bg-[#3D6FE8]' }} text-white rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md">
+                                        class="px-4 py-2 {{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 hover:bg-blue-600' : 'bg-[#4E81FA] hover:bg-[#3D6FE8]' }} text-white rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md">
                                         {{ __('messages.view') }}
                                     </a>
                                     <!-- Show Select button if event hasn't been added to curator schedule -->
@@ -338,7 +338,7 @@
                                             @click="handleSelect(idx)" 
                                             type="button" 
                                             :disabled="savingEvents[idx]"
-                                            :class="['px-4 py-2 rounded-md transition-all duration-200',
+                                            :class="['px-4 py-2 rounded-lg transition-all duration-200',
                                                 savingEvents[idx]
                                                     ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                                                     : 'bg-green-500 text-white hover:bg-green-600 hover:scale-105']">
@@ -372,7 +372,7 @@
                             </label>
                             <div class="flex flex-wrap items-center gap-2 sm:gap-3 mt-1">
                                 <input type="text"
-                                    :class="'datepicker_date_' + idx + ' flex-1 min-w-[140px] basis-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm'"
+                                    :class="'datepicker_date_' + idx + ' flex-1 min-w-[140px] basis-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm'"
                                     v-model="preview.parsed[idx].event_date"
                                     v-bind:readonly="savedEvents[idx]"
                                     autocomplete="off"
@@ -380,7 +380,7 @@
                                 <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                                     <div class="time-input-wrapper">
                                         <input type="text"
-                                            class="w-28 sm:w-32 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                            class="w-28 sm:w-32 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
                                             v-model="preview.parsed[idx].event_start_time"
                                             v-bind:readonly="savedEvents[idx]"
                                             @focus="openTimeDropdown(idx, 'start')"
@@ -405,7 +405,7 @@
                                     <span class="text-gray-500 dark:text-gray-400 text-sm shrink-0">{{ __('messages.to') }}</span>
                                     <div class="time-input-wrapper">
                                         <input type="text"
-                                            class="w-28 sm:w-32 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                            class="w-28 sm:w-32 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
                                             v-model="preview.parsed[idx].event_end_time"
                                             v-bind:readonly="savedEvents[idx]"
                                             @focus="openTimeDropdown(idx, 'end')"
@@ -432,7 +432,7 @@
                         </div>
 
                         <!-- Venue display for saved events -->
-                        <div v-if="savedEvents[idx]" class="border border-gray-300 dark:border-gray-600 rounded-md p-4">
+                        <div v-if="savedEvents[idx]" class="border border-gray-300 dark:border-gray-600 rounded-lg p-4">
                             <x-input-label :value="__('messages.venue')" class="mb-2" />
                             <div class="text-gray-900 dark:text-gray-100">
                                 <!-- Show selected existing venue -->
@@ -449,7 +449,7 @@
                         </div>
 
                         <!-- Venue section with border (editable) -->
-                        <div v-if="!savedEvents[idx]" class="border border-gray-300 dark:border-gray-600 rounded-md p-4">
+                        <div v-if="!savedEvents[idx]" class="border border-gray-300 dark:border-gray-600 rounded-lg p-4">
                             <x-input-label :value="__('messages.venue')" class="mb-2" />
 
                             <!-- Venue selection - show when venues available (auth) OR venue match exists (guest) -->
@@ -475,7 +475,7 @@
                             @auth
                             <div v-if="eventVenueTypes[idx] === 'use_existing' && venues.length > 0">
                                 <select :id="'selected_venue_' + idx" data-searchable
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
                                         @change="onVenueSelect(idx, $event.target.value ? venues.find(v => v.id === $event.target.value) : null)"
                                         :value="eventSelectedVenues[idx]?.id || ''">
                                     <option value="" disabled selected>{{ __('messages.please_select') }}</option>
@@ -571,7 +571,7 @@
                                 :ref="'descriptionEditor_' + idx"
                                 rows="4"
                                 dir="auto"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
                                 v-bind:readonly="savedEvents[idx]">@{{ preview.parsed[idx].event_details }}</textarea>
                         </div>
 
@@ -581,7 +581,7 @@
                             <div class="mt-1 flex gap-3">
                                 <select v-model="preview.parsed[idx].ticket_currency_code" data-searchable
                                     v-bind:disabled="savedEvents[idx]"
-                                    class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                    class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                     @foreach ($currencies as $currency)
                                     @if ($loop->index == 2)
                                     <option disabled>──────</option>
@@ -623,7 +623,7 @@
                             <x-input-label for="category_id_@{{ idx }}">{{ __('messages.category') }}<span v-if="requiredFields.category_id" class="text-red-500"> *</span></x-input-label>
                             <select
                                 id="category_id_@{{ idx }}"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
                                 v-model="preview.parsed[idx].category_id"
                                 v-bind:disabled="savedEvents[idx]">
                                 <option value="">{{ __('messages.please_select') }}</option>
@@ -638,7 +638,7 @@
                             <x-input-label for="group_id_@{{ idx }}">{{ __('messages.schedule') }}<span v-if="requiredFields.group_id" class="text-red-500"> *</span></x-input-label>
                             <select
                                 id="group_id_@{{ idx }}"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
                                 v-model="preview.parsed[idx].group_id"
                                 v-bind:disabled="savedEvents[idx]">
                                 <option value="">{{ __('messages.please_select') }}</option>
@@ -669,7 +669,7 @@
                                     id="custom_field_{{ $fieldKey }}_@{{ idx }}"
                                     rows="2"
                                     dir="auto"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
                                     v-model="preview.parsed[idx].custom_field_values.{{ $fieldKey }}"
                                     v-bind:readonly="savedEvents[idx]"></textarea>
                                 @elseif(($field['type'] ?? '') === 'switch')
@@ -692,7 +692,7 @@
                                 @elseif(($field['type'] ?? '') === 'dropdown')
                                 <select
                                     id="custom_field_{{ $fieldKey }}_@{{ idx }}"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
                                     v-model="preview.parsed[idx].custom_field_values.{{ $fieldKey }}"
                                     v-bind:disabled="savedEvents[idx]">
                                     <option value="">{{ __('messages.select') }}...</option>
@@ -763,12 +763,32 @@
                             
                             <div>
                                 <x-input-label for="password_@{{ idx }}" :value="__('messages.password')" />
-                                <x-text-input id="password_@{{ idx }}" 
-                                    name="password_@{{ idx }}" 
-                                    type="password" 
-                                    class="mt-1 block w-full" 
+                                <x-text-input id="password_@{{ idx }}"
+                                    name="password_@{{ idx }}"
+                                    type="password"
+                                    class="mt-1 block w-full"
                                     v-model="userPassword"
                                     required />
+                            </div>
+                            <div class="relative flex items-start">
+                                <div class="flex h-6 items-center">
+                                    <input type="checkbox" id="terms_@{{ idx }}" name="terms_@{{ idx }}" required
+                                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-blue-500 focus:ring-blue-500">
+                                </div>
+                                <div class="ms-3 text-sm leading-6">
+                                    <label :for="'terms_' + idx" class="font-medium text-gray-700 dark:text-gray-300">
+                                        @if (config('app.hosted'))
+                                            {!! str_replace([':terms', ':privacy'], [
+                                                '<a href="' . marketing_url('/terms-of-service') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
+                                                '<a href="' . marketing_url('/privacy') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
+                                            ], __('messages.i_accept_the_terms_and_privacy')) !!}
+                                        @else
+                                            {!! str_replace([':terms'], [
+                                                '<a href="' . marketing_url('/self-hosting-terms-of-service') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
+                                            ], __('messages.i_accept_the_terms')) !!}
+                                        @endif
+                                    </label>
+                                </div>
                             </div>
                         </div>
                         @endif
@@ -776,27 +796,27 @@
                         <!-- Add buttons at the bottom of the left column -->
                         <div class="mt-12 flex justify-end gap-2">
                             <template v-if="savedEvents[idx]">
-                                <button v-if="!savedEventData[idx]?.is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" @click="handleEdit(idx)" type="button" class="px-4 py-2 {{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 hover:bg-blue-600' : 'bg-[#4E81FA] hover:bg-[#3D6FE8]' }} text-white rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md">
+                                <button v-if="!savedEventData[idx]?.is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" @click="handleEdit(idx)" type="button" class="px-4 py-2 {{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 hover:bg-blue-600' : 'bg-[#4E81FA] hover:bg-[#3D6FE8]' }} text-white rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md">
                                     {{ __('messages.edit') }}
                                 </button>
-                                <button v-if="{{ auth()->check() ? 'true' : 'false' }}" @click="handleView(idx)" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
+                                <button v-if="{{ auth()->check() ? 'true' : 'false' }}" @click="handleView(idx)" type="button" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
                                     {{ __('messages.view') }}
                                 </button>
-                                <button @click="handleClearForNext" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
+                                <button @click="handleClearForNext" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
                                     {{ __('messages.clear') }}
                                 </button>
                             </template>
                             <template v-else>
-                                <button @click="handleRemoveEvent(idx)" v-if="preview.parsed.length > 1" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
+                                <button @click="handleRemoveEvent(idx)" v-if="preview.parsed.length > 1" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
                                     {{ __('messages.remove') }}
                                 </button>
-                                <button @click="handleClear" type="button" v-if="preview.parsed.length == 1" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
+                                <button @click="handleClear" type="button" v-if="preview.parsed.length == 1" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
                                     {{ __('messages.clear') }}
                                 </button>
                                 <button @click="handleSave(idx)" 
                                         type="button" 
                                         :disabled="savingEvents[idx] || !canCreateAccount"
-                                        :class="['px-4 py-2 rounded-md transition-all duration-200',
+                                        :class="['px-4 py-2 rounded-lg transition-all duration-200',
                                             (savingEvents[idx] || !canCreateAccount)
                                                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                                                 : '{{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-[#4E81FA] text-white hover:bg-[#3D6FE8]' }} hover:scale-105']">
@@ -813,7 +833,7 @@
                                 <button v-if="isCurator && preview.parsed[idx].event_url && !preview.parsed[idx].is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" 
                                         @click="handleCurate(idx)" 
                                         type="button" 
-                                        class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+                                        class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
                                     {{ __('messages.curate') }}
                                 </button>
                                 -->
@@ -823,7 +843,7 @@
 
 
                         <!-- JSON preview with border matching textarea -->
-                        <div v-if="showAllFields && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm overflow-auto bg-gray-50 dark:bg-gray-900">
+                        <div v-if="showAllFields && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm overflow-auto bg-gray-50 dark:bg-gray-900">
                             <pre class="p-4 text-xs text-gray-800 dark:text-gray-200">@{{ JSON.stringify(preview.parsed[idx], null, 2) }}</pre>
                         </div>
                         

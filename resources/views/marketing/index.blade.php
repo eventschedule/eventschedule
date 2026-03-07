@@ -297,7 +297,7 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">AI-Powered</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm flex-grow">Paste a flyer or scan a printed agenda and let AI extract the details. Translate your events into 11 languages instantly.</p>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm flex-grow">Parse text and images, generate flyers and descriptions, create your brand style, and translate to 11 languages with AI.</p>
                     <span class="inline-flex items-center mt-auto text-sm font-medium text-blue-600 group-hover:gap-2 gap-1 transition-all">
                         Learn more
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>

@@ -15,7 +15,7 @@
             @endif
 
             {{-- Event info card --}}
-            <div class="bg-white dark:bg-[#2d2d30] rounded-lg shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6 mb-6">
+            <div class="bg-white dark:bg-[#2d2d30] rounded-xl shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6 mb-6">
                 <h1 class="text-xl font-semibold text-gray-900 dark:text-white mb-1">{{ $event->name }}</h1>
                 <p class="text-sm text-gray-500 dark:text-[#9ca3af]">
                     {{ $event->getStartDateTime($sale->event_date, true)->translatedFormat('F j, Y') }}
@@ -25,7 +25,7 @@
             </div>
 
             {{-- Feedback form --}}
-            <div class="bg-white dark:bg-[#2d2d30] rounded-lg shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6">
+            <div class="bg-white dark:bg-[#2d2d30] rounded-xl shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('messages.feedback_how_was') }}</h2>
                 <p class="text-sm text-gray-500 dark:text-[#9ca3af] mb-6">{{ __('messages.feedback_rate_event') }}</p>
 

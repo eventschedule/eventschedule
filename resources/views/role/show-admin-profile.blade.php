@@ -29,7 +29,7 @@
                     {{ __('messages.youtube_videos') }}
                     @if(!$isViewer)
                     <button type="button"
-                        class="btn-show-add inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                        class="btn-show-add inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                         data-link-type="youtube_links">
                         {{ __('messages.add') }}
                     </button>
@@ -56,7 +56,7 @@
                             </x-link>
                             @if(!$isViewer)
                             <button type="button"
-                                class="btn-remove-link mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                                class="btn-remove-link mt-3 inline-flex items-center rounded-lg bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                                 data-link-type="youtube_links" data-link-url="{{ $link->url }}">
                                 {{ __('messages.remove') }}
                             </button>
@@ -81,7 +81,7 @@
                     {{ __('messages.social_links') }}
                     @if(!$isViewer)
                     <button type="button"
-                        class="btn-show-add inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                        class="btn-show-add inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                         data-link-type="social_links">
                         {{ __('messages.add') }}
                     </button>
@@ -109,7 +109,7 @@
                             </x-link>
                             @if(!$isViewer)
                             <button type="button"
-                                class="btn-remove-link mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                                class="btn-remove-link mt-3 inline-flex items-center rounded-lg bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                                 data-link-type="social_links" data-link-url="{{ $link->url }}">
                                 {{ __('messages.remove') }}
                             </button>
@@ -133,7 +133,7 @@
                     {{ __('messages.payment_links') }}
                     @if(!$isViewer)
                     <button type="button"
-                        class="btn-show-add inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                        class="btn-show-add inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                         data-link-type="payment_links">
                         {{ __('messages.add') }}
                     </button>
@@ -160,7 +160,7 @@
                             </x-link>
                             @if(!$isViewer)
                             <button type="button"
-                                class="btn-remove-link mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                                class="btn-remove-link mt-3 inline-flex items-center rounded-lg bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                                 data-link-type="payment_links" data-link-url="{{ $link->url }}">
                                 {{ __('messages.remove') }}
                             </button>
@@ -237,7 +237,7 @@ Leaving: "ease-in duration-200"
                     <div class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
                         <x-brand-button type="submit" class="w-full sm:col-start-2">{{ __('messages.save') }}</x-brand-button>
                         <button type="button"
-                            class="mt-3 inline-flex w-full items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors sm:col-start-1 sm:mt-0"
+                            class="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors sm:col-start-1 sm:mt-0"
                             id="btn-hide-add">{{ __('messages.cancel') }}</button>
                     </div>
                 </div>

@@ -6,7 +6,7 @@
         {{-- Statistics Cards --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {{-- Total Custom Domains --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-full">
@@ -23,7 +23,7 @@
             </div>
 
             {{-- Direct Mode --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
@@ -40,7 +40,7 @@
             </div>
 
             {{-- Active --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-green-100 dark:bg-green-900 rounded-full">
@@ -57,7 +57,7 @@
             </div>
 
             {{-- Pending --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-full">
@@ -75,17 +75,17 @@
         </div>
 
         {{-- Search and Filters --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
             <form method="GET" action="{{ route('admin.domains') }}" class="flex flex-wrap items-end gap-4">
                 <div class="flex-1 min-w-[200px] relative">
                     <x-input-label for="search" :value="__('messages.search')" />
                     <x-text-input id="search" name="search" type="text" class="mt-1 block w-full"
                         :value="request('search')" :placeholder="__('messages.search_domains')" autocomplete="off" data-subdomain-autocomplete />
-                    <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50"></div>
+                    <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
                 </div>
                 <div>
                     <x-input-label for="mode" :value="__('messages.custom_domain_mode')" />
-                    <select id="mode" name="mode" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                    <select id="mode" name="mode" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                         <option value="">@lang('messages.all')</option>
                         <option value="redirect" {{ request('mode') === 'redirect' ? 'selected' : '' }}>@lang('messages.custom_domain_mode_redirect')</option>
                         <option value="direct" {{ request('mode') === 'direct' ? 'selected' : '' }}>@lang('messages.custom_domain_mode_direct')</option>
@@ -93,7 +93,7 @@
                 </div>
                 <div>
                     <x-input-label for="status" :value="__('messages.status')" />
-                    <select id="status" name="status" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                    <select id="status" name="status" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                         <option value="">@lang('messages.all')</option>
                         <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>@lang('messages.domain_pending')</option>
                         <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>@lang('messages.domain_active')</option>
@@ -107,7 +107,7 @@
         </div>
 
         {{-- Domains Table --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">

@@ -85,6 +85,13 @@
 </x-app-admin-layout>
 
 <script {!! nonce_attr() !!}>
+var salesSortBy = '{{ $sortBy ?? '' }}';
+var salesSortDir = '{{ $sortDir ?? 'desc' }}';
+var waitlistSortBy = '';
+var waitlistSortDir = 'desc';
+var feedbackSortBy = '';
+var feedbackSortDir = 'desc';
+
 @if ($waitlistCount > 0 || $hasPro)
 // Tab switching
 const activeClass = 'border-[#4E81FA] text-[#4E81FA]';
@@ -122,7 +129,14 @@ document.getElementById('tab-waitlist').addEventListener('click', function() {
 });
 
 function loadWaitlist(url) {
-    fetch(url || '{{ route("waitlist.index") }}', {
+    var fetchUrl = url || '{{ route("waitlist.index") }}';
+    if (waitlistSortBy) {
+        var u = new URL(fetchUrl, window.location.origin);
+        u.searchParams.set('sort_by', waitlistSortBy);
+        u.searchParams.set('sort_dir', waitlistSortDir);
+        fetchUrl = u.toString();
+    }
+    fetch(fetchUrl, {
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
     })
     .then(response => response.text())
@@ -182,7 +196,14 @@ document.getElementById('tab-feedback').addEventListener('click', function() {
 });
 
 function loadFeedback(url) {
-    fetch(url || '{{ route("sales") }}?tab=feedback', {
+    var fetchUrl = url || '{{ route("sales") }}?tab=feedback';
+    if (feedbackSortBy) {
+        var u = new URL(fetchUrl, window.location.origin);
+        u.searchParams.set('sort_by', feedbackSortBy);
+        u.searchParams.set('sort_dir', feedbackSortDir);
+        fetchUrl = u.toString();
+    }
+    fetch(fetchUrl, {
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
     })
     .then(response => response.text())
@@ -218,6 +239,31 @@ if (tab === 'feedback' && document.getElementById('tab-feedback')) {
 }
 @endif
 
+document.addEventListener('click', function(e) {
+    var header = e.target.closest('[data-sort]');
+    if (!header) return;
+
+    var panel = header.closest('[id$="-panel"], [id$="-table"]');
+    if (!panel) return;
+    var panelId = panel.id;
+
+    var sortCol = header.getAttribute('data-sort');
+
+    if (panelId === 'sales-panel' || panelId === 'sales-table') {
+        salesSortDir = (salesSortBy === sortCol && salesSortDir === 'asc') ? 'desc' : 'asc';
+        salesSortBy = sortCol;
+        updateResults(document.getElementById('filter').value);
+    } else if (panelId === 'waitlist-panel' || panelId === 'waitlist-table') {
+        waitlistSortDir = (waitlistSortBy === sortCol && waitlistSortDir === 'asc') ? 'desc' : 'asc';
+        waitlistSortBy = sortCol;
+        loadWaitlist();
+    } else if (panelId === 'feedback-panel' || panelId === 'feedback-table') {
+        feedbackSortDir = (feedbackSortBy === sortCol && feedbackSortDir === 'asc') ? 'desc' : 'asc';
+        feedbackSortBy = sortCol;
+        loadFeedback();
+    }
+});
+
 let timeoutId;
 const filterInput = document.getElementById('filter');
 const clearButton = document.getElementById('clear-filter');
@@ -252,7 +298,11 @@ if (filterInput.value) {
 }
 
 function updateResults(value) {
-    fetch(`${window.location.pathname}?filter=${encodeURIComponent(value)}`, {
+    var url = window.location.pathname + '?filter=' + encodeURIComponent(value);
+    if (salesSortBy) {
+        url += '&sort_by=' + encodeURIComponent(salesSortBy) + '&sort_dir=' + encodeURIComponent(salesSortDir);
+    }
+    fetch(url, {
         headers: {
             'X-Requested-With': 'XMLHttpRequest'
         }
@@ -318,22 +368,31 @@ function handleAction(saleId, action) {
     });
 }
 
-function toggleCustomFields(button) {
-    var row = button.closest('tr');
-    var detailRow = row.nextElementSibling;
-    if (detailRow && detailRow.classList.contains('custom-fields-row')) {
-        detailRow.classList.toggle('hidden');
+document.addEventListener('click', function(e) {
+    var button = e.target.closest('[data-toggle-row]');
+    if (button) {
+        var saleId = button.getAttribute('data-sale-id');
+        var rows = document.querySelectorAll('.detail-row-' + saleId);
+        rows.forEach(function(row) {
+            row.classList.toggle('hidden');
+        });
         var svg = button.querySelector('svg');
         if (svg) {
             svg.classList.toggle('rotate-90');
         }
     }
-}
 
-document.addEventListener('click', function(e) {
-    var button = e.target.closest('[data-toggle-custom-fields]');
-    if (button) {
-        toggleCustomFields(button);
+    var mobileBtn = e.target.closest('[data-toggle-mobile-guests]');
+    if (mobileBtn) {
+        var mSaleId = mobileBtn.getAttribute('data-toggle-mobile-guests');
+        var guestContainer = document.querySelector('.mobile-guests-' + mSaleId);
+        if (guestContainer) {
+            guestContainer.classList.toggle('hidden');
+        }
+        var chevron = document.querySelector('.mobile-guest-chevron-' + mSaleId);
+        if (chevron) {
+            chevron.classList.toggle('rotate-90');
+        }
     }
 });
 

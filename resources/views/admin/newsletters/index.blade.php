@@ -15,19 +15,19 @@
             </div>
 
             @if (session('status'))
-            <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-md text-green-700 dark:text-green-300">
+            <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
                 {{ session('status') }}
             </div>
             @endif
 
             @if (session('error'))
-            <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300">
+            <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
                 {{ session('error') }}
             </div>
             @endif
 
             @if ($newsletters->count() > 0)
-            <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
@@ -113,7 +113,7 @@
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_newsletters_description') }}</p>
                 <div class="mt-6">
                     <a href="{{ route('admin.newsletters.create') }}"
-                        class="inline-flex items-center rounded-md bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-600">
+                        class="inline-flex items-center rounded-lg bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-600">
                         {{ __('messages.create_admin_newsletter') }}
                     </a>
                 </div>

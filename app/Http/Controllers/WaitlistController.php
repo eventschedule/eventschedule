@@ -104,13 +104,29 @@ class WaitlistController extends Controller
             });
         }
 
-        $entries = $query->orderBy('created_at', 'DESC')->paginate(50, ['*'], 'page');
-
-        if ($request->ajax()) {
-            return view('ticket.waitlist_table', compact('entries'));
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDir = strtolower($request->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $allowedSortColumns = ['name', 'email', 'status', 'created_at', 'event_date', 'event_name'];
+        if (! in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'created_at';
         }
 
-        return view('ticket.waitlist_table', compact('entries'));
+        if ($sortBy === 'event_name') {
+            $query->orderBy(
+                Event::select('name')->whereColumn('events.id', 'ticket_waitlists.event_id'),
+                $sortDir
+            );
+        } else {
+            $query->orderBy($sortBy, $sortDir);
+        }
+
+        $entries = $query->paginate(50, ['*'], 'page')->withQueryString();
+
+        if ($request->ajax()) {
+            return view('ticket.waitlist_table', compact('entries', 'sortBy', 'sortDir'));
+        }
+
+        return view('ticket.waitlist_table', compact('entries', 'sortBy', 'sortDir'));
     }
 
     public function remove($id)

@@ -19,7 +19,7 @@
         </x-brand-link>
         @elseif (config('app.hosted'))
         <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-members')"
-                class="w-full md:w-auto inline-flex items-center justify-center px-4 py-3 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-base text-white shadow-sm transition-all duration-200 hover:bg-[#3D6FE8] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                class="w-full md:w-auto inline-flex items-center justify-center px-4 py-3 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-base text-white shadow-sm transition-all duration-200 hover:bg-[#3D6FE8] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path
                     d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
@@ -41,13 +41,8 @@
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
-                                <th scope="col"
-                                    class="py-3.5 ps-4 pe-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 sm:ps-6">
-                                    {{ __('messages.name') }}
-                                </th>
-                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ __('messages.email') }}
-                                </th>
+                                <x-sortable-header column="name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'asc'" class="py-3.5 ps-4 pe-3 sm:ps-6">{{ __('messages.name') }}</x-sortable-header>
+                                <x-sortable-header column="email" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'asc'">{{ __('messages.email') }}</x-sortable-header>
                                 <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
                                     {{ __('messages.role') }}
                                 </th>
@@ -71,7 +66,7 @@
                                             @csrf
                                             @method('PATCH')
                                             <select name="level" onchange="this.form.submit()"
-                                                class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 text-sm shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                                                class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 text-sm shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                                                 <option value="admin" {{ $member->pivot->level == 'admin' ? 'selected' : '' }}>{{ __('messages.admin') }}</option>
                                                 <option value="viewer" {{ $member->pivot->level == 'viewer' ? 'selected' : '' }}>{{ __('messages.viewer') }}</option>
                                             </select>
@@ -81,7 +76,7 @@
                                     @else
                                         <a href="{{ route('role.resend_invite', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}">
                                             <button type="button"
-                                                class="inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                                class="inline-flex items-center rounded-lg bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
                                                 {{ __('messages.resend_invite') }}
                                             </button>
                                         </a>

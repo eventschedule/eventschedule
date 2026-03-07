@@ -107,7 +107,7 @@ class EventManagementTest extends DuskTestCase
                 if (form) form.submit();
             ");
 
-            $browser->waitForLocation('/events', 15);
+            $browser->waitForLocation('/dashboard', 15);
 
             // Verify role was deleted
             $this->assertNull(Role::where('subdomain', 'talent')->first());

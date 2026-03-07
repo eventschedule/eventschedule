@@ -150,6 +150,12 @@ class Sale extends Model
         return $this->hasMany(Sale::class, 'group_id', 'group_id');
     }
 
+    public function guestSales()
+    {
+        return $this->hasMany(Sale::class, 'group_id', 'id')
+            ->whereColumn('sales.id', '!=', 'sales.group_id');
+    }
+
     public function isPrimarySale()
     {
         return $this->group_id && $this->group_id === $this->id;

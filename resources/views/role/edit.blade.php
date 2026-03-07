@@ -45,7 +45,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 0.375rem;
+            border-radius: 0.5rem;
             border: 1px solid #e5e7eb;
             background: white;
             cursor: pointer;
@@ -770,7 +770,7 @@
         @if (is_rtl())
             <div class="hidden lg:flex items-center gap-3">
                 <a href="{{ $role->exists ? route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) : route('home') }}"
-                   class="js-cancel-btn inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                   class="js-cancel-btn inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                     {{ __('messages.cancel') }}
                 </a>
             </div>
@@ -789,7 +789,7 @@
 
             <div class="hidden lg:flex items-center gap-3">
                 <a href="{{ $role->exists ? route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) : route('home') }}"
-                   class="js-cancel-btn inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                   class="js-cancel-btn inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                     {{ __('messages.cancel') }}
                 </a>
             </div>
@@ -813,14 +813,14 @@
                 <div class="hidden lg:block lg:col-span-3">
                     <div class="sticky top-6">
                         <nav class="space-y-1">
-                            <a href="#section-details" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-details">
+                            <a href="#section-details" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-details">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                                 </svg>
                                 {{ __('messages.details') }}
                             </a>
                             @if ($role->isVenue())
-                            <a href="#section-address" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-address">
+                            <a href="#section-address" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-address">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
@@ -828,40 +828,40 @@
                                 {{ __('messages.venue_address') }}
                             </a>
                             @endif
-                            <a href="#section-style" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-style">
+                            <a href="#section-style" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-style">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 3 3 0 005.78-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
                                 </svg>
                                 {{ __('messages.schedule_style') }}
                             </a>
-                            <a href="#section-subschedules" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-subschedules">
+                            <a href="#section-subschedules" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-subschedules">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
                                 </svg>
                                 {{ __('messages.customize') }}
                             </a>
-                            <a href="#section-settings" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-settings">
+                            <a href="#section-settings" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-settings">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                                 {{ __('messages.schedule_settings') }}
                             </a>
-                            <a href="#section-engagement" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-engagement">
+                            <a href="#section-engagement" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-engagement">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                                 </svg>
                                 {{ __('messages.engagement') }}
                             </a>
                             @if (! config('app.hosted'))
-                            <a href="#section-auto-import" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-auto-import">
+                            <a href="#section-auto-import" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-auto-import">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                                 </svg>
                                 {{ __('messages.auto_import_settings') }}
                             </a>
                             @endif
-                            <a href="#section-integrations" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-integrations">
+                            <a href="#section-integrations" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-integrations">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                                 </svg>
@@ -898,7 +898,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-details" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                <div id="section-details" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
@@ -909,7 +909,7 @@
                             @if (config('services.google.gemini_key') && !is_demo_mode())
                                 @if ($role->isEnterprise())
                                     <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'ai-schedule-details')"
-                                        class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600"
+                                        class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600"
                                         title="{{ __('messages.ai_details_generator') }}">
                                         <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
@@ -918,7 +918,7 @@
                                     </button>
                                 @elseif (config('app.hosted'))
                                     <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-details')"
-                                        class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 opacity-75"
+                                        class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 opacity-75"
                                         title="{{ __('messages.ai_details_generator') }}">
                                         <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
@@ -986,7 +986,7 @@
                         <div class="mb-6">
                             <x-input-label for="description" :value="__('messages.description')" />
                             <textarea id="description" name="description"
-                                class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">{{ old('description', $role->description) }}</textarea>
+                                class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">{{ old('description', $role->description) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
 
@@ -999,7 +999,7 @@
                             <x-input-label for="language_code" :value="__('messages.language') " />
                             <select name="language_code" id="language_code" required {{ is_demo_mode() ? 'disabled' : '' }}
                                 data-action="language-change"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                 @foreach(config('app.supported_languages') as $key => $value)
                                 <option value="{{ $key }}" {{ $role->language_code == $key ? 'SELECTED' : '' }}>
                                     {{ __('messages.' . $value) }}
@@ -1012,7 +1012,7 @@
                         <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
                             <x-input-label for="timezone" :value="__('messages.timezone')" />
                             <select name="timezone" id="timezone" required {{ is_demo_mode() ? 'disabled' : '' }} data-searchable
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                 @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
                                 <option value="{{ $timezone }}" {{ $role->timezone == $timezone ? 'SELECTED' : '' }}>
                                     {{ $timezone }}
@@ -1060,15 +1060,15 @@
                                 @if (\App\Services\SmsService::isConfigured())
                                 <div id="role-phone-verify-ui" class="mt-2">
                                     <button type="button" id="role-phone-send-code-btn"
-                                        class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800">
+                                        class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800">
                                         {{ __('messages.click_here_to_verify_phone') }}
                                     </button>
 
                                     <div id="role-phone-code-input" style="display: none;" class="mt-2 flex items-center gap-2">
                                         <input type="text" id="role-phone-verification-code" maxlength="6" placeholder="000000"
-                                            class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm text-center tracking-widest" />
+                                            class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-lg shadow-sm text-center tracking-widest" />
                                         <button type="button" id="role-phone-verify-code-btn"
-                                            class="inline-flex items-center px-3 py-2 bg-[#4E81FA] text-white text-sm font-medium rounded-md hover:bg-[#3d6de8] transition-colors">
+                                            class="inline-flex items-center px-3 py-2 bg-[#4E81FA] text-white text-sm font-medium rounded-lg hover:bg-[#3d6de8] transition-colors">
                                             {{ __('messages.verify') }}
                                         </button>
                                     </div>
@@ -1129,7 +1129,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-address" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div id="section-address" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
@@ -1201,7 +1201,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-style" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div id="section-style" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
                     <div>
 
                     <div class="flex flex-col xl:flex-row xl:gap-12">
@@ -1215,7 +1215,7 @@
                         @if (config('services.google.gemini_key') && !is_demo_mode())
                             @if ($role->isEnterprise())
                                 <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'ai-style-generator')"
-                                    class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600"
+                                    class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600"
                                     title="{{ __('messages.ai_style_generator') }}">
                                     <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
@@ -1224,7 +1224,7 @@
                                 </button>
                             @elseif (config('app.hosted'))
                                 <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-style')"
-                                    class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 opacity-75"
+                                    class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 opacity-75"
                                     title="{{ __('messages.ai_style_generator') }}">
                                     <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
@@ -1263,7 +1263,7 @@
                                 <div id="profile_image_choose" style="{{ $role->profile_image_url ? 'display:none' : '' }}">
                                     <div class="mt-1 flex items-center gap-3">
                                         <button type="button" data-trigger-file-input="profile_image"
-                                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
                                             <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                             </svg>
@@ -1278,13 +1278,13 @@
                                 </div>
 
                                 <div id="profile_image_preview_clear" class="relative inline-block pt-3" style="display: none;">
-                                    <img id="profile_image_preview" src="#" alt="Profile Image Preview" style="max-height:120px;" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                                    <img id="profile_image_preview" src="#" alt="Profile Image Preview" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" @click="if($el.src && !$el.src.endsWith('#')) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: $el.src}))" />
                                     <button type="button" data-clear-file-input="profile_image" data-clear-preview="profile_image_preview" data-clear-filename="profile_image_filename" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                                 </div>
 
                                 @if ($role->profile_image_url)
                                 <div id="profile_image_existing" class="relative inline-block mt-4 pt-1" data-show-on-delete="profile_image_choose">
-                                    <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                                    <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" @click="window.dispatchEvent(new CustomEvent('show-lightbox', {detail: '{{ $role->profile_image_url }}'}))" />
                                     <button type="button"
                                         data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}"
                                         data-delete-image-token="{{ csrf_token() }}"
@@ -1310,7 +1310,7 @@
                                 <x-input-label for="font_family" :value="__('messages.font_family')" />
                                 <div class="flex items-center gap-1">
                                     <select id="font_family" name="font_family" data-searchable data-action="font-family-change"
-                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                         @foreach($fonts as $font)
                                         <option value="{{ $font->value }}"
                                             {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
@@ -1356,7 +1356,7 @@
                                 <x-input-label for="header_image" :value="__('messages.header_image')" />
                                 <div class="flex items-center gap-1">
                                     <select id="header_image" name="header_image"
-                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
                                         data-action="header-image-input">
                                         <option value="none" {{ $effectiveHeaderImage == 'none' || (!$effectiveHeaderImage && !$role->header_image_url) ? 'SELECTED' : '' }}>
                                             {{ __('messages.none') }}</option>
@@ -1391,7 +1391,7 @@
                                         accept="image/png, image/jpeg" data-file-trigger="header_image_url" data-filename-target="header_image_url_filename" />
                                     <div class="mt-1 flex items-center gap-3">
                                         <button type="button" data-trigger-file-input="header_image_url"
-                                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
                                             <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                             </svg>
@@ -1400,7 +1400,7 @@
                                         <span id="header_image_url_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
                                     </div>
                                     <div id="header_image_url_preview_clear" class="relative inline-block pt-3" style="display: none;">
-                                        <img id="header_image_url_preview" src="#" alt="Header Image Preview" style="max-height:120px;" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                                        <img id="header_image_url_preview" src="#" alt="Header Image Preview" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" @click="if($el.src && !$el.src.endsWith('#')) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: $el.src}))" />
                                         <button type="button" id="clear-header-file-btn" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -1417,11 +1417,11 @@
                                     src="{{ $role->header_image && $role->header_image !== 'none' ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}"
                                     alt="Header Image Preview"
                                     style="max-height:120px; {{ $effectiveHeaderImage && $effectiveHeaderImage !== 'none' ? '' : 'display:none;' }}"
-                                    class="pt-3" />
+                                    class="pt-3 cursor-pointer" @click="if($el.src) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: $el.src}))" />
 
                                 @if ($role->header_image_url)
                                 <div id="delete_header_image_button" class="relative inline-block mt-4 pt-1" style="display: {{ $effectiveHeaderImage ? 'none' : 'block' }};">
-                                    <img src="{{ $role->header_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                                    <img src="{{ $role->header_image_url }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" @click="window.dispatchEvent(new CustomEvent('show-lightbox', {detail: '{{ $role->header_image_url }}'}))" />
                                     <button type="button"
                                         data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}"
                                         data-delete-image-token="{{ csrf_token() }}"
@@ -1475,7 +1475,7 @@
                                 <x-input-label for="image" :value="__('messages.image')" />
                                 <div class="flex items-center gap-1">
                                     <select id="background_image" name="background_image"
-                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
                                         data-action="background-image-input">
                                         @foreach($backgrounds as $background => $name)
                                         <option value="{{ $background }}"
@@ -1514,7 +1514,7 @@
                                         accept="image/png, image/jpeg" data-file-trigger="background_image_url" data-filename-target="background_image_url_filename" data-update-preview="true" />
                                     <div class="mt-1 flex items-center gap-3">
                                         <button type="button" data-trigger-file-input="background_image_url"
-                                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
                                             <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                             </svg>
@@ -1527,14 +1527,14 @@
                                     </p>
 
                                     <div id="background_image_preview_clear" class="relative inline-block pt-3" style="display: none;">
-                                        <img id="background_image_preview" src="" alt="Background Image Preview" style="max-height:120px;" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                                        <img id="background_image_preview" src="" alt="Background Image Preview" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" @click="if($el.src && $el.src !== window.location.href) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: $el.src}))" />
                                         <button type="button" data-clear-file-input="background_image_url" data-clear-preview="background_image_preview" data-clear-filename="background_image_url_filename" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                                     </div>
                                 </div>
 
                                 @if ($role->background_image_url)
                                 <div id="background_image_existing" class="relative inline-block mt-4 pt-1">
-                                    <img src="{{ $role->background_image_url }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                                    <img src="{{ $role->background_image_url }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" @click="window.dispatchEvent(new CustomEvent('show-lightbox', {detail: '{{ $role->background_image_url }}'}))" />
                                     <button type="button"
                                         data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}"
                                         data-delete-image-token="{{ csrf_token() }}"
@@ -1554,7 +1554,7 @@
                                     <x-input-label for="background_colors" :value="__('messages.colors')" />
                                     <div class="flex items-center gap-1">
                                         <select id="background_colors" name="background_colors" data-action="background-colors-input"
-                                            class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                            class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                             @foreach($gradients as $gradient => $name)
                                             <option value="{{ $gradient }}"
                                                 {{ $role->background_colors == $gradient || (! array_key_exists($role->background_colors, $gradients) && ! $gradient) ? 'SELECTED' : '' }}>
@@ -1647,18 +1647,18 @@
                                 <x-input-label for="custom_css" :value="__('messages.custom_css')" />
                                 @if ($role->isPro())
                                 <textarea id="custom_css" name="custom_css" {{ is_demo_mode() ? 'disabled' : '' }}
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm font-mono text-sm"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm font-mono text-sm"
                                     rows="6">{{ old('custom_css', $role->custom_css) }}</textarea>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.custom_css_help') }}</p>
                                 <x-input-error class="mt-2" :messages="$errors->get('custom_css')" />
                                 @elseif ($role->custom_css)
                                 <textarea disabled
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm font-mono text-sm opacity-60"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm font-mono text-sm opacity-60"
                                     rows="6">{{ $role->custom_css }}</textarea>
                                 <p class="mt-1 text-sm text-amber-600 dark:text-amber-400">{{ __('messages.custom_css_grandfathered') }}</p>
                                 @else
                                 <textarea disabled
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm font-mono text-sm opacity-60"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm font-mono text-sm opacity-60"
                                     rows="3" placeholder="/* CSS */"></textarea>
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                     {{ __('messages.custom_css_enterprise_only') }}
@@ -1705,7 +1705,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-subschedules" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div id="section-subschedules" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
@@ -1821,15 +1821,20 @@
                             {{ __('messages.event_custom_fields_help') }}
                         </p>
 
+                        <input type="hidden" name="event_custom_fields_submitted" value="1">
                         <div id="event-custom-fields-container">
-                            <input type="hidden" name="event_custom_fields_submitted" value="1">
                             @php
                                 $eventCustomFields = $role->event_custom_fields ?? [];
-                                uasort($eventCustomFields, fn($a, $b) => ($a['index'] ?? 999) <=> ($b['index'] ?? 999));
                                 $fieldIndex = 0;
                             @endphp
                             @foreach($eventCustomFields as $fieldKey => $field)
-                            <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg event-custom-field-item" data-field-key="{{ $fieldKey }}" data-field-index="{{ $field['index'] ?? '' }}">
+                            <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg event-custom-field-item flex items-start gap-3" data-field-key="{{ $fieldKey }}" data-field-index="{{ $field['index'] ?? '' }}">
+                                <div class="custom-field-drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0 mt-1 {{ count($eventCustomFields) > 1 ? '' : 'hidden' }}">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <x-input-label :value="__('messages.field_name') . ' *'" class="text-sm" />
@@ -1841,7 +1846,7 @@
                                         <x-input-label :value="__('messages.field_type')" class="text-sm" />
                                         <select name="event_custom_fields[{{ $fieldKey }}][type]"
                                             data-action="toggle-field-options"
-                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                             <option value="string" {{ ($field['type'] ?? 'string') === 'string' ? 'selected' : '' }}>{{ __('messages.type_string') }}</option>
                                             <option value="multiline_string" {{ ($field['type'] ?? '') === 'multiline_string' ? 'selected' : '' }}>{{ __('messages.type_multiline_string') }}</option>
                                             <option value="switch" {{ ($field['type'] ?? '') === 'switch' ? 'selected' : '' }}>{{ __('messages.type_switch') }}</option>
@@ -1870,7 +1875,7 @@
                                 <div class="mt-3">
                                     <x-input-label :value="__('messages.ai_prompt_custom_field')" class="text-sm" />
                                     <textarea name="event_custom_fields[{{ $fieldKey }}][ai_prompt]"
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm ai-prompt-textarea"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm text-sm ai-prompt-textarea"
                                         rows="2"
                                         maxlength="500">{{ $field['ai_prompt'] ?? '' }}</textarea>
                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_prompt_custom_field_help') }}</p>
@@ -1893,6 +1898,7 @@
                                     <button type="button" data-action="remove-custom-field" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                         {{ __('messages.remove') }}
                                     </button>
+                                </div>
                                 </div>
                             </div>
                             @endforeach
@@ -2001,19 +2007,19 @@
                                         <div>
                                             <x-input-label for="new_sponsor_name_input" :value="__('messages.sponsor_name')" />
                                             <input type="text" id="new_sponsor_name_input" maxlength="100"
-                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm" />
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm text-sm" />
                                         </div>
                                         <div>
                                             <x-input-label for="new_sponsor_url_input" :value="__('messages.sponsor_url')" />
                                             <input type="url" id="new_sponsor_url_input" maxlength="500"
-                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm" />
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm text-sm" />
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                                         <div>
                                             <x-input-label :value="__('messages.sponsor_tier')" />
                                             <select id="new_sponsor_tier_input"
-                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm">
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm text-sm">
                                                 <option value="">—</option>
                                                 <option value="gold">{{ __('messages.gold') }}</option>
                                                 <option value="silver">{{ __('messages.silver') }}</option>
@@ -2023,21 +2029,21 @@
                                         <div>
                                             <x-input-label id="sponsor-logo-label" :value="__('messages.logo') . ' *'" />
                                             <input type="file" id="new_sponsor_logo_input" accept="image/*"
-                                                class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#4E81FA] file:text-white hover:file:bg-blue-600"
+                                                class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#4E81FA] file:text-white hover:file:bg-blue-600"
                                                 />
-                                            <img id="sponsor_logo_preview" src="#" alt="Logo Preview" style="max-height:120px; display:none;" class="mt-2 rounded-md border border-gray-200 dark:border-gray-600" />
+                                            <img id="sponsor_logo_preview" src="#" alt="Logo Preview" style="max-height:120px; display:none;" class="mt-2 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" @click="if($el.src && !$el.src.endsWith('#')) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: $el.src}))" />
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <button type="button" data-action="add-sponsor" id="sponsor-action-btn"
-                                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[#4E81FA] rounded-md hover:bg-blue-600 transition-colors">
+                                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[#4E81FA] rounded-lg hover:bg-blue-600 transition-colors">
                                             <svg id="sponsor-action-icon" class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                             </svg>
                                             <span id="sponsor-action-text">{{ __('messages.add_sponsor') }}</span>
                                         </button>
                                         <button type="button" data-action="cancel-edit-sponsor" id="cancel-edit-sponsor-btn"
-                                            class="hidden inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                            class="hidden inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                                             {{ __('messages.cancel') }}
                                         </button>
                                     </div>
@@ -2071,7 +2077,7 @@
                         </p>
 
                         <div class="flex gap-2 mb-6">
-                            <select id="custom-label-select" data-searchable class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                            <select id="custom-label-select" data-searchable class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                 <option value="">{{ __('messages.select_label_to_customize') }}</option>
                                 @php
                                     $existingLabelKeys = array_keys($role->custom_labels ?? []);
@@ -2085,7 +2091,7 @@
                                 @endforeach
                             </select>
                             <button type="button" data-action="add-custom-label" disabled
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[#4E81FA] rounded-md hover:bg-blue-600 transition-colors opacity-50 cursor-not-allowed">
+                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[#4E81FA] rounded-lg hover:bg-blue-600 transition-colors opacity-50 cursor-not-allowed">
                                 <svg class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                 </svg>
@@ -2153,7 +2159,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-settings" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div id="section-settings" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
@@ -2207,49 +2213,76 @@
                             </x-secondary-button>
                         </div>
                         @if (!is_demo_mode())
-                        <div class="hidden" id="subdomain-edit">
-                            <div class="mb-6">
-                                <x-input-label for="new_subdomain" :value="__('messages.subdomain')" />
-                                <x-text-input id="new_subdomain" name="new_subdomain" type="text" class="mt-1 block w-full"
-                                    :value="old('new_subdomain', $role->subdomain)" required minlength="4" maxlength="50"
-                                    pattern="[a-z0-9-]+" data-action="subdomain-sanitize" />
-                                <x-input-error class="mt-2" :messages="$errors->get('new_subdomain')" />
-                            </div>
+                        <div class="hidden" id="subdomain-edit" x-data="{ domain: '{{ old('custom_domain', $role->custom_domain) }}', mode: '{{ old('custom_domain_mode', $role->custom_domain_mode) ?: 'subdomain' }}' }">
+                            <input type="hidden" name="custom_domain_mode" :value="mode === 'subdomain' ? '' : mode">
 
-                            <div x-data="{ domain: '{{ old('custom_domain', $role->custom_domain) }}', mode: '{{ old('custom_domain_mode', $role->custom_domain_mode ?? 'redirect') }}' }">
+                            {{-- Mode radios (hosted only) --}}
+                            @if (config('app.hosted'))
+                            <div class="mb-6">
+                                <x-input-label :value="__('messages.custom_domain_mode')" />
+                                <div class="mt-2 space-y-2">
+                                    {{-- Subdomain (always enabled) --}}
+                                    <label class="flex items-start gap-3 cursor-pointer">
+                                        <input type="radio" value="subdomain" x-model="mode"
+                                            x-on:change="domain = ''"
+                                            class="mt-1 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                        <div>
+                                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ __('messages.custom_domain_mode_subdomain') }}</span>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.custom_domain_mode_subdomain_desc') }}</p>
+                                        </div>
+                                    </label>
+                                    {{-- Redirect (Enterprise-gated) --}}
+                                    <label class="flex items-start gap-3{{ $role->isEnterprise() ? ' cursor-pointer' : '' }}">
+                                        <input type="radio" value="redirect" x-model="mode"
+                                            class="mt-1 text-[#4E81FA] focus:ring-[#4E81FA]"
+                                            {{ !$role->isEnterprise() ? 'disabled' : '' }}>
+                                        <div>
+                                            <span class="text-sm font-medium text-gray-900 dark:text-white{{ !$role->isEnterprise() ? ' opacity-50' : '' }}">{{ __('messages.custom_domain_mode_redirect') }}</span>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400{{ !$role->isEnterprise() ? ' opacity-50' : '' }}">{{ __('messages.custom_domain_mode_redirect_desc') }}</p>
+                                            @if (!$role->isEnterprise())
+                                            <div class="text-xs pt-1">
+                                                <button type="button" x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-domain')"
+                                                    class="text-[#4E81FA] hover:underline font-medium">
+                                                    {{ __('messages.requires_enterprise_plan') }}
+                                                </button>
+                                            </div>
+                                            @endif
+                                        </div>
+                                    </label>
+                                    {{-- Direct (Enterprise-gated, DO config required) --}}
+                                    @if (config('services.digitalocean.app_hostname'))
+                                    <label class="flex items-start gap-3{{ $role->isEnterprise() ? ' cursor-pointer' : '' }}">
+                                        <input type="radio" value="direct" x-model="mode"
+                                            class="mt-1 text-[#4E81FA] focus:ring-[#4E81FA]"
+                                            {{ !$role->isEnterprise() ? 'disabled' : '' }}>
+                                        <div>
+                                            <span class="text-sm font-medium text-gray-900 dark:text-white{{ !$role->isEnterprise() ? ' opacity-50' : '' }}">{{ __('messages.custom_domain_mode_direct') }}</span>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400{{ !$role->isEnterprise() ? ' opacity-50' : '' }}">{{ __('messages.custom_domain_mode_direct_desc') }}</p>
+                                            @if (!$role->isEnterprise())
+                                            <div class="text-xs pt-1">
+                                                <button type="button" x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-domain')"
+                                                    class="text-[#4E81FA] hover:underline font-medium">
+                                                    {{ __('messages.requires_enterprise_plan') }}
+                                                </button>
+                                            </div>
+                                            @endif
+                                        </div>
+                                    </label>
+                                    @endif
+                                </div>
+                            </div>
+                            @endif
+
+                            {{-- Custom domain (shown for redirect/direct modes) --}}
+                            <div class="mb-6" x-show="mode === 'redirect' || mode === 'direct'" x-cloak>
                                 <x-input-label for="custom_domain" :value="__('messages.custom_domain')" />
                                 @if ($role->isEnterprise())
                                 <x-text-input id="custom_domain" name="custom_domain" type="url" class="mt-1 block w-full"
                                     :value="old('custom_domain', $role->custom_domain)" x-model="domain" />
                                 <x-input-error class="mt-2" :messages="$errors->get('custom_domain')" />
 
-                                {{-- Domain mode selector --}}
+                                {{-- CNAME instructions and status --}}
                                 <div class="mt-3" x-show="domain" x-cloak>
-                                    @if (config('services.digitalocean.app_hostname'))
-                                    <x-input-label :value="__('messages.custom_domain_mode')" />
-                                    <div class="mt-2 space-y-2">
-                                        <label class="flex items-start gap-3 cursor-pointer">
-                                            <input type="radio" name="custom_domain_mode" value="redirect" x-model="mode"
-                                                class="mt-1 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                            <div>
-                                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ __('messages.custom_domain_mode_redirect') }}</span>
-                                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.custom_domain_mode_redirect_desc') }}</p>
-                                            </div>
-                                        </label>
-                                        <label class="flex items-start gap-3 cursor-pointer">
-                                            <input type="radio" name="custom_domain_mode" value="direct" x-model="mode"
-                                                class="mt-1 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                            <div>
-                                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ __('messages.custom_domain_mode_direct') }}</span>
-                                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.custom_domain_mode_direct_desc') }}</p>
-                                            </div>
-                                        </label>
-                                    </div>
-                                    @else
-                                    <input type="hidden" name="custom_domain_mode" value="">
-                                    @endif
-
-                                    {{-- Direct mode: CNAME instructions and status --}}
                                     <div x-show="mode === 'direct'" x-cloak class="mt-3">
                                         @if (config('services.digitalocean.app_hostname'))
                                         <div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
@@ -2295,27 +2328,24 @@
                                         @endif
                                     </div>
                                 </div>
-                                <div class="mt-3">
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        <x-link href="{{ marketing_url('/docs/creating-schedules#custom-domain') }}" target="_blank" class="text-sm">
-                                            {{ __('messages.custom_domain_setup_guide') }}
-                                        </x-link>
-                                    </p>
-                                </div>
-                                @else
-                                <x-text-input id="custom_domain" name="custom_domain" type="url" class="mt-1 block w-full"
-                                    :value="old('custom_domain', $role->custom_domain)" disabled />
-                                @if (config('app.hosted'))
-                                <div class="text-xs pt-1">
-                                    <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-domain')"
-                                        class="text-[#4E81FA] hover:underline font-medium">
-                                        {{ __('messages.requires_enterprise_plan') }}
-                                    </button>
-                                </div>
-                                @else
-                                <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_enterprise_plan') }}</div>
                                 @endif
-                                @endif
+                            </div>
+
+                            {{-- Subdomain/Path field --}}
+                            <div class="mb-6" x-show="mode !== 'direct'" x-cloak>
+                                <x-input-label for="new_subdomain" :value="config('app.hosted') ? __('messages.subdomain') : __('messages.path')" />
+                                <x-text-input id="new_subdomain" name="new_subdomain" type="text" class="mt-1 block w-full"
+                                    :value="old('new_subdomain', $role->subdomain)" x-bind:required="mode !== 'direct'" minlength="4" maxlength="50"
+                                    pattern="[a-z0-9-]+" data-action="subdomain-sanitize" />
+                                <x-input-error class="mt-2" :messages="$errors->get('new_subdomain')" />
+                            </div>
+
+                            <div x-show="mode === 'redirect' || mode === 'direct'" x-cloak class="mb-3">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                    <x-link href="{{ marketing_url('/docs/creating-schedules#custom-domain') }}" target="_blank" class="text-sm">
+                                        {{ __('messages.custom_domain_setup_guide') }}
+                                    </x-link>
+                                </p>
                             </div>
 
                             <x-secondary-button type="button" data-action="toggle-subdomain-edit" class="mt-3 mb-6">
@@ -2401,7 +2431,7 @@
                             <div class="mb-6">
                                 <x-input-label for="first_day_of_week" :value="__('messages.first_day_of_week')" />
                                 <select name="first_day_of_week" id="first_day_of_week"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                     @foreach ([0 => 'sunday', 1 => 'monday', 2 => 'tuesday', 3 => 'wednesday', 4 => 'thursday', 5 => 'friday', 6 => 'saturday'] as $value => $dayName)
                                     <option value="{{ $value }}" {{ old('first_day_of_week', $role->first_day_of_week ?? 0) == $value ? 'selected' : '' }}>
                                         {{ __('messages.' . $dayName) }}
@@ -2500,7 +2530,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-engagement" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div id="section-engagement" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
                     <div class="max-w-2xl">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -2561,12 +2591,12 @@
                                 @foreach(old('approved_subdomains', $role->approved_subdomains ?? []) as $i => $subdomain)
                                     <div class="mb-2 relative">
                                         <div class="flex items-center">
-                                            <input type="text" data-subdomain-search value="{{ isset($approvedSubdomainNames[$subdomain]) ? $approvedSubdomainNames[$subdomain] . ' (' . $subdomain . ')' : $subdomain }}" placeholder="{{ __('messages.search_schedules_autocomplete') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
+                                            <input type="text" data-subdomain-search value="{{ isset($approvedSubdomainNames[$subdomain]) ? $approvedSubdomainNames[$subdomain] . ' (' . $subdomain . ')' : $subdomain }}" placeholder="{{ __('messages.search_schedules_autocomplete') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
                                             <button type="button" data-action="remove-parent-item"
                                                 class="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
                                         </div>
                                         <input type="hidden" name="approved_subdomains[]" value="{{ $subdomain }}" />
-                                        <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50"></div>
+                                        <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
                                     </div>
                                 @endforeach
                             </div>
@@ -2577,7 +2607,7 @@
                         <div class="mb-6" id="request_terms_section">
                             <x-input-label for="request_terms" :value="__('messages.request_terms')" />
                             <textarea id="request_terms" name="request_terms"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
                                 rows="4"
                                 dir="auto"
                                 placeholder="{{ __('messages.enter_request_terms') }}">{{ old('request_terms', $role->request_terms) }}</textarea>
@@ -2639,7 +2669,7 @@
 
                         <div class="mb-6" id="feedback-delay-wrapper" style="{{ $role->feedback_enabled && ! $emailDisabled ? '' : 'display: none;' }}">
                             <x-input-label for="feedback_delay_hours" value="{{ __('messages.feedback_delay') }}" />
-                            <select id="feedback_delay_hours" name="feedback_delay_hours" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" {{ $emailDisabled ? 'disabled' : '' }}>
+                            <select id="feedback_delay_hours" name="feedback_delay_hours" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" {{ $emailDisabled ? 'disabled' : '' }}>
                                 @foreach ([1, 2, 6, 12, 24, 48] as $hours)
                                 <option value="{{ $hours }}" {{ old('feedback_delay_hours', $role->feedback_delay_hours ?? 24) == $hours ? 'selected' : '' }}>
                                     {{ $hours }} {{ __('messages.feedback_hours') }}
@@ -2665,7 +2695,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-auto-import" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div id="section-auto-import" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
@@ -2754,7 +2784,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-integrations" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div id="section-integrations" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
@@ -2825,7 +2855,7 @@
 
                             <div class="mb-6">
                                 <x-input-label for="email_settings_encryption" :value="__('messages.encryption')" />
-                                <select id="email_settings_encryption" name="email_settings[encryption]" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                <select id="email_settings_encryption" name="email_settings[encryption]" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                     <option value="">{{ __('messages.none') }}</option>
                                     <option value="tls" {{ old('email_settings.encryption', $emailSettings['encryption'] ?? '') == 'tls' ? 'selected' : '' }}>TLS</option>
                                     <option value="ssl" {{ old('email_settings.encryption', $emailSettings['encryption'] ?? '') == 'ssl' ? 'selected' : '' }}>SSL</option>
@@ -2886,7 +2916,7 @@
                                 <!-- Calendar Selection -->
                                 <div>
                                     <x-input-label for="google-calendar-select" :value="__('messages.select_google_calendar')" />
-                                    <select id="google-calendar-select" name="google_calendar_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                    <select id="google-calendar-select" name="google_calendar_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                         <option value="">{{ __('messages.loading_calendars') }}</option>
                                     </select>
                                 </div>
@@ -3092,7 +3122,7 @@
 
                                 <div id="caldav-calendar-select-container" class="hidden">
                                     <x-input-label for="caldav_calendar_url" :value="__('messages.select_calendar')" />
-                                    <select id="caldav_calendar_url" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                    <select id="caldav_calendar_url" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                         <option value="">{{ __('messages.select_a_calendar') }}</option>
                                     </select>
                                 </div>
@@ -3148,7 +3178,7 @@
                                     <div class="flex items-center gap-2">
                                         <x-text-input id="ical_feed_url" type="text" class="block w-full" readonly
                                             value="{{ route('feed.ical', ['subdomain' => $role->subdomain]) }}" />
-                                        <button type="button" onclick="copyFeedUrl('ical_feed_url', this)" class="shrink-0 inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                        <button type="button" onclick="copyFeedUrl('ical_feed_url', this)" class="shrink-0 inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9.75a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
                                             </svg>
@@ -3163,7 +3193,7 @@
                                     <div class="flex items-center gap-2">
                                         <x-text-input id="rss_feed_url" type="text" class="block w-full" readonly
                                             value="{{ route('feed.rss', ['subdomain' => $role->subdomain]) }}" />
-                                        <button type="button" onclick="copyFeedUrl('rss_feed_url', this)" class="shrink-0 inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                        <button type="button" onclick="copyFeedUrl('rss_feed_url', this)" class="shrink-0 inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9.75a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
                                             </svg>
@@ -3308,12 +3338,12 @@ function addGroupField() {
     div.innerHTML = `
         <div class="mb-4">
             <label for="group_name_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.name') }} *</label>
-            <input name="groups[new_${idx}][name]" type="text" id="group_name_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+            <input name="groups[new_${idx}][name]" type="text" id="group_name_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" />
         </div>
         @if($role->language_code !== 'en' || app()->getLocale() !== 'en')
         <div class="mb-4">
             <label for="group_name_en_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.english_name') }}</label>
-            <input name="groups[new_${idx}][name_en]" type="text" id="group_name_en_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+            <input name="groups[new_${idx}][name_en]" type="text" id="group_name_en_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" />
         </div>
         @endif
         <div class="mb-4">
@@ -3499,7 +3529,7 @@ function showImportOutput(output, message, isSuccess = true) {
     // Create modal HTML
     const modalHtml = `
         <div id="import-output-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white dark:bg-gray-800">
+            <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-lg bg-white dark:bg-gray-800">
                 <div class="mt-3">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
@@ -3526,7 +3556,7 @@ function showImportOutput(output, message, isSuccess = true) {
                     ` : ''}
                     
                     <div class="flex justify-end">
-                        <button data-action="close-import-output" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500">
+                        <button data-action="close-import-output" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500">
                             {{ __("messages.close") }}
                         </button>
                     </div>
@@ -3554,7 +3584,7 @@ function addImportUrlField() {
     div.innerHTML = `
         <div class="mb-4">
             <label for="import_url_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.url') }}</label>
-            <input name="import_urls[new_${idx}]" type="url" id="import_url_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+            <input name="import_urls[new_${idx}]" type="url" id="import_url_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" />
         </div>
         <div class="flex gap-4 items-center">
             <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm" data-action="remove-parent-item">
@@ -3571,12 +3601,12 @@ function addApprovedSubdomainField() {
     div.className = 'mb-2 relative';
     div.innerHTML = `
         <div class="flex items-center">
-            <input type="text" data-subdomain-search placeholder="{{ __('messages.search_schedules_autocomplete') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" autocomplete="off" />
+            <input type="text" data-subdomain-search placeholder="{{ __('messages.search_schedules_autocomplete') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" autocomplete="off" />
             <button type="button" data-action="remove-parent-item"
                 class="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
         </div>
         <input type="hidden" name="approved_subdomains[]" value="" />
-        <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50"></div>
+        <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
     `;
     container.appendChild(div);
     const searchInput = div.querySelector('[data-subdomain-search]');
@@ -3662,7 +3692,7 @@ function addImportCityField() {
     div.innerHTML = `
         <div class="mb-4">
             <label for="import_city_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.city') }}</label>
-            <input name="import_cities[new_${idx}]" type="text" id="import_city_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" placeholder="{{ __('messages.placeholder_city') }}" />
+            <input name="import_cities[new_${idx}]" type="text" id="import_city_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" placeholder="{{ __('messages.placeholder_city') }}" />
         </div>
         <div class="flex gap-4 items-center">
             <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm" data-action="remove-parent-item">
@@ -4759,18 +4789,24 @@ function addEventCustomField() {
     }
 
     const fieldHtml = `
-        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg event-custom-field-item" data-field-key="${fieldKey}" data-field-index="${fieldIndex || ''}">
+        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg event-custom-field-item flex items-start gap-3" data-field-key="${fieldKey}" data-field-index="${fieldIndex || ''}">
+            <div class="custom-field-drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0 mt-1">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                </svg>
+            </div>
+            <div class="flex-1 min-w-0">
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_name') !!} *</label>
                     <input type="text" name="event_custom_fields[${fieldKey}][name]"
-                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" required />
+                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" required />
                 </div>
                 <div>
                     <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_type') !!}</label>
                     <select name="event_custom_fields[${fieldKey}][type]"
                         data-action="toggle-field-options"
-                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                         <option value="string">{!! __('messages.type_string') !!}</option>
                         <option value="multiline_string">{!! __('messages.type_multiline_string') !!}</option>
                         <option value="switch">{!! __('messages.type_switch') !!}</option>
@@ -4784,20 +4820,20 @@ function addEventCustomField() {
             <div class="mt-3">
                 <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.english_name') !!}</label>
                 <input type="text" name="event_custom_fields[${fieldKey}][name_en]"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
                     placeholder="{!! __('messages.auto_translated_placeholder') !!}" />
             </div>
             @endif
             <div class="mt-3 event-field-options-container" style="display: none;">
                 <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_options') !!}</label>
                 <input type="text" name="event_custom_fields[${fieldKey}][options]"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
                     placeholder="{!! __('messages.options_placeholder') !!}" />
             </div>
             <div class="mt-3">
                 <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.ai_prompt_custom_field') !!}</label>
                 <textarea name="event_custom_fields[${fieldKey}][ai_prompt]"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm ai-prompt-textarea"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm text-sm ai-prompt-textarea"
                     rows="2"
                     maxlength="500"></textarea>
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{!! __('messages.ai_prompt_custom_field_help') !!}</p>
@@ -4818,6 +4854,7 @@ function addEventCustomField() {
                     {!! __('messages.remove') !!}
                 </button>
             </div>
+            </div>
         </div>
     `;
 
@@ -4825,6 +4862,11 @@ function addEventCustomField() {
     const newTextarea = container.querySelector('.event-custom-field-item:last-child .ai-prompt-textarea');
     if (newTextarea) {
         newTextarea.placeholder = getRandomAiPromptPlaceholder();
+    }
+    // Show all drag handles when there are 2+ fields
+    const fieldItems = container.querySelectorAll('.event-custom-field-item');
+    if (fieldItems.length > 1) {
+        container.querySelectorAll('.custom-field-drag-handle').forEach(h => h.classList.remove('hidden'));
     }
     updateEventCustomFieldButton();
 }
@@ -4838,6 +4880,11 @@ function removeEventCustomField(button) {
             usedEventFieldIndices = usedEventFieldIndices.filter(i => i !== fieldIndex);
         }
         fieldItem.remove();
+        // Hide drag handles when only 1 field remains
+        const container = document.getElementById('event-custom-fields-container');
+        if (container.querySelectorAll('.event-custom-field-item').length <= 1) {
+            container.querySelectorAll('.custom-field-drag-handle').forEach(h => h.classList.add('hidden'));
+        }
         updateEventCustomFieldButton();
     }
 }
@@ -4895,7 +4942,7 @@ function addCustomLabel() {
             <div>
                 <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.english_name') !!}</label>
                 <input type="text" name="custom_labels[${key}][value_en]"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
                     placeholder="{!! __('messages.auto_translated_placeholder') !!}"
                     maxlength="200" />
             </div>`;
@@ -4914,7 +4961,7 @@ function addCustomLabel() {
         <div class="space-y-3">
             <div>
                 <input type="text" name="custom_labels[${key}][value]"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
                     placeholder="${displayName}"
                     maxlength="200" />
             </div>
@@ -5353,6 +5400,16 @@ function removeSponsor(btn) {
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
 
+    // --- Initialize SortableJS for custom fields ---
+    var customFieldsList = document.getElementById('event-custom-fields-container');
+    if (customFieldsList && typeof Sortable !== 'undefined') {
+        Sortable.create(customFieldsList, {
+            handle: '.custom-field-drag-handle',
+            animation: 150,
+            ghostClass: 'opacity-50',
+        });
+    }
+
     // --- Initialize SortableJS for sponsor logos ---
     var sponsorsList = document.getElementById('sponsors-list');
     if (sponsorsList && typeof Sortable !== 'undefined') {
@@ -5731,11 +5788,10 @@ document.addEventListener('DOMContentLoaded', function() {
     endpoint="{{ $role->exists ? url('/'.$role->subdomain.'/generate-style') : url('/generate-style') }}"
     imageEndpoint="{{ $role->exists ? url('/'.$role->subdomain.'/generate-style-image') : url('/generate-style-image') }}"
     :imageElements="['profile_image', 'header_image', 'background_image']"
-    promptEndpoint="{{ $role->exists ? url('/'.$role->subdomain.'/get-style-prompt') : url('/get-style-prompt') }}"
+    :promptEndpoint="$role->exists ? url('/'.$role->subdomain.'/get-style-prompt') : url('/get-style-prompt')"
     successCallback="handleAiStyleResults"
     extraDataCallback="getStyleExtraData"
     checkValuesCallback="getStyleCurrentValues"
-    :showPresets="true"
     savedInstructions="{{ $role->ai_style_instructions }}"
     saveInstructionsField="ai_style_instructions"
     :errorMessage="__('messages.ai_style_generation_failed')"
@@ -5895,12 +5951,11 @@ window.handleAiStyleResults = function(data) {
         ['key' => 'description', 'label' => __('messages.description'), 'has_value' => (bool)$role->description],
     ]"
     endpoint="{{ $role->exists ? url('/'.$role->subdomain.'/generate-schedule-details') : url('/generate-schedule-details') }}"
-    promptEndpoint="{{ $role->exists ? url('/'.$role->subdomain.'/get-schedule-details-prompt') : url('/get-schedule-details-prompt') }}"
+    :promptEndpoint="$role->exists ? url('/'.$role->subdomain.'/get-schedule-details-prompt') : url('/get-schedule-details-prompt')"
     successCallback="handleAiScheduleDetailsResults"
     extraDataCallback="getScheduleDetailsExtraData"
     checkValuesCallback="getScheduleDetailsCurrentValues"
     :showInstructions="true"
-    :showPresets="true"
     :instructionsLabel="__('messages.ai_additional_instructions')"
     :instructionsPlaceholder="__('messages.ai_additional_instructions_placeholder')"
     savedInstructions="{{ $role->ai_content_instructions }}"

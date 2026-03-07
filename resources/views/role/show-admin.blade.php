@@ -245,13 +245,13 @@
             {{-- Actions dropdown (always visible) --}}
             <div class="mt-2 md:ms-3">
                 <div class="relative inline-block text-start w-full">
-                    <button type="button" data-popup-target="role-actions-pop-up-menu" class="popup-toggle inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800" id="role-actions-menu-button" aria-expanded="true" aria-haspopup="true">
+                    <button type="button" data-popup-target="role-actions-pop-up-menu" class="popup-toggle inline-flex w-full justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800" id="role-actions-menu-button" aria-expanded="true" aria-haspopup="true">
                         {{ __('messages.actions') }}
                         <svg class="-me-1 ms-2 h-6 w-6 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>
                     </button>
-                    <div id="role-actions-pop-up-menu" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="role-actions-menu-button" tabindex="-1">
+                    <div id="role-actions-pop-up-menu" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="role-actions-menu-button" tabindex="-1">
                         <div class="py-2" role="none" data-popup-target="role-actions-pop-up-menu">
                             {{-- Show edit/view options only when desktop buttons are hidden (mobile) --}}
                             <div class="md:hidden">
@@ -275,7 +275,7 @@
                                 </a>
                             </div>
                             @if (!$isViewer)
-                            <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                            <a href="{{ route('event.show_import_ai', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                 <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M14,12L10,8V11H2V13H10V16M20,18V6C20,4.89 19.1,4 18,4H6A2,2 0 0,0 4,6V9H6V6H18V18H6V15H4V18A2,2 0 0,0 6,20H18A2,2 0 0,0 20,18Z" />
                                 </svg>
@@ -364,7 +364,7 @@
                 </svg>
                 <span class="text-yellow-800 dark:text-yellow-200 font-medium">{{ __('messages.verify_email_address') }}</span>
                 <a href="{{ route('role.verification.resend', ['subdomain' => $role->subdomain]) }}"
-                        class="ms-auto inline-flex items-center gap-1 rounded-md bg-yellow-100 dark:bg-yellow-800/40 px-4 py-2 text-base font-semibold text-yellow-800 dark:text-yellow-200 ring-1 ring-inset ring-yellow-300 dark:ring-yellow-700 hover:bg-yellow-200 dark:hover:bg-yellow-800/60 transition-colors duration-150"
+                        class="ms-auto inline-flex items-center gap-1 rounded-lg bg-yellow-100 dark:bg-yellow-800/40 px-4 py-2 text-base font-semibold text-yellow-800 dark:text-yellow-200 ring-1 ring-inset ring-yellow-300 dark:ring-yellow-700 hover:bg-yellow-200 dark:hover:bg-yellow-800/60 transition-colors duration-150"
                         >
                         {{ __('messages.resend_email') }}
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
@@ -379,7 +379,7 @@
         <div class="md:hidden">
             <label for="current-tab" class="sr-only">{{ __('messages.select_a_tab') }}</label>
             <select id="current-tab" name="current-tab"
-                class="block w-full rounded-md border-0 py-1.5 ps-3 pe-10 ring-1 ring-inset ring-gray-300 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-inset focus:ring-[#4E81FA]">
+                class="block w-full rounded-lg border-0 py-1.5 ps-3 pe-10 ring-1 ring-inset ring-gray-300 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-inset focus:ring-[#4E81FA]">
                 <option value="schedule" {{ $tab == 'schedule' ? 'selected' : '' }}>{{ __('messages.schedule') }}</option>
                 @if ($role->isCurator())
                 <option value="videos" {{ $tab == 'videos' ? 'selected' : '' }}>
@@ -459,6 +459,22 @@
     @endif
 
 <script {!! nonce_attr() !!}>
+@if ($tab == 'followers' || $tab == 'team')
+document.addEventListener('click', function(e) {
+    var header = e.target.closest('[data-sort]');
+    if (header) {
+        var url = new URL(window.location.href);
+        var currentSort = url.searchParams.get('sort_by') || '{{ $tab == "followers" ? "pivot_created_at" : "" }}';
+        var currentDir = url.searchParams.get('sort_dir') || '{{ $tab == "team" ? "asc" : "desc" }}';
+        var sortBy = header.getAttribute('data-sort');
+        url.searchParams.set('sort_by', sortBy);
+        url.searchParams.set('sort_dir', currentSort === sortBy && currentDir === 'asc' ? 'desc' : 'asc');
+        url.searchParams.delete('page');
+        window.location.href = url.toString();
+    }
+});
+@endif
+
 function handleEventsGraphicClick() {
     window.location.href = '{{ route("event.generate_graphic", ["subdomain" => $role->subdomain]) }}';
 }

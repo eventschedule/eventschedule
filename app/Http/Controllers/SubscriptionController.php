@@ -306,7 +306,7 @@ class SubscriptionController extends Controller
 
         $subscription = $role->subscription('default');
 
-        if (! $subscription || ! $subscription->active() || $subscription->onTrial() || $subscription->onGracePeriod()) {
+        if (! $subscription || ! $subscription->active() || $subscription->onGracePeriod()) {
             return redirect()->back()->with('error', __('messages.no_active_subscription'));
         }
 

@@ -1,6 +1,6 @@
 <div class="relative" id="event-selector-dropdown">
     <button @click="toggleDropdown" type="button" tabindex="0"
-        class="w-full flex items-center gap-3 rounded-md border border-gray-300 dark:border-[#2d2d30] bg-white dark:bg-[#1e1e1e] px-3 py-2 shadow-sm focus:border-[#4E81FA] focus:ring-2 focus:ring-[#4E81FA] focus:outline-none text-start">
+        class="w-full flex items-center gap-3 rounded-lg border border-gray-300 dark:border-[#2d2d30] bg-white dark:bg-[#1e1e1e] px-3 py-2 shadow-sm focus:border-[#4E81FA] focus:ring-2 focus:ring-[#4E81FA] focus:outline-none text-start">
         <template v-if="selectedEvent">
             <img v-if="selectedEvent.image_url" :src="selectedEvent.image_url" class="w-10 h-10 rounded object-cover flex-shrink-0">
             <span v-else class="w-10 h-10 rounded bg-gray-100 dark:bg-[#2d2d30] flex items-center justify-center flex-shrink-0">
@@ -18,7 +18,7 @@
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4" />
         </svg>
     </button>
-    <div v-if="dropdownOpen" class="absolute z-50 mt-1 w-full rounded-md border border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#1e1e1e] shadow-lg max-h-72 overflow-y-auto">
+    <div v-if="dropdownOpen" class="absolute z-50 mt-1 w-full rounded-lg border border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#1e1e1e] shadow-lg max-h-72 overflow-y-auto">
         <button v-for="event in events" :key="event.id" @click="onEventChange(event.id)" type="button"
             class="w-full flex items-center gap-3 px-3 py-2 text-start hover:bg-gray-100 dark:hover:bg-[#2d2d30] transition-colors"
             :class="event.id === selectedEventId ? 'bg-gray-50 dark:bg-[#2d2d30]/50' : ''">

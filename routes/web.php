@@ -9,6 +9,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BoostController;
 use App\Http\Controllers\CalDAVController;
 use App\Http\Controllers\CheckInController;
+use App\Http\Controllers\EventbriteController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FeedController;
@@ -145,9 +146,9 @@ Route::post('/feedback/{event_id}/{secret}', [FeedbackController::class, 'store'
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/event', [EventController::class, 'createDefault'])->name('event.create_default');
-    Route::get('/events', [HomeController::class, 'home'])->name('home');
-    Route::get('/events/api/calendar-events', [HomeController::class, 'calendarEvents'])->name('home.calendar_events');
-    Route::post('/events/feedback', [HomeController::class, 'submitFeedback'])->name('home.feedback');
+    Route::get('/dashboard', [HomeController::class, 'home'])->name('home');
+    Route::get('/dashboard/api/calendar-events', [HomeController::class, 'calendarEvents'])->name('home.calendar_events');
+    Route::post('/dashboard/feedback', [HomeController::class, 'submitFeedback'])->name('home.feedback');
     Route::get('/new/{type}', [RoleController::class, 'create'])->name('new');
     Route::post('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:25,1440');
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
@@ -299,7 +300,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/{subdomain}/team/remove-member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
     Route::patch('/{subdomain}/team/update-member-level/{hash}', [RoleController::class, 'updateMemberLevel'])->name('role.update_member_level');
     Route::delete('/{subdomain}/uncurate-event/{hash}', [EventController::class, 'uncurate'])->name('event.uncurate');
-    Route::get('/{subdomain}/import', [EventController::class, 'showImport'])->name('event.show_import');
+    Route::get('/{subdomain}/import', [EventController::class, 'showImportHub'])->name('event.show_import');
+    Route::get('/{subdomain}/import/ai', [EventController::class, 'showImport'])->name('event.show_import_ai');
+    Route::post('/{subdomain}/import/ai', [EventController::class, 'import'])->name('event.import');
+    Route::get('/{subdomain}/import/eventbrite', [EventbriteController::class, 'show'])->name('event.show_import_eventbrite');
+    Route::post('/{subdomain}/import/eventbrite/connect', [EventbriteController::class, 'connect'])->name('event.eventbrite_connect')->middleware('throttle:10,1');
+    Route::post('/{subdomain}/import/eventbrite/import', [EventbriteController::class, 'import'])->name('event.eventbrite_import')->middleware('throttle:60,1');
     Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse');
     Route::post('/{subdomain}/parse-event-parts', [EventController::class, 'parseEventParts'])->name('event.parse_parts');
     Route::post('/{subdomain}/generate-flyer', [EventController::class, 'generateFlyer'])->name('event.generate_flyer')->middleware('throttle:5,1');
@@ -315,7 +321,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/get-schedule-details-prompt', [RoleController::class, 'getScheduleDetailsPromptNew'])->name('role.get_schedule_details_prompt_new')->middleware('throttle:30,1');
     Route::post('/{subdomain}/generate-event-details', [EventController::class, 'generateEventDetails'])->name('event.generate_event_details')->middleware('throttle:5,1');
     Route::post('/{subdomain}/get-event-details-prompt', [EventController::class, 'getEventDetailsPrompt'])->name('event.get_event_details_prompt')->middleware('throttle:30,1');
-    Route::post('/{subdomain}/import', [EventController::class, 'import'])->name('event.import');
     Route::post('/{subdomain}/test-import', [RoleController::class, 'testImport'])->name('role.test_import');
     Route::get('/{subdomain}/search-youtube', [RoleController::class, 'searchYouTube'])->name('role.search_youtube');
     Route::get('/{subdomain}/match-videos', [RoleController::class, 'getTalentRolesWithoutVideos'])->name('role.talent_roles_without_videos');

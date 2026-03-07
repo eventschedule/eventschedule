@@ -60,7 +60,7 @@
                     @if (is_demo_mode())
                         <button type="button"
                             data-alert="{{ __('messages.saving_disabled_demo_mode') }}"
-                            class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
+                            class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
                             {{ __('messages.connect_stripe') }}
                         </button>
                     @else
@@ -156,7 +156,7 @@
                     @if (is_demo_mode())
                         <button type="button"
                             data-alert="{{ __('messages.saving_disabled_demo_mode') }}"
-                            class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
+                            class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
                             {{ __('messages.save') }}
                         </button>
                     @else
@@ -198,7 +198,7 @@
                     @if (is_demo_mode())
                         <button type="button"
                             data-alert="{{ __('messages.saving_disabled_demo_mode') }}"
-                            class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
+                            class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
                             {{ __('messages.save') }}
                         </button>
                     @else
@@ -245,7 +245,7 @@
                     @if (is_demo_mode())
                         <button type="button"
                             data-alert="{{ __('messages.saving_disabled_demo_mode') }}"
-                            class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
+                            class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
                             {{ __('messages.save') }}
                         </button>
                     @else

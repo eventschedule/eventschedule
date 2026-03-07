@@ -696,8 +696,8 @@
                     </x-slot:icon>
                 </x-feature-link-card>
                 <x-feature-link-card
-                    name="AI Import"
-                    description="Paste text or drop an image to create events with AI"
+                    name="AI Features"
+                    description="Import, generate, and create with AI-powered tools"
                     :url="marketing_url('/features/ai')"
                     icon-color="blue"
                 >

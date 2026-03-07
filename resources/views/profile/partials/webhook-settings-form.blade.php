@@ -38,8 +38,8 @@
         <div class="mt-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
             <p class="text-sm font-medium text-green-800 dark:text-green-200 mb-2">{{ __('messages.webhook_secret_label') }}</p>
             <div class="flex items-center gap-2">
-                <input type="text" id="webhook_secret" value="{{ session('new_webhook_secret') }}" class="flex-1 font-mono text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm" readonly>
-                <button type="button" id="copy-webhook-secret-btn" class="px-3 py-2 border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md flex items-center justify-center" title="{{ __('Copy to clipboard') }}">
+                <input type="text" id="webhook_secret" value="{{ session('new_webhook_secret') }}" class="flex-1 font-mono text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm" readonly>
+                <button type="button" id="copy-webhook-secret-btn" class="px-3 py-2 border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center justify-center" title="{{ __('Copy to clipboard') }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                     </svg>
@@ -114,11 +114,11 @@
                             @method('PUT')
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.webhook_url') }}</label>
-                                <input type="url" name="url" value="{{ $webhook->url }}" required class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm" />
+                                <input type="url" name="url" value="{{ $webhook->url }}" required class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm" />
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.description') }}</label>
-                                <input type="text" name="description" value="{{ $webhook->description }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm" maxlength="255" />
+                                <input type="text" name="description" value="{{ $webhook->description }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm" maxlength="255" />
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.webhook_events') }}</label>
@@ -167,7 +167,7 @@
 
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.webhook_url') }}</label>
-            <input type="url" name="url" value="{{ old('url') }}" required placeholder="https://example.com/webhook" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm" />
+            <input type="url" name="url" value="{{ old('url') }}" required placeholder="https://example.com/webhook" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm" />
             @error('url')
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
             @enderror
@@ -175,7 +175,7 @@
 
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.description') }}</label>
-            <input type="text" name="description" value="{{ old('description') }}" placeholder="{{ __('messages.webhook_description_placeholder') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm" maxlength="255" />
+            <input type="text" name="description" value="{{ old('description') }}" placeholder="{{ __('messages.webhook_description_placeholder') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm" maxlength="255" />
         </div>
 
         <div>

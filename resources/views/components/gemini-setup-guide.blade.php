@@ -49,7 +49,7 @@
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 {{ __('messages.add_to_environment_description', ['file' => '.env']) }}
             </p>
-            <div class="mt-3 bg-gray-900 dark:bg-gray-950 rounded-md p-2 overflow-x-auto">
+            <div class="mt-3 bg-gray-900 dark:bg-gray-950 rounded-lg p-2 overflow-x-auto">
                 <code class="text-xs text-green-400 whitespace-nowrap">GEMINI_API_KEY=your_api_key_here</code>
             </div>
         </div>

@@ -641,20 +641,40 @@
                             </p>
                             <ol class="doc-list list-decimal mb-6">
                                 <li>In your schedule settings, enter your domain (e.g., <code class="doc-inline-code">events.yourbrand.com</code>) and select <strong class="text-gray-900 dark:text-white">Direct</strong>.</li>
-                                <li>Go to your domain registrar (e.g., GoDaddy, Namecheap, Cloudflare) and create a <strong class="text-gray-900 dark:text-white">CNAME record</strong> pointing your domain to <code class="doc-inline-code">eventschedule.com</code>.</li>
+                                <li>Go to your domain registrar (e.g., GoDaddy, Namecheap, Cloudflare) and create a <strong class="text-gray-900 dark:text-white">CNAME record</strong> pointing your domain to <code class="doc-inline-code">{{ config('services.digitalocean.app_hostname') }}</code>.</li>
                                 <li>Wait for DNS propagation (usually a few minutes, but can take up to 48 hours).</li>
                                 <li>SSL is provisioned automatically. Once DNS has propagated, your schedule will be accessible at your custom domain over HTTPS.</li>
                             </ol>
 
                             <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Redirect Mode (Cloudflare)</h4>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                Your custom domain redirects visitors to your <code class="doc-inline-code">eventschedule.com</code> URL. Use this if your domain's DNS is managed by Cloudflare.
+                                Your custom domain redirects visitors to your <code class="doc-inline-code">eventschedule.com</code> URL. Use this if your domain's DNS is managed by Cloudflare. Cloudflare's free plan is sufficient.
                             </p>
                             <ol class="doc-list list-decimal mb-6">
                                 <li>In your schedule settings, enter your domain and select <strong class="text-gray-900 dark:text-white">Redirect</strong>.</li>
-                                <li>In your Cloudflare dashboard, go to <strong class="text-gray-900 dark:text-white">Rules > Redirect Rules</strong>.</li>
-                                <li>Create a redirect rule that matches your custom domain and redirects to your eventschedule.com schedule URL (e.g., <code class="doc-inline-code">https://yourname.eventschedule.com</code>).</li>
-                                <li>Visitors who go to your custom domain will be seamlessly redirected to your schedule.</li>
+                                <li>
+                                    <strong class="text-gray-900 dark:text-white">Add your domain to Cloudflare</strong> (if not already). After adding the domain, Cloudflare will provide two nameservers. Go to your domain registrar and update your domain's nameservers to the ones Cloudflare provides. Wait for Cloudflare to confirm the domain is active.
+                                </li>
+                                <li>
+                                    <strong class="text-gray-900 dark:text-white">Set up DNS records.</strong> In your Cloudflare dashboard, go to <strong class="text-gray-900 dark:text-white">DNS > Records</strong>:
+                                    <ul class="list-disc ml-6 mt-2 mb-2">
+                                        <li>Delete any existing A or AAAA records for the domain.</li>
+                                        <li>Add an <strong class="text-gray-900 dark:text-white">A record</strong> with the name <code class="doc-inline-code">@</code> (root domain) pointing to <code class="doc-inline-code">192.0.2.1</code>.</li>
+                                        <li>Add another <strong class="text-gray-900 dark:text-white">A record</strong> with the name <code class="doc-inline-code">*</code> (wildcard) pointing to <code class="doc-inline-code">192.0.2.1</code>.</li>
+                                        <li>The IP address doesn't matter since traffic will be redirected. Make sure both records are set to <strong class="text-gray-900 dark:text-white">Proxied</strong> (orange cloud icon) so Cloudflare can intercept and redirect the requests.</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <strong class="text-gray-900 dark:text-white">Create a Page Rule.</strong> In your Cloudflare dashboard, go to <strong class="text-gray-900 dark:text-white">Rules > Page Rules</strong> and create a new page rule:
+                                    <ul class="list-disc ml-6 mt-2 mb-2">
+                                        <li><strong class="text-gray-900 dark:text-white">URL pattern:</strong> <code class="doc-inline-code">*yourdomain.com/*</code></li>
+                                        <li><strong class="text-gray-900 dark:text-white">Setting:</strong> Forwarding URL</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Status code:</strong> 301 - Permanent Redirect</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Destination URL:</strong> <code class="doc-inline-code">https://yourname.eventschedule.com/$2</code></li>
+                                    </ul>
+                                    <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">The <code class="doc-inline-code">$2</code> wildcard preserves the URL path, so <code class="doc-inline-code">yourdomain.com/some-event</code> correctly redirects to <code class="doc-inline-code">yourname.eventschedule.com/some-event</code>.</p>
+                                </li>
+                                <li>Changes may take a few minutes to several hours to propagate. Once active, visitors who go to your custom domain will be seamlessly redirected to your schedule.</li>
                             </ol>
 
                             <!-- Notifications Tab -->

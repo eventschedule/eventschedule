@@ -35,7 +35,18 @@ trait RoleBillable
      */
     public function hasActiveSubscription()
     {
-        return $this->subscribed('default');
+        $subscription = $this->subscription('default');
+
+        if (! $subscription || ! $subscription->valid()) {
+            return false;
+        }
+
+        // Cancelled trials should not be considered active
+        if ($subscription->canceled() && $subscription->onTrial()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -114,7 +125,7 @@ trait RoleBillable
             return 'none';
         }
 
-        if ($subscription->onTrial()) {
+        if ($subscription->onTrial() && ! $subscription->canceled()) {
             return 'trial';
         }
 

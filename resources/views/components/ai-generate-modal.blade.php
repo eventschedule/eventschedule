@@ -17,10 +17,9 @@
     'saveInstructionsField' => null,
     'imageEndpoint' => null,
     'imageElements' => [],
-    'showPresets' => false,
 ])
 
-<x-modal :name="$name" maxWidth="md">
+<x-modal :name="$name" maxWidth="lg">
     <div class="p-6" x-data="aiGenerateModal_{{ Str::camel($name) }}">
         <div class="text-center mb-4">
             <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 mb-3">
@@ -84,8 +83,15 @@
                 </div>
                 <div x-show="!promptLoading" x-cloak>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{{ __('messages.ai_prompt_edit_hint') }}</p>
-                    <textarea x-model="customPrompt" rows="10" maxlength="5000"
-                        class="w-full font-mono text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]"></textarea>
+                    <textarea x-model="customPrompt" rows="6" maxlength="5000"
+                        class="w-full font-mono text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]"></textarea>
+                    <template x-for="imageKey in Object.keys(customImagePrompts)" :key="imageKey">
+                        <div class="mt-3">
+                            <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1" x-text="imagePromptLabels[imageKey] || imageKey"></p>
+                            <textarea x-model="customImagePrompts[imageKey]" rows="4" maxlength="5000"
+                                class="w-full font-mono text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]"></textarea>
+                        </div>
+                    </template>
                     <button type="button" x-show="promptEdited" x-cloak @click="resetPrompt()" class="mt-1 text-xs text-[#4E81FA] hover:underline">
                         {{ __('messages.ai_prompt_reset') }}
                     </button>
@@ -97,19 +103,9 @@
         @if ($showInstructions)
         <div class="mb-4">
             <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $instructionsLabel ?: __('messages.ai_style_instructions') }}</label>
-            @if ($showPresets)
-            <select @change="styleInstructions = $event.target.value; $event.target.selectedIndex = 0"
-                class="mt-1 mb-1.5 w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]">
-                <option value="" disabled selected>{{ __('messages.ai_quick_presets') }}</option>
-                <option value="{{ __('messages.ai_preset_modern') }}">{{ __('messages.ai_preset_modern_label') }}</option>
-                <option value="{{ __('messages.ai_preset_colorful') }}">{{ __('messages.ai_preset_colorful_label') }}</option>
-                <option value="{{ __('messages.ai_preset_professional') }}">{{ __('messages.ai_preset_professional_label') }}</option>
-                <option value="{{ __('messages.ai_preset_warm') }}">{{ __('messages.ai_preset_warm_label') }}</option>
-            </select>
-            @endif
             <textarea x-model="styleInstructions" maxlength="500" rows="2"
                 placeholder="{{ $instructionsPlaceholder ?: __('messages.ai_style_instructions_placeholder') }}"
-                class="mt-1 w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]"></textarea>
+                class="mt-1 w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]"></textarea>
             @if ($saveInstructionsField)
             <label x-show="styleInstructions.length > 0" x-cloak class="flex items-center gap-2 mt-1.5 cursor-pointer">
                 <input type="checkbox" x-model="saveInstructions"
@@ -131,11 +127,11 @@
 
         <div class="flex flex-row gap-3">
             <button type="button" x-on:click="cancelGeneration()"
-                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-300 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-300 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                 {{ __('messages.cancel') }}
             </button>
             <button type="button" @click="generate()" :disabled="generating || elements.length === 0"
-                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[#3D6FE8] focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50">
+                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[#3D6FE8] focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50">
                 <template x-if="generating">
                     <span class="inline-flex items-center">
                         <svg class="animate-spin -ml-1 ltr:mr-2 rtl:ml-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
@@ -178,11 +174,18 @@ document.addEventListener('alpine:init', function() {
             @if ($promptEndpoint)
             customPrompt: '',
             defaultPrompt: '',
+            defaultImagePrompts: {},
+            customImagePrompts: {},
+            imagePromptLabels: { profile_image: '{{ __('messages.profile_image') }}', header_image: '{{ __('messages.header_image') }}', background_image: '{{ __('messages.background_image') }}' },
             promptExpanded: false,
             promptLoading: false,
             promptFetched: false,
             get promptEdited() {
-                return this.customPrompt !== this.defaultPrompt;
+                if (this.customPrompt !== this.defaultPrompt) return true;
+                var self = this;
+                return Object.keys(this.customImagePrompts).some(function(key) {
+                    return self.customImagePrompts[key] !== self.defaultImagePrompts[key];
+                });
             },
             @endif
             get hasCheckedWithValue() {
@@ -211,6 +214,8 @@ document.addEventListener('alpine:init', function() {
                         @if ($promptEndpoint)
                         self.customPrompt = '';
                         self.defaultPrompt = '';
+                        self.defaultImagePrompts = {};
+                        self.customImagePrompts = {};
                         self.promptExpanded = false;
                         self.promptLoading = false;
                         self.promptFetched = false;
@@ -221,6 +226,11 @@ document.addEventListener('alpine:init', function() {
             toggleElement: function(el) {
                 var idx = this.elements.indexOf(el);
                 if (idx > -1) { this.elements.splice(idx, 1); } else { this.elements.push(el); }
+                @if ($promptEndpoint)
+                if (this.promptExpanded && !this.promptEdited) {
+                    this.fetchPrompt();
+                }
+                @endif
             },
             cancelGeneration: function() {
                 this.generationId++;
@@ -272,16 +282,16 @@ document.addEventListener('alpine:init', function() {
             @if ($promptEndpoint)
             togglePromptEditor: function() {
                 this.promptExpanded = !this.promptExpanded;
-                if (this.promptExpanded && !this.promptFetched) {
+                if (this.promptExpanded && !this.promptEdited) {
                     this.fetchPrompt();
                 }
             },
             fetchPrompt: function() {
-                this.promptLoading = true;
                 var self = this;
 
+                this.promptLoading = true;
                 var body = {
-                    elements: this.elements.filter(function(el) { return !self.imageElementKeys.includes(el); })
+                    elements: this.elements
                 };
 
                 @if ($extraDataCallback)
@@ -297,7 +307,18 @@ document.addEventListener('alpine:init', function() {
                         self.defaultPrompt = data.prompt;
                         self.customPrompt = data.prompt;
                         self.promptFetched = true;
+
+                        if (data.image_prompts) {
+                            self.defaultImagePrompts = JSON.parse(JSON.stringify(data.image_prompts));
+                            self.customImagePrompts = JSON.parse(JSON.stringify(data.image_prompts));
+                        } else {
+                            self.defaultImagePrompts = {};
+                            self.customImagePrompts = {};
+                        }
                     }
+                })
+                .catch(function() {
+                    self.promptLoading = false;
                 })
                 .finally(function() {
                     self.promptLoading = false;
@@ -305,6 +326,7 @@ document.addEventListener('alpine:init', function() {
             },
             resetPrompt: function() {
                 this.customPrompt = this.defaultPrompt;
+                this.customImagePrompts = JSON.parse(JSON.stringify(this.defaultImagePrompts));
             },
             @endif
             checkComplete: function() {
@@ -324,6 +346,13 @@ document.addEventListener('alpine:init', function() {
                 self.elementStatus[imageKey] = 'generating';
 
                 var body = Object.assign({}, self.getBaseBody(), { image_type: imageKey }, extraBody || {});
+
+                @if ($promptEndpoint)
+                delete body.custom_prompt;
+                if (self.customImagePrompts[imageKey] && self.defaultImagePrompts[imageKey] && self.customImagePrompts[imageKey] !== self.defaultImagePrompts[imageKey]) {
+                    body.custom_prompt = self.customImagePrompts[imageKey];
+                }
+                @endif
 
                 self.makeRequest(@json($imageEndpoint ?? ''), body)
                 .then(function(data) {

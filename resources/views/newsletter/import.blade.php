@@ -3,25 +3,25 @@
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.import_emails') }}</h2>
             <a href="{{ route('newsletter.index', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                class="inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                 {{ __('messages.back') }}
             </a>
         </div>
 
         @if (session('status'))
-        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-md text-green-700 dark:text-green-300">
+        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
             {{ session('status') }}
         </div>
         @endif
 
         @if (session('error'))
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300">
+        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
             {{ session('error') }}
         </div>
         @endif
 
         @if ($errors->any())
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300">
+        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
             <ul class="list-disc list-inside">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -31,7 +31,7 @@
         @endif
 
         {{-- Segment Target --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg p-6 mb-6">
+        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6 mb-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.segments') }}</h3>
 
             <div class="space-y-3">
@@ -50,7 +50,7 @@
                     <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.add_to_existing_segment') }}</span>
                 </label>
                 <div x-show="segmentTarget === 'existing'" x-cloak class="{{ is_rtl() ? 'mr-7' : 'ml-7' }}">
-                    <select x-model="segmentId" class="block w-full max-w-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm">
+                    <select x-model="segmentId" class="block w-full max-w-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-lg shadow-sm">
                         <option value="">{{ __('messages.select_segment') }}</option>
                         @foreach ($manualSegments as $segment)
                             <option value="{{ \App\Utils\UrlUtils::encodeId($segment->id) }}">{{ $segment->name }}</option>
@@ -63,7 +63,7 @@
         </div>
 
         {{-- Import Method Tabs --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl overflow-hidden">
             <div class="border-b border-gray-200 dark:border-gray-700">
                 <nav class="flex -mb-px overflow-x-auto scrollbar-hide">
                     <button @click="tab = 'form'" :class="tab === 'form' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="px-6 py-3 border-b-2 font-medium text-sm transition-colors">
@@ -82,7 +82,7 @@
             <div x-show="tab === 'form'" class="p-6">
                 {{-- Error display --}}
                 <template x-if="formErrors.length > 0">
-                    <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md">
+                    <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
                         <p class="text-sm font-medium text-red-700 dark:text-red-300 mb-2">{{ __('messages.import_validation_failed') }}</p>
                         <ul class="list-disc list-inside text-sm text-red-600 dark:text-red-400">
                             <template x-for="error in formErrors" :key="error">
@@ -137,7 +137,7 @@
                         <span x-text="getValidEntryCount()"></span> {{ __('messages.emails_to_import') }}
                     </p>
                     <button @click="submitForm()" :disabled="submitting || getValidEntryCount() === 0"
-                        class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
                         <span x-show="!submitting">{{ __('messages.confirm_import') }}</span>
                         <span x-show="submitting">{{ __('messages.loading') }}...</span>
                     </button>
@@ -147,13 +147,13 @@
             {{-- Paste Tab --}}
             <div x-show="tab === 'paste'" x-cloak class="p-6">
                 <textarea x-model="pasteText" rows="10"
-                    class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm"
+                    class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-lg shadow-sm"
                     placeholder="John Smith <john@example.com>&#10;Jane Doe <jane@example.com>&#10;bob@example.com, Bob Johnson&#10;carol@example.com, Carol Smith"></textarea>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.import_emails_help') }}</p>
 
                 <div class="flex justify-end mt-4">
                     <button @click="parsePaste()" :disabled="!pasteText.trim()"
-                        class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
                         {{ __('messages.parse_emails') }}
                     </button>
                 </div>
@@ -163,7 +163,7 @@
             <div x-show="tab === 'csv'" x-cloak class="p-6">
                 {{-- Error display for CSV tab --}}
                 <template x-if="csvErrors.length > 0">
-                    <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md">
+                    <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
                         <p class="text-sm font-medium text-red-700 dark:text-red-300 mb-2">{{ __('messages.import_validation_failed') }}</p>
                         <ul class="list-disc list-inside text-sm text-red-600 dark:text-red-400">
                             <template x-for="error in csvErrors" :key="error">
@@ -177,7 +177,7 @@
                     <input x-ref="csvFileInput" type="file" accept=".csv" @change="handleCsvFile($event); $refs.csvFilename.textContent = $event.target.files[0]?.name || ''" class="hidden" />
                     <div class="flex items-center gap-3">
                         <button type="button" @click="$refs.csvFileInput.click()"
-                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
                             <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
@@ -207,7 +207,7 @@
                                     <div class="flex flex-col gap-1">
                                         <span class="text-xs text-gray-500 dark:text-gray-400" x-text="header"></span>
                                         <select :value="columnMappings[index]" @change="columnMappings[index] = $event.target.value"
-                                            class="text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                            class="text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                             <option value="skip">{{ __('messages.skip_column') }}</option>
                                             <option value="email">{{ __('messages.email') }}</option>
                                             <option value="name">{{ __('messages.name') }}</option>
@@ -218,7 +218,7 @@
                         </div>
 
                         {{-- Preview Table --}}
-                        <div class="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-md">
+                        <div class="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50 dark:bg-gray-700">
                                     <tr>
@@ -241,7 +241,7 @@
 
                         <div class="flex justify-end mt-4">
                             <button @click="submitCsv()" :disabled="submitting || !hasEmailColumn()"
-                                class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                                class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
                                 <span x-show="!submitting">{{ __('messages.confirm_import') }}</span>
                                 <span x-show="submitting">{{ __('messages.loading') }}...</span>
                             </button>

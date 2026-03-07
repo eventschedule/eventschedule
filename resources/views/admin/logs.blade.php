@@ -16,7 +16,7 @@
         @endif
 
         @if (!$fileExists)
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-12 text-center">
                 <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
@@ -54,7 +54,7 @@
 
             {{-- Summary Cards --}}
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-5">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5">
                     <div class="flex items-center gap-3 mb-2">
                         <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -66,7 +66,7 @@
                     </p>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-5">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5">
                     <div class="flex items-center gap-3 mb-2">
                         <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
@@ -79,7 +79,7 @@
                     @endif
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-5">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5">
                     <div class="flex items-center gap-3 mb-2">
                         <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -89,7 +89,7 @@
                     <p class="text-2xl font-bold {{ $errorCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">{{ number_format($errorCount) }}</p>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-5">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5">
                     <div class="flex items-center gap-3 mb-2">
                         <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
@@ -102,7 +102,7 @@
 
             {{-- Repeated Errors --}}
             @if ($repeatedErrors->count() > 0)
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.repeated_errors')</h3>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -170,26 +170,26 @@
             @endif
 
             {{-- Filters + Recent Log Entries --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.recent_log_entries')</h3>
 
                 {{-- Filter Bar --}}
                 <form method="GET" action="{{ route('admin.logs') }}" class="flex flex-wrap gap-3 mb-4">
-                    <select name="level" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm">
+                    <select name="level" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm">
                         <option value="">@lang('messages.all_levels')</option>
                         @foreach ($levels as $level)
                         <option value="{{ $level }}" {{ request('level') === $level ? 'selected' : '' }}>{{ $level }}</option>
                         @endforeach
                     </select>
 
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search_messages') }}" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm flex-1 min-w-[200px]">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search_messages') }}" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm flex-1 min-w-[200px]">
 
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-600 hover:bg-gray-700 dark:hover:bg-gray-500 text-white text-sm font-medium rounded-md">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-600 hover:bg-gray-700 dark:hover:bg-gray-500 text-white text-sm font-medium rounded-lg">
                         @lang('messages.filter')
                     </button>
 
                     @if (request('level') || request('search'))
-                    <a href="{{ route('admin.logs') }}" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-600">
+                    <a href="{{ route('admin.logs') }}" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
                         @lang('messages.clear')
                     </a>
                     @endif
@@ -287,8 +287,8 @@
 
             {{-- Actions --}}
             @if ($fileSize > 0)
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-wrap gap-3">
-                <a href="{{ route('admin.logs.download') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-600 hover:bg-gray-700 dark:hover:bg-gray-500 text-white text-sm font-medium rounded-md">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4 flex flex-wrap gap-3">
+                <a href="{{ route('admin.logs.download') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-600 hover:bg-gray-700 dark:hover:bg-gray-500 text-white text-sm font-medium rounded-lg">
                     <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
@@ -296,7 +296,7 @@
                 </a>
                 <form method="POST" action="{{ route('admin.logs.clear') }}" class="js-confirm-form" data-confirm="{{ __('messages.confirm_clear_log') }}">
                     @csrf
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg">
                         <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>

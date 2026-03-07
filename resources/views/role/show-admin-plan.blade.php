@@ -1,5 +1,5 @@
 <div class="pt-5 container mx-auto">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 border border-gray-100 dark:border-gray-700 pb-10">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 border border-gray-100 dark:border-gray-700 pb-10">
         <h4 class="text-xl font-bold mb-6 flex justify-between items-center pb-4 border-b border-gray-200 dark:border-gray-700">
             <span class="text-gray-800 dark:text-gray-100">{{ __('messages.plan') }}</span>
         </h4>
@@ -200,7 +200,7 @@
             @if (config('cashier.key') && !$role->hasActiveSubscription() && !$role->onGracePeriod() && ($role->onGenericTrial() || $role->plan_type == 'free' || ($role->plan_type == 'pro' && !$role->isPro())))
             <div>
                 <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain]) }}"
-                    class="relative overflow-hidden inline-flex items-center rounded-md bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all">
+                    class="relative overflow-hidden inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all">
                     <span class="relative z-10">{{ __('messages.upgrade_to_pro_plan') }}</span>
                     <div class="absolute inset-0 animate-shimmer"></div>
                 </a>
@@ -213,13 +213,13 @@
             @endif
 
             {{-- Upgrade to Enterprise (for active Pro subscribers) --}}
-            @if (config('cashier.key') && config('services.stripe_platform.enterprise_price_monthly') && config('services.stripe_platform.enterprise_price_yearly') && $role->hasActiveSubscription() && !$role->hasActiveEnterpriseSubscription() && $subscription && $subscription->active() && !$subscription->onTrial() && !$subscription->onGracePeriod())
+            @if (config('cashier.key') && config('services.stripe_platform.enterprise_price_monthly') && config('services.stripe_platform.enterprise_price_yearly') && $role->hasActiveSubscription() && !$role->hasActiveEnterpriseSubscription() && $subscription && $subscription->active() && !$subscription->onGracePeriod())
             <div>
                 <form action="{{ route('subscription.swap', ['subdomain' => $role->subdomain]) }}" method="POST" class="inline form-confirm" data-confirm="{{ __('messages.are_you_sure') }}">
                     @csrf
                     <input type="hidden" name="plan" value="{{ $role->currentPlanTerm() == 'yearly' ? 'yearly' : 'monthly' }}">
                     <input type="hidden" name="tier" value="enterprise">
-                    <button type="submit" class="inline-flex items-center rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-amber-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500">
+                    <button type="submit" class="inline-flex items-center rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-amber-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500">
                         {{ __('messages.upgrade_to_enterprise') }}
                     </button>
                 </form>
@@ -233,14 +233,14 @@
             @if ($subscription && $role->stripe_id)
             <div>
                 <a href="{{ route('subscription.portal', ['subdomain' => $role->subdomain]) }}"
-                    class="inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+                    class="inline-flex items-center rounded-lg bg-white dark:bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
                     {{ __('messages.manage_subscription') }}
                 </a>
             </div>
             @endif
 
             {{-- Swap Plan (Monthly/Yearly) --}}
-            @if ($subscription && $subscription->active() && !$subscription->onTrial() && !$subscription->onGracePeriod())
+            @if ($subscription && $subscription->active() && !$subscription->onGracePeriod())
             @php
                 $isEnterpriseTier = $planTier === 'enterprise';
                 $swapMonthlyAmount = $isEnterpriseTier ? config('services.stripe_platform.enterprise_price_monthly_amount') : config('services.stripe_platform.price_monthly_amount');
@@ -314,7 +314,7 @@
 
 @if (config('app.hosted'))
 <div class="pt-5 container mx-auto">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 border border-gray-100 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 border border-gray-100 dark:border-gray-700">
         <div class="flex items-start gap-4">
             <svg class="w-8 h-8 text-[#4E81FA] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M21,12L14,5V9C7,10 4,15 3,20C5.5,16.5 9,14.9 14,14.9V19L21,12Z" />

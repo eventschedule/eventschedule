@@ -3,7 +3,7 @@
         <div class="flex justify-between items-center gap-6 mb-6">
             @if (is_rtl())
                 <a href="{{ route('event.edit_admin', $event->hashedId()) }}"
-                   class="js-cancel-btn inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                   class="js-cancel-btn inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                     {{ __('messages.cancel') }}
                 </a>
                 <div>
@@ -16,14 +16,14 @@
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ $event->translatedName() }}</p>
                 </div>
                 <a href="{{ route('event.edit_admin', $event->hashedId()) }}"
-                   class="js-cancel-btn inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                   class="js-cancel-btn inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                     {{ __('messages.cancel') }}
                 </a>
             @endif
         </div>
 
         @if (session('error'))
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300">
+        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
             {{ session('error') }}
         </div>
         @endif
@@ -55,13 +55,13 @@
                             <span class="text-gray-500 dark:text-gray-400">{{ $currencySymbol }}</span>
                             <input type="number" name="budget" id="budget-input" value="{{ $defaults['budget'] }}"
                                 min="{{ $minBudget }}" max="{{ $maxBudget }}" step="1"
-                                class="block w-32 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                class="block w-32 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.budget_type') }}</label>
-                        <select name="budget_type" class="block w-48 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <select name="budget_type" class="block w-48 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             <option value="lifetime" selected>{{ __('messages.lifetime_budget') }}</option>
                             <option value="daily">{{ __('messages.daily_budget') }}</option>
                         </select>
@@ -71,18 +71,18 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.start_date') }}</label>
                             <input type="date" name="scheduled_start" value="{{ $defaults['scheduled_start']->format('Y-m-d') }}"
-                                class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.end_date') }}</label>
                             <input type="date" name="scheduled_end" value="{{ $defaults['scheduled_end']->format('Y-m-d') }}"
-                                class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.objective') }}</label>
-                        <select name="objective" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <select name="objective" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             <option value="OUTCOME_AWARENESS">{{ __('messages.objective_awareness') }}</option>
                             <option value="OUTCOME_TRAFFIC">{{ __('messages.objective_traffic') }}</option>
                             <option value="OUTCOME_ENGAGEMENT">{{ __('messages.objective_engagement') }}</option>
@@ -97,7 +97,7 @@
 
                 <div class="space-y-4">
                     @if (!empty($geoDescription))
-                    <div class="p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-md">
+                    <div class="p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.location') }}</label>
                         <p class="text-sm text-gray-600 dark:text-gray-400">{{ $geoDescription }}</p>
                     </div>
@@ -107,20 +107,20 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.age_min') }}</label>
                             <input type="number" id="age-min" value="{{ $defaults['targeting']['age_min'] ?? 18 }}" min="18" max="65"
-                                class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.age_max') }}</label>
                             <input type="number" id="age-max" value="{{ $defaults['targeting']['age_max'] ?? 65 }}" min="18" max="65"
-                                class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.interests') }}</label>
                         <input type="text" id="interest-search" placeholder="{{ __('messages.search_interests') }}"
-                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        <div id="interest-results" class="mt-1 hidden border border-gray-200 dark:border-gray-600 rounded-md max-h-40 overflow-y-auto"></div>
+                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <div id="interest-results" class="mt-1 hidden border border-gray-200 dark:border-gray-600 rounded-lg max-h-40 overflow-y-auto"></div>
                         <div id="selected-interests" class="flex flex-wrap gap-2 mt-2"></div>
                     </div>
 
@@ -151,7 +151,7 @@
 
                 <div class="space-y-4">
                     @if ($roleLanguage && $roleLanguage !== 'en')
-                    <div class="p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-md">
+                    <div class="p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
                         <label class="inline-flex items-center gap-2">
                             <input type="checkbox" name="translate_to_english" id="translate-to-english" value="1"
                                 class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
@@ -164,24 +164,24 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.headline') }} ({{ __('messages.max_chars', ['count' => 40]) }})</label>
                         <input type="text" name="headline" value="{{ $defaults['headline'] }}" maxlength="40"
-                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.primary_text') }} ({{ __('messages.max_chars', ['count' => 125]) }})</label>
                         <textarea name="primary_text" maxlength="125" rows="2"
-                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ $defaults['primary_text'] }}</textarea>
+                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ $defaults['primary_text'] }}</textarea>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.description') }} ({{ __('messages.max_chars', ['count' => 30]) }})</label>
                         <input type="text" name="description" value="{{ $defaults['description'] }}" maxlength="30"
-                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.call_to_action') }}</label>
-                        <select name="call_to_action" class="block w-48 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <select name="call_to_action" class="block w-48 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             <option value="LEARN_MORE" {{ $defaults['call_to_action'] === 'LEARN_MORE' ? 'selected' : '' }}>{{ __('messages.cta_learn_more') }}</option>
                             <option value="GET_TICKETS" {{ $defaults['call_to_action'] === 'GET_TICKETS' ? 'selected' : '' }}>{{ __('messages.cta_get_tickets') }}</option>
                             <option value="SIGN_UP" {{ $defaults['call_to_action'] === 'SIGN_UP' ? 'selected' : '' }}>{{ __('messages.cta_sign_up') }}</option>

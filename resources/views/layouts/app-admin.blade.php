@@ -44,7 +44,7 @@
                     </div>
 
                     <!-- Sidebar component, swap this element with another sidebar if you like -->
-                    <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 dark:bg-[#1A1A1A] px-6 pb-4 ring-1 ring-white/10">
+                    <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 dark:bg-[#1A1A1A] sidebar-gradient px-6 pb-4 ring-1 ring-white/10">
 
                         @include('layouts.navigation')                        
 
@@ -56,7 +56,7 @@
         <!-- Static sidebar for desktop -->
         <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col lg:start-0">
             <!-- Sidebar component, swap this element with another sidebar if you like -->
-            <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 dark:bg-[#1A1A1A] px-6 pb-4">
+            <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 dark:bg-[#1A1A1A] sidebar-gradient px-6 pb-4">
 
                 @include('layouts.navigation')
 
@@ -65,7 +65,7 @@
 
         <div class="lg:ps-72 flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
             <div
-                class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+                class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 header-gradient px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
                 <button id="open-sidebar" type="button" class="-m-2.5 p-2.5 text-gray-700 dark:text-gray-300 lg:hidden">
                     <span class="sr-only">{{ __('messages.open_sidebar') }}</span>
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
@@ -107,7 +107,7 @@
                             <x-dropdown align="right" width="48">
                                 <x-slot name="trigger">
                                     <button
-                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-lg text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
                                         <div>{{ Auth::user()->name }}</div>
 
                                         <div class="ms-1">
@@ -150,7 +150,7 @@
                 <div class="px-4 sm:px-6 lg:px-8">
 
                     @if ($errors->any())
-                    <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg text-red-600 dark:text-red-400">
+                    <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 card-highlight shadow-md sm:rounded-xl text-red-600 dark:text-red-400">
                         <b>{{ __('messages.there_was_a_problem') . ':' }}</b>
                         <ul>
                             @foreach ($errors->all() as $error)
@@ -169,10 +169,26 @@
                 @if (config('app.hosted'))
                     {!! str_replace(':email', '<bdi dir="ltr"><a href="mailto:contact@eventschedule.com?subject=Feedback" class="hover:underline">contact@eventschedule.com</a></bdi>', __('messages.questions_or_suggestions')) !!}
                 @else
-                    <!-- Per the AAL license, please do not remove the link to Event Schedule -->
-                    {!! str_replace(':link', '<bdi dir="ltr"><a href="https://www.eventschedule.com" class="text-blue-600 dark:text-blue-400 hover:underline" target="_blank">eventschedule.com</a></bdi>', __('messages.powered_by_eventschedule')) !!}
-                    •
-                    <x-link href="https://github.com/eventschedule/eventschedule/releases" target="_blank" hideIcon>{{ config('self-update.version_installed') }}</x-link>
+                    <div class="flex items-center justify-between w-full">
+                        <span>
+                            <!-- Per the AAL license, please do not remove the link to Event Schedule -->
+                            {!! str_replace(':link', '<bdi dir="ltr"><a href="https://www.eventschedule.com" class="text-blue-600 dark:text-blue-400 hover:underline" target="_blank">eventschedule.com</a></bdi>', __('messages.powered_by_eventschedule')) !!}
+                            •
+                            <x-link href="https://github.com/eventschedule/eventschedule/releases" target="_blank" hideIcon>{{ config('self-update.version_installed') }}</x-link>
+                        </span>
+                        @if(isset($githubStars) && $githubStars)
+                            <a href="https://github.com/eventschedule/eventschedule" target="_blank"
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300 transition-all duration-200 no-underline">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                                </svg>
+                                <svg class="h-3.5 w-3.5 text-yellow-500" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                                {{ number_format($githubStars) }}
+                            </a>
+                        @endif
+                    </div>
                 @endif
             </div>
 

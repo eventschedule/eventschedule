@@ -40,7 +40,7 @@
     </x-slot>
 
     <div id="app" class="max-w-2xl mx-auto px-4">
-        <div class="bg-white dark:bg-[#1e1e1e] rounded-lg shadow-lg dark:shadow-none dark:border dark:border-[#2d2d30] p-6">
+        <div class="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-lg dark:shadow-none dark:border dark:border-[#2d2d30] p-6">
             <h2 class="text-2xl font-bold text-center text-gray-800 dark:text-gray-100 mb-6">{{ __('messages.scan_ticket') }}</h2>
             
             <div id="reader" class="max-w-md mx-auto"></div>

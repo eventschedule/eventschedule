@@ -8,7 +8,7 @@
         {{-- Key Metrics Cards --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {{-- Total Users --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
@@ -33,7 +33,7 @@
             </div>
 
             {{-- Total Schedules --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-green-100 dark:bg-green-900 rounded-full">
@@ -58,7 +58,7 @@
             </div>
 
             {{-- Total Events --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-purple-100 dark:bg-purple-900 rounded-full">
@@ -85,19 +85,19 @@
 
         {{-- Activity Stats --}}
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_users_7_days')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeUsers7Days) }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_users_30_days')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeUsers30Days) }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.upcoming_online_events')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($upcomingOnlineEvents) }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.private_events')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($privateEvents) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ number_format($passwordProtectedEvents) }} @lang('messages.with_password')</p>
@@ -106,20 +106,20 @@
 
         {{-- Boost & Newsletter Stats --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.stripe_paid')</p>
                 <p class="mt-2 text-2xl font-bold text-green-600 dark:text-green-400">{{ number_format($stripePaidCount) }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_boost_campaigns')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeBoostCampaigns) }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.boost_markup_revenue')</p>
                 <p class="mt-2 text-2xl font-bold text-green-600 dark:text-green-400">${{ number_format($boostMarkupRevenue, 2) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.in_period')</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.newsletter_subscribers')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($newsletterSubscribers) }}</p>
             </div>
@@ -127,7 +127,7 @@
 
         {{-- Events by Country --}}
         @if($eventsByCountry->count() > 0)
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.upcoming_events_by_country')</h3>
             <div class="space-y-3">
                 @foreach($eventsByCountry as $country)
@@ -152,7 +152,7 @@
         @endif
 
         {{-- Growth Trends Chart --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.growth_trends')</h3>
             <div class="h-64">
                 <canvas id="trendsChart"></canvas>
@@ -160,7 +160,7 @@
         </div>
 
         {{-- Recent Signups --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white">@lang('messages.recent_signups')</h3>
             </div>
@@ -193,7 +193,7 @@
         {{-- Recent Activity --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {{-- Recent Schedules --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white">@lang('messages.recent_schedules')</h3>
                 </div>
@@ -226,7 +226,7 @@
             </div>
 
             {{-- Recent Events --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white">@lang('messages.recent_events')</h3>
                 </div>
@@ -272,7 +272,7 @@
 
         {{-- Signups by Method (Selected Period) --}}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
@@ -288,7 +288,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-red-100 dark:bg-red-900 rounded-full">
@@ -304,7 +304,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-purple-100 dark:bg-purple-900 rounded-full">
@@ -324,7 +324,7 @@
 
         {{-- Domains --}}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
@@ -339,7 +339,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-green-100 dark:bg-green-900 rounded-full">
@@ -354,7 +354,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-full">
@@ -373,7 +373,7 @@
 
         {{-- Queue Health --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
@@ -388,7 +388,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-red-100 dark:bg-red-900 rounded-full">

@@ -22,9 +22,9 @@
             <div class="flex gap-2">
                 <input type="text" value="{{ $referralUrl }}" readonly
                     id="referral-url-input"
-                    class="flex-1 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                    class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                 <button type="button" id="copy-referral-link"
-                    class="inline-flex items-center rounded-md bg-[#4E81FA] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition-colors">
+                    class="inline-flex items-center rounded-lg bg-[#4E81FA] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition-colors">
                     <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                     </svg>
@@ -78,13 +78,13 @@
                         @csrf
                         <input type="hidden" name="referral_id" value="{{ \App\Utils\UrlUtils::encodeId($credit->id) }}">
                         <select name="role_id" required
-                            class="rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                            class="rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                             <option value="">{{ __('messages.select_schedule') }}</option>
                             @foreach ($ownedRoles as $role)
                             <option value="{{ \App\Utils\UrlUtils::encodeId($role->id) }}">{{ $role->name }}</option>
                             @endforeach
                         </select>
-                        <button type="submit" class="inline-flex items-center rounded-md bg-[#4E81FA] px-4 py-3 text-base font-semibold text-white shadow-sm hover:bg-blue-500 transition-colors">
+                        <button type="submit" class="inline-flex items-center rounded-lg bg-[#4E81FA] px-4 py-3 text-base font-semibold text-white shadow-sm hover:bg-blue-500 transition-colors">
                             {{ __('messages.apply_credit') }}
                         </button>
                     </form>
@@ -131,10 +131,10 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-900/50">
                         <tr>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.date') }}</th>
+                            <x-sortable-header column="created_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.date') }}</x-sortable-header>
                             <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.referred_user') }}</th>
                             <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.plan_tier') }}</th>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.status') }}</th>
+                            <x-sortable-header column="status" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.status') }}</x-sortable-header>
                             <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.credited_to') }}</th>
                         </tr>
                     </thead>
@@ -202,6 +202,20 @@
     </div>
 
     <script {!! nonce_attr() !!}>
+        document.addEventListener('click', function(e) {
+            var header = e.target.closest('[data-sort]');
+            if (header) {
+                var url = new URL(window.location.href);
+                var currentSort = url.searchParams.get('sort_by') || 'created_at';
+                var currentDir = url.searchParams.get('sort_dir') || 'desc';
+                var sortBy = header.getAttribute('data-sort');
+                url.searchParams.set('sort_by', sortBy);
+                url.searchParams.set('sort_dir', currentSort === sortBy && currentDir === 'asc' ? 'desc' : 'asc');
+                url.searchParams.delete('page');
+                window.location.href = url.toString();
+            }
+        });
+
         document.getElementById('copy-referral-link').addEventListener('click', function() {
             var input = document.getElementById('referral-url-input');
             navigator.clipboard.writeText(input.value).then(function() {

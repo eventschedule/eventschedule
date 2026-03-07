@@ -1,6 +1,6 @@
 {{-- Summary card --}}
 @if ($feedbackCount > 0)
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow ring-1 ring-black ring-opacity-5 p-6 mb-6">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow ring-1 ring-black ring-opacity-5 p-6 mb-6">
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div>
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.feedback_average_rating') }}</p>
@@ -47,24 +47,14 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-800">
                         <tr>
-                            <th scope="col" class="py-3.5 ps-4 pe-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 sm:ps-6">
-                                {{ __('messages.attendee') }}
-                            </th>
-                            <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                {{ __('messages.event') }}
-                            </th>
-                            <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                {{ __('messages.date') }}
-                            </th>
-                            <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                {{ __('messages.rating') }}
-                            </th>
+                            <x-sortable-header column="attendee_name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'" class="py-3.5 ps-4 pe-3 sm:ps-6">{{ __('messages.attendee') }}</x-sortable-header>
+                            <x-sortable-header column="event_name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.event') }}</x-sortable-header>
+                            <x-sortable-header column="event_date" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.date') }}</x-sortable-header>
+                            <x-sortable-header column="rating" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.rating') }}</x-sortable-header>
                             <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
                                 {{ __('messages.comment') }}
                             </th>
-                            <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                {{ __('messages.submitted') }}
-                            </th>
+                            <x-sortable-header column="created_at" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.submitted') }}</x-sortable-header>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
@@ -105,7 +95,7 @@
     {{-- Mobile Card View --}}
     <div class="md:hidden space-y-3 mt-4">
         @foreach ($feedbacks as $feedback)
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow ring-1 ring-black ring-opacity-5 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow ring-1 ring-black ring-opacity-5 p-4">
             <div class="flex justify-between items-start mb-2">
                 <div>
                     <p class="font-medium text-gray-900 dark:text-gray-100">{{ $feedback->sale->name ?? '' }}</p>

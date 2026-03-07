@@ -28,10 +28,18 @@ class ReferralController extends Controller
 
         $ownedRoles = $user->owner()->get();
 
+        $sortBy = request()->get('sort_by', 'created_at');
+        $sortDir = strtolower(request()->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $allowedSortColumns = ['created_at', 'status'];
+        if (! in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'created_at';
+        }
+
         $referralHistory = $user->referrals()
             ->with('referredUser', 'referredRole', 'creditedRole')
-            ->orderByDesc('created_at')
-            ->paginate(20);
+            ->orderBy($sortBy, $sortDir)
+            ->paginate(20)
+            ->withQueryString();
 
         return view('referral.index', [
             'referralUrl' => $referralUrl,
@@ -42,6 +50,8 @@ class ReferralController extends Controller
             'qualifiedCredits' => $qualifiedCredits,
             'ownedRoles' => $ownedRoles,
             'referralHistory' => $referralHistory,
+            'sortBy' => $sortBy,
+            'sortDir' => $sortDir,
         ]);
     }
 

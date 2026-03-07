@@ -25,20 +25,13 @@
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50 dark:bg-gray-800">
                                     <tr>
-                                        <th scope="col"
-                                            class="py-3.5 ps-4 pe-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 sm:ps-6">
-                                            {{ __('messages.event') }}
-                                        </th>
+                                        <x-sortable-header column="event_name" :sortBy="$sortBy" :sortDir="$sortDir" class="py-3.5 ps-4 pe-3 sm:ps-6">{{ __('messages.event') }}</x-sortable-header>
                                         <th scope="col"
                                             class="py-3.5 ps-4 pe-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 sm:ps-6">
                                             {{ __('messages.venue') }}
                                         </th>
-                                        <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                            {{ __('messages.date') }}
-                                        </th>
-                                        <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                            {{ __('messages.status') }}
-                                        </th>
+                                        <x-sortable-header column="event_date" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.date') }}</x-sortable-header>
+                                        <x-sortable-header column="status" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.status') }}</x-sortable-header>
                                         <th scope="col" class="relative py-3.5 ps-3 pe-4 sm:pe-6">
                                             <span class="sr-only">{{ __('messages.actions') }}</span>
                                         </th>
@@ -101,7 +94,7 @@
                                                 @endif
                                             </td>
                                             <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
-                                                <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" target="_blank" class="inline-flex items-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                                <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" target="_blank" class="inline-flex items-center rounded-lg bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                                                     {{ __('messages.view_ticket') }}                                        
                                                 </a>
                                             </td>
@@ -117,7 +110,7 @@
             <!-- Mobile List View -->
             <div class="md:hidden space-y-4">
                 @foreach ($sales as $sale)
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow duration-200">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow duration-200">
                         <div class="space-y-4">
                             <!-- Header with Status -->
                             <div class="flex items-start justify-between">
@@ -208,5 +201,20 @@
             </div>
         @endif
     </div>
+
+<script {!! nonce_attr() !!}>
+    document.addEventListener('click', function(e) {
+        var header = e.target.closest('[data-sort]');
+        if (header) {
+            var url = new URL(window.location.href);
+            var currentSort = url.searchParams.get('sort_by') || 'event_date';
+            var currentDir = url.searchParams.get('sort_dir') || '{{ $past ? "desc" : "asc" }}';
+            var sortBy = header.getAttribute('data-sort');
+            url.searchParams.set('sort_by', sortBy);
+            url.searchParams.set('sort_dir', currentSort === sortBy && currentDir === 'asc' ? 'desc' : 'asc');
+            window.location.href = url.toString();
+        }
+    });
+</script>
 
 </x-app-admin-layout>

@@ -898,7 +898,7 @@
         @if ($event->canAcceptRsvp($date))
         <div id="event-form-section" class="scroll-mt-4"
              style="display: none; transition: opacity 0.2s ease, transform 0.2s ease;"
-             @if (request()->get('rsvp') === 'true' || $errors->any())
+             @if (request()->get('rsvp') === 'true' || session('error') || $errors->any())
              data-show-initial="true"
              @endif>
             <div class="flex flex-col gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">
@@ -918,7 +918,7 @@
         {{-- Ticket form section (hidden by default, shown on CTA click) --}}
         <div id="event-form-section" class="scroll-mt-4"
              style="display: none; transition: opacity 0.2s ease, transform 0.2s ease;"
-             @if (request()->get('tickets') === 'true' || $errors->any())
+             @if (request()->get('tickets') === 'true' || session('error') || $errors->any())
              data-show-initial="true"
              @endif>
             <div class="flex flex-col gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">

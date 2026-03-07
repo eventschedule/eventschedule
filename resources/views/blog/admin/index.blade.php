@@ -33,7 +33,7 @@
                                 </div>
                             </div>
                             <div class="mt-6 flex justify-end">
-                                <button class="js-close-preview bg-gray-600 dark:bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
+                                <button class="js-close-preview bg-gray-600 dark:bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
                                     {{ __('messages.close_preview') }}
                                 </button>
                             </div>
@@ -113,15 +113,15 @@
                                             </td>
                                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                                                 @if($post->is_published && $post->published_at && $post->published_at <= now())
-                                                    <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/30 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30">
+                                                    <span class="inline-flex items-center rounded-lg bg-green-50 dark:bg-green-900/30 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30">
                                                         {{ __('messages.published') }}
                                                     </span>
                                                 @elseif($post->is_published && $post->published_at && $post->published_at > now())
-                                                    <span class="inline-flex items-center rounded-md bg-yellow-50 dark:bg-yellow-900/30 px-2 py-1 text-xs font-medium text-yellow-700 dark:text-yellow-400 ring-1 ring-inset ring-yellow-600/20 dark:ring-yellow-500/30">
+                                                    <span class="inline-flex items-center rounded-lg bg-yellow-50 dark:bg-yellow-900/30 px-2 py-1 text-xs font-medium text-yellow-700 dark:text-yellow-400 ring-1 ring-inset ring-yellow-600/20 dark:ring-yellow-500/30">
                                                         {{ __('messages.scheduled') }}
                                                     </span>
                                                 @else
-                                                    <span class="inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20 dark:ring-gray-500/30">
+                                                    <span class="inline-flex items-center rounded-lg bg-gray-50 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20 dark:ring-gray-500/30">
                                                         {{ __('messages.draft') }}
                                                     </span>
                                                 @endif

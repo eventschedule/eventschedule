@@ -4,7 +4,7 @@
             {{-- Schedule Selector --}}
             <div class="min-w-[200px] max-w-xs">
                 <select id="role-filter"
-                    class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base">
+                    class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base">
                     @foreach ($roles as $r)
                         <option value="{{ \App\Utils\UrlUtils::encodeId($r->id) }}" {{ $selectedRoleId == $r->id ? 'selected' : '' }}>
                             {{ $r->name }}
@@ -44,28 +44,28 @@
         @endif
 
         @if (session('status'))
-        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-md text-green-700 dark:text-green-300">
+        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
             {{ session('status') }}
         </div>
         @endif
 
         @if (session('error'))
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300">
+        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
             {{ session('error') }}
         </div>
         @endif
 
         @if ($newsletters->count() > 0)
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.subject') }}</th>
-                        <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.status') }}</th>
-                        <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.sent') }}</th>
-                        <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.open_rate') }}</th>
-                        <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.click_rate') }}</th>
-                        <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.sent_date') }}</th>
+                        <x-sortable-header column="subject" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.subject') }}</x-sortable-header>
+                        <x-sortable-header column="status" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.status') }}</x-sortable-header>
+                        <x-sortable-header column="sent_count" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.sent') }}</x-sortable-header>
+                        <x-sortable-header column="open_rate" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.open_rate') }}</x-sortable-header>
+                        <x-sortable-header column="click_rate" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.click_rate') }}</x-sortable-header>
+                        <x-sortable-header column="created_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.sent_date') }}</x-sortable-header>
                         <th class="px-6 py-3"></th>
                     </tr>
                 </thead>
@@ -145,7 +145,7 @@
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_newsletters_description') }}</p>
             <div class="mt-6">
                 <a href="{{ route('newsletter.create', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                    class="inline-flex items-center rounded-md bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-600">
+                    class="inline-flex items-center rounded-lg bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-600">
                     {{ __('messages.create_newsletter') }}
                 </a>
             </div>
@@ -171,7 +171,24 @@
             } else {
                 url.searchParams.delete('role_id');
             }
+            url.searchParams.delete('sort_by');
+            url.searchParams.delete('sort_dir');
+            url.searchParams.delete('page');
             window.location.href = url.toString();
+        });
+
+        document.addEventListener('click', function(e) {
+            var header = e.target.closest('[data-sort]');
+            if (header) {
+                var url = new URL(window.location.href);
+                var currentSort = url.searchParams.get('sort_by') || 'created_at';
+                var currentDir = url.searchParams.get('sort_dir') || 'desc';
+                var sortBy = header.getAttribute('data-sort');
+                url.searchParams.set('sort_by', sortBy);
+                url.searchParams.set('sort_dir', currentSort === sortBy && currentDir === 'asc' ? 'desc' : 'asc');
+                url.searchParams.delete('page');
+                window.location.href = url.toString();
+            }
         });
 
         document.addEventListener('submit', function(e) {

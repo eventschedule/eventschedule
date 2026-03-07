@@ -5,7 +5,7 @@
 
         {{-- Summary Stats --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-full">
@@ -20,7 +20,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
@@ -35,7 +35,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 {{ $failedAuthToday > 0 ? 'bg-red-100 dark:bg-red-900' : 'bg-gray-100 dark:bg-gray-700' }} rounded-full">
@@ -50,7 +50,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-indigo-100 dark:bg-indigo-900 rounded-full">
@@ -68,11 +68,11 @@
         </div>
 
         {{-- Filters --}}
-        <form method="GET" action="{{ route('admin.audit_log') }}" class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+        <form method="GET" action="{{ route('admin.audit_log') }}" class="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.category')</label>
-                    <select name="category" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
+                    <select name="category" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
                         <option value="">@lang('messages.all')</option>
                         @foreach ($categories as $cat)
                             <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ ucfirst($cat) }}</option>
@@ -81,21 +81,21 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.from')</label>
-                    <input type="date" name="from" value="{{ request('from') }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
+                    <input type="date" name="from" value="{{ request('from') }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.to')</label>
-                    <input type="date" name="to" value="{{ request('to') }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
+                    <input type="date" name="to" value="{{ request('to') }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.search')</label>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search_audit_log') }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search_audit_log') }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
                 </div>
                 <div class="flex items-end gap-2">
-                    <button type="submit" class="px-4 py-2 bg-[#4E81FA] text-white rounded-md text-sm font-medium hover:bg-blue-600">
+                    <button type="submit" class="px-4 py-2 bg-[#4E81FA] text-white rounded-lg text-sm font-medium hover:bg-blue-600">
                         @lang('messages.filter')
                     </button>
-                    <a href="{{ route('admin.audit_log') }}" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-500">
+                    <a href="{{ route('admin.audit_log') }}" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-500">
                         @lang('messages.clear')
                     </a>
                 </div>
@@ -103,7 +103,7 @@
         </form>
 
         {{-- Results --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-900">

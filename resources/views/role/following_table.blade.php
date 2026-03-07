@@ -10,96 +10,11 @@
                                 <input type="checkbox" id="select-all"
                                     class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[#4E81FA] focus:ring-[#4E81FA]">
                             </th>
-                            <th scope="col"
-                                class="py-3.5 ps-4 pe-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                                data-sort="name">
-                                <div class="flex items-center gap-1">
-                                    {{ __('messages.name') }}
-                                    @if($sortBy === 'name')
-                                        @if($sortDir === 'asc')
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                                            </svg>
-                                        @else
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                            </svg>
-                                        @endif
-                                    @endif
-                                </div>
-                            </th>
-                            <th scope="col"
-                                class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                                data-sort="type">
-                                <div class="flex items-center gap-1">
-                                    {{ __('messages.type') }}
-                                    @if($sortBy === 'type')
-                                        @if($sortDir === 'asc')
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                                            </svg>
-                                        @else
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                            </svg>
-                                        @endif
-                                    @endif
-                                </div>
-                            </th>
-                            <th scope="col"
-                                class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                                data-sort="email">
-                                <div class="flex items-center gap-1">
-                                    {{ __('messages.email') }}
-                                    @if($sortBy === 'email')
-                                        @if($sortDir === 'asc')
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                                            </svg>
-                                        @else
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                            </svg>
-                                        @endif
-                                    @endif
-                                </div>
-                            </th>
-                            <th scope="col"
-                                class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                                data-sort="phone">
-                                <div class="flex items-center gap-1">
-                                    {{ __('messages.phone') }}
-                                    @if($sortBy === 'phone')
-                                        @if($sortDir === 'asc')
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                                            </svg>
-                                        @else
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                            </svg>
-                                        @endif
-                                    @endif
-                                </div>
-                            </th>
-                            <th scope="col"
-                                class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                                data-sort="website">
-                                <div class="flex items-center gap-1">
-                                    {{ __('messages.website') }}
-                                    @if($sortBy === 'website')
-                                        @if($sortDir === 'asc')
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                                            </svg>
-                                        @else
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                            </svg>
-                                        @endif
-                                    @endif
-                                </div>
-                            </th>
+                            <x-sortable-header column="name" :sortBy="$sortBy" :sortDir="$sortDir" class="py-3.5 ps-4 pe-3 sm:ps-6">{{ __('messages.name') }}</x-sortable-header>
+                            <x-sortable-header column="type" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.type') }}</x-sortable-header>
+                            <x-sortable-header column="email" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.email') }}</x-sortable-header>
+                            <x-sortable-header column="phone" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.phone') }}</x-sortable-header>
+                            <x-sortable-header column="website" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.website') }}</x-sortable-header>
                             <th scope="col" class="relative py-3.5 ps-3 pe-4 sm:pe-6">
                                 <span class="sr-only">{{ __('messages.actions') }}</span>
                             </th>
@@ -165,7 +80,7 @@
                                     <button @click="open = !open; $nextTick(() => positionDropdown())"
                                             x-ref="button"
                                             type="button"
-                                            class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                            class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                                         {{ __('messages.actions') }}
                                         <svg class="-me-1 ms-2 h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
@@ -175,7 +90,7 @@
                                     <div x-show="open"
                                          x-ref="dropdown"
                                          @click.away="open = false"
-                                         class="w-48 origin-top-right rounded-md bg-white dark:bg-gray-800 py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-700 focus:outline-none"
+                                         class="w-48 origin-top-right rounded-lg bg-white dark:bg-gray-800 py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-700 focus:outline-none"
                                          role="menu"
                                          x-cloak
                                          aria-orientation="vertical">

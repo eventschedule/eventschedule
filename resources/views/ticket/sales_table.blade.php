@@ -8,23 +8,12 @@
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-800">
                             <tr>
-                                <th scope="col"
-                                    class="py-3.5 ps-4 pe-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 sm:ps-6">
-                                    {{ __('messages.customer') }}
-                                </th>
-                                <th scope="col"
-                                    class="py-3.5 ps-4 pe-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 sm:ps-6">
-                                    {{ __('messages.event') }}
-                                </th>
-                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ __('messages.total') }}
-                                </th>
-                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ __('messages.transaction_reference') }}
-                                </th>
-                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ __('messages.status') }}
-                                </th>
+                                <x-sortable-header column="name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'" class="py-3.5 ps-4 pe-3 sm:ps-6">{{ __('messages.customer') }}</x-sortable-header>
+                                <x-sortable-header column="event_name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'" class="py-3.5 ps-4 pe-3 sm:ps-6">{{ __('messages.event') }}</x-sortable-header>
+                                <x-sortable-header column="payment_amount" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.total') }}</x-sortable-header>
+                                <x-sortable-header column="transaction_reference" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.transaction_reference') }}</x-sortable-header>
+                                <x-sortable-header column="status" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.status') }}</x-sortable-header>
+                                <x-sortable-header column="created_at" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.date') }}</x-sortable-header>
                                 <th scope="col" class="relative py-3.5 ps-3 pe-4 sm:pe-6">
                                     <span class="sr-only">{{ __('messages.actions') }}</span>
                                 </th>
@@ -33,10 +22,12 @@
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                             @foreach ($sales as $sale)
                             @php
-                                $isGroupedNonPrimary = $sale->group_id && $sale->group_id !== $sale->id;
-                                $isGroupedPrimary = $sale->group_id && $sale->group_id === $sale->id;
+                                $isGroupedPrimary = $sale->isPrimarySale();
+                                $guestCount = $groupCounts[$sale->id] ?? 0;
+                                $hasGuests = $isGroupedPrimary && $guestCount > 0;
+                                $encodedSaleId = \App\Utils\UrlUtils::encodeId($sale->id);
                             @endphp
-                            <tr class="{{ $isGroupedNonPrimary ? 'bg-gray-50 dark:bg-gray-800/50' : 'bg-white dark:bg-gray-800' }} hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                            <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                                 @php
                                     $hasEventCustomFields = $sale->event->custom_fields && count($sale->event->custom_fields) > 0;
                                     $hasTicketCustomFields = false;
@@ -75,8 +66,8 @@
                                 @endphp
                                 <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
                                     <div class="flex items-center gap-2">
-                                        @if ($hasAnyCustomValues)
-                                            <button type="button" data-toggle-custom-fields class="flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                                        @if ($hasAnyCustomValues || $hasGuests)
+                                            <button type="button" data-toggle-row data-sale-id="{{ $encodedSaleId }}" class="flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
                                                 <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                                 </svg>
@@ -84,13 +75,10 @@
                                         @endif
                                         <div class="flex flex-col">
                                             <div class="flex items-center gap-2">
-                                                @if ($isGroupedNonPrimary)
-                                                <span class="text-gray-400 dark:text-gray-500">&#8627;</span>
-                                                @endif
                                                 <span class="font-semibold">{{ $sale->name }}</span>
-                                                @if ($isGroupedPrimary)
+                                                @if ($hasGuests)
                                                 <span class="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
-                                                    + {{ $groupCounts[$sale->id] ?? 0 }} {{ __('messages.guests') }}
+                                                    + {{ $guestCount }} {{ __('messages.guests') }}
                                                 </span>
                                                 @endif
                                             </div>
@@ -107,9 +95,7 @@
                                     </a>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    @if ($isGroupedNonPrimary)
-                                    <span class="text-gray-400 dark:text-gray-500">-</span>
-                                    @elseif ($sale->isRsvp())
+                                    @if ($sale->isRsvp())
                                     <span class="font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.registered') }}</span>
                                     @else
                                     <span class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format($sale->payment_amount, 2, '.', ',') }}</span>
@@ -179,16 +165,19 @@
                                         </svg>
                                     @endif
                                 </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ $sale->created_at->format('M j, Y') }}
+                                </td>
                                 <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
                                     <div class="flex items-center justify-end gap-3">
                                         <div class="relative inline-block text-start">
-                                            <button type="button" data-popup-toggle="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700" id="sale-actions-menu-button-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" aria-expanded="true" aria-haspopup="true">
+                                            <button type="button" data-popup-toggle="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700" id="sale-actions-menu-button-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" aria-expanded="true" aria-haspopup="true">
                                                 {{ __('messages.actions') }}
                                                 <svg class="-me-1 ms-2 h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                                                 </svg>
                                             </button>
-                                            <div id="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="sale-actions-menu-button-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" tabindex="-1">
+                                            <div id="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="sale-actions-menu-button-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" tabindex="-1">
                                                 <div class="py-2" role="none" data-popup-toggle="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}">
                                                     <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" target="_blank" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                                         <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -206,7 +195,6 @@
                                                             {{ __('messages.send_email') }}
                                                         </div>
                                                     </button>
-                                                    @if (! $isGroupedNonPrimary)
                                                     @if($sale->status === 'unpaid')
                                                     <button data-popup-toggle="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" data-sale-action="mark_paid" data-sale-id="{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors w-full text-start" role="menuitem" tabindex="0">
                                                         <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -250,7 +238,6 @@
                                                         </div>
                                                     </button>
                                                     @endif
-                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -258,7 +245,7 @@
                                 </td>
                             </tr>
                             @if ($hasAnyCustomValues)
-                            <tr class="custom-fields-row hidden bg-gray-50 dark:bg-[#2d2d30]/50" style="border-top: none;">
+                            <tr class="custom-fields-row detail-row-{{ $encodedSaleId }} hidden bg-gray-50 dark:bg-[#2d2d30]/50" style="border-top: none;">
                                 <td colspan="6" class="px-6 py-3">
                                     <div class="text-sm space-y-2">
                                         {{-- Event-level Custom Fields --}}
@@ -303,6 +290,74 @@
                                 </td>
                             </tr>
                             @endif
+                            @if ($hasGuests)
+                                @foreach ($sale->guestSales as $guest)
+                                <tr class="guest-row detail-row-{{ $encodedSaleId }} hidden bg-gray-50 dark:bg-gray-800/50" style="border-top: none;">
+                                    <td class="whitespace-nowrap py-3 ps-4 pe-3 text-sm text-gray-700 dark:text-gray-300 sm:ps-6">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-4"></div>
+                                            <span class="text-gray-400 dark:text-gray-500">&#8627;</span>
+                                            <div class="flex flex-col">
+                                                <span class="font-medium">{{ $guest->name }}</span>
+                                                <a href="mailto:{{ $guest->email }}" class="text-[#4E81FA] hover:text-[#3D6FE8] hover:underline text-xs">{{ $guest->email }}</a>
+                                                @if ($guest->phone)
+                                                <a href="tel:{{ $guest->phone }}" class="text-[#4E81FA] hover:text-[#3D6FE8] hover:underline text-xs">{{ $guest->phone }}</a>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="whitespace-nowrap py-3 ps-4 pe-3 text-sm text-gray-500 dark:text-gray-400 sm:ps-6">
+                                        <a href="{{ $sale->getEventUrl() }}" target="_blank" class="text-[#4E81FA] hover:text-[#3D6FE8] hover:underline">{{ $sale->event->name }}</a>
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-3 text-sm text-gray-400 dark:text-gray-500">-</td>
+                                    <td class="whitespace-nowrap px-3 py-3 text-sm text-gray-500 dark:text-gray-400"></td>
+                                    <td class="whitespace-nowrap px-3 py-3 text-sm text-gray-500 dark:text-gray-400">
+                                        @if($guest->status === 'paid')
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300">{{ __('messages.paid') }}</span>
+                                        @elseif($guest->status === 'cancelled')
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300">{{ __('messages.cancelled') }}</span>
+                                        @else
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">{{ __('messages.' . $guest->status) }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-3 text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $guest->created_at->format('M j, Y') }}
+                                    </td>
+                                    <td class="relative whitespace-nowrap py-3 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
+                                        <div class="flex items-center justify-end gap-3">
+                                            <div class="relative inline-block text-start">
+                                                <button type="button" data-popup-toggle="guest-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700" id="guest-actions-menu-button-{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" aria-expanded="true" aria-haspopup="true">
+                                                    {{ __('messages.actions') }}
+                                                    <svg class="-me-1 ms-2 h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                                <div id="guest-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="guest-actions-menu-button-{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" tabindex="-1">
+                                                    <div class="py-2" role="none" data-popup-toggle="guest-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($guest->id) }}">
+                                                        <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($guest->event_id), 'secret' => $guest->secret]) }}" target="_blank" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                                                            <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                                                <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
+                                                            </svg>
+                                                            <div>
+                                                                {{ __('messages.view_ticket') }}
+                                                            </div>
+                                                        </a>
+                                                        <button data-popup-toggle="guest-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" data-resend-email="{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors w-full text-start" role="menuitem" tabindex="0">
+                                                            <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                                                <path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" />
+                                                            </svg>
+                                                            <div>
+                                                                {{ __('messages.send_email') }}
+                                                            </div>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            @endif
                             @endforeach
                         </tbody>
                     </table>
@@ -315,22 +370,21 @@
     <div class="md:hidden space-y-4">
         @foreach ($sales as $sale)
         @php
-            $isGroupedNonPrimaryMobile = $sale->group_id && $sale->group_id !== $sale->id;
-            $isGroupedPrimaryMobile = $sale->group_id && $sale->group_id === $sale->id;
+            $mobileIsGroupedPrimary = $sale->isPrimarySale();
+            $mobileGuestCount = $groupCounts[$sale->id] ?? 0;
+            $mobileHasGuests = $mobileIsGroupedPrimary && $mobileGuestCount > 0;
+            $mobileEncodedSaleId = \App\Utils\UrlUtils::encodeId($sale->id);
         @endphp
-        <div class="{{ $isGroupedNonPrimaryMobile ? 'bg-gray-50 dark:bg-gray-800/50 ms-4 border-s-2 border-blue-300 dark:border-blue-700' : 'bg-white dark:bg-gray-800' }} rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow duration-200">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow duration-200">
             <div class="space-y-4">
                 <!-- Header with Status -->
                 <div class="flex items-start justify-between">
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-1">
-                            @if ($isGroupedNonPrimaryMobile)
-                            <span class="text-gray-400 dark:text-gray-500">&#8627;</span>
-                            @endif
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $sale->name }}</h3>
-                            @if ($isGroupedPrimaryMobile)
+                            @if ($mobileHasGuests)
                             <span class="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
-                                + {{ $groupCounts[$sale->id] ?? 0 }} {{ __('messages.guests') }}
+                                + {{ $mobileGuestCount }} {{ __('messages.guests') }}
                             </span>
                             @endif
                         </div>
@@ -380,6 +434,7 @@
                 <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
                     <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.event') }}</div>
                     <x-link href="{{ $sale->getEventUrl() }}" target="_blank" class="font-medium">{{ $sale->event->name }}</x-link>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $sale->created_at->format('M j, Y') }}</div>
                 </div>
 
                 <!-- Payment Details -->
@@ -532,7 +587,7 @@
                         <div x-show="open" 
                              x-ref="dropdown"
                              @click.away="open = false"
-                             class="w-48 origin-top-right rounded-md bg-white dark:bg-gray-800 py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-700 focus:outline-none" 
+                             class="w-48 origin-top-right rounded-lg bg-white dark:bg-gray-800 py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-700 focus:outline-none" 
                              role="menu" 
                              x-cloak
                              aria-orientation="vertical">
@@ -551,7 +606,6 @@
                                 {{ __('messages.send_email') }}
                             </button>
 
-                            @if (! $isGroupedNonPrimaryMobile)
                             @if($sale->status === 'unpaid')
                                 <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')"
                                         class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
@@ -583,10 +637,52 @@
                                 {{ __('messages.delete') }}
                             </button>
                             @endif
-                            @endif
                         </div>
                     </div>
                 </div>
+
+                <!-- Collapsible Guest Section (Mobile) -->
+                @if ($mobileHasGuests)
+                <div>
+                    <button type="button" data-toggle-mobile-guests="{{ $mobileEncodedSaleId }}" class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                        <svg class="w-4 h-4 transform transition-transform duration-200 mobile-guest-chevron-{{ $mobileEncodedSaleId }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                        {{ $mobileGuestCount }} {{ __('messages.guests') }}
+                    </button>
+                    <div class="mobile-guests-{{ $mobileEncodedSaleId }} hidden mt-3 space-y-3">
+                        @foreach ($sale->guestSales as $guest)
+                        <div class="bg-gray-50 dark:bg-gray-700/50 border-s-2 border-blue-300 dark:border-blue-700 rounded-lg p-3 ms-2">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-gray-400 dark:text-gray-500">&#8627;</span>
+                                <span class="font-medium text-gray-900 dark:text-gray-100">{{ $guest->name }}</span>
+                                @if($guest->status === 'paid')
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300">{{ __('messages.paid') }}</span>
+                                @elseif($guest->status === 'cancelled')
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300">{{ __('messages.cancelled') }}</span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">{{ __('messages.' . $guest->status) }}</span>
+                                @endif
+                            </div>
+                            <a href="mailto:{{ $guest->email }}" class="text-[#4E81FA] hover:text-[#3D6FE8] text-sm">{{ $guest->email }}</a>
+                            @if ($guest->phone)
+                            <br><a href="tel:{{ $guest->phone }}" class="text-[#4E81FA] hover:text-[#3D6FE8] text-sm">{{ $guest->phone }}</a>
+                            @endif
+                            <div class="mt-2 flex items-center gap-3">
+                                <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($guest->event_id), 'secret' => $guest->secret]) }}" target="_blank" class="inline-flex items-center gap-1 text-[#4E81FA] hover:text-[#3D6FE8] hover:underline text-xs">
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" /></svg>
+                                    {{ __('messages.view_ticket') }}
+                                </a>
+                                <button type="button" onclick="resendEmail('{{ \App\Utils\UrlUtils::encodeId($guest->id) }}')" class="inline-flex items-center gap-1 text-[#4E81FA] hover:text-[#3D6FE8] hover:underline text-xs">
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" /></svg>
+                                    {{ __('messages.send_email') }}
+                                </a>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
         @endforeach

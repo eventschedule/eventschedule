@@ -11,7 +11,7 @@
 
         <div class="py-5">
             <div class="max-w-7xl mx-auto space-y-6">
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
@@ -34,7 +34,7 @@
 
                         <div class="mb-6">
                             <x-input-label for="level" :value="__('messages.role')" />
-                            <select id="level" name="level" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                            <select id="level" name="level" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                                 <option value="admin" {{ old('level', 'admin') == 'admin' ? 'selected' : '' }}>{{ __('messages.admin') }}</option>
                                 <option value="viewer" {{ old('level') == 'viewer' ? 'selected' : '' }}>{{ __('messages.viewer') }}</option>
                             </select>

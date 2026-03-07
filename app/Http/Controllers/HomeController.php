@@ -8,11 +8,15 @@ use App\Models\Event;
 use App\Models\EventComment;
 use App\Models\EventPhoto;
 use App\Models\EventVideo;
+use App\Models\Newsletter;
 use App\Models\Role;
+use App\Models\Sale;
+use App\Services\AnalyticsService;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class HomeController extends Controller
@@ -97,11 +101,29 @@ class HomeController extends Controller
             $events = collect();
         }
 
+        // Dashboard data
+        $dashboardStats = null;
+        $upcomingEvents = collect();
+        $recentActivity = collect();
+        $sparklineData = [];
+
+        if ($roleIds->isNotEmpty()) {
+            $dashboardStats = $this->getDashboardStats($user, $roleIds);
+            $upcomingEvents = $this->getUpcomingEvents($roleIds);
+            $recentActivity = $this->getRecentActivity($roleIds);
+            $sparklineData = $this->getSparklineData($user);
+        }
+
         return view('home', compact(
             'events',
             'month',
             'year',
             'startOfMonth',
+            'roleIds',
+            'dashboardStats',
+            'upcomingEvents',
+            'recentActivity',
+            'sparklineData',
         ));
     }
 
@@ -230,6 +252,157 @@ class HomeController extends Controller
                 'message' => __('messages.feedback_failed'),
             ], 500);
         }
+    }
+
+    private function getDashboardStats($user, $roleIds): array
+    {
+        $analyticsService = app(AnalyticsService::class);
+        $thirtyDaysAgo = now()->subDays(30)->startOfDay();
+        $now = now()->endOfDay();
+
+        // Upcoming events count
+        $upcomingCount = Event::whereIn('id', function ($query) use ($roleIds) {
+            $query->select('event_id')
+                ->from('event_role')
+                ->whereIn('role_id', $roleIds)
+                ->where('is_accepted', true);
+        })->where('starts_at', '>', now())->count();
+
+        // Views (30d) + month-over-month change
+        $periodStats = $analyticsService->getStatsForUser($user, $thirtyDaysAgo, $now);
+        $momComparison = $analyticsService->getMonthOverMonthComparison($user);
+
+        // Followers count
+        $followersCount = DB::table('role_user')
+            ->whereIn('role_id', $roleIds)
+            ->where('level', 'follower')
+            ->count();
+
+        // Total events count (fallback for followers)
+        $totalEventsCount = Event::whereIn('id', function ($query) use ($roleIds) {
+            $query->select('event_id')
+                ->from('event_role')
+                ->whereIn('role_id', $roleIds)
+                ->where('is_accepted', true);
+        })->count();
+
+        // Revenue (30d) - only if sales exist
+        $conversionStats = $analyticsService->getConversionStats($user, $thirtyDaysAgo, $now);
+
+        return [
+            'upcoming_count' => $upcomingCount,
+            'views_30d' => $periodStats['period_views'] ?? 0,
+            'views_change' => $momComparison['percentage_change'] ?? 0,
+            'followers_count' => $followersCount,
+            'total_events_count' => $totalEventsCount,
+            'total_sales' => $conversionStats['total_sales'] ?? 0,
+            'total_revenue' => $conversionStats['total_revenue'] ?? 0,
+        ];
+    }
+
+    private function getUpcomingEvents($roleIds)
+    {
+        return Event::whereIn('id', function ($query) use ($roleIds) {
+            $query->select('event_id')
+                ->from('event_role')
+                ->whereIn('role_id', $roleIds)
+                ->where('is_accepted', true);
+        })
+            ->where('starts_at', '>', now())
+            ->orderBy('starts_at')
+            ->limit(5)
+            ->with(['roles', 'tickets'])
+            ->get();
+    }
+
+    private function getRecentActivity($roleIds)
+    {
+        $eventIds = DB::table('event_role')
+            ->whereIn('role_id', $roleIds)
+            ->where('is_accepted', true)
+            ->pluck('event_id')
+            ->unique();
+
+        $activities = collect();
+
+        // Recent sales
+        if ($eventIds->isNotEmpty()) {
+            $sales = Sale::whereIn('event_id', $eventIds)
+                ->where('status', 'paid')
+                ->latest()
+                ->limit(10)
+                ->with('event')
+                ->get()
+                ->map(function ($sale) {
+                    return [
+                        'type' => 'sale',
+                        'description' => $sale->event ? $sale->event->name : '',
+                        'date' => $sale->created_at,
+                        'amount' => $sale->payment_amount,
+                    ];
+                });
+            $activities = $activities->merge($sales);
+        }
+
+        // Recent followers
+        $followers = DB::table('role_user')
+            ->whereIn('role_id', $roleIds)
+            ->where('level', 'follower')
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get()
+            ->map(function ($follow) {
+                $user = DB::table('users')->where('id', $follow->user_id)->first();
+
+                return [
+                    'type' => 'follower',
+                    'description' => $user ? trim(($user->first_name ?? '').' '.($user->last_name ?? '')) : '',
+                    'date' => Carbon::parse($follow->created_at),
+                ];
+            });
+        $activities = $activities->merge($followers);
+
+        // Recent newsletters sent
+        $newsletters = Newsletter::whereIn('role_id', $roleIds)
+            ->where('status', 'sent')
+            ->whereNotNull('sent_at')
+            ->orderByDesc('sent_at')
+            ->limit(5)
+            ->get()
+            ->map(function ($newsletter) {
+                return [
+                    'type' => 'newsletter',
+                    'description' => $newsletter->subject,
+                    'date' => $newsletter->sent_at,
+                    'sent_count' => $newsletter->sent_count,
+                ];
+            });
+        $activities = $activities->merge($newsletters);
+
+        // Sort by date descending, take 10
+        return $activities->sortByDesc('date')->take(10)->values();
+    }
+
+    private function getSparklineData($user): array
+    {
+        $analyticsService = app(AnalyticsService::class);
+        $thirtyDaysAgo = now()->subDays(30)->startOfDay();
+        $now = now()->endOfDay();
+
+        $viewsByPeriod = $analyticsService->getViewsByPeriod($user, 'daily', $thirtyDaysAgo, $now);
+
+        // Fill in missing days with 0
+        $data = [];
+        $current = $thirtyDaysAgo->copy();
+        $viewsMap = $viewsByPeriod->pluck('view_count', 'period')->toArray();
+
+        while ($current->lte($now)) {
+            $key = $current->format('Y-m-d');
+            $data[] = (int) ($viewsMap[$key] ?? 0);
+            $current->addDay();
+        }
+
+        return $data;
     }
 
     private function processPendingFanContent(array $pending): ?string

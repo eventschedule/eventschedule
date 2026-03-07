@@ -84,18 +84,33 @@ class NewsletterController extends Controller
             $selectedRoleId = $roles->first()->id;
         }
 
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDir = strtolower($request->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $allowedSortColumns = ['subject', 'status', 'sent_count', 'created_at', 'open_rate', 'click_rate'];
+        if (! in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'created_at';
+        }
+
         $newsletters = collect();
         $role = null;
         if ($selectedRoleId) {
             $role = $roles->firstWhere('id', $selectedRoleId);
-            $newsletters = Newsletter::where('role_id', $selectedRoleId)
+            $query = Newsletter::where('role_id', $selectedRoleId)
                 ->where('type', 'schedule')
-                ->where('status', '!=', 'cancelled')
-                ->orderBy('created_at', 'desc')
-                ->paginate(20);
+                ->where('status', '!=', 'cancelled');
+
+            if ($sortBy === 'open_rate') {
+                $query->orderByRaw('CASE WHEN sent_count > 0 THEN open_count / sent_count ELSE 0 END '.$sortDir);
+            } elseif ($sortBy === 'click_rate') {
+                $query->orderByRaw('CASE WHEN sent_count > 0 THEN click_count / sent_count ELSE 0 END '.$sortDir);
+            } else {
+                $query->orderBy($sortBy, $sortDir);
+            }
+
+            $newsletters = $query->paginate(20)->withQueryString();
         }
 
-        return view('newsletter.index', compact('roles', 'role', 'selectedRoleId', 'newsletters'));
+        return view('newsletter.index', compact('roles', 'role', 'selectedRoleId', 'newsletters', 'sortBy', 'sortDir'));
     }
 
     public function create(Request $request)
@@ -458,10 +473,18 @@ class NewsletterController extends Controller
             ->where('id', UrlUtils::decodeId($hash))
             ->firstOrFail();
 
+        $sortBy = $request->get('sort_by', 'opened_at');
+        $sortDir = strtolower($request->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $allowedSortColumns = ['email', 'status', 'opened_at', 'clicked_at'];
+        if (! in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'opened_at';
+        }
+
         $recipients = $newsletter->recipients()
             ->where('status', '!=', 'test')
-            ->orderBy('opened_at', 'desc')
-            ->paginate(50);
+            ->orderBy($sortBy, $sortDir)
+            ->paginate(50)
+            ->withQueryString();
 
         // Top clicked links
         $topLinks = \App\Models\NewsletterClick::whereHas('recipient', function ($q) use ($newsletter) {
@@ -501,7 +524,9 @@ class NewsletterController extends Controller
             'topLinks',
             'openTimeline',
             'clickTimeline',
-            'abTest'
+            'abTest',
+            'sortBy',
+            'sortDir'
         ));
     }
 
@@ -628,11 +653,21 @@ class NewsletterController extends Controller
 
         $recipientCount = $segment->recipientCount();
 
+        $sortBy = 'created_at';
+        $sortDir = 'desc';
+
         if ($segment->type === 'manual') {
+            $sortBy = $request->get('sort_by', 'created_at');
+            $sortDir = strtolower($request->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+            $allowedSortColumns = ['name', 'email', 'created_at'];
+            if (! in_array($sortBy, $allowedSortColumns)) {
+                $sortBy = 'created_at';
+            }
+
             $subscribers = $segment->segmentUsers()
-                ->orderBy('created_at', 'desc')
+                ->orderBy($sortBy, $sortDir)
                 ->paginate(50)
-                ->appends(['role_id' => UrlUtils::encodeId($role->id)]);
+                ->withQueryString();
         } else {
             $subscribers = $segment->resolveRecipients()->take(50);
         }
@@ -642,6 +677,8 @@ class NewsletterController extends Controller
             'segment' => $segment,
             'subscribers' => $subscribers,
             'recipientCount' => $recipientCount,
+            'sortBy' => $sortBy,
+            'sortDir' => $sortDir,
         ]);
     }
 

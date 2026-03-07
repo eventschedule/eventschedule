@@ -2,13 +2,13 @@
     <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.segments') }}</h2>
             <a href="{{ route('newsletter.index', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                class="inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                 {{ __('messages.back') }}
             </a>
         </div>
 
         @if (session('status'))
-        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-md text-green-700 dark:text-green-300">
+        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
             {{ session('status') }}
         </div>
         @endif
@@ -17,7 +17,7 @@
         @if ($segments->count())
         <div class="space-y-4 mb-8">
             @foreach ($segments as $segment)
-            <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg p-6">
+            <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6">
                 <div class="flex justify-between items-center">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 min-w-0">{{ $segment->name }}</h3>
                     <div class="shrink-0 space-x-3">
@@ -48,7 +48,7 @@
         @endif
 
         {{-- Create New Segment --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg p-6">
+        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.create_segment') }}</h3>
 
             <form method="POST" action="{{ route('newsletter.segment.store', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" x-data="{ segmentType: 'all_followers' }">
@@ -61,7 +61,7 @@
 
                     <div>
                         <x-input-label :value="__('messages.type')" />
-                        <select name="type" x-model="segmentType" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm">
+                        <select name="type" x-model="segmentType" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-lg shadow-sm">
                             <option value="all_followers">{{ __('messages.all_followers') }}</option>
                             <option value="ticket_buyers">{{ __('messages.ticket_buyers') }}</option>
                             <option value="manual">{{ __('messages.manual') }}</option>
@@ -71,13 +71,13 @@
                     <div x-show="segmentType === 'manual'" x-cloak>
                         <x-input-label :value="__('messages.email_list')" />
                         <textarea name="emails" rows="6"
-                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm"
+                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-lg shadow-sm"
                             placeholder="{{ __('messages.email_list_placeholder') }}"></textarea>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.email_list_help') }}</p>
                     </div>
 
                     <div class="flex justify-end">
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600">
                             {{ __('messages.create_segment') }}
                         </button>
                     </div>

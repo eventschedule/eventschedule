@@ -20,8 +20,8 @@ trait AccountSetupTrait
             ->check('terms')
             ->scrollIntoView('button[type="submit"]')
             ->press('SIGN UP')
-            ->waitForLocation('/events', 15)
-            ->assertPathIs('/events')
+            ->waitForLocation('/dashboard', 15)
+            ->assertPathIs('/dashboard')
             ->assertSee($name);
     }
 
@@ -271,8 +271,8 @@ trait AccountSetupTrait
         // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
         $browser->script("document.querySelector('form').requestSubmit()");
 
-        $browser->waitForLocation('/events', 15)
-            ->assertPathIs('/events');
+        $browser->waitForLocation('/dashboard', 15)
+            ->assertPathIs('/dashboard');
     }
 
     /**
@@ -281,7 +281,7 @@ trait AccountSetupTrait
     protected function logoutUser(Browser $browser, string $name = 'John Doe'): void
     {
         /*
-        $browser->visit('/events')
+        $browser->visit('/dashboard')
             ->waitForText($name, 5)
             ->press($name)
             ->waitForText('Log Out', 5)

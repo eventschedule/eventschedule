@@ -42,10 +42,10 @@
                     x-transition:leave="transition ease-in duration-75"
                     x-transition:leave-start="opacity-100 scale-100"
                     x-transition:leave-end="opacity-0 scale-95"
-                    class="absolute z-50 mt-0 w-48 rounded-md shadow-lg ltr:origin-top-left rtl:origin-top-right start-0"
+                    class="absolute z-50 mt-0 w-48 rounded-lg shadow-lg ltr:origin-top-left rtl:origin-top-right start-0"
                     style="display: none;"
                     @click="openDropdown = null">
-                    <div class="rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-gray-700">
+                    <div class="rounded-lg ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-gray-700">
                         <a href="{{ route('admin.users') }}" class="{{ $active === 'users' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.users')
                         </a>
@@ -78,10 +78,10 @@
                     x-transition:leave="transition ease-in duration-75"
                     x-transition:leave-start="opacity-100 scale-100"
                     x-transition:leave-end="opacity-0 scale-95"
-                    class="absolute z-50 mt-0 w-48 rounded-md shadow-lg ltr:origin-top-left rtl:origin-top-right start-0"
+                    class="absolute z-50 mt-0 w-48 rounded-lg shadow-lg ltr:origin-top-left rtl:origin-top-right start-0"
                     style="display: none;"
                     @click="openDropdown = null">
-                    <div class="rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-gray-700">
+                    <div class="rounded-lg ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-gray-700">
                         <a href="{{ route('admin.boost') }}" class="{{ $active === 'boost' ? $dropdownItemActive : $dropdownItem }}">
                             Boost
                         </a>
@@ -124,10 +124,10 @@
                     x-transition:leave="transition ease-in duration-75"
                     x-transition:leave-start="opacity-100 scale-100"
                     x-transition:leave-end="opacity-0 scale-95"
-                    class="absolute z-50 mt-0 w-48 rounded-md shadow-lg ltr:origin-top-left rtl:origin-top-right start-0"
+                    class="absolute z-50 mt-0 w-48 rounded-lg shadow-lg ltr:origin-top-left rtl:origin-top-right start-0"
                     style="display: none;"
                     @click="openDropdown = null">
-                    <div class="rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-gray-700">
+                    <div class="rounded-lg ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-gray-700">
                         <a href="{{ route('admin.audit_log') }}" class="{{ $active === 'audit-log' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.audit_log')
                         </a>

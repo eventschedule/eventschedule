@@ -11,32 +11,32 @@
                 </p>
             </div>
             <a href="{{ route('newsletter.index', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                class="inline-flex items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                class="inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                 {{ __('messages.back') }}
             </a>
         </div>
 
         {{-- Summary Cards --}}
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.sent') }}</p>
                 <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ number_format($newsletter->sent_count) }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.opens') }}</p>
                 <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ number_format($newsletter->open_count) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ $newsletter->sent_count > 0 ? round(($newsletter->open_count / $newsletter->sent_count) * 100, 1) . '%' : '-' }}
                 </p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.clicks') }}</p>
                 <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ number_format($newsletter->click_count) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ $newsletter->sent_count > 0 ? round(($newsletter->click_count / $newsletter->sent_count) * 100, 1) . '%' : '-' }}
                 </p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.failed') }}</p>
                 <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ number_format($newsletter->recipients()->where('status', 'failed')->count()) }}</p>
             </div>
@@ -44,7 +44,7 @@
 
         {{-- A/B Test Comparison --}}
         @if ($abTest && $abTest->newsletters->count() >= 2)
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-8">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.ab_test_results') }}</h3>
             <div class="grid grid-cols-2 gap-6">
                 @foreach ($abTest->newsletters->whereIn('ab_variant', ['A', 'B']) as $variant)
@@ -78,11 +78,11 @@
 
         {{-- Charts --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.opens_over_time') }}</h3>
                 <canvas id="openChart"></canvas>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.clicks_over_time') }}</h3>
                 <canvas id="clickChart"></canvas>
             </div>
@@ -90,7 +90,7 @@
 
         {{-- Top Clicked Links --}}
         @if ($topLinks->isNotEmpty())
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-8">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.top_clicked_links') }}</h3>
             <div class="space-y-3">
                 @foreach ($topLinks as $link)
@@ -104,15 +104,15 @@
         @endif
 
         {{-- Recipients Table --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl overflow-hidden">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 px-6 py-4 border-b border-gray-200 dark:border-gray-700">{{ __('messages.recipients') }}</h3>
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">{{ __('messages.email') }}</th>
-                        <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">{{ __('messages.status') }}</th>
-                        <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">{{ __('messages.opened') }}</th>
-                        <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">{{ __('messages.clicked') }}</th>
+                        <x-sortable-header column="email" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.email') }}</x-sortable-header>
+                        <x-sortable-header column="status" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.status') }}</x-sortable-header>
+                        <x-sortable-header column="opened_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.opened') }}</x-sortable-header>
+                        <x-sortable-header column="clicked_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.clicked') }}</x-sortable-header>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -156,6 +156,20 @@
         </div>
 
     <script {!! nonce_attr() !!}>
+        document.addEventListener('click', function(e) {
+            var header = e.target.closest('[data-sort]');
+            if (header) {
+                var url = new URL(window.location.href);
+                var currentSort = url.searchParams.get('sort_by') || 'opened_at';
+                var currentDir = url.searchParams.get('sort_dir') || 'desc';
+                var sortBy = header.getAttribute('data-sort');
+                url.searchParams.set('sort_by', sortBy);
+                url.searchParams.set('sort_dir', currentSort === sortBy && currentDir === 'asc' ? 'desc' : 'asc');
+                url.searchParams.delete('page');
+                window.location.href = url.toString();
+            }
+        });
+
         function initCharts() {
             const isDarkMode = document.documentElement.classList.contains('dark') ||
                 (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.classList.contains('light'));

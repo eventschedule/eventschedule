@@ -85,7 +85,7 @@
       overflow-y: auto;
       background: #fff;
       border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
+      border-radius: 0.5rem;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
       margin-top: 2px;
     }
@@ -135,6 +135,7 @@
     }
   </script>
   <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
+  <script src="{{ asset('js/sortable.min.js') }}" {!! nonce_attr() !!}></script>
   <script {!! nonce_attr() !!}>
     // --- Global time helper functions (used by main event and parts) ---
     var use24hr = {{ $use24hr ? 'true' : 'false' }};
@@ -845,7 +846,7 @@
         @endphp
         @if ($activeBoost)
         <a href="{{ route('boost.show', ['hash' => $activeBoost->hashedId()]) }}"
-           class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+           class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             <svg class="me-2 h-5 w-5 text-green-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
             </svg>
@@ -853,7 +854,7 @@
         </a>
         @elseif ($boostStaticDisabled === 'upgrade' && config('app.hosted'))
         <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-boost')"
-           class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+           class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             <svg class="me-2 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
             </svg>
@@ -861,7 +862,7 @@
         </button>
         @elseif ($boostStaticDisabled)
         <button type="button" x-data x-on:click="alert('{{ addslashes($boostStaticDisabled) }}')"
-           class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+           class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             <svg class="me-2 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
             </svg>
@@ -869,14 +870,14 @@
         </button>
         @else
         <a v-cloak v-if="boostCanEnable" href="{{ route('boost.create', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-           class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+           class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             <svg class="me-2 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
             </svg>
             {{ __('messages.boost_event') }}
         </a>
         <button v-cloak v-else type="button" v-on:click="showBoostError()"
-           class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+           class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             <svg class="me-2 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
             </svg>
@@ -885,7 +886,7 @@
         @endif
         @else
         <button type="button" x-data x-on:click="alert('{{ addslashes(__('messages.save_event_first')) }}')"
-           class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+           class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             <svg class="me-2 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
             </svg>
@@ -896,13 +897,13 @@
         @if ($event->exists)
         {{-- Actions dropdown --}}
         <div class="relative inline-block text-start">
-            <button type="button" class="popup-toggle inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800" id="event-actions-menu-button" data-popup-target="event-actions-pop-up-menu" aria-expanded="true" aria-haspopup="true">
+            <button type="button" class="popup-toggle inline-flex w-full justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800" id="event-actions-menu-button" data-popup-target="event-actions-pop-up-menu" aria-expanded="true" aria-haspopup="true">
                 {{ __('messages.actions') }}
                 <svg class="-me-1 ms-2 h-6 w-6 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                 </svg>
             </button>
-            <div id="event-actions-pop-up-menu" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="event-actions-menu-button" tabindex="-1">
+            <div id="event-actions-pop-up-menu" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="event-actions-menu-button" tabindex="-1">
                 <div class="py-2" role="none" id="event-actions-pop-up-menu-items" data-popup-target="event-actions-pop-up-menu">
                     <a href="{{ route('event.clone', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                         <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -936,14 +937,14 @@
 
         {{-- Cancel button --}}
         <a href="{{ route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']) }}"
-           class="js-cancel-btn inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+           class="js-cancel-btn inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             {{ __('messages.cancel') }}
         </a>
     </div>
 
     {{-- Mobile Actions dropdown (header) --}}
     @if (!$event->exists)
-    <button type="button" x-data x-on:click="alert('{{ addslashes(__('messages.save_event_first')) }}')" class="lg:hidden inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+    <button type="button" x-data x-on:click="alert('{{ addslashes(__('messages.save_event_first')) }}')" class="lg:hidden inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
         <svg class="me-1.5 h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
         </svg>
@@ -952,13 +953,13 @@
     @endif
     @if ($event->exists)
     <div class="lg:hidden relative inline-block text-start">
-        <button type="button" class="popup-toggle inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800" id="mobile-header-event-actions-menu-button" data-popup-target="mobile-header-event-actions-pop-up-menu" aria-expanded="false" aria-haspopup="true">
+        <button type="button" class="popup-toggle inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800" id="mobile-header-event-actions-menu-button" data-popup-target="mobile-header-event-actions-pop-up-menu" aria-expanded="false" aria-haspopup="true">
             {{ __('messages.actions') }}
             <svg class="-me-1 ms-1.5 h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
             </svg>
         </button>
-        <div id="mobile-header-event-actions-pop-up-menu" class="pop-up-menu hidden absolute {{ is_rtl() ? 'start-0' : 'end-0' }} z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="mobile-header-event-actions-menu-button" tabindex="-1">
+        <div id="mobile-header-event-actions-pop-up-menu" class="pop-up-menu hidden absolute {{ is_rtl() ? 'start-0' : 'end-0' }} z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="mobile-header-event-actions-menu-button" tabindex="-1">
             <div class="py-2" role="none" id="mobile-header-event-actions-pop-up-menu-items" data-popup-target="mobile-header-event-actions-pop-up-menu">
                 @if ($activeBoost)
                 <a href="{{ route('boost.show', ['hash' => $activeBoost->hashedId()]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
@@ -1051,32 +1052,32 @@
                     <div class="sticky top-6">
                         <nav class="space-y-1">
                             @if (! $role->isVenue() || $user->isMember($role->subdomain) || $user->canEditEvent($event))
-                            <a href="#section-details" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-details">
+                            <a href="#section-details" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-details">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                                 </svg>
                                 {{ __('messages.details') }}
                             </a>
                             @endif
-                            <a href="#section-venue" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-venue">
+                            <a href="#section-venue" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-venue">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-1.5-1.5v18m7.5-18v18" />
                                 </svg>
                                 {{ __('messages.venue') }}
                             </a>
-                            <a href="#section-participants" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-participants">
+                            <a href="#section-participants" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-participants">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                                 </svg>
                                 {{ __('messages.participants') }}
                             </a>
-                            <a href="#section-recurring" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-recurring">
+                            <a href="#section-recurring" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-recurring">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                                 </svg>
                                 {{ __('messages.recurring') }}
                             </a>
-                            <a href="#section-agenda" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-agenda">
+                            <a href="#section-agenda" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-agenda">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                                 </svg>
@@ -1089,7 +1090,7 @@
                                 });
                             @endphp
                             @if ($curatorsForNav->count() > 0)
-                            <a href="#section-schedules" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-schedules">
+                            <a href="#section-schedules" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-schedules">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                                 </svg>
@@ -1097,7 +1098,7 @@
                             </a>
                             @endif
                             @if ($event->exists && $event->canBeSyncedToGoogleCalendarForSubdomain(request()->subdomain))
-                            <a href="#section-google-calendar" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-google-calendar">
+                            <a href="#section-google-calendar" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-google-calendar">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                                 </svg>
@@ -1105,13 +1106,13 @@
                             </a>
                             @endif
                             @if ($event->user_id == $user->id)
-                            <a href="#section-tickets" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-tickets">
+                            <a href="#section-tickets" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-tickets">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
                                 </svg>
                                 {{ __('messages.tickets') }}
                             </a>
-                            <a href="#section-event-settings" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-event-settings">
+                            <a href="#section-event-settings" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-event-settings">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -1120,7 +1121,7 @@
                             </a>
                             @endif
                             @php $fanContentPendingCount = $event->exists ? (($pendingVideos->count() ?? 0) + ($pendingComments->count() ?? 0) + ($pendingPhotos->count() ?? 0)) : 0; @endphp
-                            <a href="#section-engagement" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-md hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-engagement">
+                            <a href="#section-engagement" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-engagement">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                                 </svg>
@@ -1162,7 +1163,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-details" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                <div id="section-details" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -1172,7 +1173,7 @@
                             @if (config('services.google.gemini_key') && !is_demo_mode())
                                 @if ($role->isEnterprise())
                                     <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'ai-event-details')"
-                                        class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600"
+                                        class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600"
                                         title="{{ __('messages.ai_generator') }}">
                                         <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
@@ -1181,7 +1182,7 @@
                                     </button>
                                 @elseif (config('app.hosted'))
                                     <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-details')"
-                                        class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 opacity-75"
+                                        class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 opacity-75"
                                         title="{{ __('messages.ai_generator') }}">
                                         <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
@@ -1230,7 +1231,7 @@
                         @if($effectiveRole->groups && count($effectiveRole->groups))
                         <div class="mb-6">
                             <x-input-label for="current_role_group_id" :value="__('messages.schedule')" />
-                            <select id="current_role_group_id" name="current_role_group_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl', '', true) }}">
+                            <select id="current_role_group_id" name="current_role_group_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}">
                                 <option value="">{{ __('messages.please_select') }}</option>
                                 @foreach($effectiveRole->groups as $group)
                                     @php
@@ -1251,7 +1252,7 @@
 
                         <div class="mb-6">
                             <x-input-label for="category_id" :value="__('messages.category')" />
-                            <select id="category_id" name="category_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl', '', true) }}">
+                            <select id="category_id" name="category_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}">
                                 <option value="">{{ __('messages.please_select') }}</option>
                                 @foreach(get_translated_categories() as $id => $label)
                                     <option value="{{ $id }}" {{ old('category_id', $event->category_id) == $id ? 'selected' : '' }}>{{ $label }}</option>
@@ -1264,12 +1265,12 @@
                             <x-input-label for="event_date" :value="__('messages.date_and_time') . '*'" />
                             <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 mt-1">
                                 <input type="text" id="event_date"
-                                    class="datepicker-date flex-1 min-w-[140px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
+                                    class="datepicker-date flex-1 min-w-[140px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
                                     value="{{ $eventDate }}" autocomplete="off" aria-label="{{ __('messages.date') }}" />
                                 <div class="flex items-center gap-2 sm:gap-3">
                                     <div class="relative w-28 sm:w-32">
                                         <input type="text" id="start_time"
-                                            class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
+                                            class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
                                             value="{{ $eventStartTime }}" placeholder="{{ __('messages.start_time') }}"
                                             autocomplete="off" aria-label="{{ __('messages.start_time') }}" />
                                         <div class="time-dropdown" id="start_time_dropdown"></div>
@@ -1277,7 +1278,7 @@
                                     <span class="text-gray-500 dark:text-gray-400 text-sm shrink-0">{{ __('messages.to') }}</span>
                                     <div class="relative w-28 sm:w-32">
                                         <input type="text" id="end_time"
-                                            class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
+                                            class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
                                             value="{{ $eventEndTime }}" placeholder="{{ __('messages.end_time') }}"
                                             autocomplete="off" aria-label="{{ __('messages.end_time') }}" />
                                         <div class="time-dropdown" id="end_time_dropdown"></div>
@@ -1297,7 +1298,7 @@
                             <div id="flyer_image_choose" style="{{ $event->flyer_image_url ? 'display:none' : '' }}">
                                 <div class="mt-1 flex items-center gap-3">
                                     <button type="button" id="flyer-choose-btn"
-                                        class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600">
+                                        class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
                                         <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                         </svg>
@@ -1312,13 +1313,13 @@
                             </div>
 
                             <div id="image_preview" class="mt-3 relative inline-block" style="display: none;">
-                                <img id="preview_img" src="#" alt="Preview" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                                <img id="preview_img" src="#" alt="Preview" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" @click="if($el.src && !$el.src.endsWith('#')) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: $el.src}))" />
                                 <button type="button" id="clear-flyer-preview-btn" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                             </div>
 
                             @if ($event->flyer_image_url)
                             <div id="flyer_image_existing" class="relative inline-block mt-4 pt-1">
-                                <img src="{{ $event->flyer_image_url }}" alt="{{ __('messages.flyer_image') }}" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" id="flyer_preview" />
+                                <img src="{{ $event->flyer_image_url }}" alt="{{ __('messages.flyer_image') }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" id="flyer_preview" @click="window.dispatchEvent(new CustomEvent('show-lightbox', {detail: $el.src}))" />
                                 <button type="button"
                                     id="delete-flyer-btn"
                                     data-url="{{ route('event.delete_image', ['subdomain' => $subdomain]) }}"
@@ -1343,7 +1344,7 @@
                         <div class="mb-6">
                             <x-input-label for="description" :value="__('messages.description')" />
                             <textarea id="description" name="description"
-                                class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
                                 autocomplete="off">{{ old('description', $event->description) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
@@ -1362,7 +1363,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-venue" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div id="section-venue" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -1419,7 +1420,7 @@
 
                                     <div v-if="venueType === 'use_existing'">
                                         <select id="selected_venue"
-                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
                                                 v-model="selectedVenue">
                                                 <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
                                                 <option v-for="venue in venues" :key="venue.id" :value="venue">
@@ -1583,7 +1584,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-participants" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div id="section-participants" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -1716,7 +1717,7 @@
 
                                 <div v-if="memberType === 'use_existing' && Object.keys(members).length > 0">
                                     <select v-model="selectedMember" @change="addExistingMember" id="selected_member"
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                         <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                         <option v-for="member in filteredMembers" :key="member.id" :value="member">
                                             @{{ member.name }} <template v-if="member.email">(@{{ member.email }})</template>
@@ -1815,7 +1816,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-recurring" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div id="section-recurring" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -1841,7 +1842,7 @@
 
                         <div v-if="isRecurring" class="mb-6">
                             <x-input-label :value="__('messages.frequency')" />
-                            <select name="recurring_frequency" v-model="event.recurring_frequency" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                            <select name="recurring_frequency" v-model="event.recurring_frequency" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-lg shadow-sm">
                                 <option value="daily">{{ __('messages.daily') }}</option>
                                 <option value="weekly">{{ __('messages.weekly') }}</option>
                                 <option value="every_n_weeks">{{ __('messages.every_n_weeks') }}</option>
@@ -1911,7 +1912,7 @@
                             <div id="recurring-include-dates-items">
                                 <div v-for="(date, index) in recurringIncludeDates" :key="'inc-' + index" class="mb-2">
                                     <div class="flex items-center">
-                                        <input type="text" :class="'datepicker-include-date'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
+                                        <input type="text" :class="'datepicker-include-date'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
                                         <input type="hidden" name="recurring_include_dates[]" :value="date" />
                                         <button type="button" @click="removeIncludeDate(index)"
                                             class="ms-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
@@ -1929,7 +1930,7 @@
                             <div id="recurring-exclude-dates-items">
                                 <div v-for="(date, index) in recurringExcludeDates" :key="'exc-' + index" class="mb-2">
                                     <div class="flex items-center">
-                                        <input type="text" :class="'datepicker-exclude-date'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
+                                        <input type="text" :class="'datepicker-exclude-date'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
                                         <input type="hidden" name="recurring_exclude_dates[]" :value="date" />
                                         <button type="button" @click="removeExcludeDate(index)"
                                             class="ms-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
@@ -1956,7 +1957,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-agenda" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div id="section-agenda" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
                     <div class="max-w-xl {{ auth()->check() && auth()->user()->isRtl() ? 'rtl' : '' }}">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -1989,7 +1990,7 @@
                                 </div>
                                 <!-- Name input -->
                                 <input type="text" v-model="part.name" :name="'event_parts[' + index + '][name]'" required
-                                       class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+                                       class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" />
                                 <!-- Hidden fields -->
                                 <input type="hidden" :name="'event_parts[' + index + '][id]'" :value="part.id || ''" />
                                 <input type="hidden" :name="'event_parts[' + index + '][start_time]'" :value="part.start_time" />
@@ -2009,13 +2010,13 @@
                                     <div class="flex items-center justify-between mb-3">
                                         <span class="text-sm font-medium text-gray-500 dark:text-gray-400">#@{{ index + 1 }}</span>
                                         <div class="flex items-center gap-1.5">
-                                            <button type="button" @click="movePartUp(index)" :disabled="index === 0" class="inline-flex items-center justify-center gap-1 px-2 py-1 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed">
+                                            <button type="button" @click="movePartUp(index)" :disabled="index === 0" class="inline-flex items-center justify-center gap-1 px-2 py-1 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
                                                 </svg>
                                                 {{ __('messages.up') }}
                                             </button>
-                                            <button type="button" @click="movePartDown(index)" :disabled="index === eventParts.length - 1" class="inline-flex items-center justify-center gap-1 px-2 py-1 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed">
+                                            <button type="button" @click="movePartDown(index)" :disabled="index === eventParts.length - 1" class="inline-flex items-center justify-center gap-1 px-2 py-1 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                                                 </svg>
@@ -2028,7 +2029,7 @@
                                     </div>
                                     <div class="mb-3">
                                         <x-input-label :value="__('messages.part_name') . ' *'" />
-                                        <input type="text" v-model="part.name" :name="'event_parts[' + index + '][name]'" required class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+                                        <input type="text" v-model="part.name" :name="'event_parts[' + index + '][name]'" required class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" />
                                     </div>
                                     <div v-if="agendaShowTimes" class="grid grid-cols-2 gap-3 mb-3">
                                         <div class="relative">
@@ -2037,7 +2038,7 @@
                                                    :value="formatPartTime(part.start_time)"
                                                    @focus="initPartTimePickerOnFocus($event, part.uid, 'start')"
                                                    @change="onPartTimeChange(index, 'start_time', $event)"
-                                                   class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+                                                   class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" />
                                             <input type="hidden" :name="'event_parts[' + index + '][start_time]'" :value="part.start_time" />
                                             <div class="time-dropdown" :ref="'part_start_dropdown_' + part.uid"></div>
                                         </div>
@@ -2047,7 +2048,7 @@
                                                    :value="formatPartTime(part.end_time)"
                                                    @focus="initPartTimePickerOnFocus($event, part.uid, 'end')"
                                                    @change="onPartTimeChange(index, 'end_time', $event)"
-                                                   class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+                                                   class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" />
                                             <input type="hidden" :name="'event_parts[' + index + '][end_time]'" :value="part.end_time" />
                                             <div class="time-dropdown" :ref="'part_end_dropdown_' + part.uid"></div>
                                         </div>
@@ -2057,7 +2058,7 @@
                                         <textarea :ref="'partDescription_' + part.uid"
                                                   :name="'event_parts[' + index + '][description]'"
                                                   rows="2"
-                                                  class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">@{{ part.description }}</textarea>
+                                                  class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">@{{ part.description }}</textarea>
                                     </div>
                                     <input type="hidden" :name="'event_parts[' + index + '][id]'" :value="part.id || ''" />
                                 </div>
@@ -2089,7 +2090,7 @@
 
                         @if (config('services.google.gemini_key'))
                         <div v-if="showPartsTextInput" class="mt-4">
-                            <textarea v-model="partsText" rows="4" class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" placeholder="{{ __('messages.paste_setlist_or_agenda') }}"></textarea>
+                            <textarea v-model="partsText" rows="4" class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" placeholder="{{ __('messages.paste_setlist_or_agenda') }}"></textarea>
                             <div class="mt-2">
                                 <x-secondary-button type="button" @click="parsePartsFromText" v-bind:disabled="parsingParts || !partsText">
                                     <span v-if="parsingParts">{{ __('messages.parsing_image') }}</span>
@@ -2100,7 +2101,7 @@
 
                         <div class="mt-4">
                             <x-input-label :value="__('messages.ai_agenda_prompt')" />
-                            <textarea v-model="partsAiPrompt" rows="3" maxlength="500" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" dir="auto"
+                            <textarea v-model="partsAiPrompt" rows="3" maxlength="500" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" dir="auto"
                                 placeholder="{{ __('messages.ai_agenda_prompt_placeholder') }}"></textarea>
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ai_agenda_prompt_help') }}</p>
                             <input type="hidden" name="agenda_ai_prompt" :value="partsAiPrompt" />
@@ -2133,7 +2134,7 @@
                         {{-- Agenda image preview --}}
                         <div v-if="agendaImageFullUrl" class="mt-4">
                             <div class="relative inline-block">
-                                <img :src="agendaImageFullUrl" style="max-height:120px" class="rounded-md border border-gray-200 dark:border-gray-600" />
+                                <img :src="agendaImageFullUrl" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600" />
                                 <button type="button" @click="deleteAgendaImage"
                                     style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
                                     class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
@@ -2186,7 +2187,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-schedules" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div id="section-schedules" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -2240,7 +2241,7 @@
                                 <div id="curator_group_{{ $curator->encodeId() }}" class="ms-6 mb-2" style="display: {{ $isCuratorChecked ? 'block' : 'none' }};">
                                     <select id="curator_group_{{ $curator->encodeId() }}" 
                                             name="curator_groups[{{ $curator->encodeId() }}]" 
-                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                         <option value="">{{ __('messages.please_select') }}</option>
                                         @foreach($curator->groups as $group)
                                             @php
@@ -2278,7 +2279,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
             </button>
-            <div id="section-google-calendar" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+            <div id="section-google-calendar" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
                 <div class="max-w-xl">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -2339,7 +2340,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </button>
-                    <div id="section-tickets" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                    <div id="section-tickets" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
                         <div class="max-w-xl">                                                
                             <div class="mb-6 flex items-center justify-between">
                                 <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
@@ -2410,7 +2411,7 @@
                                 <x-input-label :value="__('messages.price')" />
                                 <div class="mt-1 flex flex-col sm:flex-row gap-3">
                                     <select name="ticket_currency_code" v-model="event.ticket_currency_code" data-searchable
-                                        class="w-full sm:w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        class="w-full sm:w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                         @foreach ($currencies as $currency)
                                         @if ($loop->index == 2)
                                         <option disabled>──────</option>
@@ -2465,7 +2466,7 @@
                                 <div class="mb-6">
                                     <x-input-label for="payment_method" :value="__('messages.payment_method')"/>
                                     <select id="payment_method" name="payment_method" v-model="event.payment_method" :required="event.tickets_enabled"
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                         <option value="cash">@lang('messages.cash')</option>
                                         @if ($user->stripe_completed_at)
                                         <option value="stripe">Stripe - {{ $user->stripe_company_name }}</option>
@@ -2490,7 +2491,7 @@
                                 <div class="mb-6">
                                     <x-input-label for="ticket_currency_code" :value="__('messages.currency')"/>
                                     <select id="ticket_currency_code" name="ticket_currency_code" v-model="event.ticket_currency_code" :required="event.tickets_enabled" data-searchable
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                         @foreach ($currencies as $currency)
                                         @if ($loop->index == 2)
                                         <option disabled>──────────</option>
@@ -2512,7 +2513,7 @@
                                 <div class="mb-6" v-show="event.payment_method == 'cash'">
                                     <x-input-label for="payment_instructions" :value="__('messages.payment_instructions')" />
                                     <textarea id="payment_instructions" name="payment_instructions" v-model="event.payment_instructions" rows="4"
-                                        class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                                        class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"></textarea>
                                 </div>
                                 </div>
 
@@ -2523,8 +2524,14 @@
                                 <div class="mb-6">
                                     <x-input-label :value="__('messages.custom_fields') . ' (' . __('messages.per_order') . ')'" class="mb-3" />
 
-                                    <div v-if="eventCustomFields && Object.keys(eventCustomFields).length > 0">
-                                        <div v-for="(field, fieldKey) in eventCustomFields" :key="fieldKey" class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md">
+                                    <div v-if="eventCustomFields && Object.keys(eventCustomFields).length > 0" id="event-custom-fields-sortable">
+                                        <div v-for="(field, fieldKey) in eventCustomFields" :key="fieldKey" :data-event-field-key="fieldKey" class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg flex items-start gap-2">
+                                            <div v-show="Object.keys(eventCustomFields).length > 1" class="custom-field-drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0 mt-1">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                                                </svg>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                 <div>
                                                     <x-input-label :value="__('messages.field_name') . ' *'" class="text-xs" />
@@ -2533,7 +2540,7 @@
                                                 </div>
                                                 <div>
                                                     <x-input-label :value="__('messages.field_type')" class="text-xs" />
-                                                    <select v-model="field.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                                    <select v-model="field.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                                         <option value="string">{{ __('messages.type_string') }}</option>
                                                         <option value="multiline_string">{{ __('messages.type_multiline_string') }}</option>
                                                         <option value="switch">{{ __('messages.type_switch') }}</option>
@@ -2561,6 +2568,7 @@
                                                 <button type="button" @click="removeEventCustomField(fieldKey)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                     {{ __('messages.remove') }}
                                                 </button>
+                                            </div>
                                             </div>
                                         </div>
                                     </div>
@@ -2613,7 +2621,14 @@
                                         <!-- Ticket-level Custom Fields -->
                                         <div class="mt-4" v-if="ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0">
                                             <x-input-label :value="__('messages.custom_fields') . ' (' . __('messages.per_ticket') . ')'" />
-                                            <div v-for="(field, fieldKey) in ticket.custom_fields" :key="fieldKey" class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md">
+                                            <div :id="`ticket-${index}-custom-fields`">
+                                            <div v-for="(field, fieldKey) in ticket.custom_fields" :key="fieldKey" :data-ticket-field-key="fieldKey" class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg flex items-start gap-2">
+                                                <div v-show="Object.keys(ticket.custom_fields).length > 1" class="custom-field-drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0 mt-1">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                                                    </svg>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
                                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                     <div>
                                                         <x-input-label :value="__('messages.field_name') . ' *'" class="text-xs" />
@@ -2622,7 +2637,7 @@
                                                     </div>
                                                     <div>
                                                         <x-input-label :value="__('messages.field_type')" class="text-xs" />
-                                                        <select v-model="field.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                                        <select v-model="field.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                                             <option value="string">{{ __('messages.type_string') }}</option>
                                                             <option value="multiline_string">{{ __('messages.type_multiline_string') }}</option>
                                                             <option value="switch">{{ __('messages.type_switch') }}</option>
@@ -2651,6 +2666,8 @@
                                                         {{ __('messages.remove') }}
                                                     </button>
                                                 </div>
+                                                </div>
+                                            </div>
                                             </div>
                                         </div>
                                         <input type="hidden" v-bind:name="`tickets[${index}][custom_fields]`" :value="JSON.stringify(ticket.custom_fields || {})">
@@ -2658,20 +2675,20 @@
                                         <div class="mt-4">
                                             <x-input-label :value="__('messages.description')" />
                                             <textarea v-bind:name="`tickets[${index}][description]`" v-model="ticket.description" rows="4"
-                                                class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                                                class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"></textarea>
                                         </div>
 
                                         <div class="mt-4">
                                             <x-input-label :value="__('messages.ticket_sales_end_at')" />
                                             <div class="flex items-center gap-2 mt-1">
                                                 <input type="text"
-                                                    class="datepicker-ticket-sales-end flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm"
+                                                    class="datepicker-ticket-sales-end flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm text-sm"
                                                     :data-ticket-index="index"
                                                     :value="ticket.sales_end_at_date"
                                                     autocomplete="off" />
                                                 <div class="relative w-28">
                                                     <input type="text"
-                                                        class="ticket-sales-end-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm"
+                                                        class="ticket-sales-end-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm text-sm"
                                                         :value="formatPartTime(ticket.sales_end_at_time)"
                                                         @focus="initTicketSalesEndTimePickerOnFocus($event, index)"
                                                         @change="onTicketSalesEndTimeChange(index, $event)"
@@ -2727,7 +2744,7 @@
                                 <div class="mb-6">
                                     <x-input-label for="ticket_notes" :value="__('messages.ticket_notes')" />
                                     <textarea id="ticket_notes" name="ticket_notes" v-model="event.ticket_notes" rows="4"
-                                        class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                                        class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"></textarea>
                                 </div>
 
                                 <div class="mb-6">
@@ -2784,7 +2801,7 @@
                                             </div>
                                             <div>
                                                 <x-input-label :value="__('messages.discount_type')" class="text-xs" />
-                                                <select v-bind:name="`promo_codes[${pcIndex}][type]`" v-model="promoCode.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                                <select v-bind:name="`promo_codes[${pcIndex}][type]`" v-model="promoCode.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                                     <option value="percentage">{{ __('messages.percentage') }}</option>
                                                     <option value="fixed">{{ __('messages.fixed_amount') }}</option>
                                                 </select>
@@ -2795,7 +2812,7 @@
                                             <div>
                                                 <x-input-label :value="__('messages.discount_value') . ' *'" class="text-xs" />
                                                 <div class="relative mt-1">
-                                                    <x-text-input type="number" step="0.01" min="0.01" v-bind:max="promoCode.type === 'percentage' ? 100 : undefined" v-bind:name="`promo_codes[${pcIndex}][value]`" v-model="promoCode.value" class="block w-full text-sm" required />
+                                                    <x-text-input type="number" step="0.01" min="0.01" v-bind:max="promoCode.type === 'percentage' ? 100 : undefined" v-bind:name="`promo_codes[${pcIndex}][value]`" v-model="promoCode.value" class="block w-full text-sm pe-14 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" required />
                                                     <span class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 text-sm">@{{ promoCode.type === 'percentage' ? '%' : event.ticket_currency_code }}</span>
                                                 </div>
                                             </div>
@@ -2810,13 +2827,13 @@
                                                 <x-input-label :value="__('messages.expires_at')" class="text-xs" />
                                                 <div class="flex items-center gap-2 mt-1">
                                                     <input type="text"
-                                                        :class="'datepicker-promo-date flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm'"
+                                                        :class="'datepicker-promo-date flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm text-sm'"
                                                         :data-pc-index="pcIndex"
                                                         :value="promoCode.expires_at_date"
                                                         autocomplete="off" />
                                                     <div class="relative w-28">
                                                         <input type="text"
-                                                            class="promo-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm text-sm"
+                                                            class="promo-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm text-sm"
                                                             :data-pc-index="pcIndex"
                                                             :value="formatPartTime(promoCode.expires_at_time)"
                                                             @focus="initPromoTimePickerOnFocus($event, pcIndex)"
@@ -3003,7 +3020,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </button>
-                    <div id="section-event-settings" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                    <div id="section-event-settings" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
                         <div class="max-w-xl">
                             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -3105,7 +3122,7 @@
                                         name="custom_field_values[{{ $fieldKey }}]"
                                         rows="3"
                                         dir="auto"
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
                                         {{ !empty($field['required']) ? 'required' : '' }}>{{ old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '') }}</textarea>
                                     @elseif(($field['type'] ?? '') === 'switch')
                                     <div class="mt-2">
@@ -3129,7 +3146,7 @@
                                     <select
                                         id="custom_field_{{ $fieldKey }}"
                                         name="custom_field_values[{{ $fieldKey }}]"
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
                                         {{ !empty($field['required']) ? 'required' : '' }}>
                                         <option value="">{{ __('messages.select') }}...</option>
                                         @foreach(explode(',', $field['options'] ?? '') as $option)
@@ -3183,7 +3200,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
             </button>
-            <div id="section-engagement" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+            <div id="section-engagement" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
                 <div class="max-w-2xl">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -3238,7 +3255,7 @@
                                 <div class="flex items-start justify-between gap-3 mb-3">
                                     <div class="flex-1">
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_question') }}</label>
-                                        <input type="text" v-model="poll.question" maxlength="500" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.poll_question') }}'">
+                                        <input type="text" v-model="poll.question" maxlength="500" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.poll_question') }}'">
                                     </div>
                                     <span v-if="poll.hash" class="shrink-0 mt-6 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
                                           :class="poll.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'">
@@ -3268,7 +3285,7 @@
                                     <div class="mb-4">
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_options') }}</label>
                                         <div v-for="(option, idx) in poll.options" :key="idx" class="flex items-center gap-2 mb-2">
-                                            <input type="text" v-model="poll.options[idx]" maxlength="200" class="flex-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.option_placeholder') }} ' + (idx + 1)">
+                                            <input type="text" v-model="poll.options[idx]" maxlength="200" class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.option_placeholder') }} ' + (idx + 1)">
                                             <button v-if="poll.options.length > 2" type="button" @click="poll.options.splice(idx, 1)" class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
                                             </button>
@@ -3381,7 +3398,7 @@
 
                         <div class="mb-4">
                             <x-input-label for="fan_comments_enabled" value="{{ __('messages.fan_comments_enabled') }}" />
-                            <select id="fan_comments_enabled" name="fan_comments_enabled" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                            <select id="fan_comments_enabled" name="fan_comments_enabled" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                                 <option value="" {{ is_null($event->fan_comments_enabled) ? 'selected' : '' }}>{{ __('messages.use_schedule_default') }}</option>
                                 <option value="1" {{ $event->fan_comments_enabled === true ? 'selected' : '' }}>{{ __('messages.enabled') }}</option>
                                 <option value="0" {{ $event->fan_comments_enabled === false && !is_null($event->fan_comments_enabled) ? 'selected' : '' }}>{{ __('messages.disabled') }}</option>
@@ -3390,7 +3407,7 @@
 
                         <div class="mb-4">
                             <x-input-label for="fan_photos_enabled" value="{{ __('messages.fan_photos_enabled') }}" />
-                            <select id="fan_photos_enabled" name="fan_photos_enabled" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                            <select id="fan_photos_enabled" name="fan_photos_enabled" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                                 <option value="" {{ is_null($event->fan_photos_enabled) ? 'selected' : '' }}>{{ __('messages.use_schedule_default') }}</option>
                                 <option value="1" {{ $event->fan_photos_enabled === true ? 'selected' : '' }}>{{ __('messages.enabled') }}</option>
                                 <option value="0" {{ $event->fan_photos_enabled === false && !is_null($event->fan_photos_enabled) ? 'selected' : '' }}>{{ __('messages.disabled') }}</option>
@@ -3399,7 +3416,7 @@
 
                         <div class="mb-4">
                             <x-input-label for="fan_videos_enabled" value="{{ __('messages.fan_videos_enabled') }}" />
-                            <select id="fan_videos_enabled" name="fan_videos_enabled" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                            <select id="fan_videos_enabled" name="fan_videos_enabled" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                                 <option value="" {{ is_null($event->fan_videos_enabled) ? 'selected' : '' }}>{{ __('messages.use_schedule_default') }}</option>
                                 <option value="1" {{ $event->fan_videos_enabled === true ? 'selected' : '' }}>{{ __('messages.enabled') }}</option>
                                 <option value="0" {{ $event->fan_videos_enabled === false && !is_null($event->fan_videos_enabled) ? 'selected' : '' }}>{{ __('messages.disabled') }}</option>
@@ -3561,7 +3578,7 @@
                     @if ($role->isPro())
                         <div class="mb-6">
                             <x-input-label for="feedback_enabled" value="{{ __('messages.feedback_override') }}" />
-                            <select id="feedback_enabled" name="feedback_enabled" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                            <select id="feedback_enabled" name="feedback_enabled" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                                 <option value="" {{ is_null($event->feedback_enabled) ? 'selected' : '' }}>{{ __('messages.use_schedule_default') }}</option>
                                 <option value="1" {{ $event->feedback_enabled === true ? 'selected' : '' }}>{{ __('messages.enabled') }}</option>
                                 <option value="0" {{ $event->feedback_enabled === false && !is_null($event->feedback_enabled) ? 'selected' : '' }}>{{ __('messages.disabled') }}</option>
@@ -4765,6 +4782,59 @@
         delete newFields[fieldKey];
         ticket.custom_fields = newFields;
       },
+      reorderEventCustomFields(container) {
+        const items = container.querySelectorAll('[data-event-field-key]');
+        const newFields = {};
+        items.forEach(item => {
+          const key = item.dataset.eventFieldKey;
+          if (this.eventCustomFields[key]) {
+            newFields[key] = this.eventCustomFields[key];
+          }
+        });
+        this.eventCustomFields = newFields;
+      },
+      reorderTicketCustomFields(ticketIndex) {
+        const container = document.querySelector(`#ticket-${ticketIndex}-custom-fields`);
+        if (!container) return;
+        const items = container.querySelectorAll('[data-ticket-field-key]');
+        const ticket = this.tickets[ticketIndex];
+        const newFields = {};
+        items.forEach(item => {
+          const key = item.dataset.ticketFieldKey;
+          if (ticket.custom_fields[key]) {
+            newFields[key] = ticket.custom_fields[key];
+          }
+        });
+        ticket.custom_fields = newFields;
+      },
+      initCustomFieldsSortable() {
+        const self = this;
+        if (typeof Sortable === 'undefined') return;
+
+        const eventFieldsContainer = document.querySelector('#event-custom-fields-sortable');
+        if (eventFieldsContainer && !eventFieldsContainer._sortableInitialized) {
+          Sortable.create(eventFieldsContainer, {
+            handle: '.custom-field-drag-handle',
+            animation: 150,
+            ghostClass: 'opacity-50',
+            onEnd: () => self.reorderEventCustomFields(eventFieldsContainer),
+          });
+          eventFieldsContainer._sortableInitialized = true;
+        }
+
+        this.tickets.forEach((ticket, index) => {
+          const ticketContainer = document.querySelector(`#ticket-${index}-custom-fields`);
+          if (ticketContainer && !ticketContainer._sortableInitialized) {
+            Sortable.create(ticketContainer, {
+              handle: '.custom-field-drag-handle',
+              animation: 150,
+              ghostClass: 'opacity-50',
+              onEnd: () => self.reorderTicketCustomFields(index),
+            });
+            ticketContainer._sortableInitialized = true;
+          }
+        });
+      },
       getTicketCustomFieldCount(ticketIndex) {
         const ticket = this.tickets[ticketIndex];
         return Object.keys(ticket.custom_fields || {}).length;
@@ -5149,6 +5219,11 @@
       window.addEventListener('beforeunload', (e) => {
           if (this.isDirty && !window._skipUnsavedWarning) { e.preventDefault(); e.returnValue = ''; }
       });
+
+      this.$nextTick(() => this.initCustomFieldsSortable());
+    },
+    updated() {
+      this.$nextTick(() => this.initCustomFieldsSortable());
     }
   });
   const vueInstance = app.mount('#app');
@@ -5721,9 +5796,8 @@ function deleteFlyer(url, hash, token, element) {
     extraDataCallback="getEventDetailsExtraData"
     checkValuesCallback="getEventDetailsCurrentValues"
     :showInstructions="true"
-    :showPresets="true"
     :errorMessage="__('messages.ai_details_generation_failed')"
-    promptEndpoint="{{ url('/'.$subdomain.'/get-event-details-prompt') }}"
+    :promptEndpoint="url('/'.$subdomain.'/get-event-details-prompt')"
     :instructionsLabel="__('messages.ai_additional_instructions')"
     :instructionsPlaceholder="__('messages.ai_additional_instructions_placeholder')"
     savedInstructions="{{ $role->ai_content_instructions }}"
@@ -5798,7 +5872,7 @@ window.handleAiEventDetailsResults = function(data) {
             img.src = data.flyer_image_url;
             img.alt = @json(__('messages.flyer_image'));
             img.style.maxHeight = '120px';
-            img.className = 'rounded-md border border-gray-200 dark:border-gray-600';
+            img.className = 'rounded-lg border border-gray-200 dark:border-gray-600';
             img.id = 'flyer_preview';
             container.appendChild(img);
 

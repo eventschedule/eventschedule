@@ -7,26 +7,26 @@
 
         {{-- Summary Metric Cards --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
                 <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.total_campaigns')</p>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalCampaignsAllTime) }}</p>
                 <p class="text-xs text-gray-400 dark:text-gray-500">{{ number_format($totalCampaignsInPeriod) }} @lang('messages.in_period')</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
                 <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.active_campaigns')</p>
                 <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ number_format($activeCampaigns) }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
                 <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.markup_revenue')</p>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">${{ number_format($markupRevenue, 2) }}</p>
             </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
                 <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.total_ad_spend')</p>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">${{ number_format($totalAdSpend, 2) }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
                 <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.total_refunds')</p>
                 <p class="text-2xl font-bold text-red-600 dark:text-red-400">${{ number_format($totalRefunds, 2) }}</p>
             </div>
@@ -34,19 +34,19 @@
 
         {{-- Average Performance Cards --}}
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
                 <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.avg_ctr')</p>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($avgCtr, 2) }}%</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
                 <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.avg_cpc')</p>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">${{ number_format($avgCpc, 2) }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
                 <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.avg_cpm')</p>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">${{ number_format($avgCpm, 2) }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
                 <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.rejection_rate')</p>
                 <p class="text-2xl font-bold {{ $rejectionRate > 20 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">{{ number_format($rejectionRate, 1) }}%</p>
             </div>
@@ -94,7 +94,7 @@
         {{-- Two-column: Status Donut + Top Boosters --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {{-- Status Distribution --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">@lang('messages.status_distribution')</h3>
                 @if (array_sum($statusDistribution) > 0)
                 <div class="h-64">
@@ -106,7 +106,7 @@
             </div>
 
             {{-- Top Boosters --}}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">@lang('messages.top_boosters')</h3>
                 @if ($topBoosters->count() > 0)
                 <div class="overflow-x-auto">
@@ -145,7 +145,7 @@
         </div>
 
         {{-- Performance Line Chart --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">@lang('messages.revenue_trend')</h3>
             @if (count($trendLabels) > 0)
             <div class="h-64">
@@ -157,7 +157,7 @@
         </div>
 
         {{-- Grant Credit Section --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">@lang('messages.grant_boost_credit')</h3>
 
             <form action="{{ route('admin.boost.grant_credit') }}" method="POST" class="flex flex-wrap gap-4 items-end mb-6">
@@ -165,24 +165,24 @@
                 <div class="relative">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.schedule_subdomain')</label>
                     <input type="text" name="subdomain" required autocomplete="off" data-subdomain-autocomplete
-                        class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         placeholder="subdomain">
-                    <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50"></div>
+                    <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.amount') ($)</label>
                     <input type="number" name="amount" required min="1" max="1000" step="0.01"
-                        class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 w-32"
+                        class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 w-32"
                         placeholder="100">
                 </div>
                 <button type="submit"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow-sm text-sm">
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm text-sm">
                     @lang('messages.grant_credit')
                 </button>
             </form>
 
             @if ($errors->any())
-            <div class="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-sm text-red-700 dark:text-red-300">
+            <div class="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-300">
                 @foreach ($errors->all() as $error)
                 <p>{{ $error }}</p>
                 @endforeach
@@ -190,7 +190,7 @@
             @endif
 
             @if (session('success'))
-            <div class="mb-4 p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-md text-sm text-green-700 dark:text-green-300">
+            <div class="mb-4 p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-700 dark:text-green-300">
                 {{ session('success') }}
             </div>
             @endif
@@ -221,7 +221,7 @@
         </div>
 
         {{-- Set Spending Limit Section --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">@lang('messages.set_spending_limit')</h3>
 
             <form action="{{ route('admin.boost.set_limit') }}" method="POST" class="flex flex-wrap gap-4 items-end mb-6">
@@ -229,18 +229,18 @@
                 <div class="relative">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.schedule_subdomain')</label>
                     <input type="text" name="subdomain" required autocomplete="off" data-subdomain-autocomplete
-                        class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         placeholder="subdomain">
-                    <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50"></div>
+                    <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.max_budget_per_campaign')</label>
                     <input type="number" name="amount" required min="1" max="{{ config('services.meta.max_budget', 1000) }}" step="0.01"
-                        class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 w-32"
+                        class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 w-32"
                         placeholder="100">
                 </div>
                 <button type="submit"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow-sm text-sm">
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm text-sm">
                     @lang('messages.set_limit')
                 </button>
             </form>
@@ -271,11 +271,11 @@
         </div>
 
         {{-- Campaigns Table --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">@lang('messages.campaigns')</h3>
                 <select id="status-filter"
-                    class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                    class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                     <option value="">@lang('messages.all_statuses')</option>
                     @foreach (['active', 'paused', 'completed', 'cancelled', 'failed', 'pending_payment', 'rejected'] as $s)
                     <option value="{{ $s }}" {{ $statusFilter === $s ? 'selected' : '' }}>@lang('messages.boost_status_' . $s)</option>
@@ -354,7 +354,7 @@
         </div>
 
         {{-- Recent Billing Records --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">@lang('messages.recent_billing_records')</h3>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">

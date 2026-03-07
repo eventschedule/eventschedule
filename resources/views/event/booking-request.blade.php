@@ -17,7 +17,7 @@
       overflow-y: auto;
       background: #fff;
       border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
+      border-radius: 0.5rem;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
       margin-top: 2px;
     }
@@ -94,7 +94,7 @@
             <div class="flex justify-between items-center gap-6 mb-5">
             @if (is_rtl())
                 <div class="hidden sm:flex items-center gap-3">
-                    <a href="{{ $role->getGuestUrl() }}" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
+                    <a href="{{ $role->getGuestUrl() }}" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
                         {{ __('messages.view_schedule') }}
                     </a>
                 </div>
@@ -118,7 +118,7 @@
                 </div>
 
                 <div class="hidden sm:flex items-center gap-3">
-                    <a href="{{ $role->getGuestUrl() }}" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
+                    <a href="{{ $role->getGuestUrl() }}" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
                         {{ __('messages.view_schedule') }}
                     </a>
                 </div>
@@ -144,7 +144,7 @@
               <div>
                 <x-input-label for="event_date" :value="__('messages.date')" />
                 <input type="text" id="event_date"
-                  class="datepicker-date mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
+                  class="datepicker-date mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
                   autocomplete="off" aria-label="{{ __('messages.date') }}" />
                 <input type="hidden" name="date" id="hidden_date" />
               </div>
@@ -152,7 +152,7 @@
                 <x-input-label for="event_start_time" :value="__('messages.start_time')" />
                 <div class="relative">
                   <input type="text" id="event_start_time"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
                     autocomplete="off" aria-label="{{ __('messages.start_time') }}" />
                   <div class="time-dropdown" id="start_time_dropdown"></div>
                 </div>
@@ -258,7 +258,29 @@
                 <div id="account-fields" class="{{ $role->require_account ? '' : 'hidden' }} mt-4">
                   <div>
                     <x-input-label for="account_password" :value="__('messages.password')" />
-                    <x-text-input id="account_password" name="password" type="password" class="mt-1 block w-full" />
+                    <x-text-input id="account_password" name="password" type="password" class="mt-1 block w-full" required />
+                  </div>
+                  <div class="mt-3">
+                    <div class="relative flex items-start">
+                      <div class="flex h-6 items-center">
+                        <input id="account_terms" name="terms" type="checkbox" required
+                          class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm" style="accent-color: {{ $accentColor }}">
+                      </div>
+                      <div class="ms-3 text-sm leading-6">
+                        <label for="account_terms" class="font-medium text-gray-700 dark:text-gray-300">
+                          @if (config('app.hosted'))
+                            {!! str_replace([':terms', ':privacy'], [
+                                '<a href="' . marketing_url('/terms-of-service') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
+                                '<a href="' . marketing_url('/privacy') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
+                            ], __('messages.i_accept_the_terms_and_privacy')) !!}
+                          @else
+                            {!! str_replace([':terms'], [
+                                '<a href="' . marketing_url('/self-hosting-terms-of-service') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
+                            ], __('messages.i_accept_the_terms')) !!}
+                          @endif
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -270,10 +292,10 @@
 
             {{-- Submit Button --}}
             <div class="flex items-center justify-end gap-3 mt-8">
-              <a href="{{ $role->getGuestUrl() }}" class="px-4 py-3 text-base text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200">
+              <a href="{{ $role->getGuestUrl() }}" class="px-4 py-3 text-base text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200">
                 {{ __('messages.cancel') }}
               </a>
-              <button type="submit" id="submit-btn" class="px-4 py-3 text-base rounded-md transition-all duration-200 disabled:opacity-50" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+              <button type="submit" id="submit-btn" class="px-4 py-3 text-base rounded-lg transition-all duration-200 disabled:opacity-50" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
                 {{ __('messages.submit') }}
               </button>
             </div>
@@ -480,6 +502,8 @@
       var createAccount = document.getElementById('create_account').checked;
       var accountFields = document.getElementById('account-fields');
       accountFields.classList.toggle('hidden', !createAccount);
+      document.getElementById('account_password').required = createAccount;
+      document.getElementById('account_terms').required = createAccount;
     }
 
     document.addEventListener('DOMContentLoaded', function() {

@@ -223,13 +223,13 @@
                                 </svg>
                                 AI-Powered
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Smart event import</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Paste text, drop an image, or send a WhatsApp message with a flyer. AI extracts title, date, time, venue, and description automatically. Or scan a printed agenda to populate event parts.</p>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">AI-powered features</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Parse text and images, generate flyers and descriptions, create your brand style, translate to 11 languages, and create events via WhatsApp.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Parse any format</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Smart import</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Style generation</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Content generation</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Instant translation</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Agendas & setlists</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Agenda scanning</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">WhatsApp</span>
                             </div>
                             <span class="inline-flex items-center text-blue-400 font-medium group-hover:gap-3 gap-2 transition-all">

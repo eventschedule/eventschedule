@@ -88,7 +88,14 @@ class AppServiceProvider extends ServiceProvider
             $upgradeRole = $allRoles
                 ->where('pivot.level', 'owner')
                 ->first(fn ($role) => $role->actualPlanTier() === 'free');
-            $view->with('upgradeSubdomain', $upgradeRole?->subdomain);
+            $view->with([
+                'upgradeSubdomain' => $upgradeRole?->subdomain,
+                'githubStars' => \App\Utils\GitHubUtils::getStars(),
+            ]);
+        });
+
+        View::composer('marketing.partials.header', function ($view) {
+            $view->with('githubStars', \App\Utils\GitHubUtils::getStars());
         });
 
     }
