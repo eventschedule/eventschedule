@@ -27,8 +27,6 @@ class NotifyFanContentChanges extends Command
      */
     public function handle()
     {
-        \Log::info('Checking for new fan content changes...');
-
         // Get all events that have pending fan content (videos, comments, or photos)
         $events = Event::where(function ($query) {
             $query->whereHas('pendingVideos')
@@ -73,11 +71,9 @@ class NotifyFanContentChanges extends Command
                 $event->save();
 
                 $notifiedCount++;
-                \Log::info("Notified event owner for event {$event->name} ({$subdomain}) - {$currentCount} pending fan content items");
             }
         }
 
-        \Log::info("Fan content notification check completed. Notified {$notifiedCount} events.");
         $this->info("Notified {$notifiedCount} events with new fan content.");
     }
 }

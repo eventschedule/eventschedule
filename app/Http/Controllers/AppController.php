@@ -116,9 +116,6 @@ class AppController extends Controller
         }
 
         try {
-            $startTime = microtime(true);
-            \Log::info('translateData started');
-
             // === EVERY CALL (every minute) ===
 
             // Process queued jobs (emails, etc.)
@@ -214,8 +211,6 @@ class AppController extends Controller
                 Cache::put('notified_pending_today', true, now()->endOfDay());
             }
 
-            $duration = round(microtime(true) - $startTime, 2);
-            \Log::info("translateData finished in {$duration}s");
         } finally {
             $lock->release();
         }
@@ -259,5 +254,4 @@ class AppController extends Controller
 
         abort(404);
     }
-
 }

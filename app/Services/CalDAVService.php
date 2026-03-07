@@ -146,11 +146,6 @@ class CalDAVService
             );
 
             if ($response->successful() || $response->status() === 201) {
-                Log::info('Event created in CalDAV', [
-                    'event_id' => $event->id,
-                    'uid' => $uid,
-                ]);
-
                 UsageTrackingService::track(UsageTrackingService::CALDAV_SYNC, $role->id);
 
                 return $uid;
@@ -209,11 +204,6 @@ class CalDAVService
             );
 
             if ($response->successful() || $response->status() === 204) {
-                Log::info('Event updated in CalDAV', [
-                    'event_id' => $event->id,
-                    'uid' => $uid,
-                ]);
-
                 UsageTrackingService::track(UsageTrackingService::CALDAV_SYNC, $role->id);
 
                 return true;
@@ -257,10 +247,6 @@ class CalDAVService
             );
 
             if ($response->successful() || $response->status() === 204 || $response->status() === 404) {
-                Log::info('Event deleted from CalDAV', [
-                    'uid' => $uid,
-                ]);
-
                 return true;
             }
 
@@ -405,12 +391,6 @@ class CalDAVService
                             ->first();
 
                         if ($existingByNameTime) {
-                            Log::info('CalDAV event matches existing event by name/time, skipping', [
-                                'uid' => $eventData['uid'],
-                                'existing_event_id' => $existingByNameTime->id,
-                                'role_id' => $role->id,
-                            ]);
-
                             continue;
                         }
                     }

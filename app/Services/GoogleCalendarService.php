@@ -117,12 +117,6 @@ class GoogleCalendarService
             }
         }
 
-        Log::info('Refreshing Google Calendar token', [
-            'user_id' => $user->id,
-            'expires_at' => $expiresAt,
-            'minutes_until_expiry' => $expiresAt ? now()->diffInMinutes($expiresAt) : 'unknown',
-        ]);
-
         $refreshToken = $user->google_refresh_token;
         if ($refreshToken) {
             try {

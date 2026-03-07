@@ -79,11 +79,6 @@ class SyncEventToCalDAV implements ShouldQueue
 
         if ($uid) {
             $this->event->setCalDAVEventUidForRole($this->role->id, $uid);
-
-            Log::info('Event created in CalDAV', [
-                'event_id' => $this->event->id,
-                'uid' => $uid,
-            ]);
         } else {
             Log::warning('Failed to create event in CalDAV (no UID returned)', [
                 'event_id' => $this->event->id,
@@ -110,12 +105,7 @@ class SyncEventToCalDAV implements ShouldQueue
 
         $success = $calDAVService->updateEvent($this->event, $uid, $this->role);
 
-        if ($success) {
-            Log::info('Event updated in CalDAV', [
-                'event_id' => $this->event->id,
-                'uid' => $uid,
-            ]);
-        } else {
+        if (! $success) {
             Log::warning('Failed to update event in CalDAV', [
                 'event_id' => $this->event->id,
                 'role_id' => $this->role->id,
@@ -139,11 +129,6 @@ class SyncEventToCalDAV implements ShouldQueue
 
         if ($success) {
             $this->event->setCalDAVEventUidForRole($this->role->id, null);
-
-            Log::info('Event deleted from CalDAV', [
-                'event_id' => $this->event->id,
-                'uid' => $uid,
-            ]);
         } else {
             Log::warning('Failed to delete event from CalDAV', [
                 'event_id' => $this->event->id,

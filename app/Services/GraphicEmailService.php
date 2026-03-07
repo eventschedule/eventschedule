@@ -22,8 +22,6 @@ class GraphicEmailService
     {
         // Skip sending for demo role
         if (is_demo_role($role)) {
-            Log::info('Skipping graphic email for demo role', ['role_id' => $role->id]);
-
             return false;
         }
 
@@ -58,8 +56,6 @@ class GraphicEmailService
                 ->get();
 
             if ($events->isEmpty()) {
-                Log::info('No events found for graphic email', ['role_id' => $role->id]);
-
                 return false;
             }
 

@@ -37,10 +37,9 @@
     </div>
     <div v-if="event.can_edit" class="mt-auto pt-3">
         <a :href="event.edit_url"
-            class="hover-accent inline-flex items-center px-4 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md border transition-all duration-200 hover:scale-105"
-            style="border-color: {{ $accentColor }}"
-            @click.stop>
-            {{ __('messages.edit') }}
+           class="text-sm text-gray-500 dark:text-gray-400 hover:underline hover:text-gray-700 dark:hover:text-gray-200"
+           @click.stop>
+            {{ __('messages.edit_event') }}
         </a>
     </div>
 </div>

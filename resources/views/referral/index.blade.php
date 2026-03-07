@@ -77,7 +77,7 @@
                     <form action="{{ route('referrals.apply_credit') }}" method="POST" class="flex items-center gap-2">
                         @csrf
                         <input type="hidden" name="referral_id" value="{{ \App\Utils\UrlUtils::encodeId($credit->id) }}">
-                        <select name="role_id" required
+                        <select name="role_id" required data-searchable
                             class="rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                             <option value="">{{ __('messages.select_schedule') }}</option>
                             @foreach ($ownedRoles as $role)

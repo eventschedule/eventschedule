@@ -1357,7 +1357,7 @@
                                 <div class="flex items-center gap-1">
                                     <select id="header_image" name="header_image"
                                         class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
-                                        data-action="header-image-input">
+                                        data-searchable data-action="header-image-input">
                                         <option value="none" {{ $effectiveHeaderImage == 'none' || (!$effectiveHeaderImage && !$role->header_image_url) ? 'SELECTED' : '' }}>
                                             {{ __('messages.none') }}</option>
                                         @foreach($headers as $header => $name)
@@ -1476,7 +1476,7 @@
                                 <div class="flex items-center gap-1">
                                     <select id="background_image" name="background_image"
                                         class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
-                                        data-action="background-image-input">
+                                        data-searchable data-action="background-image-input">
                                         @foreach($backgrounds as $background => $name)
                                         <option value="{{ $background }}"
                                             {{ $effectiveBackgroundImage == $background ? 'SELECTED' : '' }}>
@@ -1553,7 +1553,7 @@
                                 <div class="mb-6">
                                     <x-input-label for="background_colors" :value="__('messages.colors')" />
                                     <div class="flex items-center gap-1">
-                                        <select id="background_colors" name="background_colors" data-action="background-colors-input"
+                                        <select id="background_colors" name="background_colors" data-searchable data-action="background-colors-input"
                                             class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                             @foreach($gradients as $gradient => $name)
                                             <option value="{{ $gradient }}"
@@ -2446,6 +2446,7 @@
                                 <x-input-label :value="__('messages.default_curator_schedules')" />
                                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.default_curator_schedules_help') }}</p>
                                 @php $selectedCuratorIds = old('default_curator_ids', $role->default_curator_ids ?? []); @endphp
+                                <input type="hidden" name="default_curator_ids[]" value="">
                                 @foreach ($availableCurators as $curator)
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" name="default_curator_ids[]" value="{{ $curator->id }}"
@@ -2916,7 +2917,7 @@
                                 <!-- Calendar Selection -->
                                 <div>
                                     <x-input-label for="google-calendar-select" :value="__('messages.select_google_calendar')" />
-                                    <select id="google-calendar-select" name="google_calendar_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                                    <select id="google-calendar-select" name="google_calendar_id" data-searchable class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                         <option value="">{{ __('messages.loading_calendars') }}</option>
                                     </select>
                                 </div>
@@ -3122,7 +3123,7 @@
 
                                 <div id="caldav-calendar-select-container" class="hidden">
                                     <x-input-label for="caldav_calendar_url" :value="__('messages.select_calendar')" />
-                                    <select id="caldav_calendar_url" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                                    <select id="caldav_calendar_url" data-searchable class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
                                         <option value="">{{ __('messages.select_a_calendar') }}</option>
                                     </select>
                                 </div>

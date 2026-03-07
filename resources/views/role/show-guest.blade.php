@@ -150,7 +150,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                     @endif
                     @if($hasPhone)
                     <a href="tel:{{ $role->phone }}"
-                       class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
+                       class="w-10 h-10 rounded-lg flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
                        style="background-color: {{ $accentColor }}"
                        data-tooltip="Phone: {{ $role->phone }}">
                         <svg class="w-5 h-5" fill="{{ $contrastColor }}" viewBox="0 0 24 24">
@@ -160,7 +160,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                     @endif
                     @if($hasWebsite)
                     <a href="{{ $role->website }}" target="_blank" rel="noopener noreferrer nofollow"
-                       class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
+                       class="w-10 h-10 rounded-lg flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
                        style="background-color: {{ $accentColor }}"
                        data-tooltip="Website: {{ App\Utils\UrlUtils::clean($role->website) }}">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24">
@@ -172,7 +172,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                         @foreach (json_decode($role->social_links) as $link)
                         @if ($link)
                         <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
-                           class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
+                           class="w-10 h-10 rounded-lg flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
                            style="background-color: {{ $accentColor }}"
                            data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
                             <x-url-icon class="w-5 h-5" :color="$contrastColor">
@@ -186,6 +186,9 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                 @endif
 
                 {{-- Action buttons --}}
+                @php
+                $hasSubmitButton = ($role->isCurator() || $role->isVenue() || $role->isTalent()) && $role->accept_requests;
+                @endphp
                 @if (config('app.hosted') || config('app.is_testing'))
                 <div class="flex flex-row flex-wrap gap-3 items-center justify-center">
                   @if (($role->isCurator() || $role->isVenue() || $role->isTalent()) && $role->accept_requests)
@@ -196,13 +199,16 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                     <button
                       type="button"
                       style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                      class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                      class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
                       {{ $role->isTalent() ? $role->customLabel('request_to_book') : $role->customLabel('submit_event') }}
                     </button>
                   </a>
                   @endif
-                  @if ((! auth()->user() || ! auth()->user()->isConnected($role->subdomain)) && ! is_demo_mode())
+                  @if (! is_demo_mode() && (
+                      ($hasSubmitButton && auth()->user() && ! auth()->user()->isFollowing($role->subdomain) && ! auth()->user()->isConnected($role->subdomain)) ||
+                      (! $hasSubmitButton && (! auth()->user() || ! auth()->user()->isConnected($role->subdomain)))
+                  ))
                   <a
                     href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
                     class="inline-flex items-center justify-center"
@@ -210,7 +216,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                     <button
                       type="button"
                       style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                      class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                      class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
                       {{ $role->customLabel('follow') }}
                     </button>
@@ -224,7 +230,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                     <button
                       type="button"
                       style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                      class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold border-2 transition-all duration-200 hover:scale-105 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                      class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 transition-all duration-200 hover:scale-105 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
                       {{ __('messages.manage') }}
                     </button>
@@ -340,13 +346,16 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                     <button
                       type="button"
                       style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                      class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                      class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
                       {{ $role->isTalent() ? $role->customLabel('request_to_book') : $role->customLabel('submit_event') }}
                     </button>
                   </a>
                   @endif
-                  @if ((! auth()->user() || ! auth()->user()->isConnected($role->subdomain)) && ! is_demo_mode())
+                  @if (! is_demo_mode() && (
+                      ($hasSubmitButton && auth()->user() && ! auth()->user()->isFollowing($role->subdomain) && ! auth()->user()->isConnected($role->subdomain)) ||
+                      (! $hasSubmitButton && (! auth()->user() || ! auth()->user()->isConnected($role->subdomain)))
+                  ))
                   <a
                     href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
                     class="inline-flex items-center justify-center flex-shrink-0"
@@ -354,7 +363,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                     <button
                       type="button"
                       style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                      class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                      class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
                       {{ $role->customLabel('follow') }}
                     </button>
@@ -368,7 +377,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                     <button
                       type="button"
                       style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                      class="inline-flex items-center rounded-md px-5 py-2.5 text-sm font-semibold border-2 transition-all duration-200 hover:scale-105 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                      class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 transition-all duration-200 hover:scale-105 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
                       {{ __('messages.manage') }}
                     </button>
@@ -381,7 +390,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                 @if(!$event)
                 <button id="hero-filters-btn"
                         data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
-                        class="hidden w-11 h-11 items-center justify-center rounded-md border-2 transition-all duration-200 hover:scale-105 hover:shadow-md flex-shrink-0 relative"
+                        class="hidden w-11 h-11 items-center justify-center rounded-lg border-2 transition-all duration-200 hover:scale-105 hover:shadow-md flex-shrink-0 relative"
                         style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}; display: none;">
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3H19C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z"/>

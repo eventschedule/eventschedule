@@ -289,7 +289,7 @@ class StripeController extends Controller
                 break;
 
             default:
-                \Log::info('Received Stripe event type: '.$event->type);
+                break;
         }
 
         return response()->json(['status' => 'success']);

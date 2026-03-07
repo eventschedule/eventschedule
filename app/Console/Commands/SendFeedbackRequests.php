@@ -18,8 +18,6 @@ class SendFeedbackRequests extends Command
 
     public function handle()
     {
-        Log::info('Sending feedback requests...');
-
         $count = 0;
 
         $roles = Role::where(function ($q) {
@@ -117,7 +115,6 @@ class SendFeedbackRequests extends Command
             }
         }
 
-        Log::info("Sent {$count} feedback request emails");
     }
 
     protected function isTestEmail(string $email): bool

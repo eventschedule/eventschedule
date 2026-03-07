@@ -726,21 +726,8 @@ class ImportCuratorEvents extends Command
 
         // Handle performers array if present
         if (! empty($eventData['performers'])) {
-            \Log::info('buildMembersData: performers found', [
-                'count' => count($eventData['performers']),
-                'performers' => $eventData['performers'],
-            ]);
-
             foreach ($eventData['performers'] as $index => $performer) {
                 $memberId = ! empty($performer['talent_id']) ? $performer['talent_id'] : "new_talent_{$index}";
-
-                \Log::info('buildMembersData: processing performer', [
-                    'index' => $index,
-                    'performer_name' => $performer['name'] ?? null,
-                    'talent_id_in_data' => $performer['talent_id'] ?? null,
-                    'talent_id_empty' => empty($performer['talent_id']),
-                    'resulting_member_id' => $memberId,
-                ]);
 
                 $members[$memberId] = [
                     'name' => $performer['name'] ?? '',
@@ -750,13 +737,7 @@ class ImportCuratorEvents extends Command
                     'youtube_url' => $performer['youtube_url'] ?? '',
                 ];
             }
-        } else {
-            \Log::info('buildMembersData: no performers in eventData');
         }
-
-        \Log::info('buildMembersData: final members', [
-            'member_keys' => array_keys($members),
-        ]);
 
         return $members;
     }

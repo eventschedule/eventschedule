@@ -3,7 +3,7 @@
         <div class="flex justify-between items-center mb-6">
             {{-- Schedule Selector --}}
             <div class="min-w-[200px] max-w-xs">
-                <select id="role-filter"
+                <select id="role-filter" data-searchable
                     class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base">
                     @foreach ($roles as $r)
                         <option value="{{ \App\Utils\UrlUtils::encodeId($r->id) }}" {{ $selectedRoleId == $r->id ? 'selected' : '' }}>

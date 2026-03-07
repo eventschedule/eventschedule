@@ -28,8 +28,6 @@ class SendGraphicEmails extends Command
      */
     public function handle()
     {
-        \Log::info('Starting graphic email scheduler...');
-
         // Get all roles with graphic email enabled
         $roles = Role::where('is_deleted', false)
             ->whereNotNull('graphic_settings')
@@ -48,7 +46,6 @@ class SendGraphicEmails extends Command
 
                 // Check if Enterprise (required for this feature)
                 if (! $role->isEnterprise()) {
-                    \Log::info('Skipping graphic email for non-Enterprise role: '.$role->subdomain);
                     $skippedCount++;
 
                     continue;
@@ -59,7 +56,6 @@ class SendGraphicEmails extends Command
                 $recipientEmails = $settings['recipient_emails'] ?? '';
 
                 if (empty($recipientEmails)) {
-                    \Log::info('Skipping graphic email - no recipient emails configured for role: '.$role->subdomain);
                     $skippedCount++;
 
                     continue;
@@ -76,14 +72,12 @@ class SendGraphicEmails extends Command
                     $role->save();
 
                     $sentCount++;
-                    \Log::info('Sent graphic email for role: '.$role->subdomain);
                 }
             } catch (\Exception $e) {
                 \Log::error('Failed to send graphic email for role '.$role->subdomain.': '.$e->getMessage());
             }
         }
 
-        \Log::info("Graphic email scheduler completed. Sent: {$sentCount}, Skipped: {$skippedCount}");
     }
 
     /**

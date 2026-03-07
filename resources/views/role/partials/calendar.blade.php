@@ -4,6 +4,14 @@
         background-color: var(--es-accent) !important;
         color: var(--es-contrast) !important;
     }
+    /* GP Month Navigation */
+    .gp-month-nav { background-color: #f3f4f6; }
+    .gp-month-separator { background-color: rgba(0,0,0,0.08); }
+    .gp-month-btn:hover { background-color: rgba(0,0,0,0.04); }
+    .dark .gp-month-nav { background: linear-gradient(135deg, #2d2d30, #252526); border: 1px solid rgba(255,255,255,0.06); }
+    .dark .gp-month-nav .gp-month-btn { color: #9ca3af; }
+    .dark .gp-month-nav .gp-month-btn:hover { background-color: rgba(255,255,255,0.1); color: #d1d5db; }
+    .dark .gp-month-separator { background-color: rgba(255,255,255,0.08); }
 </style>
 <div class="flex h-full flex-col" id="calendar-app">
 @php
@@ -251,18 +259,20 @@
         <div class="flex {{ ($tab ?? '') == 'availability' ? 'flex-row flex-wrap items-center' : 'flex-col' }} md:flex-row md:flex-nowrap md:items-center md:ms-auto gap-3">
 
             {{-- Month Navigation Controls --}}
-            <div id="month-nav-controls" v-show="currentView === 'calendar'" class="flex items-center bg-white/95 dark:bg-gray-900/95 rounded-md shadow-sm {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:flex' }}" {!! ($eventLayout ?? 'calendar') === 'list' ? 'style="display:none"' : '' !!}>
+            <div id="month-nav-controls" v-show="currentView === 'calendar'" class="flex items-center shadow-sm {{ $route === 'guest' ? 'gp-month-nav rounded-xl' : 'bg-white/95 dark:bg-gray-900/95 rounded-md' }} {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:flex' }}" {!! ($eventLayout ?? 'calendar') === 'list' ? 'style="display:none"' : '' !!}>
                 @if ($route === 'guest' && !request()->graphic)
-                <button @click="navigateMonth(-1)" class="flex h-11 w-14 items-center justify-center rounded-s-md border-s border-y border-gray-300 dark:border-gray-600 pe-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:pe-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700">
+                <button @click="navigateMonth(-1)" class="flex h-11 w-14 items-center justify-center rounded-s-xl border-transparent pe-1 text-gray-400 hover:text-gray-500 focus:relative md:w-11 md:pe-0 transition-all duration-200 gp-month-btn">
                     <span class="sr-only">{{ __('messages.previous_month') }}</span>
                     <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
                         <path fill-rule="evenodd" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" clip-rule="evenodd" />
                     </svg>
                 </button>
-                <button @click="navigateMonth(0)" class="flex h-11 items-center justify-center border-y border-gray-300 dark:border-gray-600 px-4 text-base font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 focus:relative">
+                <div class="gp-month-separator w-px h-5 flex-shrink-0"></div>
+                <button @click="navigateMonth(0)" class="flex h-11 items-center justify-center px-4 text-base font-semibold text-gray-900 dark:text-gray-100 focus:relative transition-all duration-200 gp-month-btn">
                     <span class="h-6 flex items-center">{{ __('messages.this_month') }}</span>
                 </button>
-                <button @click="navigateMonth(1)" class="flex h-11 w-14 items-center justify-center rounded-e-md border-e border-y border-gray-300 dark:border-gray-600 ps-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:ps-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700">
+                <div class="gp-month-separator w-px h-5 flex-shrink-0"></div>
+                <button @click="navigateMonth(1)" class="flex h-11 w-14 items-center justify-center rounded-e-xl border-transparent ps-1 text-gray-400 hover:text-gray-500 focus:relative md:w-11 md:ps-0 transition-all duration-200 gp-month-btn">
                     <span class="sr-only">{{ __('messages.next_month') }}</span>
                     <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
                         <path fill-rule="evenodd" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" clip-rule="evenodd" />
@@ -946,13 +956,6 @@
 
                                         {{-- Action buttons row --}}
                                         <div class="flex flex-wrap items-center gap-2">
-                                            <a v-if="event.can_edit" :href="event.edit_url"
-                                               class="hover-accent inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md border transition-all duration-200 hover:scale-105"
-                                               style="border-color: {{ $accentColor }}"
-                                               @click.stop>
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>
-                                                {{ __('messages.edit') }}
-                                            </a>
                                                 <button v-if="event.fan_photos_enabled" @click.stop="togglePhotoForm(event, $event)"
                                                         class="hover-accent inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md border"
                                                         style="border-color: {{ $accentColor }}">
@@ -1051,6 +1054,12 @@
                                                         style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}">{{ __('messages.submit') }}</button>
                                             </div>
                                         </form>
+
+                                        <a v-if="event.can_edit" :href="event.edit_url"
+                                           class="text-sm text-gray-500 dark:text-gray-400 hover:underline hover:text-gray-700 dark:hover:text-gray-200"
+                                           @click.stop>
+                                            {{ __('messages.edit_event') }}
+                                        </a>
                                     </div>
                                     {{-- Flyer Image Column --}}
                                     <div v-if="!event.is_password_protected" class="md:w-[35%] md:flex-shrink-0">
@@ -1302,13 +1311,6 @@
 
                                     {{-- Action buttons row --}}
                                     <div class="flex flex-wrap items-center gap-2">
-                                        <a v-if="event.can_edit" :href="event.edit_url"
-                                           class="hover-accent inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md border transition-all duration-200 hover:scale-105"
-                                           style="border-color: {{ $accentColor }}"
-                                           @click.stop>
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>
-                                            {{ __('messages.edit') }}
-                                        </a>
                                             <button v-if="event.fan_photos_enabled" @click.stop="togglePhotoForm(event, $event)"
                                                     class="hover-accent inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white rounded-md transition-all duration-200 hover:scale-105 border"
                                                     style="border-color: {{ $accentColor }}">
@@ -1407,6 +1409,12 @@
                                                     style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}">{{ __('messages.submit') }}</button>
                                         </div>
                                     </form>
+
+                                    <a v-if="event.can_edit" :href="event.edit_url"
+                                       class="text-sm text-gray-500 dark:text-gray-400 hover:underline hover:text-gray-700 dark:hover:text-gray-200"
+                                       @click.stop>
+                                        {{ __('messages.edit_event') }}
+                                    </a>
                                 </div>
                             </template>
                         </div>

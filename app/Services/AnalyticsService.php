@@ -95,7 +95,7 @@ class AnalyticsService
             ->groupBy('event_id')
             ->orderByDesc('view_count')
             ->limit($limit)
-            ->with('event')
+            ->with('event.roles')
             ->get()
             ->filter(fn ($item) => $item->event !== null)
             ->map(fn ($item) => [

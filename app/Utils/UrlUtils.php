@@ -61,8 +61,6 @@ class UrlUtils
         // Fall back to legacy base64 method for backwards compatibility
         $id = base64_decode($value);
         if (is_numeric($id)) {
-            \Log::info('Legacy encoded ID used: consider updating URL', ['value' => $value]);
-
             return $id - 389278;
         }
 

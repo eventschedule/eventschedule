@@ -28,8 +28,6 @@ class NotifyRequestChanges extends Command
      */
     public function handle()
     {
-        \Log::info('Checking for new request changes...');
-
         // Get all roles that have pending requests
         // Pending requests are events where is_accepted is null in the event_role pivot table
         $roles = Role::whereHas('events', function ($query) {
@@ -67,12 +65,10 @@ class NotifyRequestChanges extends Command
                     $role->save();
 
                     $notifiedCount++;
-                    \Log::info("Notified editors for role {$role->name} ({$role->subdomain}) - {$currentRequestCount} pending requests");
                 }
             }
         }
 
-        \Log::info("Request notification check completed. Notified {$notifiedCount} roles.");
         $this->info("Notified {$notifiedCount} roles with new requests.");
     }
 }

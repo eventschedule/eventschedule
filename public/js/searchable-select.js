@@ -386,6 +386,10 @@
             if (isOpen) {
                 closeDropdown();
             } else {
+                var selectedOpt = select.options[select.selectedIndex];
+                if (selectedOpt && selectedOpt.disabled) {
+                    input.value = '';
+                }
                 openDropdown();
                 input.select();
             }

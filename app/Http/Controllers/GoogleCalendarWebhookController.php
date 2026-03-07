@@ -70,11 +70,6 @@ class GoogleCalendarWebhookController extends Controller
 
             // Check if sync from Google is enabled
             if (! $role->syncsFromGoogle()) {
-                Log::info('Sync from Google not enabled for role', [
-                    'role_id' => $role->id,
-                    'sync_direction' => $role->sync_direction,
-                ]);
-
                 return response('Sync from Google not enabled', 200);
             }
 
@@ -138,12 +133,6 @@ class GoogleCalendarWebhookController extends Controller
 
             $calendarId = $role->getGoogleCalendarId();
             $results = $this->googleCalendarService->syncFromGoogleCalendar($user, $role, $calendarId);
-
-            Log::info('Bidirectional sync completed from Google Calendar', [
-                'role_id' => $role->id,
-                'calendar_id' => $calendarId,
-                'results' => $results,
-            ]);
 
         } catch (\Exception $e) {
             Log::error('Failed to sync from Google Calendar via webhook', [

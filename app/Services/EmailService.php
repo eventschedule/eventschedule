@@ -27,15 +27,11 @@ class EmailService
     {
         // Skip sending to test/example email addresses
         if ($this->isTestEmail($sale->email)) {
-            Log::info('Skipping email to test address: '.$sale->email);
-
             return self::ERROR_SKIPPED;
         }
 
         // Skip sending for demo role
         if (is_demo_role($role)) {
-            Log::info('Skipping email for demo role');
-
             return self::ERROR_SKIPPED;
         }
 

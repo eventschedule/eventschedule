@@ -77,7 +77,7 @@ class MetaAdsWebhookController extends Controller
                 'ad_account' => $this->handleAdAccountChange($value),
                 'campaign' => $this->handleCampaignChange($value),
                 'ad' => $this->handleAdChange($value),
-                default => Log::info('Unhandled Meta webhook field', ['field' => $field]),
+                default => null,
             };
         } catch (\Exception $e) {
             Log::error('Error processing Meta webhook', [
@@ -90,7 +90,6 @@ class MetaAdsWebhookController extends Controller
     private function handleAdAccountChange(array $value): void
     {
         // Ad account level changes (spending limits, etc.)
-        Log::info('Meta ad account change', ['value' => $value]);
     }
 
     private function handleCampaignChange(array $value): void

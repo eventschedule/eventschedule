@@ -155,11 +155,16 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             @foreach($dashboardConfig['panels'] as $panel)
                 @if($panel['visible'])
-                    <div class="{{ $panel['size'] === 'full' ? 'lg:col-span-2' : '' }}">
-                        @include('home.panels.' . $panel['id'], ['size' => $panel['size']])
+                    <div>
+                        @include('home.panels.' . $panel['id'])
                     </div>
                 @endif
             @endforeach
+        </div>
+
+        {{-- Calendar (always shown) --}}
+        <div class="mb-6">
+            @include('role/partials/calendar', ['route' => 'home', 'tab' => ''])
         </div>
 
         {{-- Customize Dashboard Modal --}}
@@ -167,28 +172,46 @@
             <div x-data='{
                 panels: @json($dashboardConfig["panels"]),
                 labels: {
-                    stats: @json(__("messages.panel_stats")),
+                    upcoming_count: @json(__("messages.panel_upcoming_count")),
+                    views: @json(__("messages.panel_views")),
+                    followers: @json(__("messages.panel_followers")),
                     upcoming_events: @json(__("messages.panel_upcoming_events")),
                     recent_activity: @json(__("messages.panel_recent_activity")),
-                    calendar: @json(__("messages.panel_calendar"))
+                    revenue: @json(__("messages.panel_revenue")),
+                    top_events: @json(__("messages.panel_top_events")),
+                    newsletters: @json(__("messages.panel_newsletters")),
+                    boosts: @json(__("messages.panel_boosts")),
+                    traffic_sources: @json(__("messages.panel_traffic_sources"))
                 },
                 saving: false,
                 sortableInstance: null,
                 init() {
-                    this.$nextTick(() => {
-                        const list = this.$refs.panelList;
-                        if (list && typeof Sortable !== "undefined") {
-                            this.sortableInstance = Sortable.create(list, {
-                                handle: ".drag-handle",
-                                animation: 150,
-                                ghostClass: "opacity-50",
-                                onEnd: (evt) => {
-                                    const item = this.panels.splice(evt.oldIndex, 1)[0];
-                                    this.panels.splice(evt.newIndex, 0, item);
-                                }
-                            });
+                    this.$nextTick(() => this.initSortable());
+                },
+                initSortable() {
+                    const list = this.$refs.panelList;
+                    if (!list || typeof Sortable === "undefined") return;
+                    if (this.sortableInstance) this.sortableInstance.destroy();
+                    this.sortableInstance = Sortable.create(list, {
+                        handle: ".drag-handle",
+                        animation: 150,
+                        ghostClass: "opacity-50",
+                        fallbackOnBody: true,
+                        onStart: (evt) => {
+                            this._childOrder = [...evt.from.children];
+                        },
+                        onEnd: (evt) => {
+                            this._childOrder.forEach(child => evt.from.appendChild(child));
+                            const item = this.panels.splice(evt.oldIndex, 1)[0];
+                            this.panels.splice(evt.newIndex, 0, item);
                         }
                     });
+                },
+                reorder() {
+                    const visible = this.panels.filter(p => p.visible);
+                    const hidden = this.panels.filter(p => !p.visible);
+                    this.panels = [...visible, ...hidden];
+                    this.$nextTick(() => this.initSortable());
                 },
                 async save() {
                     this.saving = true;
@@ -219,9 +242,9 @@
                 </div>
 
                 <div class="p-6">
-                    <div x-ref="panelList" class="space-y-2">
+                    <div x-ref="panelList" class="flex flex-col gap-2">
                         <template x-for="(panel, index) in panels" :key="panel.id">
-                            <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-700/50">
+                            <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-700/50 transition-opacity duration-200 select-none" :class="{ 'opacity-50': !panel.visible }">
                                 {{-- Drag Handle --}}
                                 <div class="drag-handle cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0">
                                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/><circle cx="9" cy="15" r="1.5"/><circle cx="15" cy="15" r="1.5"/><circle cx="9" cy="20" r="1.5"/><circle cx="15" cy="20" r="1.5"/></svg>
@@ -229,34 +252,13 @@
 
                                 {{-- Toggle --}}
                                 <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                    <input type="checkbox" x-model="panel.visible" class="sr-only peer">
+                                    <input type="checkbox" x-model="panel.visible" x-on:change="$nextTick(() => reorder())" class="sr-only peer">
                                     <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
                                     <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                 </label>
 
                                 {{-- Label --}}
                                 <span class="flex-1 text-sm font-medium text-gray-700 dark:text-gray-300" x-text="labels[panel.id]"></span>
-
-                                {{-- Size Selector --}}
-                                <div class="flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600 flex-shrink-0">
-                                    <button type="button"
-                                        x-on:click="panel.size = 'half'"
-                                        :class="panel.size === 'half'
-                                            ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]'
-                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-650'"
-                                        class="px-3 py-1 text-xs font-medium transition-all duration-200">
-                                        {{ __('messages.size_half') }}
-                                    </button>
-                                    <div class="w-px bg-gray-200 dark:bg-white/[0.08]"></div>
-                                    <button type="button"
-                                        x-on:click="panel.size = 'full'"
-                                        :class="panel.size === 'full'
-                                            ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]'
-                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-650'"
-                                        class="px-3 py-1 text-xs font-medium transition-all duration-200">
-                                        {{ __('messages.size_full') }}
-                                    </button>
-                                </div>
                             </div>
                         </template>
                     </div>
@@ -277,7 +279,7 @@
 
     </div>
 
-    @if($roleIds->isNotEmpty() && collect($dashboardConfig['panels'])->where('id', 'stats')->where('visible', true)->isNotEmpty())
+    @if($roleIds->isNotEmpty() && collect($dashboardConfig['panels'])->where('id', 'views')->where('visible', true)->isNotEmpty())
     <script src="{{ asset('js/chart.min.js') }}" {!! nonce_attr() !!}></script>
     @endif
     @if($roleIds->isNotEmpty())

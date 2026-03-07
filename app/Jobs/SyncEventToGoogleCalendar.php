@@ -116,12 +116,6 @@ class SyncEventToGoogleCalendar implements ShouldQueue
 
         if ($googleEvent) {
             $this->event->setGoogleEventIdForRole($this->role->id, $googleEvent->getId());
-
-            Log::info('Event created in Google Calendar', [
-                'event_id' => $this->event->id,
-                'google_event_id' => $googleEvent->getId(),
-                'calendar_id' => $this->role->getGoogleCalendarId(),
-            ]);
         }
     }
 
@@ -145,12 +139,6 @@ class SyncEventToGoogleCalendar implements ShouldQueue
             $this->role
         );
 
-        if ($googleEvent) {
-            Log::info('Event updated in Google Calendar', [
-                'event_id' => $this->event->id,
-                'google_event_id' => $googleEventId,
-            ]);
-        }
     }
 
     /**
@@ -168,11 +156,6 @@ class SyncEventToGoogleCalendar implements ShouldQueue
 
         if ($success) {
             $this->event->setGoogleEventIdForRole($this->role->id, null);
-
-            Log::info('Event deleted from Google Calendar', [
-                'event_id' => $this->event->id,
-                'google_event_id' => $googleEventId,
-            ]);
         }
     }
 }

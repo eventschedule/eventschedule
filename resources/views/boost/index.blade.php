@@ -10,7 +10,7 @@
             <div class="flex items-center gap-3">
                 @if ($roles->isNotEmpty())
                 <div class="min-w-[200px] max-w-xs">
-                    <select id="role-filter"
+                    <select id="role-filter" data-searchable
                         class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base">
                         <option value="">{{ __('messages.all_schedules') }}</option>
                         @foreach ($roles as $r)

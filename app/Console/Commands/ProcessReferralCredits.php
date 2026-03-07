@@ -19,14 +19,10 @@ class ProcessReferralCredits extends Command
             return;
         }
 
-        \Log::info('Processing referral credits...');
-
         // 1. Expire stale pendings (>90 days with no subscription)
         $expiredPending = Referral::where('status', 'pending')
             ->where('created_at', '<=', now()->subDays(90))
             ->update(['status' => 'expired']);
-
-        \Log::info("Expired {$expiredPending} stale pending referrals");
 
         // 2. Qualify subscribed referrals (30+ days since subscription, still active)
         $subscribedReferrals = Referral::where('status', 'subscribed')
@@ -68,8 +64,6 @@ class ProcessReferralCredits extends Command
             }
         }
 
-        \Log::info("Qualified {$qualified} referrals");
-
         // 3. Expire cancelled referrals (subscribed but no longer active)
         $cancelledReferrals = Referral::where('status', 'subscribed')
             ->with('referredRole')
@@ -95,6 +89,5 @@ class ProcessReferralCredits extends Command
             }
         }
 
-        \Log::info("Expired {$expiredCancelled} cancelled referrals");
     }
 }

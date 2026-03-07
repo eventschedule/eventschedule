@@ -44,9 +44,6 @@ class GoogleCalendarController extends Controller
 
         // If user has tokens but no refresh token, force re-authorization
         if ($user->google_token && ! $user->google_refresh_token) {
-            Log::info('User has access token but no refresh token, forcing re-authorization', [
-                'user_id' => $user->id,
-            ]);
             $authUrl = $this->googleCalendarService->getAuthUrlWithForce();
         } else {
             $authUrl = $this->googleCalendarService->getAuthUrl();

@@ -256,6 +256,16 @@
         {!! strip_tags($role->custom_css) !!}
         @endif
 
+        /* GP Language Switcher */
+        .gp-lang-switcher { background-color: #f3f4f6; }
+        .gp-lang-active { background-color: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .gp-lang-inactive { color: #6b7280; }
+        .gp-lang-inactive:hover { color: #374151; }
+        .dark .gp-lang-switcher { background: linear-gradient(135deg, #2d2d30, #252526); border: 1px solid rgba(255,255,255,0.06); }
+        .dark .gp-lang-active { background-color: #1A1A1A; color: #d1d5db; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+        .dark .gp-lang-inactive { color: #9ca3af; }
+        .dark .gp-lang-inactive:hover { color: #d1d5db; background-color: rgba(255,255,255,0.1); }
+
         </style>
 
         @if ($event && $event->exists && $event->starts_at && !($passwordGate ?? false))
@@ -512,19 +522,19 @@
 
         @if (! request()->embed && $role->language_code != 'en')
             <div class="container mx-auto flex justify-end {{ $isRtl ? 'pl-5' : 'pr-5' }} pt-4">
-                <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-800 p-1 text-sm shadow-md z-50 {{ $isRtl ? 'flex-row-reverse' : '' }}" translate="no">
+                <div class="gp-lang-switcher flex items-center rounded-full p-1 text-sm shadow-md z-50 {{ $isRtl ? 'flex-row-reverse' : '' }}" translate="no">
                     @if(session()->has('translate') || request()->lang == 'en')
-                        <span class="bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm px-3 py-1.5 rounded-full font-medium">EN</span>
+                        <span class="gp-lang-active px-3 py-1.5 rounded-full font-medium">EN</span>
                         <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang={{ $role->language_code }}"
-                           class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 px-3 py-1.5 rounded-full font-medium transition-all duration-200">
+                           class="gp-lang-inactive px-3 py-1.5 rounded-full font-medium transition-all duration-200">
                             {{ strtoupper($role->language_code) }}
                         </a>
                     @else
                         <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang=en"
-                           class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 px-3 py-1.5 rounded-full font-medium transition-all duration-200">
+                           class="gp-lang-inactive px-3 py-1.5 rounded-full font-medium transition-all duration-200">
                             EN
                         </a>
-                        <span class="bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm px-3 py-1.5 rounded-full font-medium">{{ strtoupper($role->language_code) }}</span>
+                        <span class="gp-lang-active px-3 py-1.5 rounded-full font-medium">{{ strtoupper($role->language_code) }}</span>
                     @endif
                 </div>
             </div>

@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Models\BoostCampaign;
 use App\Services\BoostBillingService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
 
 class ExpireBoostCampaigns extends Command
 {
@@ -22,8 +21,6 @@ class ExpireBoostCampaigns extends Command
         if ($staleCampaigns->isEmpty()) {
             return;
         }
-
-        Log::info('Expiring '.$staleCampaigns->count().' stale pending_payment boost campaigns');
 
         $billingService = new BoostBillingService;
 

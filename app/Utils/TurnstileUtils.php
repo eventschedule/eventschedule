@@ -117,12 +117,6 @@ class TurnstileUtils
         }
 
         // Log error codes for debugging (without sensitive data)
-        if (isset($result['error-codes']) && ! empty($result['error-codes'])) {
-            \Log::info('Turnstile verification failed', [
-                'error_codes' => $result['error-codes'],
-            ]);
-        }
-
         return false;
     }
 }

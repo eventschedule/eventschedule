@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\SupportEmail;
 use App\Models\BlogPost;
+use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\EventComment;
 use App\Models\EventPhoto;
@@ -106,21 +107,80 @@ class HomeController extends Controller
         $visiblePanels = collect($dashboardConfig['panels'])->where('visible', true)->pluck('id')->toArray();
 
         // Dashboard data - skip queries for hidden panels
-        $dashboardStats = null;
+        $upcomingCount = 0;
+        $views30d = 0;
+        $viewsChange = 0;
+        $sparklineData = [];
+        $followersCount = 0;
+        $totalEventsCount = 0;
         $upcomingEvents = collect();
         $recentActivity = collect();
-        $sparklineData = [];
+        $revenueStats = null;
+        $topEvents = collect();
+        $latestNewsletters = collect();
+        $boostCampaigns = collect();
+        $trafficSources = collect();
 
         if ($roleIds->isNotEmpty()) {
-            if (in_array('stats', $visiblePanels)) {
-                $dashboardStats = $this->getDashboardStats($user, $roleIds);
+            $analyticsService = app(AnalyticsService::class);
+            $thirtyDaysAgo = now()->subDays(30)->startOfDay();
+            $now = now()->endOfDay();
+
+            if (in_array('upcoming_count', $visiblePanels)) {
+                $upcomingCount = Event::whereIn('id', function ($query) use ($roleIds) {
+                    $query->select('event_id')
+                        ->from('event_role')
+                        ->whereIn('role_id', $roleIds)
+                        ->where('is_accepted', true);
+                })->where('starts_at', '>', now())->count();
+            }
+            if (in_array('views', $visiblePanels)) {
+                $periodStats = $analyticsService->getStatsForUser($user, $thirtyDaysAgo, $now);
+                $momComparison = $analyticsService->getMonthOverMonthComparison($user);
+                $views30d = $periodStats['period_views'] ?? 0;
+                $viewsChange = $momComparison['percentage_change'] ?? 0;
                 $sparklineData = $this->getSparklineData($user);
+            }
+            if (in_array('followers', $visiblePanels)) {
+                $followersCount = DB::table('role_user')
+                    ->whereIn('role_id', $roleIds)
+                    ->where('level', 'follower')
+                    ->count();
+                $totalEventsCount = Event::whereIn('id', function ($query) use ($roleIds) {
+                    $query->select('event_id')
+                        ->from('event_role')
+                        ->whereIn('role_id', $roleIds)
+                        ->where('is_accepted', true);
+                })->count();
             }
             if (in_array('upcoming_events', $visiblePanels)) {
                 $upcomingEvents = $this->getUpcomingEvents($roleIds);
             }
             if (in_array('recent_activity', $visiblePanels)) {
                 $recentActivity = $this->getRecentActivity($roleIds);
+            }
+            if (in_array('revenue', $visiblePanels)) {
+                $revenueStats = $analyticsService->getConversionStats($user, $thirtyDaysAgo, $now);
+            }
+            if (in_array('top_events', $visiblePanels)) {
+                $topEvents = $analyticsService->getTopEvents($user, 3, $thirtyDaysAgo, $now);
+            }
+            if (in_array('newsletters', $visiblePanels)) {
+                $latestNewsletters = Newsletter::whereIn('role_id', $roleIds)
+                    ->where('status', 'sent')
+                    ->orderByDesc('sent_at')
+                    ->limit(3)
+                    ->get();
+            }
+            if (in_array('boosts', $visiblePanels)) {
+                $boostCampaigns = BoostCampaign::whereIn('role_id', $roleIds)
+                    ->whereIn('status', ['active', 'paused'])
+                    ->latest()
+                    ->limit(3)
+                    ->get();
+            }
+            if (in_array('traffic_sources', $visiblePanels)) {
+                $trafficSources = $analyticsService->getTopReferrerDomains($user, 5, $thirtyDaysAgo, $now);
             }
         }
 
@@ -130,11 +190,20 @@ class HomeController extends Controller
             'year',
             'startOfMonth',
             'roleIds',
-            'dashboardStats',
+            'upcomingCount',
+            'views30d',
+            'viewsChange',
+            'sparklineData',
+            'followersCount',
+            'totalEventsCount',
             'upcomingEvents',
             'recentActivity',
-            'sparklineData',
             'dashboardConfig',
+            'revenueStats',
+            'topEvents',
+            'latestNewsletters',
+            'boostCampaigns',
+            'trafficSources',
         ));
     }
 
@@ -269,16 +338,14 @@ class HomeController extends Controller
     {
         $request->validate([
             'panels' => 'required|array',
-            'panels.*.id' => 'required|string|in:stats,upcoming_events,recent_activity,calendar',
+            'panels.*.id' => 'required|string|in:upcoming_count,views,followers,upcoming_events,recent_activity,revenue,top_events,newsletters,boosts,traffic_sources',
             'panels.*.visible' => 'required|boolean',
-            'panels.*.size' => 'required|string|in:half,full',
         ]);
 
         $panels = collect($request->input('panels'))->map(function ($panel) {
             return [
                 'id' => $panel['id'],
                 'visible' => (bool) $panel['visible'],
-                'size' => $panel['size'],
             ];
         })->values()->toArray();
 
@@ -295,10 +362,16 @@ class HomeController extends Controller
     private function getDashboardConfig($user): array
     {
         $defaults = [
-            ['id' => 'stats', 'visible' => true, 'size' => 'full'],
-            ['id' => 'upcoming_events', 'visible' => true, 'size' => 'half'],
-            ['id' => 'recent_activity', 'visible' => true, 'size' => 'half'],
-            ['id' => 'calendar', 'visible' => true, 'size' => 'full'],
+            ['id' => 'upcoming_count', 'visible' => true],
+            ['id' => 'views', 'visible' => true],
+            ['id' => 'followers', 'visible' => true],
+            ['id' => 'upcoming_events', 'visible' => true],
+            ['id' => 'recent_activity', 'visible' => true],
+            ['id' => 'revenue', 'visible' => true],
+            ['id' => 'top_events', 'visible' => false],
+            ['id' => 'newsletters', 'visible' => false],
+            ['id' => 'boosts', 'visible' => false],
+            ['id' => 'traffic_sources', 'visible' => false],
         ];
 
         $config = $user->dashboard_config;
@@ -307,7 +380,7 @@ class HomeController extends Controller
             return ['panels' => $defaults];
         }
 
-        $validIds = ['stats', 'upcoming_events', 'recent_activity', 'calendar'];
+        $validIds = ['upcoming_count', 'views', 'followers', 'upcoming_events', 'recent_activity', 'revenue', 'top_events', 'newsletters', 'boosts', 'traffic_sources'];
         $configuredIds = [];
 
         // Keep only valid panels from config
@@ -323,7 +396,6 @@ class HomeController extends Controller
             $panels[] = [
                 'id' => $panel['id'],
                 'visible' => (bool) ($panel['visible'] ?? true),
-                'size' => in_array($panel['size'] ?? '', ['half', 'full']) ? $panel['size'] : 'full',
             ];
         }
 
@@ -335,47 +407,6 @@ class HomeController extends Controller
         }
 
         return ['panels' => $panels];
-    }
-
-    private function getDashboardStats($user, $roleIds): array
-    {
-        $analyticsService = app(AnalyticsService::class);
-        $thirtyDaysAgo = now()->subDays(30)->startOfDay();
-        $now = now()->endOfDay();
-
-        // Upcoming events count
-        $upcomingCount = Event::whereIn('id', function ($query) use ($roleIds) {
-            $query->select('event_id')
-                ->from('event_role')
-                ->whereIn('role_id', $roleIds)
-                ->where('is_accepted', true);
-        })->where('starts_at', '>', now())->count();
-
-        // Views (30d) + month-over-month change
-        $periodStats = $analyticsService->getStatsForUser($user, $thirtyDaysAgo, $now);
-        $momComparison = $analyticsService->getMonthOverMonthComparison($user);
-
-        // Followers count
-        $followersCount = DB::table('role_user')
-            ->whereIn('role_id', $roleIds)
-            ->where('level', 'follower')
-            ->count();
-
-        // Total events count (fallback for followers)
-        $totalEventsCount = Event::whereIn('id', function ($query) use ($roleIds) {
-            $query->select('event_id')
-                ->from('event_role')
-                ->whereIn('role_id', $roleIds)
-                ->where('is_accepted', true);
-        })->count();
-
-        return [
-            'upcoming_count' => $upcomingCount,
-            'views_30d' => $periodStats['period_views'] ?? 0,
-            'views_change' => $momComparison['percentage_change'] ?? 0,
-            'followers_count' => $followersCount,
-            'total_events_count' => $totalEventsCount,
-        ];
     }
 
     private function getUpcomingEvents($roleIds)

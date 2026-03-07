@@ -26,8 +26,6 @@ class ReleaseTickets extends Command
      */
     public function handle()
     {
-        \Log::info('Release expired unpaid tickets...');
-
         $connection = config('database.default');
         $driver = config("database.connections.{$connection}.driver");
 
@@ -44,8 +42,6 @@ class ReleaseTickets extends Command
                 }
             })
             ->get();
-
-        \Log::info('Found '.$expiredSales->count().' expired sales to process');
 
         foreach ($expiredSales as $sale) {
             \DB::transaction(function () use ($sale) {
