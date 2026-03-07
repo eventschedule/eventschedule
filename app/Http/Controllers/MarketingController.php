@@ -1346,6 +1346,7 @@ class MarketingController extends Controller
                         ['Post-event feedback', 'Yes (Pro)', 'No', true],
                     ],
                     'Integrations' => [
+                        ['Eventbrite auto-import', 'Yes (Pro)', 'N/A', true],
                         ['Google Calendar sync', 'Yes (Free)', 'No native 2-way sync', true],
                         ['CalDAV sync', 'Yes (Free)', 'No', true],
                         ['Newsletters', 'Yes (Free)', 'Yes', false],
@@ -1422,9 +1423,9 @@ class MarketingController extends Controller
                         'icon_color' => 'text-amber-600 dark:text-amber-400',
                     ],
                     [
-                        'title' => 'Event Graphics',
-                        'description' => 'Generate shareable event graphics automatically. No design skills needed, a feature unique to Event Schedule.',
-                        'icon' => 'image',
+                        'title' => 'Eventbrite Auto-Import',
+                        'description' => 'Connect your Eventbrite account and import all your events in one click. Event details, tickets, venues, and images are transferred automatically.',
+                        'icon' => 'import',
                         'gradient' => 'from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30',
                         'border' => 'border-rose-200 dark:border-rose-500/20',
                         'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20',
@@ -1436,7 +1437,13 @@ class MarketingController extends Controller
                     ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
                     ['name' => 'Tito', 'route' => 'marketing.compare_tito'],
                 ],
+                'switch_steps' => [
+                    ['title' => 'Create your schedule', 'description' => 'Sign up free and create your first schedule in under a minute.'],
+                    ['title' => 'Add your events', 'description' => 'Import your events directly from Eventbrite, use AI import, or create events manually.'],
+                    ['title' => 'Share and sell', 'description' => 'Share your schedule URL and start selling tickets.'],
+                ],
                 'faq' => [
+                    ['question' => 'Can I import my existing Eventbrite events?', 'answer' => 'Yes. With the Pro plan, you can connect your Eventbrite account and import your events in bulk. Event details, ticket types, venues, and images are all transferred automatically.'],
                     ['question' => 'Is it easy to switch from Eventbrite to Event Schedule?', 'answer' => 'Yes. There is no need to migrate your Eventbrite history. Create a free schedule, add your upcoming events (or use AI import to paste and parse them), and share your new schedule URL with your audience.'],
                     ['question' => 'How does Event Schedule pricing compare to Eventbrite?', 'answer' => 'Eventbrite charges 3.7% + $1.79 per ticket on paid events. Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat $5/mo regardless of how many tickets you sell.'],
                     ['question' => 'Does Event Schedule have an event marketplace like Eventbrite?', 'answer' => 'Event Schedule focuses on giving organizers their own branded schedule pages rather than a shared marketplace. You get a dedicated URL, custom domain support, and embeddable calendar widgets to drive discovery from your own channels.'],

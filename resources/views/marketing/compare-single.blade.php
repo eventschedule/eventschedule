@@ -322,30 +322,24 @@
                 </p>
             </div>
 
+            @php
+                $steps = $switch_steps ?? [
+                    ['title' => 'Create your schedule', 'description' => 'Sign up free and create your first schedule in under a minute.'],
+                    ['title' => 'Add your events', 'description' => 'Paste event details for AI import or create events manually.'],
+                    ['title' => 'Share and sell', 'description' => 'Share your schedule URL and start selling tickets.'],
+                ];
+            @endphp
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-                <div class="text-center">
-                    <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center mx-auto mb-5">
-                        <span class="text-lg font-bold text-blue-600 dark:text-blue-400">1</span>
+                @foreach ($steps as $index => $step)
+                    <div class="text-center">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center mx-auto mb-5">
+                            <span class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ $index + 1 }}</span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ $step['title'] }}</h3>
+                        <p class="text-gray-500 dark:text-gray-400">{{ $step['description'] }}</p>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Create your schedule</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Sign up free and create your first schedule in under a minute.</p>
-                </div>
-
-                <div class="text-center">
-                    <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center mx-auto mb-5">
-                        <span class="text-lg font-bold text-blue-600 dark:text-blue-400">2</span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Add your events</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Paste event details for AI import or create events manually.</p>
-                </div>
-
-                <div class="text-center">
-                    <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center mx-auto mb-5">
-                        <span class="text-lg font-bold text-blue-600 dark:text-blue-400">3</span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Share and sell</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Share your schedule URL and start selling tickets.</p>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
