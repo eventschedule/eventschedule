@@ -156,7 +156,7 @@ class BackupController extends Controller
         }
 
         $data = json_decode($jsonContent, true, 512);
-        if (! $data) {
+        if (json_last_error() !== JSON_ERROR_NONE) {
             return response()->json(['error' => __('messages.backup_invalid_file')], 422);
         }
 
@@ -228,6 +228,32 @@ class BackupController extends Controller
             'job_id' => $job->id,
             'message' => __('messages.backup_import_started'),
         ]);
+    }
+
+    public function cancelUpload(Request $request)
+    {
+        $request->validate([
+            'file_path' => 'required|string',
+        ]);
+
+        $user = $request->user();
+        $filePath = $request->input('file_path');
+
+        // Path traversal protection
+        if (str_contains($filePath, '..') || str_contains($filePath, "\0")) {
+            return response()->json(['error' => __('messages.backup_invalid_file')], 422);
+        }
+
+        // Validate file belongs to user
+        if (! str_starts_with($filePath, 'backups/'.$user->id.'/')) {
+            return response()->json(['error' => __('messages.unauthorized')], 403);
+        }
+
+        if (Storage::disk('local')->exists($filePath)) {
+            Storage::disk('local')->delete($filePath);
+        }
+
+        return response()->json(['message' => 'ok']);
     }
 
     public function download(Request $request, BackupJob $backupJob)

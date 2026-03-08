@@ -77,7 +77,7 @@ jobs:
           sed -i 's/APP_URL=.*/APP_URL=http:\/\/127.0.0.1:8000\nAPP_TESTING=true/' .env
           sed -i 's/APP_DEBUG=.*/APP_DEBUG=true/' .env
           sed -i 's/SESSION_SECURE_COOKIE=.*/SESSION_SECURE_COOKIE=false/' .env
-          echo "IS_NEXUS=true" >> .env
+          echo "" >> .env && echo "IS_NEXUS=true" >> .env
 
       - name: Generate application key
         run: php artisan key:generate

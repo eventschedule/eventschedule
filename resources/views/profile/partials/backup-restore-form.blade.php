@@ -56,7 +56,7 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.backup_select_schedules') }}</label>
                     <div class="space-y-2">
                         <label v-for="role in roles" :key="role.id" class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" name="role_ids[]" :value="role.id" :checked="role.checked"
+                            <input type="checkbox" name="role_ids[]" :value="role.id" v-model="selectedRoleIds"
                                 class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
                             <span class="text-sm text-gray-700 dark:text-gray-300">@{{ role.name }} <span class="text-gray-400">(@{{ role.type_label }})</span></span>
                         </label>
@@ -68,7 +68,7 @@
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <x-primary-button type="submit" v-bind:disabled="exportProcessing">
+                    <x-primary-button type="submit" v-bind:disabled="exportProcessing || selectedRoleIds.length === 0">
                         {{ __('messages.backup_export') }}
                     </x-primary-button>
                 </div>
@@ -281,6 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return {
                 activeTab: 'export',
                 roles: roles,
+                selectedRoleIds: roles.map(function(r) { return r.id; }),
                 exportProcessing: false,
                 exportJob: null,
                 exportPollTimer: null,
@@ -409,6 +410,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             },
             cancelImport: function() {
+                if (this.importFilePath) {
+                    fetch('{{ route("backup.cancel_upload") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: JSON.stringify({ file_path: this.importFilePath }),
+                    });
+                }
                 this.importPreview = null;
                 this.importFilePath = null;
                 this.selectedImportIndices = [];

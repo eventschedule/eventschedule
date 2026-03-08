@@ -79,7 +79,7 @@ class ProcessBackupImport implements ShouldQueue
             }
 
             $data = json_decode($jsonContent, true, 512);
-            if (! $data) {
+            if (json_last_error() !== JSON_ERROR_NONE) {
                 $job->update([
                     'status' => 'failed',
                     'error_message' => 'Invalid backup file: corrupted data.',

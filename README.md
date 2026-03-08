@@ -6,34 +6,47 @@
     <p>
         An open-source platform to share events, sell tickets and bring communities together.
     </p>
+    <p>
+        <img src="https://img.shields.io/badge/license-AAL-blue" alt="License: AAL">
+        <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?logo=php&logoColor=white" alt="PHP 8.2+">
+        <img src="https://img.shields.io/badge/Laravel-11-FF2D20?logo=laravel&logoColor=white" alt="Laravel 11">
+    </p>
+    <p>
+        <a href="https://eventschedule.com">Website</a> &middot;
+        <a href="https://eventschedule.com/docs">Docs</a> &middot;
+        <a href="https://github.com/eventschedule/eventschedule/issues">Issues</a>
+    </p>
 </div>
 
----
+<img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/list_villageidiot.jpg?raw=true" alt="Event Schedule" width="100%">
 
-## Getting Started
+## Why Event Schedule?
 
-| | Hosted | Self-Hosted |
-|---|---|---|
-| **Setup** | [Up and running in under 5 minutes](https://www.eventschedule.com) | [Full control over your infrastructure](https://eventschedule.com/docs/installation) |
-| **Infrastructure** | We handle hosting and servers | You manage your own servers |
-| **Updates** | Automatic | One-click updates |
-
-> [!NOTE]
-> You can use [Softaculous](https://www.softaculous.com/apps/calendars/Event_Schedule) to automatically install the self-hosted app.
+- **Free and open source** - Unlimited events and schedules. Selfhost on your own server or use the hosted version at [eventschedule.com](https://eventschedule.com).
+- **No platform fees** - Accept payments directly via Stripe. You keep 100% of ticket revenue (minus Stripe's processing fee).
+- **AI-powered** - Create events from text, images, or WhatsApp messages. Generate flyers, translate your schedule, and more.
+- **All-in-one** - Ticketing, QR check-ins, newsletters, analytics, Google Calendar sync, and a REST API, all built in.
 
 ## Screenshots
 
-<div style="display: flex; gap: 10px;">
-    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_1.png?raw=true" width="49%" alt="Guest > Schedule">
-    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_2.png?raw=true" width="49%" alt="Guest > Event">
-</div>
-
-<div style="display: flex; gap: 10px;">
-    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_3.png?raw=true" width="49%" alt="Admin > Schedule">
-    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_4.png?raw=true" width="49%" alt="Admin > Event">
-</div>
+| | | |
+|---|---|---|
+| <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/marketing_7.jpg?raw=true" alt="Calendar View" width="100%"> | <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/marketing_3.jpg?raw=true" alt="Event Page" width="100%"> | <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_3.png?raw=true" alt="Admin Panel" width="100%"> |
+| *Calendar view* | *Event page* | *Admin panel* |
 
 ## Features
+
+- **Event calendars** with recurring events, sub-schedules, and search
+- **Ticket sales** with multiple ticket types, QR code check-ins, promo codes, and waitlists
+- **Google Calendar and CalDAV sync** with bidirectional real-time updates
+- **AI event parsing** from text, images, flyers, or WhatsApp messages
+- **Newsletter system** with drag-and-drop editor, templates, A/B testing, and analytics
+- **Built-in analytics** with page views, device breakdown, and top events
+- **REST API and webhooks** for programmatic access and integrations
+- **Fully customizable** with custom CSS, themes, white-label branding, and custom domains
+
+<details>
+<summary>See all features</summary>
 
 ### Event Management
 - 🗓️ **Event Calendars:** Create and share event calendars effortlessly to keep your audience informed.
@@ -85,7 +98,7 @@
 ### Collaboration & Marketing
 - 👥 **Team Scheduling:** Collaborate with team members to manage availability and coordinate event schedules.
 - 🎨 **Event Graphics Generator:** Create beautiful graphics of your upcoming events with flyers, QR codes, and event details for social media and marketing.
-- 📊 **Built-in Analytics:** Track page views with an integrated analytics dashboard showing views over time, device breakdown, and top events—no external services required.
+- 📊 **Built-in Analytics:** Track page views with an integrated analytics dashboard showing views over time, device breakdown, and top events.
 - 👁️ **Follow Schedules:** Users can follow schedules to stay updated on new events.
 - 📧 **Email Notifications:** Automatic ticket confirmation emails sent to buyers.
 - 📧 **Newsletters:** Send newsletters to followers and ticket buyers with a drag-and-drop block editor, five professional templates, audience segments, A/B testing, and real-time delivery analytics.
@@ -110,7 +123,20 @@
 - 🔌 **REST API:** Access and manage your events programmatically through a REST API.
 - 🚀 **Automatic App Updates:** Keep the platform up to date effortlessly with one-click automatic updates.
 
-## Installation Guide
+</details>
+
+## Getting Started
+
+| | Hosted | Selfhosted |
+|---|---|---|
+| **Setup** | [Up and running in under 5 minutes](https://www.eventschedule.com) | [Full control over your infrastructure](https://eventschedule.com/docs/installation) |
+| **Infrastructure** | We handle hosting and servers | You manage your own servers |
+| **Updates** | Automatic | One-click updates |
+
+> [!NOTE]
+> You can use [Softaculous](https://www.softaculous.com/apps/calendars/Event_Schedule) to automatically install the selfhosted app.
+
+## Installation
 
 For detailed installation instructions, see the [Installation Guide](https://eventschedule.com/docs/installation).
 
@@ -119,43 +145,20 @@ Quick start options:
 - **[Docker](https://github.com/eventschedule/dockerfiles)**: Containerized deployment
 - **[Manual Installation](https://eventschedule.com/docs/installation)**: Step-by-step guide
 
-## Documentation
+## Tech Stack
 
-For advanced configuration, see the following guides:
+[PHP](https://php.net) 8.2+ / [Laravel](https://laravel.com) 11 / [Vue.js](https://vuejs.org) 3 / [Tailwind CSS](https://tailwindcss.com) / [MySQL](https://mysql.com) / [Vite](https://vite.dev)
+
+## Documentation
 
 - [SaaS Setup](https://eventschedule.com/docs/saas) - Configure Event Schedule for multi-tenant SaaS deployment with subdomain routing
 - [Stripe Setup](https://eventschedule.com/docs/stripe) - Set up Stripe Connect for ticket sales and Cashier for subscription billing
 - [Google Calendar Setup](https://eventschedule.com/docs/google-calendar) - Enable bidirectional sync with Google Calendar
 
-## Testing
+## Contributing
 
-Event Schedule includes a comprehensive browser test suite powered by Laravel Dusk.
+Contributions are welcome! Please open an [issue](https://github.com/eventschedule/eventschedule/issues) to report bugs or suggest features, or submit a pull request.
 
-> [!WARNING]  
-> WARNING: Running the tests will empty the database
+## License
 
-### Prerequisites
-
-1. **Install Laravel Dusk:**
-```bash
-composer require --dev laravel/dusk
-php artisan dusk:install
-```
-
-2. **Configure Chrome Driver:**
-```bash
-php artisan dusk:chrome-driver
-```
-
-3. **Set up test environment:**
-```bash
-cp .env .env.dusk.local
-# Configure your test database in .env.dusk.local
-```
-
-### Running Tests
-
-```bash
-# Run all browser tests
-php artisan dusk
-```
+Event Schedule is licensed under the [Attribution Assurance License (AAL)](LICENSE).

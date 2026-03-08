@@ -103,6 +103,9 @@ class ProcessBackupExport implements ShouldQueue
 
         } catch (\Exception $e) {
             report($e);
+            if (isset($zipFilename) && Storage::disk('local')->exists($zipFilename)) {
+                Storage::disk('local')->delete($zipFilename);
+            }
             $job->update([
                 'status' => 'failed',
                 'error_message' => 'Export failed. Please try again.',

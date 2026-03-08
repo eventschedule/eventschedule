@@ -542,6 +542,20 @@ class BackupService
             $errors[] = 'Too many schedules in backup (max '.self::MAX_SCHEDULES.').';
         }
 
+        foreach ($data['schedules'] as $i => $schedule) {
+            if (! isset($schedule['role']) || ! is_array($schedule['role'])) {
+                $errors[] = 'Schedule #'.($i + 1).' is missing role data.';
+
+                continue;
+            }
+            if (empty($schedule['role']['name'])) {
+                $errors[] = 'Schedule #'.($i + 1).' is missing a name.';
+            }
+            if (empty($schedule['role']['type']) || ! in_array($schedule['role']['type'], ['talent', 'venue', 'curator'])) {
+                $errors[] = 'Schedule #'.($i + 1).' has an invalid type.';
+            }
+        }
+
         return $errors;
     }
 
@@ -1147,7 +1161,8 @@ class BackupService
         $validator = Validator::make($data, [
             'type' => 'required|string|max:255',
             'quantity' => 'nullable|integer|min:0',
-            'price' => 'required|numeric|min:0',
+            'sold' => 'nullable|integer|min:0',
+            'price' => 'nullable|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -1159,7 +1174,7 @@ class BackupService
         $ticket->type = $data['type'];
         $ticket->quantity = $data['quantity'] ?? null;
         $ticket->sold = $data['sold'] ?? null;
-        $ticket->price = $data['price'];
+        $ticket->price = $data['price'] ?? 0;
         $ticket->description = $data['description'] ?? null;
         $ticket->sales_end_at = $data['sales_end_at'] ?? null;
         $ticket->custom_fields = $data['custom_fields'] ?? null;
@@ -1395,12 +1410,20 @@ class BackupService
 
     private function importWaitlist(array $data, Event $event, Role $role): void
     {
+        $validator = Validator::make($data, [
+            'email' => 'required|email|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return;
+        }
+
         TicketWaitlist::withoutEvents(function () use ($event, $data, $role) {
             TicketWaitlist::create([
                 'event_id' => $event->id,
                 'event_date' => $data['event_date'] ?? null,
                 'name' => $data['name'] ?? '',
-                'email' => $data['email'] ?? '',
+                'email' => $data['email'],
                 'subdomain' => $role->subdomain,
                 'status' => $data['status'] ?? 'waiting',
                 'locale' => $data['locale'] ?? null,
@@ -1670,7 +1693,20 @@ class BackupService
 
     private function isValidImageData(string $data): bool
     {
-        return @getimagesizefromstring($data) !== false;
+        if (strlen($data) > 20 * 1024 * 1024) {
+            return false;
+        }
+
+        $info = @getimagesizefromstring($data);
+        if ($info === false) {
+            return false;
+        }
+
+        if ($info[0] > 10000 || $info[1] > 10000) {
+            return false;
+        }
+
+        return true;
     }
 
     private function safeImageExtension(string $path): string

@@ -41,6 +41,14 @@ class ProfileController extends Controller
             ->latest()
             ->first();
 
+        // Fallback for sync queue: job completes during dispatch, so check session
+        if (! $activeExportJob && session('backup_job_id')) {
+            $activeExportJob = BackupJob::where('id', session('backup_job_id'))
+                ->where('user_id', $request->user()->id)
+                ->where('type', 'export')
+                ->first();
+        }
+
         $data = [
             'user' => $request->user(),
             'editorRoles' => $request->user()->editor()->get(),
