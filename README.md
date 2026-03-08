@@ -18,7 +18,17 @@
     </p>
 </div>
 
-<img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/list_karateclub_800w.jpg?raw=true" alt="Event Schedule" width="100%">
+## Screenshots
+
+<div style="display: flex; gap: 10px;">
+    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_1.png?raw=true" width="49%" alt="Guest > Schedule">
+    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_2.png?raw=true" width="49%" alt="Guest > Event">
+</div>
+
+<div style="display: flex; gap: 10px;">
+    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_3.png?raw=true" width="49%" alt="Admin > Schedule">
+    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_4.png?raw=true" width="49%" alt="Admin > Event">
+</div>
 
 ## Why Event Schedule?
 
