@@ -1,6 +1,6 @@
 @props(['name', 'tier' => 'pro', 'subdomain' => '', 'docsUrl' => null])
 
-@if (config('app.hosted') && $subdomain)
+@if (config('app.hosted'))
 <x-modal :name="$name" maxWidth="sm">
     <div class="p-6 text-center">
         <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4">
@@ -30,10 +30,17 @@
                     class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-300 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                 {{ __('messages.cancel') }}
             </button>
+            @if ($subdomain)
             <a href="{{ route('role.subscribe', ['subdomain' => $subdomain, 'tier' => $tier]) }}" target="_blank"
                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                 {{ __('messages.upgrade') }}
             </a>
+            @else
+            <a href="{{ route('marketing.pricing') }}" target="_blank"
+               class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                {{ __('messages.upgrade') }}
+            </a>
+            @endif
         </div>
     </div>
 </x-modal>
