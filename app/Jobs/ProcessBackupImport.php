@@ -78,7 +78,7 @@ class ProcessBackupImport implements ShouldQueue
                 return;
             }
 
-            $data = json_decode($jsonContent, true, 10);
+            $data = json_decode($jsonContent, true, 512);
             if (! $data) {
                 $job->update([
                     'status' => 'failed',

@@ -273,7 +273,7 @@ class BackupService
 
     private function exportSales(Event $event): array
     {
-        return Sale::where('event_id', $event->id)->get()->map(function ($sale) {
+        return Sale::where('event_id', $event->id)->with('saleTickets')->get()->map(function ($sale) {
             $saleData = [
                 '_ref_id' => $sale->id,
                 '_promo_code_ref_id' => $sale->promo_code_id,
@@ -300,7 +300,7 @@ class BackupService
                 $saleData[$field] = $sale->$field;
             }
 
-            $saleData['sale_tickets'] = SaleTicket::where('sale_id', $sale->id)->get()->map(function ($st) {
+            $saleData['sale_tickets'] = $sale->saleTickets->map(function ($st) {
                 $stData = [
                     '_ticket_ref_id' => $st->ticket_id,
                     'seats' => $st->seats,
@@ -682,6 +682,19 @@ class BackupService
                 }
             }
 
+            // Open ZIP once for all image imports
+            $zip = null;
+            if ($includesImages) {
+                $zipPath = $job->file_path;
+                if ($zipPath && Storage::disk('local')->exists($zipPath)) {
+                    $zipFullPath = Storage::disk('local')->path($zipPath);
+                    $zip = new \ZipArchive;
+                    if ($zip->open($zipFullPath) !== true) {
+                        $zip = null;
+                    }
+                }
+            }
+
             // Import events
             $events = $scheduleData['events'] ?? [];
             if (count($events) > self::MAX_EVENTS_PER_SCHEDULE) {
@@ -825,8 +838,8 @@ class BackupService
                     }
 
                     // Import images if included
-                    if ($includesImages) {
-                        $this->importEventImages($eventData, $event, $job, $idMap);
+                    if ($includesImages && $zip) {
+                        $this->importEventImages($eventData, $event, $zip, $idMap);
                     }
 
                 } catch (\Exception $e) {
@@ -838,6 +851,12 @@ class BackupService
 
             if ($salesTruncated) {
                 $report['warnings'][] = __('messages.backup_truncated_sales', ['limit' => number_format(self::MAX_SALES_PER_SCHEDULE)]);
+            }
+
+            // Recalculate ticket sold counts from actual imported SaleTickets
+            foreach ($idMap['tickets'] as $newTicketId) {
+                $actualSold = SaleTicket::where('ticket_id', $newTicketId)->sum('quantity');
+                Ticket::where('id', $newTicketId)->update(['sold' => $actualSold]);
             }
 
             // Second pass: fix Sale group_id self-references
@@ -936,8 +955,13 @@ class BackupService
             }
 
             // Import role images if included
-            if ($includesImages) {
-                $this->importRoleImages($scheduleData['role'] ?? [], $role, $job);
+            if ($includesImages && $zip) {
+                $this->importRoleImages($scheduleData['role'] ?? [], $role, $zip);
+            }
+
+            // Close ZIP after all image imports
+            if ($zip) {
+                $zip->close();
             }
 
             return $report;
@@ -1526,19 +1550,8 @@ class BackupService
         });
     }
 
-    private function importRoleImages(array $roleData, Role $role, BackupJob $job): void
+    private function importRoleImages(array $roleData, Role $role, \ZipArchive $zip): void
     {
-        $zipPath = $job->file_path;
-        if (! $zipPath || ! Storage::disk('local')->exists($zipPath)) {
-            return;
-        }
-
-        $zipFullPath = Storage::disk('local')->path($zipPath);
-        $zip = new \ZipArchive;
-        if ($zip->open($zipFullPath) !== true) {
-            return;
-        }
-
         foreach (['profile_image_url', 'header_image_url', 'background_image_url'] as $field) {
             $imageKey = $roleData['_'.$field] ?? null;
             if (! $imageKey) {
@@ -1595,22 +1608,10 @@ class BackupService
         }
 
         $role->saveQuietly();
-        $zip->close();
     }
 
-    private function importEventImages(array $eventData, Event $event, BackupJob $job, array &$idMap): void
+    private function importEventImages(array $eventData, Event $event, \ZipArchive $zip, array &$idMap): void
     {
-        $zipPath = $job->file_path;
-        if (! $zipPath || ! Storage::disk('local')->exists($zipPath)) {
-            return;
-        }
-
-        $zipFullPath = Storage::disk('local')->path($zipPath);
-        $zip = new \ZipArchive;
-        if ($zip->open($zipFullPath) !== true) {
-            return;
-        }
-
         // Flyer image
         $flyerKey = $eventData['_flyer_image'] ?? null;
         if ($flyerKey) {
@@ -1665,8 +1666,6 @@ class BackupService
                 ]);
             });
         }
-
-        $zip->close();
     }
 
     private function isValidImageData(string $data): bool

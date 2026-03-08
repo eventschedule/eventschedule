@@ -140,7 +140,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Period Toggle</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">On the Web Analytics tab, switch between <strong>Daily</strong> and <strong>Monthly</strong> grouping to view the Views Over Time chart at different granularities. Daily is best for short ranges; monthly is better for spotting long-term patterns.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">On the Web Analytics tab, switch between <strong>Daily</strong>, <strong>Weekly</strong>, and <strong>Monthly</strong> grouping to view the Views Over Time chart at different granularities. Daily is best for short ranges; weekly provides a balanced overview; monthly is better for spotting long-term patterns.</p>
                                 </div>
                             </div>
                         </section>

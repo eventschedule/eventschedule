@@ -436,6 +436,11 @@
 
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Responses are stored with each sale and can be viewed in your sales dashboard or exported.</p>
 
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Per-Ticket Custom Fields</div>
+                                <p>In addition to event-level custom fields, you can also add custom fields to individual ticket types. When editing a ticket type, look for the <strong>Custom Fields (Per Ticket)</strong> section. These fields are collected once per ticket purchased, rather than once per order, and are useful when each attendee needs to provide individual information (e.g., meal choice, name for badge).</p>
+                            </div>
+
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Additional Settings</h3>
                             <ul class="doc-list">
                                 <li><strong class="text-gray-900 dark:text-white">Ticket notes:</strong> Add notes that appear on the ticket (e.g., parking instructions, what to bring)</li>

@@ -74,6 +74,8 @@
                         <a href="#templates" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Templates</a>
                         <a href="#style-customization" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Style Customization</a>
                         <a href="#recipients" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Recipients & Segments</a>
+                        <a href="#managing-segments" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">Managing Segments</a>
+                        <a href="#importing-emails" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors pl-6">Importing Emails</a>
                         <a href="#sending" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Sending</a>
                         <a href="#ab-testing" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">A/B Testing</a>
                         <a href="#analytics" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Analytics</a>
@@ -332,6 +334,62 @@
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sub-schedule</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Send to ticket buyers from a specific sub-schedule. Perfect for category-specific promotions.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Managing Segments -->
+                        <section id="managing-segments" class="doc-section">
+                            <h2 class="doc-heading">Managing Segments</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Create reusable audience segments that can be selected when sending newsletters. Access the segment manager by clicking the <strong class="text-gray-900 dark:text-white">Segments</strong> button on the newsletter list page.
+                            </p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Creating a Segment</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Click <strong class="text-gray-900 dark:text-white">Segments</strong> on the newsletter list page</li>
+                                <li>Enter a name for the segment</li>
+                                <li>Choose a segment type:
+                                    <ul class="doc-list mt-2">
+                                        <li><strong class="text-gray-900 dark:text-white">All Followers</strong> - everyone who follows your schedule</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Ticket Buyers</strong> - people who have purchased tickets</li>
+                                        <li><strong class="text-gray-900 dark:text-white">Manual</strong> - a custom list of email addresses you provide</li>
+                                    </ul>
+                                </li>
+                                <li>For manual segments, enter email addresses (one per line)</li>
+                                <li>Click <strong class="text-gray-900 dark:text-white">Create Segment</strong></li>
+                            </ol>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Existing segments are listed with their type and recipient count. You can edit or delete any segment from this page. When creating a newsletter, your saved segments appear as selectable options in the Settings tab.
+                            </p>
+                        </section>
+
+                        <!-- Importing Emails -->
+                        <section id="importing-emails" class="doc-section">
+                            <h2 class="doc-heading">Importing Emails</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Bulk import contacts into a newsletter segment. Access the import tool by clicking the <strong class="text-gray-900 dark:text-white">Import Emails</strong> button on the newsletter list page.
+                            </p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Choosing a Segment</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">
+                                Before importing, choose where to add the contacts: create a new segment with a name you provide, or add to an existing manual segment.
+                            </p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Import Methods</h3>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Form Entry</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Add contacts one at a time using name and email fields. Best for small lists or individual additions.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Paste Emails</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Paste a list of email addresses in various formats (one per line, comma-separated, or with names). The importer automatically parses the entries.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Upload CSV</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Upload a CSV file and map columns to email and name fields. The importer auto-detects columns and shows a preview before importing.</p>
                                 </div>
                             </div>
                         </section>

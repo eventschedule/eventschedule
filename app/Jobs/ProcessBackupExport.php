@@ -59,7 +59,7 @@ class ProcessBackupExport implements ShouldQueue
             $result = $service->exportSchedules($roles->all(), $job->include_images, $job);
 
             // Create ZIP
-            $jsonContent = json_encode($result['json'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            $jsonContent = json_encode($result['json'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
             $timestamp = now()->format('Y-m-d-His');
             $zipFilename = "backups/{$job->user_id}/backup-{$timestamp}.zip";
 

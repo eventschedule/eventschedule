@@ -155,7 +155,7 @@ class BackupController extends Controller
             return response()->json(['error' => __('messages.backup_invalid_file')], 422);
         }
 
-        $data = json_decode($jsonContent, true, 10);
+        $data = json_decode($jsonContent, true, 512);
         if (! $data) {
             return response()->json(['error' => __('messages.backup_invalid_file')], 422);
         }
