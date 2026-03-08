@@ -22,7 +22,7 @@
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 min-w-0">{{ $segment->name }}</h3>
                     <div class="shrink-0 space-x-3">
                         <a href="{{ route('newsletter.segment.edit', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
-                            class="text-[#4E81FA] hover:text-[#3D6FE8] text-sm">{{ __('messages.edit') }}</a>
+                            class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] text-sm">{{ __('messages.edit') }}</a>
                         <form method="POST" action="{{ route('newsletter.segment.delete', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
                             class="inline js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
                             @csrf
@@ -61,7 +61,7 @@
 
                     <div>
                         <x-input-label :value="__('messages.type')" />
-                        <select name="type" x-model="segmentType" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                        <select name="type" x-model="segmentType" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                             <option value="all_followers">{{ __('messages.all_followers') }}</option>
                             <option value="ticket_buyers">{{ __('messages.ticket_buyers') }}</option>
                             <option value="manual">{{ __('messages.manual') }}</option>
@@ -71,13 +71,13 @@
                     <div x-show="segmentType === 'manual'" x-cloak>
                         <x-input-label :value="__('messages.email_list')" />
                         <textarea name="emails" rows="6"
-                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-lg shadow-sm"
+                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                             placeholder="{{ __('messages.email_list_placeholder') }}"></textarea>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.email_list_help') }}</p>
                     </div>
 
                     <div class="flex justify-end">
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[var(--brand-blue)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600">
                             {{ __('messages.create_segment') }}
                         </button>
                     </div>

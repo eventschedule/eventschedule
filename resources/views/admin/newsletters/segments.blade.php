@@ -23,7 +23,7 @@
                 <div class="flex justify-between items-center">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 min-w-0">{{ $segment->name }}</h3>
                     <div class="shrink-0 space-x-3">
-                        <a href="{{ route('admin.newsletters.segment.edit', ['hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}" class="text-[#4E81FA] hover:text-[#3D6FE8] text-sm">{{ __('messages.edit') }}</a>
+                        <a href="{{ route('admin.newsletters.segment.edit', ['hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] text-sm">{{ __('messages.edit') }}</a>
                         <form method="POST" action="{{ route('admin.newsletters.segment.delete', ['hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
                             class="inline js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
                             @csrf
@@ -70,7 +70,7 @@
 
                     <div>
                         <x-input-label :value="__('messages.type')" />
-                        <select name="type" x-model="segmentType" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                        <select name="type" x-model="segmentType" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                             <option value="all_users">{{ __('messages.all_platform_users') }}</option>
                             <option value="plan_tier">{{ __('messages.plan_tier') }}</option>
                             <option value="signup_date">{{ __('messages.signup_date') }}</option>
@@ -81,7 +81,7 @@
 
                     <div x-show="segmentType === 'plan_tier'" x-cloak>
                         <x-input-label :value="__('messages.plan_tier')" />
-                        <select name="filter_criteria[plan_type]" x-bind:disabled="segmentType !== 'plan_tier'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                        <select name="filter_criteria[plan_type]" x-bind:disabled="segmentType !== 'plan_tier'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                             <option value="free">Free</option>
                             <option value="pro">Pro</option>
                             <option value="enterprise">Enterprise</option>

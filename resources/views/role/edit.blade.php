@@ -79,8 +79,8 @@
             transform: rotate(180deg);
         }
         .mobile-section-header.active {
-            color: #4E81FA;
-            border-color: #4E81FA;
+            color: var(--brand-blue);
+            border-color: var(--brand-blue);
         }
         .mobile-section-header.validation-error {
             border-color: #dc2626 !important;
@@ -952,7 +952,7 @@
                         <!-- Tab Navigation -->
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
-                                <button type="button" class="details-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="general">
+                                <button type="button" class="details-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="general">
                                     {{ __('messages.general') }}
                                 </button>
                                 <button type="button" class="details-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="localization">
@@ -1002,7 +1002,7 @@
                         <div class="mb-6">
                             <x-input-label for="description" :value="__('messages.description')" />
                             <textarea id="description" name="description"
-                                class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">{{ old('description', $role->description) }}</textarea>
+                                class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">{{ old('description', $role->description) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
 
@@ -1015,7 +1015,7 @@
                             <x-input-label for="language_code" :value="__('messages.language') " />
                             <select name="language_code" id="language_code" required {{ is_demo_mode() ? 'disabled' : '' }}
                                 data-action="language-change"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                 @foreach(config('app.supported_languages') as $key => $value)
                                 <option value="{{ $key }}" {{ $role->language_code == $key ? 'SELECTED' : '' }}>
                                     {{ __('messages.' . $value) }}
@@ -1028,7 +1028,7 @@
                         <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
                             <x-input-label for="timezone" :value="__('messages.timezone')" />
                             <select name="timezone" id="timezone" required {{ is_demo_mode() ? 'disabled' : '' }} data-searchable
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                 @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
                                 <option value="{{ $timezone }}" {{ $role->timezone == $timezone ? 'SELECTED' : '' }}>
                                     {{ $timezone }}
@@ -1076,15 +1076,15 @@
                                 @if (\App\Services\SmsService::isConfigured())
                                 <div id="role-phone-verify-ui" class="mt-2">
                                     <button type="button" id="role-phone-send-code-btn"
-                                        class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800">
+                                        class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
                                         {{ __('messages.click_here_to_verify_phone') }}
                                     </button>
 
                                     <div id="role-phone-code-input" style="display: none;" class="mt-2 flex items-center gap-2">
                                         <input type="text" id="role-phone-verification-code" maxlength="6" placeholder="000000"
-                                            class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-lg shadow-sm text-center tracking-widest" />
+                                            class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-center tracking-widest" />
                                         <button type="button" id="role-phone-verify-code-btn"
-                                            class="inline-flex items-center px-3 py-2 bg-[#4E81FA] text-white text-sm font-medium rounded-lg hover:bg-[#3d6de8] transition-colors">
+                                            class="inline-flex items-center px-3 py-2 bg-[var(--brand-blue)] text-white text-sm font-medium rounded-lg hover:bg-[var(--brand-blue-dark)] transition-colors">
                                             {{ __('messages.verify') }}
                                         </button>
                                     </div>
@@ -1255,7 +1255,7 @@
                     <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
                         <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                             <button type="button" data-style-tab="branding" id="style-tab-branding"
-                                class="style-tab-button text-center whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium border-[#4E81FA] text-[#4E81FA]">
+                                class="style-tab-button text-center whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium border-[var(--brand-blue)] text-[var(--brand-blue)]">
                                 {{ __('messages.branding') }}
                             </button>
                             <button type="button" data-style-tab="background" id="style-tab-background"
@@ -1326,7 +1326,7 @@
                                 <x-input-label for="font_family" :value="__('messages.font_family')" />
                                 <div class="flex items-center gap-1">
                                     <select id="font_family" name="font_family" data-searchable data-action="font-family-change"
-                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                         @foreach($fonts as $font)
                                         <option value="{{ $font->value }}"
                                             {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
@@ -1372,7 +1372,7 @@
                                 <x-input-label for="header_image" :value="__('messages.header_image')" />
                                 <div class="flex items-center gap-1">
                                     <select id="header_image" name="header_image"
-                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
+                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                                         data-searchable data-action="header-image-input">
                                         <option value="none" {{ $effectiveHeaderImage == 'none' || (!$effectiveHeaderImage && !$role->header_image_url) ? 'SELECTED' : '' }}>
                                             {{ __('messages.none') }}</option>
@@ -1463,7 +1463,7 @@
                                             name="background" 
                                             value="{{ $background }}"
                                             {{ $role->background == $background ? 'checked' : '' }}
-                                            class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4"
+                                            class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4"
                                             data-action="background-type-change">
                                         <label for="background_type_{{ $background }}" class="ms-2 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.' . $background) }}
@@ -1491,7 +1491,7 @@
                                 <x-input-label for="image" :value="__('messages.image')" />
                                 <div class="flex items-center gap-1">
                                     <select id="background_image" name="background_image"
-                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
+                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                                         data-searchable data-action="background-image-input">
                                         @foreach($backgrounds as $background => $name)
                                         <option value="{{ $background }}"
@@ -1570,7 +1570,7 @@
                                     <x-input-label for="background_colors" :value="__('messages.colors')" />
                                     <div class="flex items-center gap-1">
                                         <select id="background_colors" name="background_colors" data-searchable data-action="background-colors-input"
-                                            class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                                            class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                             @foreach($gradients as $gradient => $name)
                                             <option value="{{ $gradient }}"
                                                 {{ $role->background_colors == $gradient || (! array_key_exists($role->background_colors, $gradients) && ! $gradient) ? 'SELECTED' : '' }}>
@@ -1648,7 +1648,7 @@
                                             name="event_layout"
                                             value="{{ $layout }}"
                                             {{ $role->event_layout == $layout ? 'checked' : '' }}
-                                            class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                            class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                         <label for="event_layout_{{ $layout }}" class="ms-2 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.' . $layout) }}
                                         </label>
@@ -1663,7 +1663,7 @@
                                 <x-input-label for="custom_css" :value="__('messages.custom_css')" />
                                 @if ($role->isPro())
                                 <textarea id="custom_css" name="custom_css" {{ is_demo_mode() ? 'disabled' : '' }}
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm font-mono text-sm"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm font-mono text-sm"
                                     rows="6">{{ old('custom_css', $role->custom_css) }}</textarea>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.custom_css_help') }}</p>
                                 <x-input-error class="mt-2" :messages="$errors->get('custom_css')" />
@@ -1680,7 +1680,7 @@
                                     {{ __('messages.custom_css_enterprise_only') }}
                                     @if (config('app.hosted'))
                                     - <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-css')"
-                                        class="text-[#4E81FA] hover:underline font-medium">{{ __('messages.upgrade_to_pro_plan') }}</button>
+                                        class="text-[var(--brand-blue)] hover:underline font-medium">{{ __('messages.upgrade_to_pro_plan') }}</button>
                                     @endif
                                 </p>
                                 @endif
@@ -1734,7 +1734,7 @@
                         <!-- Tab Navigation -->
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
-                                <button type="button" class="links-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="youtube_videos">
+                                <button type="button" class="links-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="youtube_videos">
                                     {{ __('messages.youtube_videos') }}
                                 </button>
                                 <button type="button" class="links-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="social_links">
@@ -1785,7 +1785,7 @@
                                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_youtube_videos') }}</p>
                             </div>
                             <button type="button"
-                                class="btn-show-add-link text-sm text-[#4E81FA] hover:text-[#3D6FE8] mt-4"
+                                class="btn-show-add-link text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] mt-4"
                                 data-link-type="youtube_links">
                                 + {{ __('messages.add_video') }}
                             </button>
@@ -1830,7 +1830,7 @@
                                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_social_links') }}</p>
                             </div>
                             <button type="button"
-                                class="btn-show-add-link text-sm text-[#4E81FA] hover:text-[#3D6FE8] mt-4"
+                                class="btn-show-add-link text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] mt-4"
                                 data-link-type="social_links">
                                 + {{ __('messages.add_link') }}
                             </button>
@@ -1875,7 +1875,7 @@
                                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_payment_links') }}</p>
                             </div>
                             <button type="button"
-                                class="btn-show-add-link text-sm text-[#4E81FA] hover:text-[#3D6FE8] mt-4"
+                                class="btn-show-add-link text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] mt-4"
                                 data-link-type="payment_links">
                                 + {{ __('messages.add_link') }}
                             </button>
@@ -1949,7 +1949,7 @@
                         <!-- Tab Navigation -->
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
-                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="subschedules">
+                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="subschedules">
                                     {{ __('messages.subschedules') }}
                                 </button>
                                 <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
@@ -2012,11 +2012,11 @@
                                             </div>
                                             <div class="flex gap-4 items-center justify-between">
                                                 <div class="flex gap-4 items-center">
-                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" id="edit-button-{{ is_object($group) ? $group->id : $i }}" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
+                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" id="edit-button-{{ is_object($group) ? $group->id : $i }}" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
                                                         {{ __('messages.edit') }}
                                                     </button>
                                                     @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
-                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" class="hidden text-sm text-[#4E81FA] hover:text-[#3D6FE8]" id="cancel-button-{{ is_object($group) ? $group->id : $i }}">
+                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" class="hidden text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" id="cancel-button-{{ is_object($group) ? $group->id : $i }}">
                                                         {{ __('messages.cancel') }}
                                                     </button>
                                                     @endif
@@ -2035,7 +2035,7 @@
                                         </div>
                                     @endforeach
                                 </div>
-                                <button type="button" data-action="add-group-field" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
+                                <button type="button" data-action="add-group-field" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
                                     + {{ __('messages.add_subschedule') }}
                                 </button>
                             </div>
@@ -2077,7 +2077,7 @@
                                         <x-input-label :value="__('messages.field_type')" class="text-sm" />
                                         <select name="event_custom_fields[{{ $fieldKey }}][type]"
                                             data-action="toggle-field-options"
-                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                             <option value="string" {{ ($field['type'] ?? 'string') === 'string' ? 'selected' : '' }}>{{ __('messages.type_string') }}</option>
                                             <option value="multiline_string" {{ ($field['type'] ?? '') === 'multiline_string' ? 'selected' : '' }}>{{ __('messages.type_multiline_string') }}</option>
                                             <option value="switch" {{ ($field['type'] ?? '') === 'switch' ? 'selected' : '' }}>{{ __('messages.type_switch') }}</option>
@@ -2106,7 +2106,7 @@
                                 <div class="mt-3">
                                     <x-input-label :value="__('messages.ai_prompt_custom_field')" class="text-sm" />
                                     <textarea name="event_custom_fields[{{ $fieldKey }}][ai_prompt]"
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm text-sm ai-prompt-textarea"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm ai-prompt-textarea"
                                         rows="2"
                                         maxlength="500">{{ $field['ai_prompt'] ?? '' }}</textarea>
                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_prompt_custom_field_help') }}</p>
@@ -2118,7 +2118,7 @@
                                                 id="event_field_required_{{ $fieldKey }}"
                                                 value="1"
                                                 {{ !empty($field['required']) ? 'checked' : '' }}
-                                                class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                                class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
                                             <label for="event_field_required_{{ $fieldKey }}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
                                         </div>
                                         <input type="hidden" name="event_custom_fields[{{ $fieldKey }}][index]" value="{{ $field['index'] ?? '' }}">
@@ -2135,7 +2135,7 @@
                             @endforeach
                         </div>
 
-                        <button type="button" data-action="add-custom-field" id="add-event-custom-field-btn" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8] {{ count($eventCustomFields) >= 10 ? 'hidden' : '' }}">
+                        <button type="button" data-action="add-custom-field" id="add-event-custom-field-btn" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] {{ count($eventCustomFields) >= 10 ? 'hidden' : '' }}">
                             + {{ __('messages.add_field') }}
                         </button>
 
@@ -2152,7 +2152,7 @@
                             </p>
                             @if (config('app.hosted'))
                             <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-fields')"
-                                class="text-[#4E81FA] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
+                                class="text-[var(--brand-blue)] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
                             @endif
                         </div>
                         @endif
@@ -2210,7 +2210,7 @@
                                             <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $sponsor['url'] }}</div>
                                         @endif
                                     </div>
-                                    <button type="button" data-action="edit-sponsor" class="flex-shrink-0 text-gray-400 hover:text-[#4E81FA] dark:hover:text-[#4E81FA] transition-colors">
+                                    <button type="button" data-action="edit-sponsor" class="flex-shrink-0 text-gray-400 hover:text-[var(--brand-blue)] transition-colors">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                         </svg>
@@ -2241,19 +2241,19 @@
                                         <div>
                                             <x-input-label for="new_sponsor_name_input" :value="__('messages.sponsor_name')" />
                                             <input type="text" id="new_sponsor_name_input" maxlength="100"
-                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm text-sm" />
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
                                         </div>
                                         <div>
                                             <x-input-label for="new_sponsor_url_input" :value="__('messages.sponsor_url')" />
                                             <input type="url" id="new_sponsor_url_input" maxlength="500"
-                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm text-sm" />
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                                         <div>
                                             <x-input-label :value="__('messages.sponsor_tier')" />
                                             <select id="new_sponsor_tier_input"
-                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm text-sm">
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm">
                                                 <option value="">—</option>
                                                 <option value="gold">{{ __('messages.gold') }}</option>
                                                 <option value="silver">{{ __('messages.silver') }}</option>
@@ -2263,14 +2263,14 @@
                                         <div>
                                             <x-input-label id="sponsor-logo-label" :value="__('messages.logo') . ' *'" />
                                             <input type="file" id="new_sponsor_logo_input" accept="image/*"
-                                                class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#4E81FA] file:text-white hover:file:bg-blue-600"
+                                                class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--brand-blue)] file:text-white hover:file:bg-blue-600"
                                                 />
                                             <img id="sponsor_logo_preview" src="#" alt="Logo Preview" style="max-height:120px; display:none;" class="mt-2 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" @click="if($el.src && !$el.src.endsWith('#')) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: $el.src}))" />
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <button type="button" data-action="add-sponsor" id="sponsor-action-btn"
-                                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[#4E81FA] rounded-lg hover:bg-blue-600 transition-colors">
+                                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[var(--brand-blue)] rounded-lg hover:bg-blue-600 transition-colors">
                                             <svg id="sponsor-action-icon" class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                             </svg>
@@ -2295,7 +2295,7 @@
                                 </p>
                                 @if (config('app.hosted'))
                                 <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-css')"
-                                    class="text-[#4E81FA] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
+                                    class="text-[var(--brand-blue)] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
                                 @endif
                             </div>
                         @endif
@@ -2311,7 +2311,7 @@
                         </p>
 
                         <div class="flex gap-2 mb-6">
-                            <select id="custom-label-select" data-searchable class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                            <select id="custom-label-select" data-searchable class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                 <option value="">{{ __('messages.select_label_to_customize') }}</option>
                                 @php
                                     $existingLabelKeys = array_keys($role->custom_labels ?? []);
@@ -2325,7 +2325,7 @@
                                 @endforeach
                             </select>
                             <button type="button" data-action="add-custom-label" disabled
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[#4E81FA] rounded-lg hover:bg-blue-600 transition-colors opacity-50 cursor-not-allowed">
+                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[var(--brand-blue)] rounded-lg hover:bg-blue-600 transition-colors opacity-50 cursor-not-allowed">
                                 <svg class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                 </svg>
@@ -2375,7 +2375,7 @@
                             </p>
                             @if (config('app.hosted'))
                             <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-labels')"
-                                class="text-[#4E81FA] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
+                                class="text-[var(--brand-blue)] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
                             @endif
                         </div>
                         @endif
@@ -2417,7 +2417,7 @@
                         <!-- Tab Navigation -->
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
-                                <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="general">
+                                <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="general">
                                     {{ __('messages.general') }}
                                 </button>
                                 <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="notifications">
@@ -2463,7 +2463,7 @@
                                     <label class="flex items-start gap-3 cursor-pointer">
                                         <input type="radio" value="subdomain" x-model="mode"
                                             x-on:change="domain = ''"
-                                            class="mt-1 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                            class="mt-1 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                                         <div>
                                             <span class="text-sm font-medium text-gray-900 dark:text-white">{{ __('messages.custom_domain_mode_subdomain') }}</span>
                                             <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.custom_domain_mode_subdomain_desc') }}</p>
@@ -2472,7 +2472,7 @@
                                     {{-- Redirect (Enterprise-gated) --}}
                                     <label class="flex items-start gap-3{{ $role->isEnterprise() ? ' cursor-pointer' : '' }}">
                                         <input type="radio" value="redirect" x-model="mode"
-                                            class="mt-1 text-[#4E81FA] focus:ring-[#4E81FA]"
+                                            class="mt-1 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
                                             {{ !$role->isEnterprise() ? 'disabled' : '' }}>
                                         <div>
                                             <span class="text-sm font-medium text-gray-900 dark:text-white{{ !$role->isEnterprise() ? ' opacity-50' : '' }}">{{ __('messages.custom_domain_mode_redirect') }}</span>
@@ -2480,7 +2480,7 @@
                                             @if (!$role->isEnterprise())
                                             <div class="text-xs pt-1">
                                                 <button type="button" x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-domain')"
-                                                    class="text-[#4E81FA] hover:underline font-medium">
+                                                    class="text-[var(--brand-blue)] hover:underline font-medium">
                                                     {{ __('messages.upgrade_enterprise_custom_domain') }}
                                                 </button>
                                             </div>
@@ -2491,7 +2491,7 @@
                                     @if (config('services.digitalocean.app_hostname'))
                                     <label class="flex items-start gap-3{{ $role->isEnterprise() ? ' cursor-pointer' : '' }}">
                                         <input type="radio" value="direct" x-model="mode"
-                                            class="mt-1 text-[#4E81FA] focus:ring-[#4E81FA]"
+                                            class="mt-1 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
                                             {{ !$role->isEnterprise() ? 'disabled' : '' }}>
                                         <div>
                                             <span class="text-sm font-medium text-gray-900 dark:text-white{{ !$role->isEnterprise() ? ' opacity-50' : '' }}">{{ __('messages.custom_domain_mode_direct') }}</span>
@@ -2499,7 +2499,7 @@
                                             @if (!$role->isEnterprise())
                                             <div class="text-xs pt-1">
                                                 <button type="button" x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-domain')"
-                                                    class="text-[#4E81FA] hover:underline font-medium">
+                                                    class="text-[var(--brand-blue)] hover:underline font-medium">
                                                     {{ __('messages.upgrade_enterprise_custom_domain') }}
                                                 </button>
                                             </div>
@@ -2639,7 +2639,7 @@
                                     </svg>
                                     <span>
                                         {{ __('messages.notification_requires_email_settings') }}
-                                        <a href="#section-integrations" class="js-email-settings-link text-[#4E81FA] hover:underline font-medium">{{ __('messages.configure_email_settings') }}</a>
+                                        <a href="#section-integrations" class="js-email-settings-link text-[var(--brand-blue)] hover:underline font-medium">{{ __('messages.configure_email_settings') }}</a>
                                     </span>
                                 </p>
                             </div>
@@ -2677,7 +2677,7 @@
                             <div class="mb-6">
                                 <x-input-label for="first_day_of_week" :value="__('messages.first_day_of_week')" />
                                 <select name="first_day_of_week" id="first_day_of_week"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                     @foreach ([0 => 'sunday', 1 => 'monday', 2 => 'tuesday', 3 => 'wednesday', 4 => 'thursday', 5 => 'friday', 6 => 'saturday'] as $value => $dayName)
                                     <option value="{{ $value }}" {{ old('first_day_of_week', $role->first_day_of_week ?? 0) == $value ? 'selected' : '' }}>
                                         {{ __('messages.' . $dayName) }}
@@ -2697,7 +2697,7 @@
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" name="default_curator_ids[]" value="{{ $curator->id }}"
                                         {{ in_array($curator->id, $selectedCuratorIds ?: []) ? 'checked' : '' }}
-                                        class="rounded border-gray-300 dark:border-gray-700 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA] dark:bg-gray-900" />
+                                        class="rounded border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] shadow-sm focus:ring-[var(--brand-blue)] dark:bg-gray-900" />
                                     <span class="ms-2 text-sm text-gray-700 dark:text-gray-300">{{ $curator->name }}</span>
                                 </label>
                                 @endforeach
@@ -2743,7 +2743,7 @@
                                         <input type="checkbox" id="import_field_{{ $fieldKey }}" name="import_fields[{{ $fieldKey }}]" value="1"
                                             {{ $isChecked ? 'checked' : '' }}
                                             class="sr-only peer import-field-toggle" data-field="{{ $fieldKey }}">
-                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
+                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-blue)] transition-colors"></div>
                                         <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                     </label>
                                     <label for="import_field_{{ $fieldKey }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 w-36 cursor-pointer">{{ $fieldLabel }}</label>
@@ -2751,7 +2751,7 @@
                                         <input type="hidden" name="required_fields[{{ $fieldKey }}]" value="0">
                                         <input type="checkbox" name="required_fields[{{ $fieldKey }}]" value="1"
                                             {{ $isRequired ? 'checked' : '' }}
-                                            class="h-3.5 w-3.5 rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                            class="h-3.5 w-3.5 rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                                         {{ __('messages.required') }}
                                     </label>
                                 </div>
@@ -2792,11 +2792,11 @@
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                                 @if ($showRequestsTab)
-                                <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="requests">
+                                <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="requests">
                                     {{ __('messages.requests') }}
                                 </button>
                                 @endif
-                                <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 {{ $showRequestsTab ? 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' : 'border-[#4E81FA] text-[#4E81FA]' }}" data-tab="fan_content">
+                                <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 {{ $showRequestsTab ? 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' : 'border-[var(--brand-blue)] text-[var(--brand-blue)]' }}" data-tab="fan_content">
                                     {{ __('messages.fan_content') }}
                                 </button>
                                 <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="feedback">
@@ -2825,7 +2825,7 @@
                                 <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
                                     <input type="radio" name="event_request_form" value="import"
                                         {{ old('event_request_form', $role->event_request_form ?? 'import') === 'import' ? 'checked' : '' }}
-                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: #4E81FA">
+                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
                                     <div>
                                         <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.ai_import') }}</div>
                                         <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_import_description') }}</div>
@@ -2834,7 +2834,7 @@
                                 <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
                                     <input type="radio" name="event_request_form" value="booking"
                                         {{ old('event_request_form', $role->event_request_form ?? 'import') === 'booking' ? 'checked' : '' }}
-                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: #4E81FA">
+                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
                                     <div>
                                         <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.booking_form') }}</div>
                                         <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.booking_form_description') }}</div>
@@ -2864,7 +2864,7 @@
                                 @foreach(old('approved_subdomains', $role->approved_subdomains ?? []) as $i => $subdomain)
                                     <div class="mb-2 relative">
                                         <div class="flex items-center">
-                                            <input type="text" data-subdomain-search value="{{ isset($approvedSubdomainNames[$subdomain]) ? $approvedSubdomainNames[$subdomain] . ' (' . $subdomain . ')' : $subdomain }}" placeholder="{{ __('messages.search_schedules_autocomplete') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
+                                            <input type="text" data-subdomain-search value="{{ isset($approvedSubdomainNames[$subdomain]) ? $approvedSubdomainNames[$subdomain] . ' (' . $subdomain . ')' : $subdomain }}" placeholder="{{ __('messages.search_schedules_autocomplete') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
                                             <button type="button" data-action="remove-parent-item"
                                                 class="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
                                         </div>
@@ -2873,14 +2873,14 @@
                                     </div>
                                 @endforeach
                             </div>
-                            <button type="button" data-action="add-approved-subdomain" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
+                            <button type="button" data-action="add-approved-subdomain" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
                                 + {{ __('messages.add_schedule') }}
                             </button>
                         </div>
                         <div class="mb-6" id="request_terms_section">
                             <x-input-label for="request_terms" :value="__('messages.request_terms')" />
                             <textarea id="request_terms" name="request_terms"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                                 rows="4"
                                 dir="auto"
                                 placeholder="{{ __('messages.enter_request_terms') }}">{{ old('request_terms', $role->request_terms) }}</textarea>
@@ -2926,7 +2926,7 @@
                                     </svg>
                                     <span>
                                         {{ __('messages.notification_requires_email_settings') }}
-                                        <a href="#section-integrations" class="js-email-settings-link text-[#4E81FA] hover:underline font-medium">{{ __('messages.configure_email_settings') }}</a>
+                                        <a href="#section-integrations" class="js-email-settings-link text-[var(--brand-blue)] hover:underline font-medium">{{ __('messages.configure_email_settings') }}</a>
                                     </span>
                                 </p>
                             </div>
@@ -2942,7 +2942,7 @@
 
                         <div class="mb-6" id="feedback-delay-wrapper" style="{{ $role->feedback_enabled && ! $emailDisabled ? '' : 'display: none;' }}">
                             <x-input-label for="feedback_delay_hours" value="{{ __('messages.feedback_delay') }}" />
-                            <select id="feedback_delay_hours" name="feedback_delay_hours" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" {{ $emailDisabled ? 'disabled' : '' }}>
+                            <select id="feedback_delay_hours" name="feedback_delay_hours" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" {{ $emailDisabled ? 'disabled' : '' }}>
                                 @foreach ([1, 2, 6, 12, 24, 48] as $hours)
                                 <option value="{{ $hours }}" {{ old('feedback_delay_hours', $role->feedback_delay_hours ?? 24) == $hours ? 'selected' : '' }}>
                                     {{ $hours }} {{ __('messages.feedback_hours') }}
@@ -2999,7 +2999,7 @@
                                         </div>
                                     @endforeach
                                 </div>
-                                <button type="button" data-action="add-import-url" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
+                                <button type="button" data-action="add-import-url" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
                                     + {{ __('messages.add') }}
                                 </button>
                             </div>
@@ -3027,7 +3027,7 @@
                                         </div>
                                     @endforeach
                                 </div>
-                                <button type="button" data-action="add-import-city" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
+                                <button type="button" data-action="add-import-city" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
                                     + {{ __('messages.add') }}
                                 </button>
                             </div>
@@ -3079,11 +3079,11 @@
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                                 @if (config('app.hosted'))
-                                <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="email">
+                                <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="email">
                                     {{ __('messages.email_settings') }}
                                 </button>
                                 @endif
-                                <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 {{ config('app.hosted') ? 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' : 'border-[#4E81FA] text-[#4E81FA]' }}" data-tab="google">
+                                <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 {{ config('app.hosted') ? 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' : 'border-[var(--brand-blue)] text-[var(--brand-blue)]' }}" data-tab="google">
                                     Google Calendar
                                 </button>
                                 <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="caldav">
@@ -3128,7 +3128,7 @@
 
                             <div class="mb-6">
                                 <x-input-label for="email_settings_encryption" :value="__('messages.encryption')" />
-                                <select id="email_settings_encryption" name="email_settings[encryption]" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                                <select id="email_settings_encryption" name="email_settings[encryption]" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                     <option value="">{{ __('messages.none') }}</option>
                                     <option value="tls" {{ old('email_settings.encryption', $emailSettings['encryption'] ?? '') == 'tls' ? 'selected' : '' }}>TLS</option>
                                     <option value="ssl" {{ old('email_settings.encryption', $emailSettings['encryption'] ?? '') == 'ssl' ? 'selected' : '' }}>SSL</option>
@@ -3189,7 +3189,7 @@
                                 <!-- Calendar Selection -->
                                 <div>
                                     <x-input-label for="google-calendar-select" :value="__('messages.select_google_calendar')" />
-                                    <select id="google-calendar-select" name="google_calendar_id" data-searchable class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                                    <select id="google-calendar-select" name="google_calendar_id" data-searchable class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                         <option value="">{{ __('messages.loading_calendars') }}</option>
                                     </select>
                                 </div>
@@ -3203,7 +3203,7 @@
                                                    name="sync_direction"
                                                    value="to"
                                                    {{ $role->sync_direction === 'to' ? 'checked' : '' }}
-                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                             <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.to_google_calendar') }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.to_google_calendar_description') }}</div>
@@ -3214,7 +3214,7 @@
                                                    name="sync_direction"
                                                    value="from"
                                                    {{ $role->sync_direction === 'from' ? 'checked' : '' }}
-                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                             <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.from_google_calendar') }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.from_google_calendar_description') }}</div>
@@ -3225,7 +3225,7 @@
                                                    name="sync_direction"
                                                    value="both"
                                                    {{ $role->sync_direction === 'both' ? 'checked' : '' }}
-                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                             <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.bidirectional_sync') }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.bidirectional_sync_description') }}</div>
@@ -3236,7 +3236,7 @@
                                                    name="sync_direction"
                                                    value=""
                                                    {{ !$role->sync_direction ? 'checked' : '' }}
-                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                             <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.no_sync') }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.no_sync_description') }}</div>
@@ -3312,7 +3312,7 @@
                                                    name="caldav_sync_direction"
                                                    value="to"
                                                    {{ $role->caldav_sync_direction === 'to' ? 'checked' : '' }}
-                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                             <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.to_caldav') }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.to_caldav_description') }}</div>
@@ -3323,7 +3323,7 @@
                                                    name="caldav_sync_direction"
                                                    value="from"
                                                    {{ $role->caldav_sync_direction === 'from' ? 'checked' : '' }}
-                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                             <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.from_caldav') }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.from_caldav_description') }}</div>
@@ -3334,7 +3334,7 @@
                                                    name="caldav_sync_direction"
                                                    value="both"
                                                    {{ $role->caldav_sync_direction === 'both' ? 'checked' : '' }}
-                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                             <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.bidirectional_sync') }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.bidirectional_sync_description') }}</div>
@@ -3345,7 +3345,7 @@
                                                    name="caldav_sync_direction"
                                                    value=""
                                                    {{ !$role->caldav_sync_direction ? 'checked' : '' }}
-                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                             <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.no_sync') }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.no_sync_description') }}</div>
@@ -3395,7 +3395,7 @@
 
                                 <div id="caldav-calendar-select-container" class="hidden">
                                     <x-input-label for="caldav_calendar_url" :value="__('messages.select_calendar')" />
-                                    <select id="caldav_calendar_url" data-searchable class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                                    <select id="caldav_calendar_url" data-searchable class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                         <option value="">{{ __('messages.select_a_calendar') }}</option>
                                     </select>
                                 </div>
@@ -3405,21 +3405,21 @@
                                     <div class="mt-2 space-y-2">
                                         <label class="flex items-center">
                                             <input type="radio" name="caldav_sync_direction_new" value="to" checked
-                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                             <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.to_caldav') }}</div>
                                             </div>
                                         </label>
                                         <label class="flex items-center">
                                             <input type="radio" name="caldav_sync_direction_new" value="from"
-                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                             <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.from_caldav') }}</div>
                                             </div>
                                         </label>
                                         <label class="flex items-center">
                                             <input type="radio" name="caldav_sync_direction_new" value="both"
-                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                             <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.bidirectional_sync') }}</div>
                                             </div>
@@ -3578,10 +3578,10 @@ function showStyleTab(tabName) {
     tabButtons.forEach(function(button) {
         const isActive = button.id === 'style-tab-' + tabName;
         if (isActive) {
-            button.classList.add('border-[#4E81FA]', 'text-[#4E81FA]');
+            button.classList.add('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
             button.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400');
         } else {
-            button.classList.remove('border-[#4E81FA]', 'text-[#4E81FA]');
+            button.classList.remove('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
             button.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
         }
     });
@@ -3611,12 +3611,12 @@ function addGroupField() {
     div.innerHTML = `
         <div class="mb-4">
             <label for="group_name_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.name') }} *</label>
-            <input name="groups[new_${idx}][name]" type="text" id="group_name_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" />
+            <input name="groups[new_${idx}][name]" type="text" id="group_name_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" />
         </div>
         @if($role->language_code !== 'en' || app()->getLocale() !== 'en')
         <div class="mb-4">
             <label for="group_name_en_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.english_name') }}</label>
-            <input name="groups[new_${idx}][name_en]" type="text" id="group_name_en_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" />
+            <input name="groups[new_${idx}][name_en]" type="text" id="group_name_en_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" />
         </div>
         @endif
         <div class="mb-4">
@@ -3857,7 +3857,7 @@ function addImportUrlField() {
     div.innerHTML = `
         <div class="mb-4">
             <label for="import_url_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.url') }}</label>
-            <input name="import_urls[new_${idx}]" type="url" id="import_url_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" />
+            <input name="import_urls[new_${idx}]" type="url" id="import_url_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" />
         </div>
         <div class="flex gap-4 items-center">
             <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm" data-action="remove-parent-item">
@@ -3874,7 +3874,7 @@ function addApprovedSubdomainField() {
     div.className = 'mb-2 relative';
     div.innerHTML = `
         <div class="flex items-center">
-            <input type="text" data-subdomain-search placeholder="{{ __('messages.search_schedules_autocomplete') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" autocomplete="off" />
+            <input type="text" data-subdomain-search placeholder="{{ __('messages.search_schedules_autocomplete') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" autocomplete="off" />
             <button type="button" data-action="remove-parent-item"
                 class="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
         </div>
@@ -3965,7 +3965,7 @@ function addImportCityField() {
     div.innerHTML = `
         <div class="mb-4">
             <label for="import_city_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.city') }}</label>
-            <input name="import_cities[new_${idx}]" type="text" id="import_city_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" placeholder="{{ __('messages.placeholder_city') }}" />
+            <input name="import_cities[new_${idx}]" type="text" id="import_city_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" placeholder="{{ __('messages.placeholder_city') }}" />
         </div>
         <div class="flex gap-4 items-center">
             <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm" data-action="remove-parent-item">
@@ -4268,10 +4268,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update active link
         sectionLinks.forEach(link => {
             if (link.getAttribute('data-section') === sectionId) {
-                link.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[#4E81FA]');
+                link.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[var(--brand-blue)]');
                 link.classList.remove('text-gray-700', 'dark:text-gray-300', 'font-medium', 'border-transparent');
             } else {
-                link.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[#4E81FA]');
+                link.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[var(--brand-blue)]');
                 link.classList.add('text-gray-700', 'dark:text-gray-300', 'font-medium', 'border-transparent');
             }
         });
@@ -4510,10 +4510,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update tab buttons
         integrationTabs.forEach(tab => {
             if (tab.dataset.tab === tabName) {
-                tab.classList.add('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.add('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
                 tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
             } else {
-                tab.classList.remove('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.remove('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
                 tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
             }
         });
@@ -4582,10 +4582,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update tab buttons
         engagementTabs.forEach(tab => {
             if (tab.dataset.tab === tabName) {
-                tab.classList.add('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.add('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
                 tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
             } else {
-                tab.classList.remove('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.remove('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
                 tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
             }
         });
@@ -4633,10 +4633,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update tab buttons
         linksTabs.forEach(tab => {
             if (tab.dataset.tab === tabName) {
-                tab.classList.add('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.add('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
                 tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
             } else {
-                tab.classList.remove('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.remove('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
                 tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
             }
         });
@@ -4682,10 +4682,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update tab buttons
         customizeTabs.forEach(tab => {
             if (tab.dataset.tab === tabName) {
-                tab.classList.add('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.add('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
                 tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
             } else {
-                tab.classList.remove('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.remove('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
                 tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
             }
         });
@@ -4735,10 +4735,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update tab buttons
         settingsTabs.forEach(tab => {
             if (tab.dataset.tab === tabName) {
-                tab.classList.add('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.add('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
                 tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
             } else {
-                tab.classList.remove('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.remove('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
                 tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
             }
         });
@@ -4784,10 +4784,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update tab buttons
         detailsTabs.forEach(tab => {
             if (tab.dataset.tab === tabName) {
-                tab.classList.add('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.add('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
                 tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
             } else {
-                tab.classList.remove('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.remove('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
                 tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
             }
         });
@@ -5124,13 +5124,13 @@ function addEventCustomField() {
                 <div>
                     <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_name') !!} *</label>
                     <input type="text" name="event_custom_fields[${fieldKey}][name]"
-                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm" required />
+                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" required />
                 </div>
                 <div>
                     <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_type') !!}</label>
                     <select name="event_custom_fields[${fieldKey}][type]"
                         data-action="toggle-field-options"
-                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                         <option value="string">{!! __('messages.type_string') !!}</option>
                         <option value="multiline_string">{!! __('messages.type_multiline_string') !!}</option>
                         <option value="switch">{!! __('messages.type_switch') !!}</option>
@@ -5144,20 +5144,20 @@ function addEventCustomField() {
             <div class="mt-3">
                 <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.english_name') !!}</label>
                 <input type="text" name="event_custom_fields[${fieldKey}][name_en]"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                     placeholder="{!! __('messages.auto_translated_placeholder') !!}" />
             </div>
             @endif
             <div class="mt-3 event-field-options-container" style="display: none;">
                 <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_options') !!}</label>
                 <input type="text" name="event_custom_fields[${fieldKey}][options]"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                     placeholder="{!! __('messages.options_placeholder') !!}" />
             </div>
             <div class="mt-3">
                 <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.ai_prompt_custom_field') !!}</label>
                 <textarea name="event_custom_fields[${fieldKey}][ai_prompt]"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm text-sm ai-prompt-textarea"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm ai-prompt-textarea"
                     rows="2"
                     maxlength="500"></textarea>
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{!! __('messages.ai_prompt_custom_field_help') !!}</p>
@@ -5168,7 +5168,7 @@ function addEventCustomField() {
                         <input type="checkbox" name="event_custom_fields[${fieldKey}][required]"
                             id="event_field_required_${fieldKey}"
                             value="1"
-                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                            class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
                         <label for="event_field_required_${fieldKey}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{!! __('messages.field_required') !!}</label>
                     </div>
                     <input type="hidden" name="event_custom_fields[${fieldKey}][index]" value="${fieldIndex || ''}">
@@ -5266,7 +5266,7 @@ function addCustomLabel() {
             <div>
                 <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.english_name') !!}</label>
                 <input type="text" name="custom_labels[${key}][value_en]"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                     placeholder="{!! __('messages.auto_translated_placeholder') !!}"
                     maxlength="200" />
             </div>`;
@@ -5285,7 +5285,7 @@ function addCustomLabel() {
         <div class="space-y-3">
             <div>
                 <input type="text" name="custom_labels[${key}][value]"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                     placeholder="${displayName}"
                     maxlength="200" />
             </div>
@@ -5426,7 +5426,7 @@ function buildSponsorCardHTML(name, tierBadge, urlDisplay, logoSrc) {
     return '<div class="drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></div>' +
         '<div class="flex-shrink-0 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden" style="width: 120px; height: 80px;">' + (logoSrc ? '<img src="' + logoSrc + '" class="max-w-full max-h-full object-contain" />' : '') + '</div>' +
         '<div class="flex-1 min-w-0"><div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">' + escapeHtml(name) + '</div>' + tierBadge + urlDisplay + '</div>' +
-        '<button type="button" data-action="edit-sponsor" class="flex-shrink-0 text-gray-400 hover:text-[#4E81FA] dark:hover:text-[#4E81FA] transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>' +
+        '<button type="button" data-action="edit-sponsor" class="flex-shrink-0 text-gray-400 hover:text-[var(--brand-blue)] transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>' +
         '<button type="button" data-action="remove-sponsor" class="flex-shrink-0 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>';
 }
 
@@ -5459,7 +5459,7 @@ function editSponsor(btn) {
     if (fileInput) fileInput.value = '';
 
     // Highlight the card being edited
-    item.classList.add('ring-2', 'ring-[#4E81FA]');
+    item.classList.add('ring-2', 'ring-[var(--brand-blue)]');
 
     // Switch button to Save mode
     var actionText = document.getElementById('sponsor-action-text');
@@ -5482,7 +5482,7 @@ function editSponsor(btn) {
 
 function resetSponsorEditState() {
     if (editingSponsorItem) {
-        editingSponsorItem.classList.remove('ring-2', 'ring-[#4E81FA]');
+        editingSponsorItem.classList.remove('ring-2', 'ring-[var(--brand-blue)]');
     }
     editingSponsorItem = null;
 
@@ -6375,7 +6375,7 @@ window.getStyleExtraData = function() {
         font_family: document.getElementById('font_family') ? document.getElementById('font_family').value : '',
         name: document.getElementById('name').value,
         type: document.querySelector('input[name="type"]') ? document.querySelector('input[name="type"]').value : (document.querySelector('select[name="type"]') ? document.querySelector('select[name="type"]').value : ''),
-        short_description: document.getElementById('short_description') ? document.getElementById('short_description').value : ''
+        short_description: document.getElementById('short_description') ? document.getElementById('short_description').value : '',
     };
 };
 
@@ -6455,6 +6455,12 @@ window.handleAiStyleResults = function(data) {
         input.value = data.header_image_filename;
         document.getElementById('edit-form').appendChild(input);
 
+        var headerPreviewClear = document.getElementById('header_image_url_preview_clear');
+        var headerPreviewImg = document.getElementById('header_image_url_preview');
+        if (headerPreviewImg && headerPreviewClear) {
+            headerPreviewImg.src = data.header_image_url;
+            headerPreviewClear.style.display = '';
+        }
         var headerSelect = document.getElementById('header_image');
         if (headerSelect) {
             headerSelect.value = '';
@@ -6462,12 +6468,6 @@ window.handleAiStyleResults = function(data) {
         }
         var customHeaderInput = document.getElementById('custom_header_input');
         if (customHeaderInput) customHeaderInput.style.display = '';
-        var headerPreviewClear = document.getElementById('header_image_url_preview_clear');
-        var headerPreviewImg = document.getElementById('header_image_url_preview');
-        if (headerPreviewImg && headerPreviewClear) {
-            headerPreviewImg.src = data.header_image_url;
-            headerPreviewClear.style.display = '';
-        }
     }
 
     // Apply background image
@@ -6481,6 +6481,12 @@ window.handleAiStyleResults = function(data) {
         input.value = data.background_image_filename;
         document.getElementById('edit-form').appendChild(input);
 
+        var bgPreviewClear = document.getElementById('background_image_preview_clear');
+        var bgPreviewImg = document.getElementById('background_image_preview');
+        if (bgPreviewImg && bgPreviewClear) {
+            bgPreviewImg.src = data.background_image_url;
+            bgPreviewClear.style.display = '';
+        }
         var bgRadio = document.getElementById('background_type_image');
         if (bgRadio) {
             bgRadio.checked = true;
@@ -6493,12 +6499,6 @@ window.handleAiStyleResults = function(data) {
         }
         var customImageInput = document.getElementById('custom_image_input');
         if (customImageInput) customImageInput.style.display = '';
-        var bgPreviewClear = document.getElementById('background_image_preview_clear');
-        var bgPreviewImg = document.getElementById('background_image_preview');
-        if (bgPreviewImg && bgPreviewClear) {
-            bgPreviewImg.src = data.background_image_url;
-            bgPreviewClear.style.display = '';
-        }
     }
 
     // Switch to branding tab

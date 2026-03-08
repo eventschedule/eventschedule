@@ -46,7 +46,7 @@
                         <div class="flex gap-2" id="star-rating">
                             @for ($i = 1; $i <= 5; $i++)
                             <button type="button" data-rating="{{ $i }}"
-                                class="star-btn p-1 rounded-lg transition-all duration-150 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-[#2d2d30]"
+                                class="star-btn p-1 rounded-lg transition-all duration-150 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-[#2d2d30]"
                                 style="min-width: 44px; min-height: 44px;"
                                 aria-label="{{ $i }} {{ __('messages.stars') }}">
                                 <svg class="w-8 h-8 star-icon transition-colors duration-150" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -62,7 +62,7 @@
                     <div class="mb-6">
                         <label for="comment" class="block text-sm font-medium text-gray-700 dark:text-[#d1d5db] mb-2">{{ __('messages.comment') }} <span class="text-gray-400 dark:text-[#9ca3af] font-normal">({{ __('messages.optional') }})</span></label>
                         <textarea id="comment" name="comment" rows="4" maxlength="2000" dir="auto"
-                            class="w-full rounded-lg border border-gray-300 dark:border-[#2d2d30] bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-[#d1d5db] px-3 py-2 text-sm focus:ring-2 focus:ring-[#4E81FA] focus:border-[#4E81FA] resize-y"
+                            class="w-full rounded-lg border border-gray-300 dark:border-[#2d2d30] bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-[#d1d5db] px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] resize-y"
                             placeholder="{{ __('messages.feedback_comment_placeholder') }}">{{ old('comment') }}</textarea>
                         <p class="mt-1 text-xs text-gray-400 dark:text-[#9ca3af]"><span id="char-count">0</span>/2000</p>
                     </div>
@@ -70,7 +70,7 @@
                     {{-- Submit --}}
                     <button type="submit" id="submit-btn"
                         class="w-full px-4 py-3 text-base font-medium text-white rounded-lg transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-[#2d2d30] opacity-50 cursor-not-allowed"
-                        style="background-color: {{ $role->accent_color ?? '#4E81FA' }}; --tw-ring-color: {{ $role->accent_color ?? '#4E81FA' }};"
+                        style="background-color: {{ $role->accent_color ?? 'var(--brand-blue)' }}; --tw-ring-color: {{ $role->accent_color ?? 'var(--brand-blue)' }};"
                         disabled>
                         {{ __('messages.feedback_submit') }}
                     </button>

@@ -12,6 +12,23 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    --brand-blue: #4E81FA;
+    --brand-blue-light: #5A8DFF;
+    --brand-blue-dark: #3D6FE8;
+    --brand-blue-a10: rgba(78, 129, 250, 0.1);
+    --brand-blue-a20: rgba(78, 129, 250, 0.2);
+    --brand-blue-a30: rgba(78, 129, 250, 0.3);
+}
+.dark {
+    --brand-blue: #5A8AEE;
+    --brand-blue-light: #6B9AFF;
+    --brand-blue-dark: #4A78DC;
+    --brand-blue-a10: rgba(90, 138, 238, 0.1);
+    --brand-blue-a20: rgba(90, 138, 238, 0.2);
+    --brand-blue-a30: rgba(90, 138, 238, 0.3);
+}
+
 [x-cloak] {
   display: none !important;
 }

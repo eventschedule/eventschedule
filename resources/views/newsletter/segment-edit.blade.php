@@ -47,7 +47,7 @@
                     </div>
 
                     <div class="flex justify-end">
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[var(--brand-blue)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600">
                             {{ __('messages.save_changes') }}
                         </button>
                     </div>
@@ -64,12 +64,12 @@
                 @csrf
                 <x-text-input name="name" type="text" class="flex-1" :placeholder="__('messages.name')" />
                 <x-text-input name="email" type="email" class="flex-1" :placeholder="__('messages.email')" required />
-                <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 whitespace-nowrap">
+                <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-[var(--brand-blue)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 whitespace-nowrap">
                     {{ __('messages.add_subscriber') }}
                 </button>
             </form>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">
-                <a href="{{ route('newsletter.import', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="text-[#4E81FA] hover:text-[#3D6FE8]">
+                <a href="{{ route('newsletter.import', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
                     {{ __('messages.import_in_bulk') }}
                 </a>
             </p>
@@ -113,7 +113,7 @@
                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $subscriber->created_at?->format('M j, Y') }}</td>
                             <td class="px-4 py-3 text-sm text-right">
                                 <div class="flex gap-3 justify-end">
-                                    <button type="button" @click="editingId = '{{ $encodedId }}'" class="text-[#4E81FA] hover:text-[#3D6FE8]">{{ __('messages.edit') }}</button>
+                                    <button type="button" @click="editingId = '{{ $encodedId }}'" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">{{ __('messages.edit') }}</button>
                                     <form method="POST" action="{{ route('newsletter.segment.user.delete', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id), 'userHash' => $encodedId]) }}"
                                         class="js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
                                         @csrf
@@ -133,7 +133,7 @@
                                     <x-text-input name="name" type="text" class="flex-1 text-sm" :value="$subscriber->name" :placeholder="__('messages.name')" />
                                     <x-text-input name="email" type="email" class="flex-1 text-sm" :value="$subscriber->email" :placeholder="__('messages.email')" required />
                                     <div class="flex gap-2">
-                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-xs text-white hover:bg-blue-600">
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-[var(--brand-blue)] border border-transparent rounded-lg font-semibold text-xs text-white hover:bg-blue-600">
                                             {{ __('messages.save_changes') }}
                                         </button>
                                         <button type="button" @click="editingId = null" class="inline-flex items-center px-3 py-1.5 bg-gray-200 dark:bg-gray-700 border border-transparent rounded-lg font-semibold text-xs text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600">

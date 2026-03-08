@@ -1703,7 +1703,7 @@ class RoleController extends Controller
 
         $user->roles()->attach($role->id, ['created_at' => now(), 'level' => 'owner']);
 
-        if (!$user->default_role_id) {
+        if (! $user->default_role_id) {
             $user->default_role_id = $role->id;
             $user->save();
         }
@@ -2934,6 +2934,7 @@ class RoleController extends Controller
             return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
         }
     }
+
 
     public function generateScheduleDetails(Request $request, $subdomain)
     {

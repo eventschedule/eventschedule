@@ -10,11 +10,11 @@
     $manageActive = in_array($active, $manageKeys);
     $systemActive = in_array($active, ['audit-log', 'queue', 'logs']);
 
-    $tabActive = 'border-[#4E81FA] text-[#4E81FA]';
+    $tabActive = 'border-[var(--brand-blue)] text-[var(--brand-blue)]';
     $tabInactive = 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300';
 
     $dropdownItem = 'block w-full px-4 py-2 text-start text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600';
-    $dropdownItemActive = 'block w-full px-4 py-2 text-start text-sm text-[#4E81FA] bg-gray-50 dark:bg-gray-600';
+    $dropdownItemActive = 'block w-full px-4 py-2 text-start text-sm text-[var(--brand-blue)] bg-gray-50 dark:bg-gray-600';
 @endphp
 
 <div class="border-b border-gray-200 dark:border-gray-700">

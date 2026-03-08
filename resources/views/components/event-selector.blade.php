@@ -1,6 +1,6 @@
 <div class="relative" id="event-selector-dropdown">
     <button @click="toggleDropdown" type="button" tabindex="0"
-        class="w-full flex items-center gap-3 rounded-lg border border-gray-300 dark:border-[#2d2d30] bg-white dark:bg-[#1e1e1e] px-3 py-2 shadow-sm focus:border-[#4E81FA] focus:ring-2 focus:ring-[#4E81FA] focus:outline-none text-start">
+        class="w-full flex items-center gap-3 rounded-lg border border-gray-300 dark:border-[#2d2d30] bg-white dark:bg-[#1e1e1e] px-3 py-2 shadow-sm focus:border-[var(--brand-blue)] focus:ring-2 focus:ring-[var(--brand-blue)] focus:outline-none text-start">
         <template v-if="selectedEvent">
             <img v-if="selectedEvent.image_url" :src="selectedEvent.image_url" class="w-10 h-10 rounded object-cover flex-shrink-0">
             <span v-else class="w-10 h-10 rounded bg-gray-100 dark:bg-[#2d2d30] flex items-center justify-center flex-shrink-0">
@@ -32,7 +32,7 @@
                 <span class="block truncate text-gray-900 dark:text-gray-100 text-sm font-medium">@{{ event.name }}</span>
                 <span v-if="event.starts_at" class="block truncate text-gray-500 dark:text-[#9ca3af] text-xs">@{{ event.starts_at }}</span>
             </span>
-            <svg v-if="event.id === selectedEventId" class="w-5 h-5 text-[#4E81FA] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg v-if="event.id === selectedEventId" class="w-5 h-5 text-[var(--brand-blue)] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
         </button>

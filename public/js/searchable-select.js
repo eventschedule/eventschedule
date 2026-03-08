@@ -249,7 +249,7 @@
                     item.style.cssText = 'padding:0.5rem 0.75rem;min-height:44px;display:flex;align-items:center;justify-content:space-between;font-size:0.875rem;color:' + (isDark ? '#d1d5db' : '#111827') + ';cursor:pointer;';
                     var labelHtml = '<span style="flex:1;min-width:0">' + highlightMatch(opt.text, query) + '</span>';
                     if (opt.value === select.value) {
-                        labelHtml += '<svg style="flex-shrink:0;width:16px;height:16px;margin-' + (isRtl ? 'right' : 'left') + ':8px;color:#4E81FA" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+                        labelHtml += '<svg style="flex-shrink:0;width:16px;height:16px;margin-' + (isRtl ? 'right' : 'left') + ':8px;color:var(--brand-blue)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
                     }
                     item.innerHTML = labelHtml;
                     count++;

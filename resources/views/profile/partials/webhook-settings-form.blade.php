@@ -129,7 +129,7 @@
                                                 <input type="checkbox" name="event_types[]" value="{{ $type }}"
                                                     {{ empty($webhook->event_types) || in_array($type, $webhook->event_types) ? 'checked' : '' }}
                                                     class="sr-only peer">
-                                                <span class="block w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></span>
+                                                <span class="block w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-blue)] transition-colors"></span>
                                                 <span class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></span>
                                             </span>
                                             <span class="text-sm text-gray-700 dark:text-gray-300">{{ $type }}</span>
@@ -186,7 +186,7 @@
                         <span class="relative w-11 h-6 flex-shrink-0">
                             <input type="checkbox" name="event_types[]" value="{{ $type }}" checked
                                 class="sr-only peer">
-                            <span class="block w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></span>
+                            <span class="block w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-blue)] transition-colors"></span>
                             <span class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></span>
                         </span>
                         <span class="text-sm text-gray-700 dark:text-gray-300">{{ $type }}</span>

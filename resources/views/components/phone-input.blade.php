@@ -26,7 +26,7 @@
 <input type="tel" id="{{ $inputId }}" value="{{ $value }}"
     {{ $required ? 'required' : '' }}
     {{ $disabled ? 'disabled' : '' }}
-    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
+    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
     autocomplete="tel" />
 
 <script {!! nonce_attr() !!}>

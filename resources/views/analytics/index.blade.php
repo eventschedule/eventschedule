@@ -31,15 +31,15 @@
             @if ($tab === 'web')
             <div class="flex gap-2 items-center">
                 <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'daily', 'range' => $range]) }}"
-                    class="px-5 py-3 rounded-lg text-base font-semibold leading-none flex items-center {{ $period === 'daily' ? 'bg-[#4E81FA] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
+                    class="px-5 py-3 rounded-lg text-base font-semibold leading-none flex items-center {{ $period === 'daily' ? 'bg-[var(--brand-blue)] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.daily') }}
                 </a>
                 <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'weekly', 'range' => $range]) }}"
-                    class="px-5 py-3 rounded-lg text-base font-semibold leading-none flex items-center {{ $period === 'weekly' ? 'bg-[#4E81FA] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
+                    class="px-5 py-3 rounded-lg text-base font-semibold leading-none flex items-center {{ $period === 'weekly' ? 'bg-[var(--brand-blue)] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.weekly') }}
                 </a>
                 <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'monthly', 'range' => $range]) }}"
-                    class="px-5 py-3 rounded-lg text-base font-semibold leading-none flex items-center {{ $period === 'monthly' ? 'bg-[#4E81FA] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
+                    class="px-5 py-3 rounded-lg text-base font-semibold leading-none flex items-center {{ $period === 'monthly' ? 'bg-[var(--brand-blue)] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.monthly') }}
                 </a>
             </div>
@@ -49,15 +49,15 @@
         {{-- Tab Navigation --}}
         <div class="flex gap-6 border-b border-gray-200 dark:border-gray-700">
             <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'range' => $range])) }}"
-                class="pb-3 text-base font-medium border-b-2 transition-colors {{ $tab === 'web' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
+                class="pb-3 text-base font-medium border-b-2 transition-colors {{ $tab === 'web' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
                 {{ __('messages.web_analytics') }}
             </a>
             <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'range' => $range, 'tab' => 'revenue'])) }}"
-                class="pb-3 text-base font-medium border-b-2 transition-colors {{ $tab === 'revenue' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
+                class="pb-3 text-base font-medium border-b-2 transition-colors {{ $tab === 'revenue' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
                 {{ __('messages.revenue') }}
             </a>
             <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'range' => $range, 'tab' => 'checkins'])) }}"
-                class="pb-3 text-base font-medium border-b-2 transition-colors {{ $tab === 'checkins' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
+                class="pb-3 text-base font-medium border-b-2 transition-colors {{ $tab === 'checkins' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
                 {{ __('messages.check_ins') }}
             </a>
         </div>
@@ -754,7 +754,7 @@
                     </div>
                     <div class="mt-4 grid grid-cols-2 gap-2 text-xs text-gray-500 dark:text-gray-400">
                         <div class="flex items-start gap-1">
-                            <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: #4E81FA;"></span>
+                            <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: var(--brand-blue);"></span>
                             <span><strong>{{ __('messages.direct') }}:</strong> {{ __('messages.direct_description') }}</span>
                         </div>
                         <div class="flex items-start gap-1">
@@ -851,6 +851,7 @@
     <script src="{{ asset('js/chart.min.js') }}" {!! nonce_attr() !!}></script>
 
     <script {!! nonce_attr() !!}>
+        const brandBlue = getComputedStyle(document.documentElement).getPropertyValue('--brand-blue').trim();
         document.getElementById('role-filter').addEventListener('change', function() {
             var url = new URL(window.location.href);
             if (this.value) {
@@ -896,7 +897,7 @@
                     datasets: [{
                         label: @json(__('messages.check_ins')),
                         data: arrivalData,
-                        backgroundColor: '#4E81FA'
+                        backgroundColor: brandBlue
                     }]
                 },
                 options: {
@@ -994,7 +995,7 @@
             const viewsDatasets = [{
                 label: @json(__('messages.views')),
                 data: @json($viewsByPeriod->pluck('view_count')->toArray()),
-                borderColor: '#4E81FA',
+                borderColor: brandBlue,
                 backgroundColor: 'rgba(78, 129, 250, 0.1)',
                 fill: true,
                 tension: 0.3
@@ -1089,7 +1090,7 @@
                 labels: Object.keys(deviceData).map(k => deviceLabels[k] || k.charAt(0).toUpperCase() + k.slice(1)),
                 datasets: [{
                     data: Object.values(deviceData),
-                    backgroundColor: ['#4E81FA', '#10B981', '#8B5CF6', '#6B7280']
+                    backgroundColor: [brandBlue, '#10B981', '#8B5CF6', '#6B7280']
                 }]
             },
             options: {
@@ -1116,7 +1117,7 @@
                 datasets: [{
                     label: @json(__('messages.views')),
                     data: @json($topEvents->pluck('view_count')->toArray()),
-                    backgroundColor: '#4E81FA'
+                    backgroundColor: brandBlue
                 }]
             },
             options: {
@@ -1303,7 +1304,7 @@
             'other': @json(__('messages.other'))
         };
         const sourceColors = {
-            'direct': '#4E81FA',
+            'direct': brandBlue,
             'search': '#10B981',
             'social': '#F59E0B',
             'email': '#EF4444',

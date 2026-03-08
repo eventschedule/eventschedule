@@ -264,7 +264,7 @@
         <div class="mb-6" v-if="maxRsvpQuantity > 1">
             <label for="rsvp_quantity" class="text-gray-900 dark:text-gray-100">{{ __('messages.number_of_guests') }}</label>
             <select id="rsvp_quantity" name="rsvp_quantity" v-model="rsvpQuantity"
-                class="mt-1 block w-32 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                class="mt-1 block w-32 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                 <template v-for="n in maxRsvpQuantity">
                     <option :value="n">@{{ n }}</option>
                 </template>
@@ -275,14 +275,14 @@
         <div v-if="!showGuestForms">
         <div class="mb-6">
             <label for="name" class="text-gray-900 dark:text-gray-100">{{ __('messages.name') . ' *' }}</label>
-            <input type="text" name="name" id="name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+            <input type="text" name="name" id="name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
                 v-model="name" required autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
         <div class="mb-6">
             <label for="email" class="text-gray-900 dark:text-gray-100">{{ __('messages.email') . ' *' }}</label>
-            <input type="email" name="email" id="email" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+            <input type="email" name="email" id="email" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
                 v-model="email" required autocomplete="email" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
@@ -291,7 +291,7 @@
                     <div class="flex items-center">
                         <input id="create_account" name="create_account" type="checkbox"
                             v-model="createAccount" value="1"
-                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 dark:border-gray-600 rounded">
+                            class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 dark:border-gray-600 rounded">
                         <label for="create_account" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                             {{ __('messages.create_account') }}
                         </label>
@@ -300,7 +300,7 @@
                     <div class="mt-6" v-if="createAccount">
                         <label for="password" class="text-gray-900 dark:text-gray-100">{{ __('messages.password') . ' *' }}</label>
                         <div class="relative mt-1">
-                            <input :type="showPassword ? 'text' : 'password'" name="password" id="password" class="block w-full pe-10 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+                            <input :type="showPassword ? 'text' : 'password'" name="password" id="password" class="block w-full pe-10 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
                                 v-model="password" required autocomplete="new-password" />
                             <button
                                 type="button"
@@ -322,7 +322,7 @@
                             <div class="relative flex items-start">
                                 <div class="flex h-6 items-center">
                                     <input id="terms" name="terms" type="checkbox" required
-                                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                                 </div>
                                 <div class="ms-3 text-sm leading-6">
                                     <label for="terms" class="font-medium text-gray-900 dark:text-gray-300">
@@ -343,10 +343,10 @@
             <label for="phone_input" class="block text-gray-900 dark:text-gray-100">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
             @if ($event->country_code_phone)
             <input type="hidden" name="phone" id="phone_hidden" v-model="phone">
-            <input type="tel" id="phone_input" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+            <input type="tel" id="phone_input" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
                 :required="requirePhone" autocomplete="tel" />
             @else
-            <input type="tel" name="phone" id="phone_input" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+            <input type="tel" name="phone" id="phone_input" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
                 v-model="phone" :required="requirePhone" autocomplete="tel" />
             @endif
             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
@@ -364,19 +364,19 @@
                 <div class="mb-3">
                     <label :for="'guest_name_' + gIndex" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.name') }} *</label>
                     <input type="text" :id="'guest_name_' + gIndex" v-model="guest.name" required
-                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm" />
+                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm" />
                     <input type="hidden" :name="'guests[' + gIndex + '][name]'" :value="guest.name">
                 </div>
                 <div class="mb-3">
                     <label :for="'guest_email_' + gIndex" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.email') }} *</label>
                     <input type="email" :id="'guest_email_' + gIndex" v-model="guest.email" required
-                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm" />
+                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm" />
                     <input type="hidden" :name="'guests[' + gIndex + '][email]'" :value="guest.email">
                 </div>
                 <div class="mb-3" v-if="askPhone">
                     <label :for="'guest_phone_' + gIndex" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
                     <input type="tel" :id="'guest_phone_' + gIndex" v-model="guest.phone" :required="requirePhone"
-                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm" />
+                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm" />
                     <input type="hidden" :name="'guests[' + gIndex + '][phone]'" :value="guest.phone">
                 </div>
 
@@ -385,7 +385,7 @@
                     <div class="flex items-center">
                         <input id="create_account_rsvp_guest" name="create_account" type="checkbox"
                             v-model="createAccount" value="1"
-                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                            class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
                         <label for="create_account_rsvp_guest" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                             {{ __('messages.create_account') }}
                         </label>
@@ -393,7 +393,7 @@
                     <div class="mt-3" v-if="createAccount">
                         <label for="password_rsvp_guest" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.password') }} *</label>
                         <div class="relative mt-1">
-                            <input :type="showPassword ? 'text' : 'password'" name="password" id="password_rsvp_guest" class="block w-full pe-10 text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
+                            <input :type="showPassword ? 'text' : 'password'" name="password" id="password_rsvp_guest" class="block w-full pe-10 text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
                                 v-model="password" required autocomplete="new-password" />
                             <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                                 <svg v-show="!showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
@@ -405,7 +405,7 @@
                             <div class="relative flex items-start">
                                 <div class="flex h-6 items-center">
                                     <input id="terms_rsvp_guest" name="terms" type="checkbox" required
-                                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                                 </div>
                                 <div class="ms-3 text-sm leading-6">
                                     <label for="terms_rsvp_guest" class="font-medium text-gray-900 dark:text-gray-300">
@@ -439,7 +439,7 @@
                     :id="`event_custom_${fieldKey}`"
                     v-model="eventCustomValues[fieldKey]"
                     :required="field.required"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
+                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
                 <!-- Multiline text -->
                 <textarea v-else-if="field.type === 'multiline_string'"
                     :name="`event_custom_values[${fieldKey}]`"
@@ -448,14 +448,14 @@
                     :required="field.required"
                     rows="3"
                     dir="auto"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"></textarea>
+                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
                 <!-- Yes/No switch -->
                 <div v-else-if="field.type === 'switch'" class="mt-1">
                     <select :name="`event_custom_values[${fieldKey}]`"
                         :id="`event_custom_${fieldKey}`"
                         v-model="eventCustomValues[fieldKey]"
                         :required="field.required"
-                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="">{{ __('messages.please_select') }}</option>
                         <option value="Yes">{{ __('messages.yes') }}</option>
                         <option value="No">{{ __('messages.no') }}</option>
@@ -467,14 +467,14 @@
                     :id="`event_custom_${fieldKey}`"
                     v-model="eventCustomValues[fieldKey]"
                     :required="field.required"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
+                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
                 <!-- Dropdown -->
                 <select v-else-if="field.type === 'dropdown'"
                     :name="`event_custom_values[${fieldKey}]`"
                     :id="`event_custom_${fieldKey}`"
                     v-model="eventCustomValues[fieldKey]"
                     :required="field.required"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                     <option value="">{{ __('messages.please_select') }}</option>
                     <option v-for="option in (field.options || '').split(',')" :key="option.trim()" :value="option.trim()">@{{ option.trim() }}</option>
                 </select>
@@ -484,7 +484,7 @@
                     <label v-for="option in (field.options || '').split(',')" :key="option.trim()" class="flex items-center gap-2 text-gray-900 dark:text-gray-100">
                         <input type="checkbox" :value="option.trim()"
                             v-model="eventMultiselectValues[fieldKey]"
-                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 dark:border-gray-600 rounded" />
+                            class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 dark:border-gray-600 rounded" />
                         @{{ option.trim() }}
                     </label>
                 </div>

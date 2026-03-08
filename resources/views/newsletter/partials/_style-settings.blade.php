@@ -26,7 +26,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
             <x-input-label :value="__('messages.font_family')" />
-            <select x-model="styleSettings.fontFamily" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-lg shadow-sm">
+            <select x-model="styleSettings.fontFamily" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                 <option value="Arial">Arial</option>
                 <option value="Georgia">Georgia</option>
                 <option value="Verdana">Verdana</option>
@@ -38,11 +38,11 @@
             <x-input-label :value="__('messages.button_style')" />
             <div class="flex gap-4 mt-2">
                 <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" x-model="styleSettings.buttonRadius" value="rounded" class="border-gray-300 dark:border-gray-700 text-[#4E81FA] focus:ring-[#4E81FA]" />
+                    <input type="radio" x-model="styleSettings.buttonRadius" value="rounded" class="border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
                     <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.rounded') }}</span>
                 </label>
                 <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" x-model="styleSettings.buttonRadius" value="square" class="border-gray-300 dark:border-gray-700 text-[#4E81FA] focus:ring-[#4E81FA]" />
+                    <input type="radio" x-model="styleSettings.buttonRadius" value="square" class="border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
                     <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.square') }}</span>
                 </label>
             </div>

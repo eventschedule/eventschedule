@@ -22,12 +22,12 @@
         <div class="border-b border-gray-200 dark:border-gray-700 mb-6 mt-6">
             <nav class="flex space-x-2 sm:space-x-6" aria-label="Tabs">
                 <button type="button" data-tab="export" @click="activeTab = 'export'"
-                    :class="activeTab === 'export' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                    :class="activeTab === 'export' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                     class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
                     {{ __('messages.backup_export') }}
                 </button>
                 <button type="button" data-tab="import" @click="activeTab = 'import'"
-                    :class="activeTab === 'import' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                    :class="activeTab === 'import' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                     class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
                     {{ __('messages.backup_import') }}
                 </button>
@@ -61,7 +61,7 @@
                     <div class="space-y-2">
                         <label v-for="role in roles" :key="role.id" class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" name="role_ids[]" :value="role.id" v-model="selectedRoleIds"
-                                class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                class="rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                             <span class="text-sm text-gray-700 dark:text-gray-300">@{{ role.name }} <span class="text-gray-400">(@{{ role.type_label }})</span></span>
                         </label>
                     </div>
@@ -100,7 +100,7 @@
                     </svg>
                     <span class="text-sm text-green-700 dark:text-green-300">
                         {{ __('messages.backup_export_complete') }}
-                        <a :href="exportJob.download_url" :download="'backup-' + new Date().toISOString().slice(0,10) + '.zip'" class="text-[#4E81FA] hover:underline font-medium">{{ __('messages.backup_download_button') }}</a>
+                        <a :href="exportJob.download_url" :download="'backup-' + new Date().toISOString().slice(0,10) + '.zip'" class="text-[var(--brand-blue)] hover:underline font-medium">{{ __('messages.backup_download_button') }}</a>
                         <span class="text-gray-500 dark:text-gray-400"> ({{ __('messages.backup_expires_in_7_days') }})</span>
                     </span>
                 </div>
@@ -173,7 +173,7 @@
                     <div class="space-y-3">
                         <label v-for="(schedule, index) in importPreview" :key="index" class="flex items-start gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg cursor-pointer">
                             <input type="checkbox" :value="index" v-model="selectedImportIndices"
-                                class="mt-1 rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                class="mt-1 rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                             <div>
                                 <span class="text-sm font-medium text-gray-900 dark:text-gray-100">@{{ schedule.name }} <span class="text-gray-400">(@{{ schedule.type }})</span></span>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -241,7 +241,7 @@
                                         </div>
                                     </template>
                                     <div v-if="schedule.subdomain" class="mt-2">
-                                        <a :href="scheduleBaseUrl.replace('__SUBDOMAIN__', schedule.subdomain)" class="text-[#4E81FA] hover:underline text-sm font-medium">
+                                        <a :href="scheduleBaseUrl.replace('__SUBDOMAIN__', schedule.subdomain)" class="text-[var(--brand-blue)] hover:underline text-sm font-medium">
                                             {{ __('messages.backup_view_schedule') }} &rarr;
                                         </a>
                                     </div>

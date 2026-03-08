@@ -523,30 +523,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     <!-- Desktop instructions -->
                     <div v-if="!isMobile" class="divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                         <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
-                            <span class="flex-shrink-0 w-6 h-6 bg-[#4E81FA] text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-blue)] text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
                             <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step1') }}</span>
                         </div>
                         <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
-                            <span class="flex-shrink-0 w-6 h-6 bg-[#4E81FA] text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-blue)] text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
                             <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step2') }}</span>
                         </div>
                         <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
-                            <span class="flex-shrink-0 w-6 h-6 bg-[#4E81FA] text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-blue)] text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
                             <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step3') }}</span>
                         </div>
                     </div>
                     <!-- Mobile instructions -->
                     <div v-else class="divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                         <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
-                            <span class="flex-shrink-0 w-6 h-6 bg-[#4E81FA] text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-blue)] text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
                             <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step1_mobile') }}</span>
                         </div>
                         <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
-                            <span class="flex-shrink-0 w-6 h-6 bg-[#4E81FA] text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-blue)] text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
                             <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step2_mobile') }}</span>
                         </div>
                         <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
-                            <span class="flex-shrink-0 w-6 h-6 bg-[#4E81FA] text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-blue)] text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
                             <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step3_mobile') }}</span>
                         </div>
                     </div>
@@ -554,7 +554,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 <!-- Try Again button -->
                 <div class="mt-6 text-center">
-                    <button @click="retryCameraAccess" class="inline-flex items-center gap-2 px-6 py-3 bg-[#4E81FA] hover:bg-[#3a6de0] border border-transparent rounded-lg font-semibold text-sm text-white uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                    <button @click="retryCameraAccess" class="inline-flex items-center gap-2 px-6 py-3 bg-[var(--brand-blue)] hover:bg-[var(--brand-blue-dark)] border border-transparent rounded-lg font-semibold text-sm text-white uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
@@ -563,7 +563,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
             <div v-else-if="!cameraStarted" class="text-center py-12">
-                <button v-if="!showCameraModal" @click="requestCameraAccess" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-sm text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                <button v-if="!showCameraModal" @click="requestCameraAccess" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-sm text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -595,7 +595,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <canvas ref="canvasEl" class="hidden"></canvas>
                 <div class="absolute bottom-4 left-0 right-0 flex justify-center">
                     <button @click="captureAndParse" :disabled="!selectedEventId"
-                        class="w-16 h-16 bg-white rounded-full border-4 border-gray-300 shadow-lg hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-[#4E81FA] disabled:opacity-50 transition-colors">
+                        class="w-16 h-16 bg-white rounded-full border-4 border-gray-300 shadow-lg hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-[var(--brand-blue)] disabled:opacity-50 transition-colors">
                         <span class="sr-only">{{ __('messages.capture_photo') }}</span>
                     </button>
                 </div>
@@ -615,7 +615,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                                 <span class="flex-1 text-sm text-gray-900 dark:text-gray-100">@{{ cam.label || selectCameraLabel }}</span>
-                                <svg v-if="cam.deviceId === selectedCameraId" class="w-5 h-5 text-[#4E81FA] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg v-if="cam.deviceId === selectedCameraId" class="w-5 h-5 text-[var(--brand-blue)] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                             </button>
@@ -626,10 +626,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             <!-- Buttons row below preview -->
             <div v-if="cameraStarted" class="mt-3 grid gap-2" :class="cameras.length > 1 ? 'grid-cols-2' : 'grid-cols-1'">
-                <button v-if="cameras.length > 1" @click="changeCamera" class="text-sm font-medium text-[#4E81FA] hover:text-[#3a6de0] border border-[#4E81FA] rounded-lg px-3 py-2">
+                <button v-if="cameras.length > 1" @click="changeCamera" class="text-sm font-medium text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] border border-[var(--brand-blue)] rounded-lg px-3 py-2">
                     {{ __('messages.change_camera') }}
                 </button>
-                <button @click="editingPrompt = !editingPrompt" class="text-sm font-medium text-[#4E81FA] hover:text-[#3a6de0] border border-[#4E81FA] rounded-lg px-3 py-2">
+                <button @click="editingPrompt = !editingPrompt" class="text-sm font-medium text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] border border-[var(--brand-blue)] rounded-lg px-3 py-2">
                     {{ __('messages.edit_prompt') }}
                 </button>
             </div>
@@ -637,7 +637,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <!-- Save image checkbox and AI prompt display -->
             <div v-if="cameraStarted && !editingPrompt" class="mt-3 flex items-center justify-between">
                 <label class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <input type="checkbox" v-model="saveAgendaImage" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA] me-2">
+                    <input type="checkbox" v-model="saveAgendaImage" class="rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] shadow-sm focus:ring-[var(--brand-blue)] me-2">
                     {{ __('messages.save_agenda_image') }}
                 </label>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -649,20 +649,20 @@ document.addEventListener('DOMContentLoaded', function() {
             <!-- AI Prompt editing -->
             <div v-if="cameraStarted && editingPrompt" class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.ai_agenda_prompt') }}</label>
-                <textarea v-model="aiPrompt" rows="2" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm" placeholder="{{ __('messages.ai_agenda_prompt_placeholder') }}"></textarea>
+                <textarea v-model="aiPrompt" rows="2" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm" placeholder="{{ __('messages.ai_agenda_prompt_placeholder') }}"></textarea>
                 <div class="flex items-center justify-between mt-2">
                     <label class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <input type="checkbox" v-model="saveAsDefault" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA] me-2">
+                        <input type="checkbox" v-model="saveAsDefault" class="rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] shadow-sm focus:ring-[var(--brand-blue)] me-2">
                         {{ __('messages.save_as_default') }}
                     </label>
-                    <button @click="editingPrompt = false" class="text-sm font-medium text-[#4E81FA] hover:text-[#3a6de0] whitespace-nowrap border border-[#4E81FA] rounded-lg px-4 py-2">{{ __('messages.done') }}</button>
+                    <button @click="editingPrompt = false" class="text-sm font-medium text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] whitespace-nowrap border border-[var(--brand-blue)] rounded-lg px-4 py-2">{{ __('messages.done') }}</button>
                 </div>
             </div>
         </div>
 
         <!-- Loading state -->
         <div v-if="state === 'loading'" class="text-center py-16">
-            <svg class="animate-spin mx-auto h-10 w-10 text-[#4E81FA]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg class="animate-spin mx-auto h-10 w-10 text-[var(--brand-blue)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
             </svg>
@@ -698,11 +698,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </svg>
                             </div>
                             <div class="flex-1 space-y-2">
-                                <input v-model="part.name" type="text" placeholder="{{ __('messages.name') }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm font-medium">
-                                <textarea v-if="showDescription" v-model="part.description" rows="2" placeholder="{{ __('messages.description') }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm"></textarea>
+                                <input v-model="part.name" type="text" placeholder="{{ __('messages.name') }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm font-medium">
+                                <textarea v-if="showDescription" v-model="part.description" rows="2" placeholder="{{ __('messages.description') }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm"></textarea>
                                 <div v-if="showTimes" class="flex gap-2">
-                                    <input v-model="part.start_time" type="text" placeholder="{{ __('messages.start_time') }}" class="w-1/2 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm">
-                                    <input v-model="part.end_time" type="text" placeholder="{{ __('messages.end_time') }}" class="w-1/2 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-sm">
+                                    <input v-model="part.start_time" type="text" placeholder="{{ __('messages.start_time') }}" class="w-1/2 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm">
+                                    <input v-model="part.end_time" type="text" placeholder="{{ __('messages.end_time') }}" class="w-1/2 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm">
                                 </div>
                             </div>
                             <button @click="removePart(index)" class="self-stretch rounded-lg border border-red-300 dark:border-red-700 px-3 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="{{ __('messages.remove') }}">
@@ -721,10 +721,10 @@ document.addEventListener('DOMContentLoaded', function() {
             <!-- Floating save/cancel bar -->
             <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 z-40 shadow-lg" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
                 <div class="flex gap-3 justify-center max-w-lg mx-auto">
-                    <button @click="saveParts" class="inline-flex items-center justify-center px-6 py-3 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-sm text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                    <button @click="saveParts" class="inline-flex items-center justify-center px-6 py-3 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-sm text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                         {{ __('messages.save') }}
                     </button>
-                    <button @click="cancelEditing" class="inline-flex items-center justify-center px-6 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                    <button @click="cancelEditing" class="inline-flex items-center justify-center px-6 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                         {{ __('messages.retake') }}
                     </button>
                 </div>

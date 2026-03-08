@@ -1194,10 +1194,13 @@ class GeminiUtils
         $apiKey = config('services.google.gemini_key');
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=".$apiKey;
 
+        $parts = [];
+        $parts[] = ['text' => $prompt];
+
         $data = [
             'contents' => [
                 [
-                    'parts' => [['text' => $prompt]],
+                    'parts' => $parts,
                 ],
             ],
             'generationConfig' => [

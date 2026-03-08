@@ -148,7 +148,7 @@
         <div class="flex justify-end items-center gap-3 mb-4">
             {{-- Customize Button --}}
             <button type="button" x-data x-on:click="$dispatch('open-modal', 'customize-dashboard')"
-                class="inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                class="inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                 <svg class="w-4 h-4 me-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 {{ __('messages.customize_dashboard') }}
             </button>
@@ -156,7 +156,7 @@
             {{-- New Schedule Dropdown --}}
             @if(!is_demo_mode())
             <div style="font-family: sans-serif" class="relative inline-block text-left">
-                <button type="button" data-popup-target="dashboard-new-schedule-menu" class="popup-toggle inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800" aria-expanded="true" aria-haspopup="true">
+                <button type="button" data-popup-target="dashboard-new-schedule-menu" class="popup-toggle inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800" aria-expanded="true" aria-haspopup="true">
                     {{ __('messages.new_schedule') }}
                     <svg class="ms-1.5 h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
@@ -314,7 +314,7 @@
                                     {{-- Toggle --}}
                                     <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
                                         <input type="checkbox" x-model="panel.visible" class="sr-only peer">
-                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
+                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-blue)] transition-colors"></div>
                                         <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                     </label>
 
@@ -341,11 +341,11 @@
                                         <div class="flex items-center gap-2">
                                             <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('messages.panel_size') }}:</span>
                                             <div class="inline-flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
-                                                <button type="button" x-on:click="panel.size = 1" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200 flex items-center gap-1" :class="panel.size === 1 ? 'bg-[#4E81FA] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'">
+                                                <button type="button" x-on:click="panel.size = 1" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200 flex items-center gap-1" :class="panel.size === 1 ? 'bg-[var(--brand-blue)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'">
                                                     <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="5" height="12" rx="1"/></svg>
                                                     {{ __('messages.panel_half_width') }}
                                                 </button>
-                                                <button type="button" x-on:click="panel.size = 2" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200 flex items-center gap-1 border-l border-gray-200 dark:border-gray-600" :class="panel.size === 2 ? 'bg-[#4E81FA] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'">
+                                                <button type="button" x-on:click="panel.size = 2" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200 flex items-center gap-1 border-l border-gray-200 dark:border-gray-600" :class="panel.size === 2 ? 'bg-[var(--brand-blue)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'">
                                                     <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="12" height="12" rx="1"/></svg>
                                                     {{ __('messages.panel_full_width') }}
                                                 </button>
@@ -358,7 +358,7 @@
                                                 <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('messages.panel_period') }}:</span>
                                                 <div class="inline-flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
                                                     <template x-for="(p, pi) in panelMeta[panel.id].periods" :key="p">
-                                                        <button type="button" x-on:click="panel.period = p" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200" :class="[panel.period === p ? 'bg-[#4E81FA] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600', pi > 0 ? 'border-l border-gray-200 dark:border-gray-600' : '']" x-text="p + 'd'"></button>
+                                                        <button type="button" x-on:click="panel.period = p" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200" :class="[panel.period === p ? 'bg-[var(--brand-blue)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600', pi > 0 ? 'border-l border-gray-200 dark:border-gray-600' : '']" x-text="p + 'd'"></button>
                                                     </template>
                                                 </div>
                                             </div>
@@ -370,7 +370,7 @@
                                                 <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('messages.panel_items') }}:</span>
                                                 <div class="inline-flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
                                                     <template x-for="(c, ci) in panelMeta[panel.id].counts" :key="c">
-                                                        <button type="button" x-on:click="panel.count = c" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200" :class="[panel.count === c ? 'bg-[#4E81FA] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600', ci > 0 ? 'border-l border-gray-200 dark:border-gray-600' : '']" x-text="c"></button>
+                                                        <button type="button" x-on:click="panel.count = c" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200" :class="[panel.count === c ? 'bg-[var(--brand-blue)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600', ci > 0 ? 'border-l border-gray-200 dark:border-gray-600' : '']" x-text="c"></button>
                                                     </template>
                                                 </div>
                                             </div>
@@ -390,7 +390,7 @@
                         <button type="button" x-on:click="$dispatch('close')" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200">
                             {{ __('messages.cancel') }}
                         </button>
-                        <button type="button" x-on:click="save()" :disabled="saving" class="px-4 py-2 text-sm font-medium text-white bg-[#4E81FA] rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-all duration-200">
+                        <button type="button" x-on:click="save()" :disabled="saving" class="px-4 py-2 text-sm font-medium text-white bg-[var(--brand-blue)] rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-all duration-200">
                             <span x-show="!saving">{{ __('messages.save') }}</span>
                             <span x-show="saving" x-cloak>{{ __('messages.saving') }}...</span>
                         </button>

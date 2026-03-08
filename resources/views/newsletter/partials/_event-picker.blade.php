@@ -1,7 +1,7 @@
 <div class="mb-4">
     <label class="flex items-center gap-2 cursor-pointer">
         <input type="checkbox" x-model="useAllEvents"
-            class="rounded border-gray-300 dark:border-gray-700 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA]" />
+            class="rounded border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] shadow-sm focus:ring-[var(--brand-blue)]" />
         <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.all_upcoming_events') }}</span>
     </label>
     <p class="text-sm text-gray-500 dark:text-gray-400 {{ is_rtl() ? 'me-6' : 'ms-6' }}">{{ __('messages.auto_populate_upcoming') }}</p>
@@ -12,12 +12,12 @@
     <div class="space-y-2">
         @foreach ($events as $event)
         <div class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 rounded-lg"
-            :class="selectedEventIds.includes({{ $event->id }}) ? 'bg-blue-50 dark:bg-blue-900/20 border-[#4E81FA]' : ''">
+            :class="selectedEventIds.includes({{ $event->id }}) ? 'bg-blue-50 dark:bg-blue-900/20 border-[var(--brand-blue)]' : ''">
             <label class="flex items-center gap-3 cursor-pointer flex-1">
                 <input type="checkbox"
                     :checked="selectedEventIds.includes({{ $event->id }})"
                     @change="toggleEvent({{ $event->id }})"
-                    class="rounded border-gray-300 dark:border-gray-700 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA]" />
+                    class="rounded border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] shadow-sm focus:ring-[var(--brand-blue)]" />
                 <div>
                     <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $event->name }}</span>
                     <span class="text-sm text-gray-500 dark:text-gray-400 {{ is_rtl() ? 'me-2' : 'ms-2' }}">

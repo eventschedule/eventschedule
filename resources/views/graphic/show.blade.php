@@ -18,13 +18,13 @@
                     button.style.minWidth = button.offsetWidth + 'px';
                     button.innerHTML = `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>${@json(__("messages.copied"))}`;
                     button.classList.add('bg-green-500', 'hover:bg-green-600');
-                    button.classList.remove('bg-[#4E81FA]', 'hover:bg-[#3D6FE8]');
+                    button.classList.remove('bg-[var(--brand-blue)]', 'hover:bg-[var(--brand-blue-dark)]');
 
                     setTimeout(function() {
                         button.innerHTML = originalText;
                         button.style.minWidth = '';
                         button.classList.remove('bg-green-500', 'hover:bg-green-600');
-                        button.classList.add('bg-[#4E81FA]', 'hover:bg-[#3D6FE8]');
+                        button.classList.add('bg-[var(--brand-blue)]', 'hover:bg-[var(--brand-blue-dark)]');
                     }, 2000);
                 }).catch(function(err) {
                     console.error('Could not copy text: ', err);
@@ -80,13 +80,13 @@
                     button.style.minWidth = button.offsetWidth + 'px';
                     button.innerHTML = `<svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>${@json(__("messages.copied"))}`;
                     button.classList.add('bg-green-500', 'hover:bg-green-600');
-                    button.classList.remove('bg-[#4E81FA]', 'hover:bg-[#3D6FE8]');
+                    button.classList.remove('bg-[var(--brand-blue)]', 'hover:bg-[var(--brand-blue-dark)]');
 
                     setTimeout(function() {
                         button.innerHTML = originalText;
                         button.style.minWidth = '';
                         button.classList.remove('bg-green-500', 'hover:bg-green-600');
-                        button.classList.add('bg-[#4E81FA]', 'hover:bg-[#3D6FE8]');
+                        button.classList.add('bg-[var(--brand-blue)]', 'hover:bg-[var(--brand-blue-dark)]');
                     }, 2000);
                 }).catch(function(err) {
                     console.error('Could not copy image: ', err);
@@ -1262,7 +1262,7 @@
         @if (is_rtl())
             <div class="flex items-center gap-3">
                 <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) }}"
-                   class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                   class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                     {{ __('messages.back') }}
                 </a>
             </div>
@@ -1291,7 +1291,7 @@
 
             <div class="flex items-center gap-3">
                 <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) }}"
-                   class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                   class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                     {{ __('messages.back') }}
                 </a>
             </div>
@@ -1366,19 +1366,19 @@
                         <nav class="flex space-x-4 overflow-x-auto scrollbar-hide" aria-label="Settings Tabs">
                             <button type="button"
                                 @click="setSettingsTab('graphic')"
-                                :class="settingsTab === 'graphic' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                                :class="settingsTab === 'graphic' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                                 class="px-3 py-2 text-sm font-medium border-b-2">
                                 {{ __('messages.graphic') }}
                             </button>
                             <button type="button"
                                 @click="setSettingsTab('text')"
-                                :class="settingsTab === 'text' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                                :class="settingsTab === 'text' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                                 class="px-3 py-2 text-sm font-medium border-b-2">
                                 {{ __('messages.text') }}
                             </button>
                             <button type="button"
                                 @click="setSettingsTab('automation')"
-                                :class="settingsTab === 'automation' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                                :class="settingsTab === 'automation' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                                 class="px-3 py-2 text-sm font-medium border-b-2">
                                 {{ __('messages.automation') }}
                             </button>
@@ -1503,9 +1503,9 @@
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
                             </div>
                             <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-prompt')"
-                                class="w-full text-start p-3 rounded-md border border-dashed border-gray-300 dark:border-gray-600 hover:border-[#4E81FA] dark:hover:border-[#4E81FA] transition-colors">
+                                class="w-full text-start p-3 rounded-md border border-dashed border-gray-300 dark:border-gray-600 hover:border-[var(--brand-blue)] transition-colors">
                                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_ai_prompt') }}</p>
-                                <p class="text-sm text-[#4E81FA] mt-1 font-medium">{{ __('messages.upgrade_to_enterprise') }} &rarr;</p>
+                                <p class="text-sm text-[var(--brand-blue)] mt-1 font-medium">{{ __('messages.upgrade_to_enterprise') }} &rarr;</p>
                             </button>
                         </div>
                         @elseif ($isPro)
@@ -1623,9 +1623,9 @@
                         </div>
                         @elseif (config('app.hosted'))
                         <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-email-scheduling')"
-                            class="w-full text-start p-3 rounded-md border border-dashed border-gray-300 dark:border-gray-600 hover:border-[#4E81FA] dark:hover:border-[#4E81FA] transition-colors">
+                            class="w-full text-start p-3 rounded-md border border-dashed border-gray-300 dark:border-gray-600 hover:border-[var(--brand-blue)] transition-colors">
                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_email_scheduling') }}</p>
-                            <p class="text-sm text-[#4E81FA] mt-1 font-medium">{{ __('messages.upgrade_to_enterprise') }} &rarr;</p>
+                            <p class="text-sm text-[var(--brand-blue)] mt-1 font-medium">{{ __('messages.upgrade_to_enterprise') }} &rarr;</p>
                         </button>
                         @else
                         <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_email_scheduling') }}</p>
@@ -1634,7 +1634,7 @@
 
                     <!-- Buttons (side by side on mobile) -->
                     <div class="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <button id="saveSettingsBtnMobile" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors">
+                        <button id="saveSettingsBtnMobile" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-[var(--brand-blue)] hover:bg-[var(--brand-blue-dark)] text-white text-sm font-semibold rounded-md transition-colors">
                             <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
@@ -1685,19 +1685,19 @@
                             <nav class="flex space-x-4 overflow-x-auto scrollbar-hide" aria-label="Settings Tabs">
                                 <button type="button"
                                     @click="setSettingsTab('graphic')"
-                                    :class="settingsTab === 'graphic' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                                    :class="settingsTab === 'graphic' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                                     class="px-3 py-2 text-sm font-medium border-b-2">
                                     {{ __('messages.graphic') }}
                                 </button>
                                 <button type="button"
                                     @click="setSettingsTab('text')"
-                                    :class="settingsTab === 'text' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                                    :class="settingsTab === 'text' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                                     class="px-3 py-2 text-sm font-medium border-b-2">
                                     {{ __('messages.text') }}
                                 </button>
                                 <button type="button"
                                     @click="setSettingsTab('automation')"
-                                    :class="settingsTab === 'automation' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                                    :class="settingsTab === 'automation' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                                     class="px-3 py-2 text-sm font-medium border-b-2">
                                     {{ __('messages.automation') }}
                                 </button>
@@ -1822,9 +1822,9 @@
                                     <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
                                 </div>
                                 <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-prompt')"
-                                    class="w-full text-start p-3 rounded-md border border-dashed border-gray-300 dark:border-gray-600 hover:border-[#4E81FA] dark:hover:border-[#4E81FA] transition-colors">
+                                    class="w-full text-start p-3 rounded-md border border-dashed border-gray-300 dark:border-gray-600 hover:border-[var(--brand-blue)] transition-colors">
                                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_ai_prompt') }}</p>
-                                    <p class="text-sm text-[#4E81FA] mt-1 font-medium">{{ __('messages.upgrade_to_enterprise') }} &rarr;</p>
+                                    <p class="text-sm text-[var(--brand-blue)] mt-1 font-medium">{{ __('messages.upgrade_to_enterprise') }} &rarr;</p>
                                 </button>
                             </div>
                             @elseif ($isPro)
@@ -1942,9 +1942,9 @@
                             </div>
                             @elseif (config('app.hosted'))
                             <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-email-scheduling')"
-                                class="w-full text-start p-3 rounded-md border border-dashed border-gray-300 dark:border-gray-600 hover:border-[#4E81FA] dark:hover:border-[#4E81FA] transition-colors">
+                                class="w-full text-start p-3 rounded-md border border-dashed border-gray-300 dark:border-gray-600 hover:border-[var(--brand-blue)] transition-colors">
                                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_email_scheduling') }}</p>
-                                <p class="text-sm text-[#4E81FA] mt-1 font-medium">{{ __('messages.upgrade_to_enterprise') }} &rarr;</p>
+                                <p class="text-sm text-[var(--brand-blue)] mt-1 font-medium">{{ __('messages.upgrade_to_enterprise') }} &rarr;</p>
                             </button>
                             @else
                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_email_scheduling') }}</p>
@@ -1953,7 +1953,7 @@
 
                         <!-- Buttons -->
                         <div class="flex flex-row gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <button id="saveSettingsBtn" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors">
+                            <button id="saveSettingsBtn" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-[var(--brand-blue)] hover:bg-[var(--brand-blue-dark)] text-white text-sm font-semibold rounded-md transition-colors">
                                 <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
@@ -1986,7 +1986,7 @@
                             </button>
                             <button
                                 id="copyTextBtn"
-                                class="inline-flex items-center justify-center flex-1 sm:flex-none sm:w-[8.5rem] px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors"
+                                class="inline-flex items-center justify-center flex-1 sm:flex-none sm:w-[8.5rem] px-3 py-1.5 bg-[var(--brand-blue)] hover:bg-[var(--brand-blue-dark)] text-white text-sm font-semibold rounded-md transition-colors"
                             >
                                 <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
@@ -2022,7 +2022,7 @@
                             </button>
                             <button
                                 id="copyImageBtn"
-                                class="inline-flex items-center justify-center flex-1 sm:flex-none sm:w-[8.5rem] px-3 py-1.5 bg-[#4E81FA] hover:bg-[#3D6FE8] text-white text-sm font-semibold rounded-md transition-colors"
+                                class="inline-flex items-center justify-center flex-1 sm:flex-none sm:w-[8.5rem] px-3 py-1.5 bg-[var(--brand-blue)] hover:bg-[var(--brand-blue-dark)] text-white text-sm font-semibold rounded-md transition-colors"
                             >
                                 <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>

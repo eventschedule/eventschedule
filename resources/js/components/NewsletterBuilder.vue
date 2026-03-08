@@ -7,17 +7,17 @@
             <div class="flex border-b border-gray-200 dark:border-gray-700 mb-4">
                 <button type="button" @click="showSection('content')"
                     class="px-4 py-3 text-sm font-medium border-b-2 transition-colors"
-                    :class="activeSection === 'content' ? 'border-[#4E81FA] text-[#4E81FA] font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'">
+                    :class="activeSection === 'content' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)] font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'">
                     {{ t.content }}
                 </button>
                 <button type="button" @click="showSection('style')"
                     class="px-4 py-3 text-sm font-medium border-b-2 transition-colors"
-                    :class="activeSection === 'style' ? 'border-[#4E81FA] text-[#4E81FA] font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'">
+                    :class="activeSection === 'style' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)] font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'">
                     {{ t.style }}
                 </button>
                 <button type="button" @click="showSection('settings')"
                     class="px-4 py-3 text-sm font-medium border-b-2 transition-colors"
-                    :class="activeSection === 'settings' ? 'border-[#4E81FA] text-[#4E81FA] font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'">
+                    :class="activeSection === 'settings' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)] font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'">
                     {{ t.settings }}
                 </button>
                 <button type="button" @click="openPreviewInNewTab()"
@@ -34,7 +34,7 @@
                             <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 px-5 py-4">{{ t.subject }} *</h3>
                             <div class="px-5 pb-5">
                                 <input id="subject" name="subject" type="text"
-                                    class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                    class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
                                     v-model="subject" @input="onSubjectInput" required />
                             </div>
                         </div>
@@ -46,7 +46,7 @@
                                     {{ t.blocks }} ({{ blocks.length }})
                                 </h3>
                                 <button type="button" @click="toggleBlockPalette()"
-                                    :class="showBlockPalette ? 'text-sm px-3 py-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 font-medium' : 'text-sm px-3 py-1 bg-[#4E81FA] text-white rounded-md hover:bg-blue-600 font-medium'">
+                                    :class="showBlockPalette ? 'text-sm px-3 py-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 font-medium' : 'text-sm px-3 py-1 bg-[var(--brand-blue)] text-white rounded-md hover:bg-blue-600 font-medium'">
                                     {{ showBlockPalette ? t.done : t.add_block }}
                                 </button>
                             </div>
@@ -55,7 +55,7 @@
                                 <div v-show="showBlockPalette" class="px-4 pb-4">
                                     <div ref="blockPalette" class="grid grid-cols-2 gap-2">
                                         <div v-for="bt in blockTypes" :key="bt.type"
-                                            class="palette-item border border-gray-200 dark:border-gray-600 rounded-lg p-2 text-center cursor-grab hover:border-[#4E81FA] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors select-none"
+                                            class="palette-item border border-gray-200 dark:border-gray-600 rounded-lg p-2 text-center cursor-grab hover:border-[var(--brand-blue)] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors select-none"
                                             :data-block-type="bt.type"
                                             @click="addBlockFromPalette(bt)">
                                             <div class="text-lg mb-1">{{ bt.icon }}</div>
@@ -68,7 +68,7 @@
                                 <div v-for="block in blocks" :key="block.id"
                                     class="block-item group relative border rounded-lg transition-colors"
                                     :data-block-id="block.id"
-                                    :class="selectedBlockId === block.id ? 'border-[#4E81FA] bg-blue-50 dark:bg-blue-900/20 ring-2 ring-[#4E81FA]' : 'border-gray-200 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-400'">
+                                    :class="selectedBlockId === block.id ? 'border-[var(--brand-blue)] bg-blue-50 dark:bg-blue-900/20 ring-2 ring-[var(--brand-blue)]' : 'border-gray-200 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-400'">
 
                                     <!-- Block header: drag handle + label + actions -->
                                     <div class="flex items-center justify-between px-3 py-2 cursor-pointer" @click="!showBlockPalette && selectBlock(block.id)">
@@ -79,7 +79,7 @@
                                             <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ blockIcon(block.type) }} {{ blockLabel(block.type) }}</span>
                                         </div>
                                         <div v-show="!showBlockPalette" class="flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-                                            <button type="button" @click.stop="cloneBlock(block.id)" class="p-1 text-gray-400 hover:text-[#4E81FA]" :title="t.clone_block">
+                                            <button type="button" @click.stop="cloneBlock(block.id)" class="p-1 text-gray-400 hover:text-[var(--brand-blue)]" :title="t.clone_block">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                             </button>
                                             <button type="button" @click.stop="removeBlock(block.id)" class="p-1 text-gray-400 hover:text-red-500" :title="t.remove_block">
@@ -122,13 +122,13 @@
                                         <div v-if="block.type === 'heading'" class="space-y-3">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.heading_text }}</label>
-                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
                                                     :value="block.data.text"
                                                     @input="onHeadingInput(block.id, $event.target.value)" />
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.heading_level }}</label>
-                                                <select class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                                <select class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm"
                                                     :value="block.data.level"
                                                     @change="updateBlockData(block.id, 'level', $event.target.value)">
                                                     <option value="h1">{{ t.heading_header }}</option>
@@ -138,7 +138,7 @@
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.alignment }}</label>
-                                                <select class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                                <select class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm"
                                                     :value="block.data.align"
                                                     @change="updateBlockData(block.id, 'align', $event.target.value)">
                                                     <option value="left">{{ t.left }}</option>
@@ -152,7 +152,7 @@
                                         <div v-if="block.type === 'text'" class="space-y-3">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.content }}</label>
-                                                <textarea :ref="el => setTextBlockRef(block.id, el)" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm" rows="6"
+                                                <textarea :ref="el => setTextBlockRef(block.id, el)" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm" rows="6"
                                                     :value="block.data.content"
                                                     @input="updateBlockData(block.id, 'content', $event.target.value)"></textarea>
                 
@@ -168,14 +168,14 @@
                                                         <input type="radio" value="cards"
                                                             :checked="block.data.layout === 'cards'"
                                                             @change="updateBlockData(block.id, 'layout', 'cards')"
-                                                            class="border-gray-300 dark:border-gray-700 text-[#4E81FA] focus:ring-[#4E81FA]" />
+                                                            class="border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
                                                         <span class="text-sm text-gray-700 dark:text-gray-300">{{ t.cards }}</span>
                                                     </label>
                                                     <label class="flex items-center gap-2 cursor-pointer">
                                                         <input type="radio" value="list"
                                                             :checked="block.data.layout === 'list'"
                                                             @change="updateBlockData(block.id, 'layout', 'list')"
-                                                            class="border-gray-300 dark:border-gray-700 text-[#4E81FA] focus:ring-[#4E81FA]" />
+                                                            class="border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
                                                         <span class="text-sm text-gray-700 dark:text-gray-300">{{ t.list }}</span>
                                                     </label>
                                                 </div>
@@ -185,7 +185,7 @@
                                                     <input type="checkbox"
                                                         :checked="block.data.useAllEvents"
                                                         @change="updateBlockData(block.id, 'useAllEvents', $event.target.checked)"
-                                                        class="rounded border-gray-300 dark:border-gray-700 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA]" />
+                                                        class="rounded border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] shadow-sm focus:ring-[var(--brand-blue)]" />
                                                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.all_upcoming_events }}</span>
                                                 </label>
                                             </div>
@@ -196,7 +196,7 @@
                                                             <input type="checkbox"
                                                                 :checked="block.data.eventIds && block.data.eventIds.includes(evt.id)"
                                                                 @change="toggleBlockEvent(block.id, evt.id)"
-                                                                class="rounded border-gray-300 dark:border-gray-700 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA]" />
+                                                                class="rounded border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] shadow-sm focus:ring-[var(--brand-blue)]" />
                                                             <span class="text-sm text-gray-900 dark:text-gray-100">{{ evt.name }}</span>
                                                             <span class="text-xs text-gray-500 dark:text-gray-400">{{ evt.date }}</span>
                                                         </label>
@@ -210,19 +210,19 @@
                                         <div v-if="block.type === 'button'" class="space-y-3">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.button_text }}</label>
-                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
                                                     :value="block.data.text"
                                                     @input="updateBlockData(block.id, 'text', $event.target.value)" />
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.button_url }}</label>
-                                                <input type="url" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                                <input type="url" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
                                                     :value="block.data.url"
                                                     @input="updateBlockData(block.id, 'url', $event.target.value)" />
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.alignment }}</label>
-                                                <select class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                                <select class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm"
                                                     :value="block.data.align"
                                                     @change="updateBlockData(block.id, 'align', $event.target.value)">
                                                     <option value="left">{{ t.left }}</option>
@@ -236,7 +236,7 @@
                                         <div v-if="block.type === 'divider'" class="space-y-3">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.divider_style }}</label>
-                                                <select class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                                <select class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm"
                                                     :value="block.data.style"
                                                     @change="updateBlockData(block.id, 'style', $event.target.value)">
                                                     <option value="solid">{{ t.solid }}</option>
@@ -250,7 +250,7 @@
                                         <div v-if="block.type === 'spacer'" class="space-y-3">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.spacer_height }}</label>
-                                                <input type="number" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm" min="5" max="200"
+                                                <input type="number" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm" min="5" max="200"
                                                     :value="block.data.height"
                                                     @input="updateBlockData(block.id, 'height', parseInt($event.target.value) || 20)" />
                                             </div>
@@ -260,25 +260,25 @@
                                         <div v-if="block.type === 'image'" class="space-y-3">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.image_url }}</label>
-                                                <input type="url" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                                <input type="url" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
                                                     :value="block.data.url"
                                                     @input="updateBlockData(block.id, 'url', $event.target.value)" />
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.image_alt }}</label>
-                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
                                                     :value="block.data.alt"
                                                     @input="updateBlockData(block.id, 'alt', $event.target.value)" />
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.width }}</label>
-                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm" placeholder="100%"
+                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm" placeholder="100%"
                                                     :value="block.data.width"
                                                     @input="updateBlockData(block.id, 'width', $event.target.value)" />
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.alignment }}</label>
-                                                <select class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                                <select class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm"
                                                     :value="block.data.align"
                                                     @change="updateBlockData(block.id, 'align', $event.target.value)">
                                                     <option value="left">{{ t.left }}</option>
@@ -293,7 +293,7 @@
                                             <div v-for="(link, linkIdx) in block.data.links" :key="linkIdx" class="flex gap-2 items-end">
                                                 <div class="flex-1">
                                                     <label v-if="linkIdx === 0" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.platform }}</label>
-                                                    <select class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm text-sm"
+                                                    <select class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm text-sm"
                                                         :value="link.platform"
                                                         @change="updateSocialLink(block.id, linkIdx, 'platform', $event.target.value)">
                                                         <option value="website">Website</option>
@@ -307,7 +307,7 @@
                                                 </div>
                                                 <div class="flex-[2]">
                                                     <label v-if="linkIdx === 0" class="block text-sm font-medium text-gray-700 dark:text-gray-300">URL</label>
-                                                    <input type="url" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm text-sm"
+                                                    <input type="url" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm text-sm"
                                                         :value="link.url"
                                                         @input="updateSocialLink(block.id, linkIdx, 'url', $event.target.value)" />
                                                 </div>
@@ -317,52 +317,52 @@
                                                 </button>
                                             </div>
                                             <button type="button" @click="addSocialLink(block.id)"
-                                                class="text-sm text-[#4E81FA] hover:text-blue-700">+ {{ t.add_link }}</button>
+                                                class="text-sm text-[var(--brand-blue)] hover:text-blue-700">+ {{ t.add_link }}</button>
                                         </div>
 
                                         <!-- Offer block settings -->
                                         <div v-if="block.type === 'offer'" class="space-y-3">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.offer_title }}</label>
-                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
                                                     :value="block.data.title"
                                                     @input="updateBlockData(block.id, 'title', $event.target.value)" />
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.offer_description }}</label>
-                                                <textarea class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm" rows="3"
+                                                <textarea class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm" rows="3"
                                                     :value="block.data.description"
                                                     @input="updateBlockData(block.id, 'description', $event.target.value)"></textarea>
                                             </div>
                                             <div class="grid grid-cols-2 gap-3">
                                                 <div>
                                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.original_price }}</label>
-                                                    <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                                    <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
                                                         :value="block.data.originalPrice"
                                                         @input="updateBlockData(block.id, 'originalPrice', $event.target.value)" />
                                                 </div>
                                                 <div>
                                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.sale_price }}</label>
-                                                    <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                                    <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
                                                         :value="block.data.salePrice"
                                                         @input="updateBlockData(block.id, 'salePrice', $event.target.value)" />
                                                 </div>
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.coupon_code_label }}</label>
-                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
                                                     :value="block.data.couponCode"
                                                     @input="updateBlockData(block.id, 'couponCode', $event.target.value)" />
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.button_text }}</label>
-                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
                                                     :value="block.data.buttonText"
                                                     @input="updateBlockData(block.id, 'buttonText', $event.target.value)" />
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.button_url }}</label>
-                                                <input type="url" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                                <input type="url" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
                                                     :value="block.data.buttonUrl"
                                                     @input="updateBlockData(block.id, 'buttonUrl', $event.target.value)" />
                                             </div>
@@ -393,17 +393,17 @@
                             <div class="px-5 pb-5">
                                 <div class="grid grid-cols-3 sm:grid-cols-5 gap-3">
                                     <label v-for="tmpl in templateNames" :key="tmpl" class="cursor-pointer"
-                                        :class="template === tmpl ? 'ring-2 ring-[#4E81FA] rounded-lg' : ''">
+                                        :class="template === tmpl ? 'ring-2 ring-[var(--brand-blue)] rounded-lg' : ''">
                                         <input type="radio" name="template_selector" :value="tmpl" v-model="template" @change="onTemplateChange(tmpl)" class="sr-only" />
-                                        <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-3 text-center hover:border-[#4E81FA] transition-colors"
-                                            :class="template === tmpl ? 'border-[#4E81FA] bg-blue-50 dark:bg-blue-900/20' : ''">
+                                        <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-3 text-center hover:border-[var(--brand-blue)] transition-colors"
+                                            :class="template === tmpl ? 'border-[var(--brand-blue)] bg-blue-50 dark:bg-blue-900/20' : ''">
                                             <div class="h-16 mb-2 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
                                                 <!-- Modern: filled rounded card with accent band -->
                                                 <div v-if="tmpl === 'modern'" class="w-full h-full flex flex-col items-center justify-center gap-1">
-                                                    <div class="w-10 h-2.5 rounded bg-[#4E81FA]"></div>
+                                                    <div class="w-10 h-2.5 rounded bg-[var(--brand-blue)]"></div>
                                                     <div class="w-8 h-1 rounded bg-gray-300 dark:bg-gray-500"></div>
                                                     <div class="w-6 h-1 rounded bg-gray-300 dark:bg-gray-500"></div>
-                                                    <div class="w-5 h-2 rounded bg-[#4E81FA]"></div>
+                                                    <div class="w-5 h-2 rounded bg-[var(--brand-blue)]"></div>
                                                 </div>
                                                 <!-- Classic: underlined heading, outlined button -->
                                                 <div v-else-if="tmpl === 'classic'" class="w-full h-full flex flex-col items-center justify-center gap-1 bg-[#faf9f6] dark:bg-gray-700">
@@ -452,28 +452,28 @@
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.background_color }}</label>
                                             <div class="flex items-center gap-2 mt-1">
                                                 <input type="color" v-model="styleSettings.backgroundColor" class="h-10 w-14 rounded cursor-pointer border border-gray-300 dark:border-gray-600" />
-                                                <input type="text" v-model="styleSettings.backgroundColor" class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm" />
+                                                <input type="text" v-model="styleSettings.backgroundColor" class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm" />
                                             </div>
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.accent_color }}</label>
                                             <div class="flex items-center gap-2 mt-1">
                                                 <input type="color" v-model="styleSettings.accentColor" class="h-10 w-14 rounded cursor-pointer border border-gray-300 dark:border-gray-600" />
-                                                <input type="text" v-model="styleSettings.accentColor" class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm" />
+                                                <input type="text" v-model="styleSettings.accentColor" class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm" />
                                             </div>
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.text_color }}</label>
                                             <div class="flex items-center gap-2 mt-1">
                                                 <input type="color" v-model="styleSettings.textColor" class="h-10 w-14 rounded cursor-pointer border border-gray-300 dark:border-gray-600" />
-                                                <input type="text" v-model="styleSettings.textColor" class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm" />
+                                                <input type="text" v-model="styleSettings.textColor" class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm" />
                                             </div>
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.font_family }}</label>
-                                            <select v-model="styleSettings.fontFamily" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                            <select v-model="styleSettings.fontFamily" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm">
                                                 <option value="Arial">Arial</option>
                                                 <option value="Georgia">Georgia</option>
                                                 <option value="Verdana">Verdana</option>
@@ -485,11 +485,11 @@
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.button_style }}</label>
                                             <div class="flex gap-4 mt-2">
                                                 <label class="flex items-center gap-2 cursor-pointer">
-                                                    <input type="radio" v-model="styleSettings.buttonRadius" value="rounded" class="border-gray-300 dark:border-gray-700 text-[#4E81FA] focus:ring-[#4E81FA]" />
+                                                    <input type="radio" v-model="styleSettings.buttonRadius" value="rounded" class="border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
                                                     <span class="text-sm text-gray-700 dark:text-gray-300">{{ t.rounded }}</span>
                                                 </label>
                                                 <label class="flex items-center gap-2 cursor-pointer">
-                                                    <input type="radio" v-model="styleSettings.buttonRadius" value="square" class="border-gray-300 dark:border-gray-700 text-[#4E81FA] focus:ring-[#4E81FA]" />
+                                                    <input type="radio" v-model="styleSettings.buttonRadius" value="square" class="border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
                                                     <span class="text-sm text-gray-700 dark:text-gray-300">{{ t.square }}</span>
                                                 </label>
                                             </div>
@@ -510,13 +510,13 @@
                             <div class="px-5 pb-5">
                                 <div v-if="segments.length" class="space-y-3">
                                     <label v-for="segment in segments" :key="segment.id"
-                                        class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:border-[#4E81FA] transition-colors"
-                                        :class="selectedSegmentIds.includes(segment.id) ? 'bg-blue-50 dark:bg-blue-900/20 border-[#4E81FA]' : ''">
+                                        class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:border-[var(--brand-blue)] transition-colors"
+                                        :class="selectedSegmentIds.includes(segment.id) ? 'bg-blue-50 dark:bg-blue-900/20 border-[var(--brand-blue)]' : ''">
                                         <div class="flex items-center gap-3">
                                             <input type="checkbox"
                                                 :checked="selectedSegmentIds.includes(segment.id)"
                                                 @change="toggleSegment(segment.id)"
-                                                class="rounded border-gray-300 dark:border-gray-700 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA]" />
+                                                class="rounded border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] shadow-sm focus:ring-[var(--brand-blue)]" />
                                             <div>
                                                 <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ segment.name }}</span>
                                                 <span class="text-xs text-gray-500 dark:text-gray-400 ms-2">({{ segment.type_label }})</span>
@@ -530,7 +530,7 @@
                                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ t.default_all_followers }}</p>
                                 </div>
                                 <div class="mt-3">
-                                    <a :href="routes.manage_segments" class="text-sm text-[#4E81FA] hover:text-blue-700">{{ t.manage_segments }}</a>
+                                    <a :href="routes.manage_segments" class="text-sm text-[var(--brand-blue)] hover:text-blue-700">{{ t.manage_segments }}</a>
                                 </div>
                             </div>
                         </div>
@@ -546,7 +546,7 @@
                             <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 px-5 py-4">{{ t.footer_text }}</h3>
                             <div class="px-5 pb-5">
                                 <textarea v-model="styleSettings.footerText" rows="2"
-                                    class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm"
+                                    class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
                                     :placeholder="roleName"></textarea>
                             </div>
                         </div>
@@ -579,7 +579,7 @@
                         {{ t.schedule_newsletter }}
                     </button>
 
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-[var(--brand-blue)] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">
                         {{ t.save }}
                     </button>
 
@@ -600,7 +600,7 @@
                     <div class="relative">
                         <div v-show="previewLoading" class="absolute inset-0 bg-white/80 dark:bg-gray-800/80 flex items-center justify-center z-10">
                             <div class="flex flex-col items-center gap-2">
-                                <svg class="animate-spin h-6 w-6 text-[#4E81FA]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <svg class="animate-spin h-6 w-6 text-[var(--brand-blue)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
@@ -624,7 +624,7 @@
                     <p class="text-sm text-gray-600 dark:text-gray-400">{{ t.test_email_sent_to.replace(':email', roleEmail) }}</p>
                     <div class="mt-4 flex justify-end gap-3">
                         <button type="button" @click="showTestSend = false" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200">{{ t.cancel }}</button>
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">{{ t.send }}</button>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[var(--brand-blue)] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">{{ t.send }}</button>
                     </div>
                 </form>
             </div>
@@ -638,7 +638,7 @@
                     <input type="hidden" name="_token" :value="csrfToken" />
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.send_at }}</label>
                     <input id="scheduled_at" name="scheduled_at" type="datetime-local"
-                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] shadow-sm" required />
+                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm" required />
                     <div class="mt-4 flex justify-end gap-3">
                         <button type="button" @click="showSchedule = false" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200">{{ t.cancel }}</button>
                         <button type="submit" class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-yellow-600">{{ t.schedule }}</button>

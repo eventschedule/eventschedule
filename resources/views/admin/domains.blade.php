@@ -85,7 +85,7 @@
                 </div>
                 <div>
                     <x-input-label for="mode" :value="__('messages.custom_domain_mode')" />
-                    <select id="mode" name="mode" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                    <select id="mode" name="mode" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="">@lang('messages.all')</option>
                         <option value="redirect" {{ request('mode') === 'redirect' ? 'selected' : '' }}>@lang('messages.custom_domain_mode_redirect')</option>
                         <option value="direct" {{ request('mode') === 'direct' ? 'selected' : '' }}>@lang('messages.custom_domain_mode_direct')</option>
@@ -93,7 +93,7 @@
                 </div>
                 <div>
                     <x-input-label for="status" :value="__('messages.status')" />
-                    <select id="status" name="status" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                    <select id="status" name="status" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="">@lang('messages.all')</option>
                         <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>@lang('messages.domain_pending')</option>
                         <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>@lang('messages.domain_active')</option>
@@ -180,7 +180,7 @@
                                     @if ($role->custom_domain_mode === 'direct')
                                     <form method="POST" action="{{ route('admin.domains.reprovision', $role) }}" class="inline">
                                         @csrf
-                                        <button type="submit" class="text-xs text-[#4E81FA] hover:underline"
+                                        <button type="submit" class="text-xs text-[var(--brand-blue)] hover:underline"
                                             onclick="return confirm('Re-provision this domain?')">
                                             @lang('messages.reprovision')
                                         </button>

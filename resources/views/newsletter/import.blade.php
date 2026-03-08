@@ -36,7 +36,7 @@
 
             <div class="space-y-3">
                 <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="radio" x-model="segmentTarget" value="new" class="text-[#4E81FA] focus:ring-[#4E81FA]">
+                    <input type="radio" x-model="segmentTarget" value="new" class="text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                     <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.create_new_segment') }}</span>
                 </label>
                 <div x-show="segmentTarget === 'new'" x-cloak class="{{ is_rtl() ? 'mr-7' : 'ml-7' }}">
@@ -46,11 +46,11 @@
 
                 @if ($manualSegments->count())
                 <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="radio" x-model="segmentTarget" value="existing" class="text-[#4E81FA] focus:ring-[#4E81FA]">
+                    <input type="radio" x-model="segmentTarget" value="existing" class="text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                     <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.add_to_existing_segment') }}</span>
                 </label>
                 <div x-show="segmentTarget === 'existing'" x-cloak class="{{ is_rtl() ? 'mr-7' : 'ml-7' }}">
-                    <select x-model="segmentId" class="block w-full max-w-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                    <select x-model="segmentId" class="block w-full max-w-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                         <option value="">{{ __('messages.select_segment') }}</option>
                         @foreach ($manualSegments as $segment)
                             <option value="{{ \App\Utils\UrlUtils::encodeId($segment->id) }}">{{ $segment->name }}</option>
@@ -66,13 +66,13 @@
         <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl overflow-hidden">
             <div class="border-b border-gray-200 dark:border-gray-700">
                 <nav class="flex -mb-px overflow-x-auto scrollbar-hide">
-                    <button @click="tab = 'form'" :class="tab === 'form' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="px-6 py-3 border-b-2 font-medium text-sm transition-colors">
+                    <button @click="tab = 'form'" :class="tab === 'form' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="px-6 py-3 border-b-2 font-medium text-sm transition-colors">
                         {{ __('messages.form_entry') }}
                     </button>
-                    <button @click="tab = 'paste'" :class="tab === 'paste' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="px-6 py-3 border-b-2 font-medium text-sm transition-colors">
+                    <button @click="tab = 'paste'" :class="tab === 'paste' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="px-6 py-3 border-b-2 font-medium text-sm transition-colors">
                         {{ __('messages.paste_emails') }}
                     </button>
-                    <button @click="tab = 'csv'" :class="tab === 'csv' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="px-6 py-3 border-b-2 font-medium text-sm transition-colors">
+                    <button @click="tab = 'csv'" :class="tab === 'csv' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="px-6 py-3 border-b-2 font-medium text-sm transition-colors">
                         {{ __('messages.upload_csv') }}
                     </button>
                 </nav>
@@ -125,7 +125,7 @@
 
                 <div class="mt-3">
                     <button type="button" @click="addFormRow()"
-                        class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
+                        class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
                         + {{ __('messages.add_row') }}
                     </button>
                 </div>
@@ -137,7 +137,7 @@
                         <span x-text="getValidEntryCount()"></span> {{ __('messages.emails_to_import') }}
                     </p>
                     <button @click="submitForm()" :disabled="submitting || getValidEntryCount() === 0"
-                        class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="inline-flex items-center px-4 py-2 bg-[var(--brand-blue)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
                         <span x-show="!submitting">{{ __('messages.confirm_import') }}</span>
                         <span x-show="submitting">{{ __('messages.loading') }}...</span>
                     </button>
@@ -147,13 +147,13 @@
             {{-- Paste Tab --}}
             <div x-show="tab === 'paste'" x-cloak class="p-6">
                 <textarea x-model="pasteText" rows="10"
-                    class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-lg shadow-sm"
+                    class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                     placeholder="John Smith <john@example.com>&#10;Jane Doe <jane@example.com>&#10;bob@example.com, Bob Johnson&#10;carol@example.com, Carol Smith"></textarea>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.import_emails_help') }}</p>
 
                 <div class="flex justify-end mt-4">
                     <button @click="parsePaste()" :disabled="!pasteText.trim()"
-                        class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="inline-flex items-center px-4 py-2 bg-[var(--brand-blue)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
                         {{ __('messages.parse_emails') }}
                     </button>
                 </div>
@@ -207,7 +207,7 @@
                                     <div class="flex flex-col gap-1">
                                         <span class="text-xs text-gray-500 dark:text-gray-400" x-text="header"></span>
                                         <select :value="columnMappings[index]" @change="columnMappings[index] = $event.target.value"
-                                            class="text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                                            class="text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                             <option value="skip">{{ __('messages.skip_column') }}</option>
                                             <option value="email">{{ __('messages.email') }}</option>
                                             <option value="name">{{ __('messages.name') }}</option>
@@ -241,7 +241,7 @@
 
                         <div class="flex justify-end mt-4">
                             <button @click="submitCsv()" :disabled="submitting || !hasEmailColumn()"
-                                class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                                class="inline-flex items-center px-4 py-2 bg-[var(--brand-blue)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
                                 <span x-show="!submitting">{{ __('messages.confirm_import') }}</span>
                                 <span x-show="submitting">{{ __('messages.loading') }}...</span>
                             </button>

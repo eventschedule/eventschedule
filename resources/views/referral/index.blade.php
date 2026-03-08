@@ -22,9 +22,9 @@
             <div class="flex gap-2">
                 <input type="text" value="{{ $referralUrl }}" readonly
                     id="referral-url-input"
-                    class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                    class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                 <button type="button" id="copy-referral-link"
-                    class="inline-flex items-center rounded-lg bg-[#4E81FA] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition-colors">
+                    class="inline-flex items-center rounded-lg bg-[var(--brand-blue)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition-colors">
                     <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                     </svg>
@@ -78,13 +78,13 @@
                         @csrf
                         <input type="hidden" name="referral_id" value="{{ \App\Utils\UrlUtils::encodeId($credit->id) }}">
                         <select name="role_id" required data-searchable
-                            class="rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                            class="rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                             <option value="">{{ __('messages.select_schedule') }}</option>
                             @foreach ($ownedRoles as $role)
                             <option value="{{ \App\Utils\UrlUtils::encodeId($role->id) }}">{{ $role->name }}</option>
                             @endforeach
                         </select>
-                        <button type="submit" class="inline-flex items-center rounded-lg bg-[#4E81FA] px-4 py-3 text-base font-semibold text-white shadow-sm hover:bg-blue-500 transition-colors">
+                        <button type="submit" class="inline-flex items-center rounded-lg bg-[var(--brand-blue)] px-4 py-3 text-base font-semibold text-white shadow-sm hover:bg-blue-500 transition-colors">
                             {{ __('messages.apply_credit') }}
                         </button>
                     </form>
@@ -99,17 +99,17 @@
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('messages.how_it_works') }}</h3>
             <div class="grid md:grid-cols-3 gap-6">
                 <div class="text-center">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 text-[#4E81FA] flex items-center justify-center mx-auto mb-3 text-lg font-bold">1</div>
+                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 text-[var(--brand-blue)] flex items-center justify-center mx-auto mb-3 text-lg font-bold">1</div>
                     <h4 class="font-medium text-gray-900 dark:text-white mb-1">{{ __('messages.referral_step_1_title') }}</h4>
                     <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.referral_step_1_description') }}</p>
                 </div>
                 <div class="text-center">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 text-[#4E81FA] flex items-center justify-center mx-auto mb-3 text-lg font-bold">2</div>
+                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 text-[var(--brand-blue)] flex items-center justify-center mx-auto mb-3 text-lg font-bold">2</div>
                     <h4 class="font-medium text-gray-900 dark:text-white mb-1">{{ __('messages.referral_step_2_title') }}</h4>
                     <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.referral_step_2_description') }}</p>
                 </div>
                 <div class="text-center">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 text-[#4E81FA] flex items-center justify-center mx-auto mb-3 text-lg font-bold">3</div>
+                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 text-[var(--brand-blue)] flex items-center justify-center mx-auto mb-3 text-lg font-bold">3</div>
                     <h4 class="font-medium text-gray-900 dark:text-white mb-1">{{ __('messages.referral_step_3_title') }}</h4>
                     <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.referral_step_3_description') }}</p>
                 </div>

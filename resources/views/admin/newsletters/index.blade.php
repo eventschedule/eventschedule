@@ -45,7 +45,7 @@
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                             <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
                                 <a href="{{ in_array($newsletter->status, ['sent', 'sending']) ? route('admin.newsletters.stats', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]) : route('admin.newsletters.edit', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]) }}"
-                                    class="hover:text-[#4E81FA]">
+                                    class="hover:text-[var(--brand-blue)]">
                                     {{ $newsletter->subject }}
                                 </a>
                             </td>
@@ -76,11 +76,11 @@
                                 <div class="flex gap-2 {{ is_rtl() ? 'justify-start' : 'justify-end' }}">
                                     @if ($newsletter->status === 'draft' || $newsletter->status === 'scheduled')
                                     <a href="{{ route('admin.newsletters.edit', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]) }}"
-                                        class="text-[#4E81FA] hover:text-[#3D6FE8]">{{ __('messages.edit') }}</a>
+                                        class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">{{ __('messages.edit') }}</a>
                                     @endif
                                     @if (in_array($newsletter->status, ['sent', 'sending']))
                                     <a href="{{ route('admin.newsletters.stats', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]) }}"
-                                        class="text-[#4E81FA] hover:text-[#3D6FE8]">{{ __('messages.newsletter_stats') }}</a>
+                                        class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">{{ __('messages.newsletter_stats') }}</a>
                                     @endif
                                     <form method="POST" action="{{ route('admin.newsletters.clone', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]) }}" class="inline">
                                         @csrf
@@ -113,7 +113,7 @@
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_newsletters_description') }}</p>
                 <div class="mt-6">
                     <a href="{{ route('admin.newsletters.create') }}"
-                        class="inline-flex items-center rounded-lg bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-600">
+                        class="inline-flex items-center rounded-lg bg-[var(--brand-blue)] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-600">
                         {{ __('messages.create_admin_newsletter') }}
                     </a>
                 </div>

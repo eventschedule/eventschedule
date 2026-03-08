@@ -202,7 +202,7 @@
                                 {{ $sale->created_at->diffForHumans() }}
                             </td>
                             <td class="px-4 py-3 text-sm">
-                                <a href="{{ route('role.view_guest', ['subdomain' => $sale->subdomain]) }}" class="text-[#4E81FA] hover:underline" target="_blank">{{ $sale->subdomain }}</a>
+                                <a href="{{ route('role.view_guest', ['subdomain' => $sale->subdomain]) }}" class="text-[var(--brand-blue)] hover:underline" target="_blank">{{ $sale->subdomain }}</a>
                             </td>
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-white" title="{{ $sale->event?->name }}">
                                 {{ \Illuminate\Support\Str::limit($sale->event?->name ?? '-', 30) }}

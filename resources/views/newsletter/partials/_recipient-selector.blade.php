@@ -1,13 +1,13 @@
 @if ($segments->count())
 <div class="space-y-3">
     @foreach ($segments as $segment)
-    <label class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:border-[#4E81FA] transition-colors"
-        :class="selectedSegmentIds.includes({{ $segment->id }}) ? 'bg-blue-50 dark:bg-blue-900/20 border-[#4E81FA]' : ''">
+    <label class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:border-[var(--brand-blue)] transition-colors"
+        :class="selectedSegmentIds.includes({{ $segment->id }}) ? 'bg-blue-50 dark:bg-blue-900/20 border-[var(--brand-blue)]' : ''">
         <div class="flex items-center gap-3">
             <input type="checkbox"
                 :checked="selectedSegmentIds.includes({{ $segment->id }})"
                 @change="toggleSegment({{ $segment->id }})"
-                class="rounded border-gray-300 dark:border-gray-700 text-[#4E81FA] shadow-sm focus:ring-[#4E81FA]" />
+                class="rounded border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] shadow-sm focus:ring-[var(--brand-blue)]" />
             <div>
                 <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $segment->name }}</span>
                 <span class="text-xs text-gray-500 dark:text-gray-400 {{ is_rtl() ? 'me-2' : 'ms-2' }}">
@@ -25,7 +25,7 @@
 @endif
 
 <div class="mt-3">
-    <a href="{{ route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8]">
+    <a href="{{ route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
         {{ __('messages.manage_segments') }}
     </a>
 </div>

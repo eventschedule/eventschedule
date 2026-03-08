@@ -70,7 +70,7 @@
                 $group = $groupId ? Group::find($groupId) : null;
             @endphp
             @if ($group)
-                <span class="inline-block bg-blue-100 dark:bg-blue-900/30 text-[#4E81FA] dark:text-blue-400 text-xs font-semibold px-3 py-1 rounded-full mb-2">
+                <span class="inline-block bg-blue-100 dark:bg-blue-900/30 text-[var(--brand-blue)] dark:text-blue-400 text-xs font-semibold px-3 py-1 rounded-full mb-2">
                     {{ $group->translatedName() }}
                 </span>
             @endif

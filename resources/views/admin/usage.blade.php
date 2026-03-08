@@ -100,7 +100,7 @@
                         @foreach ($topRolesData as $roleData)
                         <tr>
                             <td class="px-4 py-3 text-sm">
-                                <a href="{{ route('role.view_guest', ['subdomain' => $roleData['subdomain']]) }}" class="text-[#4E81FA] hover:underline" target="_blank">{{ $roleData['subdomain'] }}</a>
+                                <a href="{{ route('role.view_guest', ['subdomain' => $roleData['subdomain']]) }}" class="text-[var(--brand-blue)] hover:underline" target="_blank">{{ $roleData['subdomain'] }}</a>
                             </td>
                             <td class="px-4 py-3 text-sm text-end font-medium text-gray-900 dark:text-white">{{ number_format($roleData['total']) }}</td>
                             @foreach ($categories as $key => $cat)
@@ -134,7 +134,7 @@
                         @foreach ($topNewsletterData as $nlData)
                         <tr class="{{ !$nlData['has_smtp'] && $nlData['total'] > 50 ? 'bg-red-50 dark:bg-red-900/20' : '' }}">
                             <td class="px-4 py-3 text-sm">
-                                <a href="{{ route('role.view_guest', ['subdomain' => $nlData['subdomain']]) }}" class="text-[#4E81FA] hover:underline" target="_blank">{{ $nlData['subdomain'] }}</a>
+                                <a href="{{ route('role.view_guest', ['subdomain' => $nlData['subdomain']]) }}" class="text-[var(--brand-blue)] hover:underline" target="_blank">{{ $nlData['subdomain'] }}</a>
                             </td>
                             <td class="px-4 py-3 text-sm text-end font-medium text-gray-900 dark:text-white">{{ number_format($nlData['total']) }}</td>
                             <td class="px-4 py-3 text-sm text-end">
@@ -200,7 +200,7 @@
                         <tr>
                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">@lang('messages.schedule')</td>
                             <td class="px-4 py-3 text-sm">
-                                <a href="{{ route('role.view_guest', ['subdomain' => $record->subdomain]) }}" class="text-[#4E81FA] hover:underline" target="_blank">{{ $record->name ?: $record->subdomain }}</a>
+                                <a href="{{ route('role.view_guest', ['subdomain' => $record->subdomain]) }}" class="text-[var(--brand-blue)] hover:underline" target="_blank">{{ $record->name ?: $record->subdomain }}</a>
                                 <span class="text-gray-400">#{{ $record->id }}</span>
                             </td>
                             <td class="px-4 py-3 text-sm">
@@ -217,7 +217,7 @@
                             </td>
                             <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ $record->last_translated_at ? $record->last_translated_at->diffForHumans() : 'Never' }}</td>
                             <td class="px-4 py-3 text-sm text-end">
-                                <button class="js-retry-translation text-xs text-[#4E81FA] hover:underline" data-type="role" data-id="{{ $record->id }}">@lang('messages.retry')</button>
+                                <button class="js-retry-translation text-xs text-[var(--brand-blue)] hover:underline" data-type="role" data-id="{{ $record->id }}">@lang('messages.retry')</button>
                             </td>
                         </tr>
                         @endforeach
@@ -245,7 +245,7 @@
                             </td>
                             <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ $record->last_translated_at ? $record->last_translated_at->diffForHumans() : 'Never' }}</td>
                             <td class="px-4 py-3 text-sm text-end">
-                                <button class="js-retry-translation text-xs text-[#4E81FA] hover:underline" data-type="event" data-id="{{ $record->id }}">@lang('messages.retry')</button>
+                                <button class="js-retry-translation text-xs text-[var(--brand-blue)] hover:underline" data-type="event" data-id="{{ $record->id }}">@lang('messages.retry')</button>
                             </td>
                         </tr>
                         @endforeach
@@ -273,7 +273,7 @@
                             </td>
                             <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ $record->last_translated_at ? $record->last_translated_at->diffForHumans() : 'Never' }}</td>
                             <td class="px-4 py-3 text-sm text-end">
-                                <button class="js-retry-translation text-xs text-[#4E81FA] hover:underline" data-type="event_part" data-id="{{ $record->id }}">@lang('messages.retry')</button>
+                                <button class="js-retry-translation text-xs text-[var(--brand-blue)] hover:underline" data-type="event_part" data-id="{{ $record->id }}">@lang('messages.retry')</button>
                             </td>
                         </tr>
                         @endforeach
@@ -289,7 +289,7 @@
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
                                 {{ $record->event?->name ? \Illuminate\Support\Str::limit($record->event->name, 25) : 'Event #' . $record->event_id }}
                                 @if($record->role?->subdomain)
-                                    <a href="{{ route('role.view_guest', ['subdomain' => $record->role->subdomain]) }}" class="text-[#4E81FA] hover:underline" target="_blank">@ {{ $record->role->subdomain }}</a>
+                                    <a href="{{ route('role.view_guest', ['subdomain' => $record->role->subdomain]) }}" class="text-[var(--brand-blue)] hover:underline" target="_blank">@ {{ $record->role->subdomain }}</a>
                                 @else
                                     <span class="text-gray-400">@ Role #{{ $record->role_id }}</span>
                                 @endif
@@ -309,7 +309,7 @@
                             </td>
                             <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ $record->last_translated_at ? $record->last_translated_at->diffForHumans() : 'Never' }}</td>
                             <td class="px-4 py-3 text-sm text-end">
-                                <button class="js-retry-translation text-xs text-[#4E81FA] hover:underline" data-type="event_role" data-id="{{ $record->id }}">@lang('messages.retry')</button>
+                                <button class="js-retry-translation text-xs text-[var(--brand-blue)] hover:underline" data-type="event_role" data-id="{{ $record->id }}">@lang('messages.retry')</button>
                             </td>
                         </tr>
                         @endforeach
@@ -341,7 +341,7 @@
                     .then(data => {
                         if (data.success) {
                             button.textContent = @json(__("messages.done"));
-                            button.classList.remove('text-[#4E81FA]');
+                            button.classList.remove('text-[var(--brand-blue)]');
                             button.classList.add('text-green-600', 'dark:text-green-400');
                             // Optionally remove the row after a short delay
                             setTimeout(() => {
@@ -349,12 +349,12 @@
                             }, 1000);
                         } else {
                             button.textContent = 'Error';
-                            button.classList.remove('text-[#4E81FA]');
+                            button.classList.remove('text-[var(--brand-blue)]');
                             button.classList.add('text-red-600', 'dark:text-red-400');
                             setTimeout(() => {
                                 button.textContent = originalText;
                                 button.classList.remove('text-red-600', 'dark:text-red-400');
-                                button.classList.add('text-[#4E81FA]');
+                                button.classList.add('text-[var(--brand-blue)]');
                                 button.disabled = false;
                             }, 2000);
                         }
@@ -362,12 +362,12 @@
                     .catch(error => {
                         console.error('Error:', error);
                         button.textContent = 'Error';
-                        button.classList.remove('text-[#4E81FA]');
+                        button.classList.remove('text-[var(--brand-blue)]');
                         button.classList.add('text-red-600', 'dark:text-red-400');
                         setTimeout(() => {
                             button.textContent = originalText;
                             button.classList.remove('text-red-600', 'dark:text-red-400');
-                            button.classList.add('text-[#4E81FA]');
+                            button.classList.add('text-[var(--brand-blue)]');
                             button.disabled = false;
                         }, 2000);
                     });

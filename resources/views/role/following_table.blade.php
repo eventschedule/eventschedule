@@ -8,7 +8,7 @@
                         <tr>
                             <th scope="col" class="py-3.5 ps-4 pe-3 sm:ps-6 w-10">
                                 <input type="checkbox" id="select-all"
-                                    class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                    class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                             </th>
                             <x-sortable-header column="name" :sortBy="$sortBy" :sortDir="$sortDir" class="py-3.5 ps-4 pe-3 sm:ps-6">{{ __('messages.name') }}</x-sortable-header>
                             <x-sortable-header column="type" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.type') }}</x-sortable-header>
@@ -24,7 +24,7 @@
                         @foreach ($roles as $role)
                         <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                             <td class="py-4 ps-4 pe-3 sm:ps-6 w-10">
-                                <input type="checkbox" class="row-checkbox h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[#4E81FA] focus:ring-[#4E81FA]"
+                                <input type="checkbox" class="row-checkbox h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
                                     value="{{ $role->subdomain }}"
                                     data-has-email="{{ $role->email ? 'true' : 'false' }}">
                             </td>

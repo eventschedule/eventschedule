@@ -464,7 +464,7 @@
                     {
                         label: @json(__('messages.ad_spend')),
                         data: @json($adSpendData),
-                        borderColor: '#4E81FA',
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--brand-blue').trim(),
                         backgroundColor: 'rgba(78, 129, 250, 0.1)',
                         fill: true,
                         tension: 0.3,

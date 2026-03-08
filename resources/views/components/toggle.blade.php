@@ -6,7 +6,7 @@
             {{ $disabled ? 'disabled' : '' }}
             {{ $attributes }}
             class="sr-only peer">
-        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
+        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-blue)] transition-colors"></div>
         <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
     </label>
     <label for="{{ $id }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 {{ $disabled ? 'cursor-not-allowed' : 'cursor-pointer' }}">{!! $label !!}</label>

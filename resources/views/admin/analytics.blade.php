@@ -322,7 +322,7 @@
                     datasets: [{
                         label: @json(__('messages.events')),
                         data: @json($topSchedulesByEvents->pluck('events_count')->toArray()),
-                        backgroundColor: '#4E81FA'
+                        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--brand-blue').trim()
                     }]
                 },
                 options: {

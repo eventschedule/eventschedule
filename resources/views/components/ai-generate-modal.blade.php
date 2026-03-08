@@ -23,7 +23,7 @@
     <div class="p-6" x-data="aiGenerateModal_{{ Str::camel($name) }}">
         <div class="text-center mb-4">
             <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 mb-3">
-                <svg class="w-6 h-6 text-[#4E81FA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-6 h-6 text-[var(--brand-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                 </svg>
             </div>
@@ -37,19 +37,19 @@
                 @foreach ($fields as $field)
                 <label class="flex items-center gap-2" :class="generationStarted ? 'opacity-60 pointer-events-none' : 'cursor-pointer'">
                     <input type="checkbox" :checked="elements.includes('{{ $field['key'] }}')" @change="toggleElement('{{ $field['key'] }}')" :disabled="generationStarted"
-                        class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
+                        class="rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                     <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">{{ $field['label'] }}</span>
                     <span class="flex items-center justify-center gap-1 shrink-0 w-4">
-                        <span x-show="fieldsWithValues.includes('{{ $field['key'] }}') && !elementStatus['{{ $field['key'] }}']" x-cloak class="w-2 h-2 rounded-full bg-[#4E81FA]" title="{{ __('messages.has_existing_value') }}"></span>
+                        <span x-show="fieldsWithValues.includes('{{ $field['key'] }}') && !elementStatus['{{ $field['key'] }}']" x-cloak class="w-2 h-2 rounded-full bg-[var(--brand-blue)]" title="{{ __('messages.has_existing_value') }}"></span>
                         {{-- Per-element status indicators --}}
                         <template x-if="elementStatus['{{ $field['key'] }}'] === 'generating'">
-                            <svg class="animate-spin h-4 w-4 text-[#4E81FA]" fill="none" viewBox="0 0 24 24">
+                            <svg class="animate-spin h-4 w-4 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                         </template>
                         <template x-if="elementStatus['{{ $field['key'] }}'] === 'complete'">
-                            <svg class="h-4 w-4 text-[#4E81FA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="h-4 w-4 text-[var(--brand-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                         </template>
@@ -58,7 +58,7 @@
                                 <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
-                                <button type="button" @click="retryElement('{{ $field['key'] }}')" class="text-xs text-[#4E81FA] hover:underline">{{ __('messages.retry') }}</button>
+                                <button type="button" @click="retryElement('{{ $field['key'] }}')" class="text-xs text-[var(--brand-blue)] hover:underline">{{ __('messages.retry') }}</button>
                             </span>
                         </template>
                     </span>
@@ -86,15 +86,15 @@
                 <div x-show="!promptLoading" x-cloak>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{{ __('messages.ai_prompt_edit_hint') }}</p>
                     <textarea x-model="customPrompt" rows="6" maxlength="5000"
-                        class="w-full font-mono text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]"></textarea>
+                        class="w-full font-mono text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
                     <template x-for="imageKey in Object.keys(customImagePrompts)" :key="imageKey">
                         <div class="mt-3">
                             <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1" x-text="imagePromptLabels[imageKey] || imageKey"></p>
                             <textarea x-model="customImagePrompts[imageKey]" rows="4" maxlength="5000"
-                                class="w-full font-mono text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]"></textarea>
+                                class="w-full font-mono text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
                         </div>
                     </template>
-                    <button type="button" x-show="promptEdited" x-cloak @click="resetPrompt()" class="mt-1 text-xs text-[#4E81FA] hover:underline">
+                    <button type="button" x-show="promptEdited" x-cloak @click="resetPrompt()" class="mt-1 text-xs text-[var(--brand-blue)] hover:underline">
                         {{ __('messages.ai_prompt_reset') }}
                     </button>
                 </div>
@@ -107,11 +107,11 @@
             <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $instructionsLabel ?: __('messages.ai_style_instructions') }}</label>
             <textarea x-model="styleInstructions" maxlength="500" rows="2"
                 placeholder="{{ $instructionsPlaceholder ?: __('messages.ai_style_instructions_placeholder') }}"
-                class="mt-1 w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]"></textarea>
+                class="mt-1 w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
             @if ($saveInstructionsField)
             <label x-show="styleInstructions.length > 0" x-cloak class="flex items-center gap-2 mt-1.5 cursor-pointer">
                 <input type="checkbox" x-model="saveInstructions"
-                    class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA]">
+                    class="rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                 <span class="text-xs text-gray-600 dark:text-gray-400">{{ __('messages.ai_save_as_default') }}</span>
             </label>
             @endif
@@ -129,11 +129,11 @@
 
         <div class="flex flex-row gap-3">
             <button type="button" x-on:click="cancelGeneration()"
-                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-300 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-300 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                 {{ __('messages.cancel') }}
             </button>
             <button type="button" @click="generate()" :disabled="generating || elements.length === 0"
-                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[#3D6FE8] focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50">
+                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--brand-blue)] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-blue-dark)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50">
                 <template x-if="generating">
                     <span class="inline-flex items-center">
                         <svg class="animate-spin -ml-1 ltr:mr-2 rtl:ml-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">

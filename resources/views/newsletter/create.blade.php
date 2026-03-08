@@ -22,7 +22,7 @@
         <div class="mb-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
             <span>{{ __('messages.newsletters_used', ['used' => $newsletterUsed, 'limit' => $newsletterLimit]) }}</span>
             @if (config('cashier.key') && $role->actualPlanTier() !== 'enterprise' && $newsletterLimit < 1000)
-            <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain]) }}" class="text-[#4E81FA] hover:underline text-xs font-medium">
+            <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain]) }}" class="text-[var(--brand-blue)] hover:underline text-xs font-medium">
                 {{ __('messages.newsletter_upgrade_plan') }}
             </a>
             @endif

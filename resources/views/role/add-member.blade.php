@@ -34,7 +34,7 @@
 
                         <div class="mb-6">
                             <x-input-label for="level" :value="__('messages.role')" />
-                            <select id="level" name="level" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                            <select id="level" name="level" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                                 <option value="admin" {{ old('level', 'admin') == 'admin' ? 'selected' : '' }}>{{ __('messages.admin') }}</option>
                                 <option value="viewer" {{ old('level') == 'viewer' ? 'selected' : '' }}>{{ __('messages.viewer') }}</option>
                             </select>

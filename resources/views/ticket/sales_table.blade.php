@@ -82,16 +82,16 @@
                                                 </span>
                                                 @endif
                                             </div>
-                                            <a href="mailto:{{ $sale->email }}" class="text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8] hover:underline text-xs">{{ $sale->email }}</a>
+                                            <a href="mailto:{{ $sale->email }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline text-xs">{{ $sale->email }}</a>
                                             @if ($sale->phone)
-                                            <a href="tel:{{ $sale->phone }}" class="text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8] hover:underline text-xs">{{ $sale->phone }}</a>
+                                            <a href="tel:{{ $sale->phone }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline text-xs">{{ $sale->phone }}</a>
                                             @endif
                                         </div>
                                     </div>
                                 </td>
                                 <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
                                     <a href="{{ $sale->getEventUrl() }}"
-                                        target="_blank" class="text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8] hover:underline">{{ $sale->event->name }}
+                                        target="_blank" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline">{{ $sale->event->name }}
                                     </a>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
@@ -299,15 +299,15 @@
                                             <span class="text-gray-400 dark:text-gray-500">&#8627;</span>
                                             <div class="flex flex-col">
                                                 <span class="font-medium">{{ $guest->name }}</span>
-                                                <a href="mailto:{{ $guest->email }}" class="text-[#4E81FA] hover:text-[#3D6FE8] hover:underline text-xs">{{ $guest->email }}</a>
+                                                <a href="mailto:{{ $guest->email }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline text-xs">{{ $guest->email }}</a>
                                                 @if ($guest->phone)
-                                                <a href="tel:{{ $guest->phone }}" class="text-[#4E81FA] hover:text-[#3D6FE8] hover:underline text-xs">{{ $guest->phone }}</a>
+                                                <a href="tel:{{ $guest->phone }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline text-xs">{{ $guest->phone }}</a>
                                                 @endif
                                             </div>
                                         </div>
                                     </td>
                                     <td class="whitespace-nowrap py-3 ps-4 pe-3 text-sm text-gray-500 dark:text-gray-400 sm:ps-6">
-                                        <a href="{{ $sale->getEventUrl() }}" target="_blank" class="text-[#4E81FA] hover:text-[#3D6FE8] hover:underline">{{ $sale->event->name }}</a>
+                                        <a href="{{ $sale->getEventUrl() }}" target="_blank" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline">{{ $sale->event->name }}</a>
                                     </td>
                                     <td class="whitespace-nowrap px-3 py-3 text-sm text-gray-400 dark:text-gray-500">-</td>
                                     <td class="whitespace-nowrap px-3 py-3 text-sm text-gray-500 dark:text-gray-400"></td>
@@ -388,9 +388,9 @@
                             </span>
                             @endif
                         </div>
-                        <a href="mailto:{{ $sale->email }}" class="text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8] text-sm">{{ $sale->email }}</a>
+                        <a href="mailto:{{ $sale->email }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] text-sm">{{ $sale->email }}</a>
                         @if ($sale->phone)
-                        <br><a href="tel:{{ $sale->phone }}" class="text-[#4E81FA] dark:text-[#4E81FA] hover:text-[#3D6FE8] dark:hover:text-[#3D6FE8] text-sm">{{ $sale->phone }}</a>
+                        <br><a href="tel:{{ $sale->phone }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] text-sm">{{ $sale->phone }}</a>
                         @endif
                     </div>
                     <div class="ms-4">
@@ -577,7 +577,7 @@
                         <button @click="open = !open; $nextTick(() => positionDropdown())" 
                                 x-ref="button"
                                 type="button" 
-                                class="w-full inline-flex items-center justify-center rounded-lg bg-[#4E81FA]/10 dark:bg-[#4E81FA]/10 px-4 py-3 text-sm font-semibold text-[#4E81FA] dark:text-[#4E81FA] shadow-sm ring-1 ring-inset ring-[#4E81FA]/30 dark:ring-[#4E81FA]/30 hover:bg-[#4E81FA]/20 dark:hover:bg-[#4E81FA]/20 transition-colors duration-150">
+                                class="w-full inline-flex items-center justify-center rounded-lg bg-[var(--brand-blue-a10)] px-4 py-3 text-sm font-semibold text-[var(--brand-blue)] shadow-sm ring-1 ring-inset ring-[var(--brand-blue-a30)] hover:bg-[var(--brand-blue-a20)] transition-colors duration-150">
                             <svg class="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
                             </svg>
@@ -664,16 +664,16 @@
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">{{ __('messages.' . $guest->status) }}</span>
                                 @endif
                             </div>
-                            <a href="mailto:{{ $guest->email }}" class="text-[#4E81FA] hover:text-[#3D6FE8] text-sm">{{ $guest->email }}</a>
+                            <a href="mailto:{{ $guest->email }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] text-sm">{{ $guest->email }}</a>
                             @if ($guest->phone)
-                            <br><a href="tel:{{ $guest->phone }}" class="text-[#4E81FA] hover:text-[#3D6FE8] text-sm">{{ $guest->phone }}</a>
+                            <br><a href="tel:{{ $guest->phone }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] text-sm">{{ $guest->phone }}</a>
                             @endif
                             <div class="mt-2 flex items-center gap-3">
-                                <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($guest->event_id), 'secret' => $guest->secret]) }}" target="_blank" class="inline-flex items-center gap-1 text-[#4E81FA] hover:text-[#3D6FE8] hover:underline text-xs">
+                                <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($guest->event_id), 'secret' => $guest->secret]) }}" target="_blank" class="inline-flex items-center gap-1 text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline text-xs">
                                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" /></svg>
                                     {{ __('messages.view_ticket') }}
                                 </a>
-                                <button type="button" onclick="resendEmail('{{ \App\Utils\UrlUtils::encodeId($guest->id) }}')" class="inline-flex items-center gap-1 text-[#4E81FA] hover:text-[#3D6FE8] hover:underline text-xs">
+                                <button type="button" onclick="resendEmail('{{ \App\Utils\UrlUtils::encodeId($guest->id) }}')" class="inline-flex items-center gap-1 text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline text-xs">
                                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" /></svg>
                                     {{ __('messages.send_email') }}
                                 </a>

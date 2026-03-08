@@ -3,7 +3,7 @@
     <div class="flex justify-between items-center gap-6 pb-6">
         @if (is_rtl())
             <div class="flex items-center gap-3">
-                <button type="button" class="js-back-btn inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                <button type="button" class="js-back-btn inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                     {{ __('messages.back') }}
                 </button>
             </div>
@@ -31,7 +31,7 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <button type="button" class="js-back-btn inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                <button type="button" class="js-back-btn inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                     {{ __('messages.back') }}
                 </button>
             </div>
@@ -62,7 +62,7 @@
                             :type="showToken ? 'text' : 'password'"
                             id="eventbrite-token"
                             v-model="token"
-                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] pe-10"
+                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] pe-10"
                             placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxx"
                             @keyup.enter="connectToEventbrite"
                         >
@@ -90,7 +90,7 @@
                     </div>
 
                     <div class="mt-4">
-                        <button type="button" @click="connectToEventbrite" :disabled="connecting || !token.trim()" class="inline-flex items-center justify-center px-4 py-3 bg-gradient-to-b from-[#5A8DFF] to-[#4E81FA] border border-transparent rounded-lg font-semibold text-base text-white shadow-sm transition-all duration-200 hover:from-[#4E81FA] hover:to-[#3D6FE8] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm">
+                        <button type="button" @click="connectToEventbrite" :disabled="connecting || !token.trim()" class="inline-flex items-center justify-center px-4 py-3 bg-gradient-to-b from-[var(--brand-blue-light)] to-[var(--brand-blue)] border border-transparent rounded-lg font-semibold text-base text-white shadow-sm transition-all duration-200 hover:from-[var(--brand-blue)] hover:to-[var(--brand-blue-dark)] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm">
                             <svg v-if="connecting" class="animate-spin {{ is_rtl() ? 'ms-2' : 'me-2' }} h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
@@ -124,15 +124,15 @@
                 <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-3">
                     <div class="flex items-center gap-4">
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" v-model="selectAll" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA] dark:bg-gray-900">
+                            <input type="checkbox" v-model="selectAll" class="rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:bg-gray-900">
                             <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.eventbrite_select_all') }}</span>
                         </label>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button type="button" @click="showPastEvents = false" :class="!showPastEvents ? 'bg-[#4E81FA] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'" class="px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200">
+                        <button type="button" @click="showPastEvents = false" :class="!showPastEvents ? 'bg-[var(--brand-blue)] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'" class="px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200">
                             {{ __('messages.eventbrite_upcoming_only') }}
                         </button>
-                        <button type="button" @click="showPastEvents = true" :class="showPastEvents ? 'bg-[#4E81FA] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'" class="px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200">
+                        <button type="button" @click="showPastEvents = true" :class="showPastEvents ? 'bg-[var(--brand-blue)] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'" class="px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200">
                             {{ __('messages.eventbrite_show_past') }}
                         </button>
                     </div>
@@ -142,7 +142,7 @@
                 <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
                     <template v-for="event in filteredEvents" :key="event.eventbrite_id">
                         <label class="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
-                            <input type="checkbox" :value="event.eventbrite_id" v-model="selectedIds" class="rounded border-gray-300 dark:border-gray-600 text-[#4E81FA] focus:ring-[#4E81FA] dark:bg-gray-900 flex-shrink-0">
+                            <input type="checkbox" :value="event.eventbrite_id" v-model="selectedIds" class="rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:bg-gray-900 flex-shrink-0">
                             <div v-if="event.image_url" class="flex-shrink-0">
                                 <img :src="event.image_url" class="w-16 h-12 object-cover rounded-lg" :alt="event.name">
                             </div>
@@ -181,7 +181,7 @@
 
             {{-- Import button --}}
             <div class="mt-4 flex {{ is_rtl() ? 'justify-start' : 'justify-end' }}">
-                <button type="button" @click="startImport" :disabled="selectedIds.length === 0" class="inline-flex items-center justify-center px-4 py-3 bg-gradient-to-b from-[#5A8DFF] to-[#4E81FA] border border-transparent rounded-lg font-semibold text-base text-white shadow-sm transition-all duration-200 hover:from-[#4E81FA] hover:to-[#3D6FE8] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm">
+                <button type="button" @click="startImport" :disabled="selectedIds.length === 0" class="inline-flex items-center justify-center px-4 py-3 bg-gradient-to-b from-[var(--brand-blue-light)] to-[var(--brand-blue)] border border-transparent rounded-lg font-semibold text-base text-white shadow-sm transition-all duration-200 hover:from-[var(--brand-blue)] hover:to-[var(--brand-blue-dark)] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm">
                     <span v-text="importButtonText"></span>
                 </button>
             </div>
@@ -197,7 +197,7 @@
                         <span class="text-sm text-gray-500 dark:text-gray-400" v-text="Math.round((importProgress / importTotal) * 100) + '%'"></span>
                     </div>
                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                        <div class="bg-[#4E81FA] h-2.5 rounded-full transition-all duration-300" :style="{ width: Math.round((importProgress / importTotal) * 100) + '%' }"></div>
+                        <div class="bg-[var(--brand-blue)] h-2.5 rounded-full transition-all duration-300" :style="{ width: Math.round((importProgress / importTotal) * 100) + '%' }"></div>
                     </div>
                 </div>
 
@@ -208,7 +208,7 @@
                             {{-- Status icon --}}
                             <div class="flex-shrink-0">
                                 {{-- Importing spinner --}}
-                                <svg v-if="importingId === event.eventbrite_id" class="animate-spin h-5 w-5 text-[#4E81FA]" fill="none" viewBox="0 0 24 24">
+                                <svg v-if="importingId === event.eventbrite_id" class="animate-spin h-5 w-5 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                 </svg>
@@ -231,7 +231,7 @@
 
                             {{-- Action links --}}
                             <div v-if="importResults[event.eventbrite_id] && importResults[event.eventbrite_id].success" class="flex items-center gap-3 flex-shrink-0">
-                                <a :href="importResults[event.eventbrite_id].view_url" class="text-sm text-[#4E81FA] hover:text-[#3D6FE8] font-medium">{{ __('messages.view') }}</a>
+                                <a :href="importResults[event.eventbrite_id].view_url" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] font-medium">{{ __('messages.view') }}</a>
                                 <a :href="importResults[event.eventbrite_id].edit_url" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 font-medium">{{ __('messages.edit') }}</a>
                             </div>
                             <div v-else-if="importResults[event.eventbrite_id] && !importResults[event.eventbrite_id].success" class="flex-shrink-0">
@@ -244,7 +244,7 @@
                 {{-- Done button --}}
                 <div v-if="importComplete" class="mt-6 flex flex-col items-center gap-3">
                     <p class="text-sm font-medium text-green-700 dark:text-green-400">{{ __('messages.eventbrite_import_complete') }}</p>
-                    <a href="{{ $role->getGuestUrl() }}" class="inline-flex items-center justify-center px-4 py-3 bg-gradient-to-b from-[#5A8DFF] to-[#4E81FA] border border-transparent rounded-lg font-semibold text-base text-white shadow-sm transition-all duration-200 hover:from-[#4E81FA] hover:to-[#3D6FE8] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                    <a href="{{ $role->getGuestUrl() }}" class="inline-flex items-center justify-center px-4 py-3 bg-gradient-to-b from-[var(--brand-blue-light)] to-[var(--brand-blue)] border border-transparent rounded-lg font-semibold text-base text-white shadow-sm transition-all duration-200 hover:from-[var(--brand-blue)] hover:to-[var(--brand-blue-dark)] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                         {{ __('messages.view_schedule') }}
                     </a>
                 </div>

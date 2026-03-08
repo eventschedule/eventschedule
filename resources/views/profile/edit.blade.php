@@ -15,8 +15,8 @@
             transform: rotate(180deg);
         }
         .mobile-section-header.active {
-            color: #4E81FA;
-            border-color: #4E81FA;
+            color: var(--brand-blue);
+            border-color: var(--brand-blue);
         }
         .mobile-section-header.validation-error {
             border-color: #dc2626 !important;
@@ -317,10 +317,10 @@
             // Update active link
             sectionLinks.forEach(link => {
                 if (link.getAttribute('data-section') === sectionId) {
-                    link.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[#4E81FA]');
+                    link.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[var(--brand-blue)]');
                     link.classList.remove('text-gray-700', 'dark:text-gray-300', 'font-medium', 'border-transparent');
                 } else {
-                    link.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[#4E81FA]');
+                    link.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[var(--brand-blue)]');
                     link.classList.add('text-gray-700', 'dark:text-gray-300', 'font-medium', 'border-transparent');
                 }
             });
@@ -442,9 +442,9 @@
             const phoneField = document.getElementById('phone-field');
             if (phoneField) {
                 phoneField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                phoneField.classList.add('ring-2', 'ring-[#4E81FA]', 'rounded-lg', 'p-2', '-m-2');
+                phoneField.classList.add('ring-2', 'ring-[var(--brand-blue)]', 'rounded-lg', 'p-2', '-m-2');
                 setTimeout(() => {
-                    phoneField.classList.remove('ring-2', 'ring-[#4E81FA]', 'rounded-lg', 'p-2', '-m-2');
+                    phoneField.classList.remove('ring-2', 'ring-[var(--brand-blue)]', 'rounded-lg', 'p-2', '-m-2');
                 }, 5000);
             }
         }

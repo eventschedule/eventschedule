@@ -64,7 +64,7 @@
 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg">
     <div class="max-w-xl mx-auto text-center py-8">
         <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4">
-            <svg class="h-6 w-6 text-[#4E81FA]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <svg class="h-6 w-6 text-[var(--brand-blue)]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V10A2,2 0 0,1 6,8H15V6A3,3 0 0,0 12,3A3,3 0 0,0 9,6H7A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,17A2,2 0 0,0 14,15A2,2 0 0,0 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17Z" />
             </svg>
         </div>
@@ -78,7 +78,7 @@
         </p>
 
         <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain, 'tier' => 'enterprise']) }}"
-           class="inline-flex items-center justify-center px-4 py-2.5 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[#3D6FE8] focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+           class="inline-flex items-center justify-center px-4 py-2.5 bg-[var(--brand-blue)] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-blue-dark)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             {{ __('messages.upgrade') }}
         </a>
     </div>
@@ -127,7 +127,7 @@
                                     @drop.prevent="handleDetailsImageDrop"
                                     @dragend="dragEndDetails"
                                     autofocus {{ config('services.google.gemini_key') ? '' : 'disabled' }}
-                                    :class="['mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm transition-all duration-200', 
+                                    :class="['mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm transition-all duration-200', 
                                         isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-200 dark:ring-blue-800' : '']"
                                     dir="auto"
                                     placeholder="{{ __('messages.drag_drop_image_or_type_text') }}"></textarea>
@@ -185,7 +185,7 @@
                                         'end-16 bottom-3',
                                         (isLoading || detailsImage)
                                             ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed border border-gray-400 dark:border-gray-500'
-                                            : '{{ (isset($isGuest) && $isGuest) ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl' : 'bg-[#4E81FA] hover:bg-[#3D6FE8] text-white cursor-pointer border border-[#4E81FA]/30 shadow-lg hover:shadow-xl' }}']"
+                                            : '{{ (isset($isGuest) && $isGuest) ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl' : 'bg-[var(--brand-blue)] hover:bg-[var(--brand-blue-dark)] text-white cursor-pointer border border-[var(--brand-blue-a30)] shadow-lg hover:shadow-xl' }}']"
                                     title="{{ __('messages.add_image') }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -200,7 +200,7 @@
                                     :class="['absolute p-2 rounded-lg transition-all duration-200 shadow-md', 
                                         'end-5 bottom-3',
                                         canSubmit && !isLoading
-                                            ? '{{ (isset($isGuest) && $isGuest) ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl' : 'bg-[#4E81FA] hover:bg-[#3D6FE8] text-white cursor-pointer border border-[#4E81FA]/30 shadow-lg hover:shadow-xl' }}'
+                                            ? '{{ (isset($isGuest) && $isGuest) ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl' : 'bg-[var(--brand-blue)] hover:bg-[var(--brand-blue-dark)] text-white cursor-pointer border border-[var(--brand-blue-a30)] shadow-lg hover:shadow-xl' }}'
                                             : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed border border-gray-400 dark:border-gray-500']"
                                     title="{{ __('messages.submit') }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -262,7 +262,7 @@
                             id="show_all_fields" 
                             v-model="showAllFields" 
                             @change="saveShowAllFieldsPreference"
-                            class="rounded border-gray-300 {{ (isset($isGuest) && $isGuest) ? 'text-blue-500 focus:border-blue-500 focus:ring-blue-500' : 'text-[#4E81FA] focus:border-[#4E81FA] focus:ring-[#4E81FA]' }} shadow-sm focus:ring focus:ring-opacity-50">
+                            class="rounded border-gray-300 {{ (isset($isGuest) && $isGuest) ? 'text-blue-500 focus:border-blue-500 focus:ring-blue-500' : 'text-[var(--brand-blue)] focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]' }} shadow-sm focus:ring focus:ring-opacity-50">
                     <label for="show_all_fields" class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                         {{ __('messages.show_all_fields') }}
                     </label>
@@ -273,7 +273,7 @@
 
                 <!-- Action buttons - now includes Save All -->
                 <div class="flex gap-2 self-end sm:self-auto">
-                    <button @click="handleSaveAll" v-if="({{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1) && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" type="button" class="px-4 py-2 bg-[#4E81FA] text-white rounded-lg hover:bg-[#3D6FE8] transition-all duration-200 hover:scale-105 hover:shadow-md">
+                    <button @click="handleSaveAll" v-if="({{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1) && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" type="button" class="px-4 py-2 bg-[var(--brand-blue)] text-white rounded-lg hover:bg-[var(--brand-blue-dark)] transition-all duration-200 hover:scale-105 hover:shadow-md">
                         {{ __('messages.save_all') }}
                     </button>
                 </div>
@@ -330,7 +330,7 @@
                                     <!-- View button -->
                                     <a :href="preview.parsed[idx].event_url"
                                         target="_blank"
-                                        class="px-4 py-2 {{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 hover:bg-blue-600' : 'bg-[#4E81FA] hover:bg-[#3D6FE8]' }} text-white rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md">
+                                        class="px-4 py-2 {{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 hover:bg-blue-600' : 'bg-[var(--brand-blue)] hover:bg-[var(--brand-blue-dark)]' }} text-white rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md">
                                         {{ __('messages.view') }}
                                     </a>
                                     <!-- Show Select button if event hasn't been added to curator schedule -->
@@ -372,7 +372,7 @@
                             </label>
                             <div class="flex flex-wrap items-center gap-2 sm:gap-3 mt-1">
                                 <input type="text"
-                                    :class="'datepicker_date_' + idx + ' flex-1 min-w-[140px] basis-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm'"
+                                    :class="'datepicker_date_' + idx + ' flex-1 min-w-[140px] basis-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm'"
                                     v-model="preview.parsed[idx].event_date"
                                     v-bind:readonly="savedEvents[idx]"
                                     autocomplete="off"
@@ -380,7 +380,7 @@
                                 <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                                     <div class="time-input-wrapper">
                                         <input type="text"
-                                            class="w-28 sm:w-32 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
+                                            class="w-28 sm:w-32 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                                             v-model="preview.parsed[idx].event_start_time"
                                             v-bind:readonly="savedEvents[idx]"
                                             @focus="openTimeDropdown(idx, 'start')"
@@ -405,7 +405,7 @@
                                     <span class="text-gray-500 dark:text-gray-400 text-sm shrink-0">{{ __('messages.to') }}</span>
                                     <div class="time-input-wrapper">
                                         <input type="text"
-                                            class="w-28 sm:w-32 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
+                                            class="w-28 sm:w-32 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                                             v-model="preview.parsed[idx].event_end_time"
                                             v-bind:readonly="savedEvents[idx]"
                                             @focus="openTimeDropdown(idx, 'end')"
@@ -458,13 +458,13 @@
                                 <div class="mt-2 mb-4 space-y-4 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                     <div class="flex items-center">
                                         <input :id="'use_existing_venue_' + idx" :name="'venue_type_' + idx" type="radio" value="use_existing" v-model="eventVenueTypes[idx]" @change="onVenueTypeChange(idx)"
-                                            class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                            class="h-4 w-4 border-gray-300 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                                         <label :for="'use_existing_venue_' + idx"
                                             class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
                                     </div>
                                     <div class="flex items-center">
                                         <input :id="'create_new_venue_' + idx" :name="'venue_type_' + idx" type="radio" value="create_new" v-model="eventVenueTypes[idx]" @change="onVenueTypeChange(idx)"
-                                            class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                            class="h-4 w-4 border-gray-300 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                                         <label :for="'create_new_venue_' + idx"
                                             class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.create_new') }}</label>
                                     </div>
@@ -475,7 +475,7 @@
                             @auth
                             <div v-if="eventVenueTypes[idx] === 'use_existing' && venues.length > 0">
                                 <select :id="'selected_venue_' + idx" data-searchable
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                                         @change="onVenueSelect(idx, $event.target.value ? venues.find(v => v.id === $event.target.value) : null)"
                                         :value="eventSelectedVenues[idx]?.id || ''">
                                     <option value="" disabled selected>{{ __('messages.please_select') }}</option>
@@ -571,7 +571,7 @@
                                 :ref="'descriptionEditor_' + idx"
                                 rows="4"
                                 dir="auto"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                                 v-bind:readonly="savedEvents[idx]">@{{ preview.parsed[idx].event_details }}</textarea>
                         </div>
 
@@ -581,7 +581,7 @@
                             <div class="mt-1 flex gap-3">
                                 <select v-model="preview.parsed[idx].ticket_currency_code" data-searchable
                                     v-bind:disabled="savedEvents[idx]"
-                                    class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm">
+                                    class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                     @foreach ($currencies as $currency)
                                     @if ($loop->index == 2)
                                     <option disabled>──────</option>
@@ -623,7 +623,7 @@
                             <x-input-label for="category_id_@{{ idx }}">{{ __('messages.category') }}<span v-if="requiredFields.category_id" class="text-red-500"> *</span></x-input-label>
                             <select
                                 id="category_id_@{{ idx }}"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
                                 v-model="preview.parsed[idx].category_id"
                                 v-bind:disabled="savedEvents[idx]">
                                 <option value="">{{ __('messages.please_select') }}</option>
@@ -638,7 +638,7 @@
                             <x-input-label for="group_id_@{{ idx }}">{{ __('messages.schedule') }}<span v-if="requiredFields.group_id" class="text-red-500"> *</span></x-input-label>
                             <select
                                 id="group_id_@{{ idx }}"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
                                 v-model="preview.parsed[idx].group_id"
                                 v-bind:disabled="savedEvents[idx]">
                                 <option value="">{{ __('messages.please_select') }}</option>
@@ -669,7 +669,7 @@
                                     id="custom_field_{{ $fieldKey }}_@{{ idx }}"
                                     rows="2"
                                     dir="auto"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                                     v-model="preview.parsed[idx].custom_field_values.{{ $fieldKey }}"
                                     v-bind:readonly="savedEvents[idx]"></textarea>
                                 @elseif(($field['type'] ?? '') === 'switch')
@@ -679,7 +679,7 @@
                                         v-model="preview.parsed[idx].custom_field_values.{{ $fieldKey }}"
                                         true-value="1"
                                         false-value="0"
-                                        class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
+                                        class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded"
                                         v-bind:disabled="savedEvents[idx]" />
                                 </div>
                                 @elseif(($field['type'] ?? '') === 'date')
@@ -692,7 +692,7 @@
                                 @elseif(($field['type'] ?? '') === 'dropdown')
                                 <select
                                     id="custom_field_{{ $fieldKey }}_@{{ idx }}"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-lg shadow-sm"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                                     v-model="preview.parsed[idx].custom_field_values.{{ $fieldKey }}"
                                     v-bind:disabled="savedEvents[idx]">
                                     <option value="">{{ __('messages.select') }}...</option>
@@ -714,7 +714,7 @@
                                                 :checked="(preview.parsed[idx].custom_field_values.{{ $fieldKey }} || '').split(', ').map(s => s.trim()).includes(@js($option))"
                                                 @change="toggleImportMultiselect(idx, '{{ $fieldKey }}', @js($option), $event)"
                                                 :disabled="savedEvents[idx]"
-                                                class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded" />
+                                                class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded" />
                                             {{ $option }}
                                         </label>
                                         @endif
@@ -796,7 +796,7 @@
                         <!-- Add buttons at the bottom of the left column -->
                         <div class="mt-12 flex justify-end gap-2">
                             <template v-if="savedEvents[idx]">
-                                <button v-if="!savedEventData[idx]?.is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" @click="handleEdit(idx)" type="button" class="px-4 py-2 {{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 hover:bg-blue-600' : 'bg-[#4E81FA] hover:bg-[#3D6FE8]' }} text-white rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md">
+                                <button v-if="!savedEventData[idx]?.is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" @click="handleEdit(idx)" type="button" class="px-4 py-2 {{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 hover:bg-blue-600' : 'bg-[var(--brand-blue)] hover:bg-[var(--brand-blue-dark)]' }} text-white rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md">
                                     {{ __('messages.edit') }}
                                 </button>
                                 <button v-if="{{ auth()->check() ? 'true' : 'false' }}" @click="handleView(idx)" type="button" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
@@ -819,7 +819,7 @@
                                         :class="['px-4 py-2 rounded-lg transition-all duration-200',
                                             (savingEvents[idx] || !canCreateAccount)
                                                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                                                : '{{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-[#4E81FA] text-white hover:bg-[#3D6FE8]' }} hover:scale-105']">
+                                                : '{{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-[var(--brand-blue)] text-white hover:bg-[var(--brand-blue-dark)]' }} hover:scale-105']">
                                     <span v-if="savingEvents[idx]" class="inline-flex items-center">
                                         <svg class="animate-spin -ms-1 me-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
