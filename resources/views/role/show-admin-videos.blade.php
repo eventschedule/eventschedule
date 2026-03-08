@@ -101,7 +101,7 @@
                                             {{ __('messages.skip') }}
                                         </button>
                                         <button @click="saveVideos(role)"
-                                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
+                                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
                                             {{ __('messages.save_videos') }}
                                         </button>
                                     </div>

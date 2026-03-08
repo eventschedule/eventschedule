@@ -23,6 +23,12 @@
                                 if (event.exception.values[i].value && event.exception.values[i].value.indexOf('Vue failed to load') !== -1) {
                                     return null;
                                 }
+                                if (event.exception.values[i].value && (
+                                    event.exception.values[i].value === 'undefined' ||
+                                    event.exception.values[i].value.indexOf('Non-Error promise rejection') !== -1
+                                )) {
+                                    return null;
+                                }
                             }
                         }
                         return event;
@@ -407,7 +413,7 @@
 
         /* EasyMDE Dark Mode Styles - Using custom Tailwind colors */
         .dark .editor-toolbar {
-            background-color: #1A1A1A !important; /* Match sidebar dark gray */
+            background-color: #1e1e1e !important; /* gray-900 */
             border: none !important;
         }
 
@@ -420,18 +426,18 @@
 
         .dark .editor-toolbar button:hover,
         .dark .editor-toolbar a:hover {
-            background-color: #1A1A1A !important; /* Match sidebar dark gray */
+            background-color: #1e1e1e !important; /* gray-900 */
             color: #f9f9f9 !important; /* gray-50 */
         }
 
         .dark .editor-toolbar button.active,
         .dark .editor-toolbar a.active {
-            background-color: #525252 !important; /* gray-600 */
+            background-color: #3e3e42 !important; /* gray-600 */
             color: #f9f9f9 !important; /* gray-50 */
         }
 
         .dark .editor-toolbar .separator {
-            border-left: 1px solid #525252 !important; /* gray-600 */
+            border-left: 1px solid #3e3e42 !important; /* gray-600 */
         }
 
         .dark .editor-toolbar button:before,
@@ -458,7 +464,7 @@
         }
 
         .dark .CodeMirror {
-            background-color: #222222 !important; /* gray-900 - match standard text inputs */
+            background-color: #252526 !important; /* gray-800 - match standard text inputs */
             color: #f9f9f9 !important; /* gray-50 */
             border: none !important;
         }
@@ -468,18 +474,18 @@
         }
 
         .dark .CodeMirror-selected {
-            background-color: #525252 !important; /* gray-600 */
+            background-color: #3e3e42 !important; /* gray-600 */
         }
 
         .dark .CodeMirror-line::selection,
         .dark .CodeMirror-line > span::selection,
         .dark .CodeMirror-line > span > span::selection {
-            background-color: #525252 !important; /* gray-600 */
+            background-color: #3e3e42 !important; /* gray-600 */
         }
 
         .dark .CodeMirror-gutters {
-            background-color: #2B2B2B !important; /* gray-800 */
-            border-right: 1px solid #404040 !important; /* gray-700 */
+            background-color: #2d2d30 !important; /* gray-700 */
+            border-right: 1px solid #3e3e42 !important; /* gray-600 */
         }
 
         .dark .CodeMirror-linenumber {
@@ -487,7 +493,7 @@
         }
 
         .dark .CodeMirror-focused .CodeMirror-selected {
-            background-color: #525252 !important; /* gray-600 */
+            background-color: #3e3e42 !important; /* gray-600 */
         }
 
         .dark .EasyMDEContainer {

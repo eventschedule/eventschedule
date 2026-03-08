@@ -32,6 +32,15 @@
                             if (event.exception.values[i].value && event.exception.values[i].value.indexOf('Script error.') !== -1) {
                                 return null;
                             }
+                            if (event.exception.values[i].value && event.exception.values[i].value.indexOf('Vue failed to load') !== -1) {
+                                return null;
+                            }
+                            if (event.exception.values[i].value && (
+                                event.exception.values[i].value === 'undefined' ||
+                                event.exception.values[i].value.indexOf('Non-Error promise rejection') !== -1
+                            )) {
+                                return null;
+                            }
                         }
                     }
                     return event;

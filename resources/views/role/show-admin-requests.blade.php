@@ -1,7 +1,7 @@
 @if(count($requests) == 0 || ! $role->email_verified_at)
 
 <div class="text-center pt-20">
-    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="#ccc" viewBox="0 0 24 24" stroke="currentColor"
+    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"
         aria-hidden="true">
         <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21" />
@@ -86,7 +86,7 @@
 
             {{-- View and Edit Buttons --}}
             <div class="flex gap-2 mt-4">
-                <a href="{{ $event->getGuestUrl() }}" target="_blank" class="px-4 py-2 bg-blue-500 text-white text-sm font-semibold rounded hover:bg-blue-600 transition">
+                <a href="{{ $event->getGuestUrl() }}" target="_blank" class="px-4 py-2 bg-[var(--brand-button-bg)] text-white text-sm font-semibold rounded hover:bg-[var(--brand-button-bg-hover)] transition">
                     {{ __('messages.view') }}
                 </a>
                 @if (!$isViewer)

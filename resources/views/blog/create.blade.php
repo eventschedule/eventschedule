@@ -123,7 +123,7 @@
 
                 <div class="flex items-end">
                     <button type="button" id="generate_btn"
-                            class="w-48 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center">
+                            class="w-48 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>

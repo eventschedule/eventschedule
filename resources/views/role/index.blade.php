@@ -105,7 +105,8 @@ function updateResults() {
             setupCheckboxListeners();
             updateBulkActionButton();
         }
-    });
+    })
+    .catch(() => {});
 }
 
 function setupCheckboxListeners() {

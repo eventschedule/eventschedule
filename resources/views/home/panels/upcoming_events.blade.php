@@ -16,7 +16,7 @@
             <div class="min-w-0 flex-1">
                 <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ $event->name }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format('M j, g:i A') : '' }}
+                    {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->setTimezone($eventRole?->timezone ?? auth()->user()->timezone ?? 'UTC')->format('M j, g:i A') : '' }}
                     @if($eventRole)
                     <span class="mx-1">&middot;</span> {{ $eventRole->name }}
                     @endif

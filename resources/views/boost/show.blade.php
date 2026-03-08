@@ -184,7 +184,7 @@
                 @if ($campaign->canBePaused() || $campaign->canBeResumed())
                 <form method="POST" action="{{ route('boost.toggle_pause', ['hash' => $campaign->hashedId()]) }}">
                     @csrf
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white text-sm font-medium rounded-lg">
                         {{ $campaign->isActive() ? __('messages.pause') : __('messages.resume') }}
                     </button>
                 </form>

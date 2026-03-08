@@ -262,7 +262,7 @@
                             id="show_all_fields" 
                             v-model="showAllFields" 
                             @change="saveShowAllFieldsPreference"
-                            class="rounded border-gray-300 {{ (isset($isGuest) && $isGuest) ? 'text-blue-500 focus:border-blue-500 focus:ring-blue-500' : 'text-[var(--brand-blue)] focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]' }} shadow-sm focus:ring focus:ring-opacity-50">
+                            class="rounded border-gray-300 dark:border-gray-600 {{ (isset($isGuest) && $isGuest) ? 'text-blue-500 focus:border-blue-500 focus:ring-blue-500' : 'text-[var(--brand-blue)] focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]' }} shadow-sm focus:ring focus:ring-opacity-50">
                     <label for="show_all_fields" class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                         {{ __('messages.show_all_fields') }}
                     </label>
@@ -733,7 +733,7 @@
                                     id="create_account_@{{ idx }}" 
                                     name="create_account_@{{ idx }}" 
                                     v-model="createAccount"
-                                    class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                                    class="rounded border-gray-300 dark:border-gray-600 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
                             <label for="create_account_@{{ idx }}" class="ms-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ __('messages.create_account') }}
                             </label>

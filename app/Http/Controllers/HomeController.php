@@ -77,28 +77,28 @@ class HomeController extends Controller
 
         $roleIds = $user->roles()->pluck('roles.id');
 
-        $events = Event::with('roles')
-            ->where(function ($query) use ($roleIds, $user) {
-                $query->where(function ($query) use ($roleIds) {
-                    $query->whereIn('id', function ($query) use ($roleIds) {
-                        $query->select('event_id')
-                            ->from('event_role')
-                            ->whereIn('role_id', $roleIds)
-                            ->where('is_accepted', true);
-                    });
-                })->orWhere(function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
-                });
-            })
-            ->where(function ($query) use ($startOfMonthUtc) {
-                $query->where('starts_at', '>=', $startOfMonthUtc)
-                    ->orWhereNotNull('days_of_week');
-            })
-            ->orderBy('starts_at')
-            ->get();
-
         // Events will be loaded via Ajax in the calendar partial
-        if (! request()->graphic) {
+        if (request()->graphic) {
+            $events = Event::with('roles')
+                ->where(function ($query) use ($roleIds, $user) {
+                    $query->where(function ($query) use ($roleIds) {
+                        $query->whereIn('id', function ($query) use ($roleIds) {
+                            $query->select('event_id')
+                                ->from('event_role')
+                                ->whereIn('role_id', $roleIds)
+                                ->where('is_accepted', true);
+                        });
+                    })->orWhere(function ($query) use ($user) {
+                        $query->where('user_id', $user->id);
+                    });
+                })
+                ->where(function ($query) use ($startOfMonthUtc) {
+                    $query->where('starts_at', '>=', $startOfMonthUtc)
+                        ->orWhereNotNull('days_of_week');
+                })
+                ->orderBy('starts_at')
+                ->get();
+        } else {
             $events = collect();
         }
 
@@ -350,7 +350,7 @@ class HomeController extends Controller
     public function saveDashboardConfig(Request $request): JsonResponse
     {
         $request->validate([
-            'panels' => 'required|array',
+            'panels' => 'required|array|max:10',
             'panels.*.id' => 'required|string|in:upcoming_count,views,followers,upcoming_events,recent_activity,revenue,top_events,newsletters,boosts,traffic_sources',
             'panels.*.visible' => 'required|boolean',
             'panels.*.size' => 'sometimes|integer|in:1,2',
@@ -498,9 +498,13 @@ class HomeController extends Controller
             ->where('level', 'follower')
             ->orderByDesc('created_at')
             ->limit(10)
-            ->get()
-            ->map(function ($follow) {
-                $user = DB::table('users')->where('id', $follow->user_id)->first();
+            ->get();
+
+        $followerUserIds = $followers->pluck('user_id')->unique();
+        $followerUsers = DB::table('users')->whereIn('id', $followerUserIds)->get()->keyBy('id');
+
+        $followers = $followers->map(function ($follow) use ($followerUsers) {
+                $user = $followerUsers[$follow->user_id] ?? null;
 
                 return [
                     'type' => 'follower',
@@ -528,7 +532,7 @@ class HomeController extends Controller
         $activities = $activities->merge($newsletters);
 
         // Sort by date descending
-        return $activities->sortByDesc('date')->take($count)->values();
+        return $activities->filter(fn($a) => $a['date'] !== null)->sortByDesc('date')->take($count)->values();
     }
 
     private function getSparklineData($user, int $days = 30): array

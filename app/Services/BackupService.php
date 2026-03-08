@@ -60,14 +60,14 @@ class BackupService
     ];
 
     private const MAX_SCHEDULES = 50;
-
+    
     private const MAX_EVENTS_PER_SCHEDULE = 10000;
 
-    private const MAX_TICKETS_PER_EVENT = 100;
+    private const MAX_TICKETS_PER_EVENT = 10000;
 
-    private const MAX_SALES_PER_SCHEDULE = 50000;
+    private const MAX_SALES_PER_SCHEDULE = 100000;
 
-    private const MAX_RECIPIENTS_PER_SCHEDULE = 100000;
+    private const MAX_RECIPIENTS_PER_SCHEDULE = 10000;
 
     public function exportSchedules(array $roles, bool $includeImages, BackupJob $job): array
     {
@@ -629,7 +629,7 @@ class BackupService
                 report($e);
                 $report[] = [
                     'name' => $scheduleName,
-                    'error' => 'Failed to import schedule. ' . $e->getMessage(),
+                    'error' => 'Failed to import schedule.',
                     'schedules' => ['success' => 0, 'failed' => 1, 'failures' => [$scheduleName.': Import failed']],
                 ];
             }
@@ -763,31 +763,33 @@ class BackupService
 
                     // Import sales
                     $sales = $eventData['sales'] ?? [];
-                    foreach ($sales as $saleData) {
-                        if ($salesCount >= self::MAX_SALES_PER_SCHEDULE) {
-                            $salesTruncated = true;
-                            break;
-                        }
-                        try {
-                            $sale = $this->importSale($saleData, $event, $role, $userId, $idMap);
-                            if (isset($saleData['_ref_id'])) {
-                                $idMap['sales'][$saleData['_ref_id']] = $sale->id;
+                    if (! $salesTruncated) {
+                        foreach ($sales as $saleData) {
+                            if ($salesCount >= self::MAX_SALES_PER_SCHEDULE) {
+                                $salesTruncated = true;
+                                break;
                             }
-                            $report['sales']['success']++;
-                            $salesCount++;
-
-                            // Import sale tickets
-                            foreach ($saleData['sale_tickets'] ?? [] as $stData) {
-                                try {
-                                    $this->importSaleTicket($stData, $sale, $idMap);
-                                } catch (\Exception $e) {
-                                    report($e);
+                            try {
+                                $sale = $this->importSale($saleData, $event, $role, $userId, $idMap);
+                                if (isset($saleData['_ref_id'])) {
+                                    $idMap['sales'][$saleData['_ref_id']] = $sale->id;
                                 }
+                                $report['sales']['success']++;
+                                $salesCount++;
+
+                                // Import sale tickets
+                                foreach ($saleData['sale_tickets'] ?? [] as $stData) {
+                                    try {
+                                        $this->importSaleTicket($stData, $sale, $idMap);
+                                    } catch (\Exception $e) {
+                                        report($e);
+                                    }
+                                }
+                            } catch (\Exception $e) {
+                                report($e);
+                                $report['sales']['failed']++;
+                                $report['sales']['failures'][] = ($saleData['name'] ?? 'Unknown').': Import failed';
                             }
-                        } catch (\Exception $e) {
-                            report($e);
-                            $report['sales']['failed']++;
-                            $report['sales']['failures'][] = ($saleData['name'] ?? 'Unknown').': Import failed';
                         }
                     }
 
@@ -919,16 +921,18 @@ class BackupService
                     $report['newsletters']['success']++;
 
                     // Import recipients
-                    foreach ($nlData['recipients'] ?? [] as $recipientData) {
-                        if ($recipientCount >= self::MAX_RECIPIENTS_PER_SCHEDULE) {
-                            $recipientsTruncated = true;
-                            break;
-                        }
-                        try {
-                            $this->importRecipient($recipientData, $newsletter);
-                            $recipientCount++;
-                        } catch (\Exception $e) {
-                            report($e);
+                    if (! $recipientsTruncated) {
+                        foreach ($nlData['recipients'] ?? [] as $recipientData) {
+                            if ($recipientCount >= self::MAX_RECIPIENTS_PER_SCHEDULE) {
+                                $recipientsTruncated = true;
+                                break;
+                            }
+                            try {
+                                $this->importRecipient($recipientData, $newsletter);
+                                $recipientCount++;
+                            } catch (\Exception $e) {
+                                report($e);
+                            }
                         }
                     }
                 } catch (\Exception $e) {

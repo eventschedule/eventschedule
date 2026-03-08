@@ -113,7 +113,7 @@
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_newsletters_description') }}</p>
                 <div class="mt-6">
                     <a href="{{ route('admin.newsletters.create') }}"
-                        class="inline-flex items-center rounded-lg bg-[var(--brand-button-bg)] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-600">
+                        class="inline-flex items-center rounded-lg bg-[var(--brand-button-bg)] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--brand-button-bg-hover)]">
                         {{ __('messages.create_admin_newsletter') }}
                     </a>
                 </div>

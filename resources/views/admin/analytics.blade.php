@@ -199,6 +199,7 @@
 
             const textColor = isDarkMode ? '#9CA3AF' : '#6B7280';
             const gridColor = isDarkMode ? '#2d2d30' : '#E5E7EB';
+            const brandBlue = getComputedStyle(document.documentElement).getPropertyValue('--brand-blue').trim();
 
             // Device Breakdown Chart
             const deviceCtx = document.getElementById('deviceChart').getContext('2d');
@@ -208,8 +209,8 @@
                     labels: [@json(__('messages.desktop')), @json(__('messages.mobile')), @json(__('messages.tablet'))],
                     datasets: [{
                         data: [{{ $desktopViews }}, {{ $mobileViews }}, {{ $tabletViews }}],
-                        backgroundColor: ['#3B82F6', '#10B981', '#8B5CF6'],
-                        borderColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+                        backgroundColor: [brandBlue, '#10B981', '#8B5CF6'],
+                        borderColor: isDarkMode ? '#252526' : '#FFFFFF',
                         borderWidth: 2
                     }]
                 },
@@ -322,7 +323,7 @@
                     datasets: [{
                         label: @json(__('messages.events')),
                         data: @json($topSchedulesByEvents->pluck('events_count')->toArray()),
-                        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--brand-blue').trim()
+                        backgroundColor: brandBlue
                     }]
                 },
                 options: {

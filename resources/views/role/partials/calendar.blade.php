@@ -3513,7 +3513,9 @@ const calendarApp = createApp({
     }
 });
 
-calendarApp.config.globalProperties.FileReader = FileReader;
+if (typeof FileReader !== 'undefined') {
+    calendarApp.config.globalProperties.FileReader = FileReader;
+}
 const calendarAppInstance = calendarApp.mount('#calendar-app');
 window.calendarVueApp = calendarAppInstance;
 

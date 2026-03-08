@@ -24,7 +24,7 @@
                     id="referral-url-input"
                     class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                 <button type="button" id="copy-referral-link"
-                    class="inline-flex items-center rounded-lg bg-[var(--brand-button-bg)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition-colors">
+                    class="inline-flex items-center rounded-lg bg-[var(--brand-button-bg)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--brand-button-bg-hover)] transition-colors">
                     <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                     </svg>
@@ -84,7 +84,7 @@
                             <option value="{{ \App\Utils\UrlUtils::encodeId($role->id) }}">{{ $role->name }}</option>
                             @endforeach
                         </select>
-                        <button type="submit" class="inline-flex items-center rounded-lg bg-[var(--brand-button-bg)] px-4 py-3 text-base font-semibold text-white shadow-sm hover:bg-blue-500 transition-colors">
+                        <button type="submit" class="inline-flex items-center rounded-lg bg-[var(--brand-button-bg)] px-4 py-3 text-base font-semibold text-white shadow-sm hover:bg-[var(--brand-button-bg-hover)] transition-colors">
                             {{ __('messages.apply_credit') }}
                         </button>
                     </form>

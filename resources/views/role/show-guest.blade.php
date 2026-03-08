@@ -861,7 +861,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
 }
 .dark #carousel-prev:hover,
 .dark #carousel-next:hover {
-  background-color: rgb(31 41 55) !important;
+  background-color: #252526 !important;
 }
 
 /* Disabled state for navigation buttons */

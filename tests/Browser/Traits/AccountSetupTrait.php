@@ -11,6 +11,9 @@ trait AccountSetupTrait
      */
     protected function setupTestAccount(Browser $browser, string $name = 'Talent', string $email = 'test@gmail.com', string $password = 'password'): void
     {
+        // Clear any stale cookies/session from previous tests
+        $browser->driver->manage()->deleteAllCookies();
+
         // Sign up
         $browser->visit('/sign_up')
             ->waitFor('#name', 15)

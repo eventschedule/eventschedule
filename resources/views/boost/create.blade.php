@@ -193,7 +193,7 @@
                     {{ __('messages.customize_targeting_creative') }}
                 </a>
                 <button type="submit" id="submit-btn"
-                    class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="inline-flex items-center px-6 py-3 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white font-semibold rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                     <span id="submit-text">{{ __('messages.boost_for') }} {{ $currencySymbol }}<span id="submit-amount">{{ $isHosted ? number_format($defaults['budget'] * (1 + $markupRate), 2) : number_format($defaults['budget'], 2) }}</span></span>
                     <span id="submit-spinner" class="hidden ml-2">
                         <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
