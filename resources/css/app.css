@@ -175,6 +175,15 @@ input[type="search"], textarea, select {
     background: #1A1A1A;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
 }
+.get-started-container [aria-hidden="true"] > div {
+    transition: opacity 0.2s;
+}
+.get-started-card:hover + div > div,
+.get-started-card:hover + div + div > div,
+div:has(+ .get-started-card:hover) > div,
+div:has(+ div + .get-started-card:hover) > div {
+    opacity: 0;
+}
 
 /* Dashboard panels */
 .dashboard-panel {
