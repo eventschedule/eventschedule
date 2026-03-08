@@ -49,6 +49,42 @@ class CleanupBackups extends Command
             $this->info("Cleaned up {$stale->count()} stale import upload(s).");
         }
 
+        // Mark stuck processing jobs as failed (2x timeout: export 1200s, import 1800s)
+        $stuckExports = BackupJob::where('type', 'export')
+            ->where('status', 'processing')
+            ->where('started_at', '<', now()->subSeconds(1200))
+            ->get();
+
+        foreach ($stuckExports as $job) {
+            $job->update([
+                'status' => 'failed',
+                'error_message' => 'Processing timed out.',
+                'completed_at' => now(),
+            ]);
+        }
+
+        $stuckImports = BackupJob::where('type', 'import')
+            ->where('status', 'processing')
+            ->where('started_at', '<', now()->subSeconds(1800))
+            ->get();
+
+        foreach ($stuckImports as $job) {
+            if ($job->file_path && Storage::disk('local')->exists($job->file_path)) {
+                Storage::disk('local')->delete($job->file_path);
+            }
+            $job->update([
+                'status' => 'failed',
+                'error_message' => 'Processing timed out.',
+                'file_path' => null,
+                'completed_at' => now(),
+            ]);
+        }
+
+        $stuckCount = $stuckExports->count() + $stuckImports->count();
+        if ($stuckCount > 0) {
+            $this->info("Marked {$stuckCount} stuck processing job(s) as failed.");
+        }
+
         // Clean orphaned import uploads (uploaded but never confirmed, no BackupJob record)
         $orphaned = 0;
         $directories = Storage::disk('local')->directories('backups');

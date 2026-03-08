@@ -229,7 +229,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/settings/backup/import', [BackupController::class, 'upload'])->name('backup.upload')->middleware('throttle:3,60');
     Route::post('/settings/backup/import/confirm', [BackupController::class, 'confirm'])->name('backup.confirm')->middleware('throttle:3,60');
     Route::get('/settings/backup/download/{backupJob}', [BackupController::class, 'download'])->name('backup.download')->middleware('signed');
-    Route::get('/settings/backup/status/{backupJob}', [BackupController::class, 'status'])->name('backup.status');
+    Route::get('/settings/backup/status/{backupJob}', [BackupController::class, 'status'])->name('backup.status')->middleware('throttle:60,1');
 
     Route::get('/stripe/link', [StripeController::class, 'link'])->name('stripe.link');
     Route::post('/stripe/unlink', [StripeController::class, 'unlink'])->name('stripe.unlink');

@@ -3199,13 +3199,14 @@ class RoleController extends Controller
     {
         $role = Role::whereSubdomain($subdomain)->firstOrFail();
 
-        // Talent schedules use the simplified booking request form
-        if ($role->isTalent()) {
+        // Schedules using the booking form get the simplified booking request form
+        if ($role->usesBookingForm()) {
             return redirect(app_url(route('event.booking_request', ['subdomain' => $role->subdomain], false)));
         }
 
         session(['pending_request' => $subdomain]);
         session(['pending_request_allow_guest' => ! $role->require_account]);
+        session(['pending_request_form' => 'import']);
 
         if (! auth()->user()) {
             $lang = session()->has('translate') ? 'en' : $role->language_code;

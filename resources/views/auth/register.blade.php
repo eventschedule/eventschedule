@@ -605,7 +605,7 @@
             </div>
         </div>
 
-        <a href="{{ route('event.guest_import', ['subdomain' => session('pending_request'), 'lang' => is_valid_language_code(request()->lang) ? request()->lang : null]) }}"
+        <a href="{{ session('pending_request_form') === 'booking' ? route('event.booking_request', ['subdomain' => session('pending_request'), 'lang' => is_valid_language_code(request()->lang) ? request()->lang : null]) : route('event.guest_import', ['subdomain' => session('pending_request'), 'lang' => is_valid_language_code(request()->lang) ? request()->lang : null]) }}"
             class="w-full inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-md hover:bg-blue-100 dark:hover:bg-blue-800 hover:text-blue-700 dark:hover:text-blue-200 transition-colors duration-200">
             {{ __('messages.continue_as_guest') }}
         </a>

@@ -981,6 +981,7 @@ class EventController extends Controller
 
         session()->forget('pending_request');
         session()->forget('pending_request_allow_guest');
+        session()->forget('pending_request_form');
 
         if ($event->starts_at) {
             $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
@@ -1709,6 +1710,7 @@ class EventController extends Controller
         // Clear the pending request session
         session()->forget('pending_request');
         session()->forget('pending_request_allow_guest');
+        session()->forget('pending_request_form');
 
         return response()->json([
             'success' => true,
@@ -1775,12 +1777,13 @@ class EventController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! $role->isTalent() || ! $role->acceptEventRequests()) {
+        if (! $role->usesBookingForm() || ! $role->acceptEventRequests()) {
             abort(404);
         }
 
         if (! auth()->check()) {
             session()->put('pending_request', $subdomain);
+            session()->put('pending_request_form', 'booking');
         }
 
         // Store guest language for auth flow
@@ -1819,7 +1822,7 @@ class EventController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! $role->isTalent() || ! $role->acceptEventRequests()) {
+        if (! $role->usesBookingForm() || ! $role->acceptEventRequests()) {
             abort(403, __('messages.not_authorized'));
         }
 
@@ -1864,7 +1867,10 @@ class EventController extends Controller
         $venue = null;
         $isOnline = $request->input('is_online');
 
-        if ($request->venue_name || $request->venue_address1 || $request->venue_city) {
+        if ($role->isVenue()) {
+            // Venue schedule: use the schedule itself as the venue
+            $venue = $role;
+        } elseif ($request->venue_name || $request->venue_address1 || $request->venue_city) {
             $venue = new Role;
             $venue->name = $request->venue_name ?? null;
             $venue->subdomain = Role::generateSubdomain($request->venue_name);
@@ -1937,8 +1943,8 @@ class EventController extends Controller
         $isAccepted = $role->require_approval ? null : true;
         $event->roles()->attach($role->id, ['is_accepted' => $isAccepted]);
 
-        // Attach venue role if created
-        if ($venue) {
+        // Attach venue role if created (skip if venue is the schedule itself)
+        if ($venue && $venue->id !== $role->id) {
             $event->roles()->attach($venue->id, ['is_accepted' => true]);
         }
 
@@ -1948,6 +1954,7 @@ class EventController extends Controller
         // Clear the pending request session
         session()->forget('pending_request');
         session()->forget('pending_request_allow_guest');
+        session()->forget('pending_request_form');
 
         return response()->json([
             'success' => true,
@@ -2054,6 +2061,7 @@ class EventController extends Controller
         // Clear the pending request session
         session()->forget('pending_request');
         session()->forget('pending_request_allow_guest');
+        session()->forget('pending_request_form');
 
         // Get the redirect URL from the form, or fall back to the current URL
         $redirectUrl = $request->input('redirect_url', url()->current());

@@ -26,6 +26,7 @@ use App\Models\Ticket;
 use App\Models\TicketWaitlist;
 use App\Utils\CssUtils;
 use App\Utils\MarkdownUtils;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -39,7 +40,7 @@ class BackupService
         'phone', 'email', 'website', 'address1', 'address1_en', 'address2', 'address2_en',
         'city', 'city_en', 'state', 'state_en', 'postal_code', 'country_code', 'language_code',
         'description', 'description_en', 'short_description', 'short_description_en',
-        'accept_requests', 'require_account', 'use_24_hour_time', 'timezone',
+        'accept_requests', 'event_request_form', 'require_account', 'use_24_hour_time', 'timezone',
         'formatted_address', 'geo_address', 'geo_lat', 'geo_lon', 'show_email', 'show_phone',
         'require_approval', 'event_layout', 'request_terms', 'request_terms_en', 'custom_css',
         'event_custom_fields', 'graphic_settings', 'agenda_ai_prompt', 'agenda_show_times',
@@ -922,11 +923,13 @@ class BackupService
             // Import unsubscribes
             foreach ($scheduleData['newsletter_unsubscribes'] ?? [] as $unsubData) {
                 try {
-                    NewsletterUnsubscribe::create([
-                        'role_id' => $role->id,
-                        'email' => $unsubData['email'],
-                        'unsubscribed_at' => $unsubData['unsubscribed_at'] ?? now(),
-                    ]);
+                    NewsletterUnsubscribe::withoutEvents(function () use ($role, $unsubData) {
+                        NewsletterUnsubscribe::create([
+                            'role_id' => $role->id,
+                            'email' => $unsubData['email'],
+                            'unsubscribed_at' => $unsubData['unsubscribed_at'] ?? now(),
+                        ]);
+                    });
                 } catch (\Exception $e) {
                     report($e);
                 }
@@ -1004,7 +1007,25 @@ class BackupService
             $role->custom_css = CssUtils::sanitizeCss($role->custom_css);
         }
 
-        $role->saveQuietly();
+        // Retry on unique constraint violation (race condition with concurrent imports)
+        $saved = false;
+        $maxRetries = 100;
+        while (! $saved) {
+            try {
+                $role->saveQuietly();
+                $saved = true;
+            } catch (QueryException $e) {
+                if ($e->errorInfo[1] === 1062) {
+                    if ($counter >= $maxRetries) {
+                        throw new \RuntimeException('Failed to generate unique subdomain after '.$maxRetries.' attempts');
+                    }
+                    $role->subdomain = $baseSubdomain.'-'.$counter;
+                    $counter++;
+                } else {
+                    throw $e;
+                }
+            }
+        }
 
         // Attach user as owner
         $role->users()->attach($userId, ['level' => 'owner']);
@@ -1278,12 +1299,14 @@ class BackupService
         // Import votes (anonymous, no user_id)
         foreach ($data['votes'] ?? [] as $voteData) {
             try {
-                EventPollVote::create([
-                    'event_poll_id' => $poll->id,
-                    'user_id' => null,
-                    'option_index' => $voteData['option_index'],
-                    'event_date' => $voteData['event_date'] ?? null,
-                ]);
+                EventPollVote::withoutEvents(function () use ($poll, $voteData) {
+                    EventPollVote::create([
+                        'event_poll_id' => $poll->id,
+                        'user_id' => null,
+                        'option_index' => $voteData['option_index'],
+                        'event_date' => $voteData['event_date'] ?? null,
+                    ]);
+                });
             } catch (\Exception $e) {
                 report($e);
             }
@@ -1297,14 +1320,16 @@ class BackupService
         $partRefId = $data['_event_part_ref_id'] ?? null;
         $partId = $partRefId ? ($idMap['parts'][$partRefId] ?? null) : null;
 
-        EventComment::create([
-            'event_id' => $event->id,
-            'event_part_id' => $partId,
-            'event_date' => $data['event_date'] ?? null,
-            'user_id' => null,
-            'comment' => $data['comment'] ?? '',
-            'is_approved' => $data['is_approved'] ?? true,
-        ]);
+        EventComment::withoutEvents(function () use ($event, $partId, $data) {
+            EventComment::create([
+                'event_id' => $event->id,
+                'event_part_id' => $partId,
+                'event_date' => $data['event_date'] ?? null,
+                'user_id' => null,
+                'comment' => $data['comment'] ?? '',
+                'is_approved' => $data['is_approved'] ?? true,
+            ]);
+        });
     }
 
     private function importVideo(array $data, Event $event, array &$idMap): void
@@ -1312,14 +1337,16 @@ class BackupService
         $partRefId = $data['_event_part_ref_id'] ?? null;
         $partId = $partRefId ? ($idMap['parts'][$partRefId] ?? null) : null;
 
-        EventVideo::create([
-            'event_id' => $event->id,
-            'event_part_id' => $partId,
-            'event_date' => $data['event_date'] ?? null,
-            'user_id' => null,
-            'youtube_url' => $data['youtube_url'] ?? '',
-            'is_approved' => $data['is_approved'] ?? true,
-        ]);
+        EventVideo::withoutEvents(function () use ($event, $partId, $data) {
+            EventVideo::create([
+                'event_id' => $event->id,
+                'event_part_id' => $partId,
+                'event_date' => $data['event_date'] ?? null,
+                'user_id' => null,
+                'youtube_url' => $data['youtube_url'] ?? '',
+                'is_approved' => $data['is_approved'] ?? true,
+            ]);
+        });
     }
 
     private function importFeedback(array $data, Event $event, array &$idMap): void
@@ -1331,28 +1358,32 @@ class BackupService
             return;
         }
 
-        EventFeedback::create([
-            'event_id' => $event->id,
-            'sale_id' => $saleId,
-            'event_date' => $data['event_date'] ?? null,
-            'rating' => $data['rating'] ?? null,
-            'comment' => $data['comment'] ?? null,
-        ]);
+        EventFeedback::withoutEvents(function () use ($event, $saleId, $data) {
+            EventFeedback::create([
+                'event_id' => $event->id,
+                'sale_id' => $saleId,
+                'event_date' => $data['event_date'] ?? null,
+                'rating' => $data['rating'] ?? null,
+                'comment' => $data['comment'] ?? null,
+            ]);
+        });
     }
 
     private function importWaitlist(array $data, Event $event, Role $role): void
     {
-        TicketWaitlist::create([
-            'event_id' => $event->id,
-            'event_date' => $data['event_date'] ?? null,
-            'name' => $data['name'] ?? '',
-            'email' => $data['email'] ?? '',
-            'subdomain' => $role->subdomain,
-            'status' => $data['status'] ?? 'waiting',
-            'locale' => $data['locale'] ?? null,
-            'notified_at' => $data['notified_at'] ?? null,
-            'expires_at' => $data['expires_at'] ?? null,
-        ]);
+        TicketWaitlist::withoutEvents(function () use ($event, $data, $role) {
+            TicketWaitlist::create([
+                'event_id' => $event->id,
+                'event_date' => $data['event_date'] ?? null,
+                'name' => $data['name'] ?? '',
+                'email' => $data['email'] ?? '',
+                'subdomain' => $role->subdomain,
+                'status' => $data['status'] ?? 'waiting',
+                'locale' => $data['locale'] ?? null,
+                'notified_at' => $data['notified_at'] ?? null,
+                'expires_at' => $data['expires_at'] ?? null,
+            ]);
+        });
     }
 
     private function importNewsletter(array $data, Role $role, int $userId, array &$idMap): Newsletter
@@ -1418,20 +1449,22 @@ class BackupService
 
     private function importRecipient(array $data, Newsletter $newsletter): void
     {
-        NewsletterRecipient::create([
-            'newsletter_id' => $newsletter->id,
-            'user_id' => null,
-            'email' => $data['email'] ?? '',
-            'name' => $data['name'] ?? null,
-            'token' => Str::random(32),
-            'status' => $data['status'] ?? 'sent',
-            'sent_at' => $data['sent_at'] ?? null,
-            'error_message' => $data['error_message'] ?? null,
-            'opened_at' => $data['opened_at'] ?? null,
-            'open_count' => $data['open_count'] ?? 0,
-            'clicked_at' => $data['clicked_at'] ?? null,
-            'click_count' => $data['click_count'] ?? 0,
-        ]);
+        NewsletterRecipient::withoutEvents(function () use ($data, $newsletter) {
+            NewsletterRecipient::create([
+                'newsletter_id' => $newsletter->id,
+                'user_id' => null,
+                'email' => $data['email'] ?? '',
+                'name' => $data['name'] ?? null,
+                'token' => Str::random(32),
+                'status' => $data['status'] ?? 'sent',
+                'sent_at' => $data['sent_at'] ?? null,
+                'error_message' => $data['error_message'] ?? null,
+                'opened_at' => $data['opened_at'] ?? null,
+                'open_count' => $data['open_count'] ?? 0,
+                'clicked_at' => $data['clicked_at'] ?? null,
+                'click_count' => $data['click_count'] ?? 0,
+            ]);
+        });
     }
 
     private function importAbTest(array $data, Role $role): NewsletterAbTest
@@ -1483,12 +1516,14 @@ class BackupService
 
     private function importSegmentUser(array $data, NewsletterSegment $segment): void
     {
-        NewsletterSegmentUser::create([
-            'newsletter_segment_id' => $segment->id,
-            'user_id' => null,
-            'email' => $data['email'] ?? '',
-            'name' => $data['name'] ?? null,
-        ]);
+        NewsletterSegmentUser::withoutEvents(function () use ($data, $segment) {
+            NewsletterSegmentUser::create([
+                'newsletter_segment_id' => $segment->id,
+                'user_id' => null,
+                'email' => $data['email'] ?? '',
+                'name' => $data['name'] ?? null,
+            ]);
+        });
     }
 
     private function importRoleImages(array $roleData, Role $role, BackupJob $job): void
@@ -1619,14 +1654,16 @@ class BackupService
             $partRefId = $photoData['_event_part_ref_id'] ?? null;
             $partId = $partRefId ? ($idMap['parts'][$partRefId] ?? null) : null;
 
-            EventPhoto::create([
-                'event_id' => $event->id,
-                'event_part_id' => $partId,
-                'event_date' => $photoData['event_date'] ?? null,
-                'user_id' => null,
-                'photo_url' => $filename,
-                'is_approved' => $photoData['is_approved'] ?? true,
-            ]);
+            EventPhoto::withoutEvents(function () use ($event, $partId, $photoData, $filename) {
+                EventPhoto::create([
+                    'event_id' => $event->id,
+                    'event_part_id' => $partId,
+                    'event_date' => $photoData['event_date'] ?? null,
+                    'user_id' => null,
+                    'photo_url' => $filename,
+                    'is_approved' => $photoData['is_approved'] ?? true,
+                ]);
+            });
         }
 
         $zip->close();

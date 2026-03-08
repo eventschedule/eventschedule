@@ -28,16 +28,11 @@ class NotifyPollOptionChanges extends Command
      */
     public function handle()
     {
-        // Check email settings
-        if (config('app.hosted')) {
-            // Hosted: each role checked individually below
-        } else {
-            // Selfhosted: check that a real mailer is configured
-            if (in_array(config('mail.default'), [null, 'log', 'array'])) {
-                $this->info('No mailer configured. Skipping poll option notifications.');
+        // Selfhosted: check that a real mailer is configured
+        if (! config('app.hosted') && in_array(config('mail.default'), [null, 'log', 'array'])) {
+            $this->info('No mailer configured. Skipping poll option notifications.');
 
-                return;
-            }
+            return;
         }
 
         // Get all roles that have events with polls containing pending options

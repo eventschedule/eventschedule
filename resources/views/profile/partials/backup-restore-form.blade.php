@@ -221,6 +221,11 @@
                                             <span v-if="schedule[entity].failed > 0" class="text-red-600 dark:text-red-400">@{{ schedule[entity].failed }} {{ strtolower(__('messages.failed')) }}</span>
                                         </div>
                                     </template>
+                                    <div v-if="schedule.subdomain" class="mt-2">
+                                        <a :href="scheduleBaseUrl.replace('__SUBDOMAIN__', schedule.subdomain)" class="text-[#4E81FA] hover:underline text-sm font-medium">
+                                            {{ __('messages.backup_view_schedule') }} &rarr;
+                                        </a>
+                                    </div>
                                     <div v-if="schedule.warnings && schedule.warnings.length > 0" class="mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded">
                                         <div v-for="(warning, wIdx) in schedule.warnings" :key="wIdx" class="flex items-center gap-2 text-amber-700 dark:text-amber-300 text-xs">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 flex-shrink-0">
@@ -268,7 +273,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var roles = @json($roleData);
 
-    var initialExportJobId = {{ session('backup_job_id', 'null') }};
+    var initialExportJobId = {{ $activeExportJobId ?? 'null' }};
+    var initialImportJobId = {{ $activeImportJobId ?? 'null' }};
 
     Vue.createApp({
         data: function() {
@@ -289,6 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 importPollTimer: null,
                 exportFailedMessage: @json(__('messages.backup_export_failed')),
                 importFailedMessage: @json(__('messages.backup_import_failed')),
+                scheduleBaseUrl: @json(route('role.view_guest', ['subdomain' => '__SUBDOMAIN__'])),
             };
         },
         mounted: function() {
@@ -297,17 +304,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.pollExportStatus(initialExportJobId);
             }
 
-            // Check for active jobs
-            this.checkActiveJobs();
+            if (initialImportJobId) {
+                this.activeTab = 'import';
+                this.importProcessing = true;
+                this.pollImportStatus(initialImportJobId);
+            }
         },
         beforeUnmount: function() {
             if (this.exportPollTimer) clearInterval(this.exportPollTimer);
             if (this.importPollTimer) clearInterval(this.importPollTimer);
         },
         methods: {
-            checkActiveJobs: function() {
-                // This is handled by the initialExportJobId from session
-            },
             onExportSubmit: function() {
                 this.exportProcessing = true;
             },

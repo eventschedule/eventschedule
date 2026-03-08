@@ -114,4 +114,18 @@ class ProcessBackupExport implements ShouldQueue
             }
         }
     }
+
+    public function failed(\Throwable $e): void
+    {
+        report($e);
+
+        $job = BackupJob::find($this->backupJobId);
+        if ($job && $job->status !== 'completed') {
+            $job->update([
+                'status' => 'failed',
+                'error_message' => 'Export failed. Please try again.',
+                'completed_at' => now(),
+            ]);
+        }
+    }
 }

@@ -201,6 +201,14 @@
                 });
             }
 
+            const eventRequestFormSection = document.getElementById('event_request_form_section');
+            if (acceptRequestsCheckbox && eventRequestFormSection) {
+                eventRequestFormSection.style.display = acceptRequestsCheckbox.checked ? 'block' : 'none';
+                acceptRequestsCheckbox.addEventListener('change', function() {
+                    eventRequestFormSection.style.display = this.checked ? 'block' : 'none';
+                });
+            }
+
             const requireApprovalCheckbox = document.querySelector('input[name="require_approval"][type="checkbox"]');
             const approvedSubdomainsSection = document.getElementById('approved_subdomains_section');
 
@@ -2809,6 +2817,32 @@
                                 help="{{ __($role->isTalent() ? 'messages.accept_requests_help_talent' : 'messages.accept_requests_help') }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('accept_requests')" />
                         </div>
+                        @if (! $role->isTalent())
+                        <div class="mb-6" id="event_request_form_section">
+                            <x-input-label :value="__('messages.event_request_form')" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.event_request_form_help') }}</p>
+                            <div class="space-y-2">
+                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+                                    <input type="radio" name="event_request_form" value="import"
+                                        {{ old('event_request_form', $role->event_request_form ?? 'import') === 'import' ? 'checked' : '' }}
+                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: #4E81FA">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.ai_import') }}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_import_description') }}</div>
+                                    </div>
+                                </label>
+                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+                                    <input type="radio" name="event_request_form" value="booking"
+                                        {{ old('event_request_form', $role->event_request_form ?? 'import') === 'booking' ? 'checked' : '' }}
+                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: #4E81FA">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.booking_form') }}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.booking_form_description') }}</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        @endif
                         <div class="mb-6" id="require_account_section">
                             <x-toggle name="require_account"
                                 label="{{ __('messages.require_account') }}"

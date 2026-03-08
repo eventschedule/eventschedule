@@ -52,6 +52,7 @@ class Role extends Model implements MustVerifyEmail
         'short_description',
         'short_description_en',
         'accept_requests',
+        'event_request_form',
         'require_account',
         'use_24_hour_time',
         'timezone',
@@ -512,6 +513,15 @@ class Role extends Model implements MustVerifyEmail
     public function isCurator()
     {
         return $this->type == 'curator';
+    }
+
+    public function usesBookingForm()
+    {
+        if ($this->isTalent()) {
+            return true;
+        }
+
+        return $this->event_request_form === 'booking';
     }
 
     public function isRegistered()

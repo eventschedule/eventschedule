@@ -101,7 +101,7 @@
 
                 <div class="w-full sm:w-auto text-end">
                     <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
-                        {{ __('messages.booking_request') }}
+                        {{ $role->isTalent() ? __('messages.booking_request') : __('messages.submit_event') }}
                     </h2>
                     <h3 class="text-gray-700 dark:text-gray-300">
                         {{ $role->name }}
@@ -110,7 +110,7 @@
             @else
                 <div>
                     <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
-                        {{ __('messages.booking_request') }}
+                        {{ $role->isTalent() ? __('messages.booking_request') : __('messages.submit_event') }}
                     </h2>
                     <h3 class="text-gray-700 dark:text-gray-300">
                         {{ $role->getDisplayName(true) }}
@@ -171,15 +171,19 @@
             <div class="mb-4">
               <fieldset>
                 <div class="flex items-center space-x-6">
-                  <div class="flex items-center">
-                    <input id="in_person" type="checkbox" checked
-                      class="h-4 w-4 border-gray-300 rounded"
-                      style="accent-color: {{ $accentColor }}">
-                    <label for="in_person" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
-                      {{ __('messages.in_person') }}
-                    </label>
-                  </div>
-                  <div class="flex items-center ps-3">
+                  @if ($role->isVenue())
+                    <input type="hidden" id="in_person" value="1">
+                  @else
+                    <div class="flex items-center">
+                      <input id="in_person" type="checkbox" checked
+                        class="h-4 w-4 border-gray-300 rounded"
+                        style="accent-color: {{ $accentColor }}">
+                      <label for="in_person" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                        {{ __('messages.in_person') }}
+                      </label>
+                    </div>
+                  @endif
+                  <div class="flex items-center {{ $role->isVenue() ? '' : 'ps-3' }}">
                     <input id="is_online" name="is_online" value="1" type="checkbox"
                       class="h-4 w-4 border-gray-300 rounded"
                       style="accent-color: {{ $accentColor }}">
@@ -198,35 +202,45 @@
             </div>
 
             <div id="location-fields">
-              <div class="mb-4">
-                <x-input-label for="venue_name" :value="__('messages.venue_name')" />
-                <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full" />
-              </div>
-
-              <div class="mb-4">
-                <x-input-label for="venue_country_code" :value="__('messages.country')" />
-                <x-country-input name="venue_country_code" :value="$role->country_code" class="mt-1" />
-              </div>
-
-              <div class="mb-4">
-                <x-input-label for="venue_address1" :value="__('messages.street_address')" />
-                <x-text-input id="venue_address1" name="venue_address1" type="text" class="mt-1 block w-full" />
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                <div>
-                  <x-input-label for="venue_city" :value="__('messages.city')" />
-                  <x-text-input id="venue_city" name="venue_city" type="text" class="mt-1 block w-full" />
+              @if ($role->isVenue())
+                {{-- Venue schedule: show venue info as read-only --}}
+                <div class="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $role->name }}</div>
+                  @if ($role->fullAddress())
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $role->fullAddress() }}</div>
+                  @endif
                 </div>
-                <div>
-                  <x-input-label for="venue_state" :value="__('messages.state_province')" />
-                  <x-text-input id="venue_state" name="venue_state" type="text" class="mt-1 block w-full" />
+              @else
+                <div class="mb-4">
+                  <x-input-label for="venue_name" :value="__('messages.venue_name')" />
+                  <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full" />
                 </div>
-                <div>
-                  <x-input-label for="venue_postal_code" :value="__('messages.postal_code')" />
-                  <x-text-input id="venue_postal_code" name="venue_postal_code" type="text" class="mt-1 block w-full" />
+
+                <div class="mb-4">
+                  <x-input-label for="venue_country_code" :value="__('messages.country')" />
+                  <x-country-input name="venue_country_code" :value="$role->country_code" class="mt-1" />
                 </div>
-              </div>
+
+                <div class="mb-4">
+                  <x-input-label for="venue_address1" :value="__('messages.street_address')" />
+                  <x-text-input id="venue_address1" name="venue_address1" type="text" class="mt-1 block w-full" />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <x-input-label for="venue_city" :value="__('messages.city')" />
+                    <x-text-input id="venue_city" name="venue_city" type="text" class="mt-1 block w-full" />
+                  </div>
+                  <div>
+                    <x-input-label for="venue_state" :value="__('messages.state_province')" />
+                    <x-text-input id="venue_state" name="venue_state" type="text" class="mt-1 block w-full" />
+                  </div>
+                  <div>
+                    <x-input-label for="venue_postal_code" :value="__('messages.postal_code')" />
+                    <x-text-input id="venue_postal_code" name="venue_postal_code" type="text" class="mt-1 block w-full" />
+                  </div>
+                </div>
+              @endif
             </div>
 
             {{-- Contact Info Section --}}
@@ -508,7 +522,10 @@
 
     document.addEventListener('DOMContentLoaded', function() {
       // Bind checkbox handlers
-      document.getElementById('in_person').addEventListener('change', toggleLocationFields);
+      var inPersonEl = document.getElementById('in_person');
+      if (inPersonEl.type === 'checkbox') {
+        inPersonEl.addEventListener('change', toggleLocationFields);
+      }
       document.getElementById('is_online').addEventListener('change', toggleOnlineUrl);
       var createAccountEl = document.getElementById('create_account');
       if (createAccountEl) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Mail\SupportEmail;
+use App\Models\BackupJob;
 use App\Models\BoostCampaign;
 use App\Notifications\DeletedUserNotification;
 use App\Services\AuditService;
@@ -28,9 +29,23 @@ class ProfileController extends Controller
      */
     public function edit(Request $request, UpdaterManager $updater): View
     {
+        $activeImportJob = BackupJob::where('user_id', $request->user()->id)
+            ->where('type', 'import')
+            ->whereIn('status', ['pending', 'processing'])
+            ->latest()
+            ->first();
+
+        $activeExportJob = BackupJob::where('user_id', $request->user()->id)
+            ->where('type', 'export')
+            ->whereIn('status', ['pending', 'processing'])
+            ->latest()
+            ->first();
+
         $data = [
             'user' => $request->user(),
             'editorRoles' => $request->user()->editor()->get(),
+            'activeImportJobId' => $activeImportJob?->id,
+            'activeExportJobId' => $activeExportJob?->id,
         ];
 
         if (! config('app.hosted') && ! config('app.is_testing')) {
