@@ -18,7 +18,7 @@
     </p>
 </div>
 
-<img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/list_villageidiot.jpg?raw=true" alt="Event Schedule" width="100%">
+<img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/list_karateclub_800w.jpg?raw=true" alt="Event Schedule" width="100%">
 
 ## Why Event Schedule?
 
@@ -26,13 +26,6 @@
 - **No platform fees** - Accept payments directly via Stripe. You keep 100% of ticket revenue (minus Stripe's processing fee).
 - **AI-powered** - Create events from text, images, or WhatsApp messages. Generate flyers, translate your schedule, and more.
 - **All-in-one** - Ticketing, QR check-ins, newsletters, analytics, Google Calendar sync, and a REST API, all built in.
-
-## Screenshots
-
-| | | |
-|---|---|---|
-| <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/marketing_7.jpg?raw=true" alt="Calendar View" width="100%"> | <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/marketing_3.jpg?raw=true" alt="Event Page" width="100%"> | <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_3.png?raw=true" alt="Admin Panel" width="100%"> |
-| *Calendar view* | *Event page* | *Admin panel* |
 
 ## Features
 
