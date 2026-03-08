@@ -97,16 +97,6 @@
         </script>
     </x-slot>
 
-    <form method="POST" action="{{ route('role.remove_links', ['subdomain' => $role->subdomain]) }}"
-        id="remove_link_form">
-
-        <input type="hidden" name="remove_link" id="remove_link" />
-        <input type="hidden" name="remove_link_type" id="remove_link_type" />
-
-        @csrf
-
-    </form>
-
     @php
         $viewGuestParams = ['subdomain' => $role->subdomain];
         if ($role->event_layout == 'calendar') {
@@ -392,7 +382,6 @@
                 <option value="requests" {{ $tab == 'requests' ? 'selected' : '' }}>
                     {{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</option>
                 @endif
-                <option value="profile" {{ $tab == 'profile' ? 'selected' : '' }}>{{ __('messages.profile') }}</option>
                 @if (config('app.hosted') || config('app.is_testing'))
                 <option value="followers" {{ $tab == 'followers' ? 'selected' : '' }}>
                     {{ __('messages.followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</option>
@@ -423,8 +412,6 @@
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-[#4E81FA] px-3 pb-5 text-base font-medium text-[#4E81FA]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</a>
                 @endif
-                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'profile']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'profile' ? 'border-[#4E81FA] px-3 pb-5 text-base font-medium text-[#4E81FA]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.profile') }}</a>
                 @if (config('app.hosted') || config('app.is_testing'))
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'followers']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-[#4E81FA] px-3 pb-5 text-base font-medium text-[#4E81FA]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</a>
@@ -446,8 +433,6 @@
     @include('role.show-admin-availability')
     @elseif ($tab == 'requests')
     @include('role.show-admin-requests')
-    @elseif ($tab == 'profile')
-    @include('role.show-admin-profile')
     @elseif ($tab == 'followers')
     @include('role.show-admin-followers')
     @elseif ($tab == 'team')

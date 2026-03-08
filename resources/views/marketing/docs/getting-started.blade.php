@@ -149,11 +149,6 @@
                                             <td>Promoters, bloggers, community organizers</td>
                                             <td>A local music blog listing concerts in the area</td>
                                         </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Vendor</span></td>
-                                            <td>Food trucks, mobile businesses, pop-up shops</td>
-                                            <td>A food truck listing where they'll be parked</td>
-                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -206,7 +201,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">What's the difference between schedule types?</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Talent</strong> schedules show where you'll be performing. <strong class="text-gray-900 dark:text-white">Venue</strong> schedules show what's happening at your location (with full address support). <strong class="text-gray-900 dark:text-white">Curator</strong> schedules aggregate events from multiple sources. <strong class="text-gray-900 dark:text-white">Vendor</strong> schedules are for mobile businesses like food trucks. You can change your type anytime.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Talent</strong> schedules show where you'll be performing. <strong class="text-gray-900 dark:text-white">Venue</strong> schedules show what's happening at your location (with full address support). <strong class="text-gray-900 dark:text-white">Curator</strong> schedules aggregate events from multiple sources. You can change your type anytime.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Can I import events from my existing calendar?</h4>
@@ -270,7 +265,7 @@
                 "name": "What's the difference between schedule types?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Talent schedules show where you'll be performing. Venue schedules show what's happening at your location (with full address support). Curator schedules aggregate events from multiple sources. Vendor schedules are for mobile businesses like food trucks. You can change your type anytime."
+                    "text": "Talent schedules show where you'll be performing. Venue schedules show what's happening at your location (with full address support). Curator schedules aggregate events from multiple sources. You can change your type anytime."
                 }
             },
             {

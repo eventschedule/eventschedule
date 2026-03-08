@@ -61,6 +61,10 @@ Schedule::call(function () {
 })->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
+    Artisan::call('app:cleanup-backups');
+})->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
     if (\App\Services\MetaAdsService::isBoostConfigured()) {
         Artisan::call('boost:sync');
     }

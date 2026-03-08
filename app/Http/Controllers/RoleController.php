@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\MemberAddRequest;
 use App\Http\Requests\RoleCreateRequest;
 use App\Http\Requests\RoleEmailVerificationRequest;
-use App\Http\Requests\RoleLinkRemoveRequest;
-use App\Http\Requests\RoleLinkUpdateRequest;
 use App\Http\Requests\RoleUpdateRequest;
 use App\Http\Requests\RoleVideoSaveRequest;
 use App\Http\Requests\RoleVideosSaveRequest;
@@ -1950,6 +1948,16 @@ class RoleController extends Controller
 
         $role->fill($request->all());
 
+        if ($request->has('youtube_links')) {
+            $role->youtube_links = $request->input('youtube_links') ?: null;
+        }
+        if ($request->has('social_links')) {
+            $role->social_links = $request->input('social_links') ?: null;
+        }
+        if ($request->has('payment_links')) {
+            $role->payment_links = $request->input('payment_links') ?: null;
+        }
+
         // If sync_direction or calendar changed, handle webhook management
         if (($newSyncDirection && $oldSyncDirection !== $newSyncDirection) ||
             ($oldCalendarId !== $newCalendarId)) {
@@ -3106,99 +3114,23 @@ class RoleController extends Controller
         }
     }
 
-    public function updateLinks(RoleLinkUpdateRequest $request, $subdomain): RedirectResponse
+    public function previewLink(Request $request, $subdomain): JsonResponse
     {
         if (! auth()->user()->isEditor($subdomain)) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
+            return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        $request->validate(['url' => 'required|string|url|max:1000']);
 
-        if ($request->link_type == 'social_links') {
-            $links = $role->social_links;
-        } elseif ($request->link_type == 'payment_links') {
-            $links = $role->payment_links;
-        } else {
-            $links = $role->youtube_links;
+        $urlInfo = UrlUtils::getUrlInfo($request->url);
+        if ($urlInfo === null) {
+            return response()->json(['error' => __('messages.invalid_link')], 422);
         }
 
-        if (! $links) {
-            $links = '[]';
-        }
+        $urlInfo->brand = UrlUtils::getBrand($urlInfo->url);
+        $urlInfo->clean_url = UrlUtils::clean($urlInfo->url);
 
-        $links = json_decode($links);
-
-        foreach (explode(',', $request->link) as $link) {
-            $link = trim($link);
-
-            if (! $link) {
-                continue;
-            }
-
-            $urlInfo = UrlUtils::getUrlInfo($link);
-            if ($urlInfo !== null) {
-                $links[] = $urlInfo;
-            }
-        }
-
-        $links = json_encode($links);
-
-        if ($request->link_type == 'social_links') {
-            $role->social_links = $links;
-        } elseif ($request->link_type == 'payment_links') {
-            $role->payment_links = $links;
-        } else {
-            $role->youtube_links = $links;
-        }
-
-        $role->save();
-
-        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'profile']))
-            ->with('message', __('messages.added_link'));
-    }
-
-    public function removeLinks(RoleLinkRemoveRequest $request, $subdomain): RedirectResponse
-    {
-        if (! auth()->user()->isEditor($subdomain)) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
-        $role = Role::subdomain($subdomain)->firstOrFail();
-        if ($request->remove_link_type == 'social_links') {
-            $links = $role->social_links;
-        } elseif ($request->remove_link_type == 'payment_links') {
-            $links = $role->payment_links;
-        } else {
-            $links = $role->youtube_links;
-        }
-
-        if (! $links) {
-            $links = '[]';
-        }
-
-        $links = json_decode($links);
-        $new_links = [];
-
-        foreach ($links as $link) {
-            if ($link->url != $request->remove_link) {
-                $new_links[] = $link;
-            }
-        }
-
-        $new_links = json_encode($new_links);
-
-        if ($request->remove_link_type == 'social_links') {
-            $role->social_links = $new_links;
-        } elseif ($request->remove_link_type == 'payment_links') {
-            $role->payment_links = $new_links;
-        } else {
-            $role->youtube_links = $new_links;
-        }
-
-        $role->save();
-
-        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'profile']))
-            ->with('message', __('messages.removed_link'));
+        return response()->json($urlInfo);
     }
 
     public function qrCode($subdomain)

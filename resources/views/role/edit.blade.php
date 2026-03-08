@@ -834,6 +834,14 @@
                                 </svg>
                                 {{ __('messages.schedule_style') }}
                             </a>
+                            @if ($role->exists)
+                            <a href="#section-links" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-links">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                                </svg>
+                                {{ __('messages.videos_and_links') }}
+                            </a>
+                            @endif
                             <a href="#section-subschedules" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-subschedules">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
@@ -863,7 +871,7 @@
                             @endif
                             <a href="#section-integrations" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-integrations">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 5.427-.63 48.05 48.05 0 0 0 .582-4.717.532.532 0 0 0-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.959.401v0a.656.656 0 0 0 .658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z" />
                                 </svg>
                                 {{ __('messages.integrations') }}
                             </a>
@@ -1694,6 +1702,221 @@
                     </div>
                 </div>
 
+                @if ($role->exists)
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-links">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                        </svg>
+                        {{ __('messages.videos_and_links') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="section-links" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
+                    <div class="max-w-2xl">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                            </svg>
+                            {{ __('messages.videos_and_links') }}
+                        </h2>
+
+                        <!-- Tab Navigation -->
+                        <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                            <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
+                                <button type="button" class="links-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="youtube_videos">
+                                    {{ __('messages.youtube_videos') }}
+                                </button>
+                                <button type="button" class="links-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="social_links">
+                                    {{ __('messages.social_links') }}
+                                </button>
+                                <button type="button" class="links-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="payment_links">
+                                    {{ __('messages.payment_links') }}
+                                </button>
+                            </nav>
+                        </div>
+
+                        {{-- YouTube Videos --}}
+                        <div id="links-tab-youtube_videos" class="links-tab-content">
+                            <ul role="list" class="link-list divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+                                {!! (!$role->youtube_links || $role->youtube_links == '[]') ? 'style="display:none"' : '' !!}>
+                                @if ($role->youtube_links && $role->youtube_links != '[]')
+                                @foreach(json_decode($role->youtube_links) as $link)
+                                @if ($link)
+                                <li class="p-4 bg-white dark:bg-gray-800" data-link-url="{{ $link->url }}">
+                                    <div class="flex items-start gap-4">
+                                        <div class="flex-shrink-0 text-gray-500 dark:text-gray-400 pt-1">
+                                            <x-url-icon class="w-5 h-5" color="currentColor">
+                                                {{ \App\Utils\UrlUtils::clean($link->url) }}
+                                            </x-url-icon>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <x-link href="{{ $link->url }}" target="_blank" hideIcon class="block">
+                                                <h4 class="text-sm font-semibold break-words line-clamp-2 text-gray-900 dark:text-gray-100">{{ $link->name }}</h4>
+                                                <img src="{{ $link->thumbnail_url }}" class="mt-2 rounded"/>
+                                            </x-link>
+                                        </div>
+                                        <button type="button"
+                                            class="btn-remove-link flex-shrink-0 text-red-600 hover:text-red-800 dark:text-red-400 text-sm"
+                                            data-link-type="youtube_links" data-link-url="{{ $link->url }}">
+                                            {{ __('messages.remove') }}
+                                        </button>
+                                    </div>
+                                </li>
+                                @endif
+                                @endforeach
+                                @endif
+                            </ul>
+                            <div class="link-empty-state text-center py-8"
+                                {!! ($role->youtube_links && $role->youtube_links != '[]') ? 'style="display:none"' : '' !!}>
+                                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                                </svg>
+                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_youtube_videos') }}</p>
+                            </div>
+                            <button type="button"
+                                class="btn-show-add-link text-sm text-[#4E81FA] hover:text-[#3D6FE8] mt-4"
+                                data-link-type="youtube_links">
+                                + {{ __('messages.add_video') }}
+                            </button>
+                        </div>
+
+                        {{-- Social Links --}}
+                        <div id="links-tab-social_links" class="links-tab-content hidden">
+                            <ul role="list" class="link-list divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+                                {!! (!$role->social_links || $role->social_links == '[]') ? 'style="display:none"' : '' !!}>
+                                @if ($role->social_links && $role->social_links != '[]')
+                                @foreach(json_decode($role->social_links) as $link)
+                                @if ($link)
+                                <li class="p-4 bg-white dark:bg-gray-800" data-link-url="{{ $link->url }}">
+                                    <div class="flex items-center gap-4">
+                                        <div class="flex-shrink-0 text-gray-500 dark:text-gray-400">
+                                            <x-url-icon class="w-5 h-5" color="currentColor">
+                                                {{ \App\Utils\UrlUtils::clean($link->url) }}
+                                            </x-url-icon>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <x-link href="{{ $link->url }}" target="_blank" hideIcon class="block">
+                                                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ \App\Utils\UrlUtils::clean($link->url) }}</p>
+                                            </x-link>
+                                        </div>
+                                        <button type="button"
+                                            class="btn-remove-link flex-shrink-0 text-red-600 hover:text-red-800 dark:text-red-400 text-sm"
+                                            data-link-type="social_links" data-link-url="{{ $link->url }}">
+                                            {{ __('messages.remove') }}
+                                        </button>
+                                    </div>
+                                </li>
+                                @endif
+                                @endforeach
+                                @endif
+                            </ul>
+                            <div class="link-empty-state text-center py-8"
+                                {!! ($role->social_links && $role->social_links != '[]') ? 'style="display:none"' : '' !!}>
+                                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253" />
+                                </svg>
+                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_social_links') }}</p>
+                            </div>
+                            <button type="button"
+                                class="btn-show-add-link text-sm text-[#4E81FA] hover:text-[#3D6FE8] mt-4"
+                                data-link-type="social_links">
+                                + {{ __('messages.add_link') }}
+                            </button>
+                        </div>
+
+                        {{-- Payment Links --}}
+                        <div id="links-tab-payment_links" class="links-tab-content hidden">
+                            <ul role="list" class="link-list divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+                                {!! (!$role->payment_links || $role->payment_links == '[]') ? 'style="display:none"' : '' !!}>
+                                @if ($role->payment_links && $role->payment_links != '[]')
+                                @foreach(json_decode($role->payment_links) as $link)
+                                @if ($link)
+                                <li class="p-4 bg-white dark:bg-gray-800" data-link-url="{{ $link->url }}">
+                                    <div class="flex items-center gap-4">
+                                        <div class="flex-shrink-0 text-gray-500 dark:text-gray-400">
+                                            <x-url-icon class="w-5 h-5" color="currentColor">
+                                                {{ \App\Utils\UrlUtils::clean($link->url) }}
+                                            </x-url-icon>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <x-link href="{{ $link->url }}" target="_blank" hideIcon class="block">
+                                                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ \App\Utils\UrlUtils::clean($link->url) }}</p>
+                                            </x-link>
+                                        </div>
+                                        <button type="button"
+                                            class="btn-remove-link flex-shrink-0 text-red-600 hover:text-red-800 dark:text-red-400 text-sm"
+                                            data-link-type="payment_links" data-link-url="{{ $link->url }}">
+                                            {{ __('messages.remove') }}
+                                        </button>
+                                    </div>
+                                </li>
+                                @endif
+                                @endforeach
+                                @endif
+                            </ul>
+                            <div class="link-empty-state text-center py-8"
+                                {!! ($role->payment_links && $role->payment_links != '[]') ? 'style="display:none"' : '' !!}>
+                                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_payment_links') }}</p>
+                            </div>
+                            <button type="button"
+                                class="btn-show-add-link text-sm text-[#4E81FA] hover:text-[#3D6FE8] mt-4"
+                                data-link-type="payment_links">
+                                + {{ __('messages.add_link') }}
+                            </button>
+                        </div>
+
+                        <input type="hidden" name="youtube_links" id="youtube_links_data"
+                            value="{{ $role->youtube_links ?? '[]' }}">
+                        <input type="hidden" name="social_links" id="social_links_data"
+                            value="{{ $role->social_links ?? '[]' }}">
+                        <input type="hidden" name="payment_links" id="payment_links_data"
+                            value="{{ $role->payment_links ?? '[]' }}">
+
+                    </div>
+                </div>
+
+                {{-- Add Link Modal --}}
+                <div id="add_link_modal" class="hidden relative z-10" aria-labelledby="add-link-modal-title" role="dialog" aria-modal="true">
+                    <div class="fixed inset-0 bg-gray-500 dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+                    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                                <input type="hidden" id="link_type" />
+                                <div class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-start shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                                    <div>
+                                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                                            <svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                                            </svg>
+                                        </div>
+                                        <div class="mt-3 text-center sm:mt-5">
+                                            <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-100" id="add-link-modal-title">
+                                                {{ __('messages.add_link') }}</h3>
+                                            <div class="mt-2">
+                                                <x-text-input id="link" type="url" class="mt-1 block w-full" autofocus />
+                                                <p id="link-error" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display:none"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                                        <x-brand-button type="button" id="btn-save-link" class="w-full sm:col-start-2">{{ __('messages.save') }}</x-brand-button>
+                                        <button type="button"
+                                            class="btn-hide-add-link mt-3 inline-flex w-full items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors sm:col-start-1 sm:mt-0"
+                                            >{{ __('messages.cancel') }}</button>
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-subschedules">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -1718,14 +1941,14 @@
                         <!-- Tab Navigation -->
                         <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
-                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="custom-fields">
+                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[#4E81FA] text-[#4E81FA]" data-tab="subschedules">
+                                    {{ __('messages.subschedules') }}
+                                </button>
+                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
                                     {{ __('messages.custom_fields') }}
                                 </button>
                                 <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-labels">
                                     {{ __('messages.custom_labels') }}
-                                </button>
-                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="subschedules">
-                                    {{ __('messages.subschedules') }}
                                 </button>
                                 <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="sponsors">
                                     {{ __('messages.sponsors') }}
@@ -1734,7 +1957,7 @@
                         </div>
 
                         <!-- Tab Content: Sub-schedules -->
-                        <div id="customize-tab-subschedules" class="customize-tab-content hidden">
+                        <div id="customize-tab-subschedules" class="customize-tab-content">
 
                         <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.subschedules_help') }}</p>
                         <div class="mb-6">
@@ -1815,7 +2038,7 @@
                         <!-- End Tab Content: Sub-schedules -->
 
                         <!-- Tab Content: Custom Fields -->
-                        <div id="customize-tab-custom-fields" class="customize-tab-content">
+                        <div id="customize-tab-custom-fields" class="customize-tab-content hidden">
                         @if ($role->isPro())
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                             {{ __('messages.event_custom_fields_help') }}
@@ -2777,7 +3000,7 @@
                 <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-integrations">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 5.427-.63 48.05 48.05 0 0 0 .582-4.717.532.532 0 0 0-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.959.401v0a.656.656 0 0 0 .658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z" />
                         </svg>
                         {{ __('messages.integrations') }}
                     </span>
@@ -2790,7 +3013,7 @@
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 5.427-.63 48.05 48.05 0 0 0 .582-4.717.532.532 0 0 0-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.959.401v0a.656.656 0 0 0 .658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z" />
                             </svg>
                             {{ __('messages.integrations') }}
                         </h2>
@@ -4330,6 +4553,57 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Links tabs switching
+document.addEventListener('DOMContentLoaded', function() {
+    const linksTabs = document.querySelectorAll('.links-tab');
+    const linksTabContents = document.querySelectorAll('.links-tab-content');
+
+    if (linksTabs.length === 0) return;
+
+    // Restore active tab from localStorage
+    if (!isNewSchedule) {
+        const savedLinksTab = localStorage.getItem('linksActiveTab');
+        if (savedLinksTab) {
+            if (document.getElementById('links-tab-' + savedLinksTab)) {
+                switchLinksTab(savedLinksTab);
+            } else {
+                switchLinksTab(document.querySelector('.links-tab').dataset.tab);
+            }
+        }
+    }
+
+    linksTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabName = this.dataset.tab;
+            switchLinksTab(tabName);
+            localStorage.setItem('linksActiveTab', tabName);
+        });
+    });
+
+    function switchLinksTab(tabName) {
+        // Update tab buttons
+        linksTabs.forEach(tab => {
+            if (tab.dataset.tab === tabName) {
+                tab.classList.add('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
+            } else {
+                tab.classList.remove('border-[#4E81FA]', 'text-[#4E81FA]');
+                tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
+            }
+        });
+
+        // Update tab contents
+        linksTabContents.forEach(content => {
+            const contentId = content.id.replace('links-tab-', '');
+            if (contentId === tabName) {
+                content.classList.remove('hidden');
+            } else {
+                content.classList.add('hidden');
+            }
+        });
+    }
+});
+
 // Customize tabs switching
 document.addEventListener('DOMContentLoaded', function() {
     const customizeTabs = document.querySelectorAll('.customize-tab');
@@ -4342,7 +4616,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (document.getElementById('customize-tab-' + savedCustomizeTab)) {
                 switchCustomizeTab(savedCustomizeTab);
             } else {
-                switchCustomizeTab('custom-fields');
+                switchCustomizeTab('subschedules');
             }
         }
     }
@@ -5766,6 +6040,253 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }).catch(function() {
                 roleVerifyCodeBtn.disabled = false;
+            });
+        });
+    }
+
+    // --- Videos & Links section ---
+    var addLinkModal = document.getElementById('add_link_modal');
+    if (addLinkModal) {
+        // Link data state (parsed from hidden inputs)
+        var linkData = {
+            youtube_links: JSON.parse(document.getElementById('youtube_links_data').value || '[]'),
+            social_links: JSON.parse(document.getElementById('social_links_data').value || '[]'),
+            payment_links: JSON.parse(document.getElementById('payment_links_data').value || '[]')
+        };
+        var currentLinkType = '';
+
+        // Helper: update hidden input and trigger unsaved changes warning
+        function updateLinkInput(linkType) {
+            var input = document.getElementById(linkType + '_data');
+            input.value = JSON.stringify(linkData[linkType]);
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        // Helper: get tab content div from link type
+        function getTabDiv(linkType) {
+            var tabKey = linkType === 'youtube_links' ? 'youtube_videos' : linkType;
+            return document.getElementById('links-tab-' + tabKey);
+        }
+
+        // Helper: toggle list/empty-state visibility
+        function toggleEmptyState(linkType) {
+            var tab = getTabDiv(linkType);
+            var ul = tab.querySelector('.link-list');
+            var empty = tab.querySelector('.link-empty-state');
+            var hasItems = linkData[linkType].filter(function(l) { return !!l; }).length > 0;
+            ul.style.display = hasItems ? '' : 'none';
+            empty.style.display = hasItems ? 'none' : '';
+        }
+
+        // Helper: create a generic link icon SVG element
+        function createLinkIcon() {
+            var div = document.createElement('div');
+            div.innerHTML = '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>';
+            return div.firstChild;
+        }
+
+        // Helper: create an <li> for a YouTube link
+        function createYoutubeLi(link) {
+            var li = document.createElement('li');
+            li.className = 'p-4 bg-white dark:bg-gray-800';
+            li.setAttribute('data-link-url', link.url);
+
+            var row = document.createElement('div');
+            row.className = 'flex items-start gap-4';
+
+            var iconWrap = document.createElement('div');
+            iconWrap.className = 'flex-shrink-0 text-gray-500 dark:text-gray-400 pt-1';
+            iconWrap.appendChild(createLinkIcon());
+
+            var content = document.createElement('div');
+            content.className = 'flex-1 min-w-0';
+            var a = document.createElement('a');
+            a.href = link.url;
+            a.target = '_blank';
+            a.className = 'block';
+            var h4 = document.createElement('h4');
+            h4.className = 'text-sm font-semibold break-words line-clamp-2 text-gray-900 dark:text-gray-100';
+            h4.textContent = link.name || link.url;
+            a.appendChild(h4);
+            if (link.thumbnail_url) {
+                var img = document.createElement('img');
+                img.src = link.thumbnail_url;
+                img.className = 'mt-2 rounded';
+                a.appendChild(img);
+            }
+            content.appendChild(a);
+
+            var removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn-remove-link flex-shrink-0 text-red-600 hover:text-red-800 dark:text-red-400 text-sm';
+            removeBtn.setAttribute('data-link-type', 'youtube_links');
+            removeBtn.setAttribute('data-link-url', link.url);
+            removeBtn.textContent = @json(__('messages.remove'));
+
+            row.appendChild(iconWrap);
+            row.appendChild(content);
+            row.appendChild(removeBtn);
+            li.appendChild(row);
+            return li;
+        }
+
+        // Helper: create an <li> for a social/payment link
+        function createTextLinkLi(link, linkType) {
+            var li = document.createElement('li');
+            li.className = 'p-4 bg-white dark:bg-gray-800';
+            li.setAttribute('data-link-url', link.url);
+
+            var row = document.createElement('div');
+            row.className = 'flex items-center gap-4';
+
+            var iconWrap = document.createElement('div');
+            iconWrap.className = 'flex-shrink-0 text-gray-500 dark:text-gray-400';
+            iconWrap.appendChild(createLinkIcon());
+
+            var content = document.createElement('div');
+            content.className = 'flex-1 min-w-0';
+            var a = document.createElement('a');
+            a.href = link.url;
+            a.target = '_blank';
+            a.className = 'block';
+            var h4 = document.createElement('h4');
+            h4.className = 'text-sm font-semibold text-gray-900 dark:text-gray-100';
+            h4.textContent = link.brand || link.url;
+            a.appendChild(h4);
+            var p = document.createElement('p');
+            p.className = 'text-sm text-gray-500 dark:text-gray-400 truncate';
+            p.textContent = link.clean_url || link.url;
+            a.appendChild(p);
+            content.appendChild(a);
+
+            var removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn-remove-link flex-shrink-0 text-red-600 hover:text-red-800 dark:text-red-400 text-sm';
+            removeBtn.setAttribute('data-link-type', linkType);
+            removeBtn.setAttribute('data-link-url', link.url);
+            removeBtn.textContent = @json(__('messages.remove'));
+
+            row.appendChild(iconWrap);
+            row.appendChild(content);
+            row.appendChild(removeBtn);
+            li.appendChild(row);
+            return li;
+        }
+
+        // Open modal
+        document.querySelectorAll('.btn-show-add-link').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                currentLinkType = this.getAttribute('data-link-type');
+                document.getElementById('link_type').value = currentLinkType;
+                document.getElementById('link').value = '';
+                document.getElementById('link-error').style.display = 'none';
+                addLinkModal.style.display = '';
+                addLinkModal.classList.remove('hidden');
+                var linkInput = document.getElementById('link');
+                if (linkInput) linkInput.focus();
+            });
+        });
+
+        // Close modal
+        document.querySelectorAll('.btn-hide-add-link').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                addLinkModal.style.display = 'none';
+                addLinkModal.classList.add('hidden');
+            });
+        });
+
+        // Save link (fetch preview, append to list)
+        var saveLinkBtn = document.getElementById('btn-save-link');
+        saveLinkBtn.addEventListener('click', function() {
+            var linkInput = document.getElementById('link');
+            var linkUrl = linkInput.value.trim();
+            var errorEl = document.getElementById('link-error');
+            errorEl.style.display = 'none';
+
+            if (!linkUrl) {
+                errorEl.textContent = @json(__('messages.field_required'));
+                errorEl.style.display = '';
+                return;
+            }
+
+            // Loading state
+            var origText = saveLinkBtn.textContent;
+            saveLinkBtn.disabled = true;
+            saveLinkBtn.textContent = @json(__('messages.saving'));
+
+            fetch(@json(route('role.preview_link', ['subdomain' => $role->subdomain])), {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url: linkUrl })
+            })
+            .then(function(r) {
+                if (!r.ok) return r.json().then(function(d) { throw d; });
+                return r.json();
+            })
+            .then(function(link) {
+                // Add to data array
+                linkData[currentLinkType].push({
+                    name: link.name,
+                    url: link.url,
+                    thumbnail_url: link.thumbnail_url
+                });
+
+                // Append to DOM
+                var tab = getTabDiv(currentLinkType);
+                var ul = tab.querySelector('.link-list');
+                var li;
+                if (currentLinkType === 'youtube_links') {
+                    li = createYoutubeLi(link);
+                } else {
+                    li = createTextLinkLi(link, currentLinkType);
+                }
+                ul.appendChild(li);
+
+                // Update state
+                updateLinkInput(currentLinkType);
+                toggleEmptyState(currentLinkType);
+
+                // Close modal
+                addLinkModal.style.display = 'none';
+                addLinkModal.classList.add('hidden');
+                linkInput.value = '';
+            })
+            .catch(function(err) {
+                errorEl.textContent = (err && err.error) ? err.error :
+                    ((err && err.errors && err.errors.url) ? err.errors.url[0] : @json(__('messages.error_occurred')));
+                errorEl.style.display = '';
+            })
+            .finally(function() {
+                saveLinkBtn.disabled = false;
+                saveLinkBtn.textContent = origText;
+            });
+        });
+
+        // Remove link (event delegation for both Blade-rendered and JS-appended items)
+        document.querySelectorAll('.links-tab-content').forEach(function(tab) {
+            tab.addEventListener('click', function(e) {
+                var btn = e.target.closest('.btn-remove-link');
+                if (!btn) return;
+
+                var linkType = btn.getAttribute('data-link-type');
+                var linkUrl = btn.getAttribute('data-link-url');
+
+                // Remove from data array
+                linkData[linkType] = linkData[linkType].filter(function(l) {
+                    return l && l.url !== linkUrl;
+                });
+
+                // Remove from DOM
+                var li = btn.closest('li');
+                if (li) li.remove();
+
+                // Update state
+                updateLinkInput(linkType);
+                toggleEmptyState(linkType);
             });
         });
     }

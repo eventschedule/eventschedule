@@ -73,7 +73,6 @@
                         <a href="#videos" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Videos</a>
                         <a href="#availability" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Availability</a>
                         <a href="#requests" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Requests</a>
-                        <a href="#profile" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Profile</a>
                         <a href="#followers" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Followers</a>
                         <a href="#team" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Team</a>
                         <a href="#plan" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Plan</a>
@@ -100,7 +99,12 @@
 
                         <!-- Schedule -->
                         <section id="schedule" class="doc-section">
-                            <h2 class="doc-heading">Schedule</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                </svg>
+                                Schedule
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 The <strong class="text-gray-900 dark:text-white">Schedule</strong> tab is the main view of your admin panel. It shows your events in a calendar layout, organized by month.
                             </p>
@@ -119,7 +123,12 @@
 
                         <!-- Videos -->
                         <section id="videos" class="doc-section">
-                            <h2 class="doc-heading">Videos</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                </svg>
+                                Videos
+                            </h2>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-400 mb-4">Curator schedules only</span>
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
@@ -138,7 +147,12 @@
 
                         <!-- Availability -->
                         <section id="availability" class="doc-section">
-                            <h2 class="doc-heading">Availability</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                Availability
+                            </h2>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 mb-2">Talent schedules only</span>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 mb-4">Enterprise</span>
 
@@ -178,7 +192,12 @@
 
                         <!-- Requests -->
                         <section id="requests" class="doc-section">
-                            <h2 class="doc-heading">Requests</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H6.911a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661Z" />
+                                </svg>
+                                Requests
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 The <strong class="text-gray-900 dark:text-white">Requests</strong> tab appears when your schedule has pending event requests. Anyone with the public sign-up link can submit a request to add an event to your schedule.
                             </p>
@@ -196,31 +215,15 @@
                             </p>
                         </section>
 
-                        <!-- Profile -->
-                        <section id="profile" class="doc-section">
-                            <h2 class="doc-heading">Profile</h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                The <strong class="text-gray-900 dark:text-white">Profile</strong> tab shows a read-only preview of your schedule's public profile, including:
-                            </p>
-
-                            <x-doc-screenshot id="managing-schedules--profile-tab" alt="Profile tab showing schedule info" />
-
-                            <ul class="doc-list mb-6">
-                                <li><strong>Description</strong> - Your schedule's markdown-formatted description</li>
-                                <li><strong>YouTube videos</strong> - Any linked YouTube videos</li>
-                                <li><strong>Social links</strong> - Connected social media profiles</li>
-                                <li><strong>Payment links</strong> - Direct payment links (Stripe, PayPal, etc.)</li>
-                                <li><strong>Google Map</strong> - Displayed if an address is configured</li>
-                            </ul>
-
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                To edit these details, go to <x-link href="{{ route('marketing.docs.creating_schedules') }}#details">Edit Schedule</x-link>.
-                            </p>
-                        </section>
 
                         <!-- Followers -->
                         <section id="followers" class="doc-section">
-                            <h2 class="doc-heading">Followers</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                                </svg>
+                                Followers
+                            </h2>
                             @if(config('app.hosted'))
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 The <strong class="text-gray-900 dark:text-white">Followers</strong> tab shows a list of users who follow your schedule. Followers receive notifications when you publish new events.
@@ -244,7 +247,12 @@
 
                         <!-- Team -->
                         <section id="team" class="doc-section">
-                            <h2 class="doc-heading">Team</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                                </svg>
+                                Team
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 The <strong class="text-gray-900 dark:text-white">Team</strong> tab lets you manage who has access to your schedule. You can invite team members and assign them different permission levels.
                             </p>
@@ -292,7 +300,12 @@
 
                         <!-- Plan -->
                         <section id="plan" class="doc-section">
-                            <h2 class="doc-heading">Plan</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+                                </svg>
+                                Plan
+                            </h2>
                             @if(config('app.hosted'))
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 The <strong class="text-gray-900 dark:text-white">Plan</strong> tab shows your schedule's current subscription plan and lets you manage it.

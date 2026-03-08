@@ -81,6 +81,7 @@
                         <a href="#api" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">API Settings</a>
                         <a href="#webhooks" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Webhooks</a>
                         <a href="#google" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Google Settings</a>
+                        <a href="#backup" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Backup & Restore</a>
                         <a href="#app-update" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">App Update</a>
                         <a href="#password" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Update Password</a>
                         <a href="#two-factor" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Two-Factor Authentication</a>
@@ -302,6 +303,49 @@
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
                                 <p>Google Calendar sync is configured per schedule in the schedule settings. Connect your Google account here first, then enable sync on each schedule you want to keep in sync.</p>
+                            </div>
+                        </section>
+
+                        <!-- Backup & Restore -->
+                        <section id="backup" class="doc-section">
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+                                </svg>
+                                Backup & Restore
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">
+                                Export your schedules as portable backup files or import data from a previous backup. Backups include events, tickets, sales, sub-schedules, newsletters, and optionally images.
+                            </p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Exporting</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                To create a backup, select which schedules to include and whether to include images. The export runs in the background, and you'll receive an email with a download link when it's ready. Download links expire after 7 days.
+                            </p>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Schedule Selection</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose one or more schedules to include in the backup. Each schedule's events, tickets, sales, sub-schedules, and newsletters are exported together.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Include Images</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Toggle this on to include event images, schedule logos, and other media in the backup file. This increases the file size but ensures a complete backup.</p>
+                                </div>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Importing</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Upload a previously exported .zip backup file to restore your data. After uploading, you'll see a preview showing the schedules, event counts, ticket counts, and sale counts contained in the file. Select which schedules to import and confirm. Imported schedules are created as new schedules and will not overwrite existing data. You'll receive an email notification when the import is complete.
+                            </p>
+
+                            <div class="doc-callout doc-callout-info mb-6">
+                                <div class="doc-callout-title">Note</div>
+                                <p>On the hosted platform, newsletter recipient emails, segment contacts, and unsubscribe lists are excluded from exports for privacy.</p>
+                            </div>
+
+                            <div class="doc-callout doc-callout-warning">
+                                <div class="doc-callout-title">Important</div>
+                                <p>On selfhosted installations, exports contain personal data including email addresses. Store backup files securely. For migrating between selfhosted instances, consider using <code class="text-xs bg-gray-200 dark:bg-white/10 px-1.5 py-0.5 rounded">mysqldump</code> for a complete database transfer.</p>
                             </div>
                         </section>
 

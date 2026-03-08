@@ -17,6 +17,7 @@
 .dark .iti__dropdown-content { color: #d1d5db; }
 .dark .iti__selected-dial-code { color: #d1d5db; }
 .dark .iti__search-input { background: #1e1e1e; color: #d1d5db; border-color: #2d2d30; }
+.iti:not(.iti--country-only) > .iti__country-container { padding: 0 0 0 4px !important; }
 </style>
 <script src="{{ asset('vendor/intl-tel-input/js/intlTelInput.min.js') }}" {!! nonce_attr() !!}></script>
 @endonce
@@ -41,6 +42,31 @@
         strictMode: true,
         nationalMode: false,
         autoPlaceholder: 'off',
+    });
+
+    // Fix .iti wrapper layout (library defaults to inline-block)
+    var wrapper = input.closest('.iti');
+    if (wrapper) {
+        wrapper.style.setProperty('display', 'block', 'important');
+        wrapper.style.setProperty('width', '100%', 'important');
+    }
+
+    // Match height to adjacent text inputs (with CSS-load guard)
+    function matchHeight() {
+        var form = input.closest('form');
+        var refInput = form && form.querySelector('input[type="text"], input[type="email"]');
+        if (refInput && refInput.offsetHeight > 30) {
+            input.style.setProperty('height', refInput.offsetHeight + 'px', 'important');
+            return true;
+        }
+        return false;
+    }
+
+    requestAnimationFrame(function() {
+        if (!matchHeight()) {
+            // CSS not loaded yet (Vite dev mode) - retry after full page load
+            window.addEventListener('load', matchHeight);
+        }
     });
 
     // If we have an initial value, set it

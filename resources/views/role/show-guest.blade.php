@@ -107,6 +107,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                 $hasPhone = $role->phone && $role->show_phone && $role->phone_verified_at;
                 $hasWebsite = $role->website;
                 $hasSocial = $role->social_links && $role->social_links != '[]';
+                $hasPayment = $role->payment_links && $role->payment_links != '[]';
             @endphp
             {{-- Mobile layout (< sm): stacked, centered --}}
             <div class="flex sm:hidden flex-col items-center gap-3 mb-5">
@@ -136,7 +137,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
               {{-- Icons + Buttons together on same row (centered) --}}
               <div class="flex flex-row flex-wrap items-center justify-center gap-3">
                 {{-- Social icons --}}
-                @if($hasEmail || $hasPhone || $hasWebsite || $hasSocial)
+                @if($hasEmail || $hasPhone || $hasWebsite || $hasSocial || $hasPayment)
                 <div class="flex flex-row gap-3 items-center">
                     @if($hasEmail)
                     <a href="mailto:{{ $role->email }}"
@@ -170,6 +171,20 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                     @endif
                     @if($hasSocial)
                         @foreach (json_decode($role->social_links) as $link)
+                        @if ($link)
+                        <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
+                           class="w-10 h-10 rounded-lg flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
+                           style="background-color: {{ $accentColor }}"
+                           data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
+                            <x-url-icon class="w-5 h-5" :color="$contrastColor">
+                                {{ \App\Utils\UrlUtils::clean($link->url) }}
+                            </x-url-icon>
+                        </a>
+                        @endif
+                        @endforeach
+                    @endif
+                    @if($hasPayment)
+                        @foreach (json_decode($role->payment_links) as $link)
                         @if ($link)
                         <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
                            class="w-10 h-10 rounded-lg flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
@@ -289,7 +304,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                   </a>
                   @endif
                   {{-- Social icons (desktop - simple monochrome style) --}}
-                  @if($hasEmail || $hasPhone || $hasWebsite || $hasSocial)
+                  @if($hasEmail || $hasPhone || $hasWebsite || $hasSocial || $hasPayment)
                   <div class="flex flex-row gap-4 items-center mt-3">
                       @if($hasEmail)
                       <a href="mailto:{{ $role->email }}"
@@ -320,6 +335,19 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                       @endif
                       @if($hasSocial)
                           @foreach (json_decode($role->social_links) as $link)
+                          @if ($link)
+                          <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
+                             class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
+                             data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
+                              <x-url-icon class="w-5 h-5" color="currentColor">
+                                  {{ \App\Utils\UrlUtils::clean($link->url) }}
+                              </x-url-icon>
+                          </a>
+                          @endif
+                          @endforeach
+                      @endif
+                      @if($hasPayment)
+                          @foreach (json_decode($role->payment_links) as $link)
                           @if ($link)
                           <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
                              class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"

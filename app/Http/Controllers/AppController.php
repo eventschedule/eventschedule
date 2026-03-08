@@ -191,6 +191,7 @@ class AppController extends Controller
                 \Artisan::call('google:refresh-webhooks');
                 \Artisan::call('audit:prune');
                 \Artisan::call('app:cleanup-webhook-deliveries');
+                \Artisan::call('app:cleanup-backups');
 
                 if (config('app.hosted')) {
                     \Artisan::call('app:generate-sub-audience-blog');

@@ -259,7 +259,6 @@ class GenerateDocScreenshots extends Command
                 ['id' => 'managing-schedules--videos-tab', 'route' => '/simpsons/videos'],
                 ['id' => 'managing-schedules--availability', 'route' => '/simpsons/availability', 'pause' => 2000],
                 ['id' => 'managing-schedules--requests-tab', 'route' => '/simpsons/requests'],
-                ['id' => 'managing-schedules--profile-tab', 'route' => '/simpsons/profile'],
                 ['id' => 'managing-schedules--team-tab', 'route' => '/simpsons/team'],
             ],
             'scan-agenda' => [

@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminNewsletterController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\Api\ApiSettingsController;
 use App\Http\Controllers\AppController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BoostController;
 use App\Http\Controllers\CalDAVController;
@@ -223,6 +224,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/settings', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::delete('/settings/profile-image', [ProfileController::class, 'deleteImage'])->name('profile.delete_image');
 
+    // Backup & Restore
+    Route::post('/settings/backup/export', [BackupController::class, 'export'])->name('backup.export')->middleware('throttle:3,60');
+    Route::post('/settings/backup/import', [BackupController::class, 'upload'])->name('backup.upload')->middleware('throttle:3,60');
+    Route::post('/settings/backup/import/confirm', [BackupController::class, 'confirm'])->name('backup.confirm')->middleware('throttle:3,60');
+    Route::get('/settings/backup/download/{backupJob}', [BackupController::class, 'download'])->name('backup.download')->middleware('signed');
+    Route::get('/settings/backup/status/{backupJob}', [BackupController::class, 'status'])->name('backup.status');
+
     Route::get('/stripe/link', [StripeController::class, 'link'])->name('stripe.link');
     Route::post('/stripe/unlink', [StripeController::class, 'unlink'])->name('stripe.unlink');
     Route::get('/stripe/complete', [StripeController::class, 'complete'])->name('stripe.complete');
@@ -293,8 +301,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/{subdomain}/requests/accept-event/{hash}', [EventController::class, 'accept'])->name('event.accept');
     Route::post('/{subdomain}/requests/decline-event/{hash}', [EventController::class, 'decline'])->name('event.decline');
     Route::post('/{subdomain}/requests/accept-all', [EventController::class, 'acceptAll'])->name('event.accept_all');
-    Route::post('/{subdomain}/profile/update-links', [RoleController::class, 'updateLinks'])->name('role.update_links');
-    Route::post('/{subdomain}/profile/remove-links', [RoleController::class, 'removeLinks'])->name('role.remove_links');
+    Route::post('/{subdomain}/preview-link', [RoleController::class, 'previewLink'])->name('role.preview_link');
     Route::get('/{subdomain}/followers/qr-code', [RoleController::class, 'qrCode'])->name('role.qr_code');
     Route::get('/{subdomain}/team/add-member', [RoleController::class, 'createMember'])->name('role.create_member');
     Route::post('/{subdomain}/team/add-member', [RoleController::class, 'storeMember'])->name('role.store_member');
@@ -346,7 +353,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{subdomain}/scan-agenda', [EventController::class, 'scanAgenda'])->name('event.scan_agenda')->where('subdomain', '(?!docs(?=/|$))[^/]+');
     Route::post('/{subdomain}/save-event-parts', [EventController::class, 'saveEventParts'])->name('event.save_parts');
 
-    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|profile|followers|team|plan|videos')->where('subdomain', '(?!docs(?=/|$))[^/]+');
+    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|followers|team|plan|videos')->where('subdomain', '(?!docs(?=/|$))[^/]+');
 
     Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image');
 

@@ -97,6 +97,9 @@ class RoleUpdateRequest extends FormRequest
             'custom_labels' => ['nullable', 'array', 'max:30'],
             'custom_labels.*.value' => ['required_with:custom_labels', 'string', 'max:200'],
             'custom_labels.*.value_en' => ['nullable', 'string', 'max:200'],
+            'youtube_links' => ['nullable', 'json'],
+            'social_links' => ['nullable', 'json'],
+            'payment_links' => ['nullable', 'json'],
         ];
     }
 }
