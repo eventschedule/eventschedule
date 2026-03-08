@@ -32,6 +32,7 @@ All users get these features with no subscription required.
 | CalDAV sync | Standard calendar protocol |
 | Fan videos, photos & comments on events | User-generated content on events (25 photo limit on free tier) |
 | Built-in analytics | Schedule analytics dashboard |
+| Configurable dashboard | Customize which panels appear on the dashboard |
 | Sub-schedules | Group events into sub-schedules |
 | Online events | Virtual event support |
 | Recurring events | Day-of-week recurring patterns with date exceptions (include/exclude specific dates) |
@@ -41,6 +42,7 @@ All users get these features with no subscription required.
 | iCal download | Download .ics files for individual events and recurring event dates |
 | Fan photos on events (25 per schedule) | User-submitted photos with approval workflow; upgrade prompt at limit |
 | Event cloning | Duplicate an existing event as a starting point for a new one |
+| Backup & restore | Export and import schedule data with optional images |
 | 10 newsletter emails per month | Basic newsletter email sending limit (counts each recipient as one email) |
 
 ## Pro Features
@@ -67,6 +69,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Post-event feedback | `FeedbackController`, `$role->isPro()` | Collect star ratings and comments from attendees after events |
 | Embed ticket widget | `edit.blade.php`, `$role->isPro()` | Embed ticket purchase or RSVP form on external websites via iframe |
 | Promo/discount codes | `PromoCodeController`, tied to ticketing gate | Percentage or fixed discounts with usage limits and expiration dates |
+| Eventbrite import | EventbriteController, $role->isPro() | Import events from Eventbrite |
 | Invoice Ninja integration | `InvoiceNinjaController` | Alternative payment processing via Invoice Ninja |
 | 100 newsletter emails per month | `$role->newsletterLimit()` | Increased email sending limit (counts each recipient as one email) |
 | Unlimited fan photos + bulk download | `EventController`, `$role->isPro()` | No per-schedule photo cap; download all event photos as zip |

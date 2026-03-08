@@ -28,7 +28,7 @@
             "@id": "{{ url()->current() }}"
         },
         "datePublished": "2024-01-01",
-        "dateModified": "2026-02-01"
+        "dateModified": "2026-03-08"
     }
     </script>
     </x-slot>
@@ -113,6 +113,7 @@
                                     <li><strong class="text-gray-900 dark:text-white">Enterprise:</strong> 1,000 newsletter emails per month</li>
                                     <li><strong class="text-gray-900 dark:text-white">Selfhosted</strong> (with own email settings): Unlimited</li>
                                 </ul>
+                                <p class="mt-2">A usage meter at the top of the Newsletters page shows how many emails you have sent this month relative to your plan limit (e.g. "5 of 100 sent").</p>
                             </div>
                         </section>
 

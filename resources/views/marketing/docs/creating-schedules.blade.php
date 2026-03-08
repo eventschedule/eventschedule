@@ -28,7 +28,7 @@
             "@id": "{{ url()->current() }}"
         },
         "datePublished": "2024-01-01",
-        "dateModified": "2026-02-27"
+        "dateModified": "2026-03-08"
     }
     </script>
     </x-slot>
@@ -185,7 +185,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Short Description</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">A brief subtitle for your schedule (up to 200 characters). This appears below your schedule name on the schedule page.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">A brief subtitle for your schedule (up to 200 characters). This appears below your schedule name on the schedule page. If your schedule name is in a non-English language, an additional <strong class="text-gray-900 dark:text-white">Short Description (English)</strong> field appears for providing an English translation.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Description</h4>
@@ -286,7 +286,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">City/Country</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">For non-Venue schedules (Talent, Curator), you can specify your city and country. This appears on your profile without requiring a full street address.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">For non-Venue schedules, you can specify location details without requiring a full street address. Curator schedules have both City and Country fields. Talent schedules have a Country field only. This appears on your profile to give visitors a sense of your location.</p>
                                 </div>
                             </div>
                         </section>
@@ -350,16 +350,43 @@
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">URL Slugs</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Each sub-schedule gets a URL slug (e.g., <code class="doc-inline-code">/live-music</code>) so visitors can bookmark and share filtered views.</p>
                                 </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Color</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Assign a color to each sub-schedule. Choose from 14 preset colors. The color is used to visually distinguish sub-schedules in calendar views and filter buttons.</p>
+                                </div>
                             </div>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Assigning Events to Sub-schedules</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">When creating or editing an event, select a sub-schedule from the dropdown. Events can belong to one sub-schedule at a time.</p>
 
                             <!-- Custom Fields -->
-                            <h3 id="customize-custom-fields" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Custom Fields</h3>
+                            <h3 id="customize-custom-fields" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Custom Fields <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-1">Pro</span></h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                Define <a href="{{ marketing_url('/features/custom-fields') }}" class="text-cyan-400 hover:text-cyan-300">Event Custom Fields</a> to add extra data to your events. Custom field values can also be used as URL pattern variables.
+                                Define <a href="{{ marketing_url('/features/custom-fields') }}" class="text-cyan-400 hover:text-cyan-300">Event Custom Fields</a> to add extra data to your events. You can add up to 10 custom fields per schedule. Custom field values can also be used as URL pattern variables.
                             </p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Each custom field has the following properties:</p>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Field Name & English Name</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">The display name for the field. For non-English schedules, an English name field also appears for translation.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Field Type</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose from six types: <strong class="text-gray-900 dark:text-white">String</strong> (single-line text), <strong class="text-gray-900 dark:text-white">Multiline String</strong> (multi-line text), <strong class="text-gray-900 dark:text-white">Switch</strong> (on/off toggle), <strong class="text-gray-900 dark:text-white">Date</strong> (date picker), <strong class="text-gray-900 dark:text-white">Dropdown</strong> (single select from predefined options), or <strong class="text-gray-900 dark:text-white">Multiselect</strong> (multiple selections from predefined options).</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">AI Prompt</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">An optional prompt that helps AI fill in this field automatically when using <a href="{{ route('marketing.docs.ai_import') }}" class="text-cyan-400 hover:text-cyan-300">AI Import</a> or the AI Details Generator.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Required</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Mark a field as required so that events cannot be saved without providing a value.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Reordering</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Drag and drop fields to change the order they appear on event forms.</p>
+                                </div>
+                            </div>
 
                             @if (!empty($customFieldsData))
                                 {{-- Dynamic: Show user's actual custom fields --}}
@@ -738,6 +765,14 @@
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Notify New Sale</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Receive an email when a ticket sale is completed for one of your events.</p>
                                 </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Notify New Feedback</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Receive an email when an attendee submits post-event feedback for one of your events.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Notify New Poll Option</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Receive an email when a visitor suggests a new option on one of your event polls (requires <a href="{{ route('marketing.docs.creating_events') }}#polls" class="text-cyan-400 hover:text-cyan-300">Allow User Options</a> to be enabled).</p>
+                                </div>
                             </div>
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Email Settings Required</div>
@@ -749,7 +784,7 @@
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">First Day of Week</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose whether your calendar starts on Sunday or Monday.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose which day your calendar week starts on. All seven days are available (Sunday, Monday, Tuesday, etc.).</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Import Form Fields</h4>
@@ -760,8 +795,8 @@
                                     <p class="text-sm text-gray-500 dark:text-gray-400">When enabled, clicking events on the calendar or scanning QR codes in event graphics will link directly to the event's registration URL instead of showing the event detail page first. Only affects events that have a registration URL configured.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Unlisted Schedule <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-1">Enterprise</span></h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Make your schedule private - it won't appear in search results or public listings. Only people with the direct link can access it. For per-event privacy with password protection, see <a href="{{ route('marketing.docs.creating_events') }}#privacy" class="text-cyan-400 hover:text-cyan-300">Privacy</a>.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Default Curator Schedules</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">For non-Curator schedules, if you also manage Curator-type schedules, you can select which curator schedules new events are automatically shared to. This saves you from manually selecting curators on each event. Only shown when you have available curator schedules.</p>
                                 </div>
                             </div>
                         </section>
@@ -807,14 +842,27 @@
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Request Terms</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Add custom terms or guidelines that submitters must agree to when requesting events. Use this to set expectations about your booking policies, technical requirements, or submission guidelines.</p>
                                 </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Event Request Form</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose the type of request form shown to visitors: <strong class="text-gray-900 dark:text-white">AI Import</strong> (paste event text or upload a flyer and let AI extract the details) or <strong class="text-gray-900 dark:text-white">Booking Form</strong> (a structured form with predefined fields). Available for Venue and Curator schedules.</p>
+                                </div>
                             </div>
 
                             <!-- Fan Content Tab -->
                             <h3 id="engagement-fan-content" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Fan Content</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Control which types of fan content visitors can submit to your events. Each type has its own toggle and all submissions require your approval before appearing publicly.</p>
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Enable Fan Content</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Allow visitors to submit photos and videos to your events. Submitted content requires your approval before appearing publicly on the event page.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Fan Comments</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Allow visitors to submit text comments on your events.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Fan Photos</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Allow visitors to upload photos to your events.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Fan Videos</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Allow visitors to submit YouTube or Vimeo video links on your events.</p>
                                 </div>
                             </div>
 
@@ -866,6 +914,7 @@
                                 <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong></li>
                                 <li>Scroll to the <strong class="text-gray-900 dark:text-white">Auto Import</strong> section</li>
                                 <li>Add URLs or city names you want to import from</li>
+                                <li>Click <strong class="text-gray-900 dark:text-white">Test Import</strong> to verify your sources are working correctly before saving</li>
                                 <li>Events will be automatically checked and imported on a regular schedule</li>
                             </ol>
 

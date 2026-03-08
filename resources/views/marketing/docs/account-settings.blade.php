@@ -28,7 +28,7 @@
             "@id": "{{ url()->current() }}"
         },
         "datePublished": "2024-01-01",
-        "dateModified": "2026-03-01"
+        "dateModified": "2026-03-08"
     }
     </script>
     </x-slot>
@@ -102,11 +102,12 @@
                                 Profile Information
                             </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                Access your account settings by clicking <strong>Settings</strong> in the main navigation. The Profile Information section lets you manage your personal details:
+                                Access your account settings by clicking <strong>Settings</strong> in the main navigation. The Profile Information section is organized into two sub-tabs: <strong class="text-gray-900 dark:text-white">General</strong> and <strong class="text-gray-900 dark:text-white">Localization</strong>.
                             </p>
 
                             <x-doc-screenshot id="account-settings--settings" alt="Account settings page" loading="eager" />
 
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">General</h3>
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
                                     <thead>
@@ -129,6 +130,28 @@
                                             <td>Your phone number in international format. On the hosted platform, you'll need to verify your phone via SMS before it can be displayed on your schedules. Used for identity verification and displayed on schedules that have "Show phone number" enabled.</td>
                                         </tr>
                                         <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Default Schedule</span></td>
+                                            <td>When you manage multiple schedules, choose which one is selected by default when you log in. Only shown if you have more than one schedule.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Profile Image</span></td>
+                                            <td>Upload a profile picture. This is used for your user avatar and may appear in team member lists.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Localization</h3>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Setting</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Timezone</span></td>
                                             <td>Controls how dates and times are displayed throughout the app. Event times are stored in UTC and converted to your timezone for display.</td>
                                         </tr>
@@ -139,10 +162,6 @@
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">24-Hour Time</span></td>
                                             <td>Toggle between 12-hour (AM/PM) and 24-hour time format across the app</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Profile Image</span></td>
-                                            <td>Upload a profile picture. This is used for your user avatar and may appear in team member lists.</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -433,6 +452,10 @@
                                 <li>Removes all events, tickets, and sales data</li>
                                 <li>Disconnects any linked services (Stripe, Google, etc.)</li>
                             </ul>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                The confirmation dialog includes an optional feedback textarea where you can share the reason for leaving. This helps us improve the platform.
+                            </p>
 
                             <div class="doc-callout doc-callout-warning">
                                 <div class="doc-callout-title">Warning</div>

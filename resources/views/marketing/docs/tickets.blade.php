@@ -28,7 +28,7 @@
             "@id": "{{ url()->current() }}"
         },
         "datePublished": "2024-01-01",
-        "dateModified": "2026-03-01"
+        "dateModified": "2026-03-08"
     }
     </script>
     </x-slot>
@@ -495,11 +495,15 @@
                                 <li>Total revenue</li>
                             </ul>
 
+                            <h3 id="filtering-sales" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Filtering Sales</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Use the filter input at the top of the sales list to search by buyer name, email, or event name. The filter updates results in real time. When exporting sales data, only the currently filtered results are included in the export.</p>
+
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Actions</h3>
                             <ul class="doc-list">
                                 <li><strong class="text-gray-900 dark:text-white">Resend tickets:</strong> Send confirmation email again</li>
                                 <li><strong class="text-gray-900 dark:text-white">Mark as paid:</strong> For cash or external payments</li>
                                 <li><strong class="text-gray-900 dark:text-white">Cancel/refund:</strong> Cancel a sale (refunds handled in Stripe)</li>
+                                <li><strong class="text-gray-900 dark:text-white">Delete:</strong> Permanently remove a sale record</li>
                             </ul>
                         </section>
 

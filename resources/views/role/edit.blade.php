@@ -6263,7 +6263,7 @@ document.addEventListener('DOMContentLoaded', function() {
             saveLinkBtn.disabled = true;
             saveLinkBtn.textContent = @json(__('messages.saving'));
 
-            fetch(@json(route('role.preview_link', ['subdomain' => $role->subdomain])), {
+            fetch(@json($role->subdomain ? route('role.preview_link', ['subdomain' => $role->subdomain]) : ''), {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',

@@ -45,6 +45,9 @@
 - 📊 **Event Polls:** Add multiple choice polls to events. Guests vote and see real-time results.
 - 🔒 **Private Events:** Password-protect events or hide them from the public schedule for invite-only gatherings.
 - 📑 **Event Agenda:** Break events into timed segments with names, descriptions, and individual start and end times.
+- 📊 **Configurable Dashboard:** Customize which panels appear on your admin dashboard.
+- 💾 **Backup & Restore:** Export and import schedule data with optional images.
+- 📝 **Free Event Registration:** Native sign-up for free events with optional capacity limits.
 
 ### Ticketing & Payments
 - 🎟️ **Sell Tickets Online:** Offer ticket sales directly through the platform with a seamless checkout process.
@@ -55,6 +58,11 @@
 - 💻 **Online Events:** Use the platform to sell tickets to online events.
 - 💳 **Online Payments:** Accept secure online payments via [Stripe](https://stripe.com), [Invoice Ninja](https://www.invoiceninja.com), or payment links.
 - 🏷️ **Promo Codes:** Create discount codes with percentage or fixed amounts, usage limits, and ticket-specific targeting.
+- 🎫 **Individual Tickets:** Collect per-attendee details with individual confirmation emails and QR codes.
+- 📊 **Check-in Dashboard:** Track real-time attendance with per-ticket breakdown.
+- ⏳ **Ticket Waitlist:** Automatically notify attendees when sold-out tickets become available.
+- 🖥️ **Embed Ticket Widget:** Embed a ticket purchase or RSVP form on external websites.
+- 📤 **Sales CSV Export:** Export sales data including custom fields.
 
 ### Integrations
 - 📅 **Calendar Integration:** Enable attendees to add events directly to Google, Apple, or Microsoft calendars.
@@ -63,10 +71,16 @@
 - 🔗 **Third-Party Event Import:** Automatically import events from third-party websites to expand your calendar offerings.
 - 🖥️ **Website Embedding:** Embed your schedule on any website using a simple iframe widget.
 - 🔐 **Social Login:** Sign in quickly using Google or Facebook accounts.
+- 🎪 **Eventbrite Import:** Import events from Eventbrite into your schedule.
+- 🔔 **Webhooks:** Receive POST notifications for sales, events, and check-ins.
+- 💬 **WhatsApp Event Creation:** Create events by sending messages or images via WhatsApp with AI parsing.
 
 ### AI-Powered
 - 🤖 **AI Event Parsing:** Automatically extract event details using AI to quickly create new events.
 - 🤖 **AI Translation:** Automatically translate your entire schedule into multiple languages using AI.
+- 🤖 **AI Flyer Generation:** Generate event flyer images from event details.
+- 🎨 **AI Style Generation:** Generate cohesive schedule branding including images, accent color, and font.
+- 📑 **AI Agenda Scanning:** Scan agendas to automatically create event parts.
 
 ### Collaboration & Marketing
 - 👥 **Team Scheduling:** Collaborate with team members to manage availability and coordinate event schedules.
@@ -76,6 +90,10 @@
 - 📧 **Email Notifications:** Automatic ticket confirmation emails sent to buyers.
 - 📧 **Newsletters:** Send newsletters to followers and ticket buyers with a drag-and-drop block editor, five professional templates, audience segments, A/B testing, and real-time delivery analytics.
 - 📸 **Fan Videos & Comments:** Let attendees submit videos, photos, and comments on events with built-in moderation.
+- ⭐ **Post-Event Feedback:** Collect star ratings and comments from attendees after events.
+- 🏢 **Sponsor Logos:** Display sponsor and partner logos with tiers on your schedule page.
+- 🔔 **Sale Notifications:** Receive email alerts when tickets are sold.
+- 📢 **Event Boosting:** Promote events with Meta Ads integration.
 
 ### Customization
 - 📝 **Custom Fields:** Collect additional information from ticket buyers with customizable form fields at both event and ticket levels. Supports text, dropdown, date, and yes/no field types.
@@ -84,6 +102,8 @@
 - 🎨 **Profile Themes:** Customize header images, background gradients, and fonts.
 - 🏷️ **White-label Branding:** Remove Event Schedule branding for a fully branded experience.
 - 🌐 **Custom Domains:** Use your own domain name for your schedule with automatic SSL support.
+- 📍 **Venue Location Maps:** Show event venues on Google Maps.
+- 📅 **iCal Download:** Download .ics files for individual events and recurring event dates.
 
 ### Developer Tools
 - 🤖 **AI Agent Support:** Manage events programmatically with [AI agent workflows](https://eventschedule.com/.well-known/agents.json), an [OpenAPI 3.0 spec](https://eventschedule.com/api/openapi.json), [llms.txt](https://eventschedule.com/llms.txt), and [llms-full.txt](https://eventschedule.com/llms-full.txt) for seamless integration with AI agents and developer tools.

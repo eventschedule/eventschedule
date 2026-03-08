@@ -28,7 +28,7 @@
             "@id": "{{ url()->current() }}"
         },
         "datePublished": "2024-01-01",
-        "dateModified": "2026-03-01"
+        "dateModified": "2026-03-08"
     }
     </script>
     </x-slot>
@@ -161,12 +161,16 @@
                                             <td>The event title (required)</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Date & Time</span></td>
-                                            <td>When the event starts</td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Category</span></td>
+                                            <td>Select an event category from the dropdown (e.g. Concert, Workshop, Conference)</td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Duration</span></td>
-                                            <td>How long the event lasts (in hours)</td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Date, Start Time & End Time</span></td>
+                                            <td>The event date, start time, and end time. Duration is calculated automatically from the start and end times.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Short Description</span></td>
+                                            <td>A brief summary of the event (up to 200 characters). Appears as a subtitle on the event page.</td>
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Description</span></td>
@@ -178,15 +182,11 @@
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Sub-schedule</span></td>
-                                            <td>Organize events by type (e.g., "Live Music", "Comedy"). See <a href="{{ route('marketing.docs.creating_schedules') }}#subschedules" class="text-cyan-400 hover:text-cyan-300">Sub-schedules</a></td>
+                                            <td>Organize events by type (e.g., "Live Music", "Comedy"). See <a href="{{ route('marketing.docs.creating_schedules') }}#customize-subschedules" class="text-cyan-400 hover:text-cyan-300">Sub-schedules</a></td>
                                         </tr>
                                         <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Registration URL</span></td>
-                                            <td>Link to external registration or <a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">ticketing</a></td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Ticket Price</span></td>
-                                            <td>For events using external ticketing, enter the ticket price. Used in <a href="{{ route('marketing.docs.event_graphics') }}#text-templates" class="text-cyan-400 hover:text-cyan-300">event graphics text templates</a> as <code class="text-xs bg-gray-200 dark:bg-white/10 px-1.5 py-0.5 rounded">{price}</code> and <code class="text-xs bg-gray-200 dark:bg-white/10 px-1.5 py-0.5 rounded">{currency}</code>. Leave blank if unknown, enter 0 for free events.</td>
+                                            <td><span class="font-semibold text-gray-900 dark:text-white">Event URL / Slug</span></td>
+                                            <td>For existing events, the event URL is displayed with a copy button. You can click <strong>Edit</strong> to customize the URL slug.</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -225,7 +225,11 @@
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">In-Person Events</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Enter the venue name and address. An interactive map is displayed on the public event page so guests can find the location.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose <strong class="text-gray-900 dark:text-white">Use Existing</strong> to select a venue that has appeared on your schedule before, or <strong class="text-gray-900 dark:text-white">Create New</strong> to enter a new venue name and address. An interactive map is displayed on the public event page.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Address Validation</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">After entering an address, click <strong class="text-gray-900 dark:text-white">Validate Address</strong> to verify the location and generate map coordinates. Use the <strong class="text-gray-900 dark:text-white">View Map</strong> button to preview the location on a map before saving.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Online Events</h4>
@@ -233,7 +237,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Venue Contact</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Optionally add the venue's email and website so guests can contact the venue directly.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Optionally add the venue's email and website so guests can contact the venue directly. On the hosted platform, you can check <strong class="text-gray-900 dark:text-white">"Send email to notify"</strong> to send the venue an email about the event.</p>
                                 </div>
                             </div>
                         </section>
@@ -251,7 +255,11 @@
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Adding Participants</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Search for existing members on your schedule or add new ones. Each participant is linked to their schedule profile page.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Search for existing members on your schedule or add new ones. Each participant is linked to their schedule profile page. You can also provide an <strong class="text-gray-900 dark:text-white">email address</strong> and a <strong class="text-gray-900 dark:text-white">YouTube video URL</strong> for each participant.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Notify Participants</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">On the hosted platform, you can check <strong class="text-gray-900 dark:text-white">"Send email to notify"</strong> for each participant to send them an email about the event.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">When to Use</h4>
@@ -287,11 +295,11 @@
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Weekly</span></td>
-                                            <td>Repeats every week on the same day</td>
+                                            <td>Repeats every week. Select which days of the week the event occurs on using the day checkboxes (Sun, Mon, Tue, etc.).</td>
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Every N weeks</span></td>
-                                            <td>Repeats every 2, 3, or more weeks (e.g., biweekly)</td>
+                                            <td>Repeats every 2, 3, or more weeks (e.g., biweekly). Includes day-of-week checkboxes to select which days.</td>
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Monthly (same date)</span></td>
@@ -348,9 +356,22 @@
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Display Options</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">You can choose whether to show or hide times and descriptions for event parts on the public event page.</p>
 
-                            <div class="doc-callout doc-callout-tip">
-                                <div class="doc-callout-title">AI Import</div>
-                                <p>You can import event parts from text or an image using AI. Paste an agenda or upload a flyer and the AI will extract each part automatically. Requires a <a href="{{ route('marketing.docs.ai_import') }}" class="text-cyan-400 hover:text-cyan-300">Gemini API key</a> to be configured.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">AI Import</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">You can import event parts using AI in two ways:</p>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Import from Image</strong> - Upload a photo of a printed agenda or schedule and AI will extract each part automatically.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Import from Text</strong> - Paste agenda text (e.g., a lineup list) and AI will parse it into individual parts.</li>
+                            </ul>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Additional AI options:</p>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">AI Agenda Prompt</strong> - Add custom instructions to help AI interpret your specific agenda format (up to 500 characters).</li>
+                                <li><strong class="text-gray-900 dark:text-white">Save Agenda Image</strong> - Save the uploaded agenda image as the event's featured image.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Save as Default</strong> - Save the AI prompt as the default for all future events on this schedule.</li>
+                            </ul>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Note</div>
+                                <p>AI agenda import requires a <a href="{{ route('marketing.docs.ai_import') }}" class="text-cyan-400 hover:text-cyan-300">Gemini API key</a> to be configured.</p>
                             </div>
                         </section>
 
@@ -363,6 +384,8 @@
                                 Schedules
                             </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">The Schedules tab lets you share events to other Curator-type schedules you manage. This is useful when you want an event to appear on multiple schedules at once.</p>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">For each curator schedule you select, you can also choose which <strong class="text-gray-900 dark:text-white">sub-schedule</strong> the event should be assigned to on that curator's schedule (if the curator has sub-schedules configured).</p>
 
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Conditional Tab</div>
@@ -440,8 +463,11 @@
                                 </svg>
                                 Tickets <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-2">Pro</span>
                             </h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Sell tickets directly from your event pages with built-in Stripe payments. Set up ticket types, manage sales, and check in attendees at the door. See the full <a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Selling Tickets</a> guide for setup, sales management, and check-in details.
+                            </p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">
+                                If you are not using built-in ticketing or RSVP, the Tickets section shows fields for <strong class="text-gray-900 dark:text-white">external ticketing</strong>: a <strong class="text-gray-900 dark:text-white">Registration URL</strong> (link to your external ticketing page), <strong class="text-gray-900 dark:text-white">Ticket Price</strong> (with currency selector, used in <a href="{{ route('marketing.docs.event_graphics') }}#text-templates" class="text-cyan-400 hover:text-cyan-300">event graphics text templates</a>), and an optional <strong class="text-gray-900 dark:text-white">Coupon Code</strong>.
                             </p>
                         </section>
 
@@ -484,7 +510,7 @@
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
-                                <p>For schedule-level privacy (hiding the entire schedule from public listings), see the <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="text-cyan-400 hover:text-cyan-300">Unlisted Schedule</a> setting.</p>
+                                <p>For schedule-level settings, see <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="text-cyan-400 hover:text-cyan-300">Advanced Settings</a>.</p>
                             </div>
                         </section>
 
@@ -497,7 +523,7 @@
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong></li>
                                 <li>Scroll to <strong class="text-gray-900 dark:text-white">Custom Fields</strong></li>
-                                <li>Add fields with a name and type (text, number, date, or dropdown)</li>
+                                <li>Add fields with a name and type (string, multiline string, switch, date, dropdown, or multiselect)</li>
                                 <li>Save your settings</li>
                             </ol>
 
@@ -510,7 +536,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Field Types</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Text:</strong> Free-form text input. <strong class="text-gray-900 dark:text-white">Number:</strong> Numeric values. <strong class="text-gray-900 dark:text-white">Date:</strong> Date picker. <strong class="text-gray-900 dark:text-white">Dropdown:</strong> Predefined list of options.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">String:</strong> Single-line text input. <strong class="text-gray-900 dark:text-white">Multiline String:</strong> Multi-line text area. <strong class="text-gray-900 dark:text-white">Switch:</strong> On/off toggle. <strong class="text-gray-900 dark:text-white">Date:</strong> Date picker. <strong class="text-gray-900 dark:text-white">Dropdown:</strong> Single select from predefined options. <strong class="text-gray-900 dark:text-white">Multiselect:</strong> Multiple selections from predefined options.</p>
                                 </div>
                             </div>
                         </section>
@@ -554,20 +580,19 @@
                                 Once the schedule type is set to Curator, the <strong>Videos</strong> tab appears in your admin panel and fans can submit content on your public event pages.
                             </p>
 
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Fan Videos</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Content Types</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                Fans can submit YouTube or Vimeo video links on your public event pages. Videos can be attached to the event itself or to specific event parts (e.g., individual performances or sessions).
+                                Three types of fan content are available, each controlled by a separate toggle at the schedule level:
                             </p>
-                            <ol class="doc-list doc-list-numbered mb-6">
-                                <li>They paste a YouTube or Vimeo URL on the event page</li>
-                                <li>They select which event or event part the video belongs to</li>
-                                <li>The submission is sent to you for review</li>
-                                <li>Once approved, the video appears embedded on the public event page</li>
-                            </ol>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Fan Comments</strong> - Text comments on events and event parts</li>
+                                <li><strong class="text-gray-900 dark:text-white">Fan Photos</strong> - Photo uploads on events</li>
+                                <li><strong class="text-gray-900 dark:text-white">Fan Videos</strong> - YouTube or Vimeo video links on events and event parts</li>
+                            </ul>
 
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Fan Comments</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Per-Event Overrides</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                Fans can also leave text comments on events and event parts. Comments follow the same approval workflow as videos.
+                                On the event edit page, each content type has a dropdown to override the schedule-level setting: <strong class="text-gray-900 dark:text-white">Use Schedule Default</strong>, <strong class="text-gray-900 dark:text-white">Enabled</strong>, or <strong class="text-gray-900 dark:text-white">Disabled</strong>. This lets you enable fan content for specific events while keeping it off schedule-wide, or vice versa.
                             </p>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Moderation</h3>
@@ -621,6 +646,15 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-6">
                                 As an organizer, you can always see poll results in the event edit page of your admin panel, regardless of whether you have voted.
                             </p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">User-Suggested Options</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                You can allow guests to suggest their own poll options:
+                            </p>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Allow User Options</strong> - Enable this toggle to let guests add their own options to the poll.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Require Option Approval</strong> - When enabled (appears after enabling Allow User Options), user-suggested options go to a pending queue for your approval before appearing in the poll. Review pending options on the event edit page and approve or reject each one.</li>
+                            </ul>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Closing and Reopening</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">

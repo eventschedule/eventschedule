@@ -28,7 +28,7 @@
             "@id": "{{ url()->current() }}"
         },
         "datePublished": "2024-01-01",
-        "dateModified": "2026-02-27"
+        "dateModified": "2026-03-08"
     }
     </script>
     </x-slot>
@@ -69,7 +69,12 @@
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
                         <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Overview</a>
-                        <a href="#schedule" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Schedule</a>
+                        <div class="doc-nav-group">
+                            <a href="#schedule" class="doc-nav-group-header doc-nav-link">Schedule <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
+                            <div class="doc-nav-group-items">
+                                <a href="#actions" class="doc-nav-link">Actions</a>
+                            </div>
+                        </div>
                         <a href="#videos" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Videos</a>
                         <a href="#availability" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Availability</a>
                         <a href="#requests" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Requests</a>
@@ -119,6 +124,19 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 For details on adding and editing events, see <x-link href="{{ route('marketing.docs.creating_events') }}">Creating Events</x-link>.
                             </p>
+
+                            <h3 id="actions" class="text-lg font-semibold text-gray-900 dark:text-white mt-6 mb-3">Actions Dropdown</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                The <strong class="text-gray-900 dark:text-white">Actions</strong> dropdown on the Schedule tab gives you quick access to common schedule operations:
+                            </p>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Import Events</strong> - Open the <a href="{{ route('marketing.docs.ai_import') }}" class="text-cyan-400 hover:text-cyan-300">AI Import</a> page to bulk-import events from text or images</li>
+                                <li><strong class="text-gray-900 dark:text-white">Scan Agenda</strong> - Use AI to scan a printed agenda and create event parts (Enterprise)</li>
+                                <li><strong class="text-gray-900 dark:text-white">Sync Events</strong> - Manually trigger a sync with Google Calendar (shown when Google Calendar is connected)</li>
+                                <li><strong class="text-gray-900 dark:text-white">Events Graphic</strong> - Generate a <a href="{{ route('marketing.docs.event_graphics') }}" class="text-cyan-400 hover:text-cyan-300">promotional graphic</a> for your events</li>
+                                <li><strong class="text-gray-900 dark:text-white">Embed Schedule</strong> - Get the embed code to add your schedule to any website</li>
+                                <li><strong class="text-gray-900 dark:text-white">Delete Schedule</strong> - Permanently delete this schedule (owner only)</li>
+                            </ul>
                         </section>
 
                         <!-- Videos -->

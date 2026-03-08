@@ -28,7 +28,7 @@
             "@id": "{{ url()->current() }}"
         },
         "datePublished": "2024-01-01",
-        "dateModified": "2026-02-01"
+        "dateModified": "2026-03-08"
     }
     </script>
     </x-slot>
@@ -106,7 +106,7 @@
                                 <li>Paste your event text into the text box</li>
                                 <li>Click <strong class="text-gray-900 dark:text-white">"Parse Events"</strong></li>
                                 <li>Review the extracted events and make any corrections</li>
-                                <li>Click <strong class="text-gray-900 dark:text-white">"Import"</strong> to add them to your schedule</li>
+                                <li>Click <strong class="text-gray-900 dark:text-white">"Import"</strong> on individual events, or use <strong class="text-gray-900 dark:text-white">"Save All"</strong> to import all parsed events at once</li>
                             </ol>
 
                             <div class="grid md:grid-cols-2 gap-4 mb-6">
@@ -135,6 +135,9 @@
                             </div>
 
                             <p class="text-gray-600 dark:text-gray-300">Review the extracted details, make any corrections, and click Import. You can process multiple events at once.</p>
+
+                            <h4 class="font-semibold text-gray-900 dark:text-white mb-2 mt-6">Venue Matching</h4>
+                            <p class="text-gray-600 dark:text-gray-300">When AI detects a venue name that matches an existing venue in your schedule, it will suggest the match so you can reuse the existing venue instead of creating a duplicate. If a similar event is detected, you will also be notified to avoid importing duplicates.</p>
                         </section>
 
                         <!-- Image Import -->
@@ -144,7 +147,7 @@
 
                             <ol class="doc-list doc-list-numbered mb-6">
                                 <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule</strong> and click <strong class="text-gray-900 dark:text-white">"Import"</strong></li>
-                                <li>Upload an image file (JPG, PNG, etc.)</li>
+                                <li>Add an image using any of these methods: click to <strong class="text-gray-900 dark:text-white">upload a file</strong> (JPG, PNG, etc.), <strong class="text-gray-900 dark:text-white">paste an image from your clipboard</strong>, or <strong class="text-gray-900 dark:text-white">drag and drop</strong> a file onto the upload area</li>
                                 <li>Click <strong class="text-gray-900 dark:text-white">"Parse Events"</strong></li>
                                 <li>Review the extracted events</li>
                                 <li>The uploaded image can automatically become the event's featured image</li>
