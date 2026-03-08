@@ -57,7 +57,7 @@
                 {{-- Plan Type --}}
                 <div>
                     <label for="plan_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.plan_type')</label>
-                    <select name="plan_type" id="plan_type" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <select name="plan_type" id="plan_type" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="free" {{ ($role->plan_type ?? 'free') === 'free' ? 'selected' : '' }}>@lang('messages.free')</option>
                         <option value="pro" {{ $role->plan_type === 'pro' ? 'selected' : '' }}>@lang('messages.pro')</option>
                         <option value="enterprise" {{ $role->plan_type === 'enterprise' ? 'selected' : '' }}>@lang('messages.enterprise')</option>
@@ -70,7 +70,7 @@
                 {{-- Plan Term --}}
                 <div>
                     <label for="plan_term" class="block text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.plan_term')</label>
-                    <select name="plan_term" id="plan_term" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <select name="plan_term" id="plan_term" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="">@lang('messages.none')</option>
                         <option value="month" {{ $role->plan_term === 'month' ? 'selected' : '' }}>@lang('messages.monthly')</option>
                         <option value="year" {{ $role->plan_term === 'year' ? 'selected' : '' }}>@lang('messages.yearly')</option>
@@ -84,7 +84,7 @@
                 <div>
                     <label for="plan_expires" class="block text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.plan_expires')</label>
                     <input type="text" name="plan_expires" id="plan_expires" value="{{ $role->plan_expires }}"
-                        class="datepicker-date mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        class="datepicker-date mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                     @error('plan_expires')
                         <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                     @enderror

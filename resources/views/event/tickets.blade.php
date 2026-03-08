@@ -1000,7 +1000,7 @@
                         :class="{'opacity-50': promoCodeValid}"
                         placeholder="{{ __('messages.enter_promo_code') }}" />
                     <button type="button" v-if="!promoCodeValid" @click="applyPromoCode" :disabled="isValidatingPromo || !promoCode.trim()"
-                        class="px-4 py-2 bg-[var(--brand-blue)] text-white text-sm font-medium rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        class="px-4 py-2 bg-[var(--brand-button-bg)] text-white text-sm font-medium rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                         <span v-if="isValidatingPromo">...</span>
                         <span v-else>{{ __('messages.apply') }}</span>
                     </button>

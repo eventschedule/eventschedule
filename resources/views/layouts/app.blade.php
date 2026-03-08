@@ -17,7 +17,10 @@
                     beforeSend: function (event) {
                         if (event.exception && event.exception.values) {
                             for (var i = 0; i < event.exception.values.length; i++) {
-                                if (event.exception.values[i].value === 'Script error.') {
+                                if (event.exception.values[i].value && event.exception.values[i].value.indexOf('Script error.') !== -1) {
+                                    return null;
+                                }
+                                if (event.exception.values[i].value && event.exception.values[i].value.indexOf('Vue failed to load') !== -1) {
                                     return null;
                                 }
                             }

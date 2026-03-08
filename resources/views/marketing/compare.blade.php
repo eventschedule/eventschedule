@@ -269,12 +269,12 @@
                         <label class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Ticket price</label>
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">$</span>
-                            <input type="number" x-model.number="price" min="1" max="10000" class="w-28 pl-7 pr-3 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <input type="number" x-model.number="price" min="1" max="10000" class="w-28 pl-7 pr-3 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-transparent">
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
                         <label class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Tickets per month</label>
-                        <input type="number" x-model.number="tickets" min="1" max="100000" class="w-28 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <input type="number" x-model.number="tickets" min="1" max="100000" class="w-28 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-transparent">
                     </div>
                 </div>
 

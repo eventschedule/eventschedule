@@ -35,12 +35,12 @@
         <div class="flex items-center gap-2">
             <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.filter') }}:</span>
             <a href="{{ route('admin.referrals') }}"
-                class="px-3 py-1 rounded-full text-sm {{ !$statusFilter ? 'bg-[var(--brand-blue)] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
+                class="px-3 py-1 rounded-full text-sm {{ !$statusFilter ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
                 {{ __('messages.all') }}
             </a>
             @foreach (['pending', 'subscribed', 'qualified', 'credited', 'expired'] as $status)
             <a href="{{ route('admin.referrals', ['status' => $status]) }}"
-                class="px-3 py-1 rounded-full text-sm {{ $statusFilter === $status ? 'bg-[var(--brand-blue)] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
+                class="px-3 py-1 rounded-full text-sm {{ $statusFilter === $status ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
                 {{ __('messages.' . $status) }}
             </a>
             @endforeach

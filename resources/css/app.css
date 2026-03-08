@@ -19,14 +19,20 @@
     --brand-blue-a10: rgba(78, 129, 250, 0.1);
     --brand-blue-a20: rgba(78, 129, 250, 0.2);
     --brand-blue-a30: rgba(78, 129, 250, 0.3);
+    --brand-button-bg-light: #5A8DFF;
+    --brand-button-bg: #4E81FA;
+    --brand-button-bg-hover: #3D6FE8;
 }
 .dark {
-    --brand-blue: #5A8AEE;
-    --brand-blue-light: #6B9AFF;
-    --brand-blue-dark: #4A78DC;
-    --brand-blue-a10: rgba(90, 138, 238, 0.1);
-    --brand-blue-a20: rgba(90, 138, 238, 0.2);
-    --brand-blue-a30: rgba(90, 138, 238, 0.3);
+    --brand-blue: #6B9AFF;
+    --brand-blue-light: #7AA8FF;
+    --brand-blue-dark: #5A8DFF;
+    --brand-blue-a10: rgba(107, 154, 255, 0.1);
+    --brand-blue-a20: rgba(107, 154, 255, 0.2);
+    --brand-blue-a30: rgba(107, 154, 255, 0.3);
+    --brand-button-bg-light: #5A8DFF;
+    --brand-button-bg: #4E81FA;
+    --brand-button-bg-hover: #3D6FE8;
 }
 
 [x-cloak] {

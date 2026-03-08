@@ -40,7 +40,7 @@
                         class="rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                     <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">{{ $field['label'] }}</span>
                     <span class="flex items-center justify-center gap-1 shrink-0 w-4">
-                        <span x-show="fieldsWithValues.includes('{{ $field['key'] }}') && !elementStatus['{{ $field['key'] }}']" x-cloak class="w-2 h-2 rounded-full bg-[var(--brand-blue)]" title="{{ __('messages.has_existing_value') }}"></span>
+                        <span x-show="fieldsWithValues.includes('{{ $field['key'] }}') && !elementStatus['{{ $field['key'] }}']" x-cloak class="w-2 h-2 rounded-full bg-[var(--brand-button-bg)]" title="{{ __('messages.has_existing_value') }}"></span>
                         {{-- Per-element status indicators --}}
                         <template x-if="elementStatus['{{ $field['key'] }}'] === 'generating'">
                             <svg class="animate-spin h-4 w-4 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24">
@@ -133,7 +133,7 @@
                 {{ __('messages.cancel') }}
             </button>
             <button type="button" @click="generate()" :disabled="generating || elements.length === 0"
-                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--brand-blue)] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-blue-dark)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50">
+                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50">
                 <template x-if="generating">
                     <span class="inline-flex items-center">
                         <svg class="animate-spin -ml-1 ltr:mr-2 rtl:ml-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">

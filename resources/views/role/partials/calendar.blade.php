@@ -324,7 +324,7 @@
                         </svg>
                         {{ $label('filters') }}
                         <span v-if="activeFilterCount > 0"
-                              class="ms-1 px-1.5 py-0.5 text-xs bg-[var(--brand-blue)] text-white rounded-full">
+                              class="ms-1 px-1.5 py-0.5 text-xs bg-[var(--brand-button-bg)] text-white rounded-full">
                             @{{ activeFilterCount }}
                         </span>
                     </button>
@@ -357,7 +357,7 @@
                     {{ $label('filters') }}
                     {{-- Active filter count badge --}}
                     <span v-if="activeFilterCount > 0"
-                          class="ms-1 px-1.5 py-0.5 text-xs bg-[var(--brand-blue)] text-white rounded-full">
+                          class="ms-1 px-1.5 py-0.5 text-xs bg-[var(--brand-button-bg)] text-white rounded-full">
                         @{{ activeFilterCount }}
                     </span>
                 </button>
@@ -503,7 +503,7 @@
                         <div class="flex justify-between">
                         @if ($route == 'admin' || $route == 'home')
                         <time datetime="{{ $currentDate->format('Y-m-d') }}"
-                            class="{{ $currentDate->day == $today->day && $currentDate->month == $today->month && $currentDate->year == $today->year ? 'flex h-6 w-6 items-center justify-center rounded bg-[var(--brand-blue)] font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
+                            class="{{ $currentDate->day == $today->day && $currentDate->month == $today->month && $currentDate->year == $today->year ? 'flex h-6 w-6 items-center justify-center rounded bg-[var(--brand-button-bg)] font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
                         @else
                         @php
                             $isToday = $currentDate->day == $today->day && $currentDate->month == $today->month && $currentDate->year == $today->year;
@@ -1592,7 +1592,7 @@
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $label('free_entry') }}</span>
                 <button role="switch" :aria-checked="showFreeOnly.toString()"
                         class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
-                        :class="showFreeOnly ? 'bg-[var(--brand-blue)]' : 'bg-gray-300 dark:bg-gray-600'">
+                        :class="showFreeOnly ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-300 dark:bg-gray-600'">
                     <span class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200"
                           :class="showFreeOnly ? 'ltr:translate-x-5 rtl:-translate-x-5' : 'translate-x-0'"></span>
                 </button>
@@ -1605,7 +1605,7 @@
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $label('online') }}</span>
                 <button role="switch" :aria-checked="showOnlineOnly.toString()"
                         class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
-                        :class="showOnlineOnly ? 'bg-[var(--brand-blue)]' : 'bg-gray-300 dark:bg-gray-600'">
+                        :class="showOnlineOnly ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-300 dark:bg-gray-600'">
                     <span class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200"
                           :class="showOnlineOnly ? 'ltr:translate-x-5 rtl:-translate-x-5' : 'translate-x-0'"></span>
                 </button>
@@ -1707,7 +1707,7 @@
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $label('free_entry') }}</span>
                     <button role="switch" :aria-checked="showFreeOnly.toString()"
                             class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
-                            :class="showFreeOnly ? 'bg-[var(--brand-blue)]' : 'bg-gray-300 dark:bg-gray-600'">
+                            :class="showFreeOnly ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-300 dark:bg-gray-600'">
                         <span class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200"
                               :class="showFreeOnly ? 'ltr:translate-x-5 rtl:-translate-x-5' : 'translate-x-0'"></span>
                     </button>
@@ -1720,7 +1720,7 @@
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $label('online') }}</span>
                     <button role="switch" :aria-checked="showOnlineOnly.toString()"
                             class="relative w-11 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0"
-                            :class="showOnlineOnly ? 'bg-[var(--brand-blue)]' : 'bg-gray-300 dark:bg-gray-600'">
+                            :class="showOnlineOnly ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-300 dark:bg-gray-600'">
                         <span class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200"
                               :class="showOnlineOnly ? 'ltr:translate-x-5 rtl:-translate-x-5' : 'translate-x-0'"></span>
                     </button>
@@ -1778,6 +1778,7 @@
 @endif
 <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
 <script {!! nonce_attr() !!}>
+if (typeof Vue === 'undefined') { throw new Error('Vue failed to load'); }
 const { createApp } = Vue;
 
 const calendarApp = createApp({

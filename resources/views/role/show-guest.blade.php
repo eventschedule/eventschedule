@@ -425,7 +425,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                     </svg>
                     {{-- Active filter count badge --}}
                     <span id="hero-filters-badge"
-                          class="absolute -top-1 -end-1 min-w-[18px] h-[18px] items-center justify-center text-xs bg-[var(--brand-blue)] text-white rounded-full px-1 hidden"></span>
+                          class="absolute -top-1 -end-1 min-w-[18px] h-[18px] items-center justify-center text-xs bg-[var(--brand-button-bg)] text-white rounded-full px-1 hidden"></span>
                 </button>
                 @endif
 
@@ -610,7 +610,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
             </svg>
             {{ $role->customLabel('filters') }}
             <span id="hero-filters-badge-mobile"
-                  class="ms-1 px-1.5 py-0.5 text-xs bg-[var(--brand-blue)] text-white rounded-full hidden"></span>
+                  class="ms-1 px-1.5 py-0.5 text-xs bg-[var(--brand-button-bg)] text-white rounded-full hidden"></span>
         </button>
         @endif
 

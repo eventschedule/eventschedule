@@ -523,30 +523,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     <!-- Desktop instructions -->
                     <div v-if="!isMobile" class="divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                         <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
-                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-blue)] text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-button-bg)] text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
                             <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step1') }}</span>
                         </div>
                         <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
-                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-blue)] text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-button-bg)] text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
                             <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step2') }}</span>
                         </div>
                         <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
-                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-blue)] text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-button-bg)] text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
                             <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step3') }}</span>
                         </div>
                     </div>
                     <!-- Mobile instructions -->
                     <div v-else class="divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                         <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
-                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-blue)] text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-button-bg)] text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
                             <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step1_mobile') }}</span>
                         </div>
                         <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
-                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-blue)] text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-button-bg)] text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
                             <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step2_mobile') }}</span>
                         </div>
                         <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
-                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-blue)] text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                            <span class="flex-shrink-0 w-6 h-6 bg-[var(--brand-button-bg)] text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
                             <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.camera_fix_step3_mobile') }}</span>
                         </div>
                     </div>
@@ -554,7 +554,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 <!-- Try Again button -->
                 <div class="mt-6 text-center">
-                    <button @click="retryCameraAccess" class="inline-flex items-center gap-2 px-6 py-3 bg-[var(--brand-blue)] hover:bg-[var(--brand-blue-dark)] border border-transparent rounded-lg font-semibold text-sm text-white uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                    <button @click="retryCameraAccess" class="inline-flex items-center gap-2 px-6 py-3 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] border border-transparent rounded-lg font-semibold text-sm text-white uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>

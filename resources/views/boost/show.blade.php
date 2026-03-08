@@ -205,6 +205,7 @@
         const isDark = document.documentElement.classList.contains('dark');
         const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
         const textColor = isDark ? '#9ca3af' : '#6b7280';
+        const brandBlue = getComputedStyle(document.documentElement).getPropertyValue('--brand-blue').trim();
 
         new Chart(document.getElementById('performance-chart'), {
             type: 'line',
@@ -214,7 +215,7 @@
                     {
                         label: @json(__("messages.impressions")),
                         data: impressions,
-                        borderColor: '#3b82f6',
+                        borderColor: brandBlue,
                         backgroundColor: 'rgba(59,130,246,0.1)',
                         fill: true,
                         tension: 0.3,

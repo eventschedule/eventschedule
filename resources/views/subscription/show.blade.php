@@ -196,7 +196,7 @@
                     <label for="card-holder-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {{ __('messages.card_holder_name') }}
                     </label>
-                    <input type="text" id="card-holder-name" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                    <input type="text" id="card-holder-name" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] sm:text-sm" required>
                 </div>
 
                 <div class="mb-6">

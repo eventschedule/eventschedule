@@ -165,14 +165,14 @@
                 <div class="relative">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.schedule_subdomain')</label>
                     <input type="text" name="subdomain" required autocomplete="off" data-subdomain-autocomplete
-                        class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
                         placeholder="subdomain">
                     <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.amount') ($)</label>
                     <input type="number" name="amount" required min="1" max="1000" step="0.01"
-                        class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 w-32"
+                        class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] w-32"
                         placeholder="100">
                 </div>
                 <x-brand-button type="submit">
@@ -228,14 +228,14 @@
                 <div class="relative">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.schedule_subdomain')</label>
                     <input type="text" name="subdomain" required autocomplete="off" data-subdomain-autocomplete
-                        class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
                         placeholder="subdomain">
                     <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.max_budget_per_campaign')</label>
                     <input type="number" name="amount" required min="1" max="{{ config('services.meta.max_budget', 1000) }}" step="0.01"
-                        class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 w-32"
+                        class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] w-32"
                         placeholder="100">
                 </div>
                 <x-brand-button type="submit">
@@ -273,7 +273,7 @@
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">@lang('messages.campaigns')</h3>
                 <select id="status-filter"
-                    class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                    class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm">
                     <option value="">@lang('messages.all_statuses')</option>
                     @foreach (['active', 'paused', 'completed', 'cancelled', 'failed', 'pending_payment', 'rejected'] as $s)
                     <option value="{{ $s }}" {{ $statusFilter === $s ? 'selected' : '' }}>@lang('messages.boost_status_' . $s)</option>

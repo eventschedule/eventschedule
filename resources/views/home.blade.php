@@ -125,14 +125,14 @@
                         id="feedback-textarea"
                         name="feedback"
                         placeholder="{{ __('messages.feedback_placeholder') }}"
-                        class="w-full px-4 py-2 pr-12 pb-10 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 min-h-[135px] sm:min-h-0"
+                        class="w-full px-4 py-2 pr-12 pb-10 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 min-h-[135px] sm:min-h-0"
                         rows="2"
                         dir="auto"
                     ></textarea>
                     <button 
                         type="button"
                         id="feedback-submit-btn"
-                        class="absolute bottom-2 right-2 p-2 mb-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all opacity-0 pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="absolute bottom-2 right-2 p-2 mb-2 bg-[var(--brand-button-bg)] text-white rounded-lg hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 transition-all opacity-0 pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
                         style="transition: opacity 0.2s ease-in-out;"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -314,7 +314,7 @@
                                     {{-- Toggle --}}
                                     <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
                                         <input type="checkbox" x-model="panel.visible" class="sr-only peer">
-                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-blue)] transition-colors"></div>
+                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
                                         <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                     </label>
 
@@ -341,11 +341,11 @@
                                         <div class="flex items-center gap-2">
                                             <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('messages.panel_size') }}:</span>
                                             <div class="inline-flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
-                                                <button type="button" x-on:click="panel.size = 1" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200 flex items-center gap-1" :class="panel.size === 1 ? 'bg-[var(--brand-blue)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'">
+                                                <button type="button" x-on:click="panel.size = 1" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200 flex items-center gap-1" :class="panel.size === 1 ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'">
                                                     <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="5" height="12" rx="1"/></svg>
                                                     {{ __('messages.panel_half_width') }}
                                                 </button>
-                                                <button type="button" x-on:click="panel.size = 2" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200 flex items-center gap-1 border-l border-gray-200 dark:border-gray-600" :class="panel.size === 2 ? 'bg-[var(--brand-blue)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'">
+                                                <button type="button" x-on:click="panel.size = 2" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200 flex items-center gap-1 border-l border-gray-200 dark:border-gray-600" :class="panel.size === 2 ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'">
                                                     <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="12" height="12" rx="1"/></svg>
                                                     {{ __('messages.panel_full_width') }}
                                                 </button>
@@ -358,7 +358,7 @@
                                                 <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('messages.panel_period') }}:</span>
                                                 <div class="inline-flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
                                                     <template x-for="(p, pi) in panelMeta[panel.id].periods" :key="p">
-                                                        <button type="button" x-on:click="panel.period = p" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200" :class="[panel.period === p ? 'bg-[var(--brand-blue)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600', pi > 0 ? 'border-l border-gray-200 dark:border-gray-600' : '']" x-text="p + 'd'"></button>
+                                                        <button type="button" x-on:click="panel.period = p" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200" :class="[panel.period === p ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600', pi > 0 ? 'border-l border-gray-200 dark:border-gray-600' : '']" x-text="p + 'd'"></button>
                                                     </template>
                                                 </div>
                                             </div>
@@ -370,7 +370,7 @@
                                                 <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('messages.panel_items') }}:</span>
                                                 <div class="inline-flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
                                                     <template x-for="(c, ci) in panelMeta[panel.id].counts" :key="c">
-                                                        <button type="button" x-on:click="panel.count = c" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200" :class="[panel.count === c ? 'bg-[var(--brand-blue)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600', ci > 0 ? 'border-l border-gray-200 dark:border-gray-600' : '']" x-text="c"></button>
+                                                        <button type="button" x-on:click="panel.count = c" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200" :class="[panel.count === c ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600', ci > 0 ? 'border-l border-gray-200 dark:border-gray-600' : '']" x-text="c"></button>
                                                     </template>
                                                 </div>
                                             </div>
@@ -390,7 +390,7 @@
                         <button type="button" x-on:click="$dispatch('close')" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200">
                             {{ __('messages.cancel') }}
                         </button>
-                        <button type="button" x-on:click="save()" :disabled="saving" class="px-4 py-2 text-sm font-medium text-white bg-[var(--brand-blue)] rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-all duration-200">
+                        <button type="button" x-on:click="save()" :disabled="saving" class="px-4 py-2 text-sm font-medium text-white bg-[var(--brand-button-bg)] rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-all duration-200">
                             <span x-show="!saving">{{ __('messages.save') }}</span>
                             <span x-show="saving" x-cloak>{{ __('messages.saving') }}...</span>
                         </button>

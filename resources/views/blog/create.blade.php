@@ -118,7 +118,7 @@
                 <div>
                     <label for="ai_topic" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.topic') }} *</label>
                     <textarea id="ai_topic" placeholder="e.g., Event Planning Tips for Beginners" rows="3" dir="auto"
-                           class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                           class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] sm:text-sm"></textarea>
                 </div>
 
                 <div class="flex items-end">
@@ -144,7 +144,7 @@
                             <label for="title" class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.title') }} *</label>
                             <div class="mt-2">
                                 <input type="text" name="title" id="title" value="{{ old('title') }}" required
-                                       class="block w-full rounded-lg border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
+                                       class="block w-full rounded-lg border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-[var(--brand-blue)] sm:text-sm sm:leading-6">
                             </div>
                             @error('title')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -156,7 +156,7 @@
                             <label for="content" class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.content') }} *</label>
                             <div class="mt-2">
                                 <textarea name="content" id="content" rows="20" required dir="auto"
-                                          class="block w-full rounded-lg border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">{{ old('content') }}</textarea>
+                                          class="block w-full rounded-lg border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-[var(--brand-blue)] sm:text-sm sm:leading-6">{{ old('content') }}</textarea>
                             </div>
                             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{!! __('messages.html_formatting_help') !!}</p>
                             @error('content')
@@ -169,7 +169,7 @@
                             <label for="excerpt" class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.excerpt') }}</label>
                             <div class="mt-2">
                                 <textarea name="excerpt" id="excerpt" rows="3" maxlength="500" dir="auto"
-                                          class="block w-full rounded-lg border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">{{ old('excerpt') }}</textarea>
+                                          class="block w-full rounded-lg border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-[var(--brand-blue)] sm:text-sm sm:leading-6">{{ old('excerpt') }}</textarea>
                             </div>
                             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.excerpt_help') }}</p>
                             @error('excerpt')
@@ -182,7 +182,7 @@
                             <label for="tags" class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.tags') }}</label>
                             <div class="mt-2">
                                 <input type="text" name="tags" id="tags" value="{{ old('tags') }}"
-                                       class="block w-full rounded-lg border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+                                       class="block w-full rounded-lg border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-[var(--brand-blue)] sm:text-sm sm:leading-6"
                                        placeholder="{{ __('messages.tags_placeholder') }}">
                             </div>
                             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.comma_separated_tags') }}</p>
@@ -196,7 +196,7 @@
                             <label for="featured_image" class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.featured_image') }}</label>
                             <div class="mt-2">
                                 <select name="featured_image" id="featured_image"
-                                        class="block w-full rounded-lg border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
+                                        class="block w-full rounded-lg border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-inset focus:ring-[var(--brand-blue)] sm:text-sm sm:leading-6">
                                     <option value="">{{ __('messages.no_featured_image') }}</option>
                                     @foreach(\App\Models\BlogPost::getAvailableHeaderImages() as $image => $description)
                                         <option value="{{ $image }}" {{ old('featured_image') == $image ? 'selected' : '' }}>
@@ -216,7 +216,7 @@
                             <label for="published_at" class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.publish_date') }}</label>
                             <div class="mt-2">
                                 <input type="datetime-local" name="published_at" id="published_at" value="{{ old('published_at') }}"
-                                       class="block w-full rounded-lg border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
+                                       class="block w-full rounded-lg border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-[var(--brand-blue)] sm:text-sm sm:leading-6">
                             </div>
                             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.publish_date_help') }}</p>
                             @error('published_at')
@@ -228,7 +228,7 @@
                         <div class="sm:col-span-2">
                             <div class="flex items-center">
                                 <input type="checkbox" name="is_published" id="is_published" value="1" {{ old('is_published') ? 'checked' : '' }}
-                                       class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-600 bg-white dark:bg-gray-900">
+                                       class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] bg-white dark:bg-gray-900">
                                 <label for="is_published" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                     {{ __('messages.publish_this_post') }}
                                 </label>
@@ -250,7 +250,7 @@
                             <label for="meta_title" class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.meta_title') }}</label>
                             <div class="mt-2">
                                 <input type="text" name="meta_title" id="meta_title" value="{{ old('meta_title') }}" maxlength="60"
-                                       class="block w-full rounded-lg border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
+                                       class="block w-full rounded-lg border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-[var(--brand-blue)] sm:text-sm sm:leading-6">
                             </div>
                             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.meta_title_help') }}</p>
                             @error('meta_title')
@@ -263,7 +263,7 @@
                             <label for="meta_description" class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.meta_description') }}</label>
                             <div class="mt-2">
                                 <textarea name="meta_description" id="meta_description" rows="3" maxlength="160" dir="auto"
-                                          class="block w-full rounded-lg border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">{{ old('meta_description') }}</textarea>
+                                          class="block w-full rounded-lg border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-[var(--brand-blue)] sm:text-sm sm:leading-6">{{ old('meta_description') }}</textarea>
                             </div>
                             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.meta_description_help') }}</p>
                             @error('meta_description')

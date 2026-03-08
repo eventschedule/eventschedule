@@ -1842,7 +1842,7 @@
 
                         <div v-if="isRecurring" class="mb-6">
                             <x-input-label :value="__('messages.frequency')" />
-                            <select name="recurring_frequency" v-model="event.recurring_frequency" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-lg shadow-sm">
+                            <select name="recurring_frequency" v-model="event.recurring_frequency" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                 <option value="daily">{{ __('messages.daily') }}</option>
                                 <option value="weekly">{{ __('messages.weekly') }}</option>
                                 <option value="every_n_weeks">{{ __('messages.every_n_weeks') }}</option>
@@ -1912,7 +1912,7 @@
                             <div id="recurring-include-dates-items">
                                 <div v-for="(date, index) in recurringIncludeDates" :key="'inc-' + index" class="mb-2">
                                     <div class="flex items-center">
-                                        <input type="text" :class="'datepicker-include-date'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
+                                        <input type="text" :class="'datepicker-include-date'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
                                         <input type="hidden" name="recurring_include_dates[]" :value="date" />
                                         <button type="button" @click="removeIncludeDate(index)"
                                             class="ms-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
@@ -1930,7 +1930,7 @@
                             <div id="recurring-exclude-dates-items">
                                 <div v-for="(date, index) in recurringExcludeDates" :key="'exc-' + index" class="mb-2">
                                     <div class="flex items-center">
-                                        <input type="text" :class="'datepicker-exclude-date'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
+                                        <input type="text" :class="'datepicker-exclude-date'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800" readonly autocomplete="off" />
                                         <input type="hidden" name="recurring_exclude_dates[]" :value="date" />
                                         <button type="button" @click="removeExcludeDate(index)"
                                             class="ms-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
@@ -2156,7 +2156,7 @@
                                 </div>
                             </div>
                             <div class="flex gap-2">
-                                <x-secondary-button type="button" @click="acceptParsedParts" class="!bg-[var(--brand-blue)] !text-white hover:!bg-[var(--brand-blue-dark)]">
+                                <x-secondary-button type="button" @click="acceptParsedParts" class="!bg-[var(--brand-button-bg)] !text-white hover:!bg-[var(--brand-blue-dark)]">
                                     {{ __('messages.accept_parts') }}
                                 </x-secondary-button>
                                 <x-secondary-button type="button" @click="showPartsPreview = false; parsedPartsPreview = []">
@@ -2783,7 +2783,7 @@
                                                     v-model="showExpireUnpaid"
                                                     class="sr-only peer"
                                                     @change="toggleExpireUnpaid">
-                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-blue)] transition-colors"></div>
+                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
                                                 <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                             </label>
                                             <label for="expire_unpaid_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
@@ -2868,7 +2868,7 @@
                                                         <input type="checkbox" :checked="promoCode.is_active"
                                                             @change="promoCode.is_active = $event.target.checked"
                                                             class="sr-only peer">
-                                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-blue)] transition-colors"></div>
+                                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
                                                         <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                                     </label>
                                                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.active') }}</span>
@@ -2941,7 +2941,7 @@
                                                 v-model="event.ask_phone"
                                                 class="sr-only peer"
                                                 @change="event.ask_phone || (event.require_phone = false, event.country_code_phone = false)">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-blue)] transition-colors"></div>
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
                                             <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                         </label>
                                         <label for="ask_phone_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
@@ -2972,7 +2972,7 @@
                                             <input id="individual_tickets_checkbox" type="checkbox"
                                                 v-model="event.individual_tickets"
                                                 class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-blue)] transition-colors"></div>
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
                                             <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                         </label>
                                         <label for="individual_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
@@ -2989,7 +2989,7 @@
                                                 <input id="individual_ticket_fields_checkbox" type="checkbox"
                                                     v-model="event.individual_ticket_fields"
                                                     class="sr-only peer">
-                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-blue)] transition-colors"></div>
+                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
                                                 <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                             </label>
                                             <label for="individual_ticket_fields_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
@@ -3013,7 +3013,7 @@
                                 <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
                                     <input id="save_default_tickets" name="save_default_tickets" type="checkbox"
                                         class="sr-only peer">
-                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-blue)] transition-colors"></div>
+                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
                                     <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                 </label>
                                 <label for="save_default_tickets" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
@@ -3076,7 +3076,7 @@
                                             <input type="hidden" name="is_private" :value="event.is_private ? 1 : 0">
                                             <input id="is_private" name="is_private" type="checkbox" v-model="event.is_private" :value="1"
                                                 class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-blue)] transition-colors"></div>
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
                                             <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                         </label>
                                         <label for="is_private" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
@@ -3267,7 +3267,7 @@
                                 <div class="flex items-start justify-between gap-3 mb-3">
                                     <div class="flex-1">
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_question') }}</label>
-                                        <input type="text" v-model="poll.question" maxlength="500" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.poll_question') }}'">
+                                        <input type="text" v-model="poll.question" maxlength="500" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] sm:text-sm" :placeholder="'{{ __('messages.poll_question') }}'">
                                     </div>
                                     <span v-if="poll.hash" class="shrink-0 mt-6 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
                                           :class="poll.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'">
@@ -3297,7 +3297,7 @@
                                     <div class="mb-4">
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.poll_options') }}</label>
                                         <div v-for="(option, idx) in poll.options" :key="idx" class="flex items-center gap-2 mb-2">
-                                            <input type="text" v-model="poll.options[idx]" maxlength="200" class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" :placeholder="'{{ __('messages.option_placeholder') }} ' + (idx + 1)">
+                                            <input type="text" v-model="poll.options[idx]" maxlength="200" class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] sm:text-sm" :placeholder="'{{ __('messages.option_placeholder') }} ' + (idx + 1)">
                                             <button v-if="poll.options.length > 2" type="button" @click="poll.options.splice(idx, 1)" class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
                                             </button>
@@ -3322,7 +3322,7 @@
                                             <input type="checkbox" :checked="poll.allow_user_options"
                                                 @change="poll.allow_user_options = $event.target.checked; if (!$event.target.checked) poll.require_option_approval = false"
                                                 class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-blue)] transition-colors"></div>
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
                                             <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                         </label>
                                         <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.allow_user_options') }}</span>
@@ -3332,7 +3332,7 @@
                                             <input type="checkbox" :checked="poll.require_option_approval"
                                                 @change="poll.require_option_approval = $event.target.checked"
                                                 class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-blue)] transition-colors"></div>
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
                                             <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                         </label>
                                         <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.require_option_approval') }}</span>

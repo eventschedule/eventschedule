@@ -144,7 +144,7 @@
               <div>
                 <x-input-label for="event_date" :value="__('messages.date')" />
                 <input type="text" id="event_date"
-                  class="datepicker-date mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
+                  class="datepicker-date mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
                   autocomplete="off" aria-label="{{ __('messages.date') }}" />
                 <input type="hidden" name="date" id="hidden_date" />
               </div>
@@ -152,7 +152,7 @@
                 <x-input-label for="event_start_time" :value="__('messages.start_time')" />
                 <div class="relative">
                   <input type="text" id="event_start_time"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
                     autocomplete="off" aria-label="{{ __('messages.start_time') }}" />
                   <div class="time-dropdown" id="start_time_dropdown"></div>
                 </div>

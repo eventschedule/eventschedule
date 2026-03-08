@@ -18,13 +18,13 @@
                     button.style.minWidth = button.offsetWidth + 'px';
                     button.innerHTML = `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>${@json(__("messages.copied"))}`;
                     button.classList.add('bg-green-500', 'hover:bg-green-600');
-                    button.classList.remove('bg-[var(--brand-blue)]', 'hover:bg-[var(--brand-blue-dark)]');
+                    button.classList.remove('bg-[var(--brand-button-bg)]', 'hover:bg-[var(--brand-button-bg-hover)]');
 
                     setTimeout(function() {
                         button.innerHTML = originalText;
                         button.style.minWidth = '';
                         button.classList.remove('bg-green-500', 'hover:bg-green-600');
-                        button.classList.add('bg-[var(--brand-blue)]', 'hover:bg-[var(--brand-blue-dark)]');
+                        button.classList.add('bg-[var(--brand-button-bg)]', 'hover:bg-[var(--brand-button-bg-hover)]');
                     }, 2000);
                 }).catch(function(err) {
                     console.error('Could not copy text: ', err);
@@ -80,13 +80,13 @@
                     button.style.minWidth = button.offsetWidth + 'px';
                     button.innerHTML = `<svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>${@json(__("messages.copied"))}`;
                     button.classList.add('bg-green-500', 'hover:bg-green-600');
-                    button.classList.remove('bg-[var(--brand-blue)]', 'hover:bg-[var(--brand-blue-dark)]');
+                    button.classList.remove('bg-[var(--brand-button-bg)]', 'hover:bg-[var(--brand-button-bg-hover)]');
 
                     setTimeout(function() {
                         button.innerHTML = originalText;
                         button.style.minWidth = '';
                         button.classList.remove('bg-green-500', 'hover:bg-green-600');
-                        button.classList.add('bg-[var(--brand-blue)]', 'hover:bg-[var(--brand-blue-dark)]');
+                        button.classList.add('bg-[var(--brand-button-bg)]', 'hover:bg-[var(--brand-button-bg-hover)]');
                     }, 2000);
                 }).catch(function(err) {
                     console.error('Could not copy image: ', err);
@@ -1392,15 +1392,15 @@
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.layout_type') }}</h4>
                             <div class="flex flex-row flex-wrap gap-x-4 gap-y-2">
                                 <label class="flex items-center cursor-pointer group">
-                                    <input type="radio" name="layout_mobile" value="grid" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" checked>
+                                    <input type="radio" name="layout_mobile" value="grid" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-gray-700" checked>
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.grid_layout') }}</span>
                                 </label>
                                 <label class="flex items-center cursor-pointer group">
-                                    <input type="radio" name="layout_mobile" value="row" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                    <input type="radio" name="layout_mobile" value="row" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-gray-700">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.row_layout') }}</span>
                                 </label>
                                 <label class="flex items-center cursor-pointer group">
-                                    <input type="radio" name="layout_mobile" value="list" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                    <input type="radio" name="layout_mobile" value="list" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-gray-700">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.list_layout') }}</span>
                                 </label>
                             </div>
@@ -1410,7 +1410,7 @@
                         <!-- Show Text (only for grid and row layouts) -->
                         <div id="date_position_container_mobile" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.show_text') }}</h4>
-                            <select id="date_position_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                            <select id="date_position_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                 <option value="">{{ __('messages.date_position_none') }}</option>
                                 <option value="overlay">{{ __('messages.date_position_overlay') }}</option>
                                 <option value="above">{{ __('messages.date_position_above') }}</option>
@@ -1418,7 +1418,7 @@
 
                             <!-- Overlay Text Input (shown when overlay/above selected) -->
                             <div id="overlay_text_container_mobile" class="mt-3 hidden">
-                                <input type="text" id="overlay_text_mobile" placeholder="{{ __('messages.overlay_text_placeholder') }}" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                <input type="text" id="overlay_text_mobile" placeholder="{{ __('messages.overlay_text_placeholder') }}" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
                                     {{ __('messages.overlay_text_help') }}
                                     <a href="{{ marketing_url('/docs/event-graphics#variables') }}" target="_blank" class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">{{ __('messages.view_variables') }}</a>
@@ -1429,7 +1429,7 @@
                         <!-- Max Per Row (only for row layout) -->
                         <div id="max_per_row_container_mobile" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700 hidden">
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.max_per_row') }}</h4>
-                            <select id="max_per_row_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                            <select id="max_per_row_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                 <option value="">{{ __('messages.no_limit') }}</option>
                                 @for ($i = 2; $i <= 10; $i++)
                                     <option value="{{ $i }}">{{ $i }}</option>
@@ -1441,7 +1441,7 @@
                         <!-- Event Count -->
                         <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.event_count') }}</h4>
-                            <select id="event_count_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                            <select id="event_count_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                 <option value="">{{ __('messages.all_available') }}</option>
                                 @for ($i = 1; $i <= 9; $i++)
                                     <option value="{{ $i }}">{{ $i }}</option>
@@ -1481,7 +1481,7 @@
                             </div>
                             <textarea id="text_template_mobile" rows="5"
                                 aria-label="{{ __('messages.text_template') }}"
-                                class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-xs font-mono resize-y"
+                                class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-xs font-mono resize-y"
                                 placeholder="*{day_name}* {date_dmy} | {time}&#10;*{event_name}*:&#10;{short_description}&#10;{venue} | {city}&#10;{url}"></textarea>
                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
                         </div>
@@ -1493,7 +1493,7 @@
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
                             </div>
                             <div>
-                                <textarea id="ai_prompt_mobile" rows="5" dir="auto" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
+                                <textarea id="ai_prompt_mobile" rows="5" dir="auto" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
                             </div>
                         </div>
@@ -1522,11 +1522,11 @@
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.url_format') }}</h4>
                             <div class="flex flex-col gap-2">
                                 <label class="flex items-center cursor-pointer group">
-                                    <input type="checkbox" id="url_include_https_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                    <input type="checkbox" id="url_include_https_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-gray-700">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.url_include_https') }}</span>
                                 </label>
                                 <label class="flex items-center cursor-pointer group">
-                                    <input type="checkbox" id="url_include_id_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                    <input type="checkbox" id="url_include_id_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-gray-700">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.url_include_id') }}</span>
                                 </label>
                             </div>
@@ -1540,7 +1540,7 @@
                         <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.recurring_events') }}</h4>
                             <label class="flex items-center cursor-pointer group">
-                                <input type="checkbox" id="exclude_recurring_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                <input type="checkbox" id="exclude_recurring_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-gray-700">
                                 <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.exclude_recurring_events') }}</span>
                             </label>
                         </div>
@@ -1564,7 +1564,7 @@
                                     <div class="flex flex-col gap-3 mb-4">
                                         <div>
                                             <label for="frequency_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.frequency') }}</label>
-                                            <select id="frequency_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                            <select id="frequency_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                                 <option value="daily">{{ __('messages.daily') }}</option>
                                                 <option value="weekly">{{ __('messages.weekly') }}</option>
                                                 <option value="monthly">{{ __('messages.monthly') }}</option>
@@ -1576,7 +1576,7 @@
                                             <div class="flex flex-wrap gap-2">
                                                 @foreach ([0 => __('messages.sun'), 1 => __('messages.mon'), 2 => __('messages.tue'), 3 => __('messages.wed'), 4 => __('messages.thu'), 5 => __('messages.fri'), 6 => __('messages.sat')] as $dayVal => $dayLabel)
                                                     <label class="inline-flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300">
-                                                        <input type="checkbox" class="weekly-day-checkbox rounded border-gray-300 dark:border-gray-600 text-blue-500 focus:ring-blue-500 dark:bg-gray-700" value="{{ $dayVal }}" data-form="mobile">
+                                                        <input type="checkbox" class="weekly-day-checkbox rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:bg-gray-700" value="{{ $dayVal }}" data-form="mobile">
                                                         {{ $dayLabel }}
                                                     </label>
                                                 @endforeach
@@ -1585,7 +1585,7 @@
 
                                         <div id="monthly_day_container_mobile" class="hidden">
                                             <label for="monthly_day_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.day_of_month') }}</label>
-                                            <select id="monthly_day_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                            <select id="monthly_day_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                                 @for ($i = 1; $i <= 28; $i++)
                                                     <option value="{{ $i }}">{{ $i }}</option>
                                                 @endfor
@@ -1594,7 +1594,7 @@
 
                                         <div>
                                             <label for="send_hour_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_at_hour') }}</label>
-                                            <select id="send_hour_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                            <select id="send_hour_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                                 @for ($i = 0; $i < 24; $i++)
                                                     <option value="{{ $i }}">{{ sprintf('%02d:00', $i) }}</option>
                                                 @endfor
@@ -1607,7 +1607,7 @@
                                             {{ __('messages.recipient_emails') }}
                                         </label>
                                         <input type="text" id="recipient_emails_mobile"
-                                            class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm"
+                                            class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm"
                                             placeholder="{{ __('messages.recipient_emails_placeholder') }}">
                                         <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.recipient_emails_help') }}</p>
                                     </div>
@@ -1634,7 +1634,7 @@
 
                     <!-- Buttons (side by side on mobile) -->
                     <div class="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <button id="saveSettingsBtnMobile" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-[var(--brand-blue)] hover:bg-[var(--brand-blue-dark)] text-white text-sm font-semibold rounded-md transition-colors">
+                        <button id="saveSettingsBtnMobile" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white text-sm font-semibold rounded-md transition-colors">
                             <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
@@ -1711,15 +1711,15 @@
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.layout_type') }}</h4>
                                 <div class="flex flex-row flex-wrap gap-x-4 gap-y-2">
                                     <label class="flex items-center cursor-pointer group">
-                                        <input type="radio" name="layout" value="grid" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700" checked>
+                                        <input type="radio" name="layout" value="grid" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-gray-700" checked>
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.grid_layout') }}</span>
                                     </label>
                                     <label class="flex items-center cursor-pointer group">
-                                        <input type="radio" name="layout" value="row" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                        <input type="radio" name="layout" value="row" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-gray-700">
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.row_layout') }}</span>
                                     </label>
                                     <label class="flex items-center cursor-pointer group">
-                                        <input type="radio" name="layout" value="list" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                        <input type="radio" name="layout" value="list" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-gray-700">
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.list_layout') }}</span>
                                     </label>
                                 </div>
@@ -1729,7 +1729,7 @@
                             <!-- Show Text (only for grid and row layouts) -->
                             <div id="date_position_container" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.show_text') }}</h4>
-                                <select id="date_position" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                <select id="date_position" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                     <option value="">{{ __('messages.date_position_none') }}</option>
                                     <option value="overlay">{{ __('messages.date_position_overlay') }}</option>
                                     <option value="above">{{ __('messages.date_position_above') }}</option>
@@ -1737,7 +1737,7 @@
 
                                 <!-- Overlay Text Input (shown when overlay/above selected) -->
                                 <div id="overlay_text_container" class="mt-3 hidden">
-                                    <input type="text" id="overlay_text" placeholder="{{ __('messages.overlay_text_placeholder') }}" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                    <input type="text" id="overlay_text" placeholder="{{ __('messages.overlay_text_placeholder') }}" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                     <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
                                         {{ __('messages.overlay_text_help') }}
                                         <a href="{{ marketing_url('/docs/event-graphics#variables') }}" target="_blank" class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">{{ __('messages.view_variables') }}</a>
@@ -1748,7 +1748,7 @@
                             <!-- Max Per Row (only for row layout) -->
                             <div id="max_per_row_container" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700 hidden">
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.max_per_row') }}</h4>
-                                <select id="max_per_row" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                <select id="max_per_row" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                     <option value="">{{ __('messages.no_limit') }}</option>
                                     @for ($i = 2; $i <= 10; $i++)
                                         <option value="{{ $i }}">{{ $i }}</option>
@@ -1760,7 +1760,7 @@
                             <!-- Event Count -->
                             <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.event_count') }}</h4>
-                                <select id="event_count" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                <select id="event_count" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                     <option value="">{{ __('messages.all_available') }}</option>
                                     @for ($i = 1; $i <= 9; $i++)
                                         <option value="{{ $i }}">{{ $i }}</option>
@@ -1800,7 +1800,7 @@
                                 </div>
                                 <textarea id="text_template" rows="5"
                                     aria-label="{{ __('messages.text_template') }}"
-                                    class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-xs font-mono resize-y"
+                                    class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-xs font-mono resize-y"
                                     placeholder="*{day_name}* {date_dmy} | {time}&#10;*{event_name}*:&#10;{short_description}&#10;{venue} | {city}&#10;{url}"></textarea>
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
                             </div>
@@ -1812,7 +1812,7 @@
                                     <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
                                 </div>
                                 <div>
-                                    <textarea id="ai_prompt" rows="5" dir="auto" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
+                                    <textarea id="ai_prompt" rows="5" dir="auto" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
                                     <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
                                 </div>
                             </div>
@@ -1841,11 +1841,11 @@
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.url_format') }}</h4>
                                 <div class="flex flex-col gap-2">
                                     <label class="flex items-center cursor-pointer group">
-                                        <input type="checkbox" id="url_include_https" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                        <input type="checkbox" id="url_include_https" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-gray-700">
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.url_include_https') }}</span>
                                     </label>
                                     <label class="flex items-center cursor-pointer group">
-                                        <input type="checkbox" id="url_include_id" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                        <input type="checkbox" id="url_include_id" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-gray-700">
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.url_include_id') }}</span>
                                     </label>
                                 </div>
@@ -1859,7 +1859,7 @@
                             <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.recurring_events') }}</h4>
                                 <label class="flex items-center cursor-pointer group">
-                                    <input type="checkbox" id="exclude_recurring" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700">
+                                    <input type="checkbox" id="exclude_recurring" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-gray-700">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.exclude_recurring_events') }}</span>
                                 </label>
                             </div>
@@ -1883,7 +1883,7 @@
                                         <div class="flex flex-col gap-3 mb-4">
                                             <div>
                                                 <label for="frequency" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.frequency') }}</label>
-                                                <select id="frequency" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                                <select id="frequency" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                                     <option value="daily">{{ __('messages.daily') }}</option>
                                                     <option value="weekly">{{ __('messages.weekly') }}</option>
                                                     <option value="monthly">{{ __('messages.monthly') }}</option>
@@ -1895,7 +1895,7 @@
                                                 <div class="flex flex-wrap gap-2">
                                                     @foreach ([0 => __('messages.sun'), 1 => __('messages.mon'), 2 => __('messages.tue'), 3 => __('messages.wed'), 4 => __('messages.thu'), 5 => __('messages.fri'), 6 => __('messages.sat')] as $dayVal => $dayLabel)
                                                         <label class="inline-flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300">
-                                                            <input type="checkbox" class="weekly-day-checkbox rounded border-gray-300 dark:border-gray-600 text-blue-500 focus:ring-blue-500 dark:bg-gray-700" value="{{ $dayVal }}" data-form="desktop">
+                                                            <input type="checkbox" class="weekly-day-checkbox rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:bg-gray-700" value="{{ $dayVal }}" data-form="desktop">
                                                             {{ $dayLabel }}
                                                         </label>
                                                     @endforeach
@@ -1904,7 +1904,7 @@
 
                                             <div id="monthly_day_container" class="hidden">
                                                 <label for="monthly_day" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.day_of_month') }}</label>
-                                                <select id="monthly_day" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                                <select id="monthly_day" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                                     @for ($i = 1; $i <= 28; $i++)
                                                         <option value="{{ $i }}">{{ $i }}</option>
                                                     @endfor
@@ -1913,7 +1913,7 @@
 
                                             <div>
                                                 <label for="send_hour" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_at_hour') }}</label>
-                                                <select id="send_hour" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                                <select id="send_hour" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                                     @for ($i = 0; $i < 24; $i++)
                                                         <option value="{{ $i }}">{{ sprintf('%02d:00', $i) }}</option>
                                                     @endfor
@@ -1926,7 +1926,7 @@
                                                 {{ __('messages.recipient_emails') }}
                                             </label>
                                             <input type="text" id="recipient_emails"
-                                                class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-sm"
+                                                class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm"
                                                 placeholder="{{ __('messages.recipient_emails_placeholder') }}">
                                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.recipient_emails_help') }}</p>
                                         </div>
@@ -1953,7 +1953,7 @@
 
                         <!-- Buttons -->
                         <div class="flex flex-row gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <button id="saveSettingsBtn" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-[var(--brand-blue)] hover:bg-[var(--brand-blue-dark)] text-white text-sm font-semibold rounded-md transition-colors">
+                            <button id="saveSettingsBtn" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white text-sm font-semibold rounded-md transition-colors">
                                 <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
@@ -1986,7 +1986,7 @@
                             </button>
                             <button
                                 id="copyTextBtn"
-                                class="inline-flex items-center justify-center flex-1 sm:flex-none sm:w-[8.5rem] px-3 py-1.5 bg-[var(--brand-blue)] hover:bg-[var(--brand-blue-dark)] text-white text-sm font-semibold rounded-md transition-colors"
+                                class="inline-flex items-center justify-center flex-1 sm:flex-none sm:w-[8.5rem] px-3 py-1.5 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white text-sm font-semibold rounded-md transition-colors"
                             >
                                 <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
@@ -2022,7 +2022,7 @@
                             </button>
                             <button
                                 id="copyImageBtn"
-                                class="inline-flex items-center justify-center flex-1 sm:flex-none sm:w-[8.5rem] px-3 py-1.5 bg-[var(--brand-blue)] hover:bg-[var(--brand-blue-dark)] text-white text-sm font-semibold rounded-md transition-colors"
+                                class="inline-flex items-center justify-center flex-1 sm:flex-none sm:w-[8.5rem] px-3 py-1.5 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white text-sm font-semibold rounded-md transition-colors"
                             >
                                 <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>

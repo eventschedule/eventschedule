@@ -274,6 +274,7 @@
 
             const textColor = isDarkMode ? '#9CA3AF' : '#6B7280';
             const gridColor = isDarkMode ? '#2d2d30' : '#E5E7EB';
+            const brandBlue = getComputedStyle(document.documentElement).getPropertyValue('--brand-blue').trim();
 
             // Signup Method Donut Chart
             const signupMethodCtx = document.getElementById('signupMethodChart').getContext('2d');
@@ -283,8 +284,8 @@
                     labels: [@json(__('messages.email')), @json(__('messages.google')), @json(__('messages.hybrid'))],
                     datasets: [{
                         data: [{{ $emailUsers }}, {{ $googleUsers }}, {{ $hybridUsers }}],
-                        backgroundColor: ['#3B82F6', '#EF4444', '#F59E0B'],
-                        borderColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+                        backgroundColor: [brandBlue, '#EF4444', '#F59E0B'],
+                        borderColor: isDarkMode ? '#252526' : '#FFFFFF',
                         borderWidth: 2
                     }]
                 },
@@ -310,7 +311,7 @@
                         {
                             label: @json(__('messages.email')),
                             data: @json($trendData['emailUsers']),
-                            backgroundColor: '#3B82F6',
+                            backgroundColor: brandBlue,
                             stack: 'signups'
                         },
                         {

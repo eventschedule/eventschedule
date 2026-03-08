@@ -32,7 +32,7 @@
                     </button>
                 </div>
                 <div class="sm:flex sm:items-start">
-                    <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[var(--brand-blue)] bg-opacity-10 dark:bg-opacity-20 sm:mx-0 sm:h-10 sm:w-10">
+                    <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[var(--brand-button-bg)] bg-opacity-10 dark:bg-opacity-20 sm:mx-0 sm:h-10 sm:w-10">
                         <svg class="h-6 w-6 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z" />
                         </svg>

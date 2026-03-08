@@ -94,7 +94,7 @@
                                 <input type="text" id="phone-verification-code" maxlength="6" placeholder="000000"
                                     class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-center tracking-widest" />
                                 <button type="button" id="phone-verify-code-btn"
-                                    class="inline-flex items-center px-3 py-2 bg-[var(--brand-blue)] text-white text-sm font-medium rounded-lg hover:bg-[var(--brand-blue-dark)] transition-colors">
+                                    class="inline-flex items-center px-3 py-2 bg-[var(--brand-button-bg)] text-white text-sm font-medium rounded-lg hover:bg-[var(--brand-button-bg-hover)] transition-colors">
                                     {{ __('messages.verify') }}
                                 </button>
                             </div>

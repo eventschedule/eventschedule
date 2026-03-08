@@ -137,7 +137,7 @@
                         <span x-text="getValidEntryCount()"></span> {{ __('messages.emails_to_import') }}
                     </p>
                     <button @click="submitForm()" :disabled="submitting || getValidEntryCount() === 0"
-                        class="inline-flex items-center px-4 py-2 bg-[var(--brand-blue)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
                         <span x-show="!submitting">{{ __('messages.confirm_import') }}</span>
                         <span x-show="submitting">{{ __('messages.loading') }}...</span>
                     </button>
@@ -153,7 +153,7 @@
 
                 <div class="flex justify-end mt-4">
                     <button @click="parsePaste()" :disabled="!pasteText.trim()"
-                        class="inline-flex items-center px-4 py-2 bg-[var(--brand-blue)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
                         {{ __('messages.parse_emails') }}
                     </button>
                 </div>
@@ -241,7 +241,7 @@
 
                         <div class="flex justify-end mt-4">
                             <button @click="submitCsv()" :disabled="submitting || !hasEmailColumn()"
-                                class="inline-flex items-center px-4 py-2 bg-[var(--brand-blue)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                                class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
                                 <span x-show="!submitting">{{ __('messages.confirm_import') }}</span>
                                 <span x-show="submitting">{{ __('messages.loading') }}...</span>
                             </button>

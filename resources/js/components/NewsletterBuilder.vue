@@ -46,7 +46,7 @@
                                     {{ t.blocks }} ({{ blocks.length }})
                                 </h3>
                                 <button type="button" @click="toggleBlockPalette()"
-                                    :class="showBlockPalette ? 'text-sm px-3 py-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 font-medium' : 'text-sm px-3 py-1 bg-[var(--brand-blue)] text-white rounded-md hover:bg-blue-600 font-medium'">
+                                    :class="showBlockPalette ? 'text-sm px-3 py-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 font-medium' : 'text-sm px-3 py-1 bg-[var(--brand-button-bg)] text-white rounded-md hover:bg-blue-600 font-medium'">
                                     {{ showBlockPalette ? t.done : t.add_block }}
                                 </button>
                             </div>
@@ -400,10 +400,10 @@
                                             <div class="h-16 mb-2 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
                                                 <!-- Modern: filled rounded card with accent band -->
                                                 <div v-if="tmpl === 'modern'" class="w-full h-full flex flex-col items-center justify-center gap-1">
-                                                    <div class="w-10 h-2.5 rounded bg-[var(--brand-blue)]"></div>
+                                                    <div class="w-10 h-2.5 rounded bg-[var(--brand-button-bg)]"></div>
                                                     <div class="w-8 h-1 rounded bg-gray-300 dark:bg-gray-500"></div>
                                                     <div class="w-6 h-1 rounded bg-gray-300 dark:bg-gray-500"></div>
-                                                    <div class="w-5 h-2 rounded bg-[var(--brand-blue)]"></div>
+                                                    <div class="w-5 h-2 rounded bg-[var(--brand-button-bg)]"></div>
                                                 </div>
                                                 <!-- Classic: underlined heading, outlined button -->
                                                 <div v-else-if="tmpl === 'classic'" class="w-full h-full flex flex-col items-center justify-center gap-1 bg-[#faf9f6] dark:bg-gray-700">
@@ -579,7 +579,7 @@
                         {{ t.schedule_newsletter }}
                     </button>
 
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-[var(--brand-blue)] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">
                         {{ t.save }}
                     </button>
 
@@ -624,7 +624,7 @@
                     <p class="text-sm text-gray-600 dark:text-gray-400">{{ t.test_email_sent_to.replace(':email', roleEmail) }}</p>
                     <div class="mt-4 flex justify-end gap-3">
                         <button type="button" @click="showTestSend = false" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200">{{ t.cancel }}</button>
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[var(--brand-blue)] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">{{ t.send }}</button>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">{{ t.send }}</button>
                     </div>
                 </form>
             </div>

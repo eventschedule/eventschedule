@@ -6,7 +6,7 @@
             <div class="flex gap-2 flex-wrap items-center">
                 <div class="min-w-[200px]">
                     <select id="role-filter"
-                        class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base">
+                        class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-base">
                         <option value="">{{ __('messages.all_schedules') }}</option>
                         @foreach ($roles as $role)
                             <option value="{{ \App\Utils\UrlUtils::encodeId($role->id) }}" {{ $selectedRoleId == $role->id ? 'selected' : '' }}>
@@ -17,7 +17,7 @@
                 </div>
                 <div class="min-w-[180px]">
                     <select id="date-range"
-                        class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base">
+                        class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-base">
                         <option value="last_7_days" {{ $range === 'last_7_days' ? 'selected' : '' }}>{{ __('messages.last_7_days') }}</option>
                         <option value="last_30_days" {{ $range === 'last_30_days' ? 'selected' : '' }}>{{ __('messages.last_30_days') }}</option>
                         <option value="last_90_days" {{ $range === 'last_90_days' ? 'selected' : '' }}>{{ __('messages.last_90_days') }}</option>
@@ -31,15 +31,15 @@
             @if ($tab === 'web')
             <div class="flex gap-2 items-center">
                 <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'daily', 'range' => $range]) }}"
-                    class="px-5 py-3 rounded-lg text-base font-semibold leading-none flex items-center {{ $period === 'daily' ? 'bg-[var(--brand-blue)] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
+                    class="px-5 py-3 rounded-lg text-base font-semibold leading-none flex items-center {{ $period === 'daily' ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.daily') }}
                 </a>
                 <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'weekly', 'range' => $range]) }}"
-                    class="px-5 py-3 rounded-lg text-base font-semibold leading-none flex items-center {{ $period === 'weekly' ? 'bg-[var(--brand-blue)] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
+                    class="px-5 py-3 rounded-lg text-base font-semibold leading-none flex items-center {{ $period === 'weekly' ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.weekly') }}
                 </a>
                 <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'monthly', 'range' => $range]) }}"
-                    class="px-5 py-3 rounded-lg text-base font-semibold leading-none flex items-center {{ $period === 'monthly' ? 'bg-[var(--brand-blue)] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
+                    class="px-5 py-3 rounded-lg text-base font-semibold leading-none flex items-center {{ $period === 'monthly' ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.monthly') }}
                 </a>
             </div>
@@ -754,7 +754,7 @@
                     </div>
                     <div class="mt-4 grid grid-cols-2 gap-2 text-xs text-gray-500 dark:text-gray-400">
                         <div class="flex items-start gap-1">
-                            <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: var(--brand-blue);"></span>
+                            <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: var(--brand-button-bg);"></span>
                             <span><strong>{{ __('messages.direct') }}:</strong> {{ __('messages.direct_description') }}</span>
                         </div>
                         <div class="flex items-start gap-1">

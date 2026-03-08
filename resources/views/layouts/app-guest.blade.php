@@ -1,7 +1,7 @@
 <x-app-layout :title="($event && $event->exists ? $event->translatedName() . ' | ' : '') . $role->name . ' | Event Schedule'">
 
     <noscript>
-      <div style="background: #fff3cd; color: #856404; padding: 16px; text-align: center; font-size: 1rem;">
+      <div class="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 p-4 text-center text-base">
         JavaScript is required to use Event Schedule. Please enable JavaScript in your browser.
       </div>
     </noscript>

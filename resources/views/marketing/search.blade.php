@@ -61,7 +61,7 @@
                             name="q"
                             value="{{ $query }}"
                             placeholder="{{ __('messages.search') }}..."
-                            class="w-full ltr:pl-12 rtl:pr-12 ltr:pr-4 rtl:pl-4 py-4 text-lg rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            class="w-full ltr:pl-12 rtl:pr-12 ltr:pr-4 rtl:pl-4 py-4 text-lg rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-transparent"
                             autofocus
                         >
                     </div>

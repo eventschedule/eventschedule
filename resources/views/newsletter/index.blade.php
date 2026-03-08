@@ -4,7 +4,7 @@
             {{-- Schedule Selector --}}
             <div class="min-w-[200px] max-w-xs">
                 <select id="role-filter" data-searchable
-                    class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base">
+                    class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-base">
                     @foreach ($roles as $r)
                         <option value="{{ \App\Utils\UrlUtils::encodeId($r->id) }}" {{ $selectedRoleId == $r->id ? 'selected' : '' }}>
                             {{ $r->name }}
@@ -145,7 +145,7 @@
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_newsletters_description') }}</p>
             <div class="mt-6">
                 <a href="{{ route('newsletter.create', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                    class="inline-flex items-center rounded-lg bg-[var(--brand-blue)] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-600">
+                    class="inline-flex items-center rounded-lg bg-[var(--brand-button-bg)] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-600">
                     {{ __('messages.create_newsletter') }}
                 </a>
             </div>
