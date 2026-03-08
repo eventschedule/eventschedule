@@ -6,7 +6,7 @@
         {{-- Statistics Cards --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {{-- Total Custom Domains --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-full">
@@ -23,7 +23,7 @@
             </div>
 
             {{-- Direct Mode --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
@@ -40,7 +40,7 @@
             </div>
 
             {{-- Active --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-green-100 dark:bg-green-900 rounded-full">
@@ -57,7 +57,7 @@
             </div>
 
             {{-- Pending --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-full">
@@ -75,7 +75,7 @@
         </div>
 
         {{-- Search and Filters --}}
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
+        <div class="ap-card rounded-xl shadow p-4">
             <form method="GET" action="{{ route('admin.domains') }}" class="flex flex-wrap items-end gap-4">
                 <div class="flex-1 min-w-[200px] relative">
                     <x-input-label for="search" :value="__('messages.search')" />
@@ -107,7 +107,7 @@
         </div>
 
         {{-- Domains Table --}}
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
+        <div class="ap-card rounded-xl shadow overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">

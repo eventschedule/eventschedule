@@ -45,7 +45,7 @@
             <input type="hidden" id="payment_intent_id" name="payment_intent_id" value="">
 
             {{-- Step 1: Budget & Duration --}}
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+            <div class="ap-card shadow-md rounded-lg p-6">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">1. {{ __('messages.budget_and_duration') }}</h2>
 
                 <div class="space-y-4">
@@ -92,7 +92,7 @@
             </div>
 
             {{-- Step 2: Targeting --}}
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+            <div class="ap-card shadow-md rounded-lg p-6">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">2. {{ __('messages.targeting') }}</h2>
 
                 <div class="space-y-4">
@@ -146,7 +146,7 @@
             </div>
 
             {{-- Step 3: Creative --}}
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+            <div class="ap-card shadow-md rounded-lg p-6">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">3. {{ __('messages.creative') }}</h2>
 
                 <div class="space-y-4">
@@ -192,7 +192,7 @@
             </div>
 
             {{-- Step 4: Review & Pay --}}
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+            <div class="ap-card shadow-md rounded-lg p-6">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">4. {{ __('messages.review_and_pay') }}</h2>
 
                 <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm mb-4">

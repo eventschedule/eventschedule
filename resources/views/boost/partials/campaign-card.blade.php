@@ -1,5 +1,5 @@
 <a href="{{ route('boost.show', ['hash' => $campaign->hashedId()]) }}"
-   class="block bg-white dark:bg-gray-800 shadow-md rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+   class="ap-card block shadow-md rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
     <div class="p-5">
         <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ $campaign->event?->translatedName() ?? __('messages.deleted_event') }}</h3>

@@ -118,6 +118,10 @@
                     </svg>
                 </a>
             </div>
+
+            <p class="mt-6 text-gray-500 dark:text-gray-400 animate-reveal delay-300" style="opacity: 0;">
+                <a href="{{ route('marketing.docs.schedule_styling') }}#custom-css" class="underline hover:text-violet-600 dark:hover:text-violet-400 transition-colors">Read the Custom CSS guide</a>
+            </p>
         </div>
     </section>
 

@@ -47,8 +47,9 @@
             justify-content: center;
             border-radius: 0.5rem;
             border: 1px solid #e5e7eb;
-            background: white;
+            background: linear-gradient(to bottom, #ffffff, #f9fafb);
             cursor: pointer;
+            transition: all 0.15s ease;
         }
 
         .color-nav-button:disabled {
@@ -57,16 +58,24 @@
         }
 
         .color-nav-button:hover:not(:disabled) {
-            background: #f3f4f6;
+            background: linear-gradient(to bottom, #f3f4f6, #eef0f3);
+        }
+
+        .color-nav-button:active:not(:disabled) {
+            background: linear-gradient(to bottom, #e8eaed, #e5e7eb);
         }
 
         .dark .color-nav-button {
             border-color: #2d2d30;
-            background: #2d2d30;
+            background: linear-gradient(to bottom, #2d2d30, #282828);
         }
 
         .dark .color-nav-button:hover:not(:disabled) {
-            background: #3e3e42;
+            background: linear-gradient(to bottom, #3e3e42, #383838);
+        }
+
+        .dark .color-nav-button:active:not(:disabled) {
+            background: linear-gradient(to bottom, #252526, #222222);
         }
 
         .section-nav-link.validation-error {
@@ -830,14 +839,14 @@
                 <div class="hidden lg:block lg:col-span-3">
                     <div class="sticky top-6">
                         <nav class="space-y-1">
-                            <a href="#section-details" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-details">
+                            <a href="#section-details" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-details">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                                 </svg>
                                 {{ __('messages.details') }}
                             </a>
                             @if ($role->isVenue())
-                            <a href="#section-address" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-address">
+                            <a href="#section-address" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-address">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
@@ -845,48 +854,48 @@
                                 {{ __('messages.venue_address') }}
                             </a>
                             @endif
-                            <a href="#section-style" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-style">
+                            <a href="#section-style" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-style">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 3 3 0 005.78-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
                                 </svg>
                                 {{ __('messages.schedule_style') }}
                             </a>
                             @if ($role->exists)
-                            <a href="#section-links" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-links">
+                            <a href="#section-links" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-links">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                                 </svg>
                                 {{ __('messages.videos_and_links') }}
                             </a>
                             @endif
-                            <a href="#section-subschedules" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-subschedules">
+                            <a href="#section-subschedules" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-subschedules">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
                                 </svg>
                                 {{ __('messages.customize') }}
                             </a>
-                            <a href="#section-settings" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-settings">
+                            <a href="#section-settings" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-settings">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                                 {{ __('messages.schedule_settings') }}
                             </a>
-                            <a href="#section-engagement" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-engagement">
+                            <a href="#section-engagement" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-engagement">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                                 </svg>
                                 {{ __('messages.engagement') }}
                             </a>
                             @if (! config('app.hosted'))
-                            <a href="#section-auto-import" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-auto-import">
+                            <a href="#section-auto-import" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-auto-import">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                                 </svg>
                                 {{ __('messages.auto_import_settings') }}
                             </a>
                             @endif
-                            <a href="#section-integrations" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg hover:bg-gray-100 dark:hover:bg-gray-700 border-s-4 border-transparent" data-section="section-integrations">
+                            <a href="#section-integrations" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-integrations">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 5.427-.63 48.05 48.05 0 0 0 .582-4.717.532.532 0 0 0-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.959.401v0a.656.656 0 0 0 .658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z" />
                                 </svg>
@@ -912,7 +921,7 @@
 
                 <!-- Main Content Area -->
                 <div class="lg:col-span-9 space-y-6 lg:space-y-0">
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-details">
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-details">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
@@ -923,7 +932,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-details" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl">
+                <div id="section-details" class="section-content p-4 sm:p-8 sm:rounded-xl">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
@@ -959,7 +968,7 @@
                         @endif
 
                         <!-- Tab Navigation -->
-                        <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                        <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6">
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                                 <button type="button" class="details-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="general">
                                     {{ __('messages.general') }}
@@ -1142,7 +1151,7 @@
                 </div>
 
                 @if ($role->isVenue())
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-address">
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-address">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -1154,7 +1163,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-address" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
+                <div id="section-address" class="section-content p-4 sm:p-8 sm:rounded-xl lg:mt-0">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
@@ -1215,7 +1224,7 @@
                 </div>
                 @endif
 
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-style">
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-style">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 3 3 0 005.78-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
@@ -1226,7 +1235,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-style" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
+                <div id="section-style" class="section-content p-4 sm:p-8 sm:rounded-xl lg:mt-0">
                     <div>
 
                     <div class="flex flex-col xl:flex-row xl:gap-12">
@@ -1261,7 +1270,7 @@
                     </h2>
 
                     <!-- Sub-Tab Navigation -->
-                    <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                    <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6">
                         <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                             <button type="button" data-style-tab="branding" id="style-tab-branding"
                                 class="style-tab-button text-center whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium border-[var(--brand-blue)] text-[var(--brand-blue)]">
@@ -1720,7 +1729,7 @@
                 </div>
 
                 @if ($role->exists)
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-links">
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-links">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
@@ -1731,8 +1740,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-links" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
-                    <div class="max-w-2xl">
+                <div id="section-links" class="section-content p-4 sm:p-8 sm:rounded-xl lg:mt-0">
+                    <div class="max-w-xl">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
@@ -1741,7 +1750,7 @@
                         </h2>
 
                         <!-- Tab Navigation -->
-                        <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                        <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6">
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                                 <button type="button" class="links-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="youtube_videos">
                                     {{ __('messages.youtube_videos') }}
@@ -1902,7 +1911,7 @@
 
                 {{-- Add Link Modal --}}
                 <div id="add_link_modal" class="hidden relative z-10" aria-labelledby="add-link-modal-title" role="dialog" aria-modal="true">
-                    <div class="fixed inset-0 bg-gray-500 dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+                    <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity" aria-hidden="true"></div>
                     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                         <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                                 <input type="hidden" id="link_type" />
@@ -1934,7 +1943,7 @@
                 </div>
                 @endif
 
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-subschedules">
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-subschedules">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
@@ -1945,7 +1954,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-subschedules" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
+                <div id="section-subschedules" class="section-content p-4 sm:p-8 sm:rounded-xl lg:mt-0">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
@@ -1956,7 +1965,7 @@
                         </h2>
 
                         <!-- Tab Navigation -->
-                        <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                        <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6">
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                                 <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="subschedules">
                                     {{ __('messages.subschedules') }}
@@ -2152,18 +2161,14 @@
                             {{ __('messages.event_custom_fields_graphic_help') }}
                         </p>
                         @else
-                        <div class="text-center py-8">
-                            <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                            </svg>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                                {{ __('messages.custom_fields_pro_only') }}
-                            </p>
-                            @if (config('app.hosted'))
-                            <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-fields')"
-                                class="text-[var(--brand-blue)] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
-                            @endif
-                        </div>
+                        <x-upgrade-prompt tier="pro" :docsUrl="route('marketing.docs.creating_schedules').'#customize-custom-fields'" :subdomain="$role->subdomain">
+                            <x-slot:icon>
+                                <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                </svg>
+                            </x-slot:icon>
+                            {{ __('messages.custom_fields_pro_only') }}
+                        </x-upgrade-prompt>
                         @endif
                         </div>
                         <!-- End Tab Content: Custom Fields -->
@@ -2295,18 +2300,14 @@
 
                             <div id="new-sponsor-inputs-container"></div>
                         @else
-                            <div class="text-center py-8">
-                                <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-                                </svg>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                                    {{ __('messages.upgrade_sponsor_logos') }}
-                                </p>
-                                @if (config('app.hosted'))
-                                <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-css')"
-                                    class="text-[var(--brand-blue)] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
-                                @endif
-                            </div>
+                            <x-upgrade-prompt tier="pro" :docsUrl="route('marketing.docs.schedule_styling').'#custom-css'" :subdomain="$role->subdomain">
+                                <x-slot:icon>
+                                    <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                                    </svg>
+                                </x-slot:icon>
+                                {{ __('messages.upgrade_sponsor_logos') }}
+                            </x-upgrade-prompt>
                         @endif
                         </div>
                         <!-- End Tab Content: Sponsors -->
@@ -2374,19 +2375,15 @@
                             @endforeach
                         </div>
                         @else
-                        <div class="text-center py-8">
-                            <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 6h.008v.008H6V6z" />
-                            </svg>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                                {{ __('messages.custom_labels_pro_only') }}
-                            </p>
-                            @if (config('app.hosted'))
-                            <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-labels')"
-                                class="text-[var(--brand-blue)] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
-                            @endif
-                        </div>
+                        <x-upgrade-prompt tier="pro" :docsUrl="route('marketing.docs.creating_schedules').'#customize-custom-labels'" :subdomain="$role->subdomain">
+                            <x-slot:icon>
+                                <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 6h.008v.008H6V6z" />
+                                </svg>
+                            </x-slot:icon>
+                            {{ __('messages.custom_labels_pro_only') }}
+                        </x-upgrade-prompt>
                         @endif
                         </div>
                         <!-- End Tab Content: Custom Labels -->
@@ -2394,7 +2391,7 @@
                     </div>
                 </div>
 
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-settings">
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-settings">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
@@ -2406,7 +2403,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-settings" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
+                <div id="section-settings" class="section-content p-4 sm:p-8 sm:rounded-xl lg:mt-0">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
@@ -2424,7 +2421,7 @@
                         @endif
 
                         <!-- Tab Navigation -->
-                        <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                        <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6">
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                                 <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="general">
                                     {{ __('messages.general') }}
@@ -2775,7 +2772,7 @@
                     </div>
                 </div>
 
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-engagement">
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-engagement">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
@@ -2786,7 +2783,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-engagement" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
+                <div id="section-engagement" class="section-content p-4 sm:p-8 sm:rounded-xl lg:mt-0">
                     <div class="max-w-2xl">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -2798,7 +2795,7 @@
                         @php $showRequestsTab = $role->isCurator() || ((config('app.hosted') || config('app.is_testing')) && ($role->isVenue() || $role->isTalent())); @endphp
 
                         <!-- Tab Navigation -->
-                        <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                        <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6">
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                                 @if ($showRequestsTab)
                                 <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="requests">
@@ -2966,7 +2963,7 @@
                 </div>
 
                 @if (! config('app.hosted'))
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-auto-import">
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-auto-import">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
@@ -2977,7 +2974,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-auto-import" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
+                <div id="section-auto-import" class="section-content p-4 sm:p-8 sm:rounded-xl lg:mt-0">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
@@ -3055,7 +3052,7 @@
                 </div>
                 @endif
 
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 shadow-sm" data-section="section-integrations">
+                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-integrations">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 5.427-.63 48.05 48.05 0 0 0 .582-4.717.532.532 0 0 0-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.959.401v0a.656.656 0 0 0 .658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z" />
@@ -3066,7 +3063,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-integrations" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl lg:mt-0">
+                <div id="section-integrations" class="section-content p-4 sm:p-8 sm:rounded-xl lg:mt-0">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
@@ -3085,7 +3082,7 @@
                         <div>
 
                         <!-- Tab Navigation -->
-                        <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                        <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6">
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                                 @if (config('app.hosted'))
                                 <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="email">
@@ -3810,7 +3807,7 @@ function testImport() {
 function showImportOutput(output, message, isSuccess = true) {
     // Create modal HTML
     const modalHtml = `
-        <div id="import-output-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div id="import-output-modal" class="fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full z-50">
             <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-lg bg-white dark:bg-gray-800">
                 <div class="mt-3">
                     <div class="flex items-center justify-between mb-4">
@@ -4277,10 +4274,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update active link
         sectionLinks.forEach(link => {
             if (link.getAttribute('data-section') === sectionId) {
-                link.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[var(--brand-blue)]');
+                link.classList.add('nav-active', 'bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[var(--brand-blue)]');
                 link.classList.remove('text-gray-700', 'dark:text-gray-300', 'font-medium', 'border-transparent');
             } else {
-                link.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[var(--brand-blue)]');
+                link.classList.remove('nav-active', 'bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[var(--brand-blue)]');
                 link.classList.add('text-gray-700', 'dark:text-gray-300', 'font-medium', 'border-transparent');
             }
         });
@@ -6517,7 +6514,7 @@ window.handleAiStyleResults = function(data) {
 </script>
 @endif
 
-<x-upgrade-modal name="upgrade-ai-style" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.schedule_styling') }}#ai-style-generator">
+<x-upgrade-modal name="upgrade-ai-style" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.ai') }}">
     {{ __('messages.upgrade_feature_description_ai_style') }}
 </x-upgrade-modal>
 
@@ -6583,18 +6580,18 @@ window.handleAiScheduleDetailsResults = function(data) {
 </script>
 @endif
 
-<x-upgrade-modal name="upgrade-ai-details" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.creating_schedules') }}#ai-details-generator">
+<x-upgrade-modal name="upgrade-ai-details" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.ai') }}">
     {{ __('messages.upgrade_feature_description_ai_details') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-custom-css" tier="pro" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.schedule_styling') }}#custom-css">
+<x-upgrade-modal name="upgrade-custom-css" tier="pro" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.custom_css') }}">
     {{ __('messages.upgrade_feature_description_custom_css') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-custom-fields" tier="pro" :subdomain="$role->subdomain" docsUrl="{{ marketing_url('/features/custom-fields') }}">
+<x-upgrade-modal name="upgrade-custom-fields" tier="pro" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.custom_fields') }}">
     {{ __('messages.upgrade_feature_description_custom_fields') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-custom-domain" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.sharing') }}#schedule-url">
+<x-upgrade-modal name="upgrade-custom-domain" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.custom_domain') }}">
     {{ __('messages.upgrade_feature_description_custom_domain') }}
 </x-upgrade-modal>

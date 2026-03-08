@@ -49,7 +49,7 @@
         </div>
 
         {{-- Edit Form --}}
-        <form method="POST" action="{{ route('admin.plans.update', ['role' => $role->encodeId()]) }}" class="bg-white dark:bg-gray-800 rounded-xl shadow">
+        <form method="POST" action="{{ route('admin.plans.update', ['role' => $role->encodeId()]) }}" class="ap-card rounded-xl shadow">
             @csrf
             @method('PUT')
 

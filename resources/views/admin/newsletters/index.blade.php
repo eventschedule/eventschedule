@@ -27,7 +27,7 @@
             @endif
 
             @if ($newsletters->count() > 0)
-            <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl overflow-hidden">
+            <div class="ap-card shadow-md sm:rounded-xl overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>

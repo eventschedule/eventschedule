@@ -118,6 +118,10 @@
                     </svg>
                 </a>
             </div>
+
+            <p class="mt-6 text-gray-500 dark:text-gray-400 animate-reveal delay-300" style="opacity: 0;">
+                <a href="{{ route('marketing.docs.creating_schedules') }}#customize-custom-fields" class="underline hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Read the Custom Fields guide</a>
+            </p>
         </div>
     </section>
 

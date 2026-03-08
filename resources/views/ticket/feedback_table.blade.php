@@ -1,6 +1,6 @@
 {{-- Summary card --}}
 @if ($feedbackCount > 0)
-<div class="bg-white dark:bg-gray-800 rounded-xl shadow ring-1 ring-black ring-opacity-5 p-6 mb-6">
+<div class="ap-card rounded-xl shadow ring-1 ring-black/5 p-6 mb-6">
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div>
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.feedback_average_rating') }}</p>
@@ -43,7 +43,7 @@
     {{-- Desktop Table --}}
     <div class="hidden md:block -mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+            <div class="overflow-hidden shadow ring-1 ring-black/5 md:rounded-lg">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-800">
                         <tr>
@@ -95,7 +95,7 @@
     {{-- Mobile Card View --}}
     <div class="md:hidden space-y-3 mt-4">
         @foreach ($feedbacks as $feedback)
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow ring-1 ring-black ring-opacity-5 p-4">
+        <div class="ap-card rounded-xl shadow ring-1 ring-black/5 p-4">
             <div class="flex justify-between items-start mb-2">
                 <div>
                     <p class="font-medium text-gray-900 dark:text-gray-100">{{ $feedback->sale->name ?? '' }}</p>

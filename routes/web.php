@@ -500,6 +500,8 @@ if (config('app.is_nexus')) {
         Route::get('/features/white-label', [MarketingController::class, 'whiteLabel'])->name('marketing.white_label');
         Route::get('/features/custom-css', [MarketingController::class, 'customCss'])->name('marketing.custom_css');
         Route::get('/features/custom-domain', [MarketingController::class, 'customDomain'])->name('marketing.custom_domain');
+        Route::get('/features/feedback', [MarketingController::class, 'feedback'])->name('marketing.feedback');
+        Route::get('/features/availability', [MarketingController::class, 'availability'])->name('marketing.availability');
         // Redirects from old feature URLs
         Route::get('/wp/analytics', fn () => redirect()->route('marketing.analytics', [], 301));
         Route::get('/wp/newsletters', fn () => redirect()->route('marketing.newsletters', [], 301));
@@ -688,6 +690,8 @@ if (config('app.is_nexus')) {
             Route::get('/features/white-label', [MarketingController::class, 'whiteLabel'])->name('marketing.white_label');
             Route::get('/features/custom-css', [MarketingController::class, 'customCss'])->name('marketing.custom_css');
             Route::get('/features/custom-domain', [MarketingController::class, 'customDomain'])->name('marketing.custom_domain');
+            Route::get('/features/feedback', [MarketingController::class, 'feedback'])->name('marketing.feedback');
+            Route::get('/features/availability', [MarketingController::class, 'availability'])->name('marketing.availability');
             // Redirects from old feature URLs
             Route::get('/ticketing', fn () => redirect()->route('marketing.ticketing', [], 301));
             Route::get('/ai', fn () => redirect()->route('marketing.ai', [], 301));

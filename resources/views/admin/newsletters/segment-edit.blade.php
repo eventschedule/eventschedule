@@ -32,7 +32,7 @@
         @endif
 
         {{-- Segment Info --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6 mb-6">
+        <div class="ap-card shadow-md sm:rounded-xl p-6 mb-6">
             <form method="POST" action="{{ route('admin.newsletters.segment.update', ['hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}">
                 @csrf
                 @method('PUT')
@@ -73,7 +73,7 @@
 
         {{-- Add Subscriber (manual segments only) --}}
         @if ($segment->type === 'manual')
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6 mb-6">
+        <div class="ap-card shadow-md sm:rounded-xl p-6 mb-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.add_subscriber') }}</h3>
             <form method="POST" action="{{ route('admin.newsletters.segment.user.store', ['hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
                 id="add-user-form" class="relative">
@@ -82,7 +82,7 @@
                 <div class="flex flex-col sm:flex-row gap-3">
                     <div class="flex-1 relative">
                         <x-text-input type="text" id="user-search-input" class="block w-full" :placeholder="__('messages.search_users')" autocomplete="off" />
-                        <div id="user-search-results" class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto hidden">
+                        <div id="user-search-results" class="absolute z-10 mt-1 w-full border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto hidden">
                         </div>
                     </div>
                     <x-brand-button type="submit" id="add-user-btn" disabled class="whitespace-nowrap">
@@ -94,7 +94,7 @@
         @endif
 
         {{-- Subscribers Table --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6">
+        <div class="ap-card shadow-md sm:rounded-xl p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
                 {{ __('messages.subscribers') }} ({{ number_format($recipientCount) }})
             </h3>

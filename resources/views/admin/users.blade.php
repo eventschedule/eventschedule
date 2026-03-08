@@ -7,7 +7,7 @@
 
         {{-- User Count with Period Comparison --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
@@ -31,17 +31,17 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_users_7_days')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeUsers7Days) }}</p>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_users_30_days')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeUsers30Days) }}</p>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.newsletter_subscribers')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($newsletterSubscribed) }}</p>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ number_format($newsletterUnsubscribed) }} @lang('messages.unsubscribed')</p>
@@ -51,7 +51,7 @@
         {{-- User Signup Method Breakdown --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {{-- Signup Method Donut Chart --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.signup_method_breakdown') (@lang('messages.all_time'))</h3>
                 <div class="flex items-center gap-6">
                     <div class="w-48 h-48">
@@ -104,7 +104,7 @@
             </div>
 
             {{-- Signup Method in Period --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.signups_by_method') (@lang('messages.selected_period'))</h3>
                 <div class="h-48">
                     <canvas id="signupMethodTrendChart"></canvas>
@@ -129,7 +129,7 @@
         {{-- UTM Attribution Section --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {{-- UTM Summary Card + Bar Chart --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.utm_attribution') (@lang('messages.selected_period'))</h3>
 
                 @if($usersWithUtmInPeriod + $usersWithoutUtmInPeriod > 0)
@@ -152,7 +152,7 @@
             </div>
 
             {{-- Top Campaigns Table --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.top_campaigns') (@lang('messages.all_time'))</h3>
 
                 @if($topUtmCampaigns->count() > 0)
@@ -187,7 +187,7 @@
         {{-- Top UTM Sources & Top Referrers (All Time) --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             @if($topUtmSources->count() > 0)
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+                <div class="ap-card rounded-xl shadow p-6">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.top_sources') (@lang('messages.all_time'))</h3>
                     <div class="h-64">
                         <canvas id="utmTopSourcesChart"></canvas>
@@ -196,7 +196,7 @@
             @endif
 
             @if($topReferrerDomains->count() > 0)
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+                <div class="ap-card rounded-xl shadow p-6">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.top_referrers') (@lang('messages.all_time'))</h3>
                     <div class="h-64">
                         <canvas id="topReferrersChart"></canvas>
@@ -206,7 +206,7 @@
         </div>
 
         {{-- Recent Signups --}}
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+        <div class="ap-card rounded-xl shadow p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.recent_signups')</h3>
 
             @if($recentSignups->count() > 0)

@@ -11,7 +11,7 @@
   <main>
     <div>
       <div class="container mx-auto pt-7 pb-20 px-5 max-w-3xl">
-        <div class="bg-white dark:bg-gray-800 mb-4 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} rounded-lg shadow-md">
+        <div class="ap-card mb-4 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} rounded-lg shadow-md">
           <div
             class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0"
           >

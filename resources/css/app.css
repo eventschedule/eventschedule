@@ -195,6 +195,174 @@ div:has(+ div + .get-started-card:hover) > div {
     box-shadow: none;
 }
 
+/* AP card/panel gradient */
+.ap-card {
+    background: linear-gradient(to bottom, #ffffff, #f9fafb);
+}
+.dark .ap-card {
+    background: linear-gradient(to bottom, #2d2d30, #252526);
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: none;
+}
+
+/* AP tab containers */
+.ap-tab-container {
+    border-color: #e5e7eb;
+}
+.dark .ap-tab-container {
+    border-color: rgba(255, 255, 255, 0.06);
+}
+.ap-tab-container button, .ap-tab-container a {
+    transition: all 0.2s ease;
+}
+
+/* Section content panels */
+.section-content {
+    background: linear-gradient(to bottom, #ffffff, #f9fafb);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+.dark .section-content {
+    background: linear-gradient(to bottom, #2d2d30, #252526);
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: none;
+}
+
+/* AP modal gradient */
+.ap-modal {
+    background: linear-gradient(to bottom, #ffffff, #fafafa);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+}
+.dark .ap-modal {
+    background: linear-gradient(to bottom, #2d2d30, #252526);
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* AP dropdown gradient */
+.ap-dropdown {
+    background: linear-gradient(to bottom, #ffffff, #fafafa);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+.dark .ap-dropdown {
+    background: linear-gradient(to bottom, #2d2d30, #282828);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+.dark .ap-dropdown a:hover, .dark .ap-dropdown button:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Sidebar section nav */
+.section-nav-link:hover:not(.nav-active) {
+    background: linear-gradient(to bottom, #f3f4f6, #eef0f3) !important;
+}
+.section-nav-link.nav-active {
+    background: linear-gradient(to bottom, #f0f1f3, #eaecef) !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+.dark .section-nav-link:hover:not(.nav-active) {
+    background: linear-gradient(to bottom, #262626, #222222) !important;
+}
+.dark .section-nav-link.nav-active {
+    background: linear-gradient(to bottom, #282828, #232323) !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Admin navigation dropdowns */
+.admin-dropdown {
+    background: linear-gradient(to bottom, #ffffff, #fafafa);
+}
+.dark .admin-dropdown {
+    background: linear-gradient(to bottom, #2d2d30, #282828);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+.admin-dropdown a:hover {
+    background: rgba(0, 0, 0, 0.04) !important;
+}
+.dark .admin-dropdown a:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* AP secondary button/link gradient */
+.ap-secondary-btn {
+    background: linear-gradient(to bottom, #ffffff, #fafafa);
+}
+.dark .ap-secondary-btn {
+    background: linear-gradient(to bottom, #2d2d30, #282828);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+.ap-secondary-btn:hover {
+    background: linear-gradient(to bottom, #f3f4f6, #eef0f3);
+}
+.dark .ap-secondary-btn:hover {
+    background: linear-gradient(to bottom, #333336, #2d2d30);
+}
+
+/* Mobile accordion headers */
+.mobile-section-header {
+    background: linear-gradient(to bottom, #ffffff, #fafafa);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+.dark .mobile-section-header {
+    background: linear-gradient(to bottom, #2d2d30, #282828);
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: none;
+}
+.mobile-section-header:hover {
+    background: linear-gradient(to bottom, #f3f4f6, #eef0f3);
+}
+.mobile-section-header.active {
+    background: linear-gradient(to bottom, #f0f1f3, #eaecef);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+.dark .mobile-section-header:hover {
+    background: linear-gradient(to bottom, #333336, #2d2d30);
+}
+.dark .mobile-section-header.active {
+    background: linear-gradient(to bottom, #282828, #232323);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Table refinement inside cards */
+.ap-card thead th {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+.ap-card tbody tr {
+    border-color: rgba(0, 0, 0, 0.06);
+}
+.ap-card tbody tr:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+.dark .ap-card thead th {
+    background: rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+.dark .ap-card tbody tr {
+    border-color: rgba(255, 255, 255, 0.06);
+}
+.dark .ap-card tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* Auth page card gradient */
+.auth-card {
+    background: linear-gradient(to bottom, #ffffff, #fafafa);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+.dark .auth-card {
+    background: linear-gradient(to bottom, #2d2d30, #252526);
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Dropdown link hover refinement */
+.ap-dropdown-link:hover {
+    background: rgba(0, 0, 0, 0.04) !important;
+}
+.dark .ap-dropdown-link:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
 /* Keep visited links blue (prevent browser default purple) */
 a.text-blue-600:visited { color: rgb(37 99 235); }
 .dark a.text-blue-600:visited { color: rgb(96 165 250); }

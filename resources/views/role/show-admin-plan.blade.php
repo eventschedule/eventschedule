@@ -1,5 +1,5 @@
 <div class="pt-5 container mx-auto">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 border border-gray-100 dark:border-gray-700 pb-10">
+    <div class="ap-card rounded-xl shadow-md p-8 border border-gray-100 pb-10">
         <h4 class="text-xl font-bold mb-6 flex justify-between items-center pb-4 border-b border-gray-200 dark:border-gray-700">
             <span class="text-gray-800 dark:text-gray-100">{{ __('messages.plan') }}</span>
         </h4>
@@ -314,7 +314,7 @@
 
 @if (config('app.hosted'))
 <div class="pt-5 container mx-auto">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 border border-gray-100 dark:border-gray-700">
+    <div class="ap-card rounded-xl shadow-md p-8 border border-gray-100">
         <div class="flex items-start gap-4">
             <svg class="w-8 h-8 text-[var(--brand-blue)] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M21,12L14,5V9C7,10 4,15 3,20C5.5,16.5 9,14.9 14,14.9V19L21,12Z" />

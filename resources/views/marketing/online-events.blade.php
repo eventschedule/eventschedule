@@ -97,6 +97,9 @@
                     </svg>
                 </a>
             </div>
+            <p class="mt-6 text-gray-500 dark:text-gray-400 animate-reveal delay-300" style="opacity: 0;">
+                <a href="{{ route('marketing.docs.creating_events') }}" class="underline hover:text-sky-600 dark:hover:text-sky-400 transition-colors">Read the Events guide</a>
+            </p>
         </div>
     </section>
 

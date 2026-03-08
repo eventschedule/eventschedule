@@ -49,19 +49,19 @@
 
         {{-- Key metrics --}}
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 text-center">
+            <div class="ap-card shadow-md rounded-lg p-4 text-center">
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($campaign->impressions) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.impressions') }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 text-center">
+            <div class="ap-card shadow-md rounded-lg p-4 text-center">
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($campaign->reach) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.reach') }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 text-center">
+            <div class="ap-card shadow-md rounded-lg p-4 text-center">
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($campaign->clicks) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.clicks') }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 text-center">
+            <div class="ap-card shadow-md rounded-lg p-4 text-center">
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($campaign->conversions ?? 0) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.conversions') }}</p>
             </div>
@@ -70,7 +70,7 @@
         {{-- Detailed metrics --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
             {{-- Budget utilization --}}
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+            <div class="ap-card shadow-md rounded-lg p-6">
                 <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.budget_utilization') }}</h3>
                 <div class="mb-2">
                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
@@ -99,7 +99,7 @@
             </div>
 
             {{-- Campaign info --}}
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+            <div class="ap-card shadow-md rounded-lg p-6">
                 <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.campaign_details') }}</h3>
                 <div class="space-y-2 text-sm">
                     @if (config('app.hosted'))
@@ -132,7 +132,7 @@
 
         {{-- Daily performance chart --}}
         @if ($campaign->daily_analytics && count($campaign->daily_analytics) > 1)
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-6">
+        <div class="ap-card shadow-md rounded-lg p-6 mb-6">
             <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.daily_performance') }}</h3>
             <canvas id="performance-chart" height="200"></canvas>
         </div>
@@ -140,7 +140,7 @@
 
         {{-- Ad creative(s) --}}
         @if ($campaign->ads->isNotEmpty())
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-6">
+        <div class="ap-card shadow-md rounded-lg p-6 mb-6">
             <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.ad_creative') }}</h3>
             @foreach ($campaign->ads as $ad)
             <div class="@if (!$loop->first) mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 @endif">
@@ -168,7 +168,7 @@
 
         {{-- Campaign controls --}}
         @if ($campaign->canBePaused() || $campaign->canBeResumed() || $campaign->canBeCancelled())
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+        <div class="ap-card shadow-md rounded-lg p-6">
             <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.campaign_controls') }}</h3>
             <div class="flex gap-3">
                 @if ($campaign->canBeCancelled())

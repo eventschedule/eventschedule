@@ -6,7 +6,7 @@
         {{-- Row 1: Plan Breakdown --}}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {{-- Free Count --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-full">
@@ -23,7 +23,7 @@
             </div>
 
             {{-- Pro Count --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
@@ -40,7 +40,7 @@
             </div>
 
             {{-- Enterprise Count --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-purple-100 dark:bg-purple-900 rounded-full">
@@ -60,7 +60,7 @@
         {{-- Row 2: Payment/Status Breakdown --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {{-- Stripe Paid --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-green-100 dark:bg-green-900 rounded-full">
@@ -77,7 +77,7 @@
             </div>
 
             {{-- Manual --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-indigo-100 dark:bg-indigo-900 rounded-full">
@@ -94,7 +94,7 @@
             </div>
 
             {{-- On Trial --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-full">
@@ -111,7 +111,7 @@
             </div>
 
             {{-- Expiring Soon --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="p-3 bg-amber-100 dark:bg-amber-900 rounded-full">
@@ -129,7 +129,7 @@
         </div>
 
         {{-- Filters --}}
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
+        <div class="ap-card rounded-xl shadow p-4">
             <form method="GET" action="{{ route('admin.plans') }}" class="flex flex-col sm:flex-row gap-4">
                 <div class="flex-1 relative">
                     <input type="text" name="search" value="{{ request('search') }}"
@@ -175,7 +175,7 @@
         </div>
 
         {{-- Role List Table --}}
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
+        <div class="ap-card rounded-xl shadow overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">

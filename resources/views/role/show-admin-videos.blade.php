@@ -1,5 +1,5 @@
 <div class="pt-5">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+    <div class="ap-card rounded-xl shadow-sm p-6">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.videos') }}</h2>
         <p class="text-gray-600 dark:text-gray-400 mb-6">{{ __('messages.videos_description') }}</p>
         

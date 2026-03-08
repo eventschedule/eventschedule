@@ -16,7 +16,7 @@
         @endif
 
         @if (!$fileExists)
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-12 text-center">
+            <div class="ap-card rounded-xl shadow p-12 text-center">
                 <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
@@ -54,7 +54,7 @@
 
             {{-- Summary Cards --}}
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5">
+                <div class="ap-card rounded-xl shadow p-5">
                     <div class="flex items-center gap-3 mb-2">
                         <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -66,7 +66,7 @@
                     </p>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5">
+                <div class="ap-card rounded-xl shadow p-5">
                     <div class="flex items-center gap-3 mb-2">
                         <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
@@ -79,7 +79,7 @@
                     @endif
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5">
+                <div class="ap-card rounded-xl shadow p-5">
                     <div class="flex items-center gap-3 mb-2">
                         <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -89,7 +89,7 @@
                     <p class="text-2xl font-bold {{ $errorCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">{{ number_format($errorCount) }}</p>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5">
+                <div class="ap-card rounded-xl shadow p-5">
                     <div class="flex items-center gap-3 mb-2">
                         <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
@@ -102,7 +102,7 @@
 
             {{-- Repeated Errors --}}
             @if ($repeatedErrors->count() > 0)
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.repeated_errors')</h3>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -170,7 +170,7 @@
             @endif
 
             {{-- Filters + Recent Log Entries --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.recent_log_entries')</h3>
 
                 {{-- Filter Bar --}}
@@ -287,7 +287,7 @@
 
             {{-- Actions --}}
             @if ($fileSize > 0)
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4 flex flex-wrap gap-3">
+            <div class="ap-card rounded-xl shadow p-4 flex flex-wrap gap-3">
                 <x-secondary-link :href="route('admin.logs.download')">
                     <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>

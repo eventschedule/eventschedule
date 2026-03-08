@@ -3,7 +3,7 @@
     <!-- Desktop Table View -->
     <div class="hidden md:block -mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+            <div class="overflow-hidden shadow ring-1 ring-black/5 md:rounded-lg">
                 <div class="overflow-x-auto" style="overflow-x: auto; scrollbar-width: thin;">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-800">
@@ -177,7 +177,7 @@
                                                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                                                 </svg>
                                             </button>
-                                            <div id="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="sale-actions-menu-button-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" tabindex="-1">
+                                            <div id="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" class="ap-dropdown pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-white/[0.06] rounded-lg ring-1 ring-black/5 dark:ring-white/[0.06] focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="sale-actions-menu-button-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" tabindex="-1">
                                                 <div class="py-2" role="none" data-popup-toggle="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}">
                                                     <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" target="_blank" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                                         <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -332,7 +332,7 @@
                                                         <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                                                     </svg>
                                                 </button>
-                                                <div id="guest-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="guest-actions-menu-button-{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" tabindex="-1">
+                                                <div id="guest-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" class="ap-dropdown pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-white/[0.06] rounded-lg ring-1 ring-black/5 dark:ring-white/[0.06] focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="guest-actions-menu-button-{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" tabindex="-1">
                                                     <div class="py-2" role="none" data-popup-toggle="guest-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($guest->id) }}">
                                                         <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($guest->event_id), 'secret' => $guest->secret]) }}" target="_blank" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                                             <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -375,7 +375,7 @@
             $mobileHasGuests = $mobileIsGroupedPrimary && $mobileGuestCount > 0;
             $mobileEncodedSaleId = \App\Utils\UrlUtils::encodeId($sale->id);
         @endphp
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow duration-200">
+        <div class="ap-card rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow duration-200">
             <div class="space-y-4">
                 <!-- Header with Status -->
                 <div class="flex items-start justify-between">
@@ -587,7 +587,7 @@
                         <div x-show="open" 
                              x-ref="dropdown"
                              @click.away="open = false"
-                             class="w-48 origin-top-right rounded-lg bg-white dark:bg-gray-800 py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-700 focus:outline-none" 
+                             class="ap-dropdown w-48 origin-top-right rounded-lg py-1 ring-1 ring-black/5 dark:ring-white/[0.06] focus:outline-none" 
                              role="menu" 
                              x-cloak
                              aria-orientation="vertical">

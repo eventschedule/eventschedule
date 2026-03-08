@@ -19,7 +19,7 @@
     @endif
 
     <!-- Tab Navigation -->
-    <div class="border-b border-gray-200 dark:border-gray-700 mb-6 mt-6">
+    <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6 mt-6">
         <nav class="flex space-x-4 overflow-x-auto scrollbar-hide" aria-label="Tabs">
             <button type="button" class="payment-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="stripe">
                 {{ __('messages.stripe') }}

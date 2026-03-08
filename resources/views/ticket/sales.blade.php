@@ -1,7 +1,7 @@
 <x-app-admin-layout>
 
     @if ($waitlistCount > 0 || $hasPro)
-    <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+    <div class="ap-tab-container mb-6 border-b border-gray-200 dark:border-gray-700">
         <nav class="-mb-px flex gap-6">
             <button type="button" id="tab-sales"
                 class="sales-tab whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-[var(--brand-blue)] text-[var(--brand-blue)]">

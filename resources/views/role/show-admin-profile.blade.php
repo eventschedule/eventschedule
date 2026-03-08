@@ -1,5 +1,5 @@
 @if ($role->description_html)
-<div class="mt-5 overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-md">
+<div class="ap-card mt-5 overflow-hidden rounded-lg shadow-md">
     <div class="px-4 py-5 sm:p-6 text-gray-700 dark:text-gray-300 custom-content">
         {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->description_html) !!}
     </div>
@@ -22,7 +22,7 @@
 <div class="pt-5 container mx-auto">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-    <div class="divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-sm shadow ring-1 ring-black dark:ring-gray-700 ring-opacity-5">
+    <div class="ap-card divide-y divide-gray-100 dark:divide-[#2d2d30] overflow-hidden rounded-lg text-sm shadow ring-1 ring-black/5 dark:ring-[#2d2d30]">
         <div class="relative flex items-center py-6 px-4 gap-x-6">
             <div class="flex-auto ps-4">
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
@@ -74,7 +74,7 @@
         </div>
     </div>
 
-    <div class="divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-sm shadow ring-1 ring-black dark:ring-gray-700 ring-opacity-5">
+    <div class="ap-card divide-y divide-gray-100 dark:divide-[#2d2d30] overflow-hidden rounded-lg text-sm shadow ring-1 ring-black/5 dark:ring-[#2d2d30]">
         <div class="relative flex items-center py-6 px-4 gap-x-6">
             <div class="flex-auto ps-4">
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
@@ -126,7 +126,7 @@
         </div>
     </div>
 
-    <div class="divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-sm shadow ring-1 ring-black dark:ring-gray-700 ring-opacity-5">
+    <div class="ap-card divide-y divide-gray-100 dark:divide-[#2d2d30] overflow-hidden rounded-lg text-sm shadow ring-1 ring-black/5 dark:ring-[#2d2d30]">
         <div class="relative flex items-center py-6 px-4 gap-x-6">
             <div class="flex-auto ps-4">
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
@@ -193,7 +193,7 @@ Leaving: "ease-in duration-200"
     From: "opacity-100"
     To: "opacity-0"
 -->
-    <div class="fixed inset-0 bg-gray-500 dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+    <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity" aria-hidden="true"></div>
 
     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">

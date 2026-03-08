@@ -125,6 +125,9 @@
                     </svg>
                 </a>
             </div>
+            <p class="mt-6 text-gray-500 dark:text-gray-400 animate-reveal delay-300" style="opacity: 0;">
+                <a href="{{ route('marketing.docs.creating_schedules') }}" class="underline hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">Read the Scheduling guide</a>
+            </p>
         </div>
     </section>
 

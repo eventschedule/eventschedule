@@ -241,7 +241,7 @@
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>
                     </button>
-                    <div id="role-actions-pop-up-menu" class="pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="role-actions-menu-button" tabindex="-1">
+                    <div id="role-actions-pop-up-menu" class="ap-dropdown pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-white/[0.06] rounded-lg ring-1 ring-black/5 dark:ring-white/[0.06] focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="role-actions-menu-button" tabindex="-1">
                         <div class="py-2" role="none" data-popup-target="role-actions-pop-up-menu">
                             {{-- Show edit/view options only when desktop buttons are hidden (mobile) --}}
                             <div class="md:hidden">
@@ -396,7 +396,7 @@
         </div>
 
         <!-- Tabs at small breakpoint and up -->
-        <div class="hidden md:block">
+        <div class="ap-tab-container hidden md:block">
             <nav class="-mb-px flex gap-x-8 overflow-x-auto scrollbar-hide">
                 <a href="{{ route('role.view_admin', ((now()->year == $year && now()->month == $month) || $tab == 'schedule') ? ['subdomain' => $role->subdomain, 'tab' => 'schedule'] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'month' => $month] : ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => $year, 'month' => $month])) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.schedule') }}</a>
@@ -556,11 +556,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 @include('components.embed-modal')
 
-<x-upgrade-modal name="upgrade-scan-agenda" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.scan_agenda') }}">
+<x-upgrade-modal name="upgrade-scan-agenda" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.ai') }}">
     {{ __('messages.upgrade_feature_description_scan_agenda') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-availability" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.docs.availability') }}">
+<x-upgrade-modal name="upgrade-availability" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.availability') }}">
     {{ __('messages.upgrade_feature_description_availability') }}
 </x-upgrade-modal>
 

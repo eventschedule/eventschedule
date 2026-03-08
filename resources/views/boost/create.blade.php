@@ -45,7 +45,7 @@
         <div>
 
         {{-- Event summary --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-6">
+        <div class="ap-card shadow-md rounded-lg p-6 mb-6">
             <div class="flex items-start gap-4">
                 @if ($event->getImageUrl())
                 <img src="{{ $event->getImageUrl() }}" alt="{{ $event->name }}" class="w-24 h-24 rounded-lg object-cover flex-shrink-0">
@@ -100,7 +100,7 @@
             <input type="hidden" name="budget_type" value="lifetime">
 
             {{-- Budget slider --}}
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+            <div class="ap-card shadow-md rounded-lg p-6">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.ad_budget') }}</label>
                 <div class="flex items-center gap-4 mb-2">
                     <input type="range" id="budget-slider" min="{{ $minBudget }}" max="{{ min($maxBudget, 500) }}" step="5"
@@ -135,7 +135,7 @@
 
             {{-- Ad preview (mobile only; desktop version in right column) --}}
             <div class="lg:hidden">
-                <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+                <div class="ap-card shadow-md rounded-lg p-6">
                     <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.ad_preview') }}</h3>
                     @include('boost.partials.ad-preview-mockup', [
                         'headline' => $defaults['headline'],
@@ -147,7 +147,7 @@
             </div>
 
             {{-- Credit payment (shown when credit covers full cost) --}}
-            <div id="credit-payment-section" class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 hidden">
+            <div id="credit-payment-section" class="ap-card shadow-md rounded-lg p-6 hidden">
                 <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.payment') }}</h3>
                 <div class="flex items-center gap-2 text-green-700 dark:text-green-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,7 +159,7 @@
 
             {{-- Stripe/testing payment --}}
             @if (!empty($isTesting) || empty($isHosted))
-            <div id="stripe-payment-section" class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+            <div id="stripe-payment-section" class="ap-card shadow-md rounded-lg p-6">
                 <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.payment') }}</h3>
                 @if (!empty($isTesting))
                 <div class="mb-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
@@ -174,7 +174,7 @@
                 <div id="payment-errors" class="text-sm text-red-600 dark:text-red-400 hidden"></div>
             </div>
             @else
-            <div id="stripe-payment-section" class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+            <div id="stripe-payment-section" class="ap-card shadow-md rounded-lg p-6">
                 <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.payment') }}</h3>
                 @if (!empty($pmLastFour))
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
@@ -210,7 +210,7 @@
         {{-- Right column: ad preview (desktop only, sticky) --}}
         <div class="hidden lg:block">
             <div class="lg:sticky lg:top-6">
-                <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+                <div class="ap-card shadow-md rounded-lg p-6">
                     <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.ad_preview') }}</h3>
                     @include('boost.partials.ad-preview-mockup', [
                         'headline' => $defaults['headline'],

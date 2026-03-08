@@ -235,6 +235,22 @@ class MarketingController extends Controller
     }
 
     /**
+     * Feedback page
+     */
+    public function feedback()
+    {
+        return view('marketing.feedback');
+    }
+
+    /**
+     * Availability page
+     */
+    public function availability()
+    {
+        return view('marketing.availability');
+    }
+
+    /**
      * Custom Fields page
      */
     public function customFields()

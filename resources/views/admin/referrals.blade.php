@@ -5,27 +5,27 @@
 
         {{-- Stats --}}
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div class="ap-card rounded-lg border border-gray-200 p-4 text-center">
                 <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $totalReferrals }}</div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.total_referrals') }}</div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div class="ap-card rounded-lg border border-gray-200 p-4 text-center">
                 <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $pending }}</div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pending') }}</div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div class="ap-card rounded-lg border border-gray-200 p-4 text-center">
                 <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $subscribed }}</div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.status_subscribed') }}</div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div class="ap-card rounded-lg border border-gray-200 p-4 text-center">
                 <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $qualified }}</div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.qualified') }}</div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div class="ap-card rounded-lg border border-gray-200 p-4 text-center">
                 <div class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ $credited }}</div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.credited') }}</div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div class="ap-card rounded-lg border border-gray-200 p-4 text-center">
                 <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $conversionRate }}%</div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.conversion_rate') }}</div>
             </div>
@@ -47,7 +47,7 @@
         </div>
 
         {{-- Table --}}
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="ap-card rounded-lg border border-gray-200 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-900/50">
@@ -111,7 +111,7 @@
                 </table>
             </div>
             @if ($referrals->hasPages())
-            <div class="px-4 py-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="px-4 py-4 border-t border-gray-200">
                 {{ $referrals->links() }}
             </div>
             @endif

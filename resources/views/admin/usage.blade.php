@@ -29,7 +29,7 @@
         {{-- Summary Metric Cards --}}
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             @foreach ($categorySummaries as $key => $cat)
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5">
+            <div class="ap-card rounded-xl shadow p-5">
                 <div class="flex items-center justify-between mb-2">
                     <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ $cat['label'] }}</h4>
                     @if ($cat['limit'] && $cat['today_total'] > $cat['limit'])
@@ -51,7 +51,7 @@
         </div>
 
         {{-- Operation Breakdown Table --}}
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+        <div class="ap-card rounded-xl shadow p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.operation_breakdown')</h3>
             @if (count($operationBreakdown) > 0)
             <div class="overflow-x-auto">
@@ -82,7 +82,7 @@
         </div>
 
         {{-- Top Roles by Usage --}}
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+        <div class="ap-card rounded-xl shadow p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.top_schedules_by_usage')</h3>
             @if ($topRolesData->count() > 0)
             <div class="overflow-x-auto">
@@ -117,7 +117,7 @@
         </div>
 
         {{-- Top Newsletter Senders --}}
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+        <div class="ap-card rounded-xl shadow p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Top Newsletter Senders</h3>
             @if ($topNewsletterData->count() > 0)
             <div class="overflow-x-auto">
@@ -167,7 +167,7 @@
         @php
             $hasStuckRecords = $stuckRoles->count() > 0 || $stuckEvents->count() > 0 || $stuckEventParts->count() > 0 || $stuckEventRoles->count() > 0;
         @endphp
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+        <div class="ap-card rounded-xl shadow p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.stuck_translation_records')</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">@lang('messages.stuck_translation_description', ['threshold' => $stuckThreshold])</p>
 

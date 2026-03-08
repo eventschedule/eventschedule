@@ -17,15 +17,16 @@
         width: 100%;
         max-height: 200px;
         overflow-y: auto;
-        background: #fff;
-        border: 1px solid #d1d5db;
+        background: linear-gradient(to bottom, #ffffff, #fafafa);
+        border: 1px solid rgba(0, 0, 0, 0.08);
         border-radius: 0.5rem;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
         margin-top: 2px;
     }
     .dark .time-dropdown-import {
-        background: #1e1e1e;
-        border-color: #2d2d30;
+        background: linear-gradient(to bottom, #2d2d30, #282828);
+        border-color: rgba(255, 255, 255, 0.06);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
     }
     .time-dropdown-import.open {
         display: block;
@@ -35,18 +36,19 @@
         cursor: pointer;
         font-size: 0.875rem;
         color: #111827;
+        transition: all 0.15s ease;
     }
     .dark .time-dropdown-item-import {
         color: #d1d5db;
     }
     .time-dropdown-item-import:hover,
     .time-dropdown-item-import.highlighted {
-        background: #e5e7eb;
+        background: linear-gradient(to bottom, #f3f4f6, #eef0f3);
         color: #111827;
     }
     .dark .time-dropdown-item-import:hover,
     .dark .time-dropdown-item-import.highlighted {
-        background: #2d2d30;
+        background: linear-gradient(to bottom, #3e3e42, #383838);
         color: #fff;
     }
     .time-input-wrapper {
@@ -55,13 +57,13 @@
 </style>
 
 @if (! config('services.google.gemini_key'))
-<div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg">
+<div class="ap-card p-4 sm:p-8 shadow-md rounded-lg">
     <div class="max-w-3xl mx-auto">
         <x-gemini-setup-guide />
     </div>
 </div>
 @elseif (config('app.hosted') && ! $role->isEnterprise() && (! isset($isGuest) || ! $isGuest))
-<div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg">
+<div class="ap-card p-4 sm:p-8 shadow-md rounded-lg">
     <div class="max-w-xl mx-auto text-center py-8">
         <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4">
             <svg class="h-6 w-6 text-[var(--brand-blue)]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -94,7 +96,7 @@
         @php $use24hr = get_use_24_hour_time($role ?? null); @endphp
 
         <div v-if="!preview || !preview.parsed || preview.parsed.length === 0">
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg">
+            <div class="ap-card p-4 sm:p-8 shadow-md rounded-lg">
             <div class="max-w-3xl mx-auto">
                 <!-- Centered single column layout -->
                 <div class="flex justify-center">
@@ -236,7 +238,7 @@
 
         @if($role->accept_requests && $role->request_terms)
         <!-- Request Terms Panel -->
-        <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg mb-4 mt-4">
+        <div class="ap-card p-4 sm:p-8 shadow-md rounded-lg mb-4 mt-4">
             <div class="max-w-3xl mx-auto">
                 <div class="flex justify-center">
                     <div class="w-full max-w-2xl md:max-w-xl lg:max-w-2xl">
@@ -254,7 +256,7 @@
         @endif
 
         <!-- Show All Fields and Save All buttons when events are parsed -->
-        <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg mb-4">
+        <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="ap-card p-4 sm:p-8 shadow-md rounded-lg mb-4">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 @if (auth()->user() && auth()->user()->isAdmin())
                 <div class="flex items-center mb-3 sm:mb-0">
@@ -262,7 +264,7 @@
                             id="show_all_fields" 
                             v-model="showAllFields" 
                             @change="saveShowAllFieldsPreference"
-                            class="rounded border-gray-300 dark:border-gray-600 {{ (isset($isGuest) && $isGuest) ? 'text-blue-500 focus:border-blue-500 focus:ring-blue-500' : 'text-[var(--brand-blue)] focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]' }} shadow-sm focus:ring focus:ring-opacity-50">
+                            class="rounded border-gray-300 dark:border-gray-600 {{ (isset($isGuest) && $isGuest) ? 'text-blue-500 focus:border-blue-500 focus:ring-blue-500/50' : 'text-[var(--brand-blue)] focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]/50' }} shadow-sm focus:ring">
                     <label for="show_all_fields" class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                         {{ __('messages.show_all_fields') }}
                     </label>
@@ -292,7 +294,7 @@
         <!-- Events cards - Moved outside the main div -->
         <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="space-y-6">
             <div v-for="(event, idx) in preview.parsed" :key="idx" 
-                    :class="['p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-xl mt-4', 
+                    :class="['ap-card p-4 sm:p-8 shadow-md sm:rounded-xl mt-4', 
                             savedEvents[idx] ? 'border-2 border-green-500 dark:border-green-600' : '']">
                 
                 <!-- Card header -->
@@ -733,7 +735,7 @@
                                     id="create_account_@{{ idx }}" 
                                     name="create_account_@{{ idx }}" 
                                     v-model="createAccount"
-                                    class="rounded border-gray-300 dark:border-gray-600 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                                    class="rounded border-gray-300 dark:border-gray-600 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500/50">
                             <label for="create_account_@{{ idx }}" class="ms-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ __('messages.create_account') }}
                             </label>

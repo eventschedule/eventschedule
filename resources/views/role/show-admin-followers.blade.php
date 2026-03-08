@@ -45,7 +45,7 @@
 <div class="mt-8 flow-root">
     <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <div class="overflow-hidden shadow ring-1 ring-black dark:ring-gray-700 ring-opacity-5 md:rounded-lg">
+            <div class="overflow-hidden shadow ring-1 ring-black/5 dark:ring-[#2d2d30] md:rounded-lg">
                 <div class="overflow-x-auto" style="overflow-x: auto; scrollbar-width: thin;">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700">

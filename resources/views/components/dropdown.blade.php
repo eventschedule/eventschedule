@@ -1,4 +1,4 @@
-@props(['align' => 'right', 'width' => '48', 'contentClasses' => 'py-1 bg-white dark:bg-gray-800'])
+@props(['align' => 'right', 'width' => '48', 'contentClasses' => 'py-1'])
 
 @php
 $alignmentClasses = match ($align) {
@@ -28,7 +28,7 @@ $width = match ($width) {
             class="absolute z-50 mt-2 {{ $width }} rounded-lg shadow-lg {{ $alignmentClasses }}"
             style="display: none;"
             @click="open = false">
-        <div class="rounded-lg ring-1 ring-black/8 dark:ring-white/10 {{ $contentClasses }}">
+        <div class="ap-dropdown rounded-lg ring-1 ring-black/8 dark:ring-white/10 {{ $contentClasses }}">
             {{ $content }}
         </div>
     </div>

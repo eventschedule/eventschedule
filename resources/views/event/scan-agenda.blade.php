@@ -483,7 +483,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <!-- Camera view -->
         <div v-if="state === 'camera'">
             <!-- Camera Error Card -->
-            <div v-if="cameraError" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm">
+            <div v-if="cameraError" class="ap-card border border-gray-200 rounded-xl p-6 shadow-sm">
                 <div class="text-center">
                     <!-- Camera icon with X overlay -->
                     <div class="relative inline-block mb-4">
@@ -685,7 +685,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         @dragend="onDragEnd"
                         :class="{ 'opacity-50': dragIndex === index }"
                         :style="{ marginTop: dropTargetIndex === index && dragIndex !== null && dragIndex !== index ? '3rem' : '', transition: 'margin 150ms ease' }"
-                        class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                        class="ap-card border border-gray-200 rounded-lg p-4 shadow-sm">
                         <div class="flex items-start gap-2">
                             <div class="cursor-grab text-gray-400 dark:text-gray-500 pt-2">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16">

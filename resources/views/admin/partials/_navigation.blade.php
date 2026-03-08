@@ -13,11 +13,11 @@
     $tabActive = 'border-[var(--brand-blue)] text-[var(--brand-blue)]';
     $tabInactive = 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300';
 
-    $dropdownItem = 'block w-full px-4 py-2 text-start text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600';
-    $dropdownItemActive = 'block w-full px-4 py-2 text-start text-sm text-[var(--brand-blue)] bg-gray-50 dark:bg-gray-600';
+    $dropdownItem = 'ap-dropdown-link block w-full px-4 py-2 text-start text-sm text-gray-700 dark:text-gray-300';
+    $dropdownItemActive = 'ap-dropdown-link block w-full px-4 py-2 text-start text-sm text-[var(--brand-blue)] bg-[var(--brand-blue-a10)]';
 @endphp
 
-<div class="border-b border-gray-200 dark:border-gray-700">
+<div class="ap-tab-container border-b border-gray-200 dark:border-gray-700">
     <div class="flex justify-between items-center">
         <nav class="-mb-px flex gap-8" x-data="{ openDropdown: null }">
             {{-- Dashboard --}}
@@ -45,7 +45,7 @@
                     class="absolute z-50 mt-0 w-48 rounded-lg shadow-lg ltr:origin-top-left rtl:origin-top-right start-0"
                     style="display: none;"
                     @click="openDropdown = null">
-                    <div class="rounded-lg ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-gray-700">
+                    <div class="admin-dropdown rounded-lg ring-1 ring-black/5 py-1">
                         <a href="{{ route('admin.users') }}" class="{{ $active === 'users' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.users')
                         </a>
@@ -81,7 +81,7 @@
                     class="absolute z-50 mt-0 w-48 rounded-lg shadow-lg ltr:origin-top-left rtl:origin-top-right start-0"
                     style="display: none;"
                     @click="openDropdown = null">
-                    <div class="rounded-lg ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-gray-700">
+                    <div class="admin-dropdown rounded-lg ring-1 ring-black/5 py-1">
                         <a href="{{ route('admin.boost') }}" class="{{ $active === 'boost' ? $dropdownItemActive : $dropdownItem }}">
                             Boost
                         </a>
@@ -127,7 +127,7 @@
                     class="absolute z-50 mt-0 w-48 rounded-lg shadow-lg ltr:origin-top-left rtl:origin-top-right start-0"
                     style="display: none;"
                     @click="openDropdown = null">
-                    <div class="rounded-lg ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-gray-700">
+                    <div class="admin-dropdown rounded-lg ring-1 ring-black/5 py-1">
                         <a href="{{ route('admin.audit_log') }}" class="{{ $active === 'audit-log' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.audit_log')
                         </a>

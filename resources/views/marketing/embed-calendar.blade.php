@@ -88,6 +88,9 @@
                     </svg>
                 </a>
             </div>
+            <p class="mt-6 text-gray-500 dark:text-gray-400 animate-reveal delay-300" style="opacity: 0;">
+                <a href="{{ route('marketing.docs.sharing') }}" class="underline hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Read the Sharing guide</a>
+            </p>
 
         </div>
     </section>

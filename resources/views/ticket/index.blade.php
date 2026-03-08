@@ -20,7 +20,7 @@
             <!-- Desktop Table View -->
             <div class="hidden md:block -mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                 <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                    <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                    <div class="overflow-hidden shadow ring-1 ring-black/5 md:rounded-lg">
                         <div class="overflow-x-auto" style="overflow-x: auto; scrollbar-width: thin;">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50 dark:bg-gray-800">
@@ -110,7 +110,7 @@
             <!-- Mobile List View -->
             <div class="md:hidden space-y-4">
                 @foreach ($sales as $sale)
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow duration-200">
+                    <div class="ap-card rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow duration-200">
                         <div class="space-y-4">
                             <!-- Header with Status -->
                             <div class="flex items-start justify-between">

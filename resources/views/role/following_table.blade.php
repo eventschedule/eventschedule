@@ -1,7 +1,7 @@
 @if($roles->count() > 0)
 <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
     <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-        <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+        <div class="overflow-hidden shadow ring-1 ring-black/5 md:rounded-lg">
             <div class="overflow-x-auto" style="overflow-x: auto; scrollbar-width: thin;">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-800">
@@ -90,7 +90,7 @@
                                     <div x-show="open"
                                          x-ref="dropdown"
                                          @click.away="open = false"
-                                         class="w-48 origin-top-right rounded-lg bg-white dark:bg-gray-800 py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-700 focus:outline-none"
+                                         class="ap-dropdown w-48 origin-top-right rounded-lg py-1 ring-1 ring-black/5 dark:ring-white/[0.06] focus:outline-none"
                                          role="menu"
                                          x-cloak
                                          aria-orientation="vertical">
