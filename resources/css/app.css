@@ -119,7 +119,7 @@
 input[type="text"], input[type="email"], input[type="password"],
 input[type="number"], input[type="url"], input[type="tel"],
 input[type="search"], textarea, select {
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 .dark input[type="text"], .dark input[type="email"], .dark input[type="password"],
 .dark input[type="number"], .dark input[type="url"], .dark input[type="tel"],
@@ -129,7 +129,7 @@ input[type="search"], textarea, select {
 
 /* Toggle track depth */
 .peer ~ div:first-of-type {
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 .dark .peer ~ div:first-of-type {
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
