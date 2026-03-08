@@ -1437,6 +1437,21 @@ class MarketingController extends Controller
                     ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
                     ['name' => 'Tito', 'route' => 'marketing.compare_tito'],
                 ],
+                'auto_import' => [
+                    'title' => 'Bring your Eventbrite events with you',
+                    'description' => 'Connect your Eventbrite account and import all your events in one click. No manual data entry or copy-pasting needed.',
+                    'bullets' => [
+                        'Event details and descriptions',
+                        'Ticket types and pricing',
+                        'Venue information',
+                        'Event images',
+                    ],
+                    'steps' => [
+                        ['title' => 'Connect your account', 'description' => 'Link your Eventbrite account with one click.'],
+                        ['title' => 'Select your events', 'description' => 'Browse your Eventbrite events and choose which to import.'],
+                        ['title' => 'Import instantly', 'description' => 'All details, tickets, venues, and images transfer automatically.'],
+                    ],
+                ],
                 'switch_steps' => [
                     ['title' => 'Create your schedule', 'description' => 'Sign up free and create your first schedule in under a minute.'],
                     ['title' => 'Add your events', 'description' => 'Import your events directly from Eventbrite, use AI import, or create events manually.'],

@@ -141,6 +141,59 @@
     <!-- Transition -->
     <div class="section-fade-to-gray h-24"></div>
 
+    @if (!empty($auto_import))
+    <!-- Auto-Import Section -->
+    <section class="bg-gray-100 dark:bg-[#0f0f14] pt-24 pb-12">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Left Column -->
+                <div>
+                    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 text-sm font-medium mb-6">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        Import from {{ $name }}
+                    </span>
+
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                        {{ $auto_import['title'] }}
+                    </h2>
+
+                    <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
+                        {{ $auto_import['description'] }}
+                    </p>
+
+                    <ul class="space-y-3">
+                        @foreach ($auto_import['bullets'] as $bullet)
+                        <li class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                            <svg class="w-5 h-5 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            {{ $bullet }}
+                        </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <!-- Right Column: Steps -->
+                <div class="space-y-4">
+                    @foreach ($auto_import['steps'] as $index => $step)
+                    <div class="relative flex items-start gap-5 bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 p-6">
+                        <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                            {{ $index + 1 }}
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ $step['title'] }}</h3>
+                            <p class="text-gray-600 dark:text-gray-400">{{ $step['description'] }}</p>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </section>
+    @endif
+
     <!-- Comparison Table -->
     <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">

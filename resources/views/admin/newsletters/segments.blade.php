@@ -4,10 +4,9 @@
 
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.segments') }}</h2>
-            <a href="{{ route('admin.newsletters.index') }}"
-                class="inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+            <x-secondary-link :href="route('admin.newsletters.index')">
                 {{ __('messages.back') }}
-            </a>
+            </x-secondary-link>
         </div>
 
         @if (session('status'))
@@ -103,9 +102,9 @@
                     </div>
 
                     <div class="flex justify-end">
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[#4E81FA] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-600">
+                        <x-brand-button type="submit">
                             {{ __('messages.create_segment') }}
-                        </button>
+                        </x-brand-button>
                     </div>
                 </div>
             </form>

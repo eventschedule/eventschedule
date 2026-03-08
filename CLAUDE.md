@@ -37,6 +37,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Use bordered panels for AP warnings** - Never use plain colored text for warnings. Use `bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3` with a warning triangle SVG icon (`w-5 h-5 text-amber-600 dark:text-amber-400`) inside a flex layout
 - **Never modify WP pricing feature lists or header/footer links** - The feature lists on the /pricing page and the WP header/footer navigation links are manually curated. Do not add, remove, or reorder items unless explicitly asked.
 - **Use Vue.js, not Alpine.js or jQuery** - Always use Vue.js for JavaScript interactivity. Do not use Alpine.js directives (x-data, x-show, @click, etc.) or jQuery. When modifying files that use Alpine.js or jQuery, migrate the relevant code to Vue.js.
+- **Use button components in the AP** - Use `<x-brand-button>` for primary actions (save, submit, filter), `<x-secondary-link>` for secondary navigation (back, cancel, clear), and `<x-danger-button>` for destructive actions. Never hardcode inline button styles. Small utility buttons (e.g. "Add 30 days") may use inline styles but must use `focus:ring-[#4E81FA]` for focus rings.
 
 ## Terminology
 

@@ -162,13 +162,13 @@
                     </select>
                 </div>
                 <div class="flex gap-2">
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <x-brand-button type="submit">
                         @lang('messages.filter')
-                    </button>
+                    </x-brand-button>
                     @if(request('search') || request('plan_type') || request('status') || request('source'))
-                        <a href="{{ route('admin.plans') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-600 border border-transparent rounded-lg font-semibold text-xs text-gray-700 dark:text-gray-200 uppercase tracking-widest hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        <x-secondary-link :href="route('admin.plans')">
                             @lang('messages.clear')
-                        </a>
+                        </x-secondary-link>
                     @endif
                 </div>
             </form>

@@ -304,7 +304,7 @@ trait AccountSetupTrait
             form.submit();
         ");
 
-        $browser->waitForLocation('/', 5)
-            ->assertPathIs('/');
+        $browser->waitForLocation('/login', 5)
+            ->assertPathIs('/login');
     }
 }

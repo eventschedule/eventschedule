@@ -207,12 +207,6 @@
                         }
                     });
                 },
-                reorder() {
-                    const visible = this.panels.filter(p => p.visible);
-                    const hidden = this.panels.filter(p => !p.visible);
-                    this.panels = [...visible, ...hidden];
-                    this.$nextTick(() => this.initSortable());
-                },
                 async save() {
                     this.saving = true;
                     try {
@@ -246,13 +240,13 @@
                         <template x-for="(panel, index) in panels" :key="panel.id">
                             <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-700/50 transition-opacity duration-200 select-none" :class="{ 'opacity-50': !panel.visible }">
                                 {{-- Drag Handle --}}
-                                <div class="drag-handle cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0">
+                                <div class="drag-handle cursor-grab active:cursor-grabbing flex-shrink-0" :class="panel.visible ? 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' : 'text-gray-300 dark:text-gray-600'">
                                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/><circle cx="9" cy="15" r="1.5"/><circle cx="15" cy="15" r="1.5"/><circle cx="9" cy="20" r="1.5"/><circle cx="15" cy="20" r="1.5"/></svg>
                                 </div>
 
                                 {{-- Toggle --}}
                                 <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                    <input type="checkbox" x-model="panel.visible" x-on:change="$nextTick(() => reorder())" class="sr-only peer">
+                                    <input type="checkbox" x-model="panel.visible" class="sr-only peer">
                                     <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
                                     <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                 </label>

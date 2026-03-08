@@ -117,23 +117,23 @@
             @if ($failedJobsCount > 0)
             <form method="POST" action="{{ route('admin.queue.retry-all') }}" class="js-confirm-form" data-confirm="{{ __('messages.confirm_retry_all_failed', ['count' => number_format($failedJobsCount)]) }}">
                 @csrf
-                <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg">
+                <x-brand-button type="submit">
                     @lang('messages.retry_all_failed')
-                </button>
+                </x-brand-button>
             </form>
             <form method="POST" action="{{ route('admin.queue.clear-failed') }}" class="js-confirm-form" data-confirm="{{ __('messages.confirm_delete_all_failed', ['count' => number_format($failedJobsCount)]) }}">
                 @csrf
-                <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg">
+                <x-danger-button>
                     @lang('messages.clear_all_failed')
-                </button>
+                </x-danger-button>
             </form>
             @endif
             @if ($pendingJobsCount > 0)
             <form method="POST" action="{{ route('admin.queue.flush-pending') }}" class="js-confirm-form" data-confirm="{{ __('messages.confirm_flush_pending', ['count' => number_format($pendingJobsCount)]) }}">
                 @csrf
-                <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg">
+                <x-danger-button>
                     @lang('messages.flush_pending')
-                </button>
+                </x-danger-button>
             </form>
             @endif
         </div>

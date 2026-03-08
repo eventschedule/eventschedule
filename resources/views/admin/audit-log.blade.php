@@ -92,12 +92,12 @@
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search_audit_log') }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
                 </div>
                 <div class="flex items-end gap-2">
-                    <button type="submit" class="px-4 py-2 bg-[#4E81FA] text-white rounded-lg text-sm font-medium hover:bg-blue-600">
+                    <x-brand-button type="submit">
                         @lang('messages.filter')
-                    </button>
-                    <a href="{{ route('admin.audit_log') }}" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-500">
+                    </x-brand-button>
+                    <x-secondary-link :href="route('admin.audit_log')">
                         @lang('messages.clear')
-                    </a>
+                    </x-secondary-link>
                 </div>
             </div>
         </form>

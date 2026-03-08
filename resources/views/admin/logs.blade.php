@@ -184,14 +184,14 @@
 
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search_messages') }}" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm flex-1 min-w-[200px]">
 
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-600 hover:bg-gray-700 dark:hover:bg-gray-500 text-white text-sm font-medium rounded-lg">
+                    <x-brand-button type="submit">
                         @lang('messages.filter')
-                    </button>
+                    </x-brand-button>
 
                     @if (request('level') || request('search'))
-                    <a href="{{ route('admin.logs') }}" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
+                    <x-secondary-link :href="route('admin.logs')">
                         @lang('messages.clear')
-                    </a>
+                    </x-secondary-link>
                     @endif
                 </form>
 
@@ -288,20 +288,20 @@
             {{-- Actions --}}
             @if ($fileSize > 0)
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4 flex flex-wrap gap-3">
-                <a href="{{ route('admin.logs.download') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-600 hover:bg-gray-700 dark:hover:bg-gray-500 text-white text-sm font-medium rounded-lg">
+                <x-secondary-link :href="route('admin.logs.download')">
                     <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                     @lang('messages.download_log')
-                </a>
+                </x-secondary-link>
                 <form method="POST" action="{{ route('admin.logs.clear') }}" class="js-confirm-form" data-confirm="{{ __('messages.confirm_clear_log') }}">
                     @csrf
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg">
+                    <x-danger-button>
                         <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
                         @lang('messages.clear_log')
-                    </button>
+                    </x-danger-button>
                 </form>
             </div>
             @endif

@@ -175,10 +175,9 @@
                         class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 w-32"
                         placeholder="100">
                 </div>
-                <button type="submit"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm text-sm">
+                <x-brand-button type="submit">
                     @lang('messages.grant_credit')
-                </button>
+                </x-brand-button>
             </form>
 
             @if ($errors->any())
@@ -239,10 +238,9 @@
                         class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 w-32"
                         placeholder="100">
                 </div>
-                <button type="submit"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm text-sm">
+                <x-brand-button type="submit">
                     @lang('messages.set_limit')
-                </button>
+                </x-brand-button>
             </form>
 
             @if ($rolesWithLimit->count() > 0)
