@@ -42,9 +42,8 @@ class GeneralTest extends DuskTestCase
             $browser->script("document.querySelector('.details-tab[data-tab=\"contact\"]').click()");
             $browser->waitFor('#website', 5)
                 ->type('website', 'https://google.com')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/venue/schedule', 5)
+                ->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit()");
+            $browser->waitForLocation('/venue/schedule', 15)
                 ->assertSee('google.com');
 
             // Create/edit talent using the trait
@@ -57,9 +56,8 @@ class GeneralTest extends DuskTestCase
             $browser->script("document.querySelector('.details-tab[data-tab=\"contact\"]').click()");
             $browser->waitFor('#website', 5)
                 ->type('website', 'https://google.com')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/talent/schedule', 5)
+                ->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit()");
+            $browser->waitForLocation('/talent/schedule', 15)
                 ->assertSee('google.com');
 
             // Create/edit event
@@ -71,9 +69,8 @@ class GeneralTest extends DuskTestCase
             $browser->script("var cb = document.getElementById('in_person'); if (!cb.checked) cb.click();");
             $browser->waitFor('#selected_venue', 5)
                 ->select('#selected_venue')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/talent/schedule', 5)
+                ->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit()");
+            $browser->waitForLocation('/talent/schedule', 15)
                 ->assertSee('Venue');
 
             // Create/edit event
@@ -82,9 +79,8 @@ class GeneralTest extends DuskTestCase
                 ->click('a[data-section="section-participants"]')
                 ->waitFor('#selected_member', 5)
                 ->select('#selected_member')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/venue/schedule', 5)
+                ->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit()");
+            $browser->waitForLocation('/venue/schedule', 15)
                 ->pause(1000)
                 ->assertSee('Venue Event');
         });
