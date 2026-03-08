@@ -259,6 +259,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Custom Labels page
+     */
+    public function customLabels()
+    {
+        return view('marketing.custom-labels');
+    }
+
+    /**
      * Team Scheduling page
      */
     public function teamScheduling()

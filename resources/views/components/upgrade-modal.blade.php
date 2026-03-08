@@ -1,4 +1,4 @@
-@props(['name', 'tier' => 'pro', 'subdomain' => '', 'docsUrl' => null])
+@props(['name', 'tier' => 'pro', 'subdomain' => '', 'learnMoreUrl' => null])
 
 @if (config('app.hosted'))
 <x-modal :name="$name" maxWidth="sm">
@@ -17,9 +17,9 @@
             {{ $slot }}
         </p>
 
-        @if ($docsUrl)
+        @if ($learnMoreUrl)
         <p class="text-sm mb-4">
-            <a href="{{ $docsUrl }}" target="_blank" class="text-[var(--brand-blue)] hover:underline">{{ __('messages.learn_more') }} &rarr;</a>
+            <a href="{{ $learnMoreUrl }}" target="_blank" class="text-[var(--brand-blue)] hover:underline">{{ __('messages.learn_more') }} &rarr;</a>
         </p>
         @else
         <div class="mb-2"></div>

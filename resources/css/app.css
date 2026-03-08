@@ -218,8 +218,15 @@ div:has(+ div + .get-started-card:hover) > div {
 
 /* Section content panels */
 .section-content {
+    padding: 1rem;
     background: linear-gradient(to bottom, #ffffff, #f9fafb);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+@media (min-width: 640px) {
+    .section-content {
+        padding: 2rem;
+        border-radius: 0.75rem;
+    }
 }
 .dark .section-content {
     background: linear-gradient(to bottom, #2d2d30, #252526);
@@ -252,6 +259,22 @@ div:has(+ div + .get-started-card:hover) > div {
 }
 
 /* Sidebar section nav */
+.section-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 0.75rem;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    font-weight: 500;
+    color: #2d2d30;
+    border-start-end-radius: 0.5rem;
+    border-end-end-radius: 0.5rem;
+    border-inline-start: 4px solid transparent;
+}
+.dark .section-nav-link {
+    color: #d1d5db;
+}
 .section-nav-link:hover:not(.nav-active) {
     background: linear-gradient(to bottom, #f3f4f6, #eef0f3) !important;
 }
@@ -299,8 +322,21 @@ div:has(+ div + .get-started-card:hover) > div {
 
 /* Mobile accordion headers */
 .mobile-section-header {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
     background: linear-gradient(to bottom, #ffffff, #fafafa);
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+@media (min-width: 1024px) {
+    .mobile-section-header {
+        display: none;
+    }
 }
 .dark .mobile-section-header {
     background: linear-gradient(to bottom, #2d2d30, #282828);

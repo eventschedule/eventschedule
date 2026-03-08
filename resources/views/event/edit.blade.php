@@ -1054,32 +1054,32 @@
                     <div class="sticky top-6">
                         <nav class="space-y-1">
                             @if (! $role->isVenue() || $user->isMember($role->subdomain) || $user->canEditEvent($event))
-                            <a href="#section-details" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-details">
+                            <a href="#section-details" class="section-nav-link" data-section="section-details">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                                 </svg>
                                 {{ __('messages.details') }}
                             </a>
                             @endif
-                            <a href="#section-venue" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-venue">
+                            <a href="#section-venue" class="section-nav-link" data-section="section-venue">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-1.5-1.5v18m7.5-18v18" />
                                 </svg>
                                 {{ __('messages.venue') }}
                             </a>
-                            <a href="#section-participants" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-participants">
+                            <a href="#section-participants" class="section-nav-link" data-section="section-participants">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                                 </svg>
                                 {{ __('messages.participants') }}
                             </a>
-                            <a href="#section-recurring" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-recurring">
+                            <a href="#section-recurring" class="section-nav-link" data-section="section-recurring">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                                 </svg>
                                 {{ __('messages.recurring') }}
                             </a>
-                            <a href="#section-agenda" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-agenda">
+                            <a href="#section-agenda" class="section-nav-link" data-section="section-agenda">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                                 </svg>
@@ -1092,7 +1092,7 @@
                                 });
                             @endphp
                             @if ($curatorsForNav->count() > 0)
-                            <a href="#section-schedules" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-schedules">
+                            <a href="#section-schedules" class="section-nav-link" data-section="section-schedules">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                                 </svg>
@@ -1100,7 +1100,7 @@
                             </a>
                             @endif
                             @if ($event->exists && $event->canBeSyncedToGoogleCalendarForSubdomain(request()->subdomain))
-                            <a href="#section-google-calendar" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-google-calendar">
+                            <a href="#section-google-calendar" class="section-nav-link" data-section="section-google-calendar">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                                 </svg>
@@ -1108,13 +1108,13 @@
                             </a>
                             @endif
                             @if ($event->user_id == $user->id)
-                            <a href="#section-tickets" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-tickets">
+                            <a href="#section-tickets" class="section-nav-link" data-section="section-tickets">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
                                 </svg>
                                 {{ __('messages.tickets') }}
                             </a>
-                            <a href="#section-event-settings" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-event-settings">
+                            <a href="#section-event-settings" class="section-nav-link" data-section="section-event-settings">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -1123,7 +1123,7 @@
                             </a>
                             @endif
                             @php $fanContentPendingCount = $event->exists ? (($pendingVideos->count() ?? 0) + ($pendingComments->count() ?? 0) + ($pendingPhotos->count() ?? 0)) : 0; @endphp
-                            <a href="#section-engagement" class="section-nav-link flex items-center gap-2 px-3 py-3.5 text-lg font-medium text-gray-700 dark:text-gray-300 rounded-e-lg border-s-4 border-transparent" data-section="section-engagement">
+                            <a href="#section-engagement" class="section-nav-link" data-section="section-engagement">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                                 </svg>
@@ -1154,7 +1154,7 @@
                 <!-- Main Content Area -->
                 <div class="lg:col-span-9 space-y-6 lg:space-y-0">
                 @if (! $role->isVenue() || $user->isMember($role->subdomain) || $user->canEditEvent($event))
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-details">
+                <button type="button" class="mobile-section-header" data-section="section-details">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
@@ -1165,7 +1165,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-details" class="section-content p-4 sm:p-8 sm:rounded-xl">
+                <div id="section-details" class="section-content">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -1354,7 +1354,7 @@
                     </div>
                 </div>
                 @endif
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-venue">
+                <button type="button" class="mobile-section-header" data-section="section-venue">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-1.5-1.5v18m7.5-18v18" />
@@ -1365,7 +1365,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-venue" class="section-content p-4 sm:p-8 sm:rounded-xl lg:mt-0">
+                <div id="section-venue" class="section-content lg:mt-0">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -1575,7 +1575,7 @@
                     </div>
                 </div>
 
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-participants">
+                <button type="button" class="mobile-section-header" data-section="section-participants">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
@@ -1586,7 +1586,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-participants" class="section-content p-4 sm:p-8 sm:rounded-xl lg:mt-0">
+                <div id="section-participants" class="section-content lg:mt-0">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -1807,7 +1807,7 @@
                     </div>
                 </div>
 
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-recurring">
+                <button type="button" class="mobile-section-header" data-section="section-recurring">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
@@ -1818,7 +1818,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-recurring" class="section-content p-4 sm:p-8 sm:rounded-xl lg:mt-0">
+                <div id="section-recurring" class="section-content lg:mt-0">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -1948,7 +1948,7 @@
                 </div>
 
                 <!-- Agenda Section -->
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-agenda">
+                <button type="button" class="mobile-section-header" data-section="section-agenda">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -1959,7 +1959,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-agenda" class="section-content p-4 sm:p-8 sm:rounded-xl lg:mt-0">
+                <div id="section-agenda" class="section-content lg:mt-0">
                     <div class="max-w-xl {{ auth()->check() && auth()->user()->isRtl() ? 'rtl' : '' }}">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -2178,7 +2178,7 @@
                 @endphp
 
                 @if ($curators->count() > 0)
-                <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-schedules">
+                <button type="button" class="mobile-section-header" data-section="section-schedules">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
@@ -2189,7 +2189,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-schedules" class="section-content p-4 sm:p-8 sm:rounded-xl lg:mt-0">
+                <div id="section-schedules" class="section-content lg:mt-0">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -2270,7 +2270,7 @@
                 @endif
 
             @if ($event->exists && $event->canBeSyncedToGoogleCalendarForSubdomain(request()->subdomain))
-            <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-google-calendar">
+            <button type="button" class="mobile-section-header" data-section="section-google-calendar">
                 <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
@@ -2281,7 +2281,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
             </button>
-            <div id="section-google-calendar" class="section-content p-4 sm:p-8 sm:rounded-xl lg:mt-0">
+            <div id="section-google-calendar" class="section-content lg:mt-0">
                 <div class="max-w-xl">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -2331,7 +2331,7 @@
             @endif
 
                     @if ($event->user_id == $user->id)
-                    <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-tickets">
+                    <button type="button" class="mobile-section-header" data-section="section-tickets">
                         <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
@@ -2342,7 +2342,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </button>
-                    <div id="section-tickets" class="section-content p-4 sm:p-8 sm:rounded-xl lg:mt-0">
+                    <div id="section-tickets" class="section-content lg:mt-0">
                         <div class="max-w-xl">                                                
                             <div class="mb-6 flex items-center justify-between">
                                 <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
@@ -2425,7 +2425,7 @@
                             <div v-show="event.tickets_enabled || event.rsvp_enabled">
 
                                 <!-- Upgrade banner for non-Pro users selecting Tickets -->
-                                <x-upgrade-prompt tier="pro" :docsUrl="route('marketing.docs.tickets')" :subdomain="$subdomain" v-show="event.tickets_enabled && !isPro" class="mb-4">
+                                <x-upgrade-prompt tier="pro" :learnMoreUrl="route('marketing.ticketing')" :subdomain="$subdomain" v-show="event.tickets_enabled && !isPro" class="mb-4">
                                     {{ __('messages.requires_pro_plan') }}
                                 </x-upgrade-prompt>
 
@@ -2578,7 +2578,7 @@
                                 </div>
                                 </template>
                                 <template v-else>
-                                <x-upgrade-prompt tier="pro" :docsUrl="route('marketing.docs.tickets')" :subdomain="$subdomain" v-show="event.rsvp_enabled" class="mb-6">
+                                <x-upgrade-prompt tier="pro" :learnMoreUrl="route('marketing.ticketing')" :subdomain="$subdomain" v-show="event.rsvp_enabled" class="mb-6">
                                     <x-slot:icon>
                                         <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" />
@@ -3019,7 +3019,7 @@
                 @endif
 
                 @if ($event->user_id == $user->id)
-                    <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-event-settings">
+                    <button type="button" class="mobile-section-header" data-section="section-event-settings">
                         <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
@@ -3031,7 +3031,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </button>
-                    <div id="section-event-settings" class="section-content p-4 sm:p-8 sm:rounded-xl lg:mt-0">
+                    <div id="section-event-settings" class="section-content lg:mt-0">
                         <div class="max-w-xl">
                             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -3085,18 +3085,9 @@
                                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.event_password_help') }}</p>
                                 </div>
                             @else
-                                <div class="text-center py-8">
-                                    <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                                    </svg>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                                        {{ __('messages.upgrade_enterprise_privacy') }}
-                                    </p>
-                                    @if (config('app.hosted'))
-                                    <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-privacy')"
-                                        class="text-[var(--brand-blue)] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_enterprise') }}</button>
-                                    @endif
-                                </div>
+                                <x-upgrade-prompt tier="enterprise" :learnMoreUrl="route('marketing.private_events')" :subdomain="$subdomain">
+                                    {{ __('messages.upgrade_enterprise_privacy') }}
+                                </x-upgrade-prompt>
                             @endif
                             </div>
 
@@ -3193,7 +3184,7 @@
                     </div>
                 @endif
 
-            <button type="button" class="mobile-section-header lg:hidden w-full flex items-center justify-between px-4 py-3 border rounded-lg mb-2" data-section="section-engagement">
+            <button type="button" class="mobile-section-header" data-section="section-engagement">
                 <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
@@ -3204,7 +3195,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
             </button>
-            <div id="section-engagement" class="section-content p-4 sm:p-8 sm:rounded-xl lg:mt-0">
+            <div id="section-engagement" class="section-content lg:mt-0">
                 <div class="max-w-2xl">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -3385,7 +3376,7 @@
                             {{ __('messages.add_poll') }}
                         </button>
                     @else
-                        <x-upgrade-prompt tier="pro" :docsUrl="route('marketing.docs.creating_events').'#polls'" :subdomain="$subdomain">
+                        <x-upgrade-prompt tier="pro" :learnMoreUrl="route('marketing.polls')" :subdomain="$subdomain">
                             <x-slot:icon>
                                 <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
@@ -3591,7 +3582,7 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.feedback_override_help') }}</p>
                         </div>
                     @else
-                        <x-upgrade-prompt tier="pro" :docsUrl="route('marketing.docs.creating_events').'#feedback'" :subdomain="$subdomain">
+                        <x-upgrade-prompt tier="pro" :learnMoreUrl="route('marketing.feedback')" :subdomain="$subdomain">
                             <x-slot:icon>
                                 <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
@@ -5762,23 +5753,23 @@ function deleteFlyer(url, hash, token, element) {
 }
 </script>
 
-<x-upgrade-modal name="upgrade-polls" tier="pro" :subdomain="$subdomain" docsUrl="{{ route('marketing.polls') }}">
+<x-upgrade-modal name="upgrade-polls" tier="pro" :subdomain="$subdomain" learnMoreUrl="{{ route('marketing.polls') }}">
     {{ __('messages.polls_pro_only') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-feedback" tier="pro" :subdomain="$subdomain" docsUrl="{{ route('marketing.feedback') }}">
+<x-upgrade-modal name="upgrade-feedback" tier="pro" :subdomain="$subdomain" learnMoreUrl="{{ route('marketing.feedback') }}">
     {{ __('messages.feedback_pro_only') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-boost" tier="pro" :subdomain="$subdomain" docsUrl="{{ route('marketing.boost') }}">
+<x-upgrade-modal name="upgrade-boost" tier="pro" :subdomain="$subdomain" learnMoreUrl="{{ route('marketing.boost') }}">
     {{ __('messages.upgrade_feature_description_boost') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-tickets" tier="pro" :subdomain="$subdomain" docsUrl="{{ route('marketing.ticketing') }}">
+<x-upgrade-modal name="upgrade-tickets" tier="pro" :subdomain="$subdomain" learnMoreUrl="{{ route('marketing.ticketing') }}">
     {{ __('messages.upgrade_feature_description_tickets') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-privacy" tier="enterprise" :subdomain="$subdomain" docsUrl="{{ route('marketing.private_events') }}">
+<x-upgrade-modal name="upgrade-privacy" tier="enterprise" :subdomain="$subdomain" learnMoreUrl="{{ route('marketing.private_events') }}">
     {{ __('messages.upgrade_feature_description_privacy') }}
 </x-upgrade-modal>
 
@@ -5920,7 +5911,7 @@ window.handleAiEventDetailsResults = function(data) {
 </script>
 @endif
 
-<x-upgrade-modal name="upgrade-ai-details" tier="enterprise" :subdomain="$subdomain" docsUrl="{{ route('marketing.ai') }}">
+<x-upgrade-modal name="upgrade-ai-details" tier="enterprise" :subdomain="$subdomain" learnMoreUrl="{{ route('marketing.ai') }}">
     {{ __('messages.upgrade_feature_description_ai_details') }}
 </x-upgrade-modal>
 

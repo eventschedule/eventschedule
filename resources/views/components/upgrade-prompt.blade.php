@@ -1,4 +1,4 @@
-@props(['tier' => 'pro', 'docsUrl' => null, 'subdomain' => null])
+@props(['tier' => 'pro', 'learnMoreUrl' => null, 'subdomain' => null])
 
 <div {{ $attributes->merge(['class' => 'text-center py-10 px-6 rounded-xl bg-gray-50 dark:bg-[#252526] border border-gray-200 dark:border-[#2d2d30]']) }}>
     <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08]">
@@ -15,8 +15,8 @@
     </p>
     @if (config('app.hosted'))
     <div class="flex items-center justify-center gap-3 mt-5">
-        @if ($docsUrl)
-        <a href="{{ $docsUrl }}" target="_blank"
+        @if ($learnMoreUrl)
+        <a href="{{ $learnMoreUrl }}" target="_blank"
             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 text-sm font-medium hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-all duration-200">
             {{ __('messages.learn_more') }}
         </a>

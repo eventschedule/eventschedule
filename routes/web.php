@@ -484,6 +484,7 @@ if (config('app.is_nexus')) {
         Route::get('/features/analytics', [MarketingController::class, 'analytics'])->name('marketing.analytics');
         Route::get('/features/integrations', [MarketingController::class, 'integrations'])->name('marketing.integrations');
         Route::get('/features/custom-fields', [MarketingController::class, 'customFields'])->name('marketing.custom_fields');
+        Route::get('/features/custom-labels', [MarketingController::class, 'customLabels'])->name('marketing.custom_labels');
         Route::get('/features/team-scheduling', [MarketingController::class, 'teamScheduling'])->name('marketing.team_scheduling');
         Route::get('/features/sub-schedules', [MarketingController::class, 'subSchedules'])->name('marketing.sub_schedules');
         Route::get('/features/online-events', [MarketingController::class, 'onlineEvents'])->name('marketing.online_events');
@@ -674,6 +675,7 @@ if (config('app.is_nexus')) {
             Route::get('/features/analytics', [MarketingController::class, 'analytics'])->name('marketing.analytics');
             Route::get('/features/integrations', [MarketingController::class, 'integrations'])->name('marketing.integrations');
             Route::get('/features/custom-fields', [MarketingController::class, 'customFields'])->name('marketing.custom_fields');
+            Route::get('/features/custom-labels', [MarketingController::class, 'customLabels'])->name('marketing.custom_labels');
             Route::get('/features/team-scheduling', [MarketingController::class, 'teamScheduling'])->name('marketing.team_scheduling');
             Route::get('/features/sub-schedules', [MarketingController::class, 'subSchedules'])->name('marketing.sub_schedules');
             Route::get('/features/online-events', [MarketingController::class, 'onlineEvents'])->name('marketing.online_events');
@@ -880,6 +882,7 @@ if (config('app.is_nexus')) {
             Route::get('/features/analytics', fn () => redirect('https://eventschedule.com/features/analytics', 301));
             Route::get('/features/integrations', fn () => redirect('https://eventschedule.com/features/integrations', 301));
             Route::get('/features/custom-fields', fn () => redirect('https://eventschedule.com/features/custom-fields', 301));
+            Route::get('/features/custom-labels', fn () => redirect('https://eventschedule.com/features/custom-labels', 301));
             Route::get('/features/team-scheduling', fn () => redirect('https://eventschedule.com/features/team-scheduling', 301));
             Route::get('/features/sub-schedules', fn () => redirect('https://eventschedule.com/features/sub-schedules', 301));
             Route::get('/features/online-events', fn () => redirect('https://eventschedule.com/features/online-events', 301));
@@ -1043,6 +1046,7 @@ if (config('app.is_nexus')) {
     Route::get('/invoiceninja', fn () => redirect()->route('home'));
     Route::get('/features/integrations', fn () => redirect()->route('home'));
     Route::get('/features/custom-fields', fn () => redirect()->route('home'));
+    Route::get('/features/custom-labels', fn () => redirect()->route('home'));
     Route::get('/features/team-scheduling', fn () => redirect()->route('home'));
     Route::get('/features/sub-schedules', fn () => redirect()->route('home'));
     Route::get('/features/online-events', fn () => redirect()->route('home'));

@@ -2048,11 +2048,11 @@
             </div>
         </div>
     </div>
-<x-upgrade-modal name="upgrade-ai-prompt" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.event_graphics') }}">
+<x-upgrade-modal name="upgrade-ai-prompt" tier="enterprise" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.event_graphics') }}">
     {{ __('messages.upgrade_feature_description_ai_prompt') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-email-scheduling" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.newsletters') }}">
+<x-upgrade-modal name="upgrade-email-scheduling" tier="enterprise" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.newsletters') }}">
     {{ __('messages.upgrade_feature_description_email_scheduling') }}
 </x-upgrade-modal>
 

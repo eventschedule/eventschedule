@@ -556,11 +556,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 @include('components.embed-modal')
 
-<x-upgrade-modal name="upgrade-scan-agenda" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.ai') }}">
+<x-upgrade-modal name="upgrade-scan-agenda" tier="enterprise" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.ai') }}">
     {{ __('messages.upgrade_feature_description_scan_agenda') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-availability" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.availability') }}">
+<x-upgrade-modal name="upgrade-availability" tier="enterprise" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.availability') }}">
     {{ __('messages.upgrade_feature_description_availability') }}
 </x-upgrade-modal>
 

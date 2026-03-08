@@ -304,6 +304,12 @@
         <priority>0.8</priority>
     </url>
     <url>
+        <loc>{{ url('/features/custom-labels') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
         <loc>{{ url('/features/team-scheduling') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>

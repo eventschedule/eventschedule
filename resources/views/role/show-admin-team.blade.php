@@ -26,7 +26,7 @@
             </svg>
             {{ __('messages.add_member') }}
         </button>
-        <x-upgrade-modal name="upgrade-members" tier="enterprise" :subdomain="$role->subdomain" docsUrl="{{ route('marketing.team_scheduling') }}">
+        <x-upgrade-modal name="upgrade-members" tier="enterprise" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.team_scheduling') }}">
             {{ __('messages.upgrade_feature_description_members') }}
         </x-upgrade-modal>
         @endif
