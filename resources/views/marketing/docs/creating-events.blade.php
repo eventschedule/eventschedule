@@ -89,8 +89,8 @@
                         <div class="doc-nav-group">
                             <a href="#engagement" class="doc-nav-group-header doc-nav-link">Engagement <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
                             <div class="doc-nav-group-items">
-                                <a href="#polls" class="doc-nav-link">Polls</a>
                                 <a href="#fan-content" class="doc-nav-link">Fan Content</a>
+                                <a href="#polls" class="doc-nav-link">Polls</a>
                                 <a href="#feedback" class="doc-nav-link">Feedback</a>
                             </div>
                         </div>
@@ -523,59 +523,7 @@
                                 </svg>
                                 Engagement
                             </h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Add interactive features to your events including polls, fan content, and post-event feedback.</p>
-                        </section>
-
-                        <!-- Polls -->
-                        <section id="polls" class="doc-section">
-                            <h2 class="doc-heading">Polls <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-2">Pro</span></h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                Add interactive multiple-choice questions to your events and let your guests vote on the options that matter most.
-                            </p>
-                            <div class="doc-callout doc-callout-info">
-                                <div class="doc-callout-title">Note</div>
-                                <p>Event Polls is a Pro feature. Upgrade your schedule to Pro to start creating polls on your events.</p>
-                            </div>
-
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Creating Polls</h3>
-                            <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to the event edit page in your admin panel</li>
-                                <li>Scroll down to the <strong>Polls</strong> section</li>
-                                <li>Enter your question</li>
-                                <li>Add between 2 and 10 options for voters to choose from</li>
-                                <li>Save the event</li>
-                            </ol>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">
-                                You can add up to 5 polls per event. Each poll has its own question and set of options.
-                            </p>
-
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">How Voting Works</h3>
-                            <ul class="doc-list mb-6">
-                                <li><strong>Sign in required</strong> - Guests must be signed in to vote, which ensures each person can only vote once.</li>
-                                <li><strong>One click to vote</strong> - Guests simply click on the option they want to vote for.</li>
-                                <li><strong>One vote per poll</strong> - Each guest can cast one vote per poll. Votes cannot be changed after submission.</li>
-                                <li><strong>Instant results</strong> - After voting, results are shown immediately so guests can see how others voted.</li>
-                            </ul>
-
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Viewing Results</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                After a guest casts their vote, poll results are displayed with progress bars showing the count and percentage for each option. The leading option is highlighted so it is easy to see which choice is ahead.
-                            </p>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">
-                                As an organizer, you can always see poll results in the event edit page of your admin panel, regardless of whether you have voted.
-                            </p>
-
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Closing and Reopening</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                You can control whether a poll is accepting votes by toggling it between active and closed states:
-                            </p>
-                            <ul class="doc-list mb-6">
-                                <li><strong>Active polls</strong> - Guests can vote and results update in real time.</li>
-                                <li><strong>Closed polls</strong> - Results are still visible, but no new votes can be cast.</li>
-                            </ul>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                You can reopen a closed poll at any time if you want to allow voting again. Toggle the poll status from the event edit page in your admin panel.
-                            </p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Add interactive features to your events including fan content, polls, and post-event feedback.</p>
                         </section>
 
                         <!-- Fan Content -->
@@ -632,6 +580,58 @@
                             </ul>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Approved content appears on the public event page immediately. You can remove previously approved content at any time from the Videos tab in your admin panel.
+                            </p>
+                        </section>
+
+                        <!-- Polls -->
+                        <section id="polls" class="doc-section">
+                            <h2 class="doc-heading">Polls <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-2">Pro</span></h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Add interactive multiple-choice questions to your events and let your guests vote on the options that matter most.
+                            </p>
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Note</div>
+                                <p>Event Polls is a Pro feature. Upgrade your schedule to Pro to start creating polls on your events.</p>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Creating Polls</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Go to the event edit page in your admin panel</li>
+                                <li>Scroll down to the <strong>Polls</strong> section</li>
+                                <li>Enter your question</li>
+                                <li>Add between 2 and 10 options for voters to choose from</li>
+                                <li>Save the event</li>
+                            </ol>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">
+                                You can add up to 5 polls per event. Each poll has its own question and set of options.
+                            </p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">How Voting Works</h3>
+                            <ul class="doc-list mb-6">
+                                <li><strong>Sign in required</strong> - Guests must be signed in to vote, which ensures each person can only vote once.</li>
+                                <li><strong>One click to vote</strong> - Guests simply click on the option they want to vote for.</li>
+                                <li><strong>One vote per poll</strong> - Each guest can cast one vote per poll. Votes cannot be changed after submission.</li>
+                                <li><strong>Instant results</strong> - After voting, results are shown immediately so guests can see how others voted.</li>
+                            </ul>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Viewing Results</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                After a guest casts their vote, poll results are displayed with progress bars showing the count and percentage for each option. The leading option is highlighted so it is easy to see which choice is ahead.
+                            </p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">
+                                As an organizer, you can always see poll results in the event edit page of your admin panel, regardless of whether you have voted.
+                            </p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Closing and Reopening</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                You can control whether a poll is accepting votes by toggling it between active and closed states:
+                            </p>
+                            <ul class="doc-list mb-6">
+                                <li><strong>Active polls</strong> - Guests can vote and results update in real time.</li>
+                                <li><strong>Closed polls</strong> - Results are still visible, but no new votes can be cast.</li>
+                            </ul>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                You can reopen a closed poll at any time if you want to allow voting again. Toggle the poll status from the event edit page in your admin panel.
                             </p>
                         </section>
 

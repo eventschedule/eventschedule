@@ -2136,6 +2136,9 @@
                         </p>
                         @else
                         <div class="text-center py-8">
+                            <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                            </svg>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
                                 {{ __('messages.custom_fields_pro_only') }}
                             </p>
@@ -2355,6 +2358,10 @@
                         </div>
                         @else
                         <div class="text-center py-8">
+                            <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 6h.008v.008H6V6z" />
+                            </svg>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
                                 {{ __('messages.custom_labels_pro_only') }}
                             </p>
@@ -2466,7 +2473,7 @@
                                             <div class="text-xs pt-1">
                                                 <button type="button" x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-domain')"
                                                     class="text-[#4E81FA] hover:underline font-medium">
-                                                    {{ __('messages.requires_enterprise_plan') }}
+                                                    {{ __('messages.upgrade_enterprise_custom_domain') }}
                                                 </button>
                                             </div>
                                             @endif
@@ -2485,7 +2492,7 @@
                                             <div class="text-xs pt-1">
                                                 <button type="button" x-on:click.prevent="$dispatch('open-modal', 'upgrade-custom-domain')"
                                                     class="text-[#4E81FA] hover:underline font-medium">
-                                                    {{ __('messages.requires_enterprise_plan') }}
+                                                    {{ __('messages.upgrade_enterprise_custom_domain') }}
                                                 </button>
                                             </div>
                                             @endif
@@ -2646,6 +2653,14 @@
                                 :disabled="$emailDisabled" />
                         </div>
 
+                        <div class="mb-6">
+                            <x-toggle name="notification_new_poll_option"
+                                label="{{ __('messages.notify_new_poll_option') }}"
+                                checked="{{ old('notification_new_poll_option', $notificationSettings['new_poll_option'] ?? false) }}"
+                                help="{{ __('messages.notify_new_poll_option_help') }}"
+                                :disabled="$emailDisabled" />
+                        </div>
+
                         </div>
                         <!-- End Tab Content: Notifications -->
 
@@ -2689,7 +2704,7 @@
                             <x-input-error class="mt-2" :messages="$errors->get('direct_registration')" />
                         </div>
 
-                        @if ((config('app.hosted') || config('app.is_testing')) && ($role->isVenue() || $role->isCurator()))
+                        @if (config('app.hosted') || config('app.is_testing'))
                         <div class="mb-6" id="import_form_fields_section">
                             <x-input-label :value="__('messages.import_form_fields')" />
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.import_form_fields_help') }}</p>

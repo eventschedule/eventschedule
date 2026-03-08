@@ -68,10 +68,9 @@
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <button type="submit" :disabled="exportProcessing"
-                        class="inline-flex items-center justify-center px-4 py-3 bg-gradient-to-b from-[#5A8DFF] to-[#4E81FA] border border-transparent rounded-lg font-semibold text-base text-white shadow-sm transition-all duration-200 hover:from-[#4E81FA] hover:to-[#3D6FE8] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm">
+                    <x-primary-button type="submit" v-bind:disabled="exportProcessing">
                         {{ __('messages.backup_export') }}
-                    </button>
+                    </x-primary-button>
                 </div>
             </form>
 
@@ -138,13 +137,12 @@
                 <div v-if="!importPreview">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.backup_select_file') }}</label>
                     <input type="file" accept=".zip" @change="onFileSelected" ref="fileInput"
-                        class="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#4E81FA] file:text-white hover:file:bg-[#3d6de8] file:cursor-pointer">
+                        class="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-800 file:text-white hover:file:bg-gray-700 dark:file:bg-gray-200 dark:file:text-gray-800 dark:hover:file:bg-white file:cursor-pointer">
 
-                    <div class="flex items-center gap-4 mt-4">
-                        <button type="button" @click="uploadFile" :disabled="!selectedFile || uploadProcessing"
-                            class="inline-flex items-center justify-center px-4 py-3 bg-gradient-to-b from-[#5A8DFF] to-[#4E81FA] border border-transparent rounded-lg font-semibold text-base text-white shadow-sm transition-all duration-200 hover:from-[#4E81FA] hover:to-[#3D6FE8] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm">
+                    <div v-show="selectedFile" class="flex items-center gap-4 mt-4">
+                        <x-primary-button type="button" @click="uploadFile" v-bind:disabled="!selectedFile || uploadProcessing">
                             {{ __('messages.backup_upload') }}
-                        </button>
+                        </x-primary-button>
                         <span v-if="uploadProcessing" class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.backup_uploading') }}...</span>
                     </div>
 
@@ -182,10 +180,9 @@
                     </div>
 
                     <div class="flex items-center gap-4 mt-4">
-                        <button type="button" @click="startImport" :disabled="selectedImportIndices.length === 0 || importProcessing"
-                            class="inline-flex items-center justify-center px-4 py-3 bg-gradient-to-b from-[#5A8DFF] to-[#4E81FA] border border-transparent rounded-lg font-semibold text-base text-white shadow-sm transition-all duration-200 hover:from-[#4E81FA] hover:to-[#3D6FE8] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm">
+                        <x-primary-button type="button" @click="startImport" v-bind:disabled="selectedImportIndices.length === 0 || importProcessing">
                             {{ __('messages.backup_start_import') }}
-                        </button>
+                        </x-primary-button>
                         <button type="button" @click="cancelImport" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
                             {{ __('messages.cancel') }}
                         </button>
@@ -205,11 +202,36 @@
                         </span>
                     </div>
 
-                    <div v-if="importJob.status === 'completed'" class="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-600 dark:text-green-400">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span class="text-sm text-green-700 dark:text-green-300">{{ __('messages.backup_import_complete') }}</span>
+                    <div v-if="importJob.status === 'completed'" class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+                        <div class="flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-600 dark:text-green-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="text-sm text-green-700 dark:text-green-300">{{ __('messages.backup_import_complete') }}</span>
+                        </div>
+                        <div v-if="importJob.report" class="mt-3 space-y-3">
+                            <div v-for="(schedule, sIdx) in importJob.report" :key="sIdx" class="text-sm text-gray-700 dark:text-gray-300">
+                                <p v-if="importJob.report.length > 1" class="font-medium text-gray-900 dark:text-gray-100 mb-1">@{{ schedule.name }}</p>
+                                <div v-if="schedule.error" class="text-red-600 dark:text-red-400">@{{ schedule.error }}</div>
+                                <div v-else class="space-y-1">
+                                    <template v-for="entity in ['schedules', 'sub_schedules', 'events', 'tickets', 'sales', 'promo_codes', 'newsletters']" :key="entity">
+                                        <div v-if="schedule[entity] && (schedule[entity].success > 0 || schedule[entity].failed > 0)" class="flex items-center gap-2">
+                                            <span>@{{ formatEntityName(entity) }}:</span>
+                                            <span class="text-green-700 dark:text-green-400">@{{ schedule[entity].success }} {{ strtolower(__('messages.backup_imported')) }}</span>
+                                            <span v-if="schedule[entity].failed > 0" class="text-red-600 dark:text-red-400">@{{ schedule[entity].failed }} {{ strtolower(__('messages.failed')) }}</span>
+                                        </div>
+                                    </template>
+                                    <div v-if="schedule.warnings && schedule.warnings.length > 0" class="mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded">
+                                        <div v-for="(warning, wIdx) in schedule.warnings" :key="wIdx" class="flex items-center gap-2 text-amber-700 dark:text-amber-300 text-xs">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                            </svg>
+                                            <span>@{{ warning }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div v-if="importJob.status === 'failed'" class="flex items-center gap-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
@@ -306,6 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     .catch(function() {
                         clearInterval(self.exportPollTimer);
                         self.exportProcessing = false;
+                        self.exportJob = { status: 'failed', error: self.exportFailedMessage };
                     });
                 }, 2000);
             },
@@ -373,6 +396,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     self.pollImportStatus(data.job_id);
                 })
                 .catch(function(err) {
+                    self.importPreview = null;
                     self.uploadError = err.message;
                     self.importProcessing = false;
                 });
@@ -383,6 +407,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.selectedImportIndices = [];
                 this.selectedFile = null;
                 if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+            },
+            formatEntityName: function(key) {
+                var names = {
+                    schedules: @json(__('messages.backup_entity_schedules')),
+                    sub_schedules: @json(__('messages.backup_entity_sub_schedules')),
+                    events: @json(__('messages.backup_entity_events')),
+                    tickets: @json(__('messages.backup_entity_tickets')),
+                    sales: @json(__('messages.backup_entity_sales')),
+                    promo_codes: @json(__('messages.backup_entity_promo_codes')),
+                    newsletters: @json(__('messages.backup_entity_newsletters')),
+                };
+                return names[key] || key;
             },
             pollImportStatus: function(jobId) {
                 var self = this;
@@ -401,6 +437,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     .catch(function() {
                         clearInterval(self.importPollTimer);
                         self.importProcessing = false;
+                        self.importJob = { status: 'failed', error: self.importFailedMessage };
                     });
                 }, 2000);
             },

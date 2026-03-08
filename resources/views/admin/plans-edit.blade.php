@@ -83,8 +83,8 @@
                 {{-- Plan Expires --}}
                 <div>
                     <label for="plan_expires" class="block text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.plan_expires')</label>
-                    <input type="date" name="plan_expires" id="plan_expires" value="{{ $role->plan_expires }}"
-                        class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <input type="text" name="plan_expires" id="plan_expires" value="{{ $role->plan_expires }}"
+                        class="datepicker-date mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     @error('plan_expires')
                         <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                     @enderror
@@ -121,25 +121,34 @@
     </div>
 
     <script {!! nonce_attr() !!}>
-        document.querySelectorAll('.js-add-days').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                var days = parseInt(this.getAttribute('data-add-days'));
-                var input = document.getElementById('plan_expires');
-                var startDate;
-
-                if (input.value) {
-                    startDate = new Date(input.value);
-                } else {
-                    startDate = new Date();
-                }
-
-                startDate.setDate(startDate.getDate() + days);
-                input.value = startDate.toISOString().split('T')[0];
+        document.addEventListener('DOMContentLoaded', function() {
+            var fp = flatpickr('#plan_expires', {
+                allowInput: true,
+                enableTime: false,
+                altInput: true,
+                altFormat: 'M j, Y',
+                dateFormat: 'Y-m-d',
             });
-        });
 
-        document.getElementById('clear-expiration-btn').addEventListener('click', function() {
-            document.getElementById('plan_expires').value = '';
+            document.querySelectorAll('.js-add-days').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var days = parseInt(this.getAttribute('data-add-days'));
+                    var startDate;
+
+                    if (fp.selectedDates.length) {
+                        startDate = new Date(fp.selectedDates[0]);
+                    } else {
+                        startDate = new Date();
+                    }
+
+                    startDate.setDate(startDate.getDate() + days);
+                    fp.setDate(startDate);
+                });
+            });
+
+            document.getElementById('clear-expiration-btn').addEventListener('click', function() {
+                fp.clear();
+            });
         });
     </script>
 

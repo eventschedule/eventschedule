@@ -209,6 +209,7 @@ class AppController extends Controller
             if (now()->hour >= 12 && ! Cache::has('notified_pending_today')) {
                 \Artisan::call('app:notify-request-changes');
                 \Artisan::call('app:notify-fan-content-changes');
+                \Artisan::call('app:notify-poll-option-changes');
                 Cache::put('notified_pending_today', true, now()->endOfDay());
             }
 

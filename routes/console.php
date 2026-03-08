@@ -89,6 +89,7 @@ Schedule::call(function () {
 Schedule::call(function () {
     Artisan::call('app:notify-request-changes');
     Artisan::call('app:notify-fan-content-changes');
+    Artisan::call('app:notify-poll-option-changes');
 })->daily()->at('12:00')->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {

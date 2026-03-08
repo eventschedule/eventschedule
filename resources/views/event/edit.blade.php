@@ -2378,21 +2378,10 @@
                                     </div>
                                     <div class="flex items-center">
                                         <input id="ticket_mode_tickets" type="radio" value="tickets" v-model="ticketMode"
-                                            class="ticket-mode-radio h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]"
-                                            {{ ! $role->isPro() ? 'disabled' : '' }}>
+                                            class="ticket-mode-radio h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                         <label for="ticket_mode_tickets"
-                                            class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer{{ ! $role->isPro() ? ' opacity-50' : '' }}">
+                                            class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">
                                             {{ __('messages.tickets') }}
-                                            @if (! $role->isPro() && config('app.hosted'))
-                                            <div class="text-xs pt-1">
-                                                <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-tickets')"
-                                                    class="text-[#4E81FA] hover:underline font-medium">
-                                                    {{ __('messages.requires_pro_plan') }}
-                                                </button>
-                                            </div>
-                                            @elseif (! $role->isPro())
-                                            <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_pro_plan') }}</div>
-                                            @endif
                                         </label>
                                     </div>
                                 </div>
@@ -2431,8 +2420,18 @@
                                     v-model="event.coupon_code" maxlength="255" />
                             </div>
 
-                            @if ($role->isPro())
                             <div v-show="event.tickets_enabled || event.rsvp_enabled">
+
+                                <!-- Upgrade banner for non-Pro users selecting Tickets -->
+                                <div v-show="event.tickets_enabled && !isPro" class="mb-4 text-center py-4">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                                        {{ __('messages.requires_pro_plan') }}
+                                    </p>
+                                    @if (config('app.hosted'))
+                                    <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-tickets')"
+                                        class="text-[#4E81FA] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
+                                    @endif
+                                </div>
 
                                 <!-- Ticket Section Tabs -->
                                 <div class="mt-6 mb-6 border-b border-gray-200 dark:border-gray-700" v-show="event.tickets_enabled">
@@ -2459,6 +2458,9 @@
                                         </button>
                                     </nav>
                                 </div>
+
+                                <!-- Disabled state wrapper for non-Pro ticket content -->
+                                <div :class="{'opacity-50 pointer-events-none select-none': event.tickets_enabled && !isPro}">
 
                                 <!-- Payment Tab -->
                                 <div v-show="activeTicketTab === 'payment'">
@@ -2521,6 +2523,7 @@
                                 <div v-show="activeTicketTab === 'options' || event.rsvp_enabled">
 
                                 <!-- Event-level Custom Fields -->
+                                <template v-if="isPro">
                                 <div class="mb-6">
                                     <x-input-label :value="__('messages.custom_fields') . ' (' . __('messages.per_order') . ')'" class="mb-3" />
 
@@ -2577,6 +2580,21 @@
                                         + {{ __('messages.add_field') }}
                                     </button>
                                 </div>
+                                </template>
+                                <template v-else>
+                                <div v-show="event.rsvp_enabled" class="text-center py-6 mb-6">
+                                    <svg class="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" />
+                                    </svg>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                                        {{ __('messages.custom_fields_pro_only') }}
+                                    </p>
+                                    @if (config('app.hosted'))
+                                    <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-tickets')"
+                                        class="text-[#4E81FA] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
+                                    @endif
+                                </div>
+                                </template>
                                 </div>
 
                                 <div class="mb-6" v-show="event.rsvp_enabled">
@@ -2984,12 +3002,14 @@
                                 </div>
                                 </div>
 
+                                </div><!-- /disabled state wrapper -->
+
                             </div>
 
                             <hr class="my-4 border-gray-200 dark:border-gray-700">
 
                             @if ($user->isMember($subdomain))
-                            <div class="flex items-center gap-3 mt-3">
+                            <div class="flex items-center gap-3 mt-3" :class="{'opacity-50 pointer-events-none select-none': event.tickets_enabled && !isPro}">
                                 <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
                                     <input id="save_default_tickets" name="save_default_tickets" type="checkbox"
                                         class="sr-only peer">
@@ -3002,7 +3022,6 @@
                             </div>
                             @endif
 
-                            @endif
                         </div>
                     </div>
                 @endif
@@ -3050,28 +3069,18 @@
 
                             <!-- Privacy Tab -->
                             <div v-show="activeSettingsTab === 'privacy'">
+                            @if ($role->isEnterprise())
                                 <div class="mb-6">
                                     <div class="flex items-center gap-3">
                                         <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
                                             <input type="hidden" name="is_private" :value="event.is_private ? 1 : 0">
                                             <input id="is_private" name="is_private" type="checkbox" v-model="event.is_private" :value="1"
-                                                class="sr-only peer"
-                                                {{ ! $role->isEnterprise() ? 'disabled' : '' }}>
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors{{ ! $role->isEnterprise() ? ' opacity-50' : '' }}"></div>
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[#4E81FA] transition-colors"></div>
                                             <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                         </label>
                                         <label for="is_private" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                                             {{ __('messages.private_event') }}
-                                            @if (! $role->isEnterprise() && config('app.hosted'))
-                                            <div class="text-xs pt-1">
-                                                <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-privacy')"
-                                                    class="text-[#4E81FA] hover:underline font-medium">
-                                                    {{ __('messages.requires_enterprise_plan') }}
-                                                </button>
-                                            </div>
-                                            @elseif (! $role->isEnterprise())
-                                            <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_enterprise_plan') }}</div>
-                                            @endif
                                         </label>
                                     </div>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 ms-14">{{ __('messages.private_event_help') }}</p>
@@ -3080,20 +3089,23 @@
                                 <div class="mb-6" v-show="event.is_private">
                                     <x-input-label for="event_password" :value="__('messages.event_password')" />
                                     <x-text-input id="event_password" name="event_password" type="text" class="mt-1 block w-full"
-                                        v-model="event.event_password" maxlength="255"
-                                        :disabled="! $role->isEnterprise()" />
+                                        v-model="event.event_password" maxlength="255" />
                                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.event_password_help') }}</p>
-                                    @if (! $role->isEnterprise() && config('app.hosted'))
-                                    <div class="text-xs pt-1">
-                                        <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-privacy')"
-                                            class="text-[#4E81FA] hover:underline font-medium">
-                                            {{ __('messages.requires_enterprise_plan') }}
-                                        </button>
-                                    </div>
-                                    @elseif (! $role->isEnterprise())
-                                    <div class="text-xs pt-1 text-gray-500">{{ __('messages.requires_enterprise_plan') }}</div>
+                                </div>
+                            @else
+                                <div class="text-center py-8">
+                                    <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                    </svg>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                                        {{ __('messages.upgrade_enterprise_privacy') }}
+                                    </p>
+                                    @if (config('app.hosted'))
+                                    <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-privacy')"
+                                        class="text-[#4E81FA] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_enterprise') }}</button>
                                     @endif
                                 </div>
+                            @endif
                             </div>
 
                             <!-- Custom Fields Tab -->
@@ -3212,12 +3224,6 @@
                     <!-- Engagement Tabs -->
                     <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
                         <nav class="-mb-px flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide">
-                            <button type="button" @click="activeEngagementTab = 'polls'"
-                                :class="activeEngagementTab === 'polls' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                class="engagement-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="polls">
-                                {{ __('messages.polls') }}
-                                <span v-if="polls.some(p => p.pending_options && p.pending_options.length > 0)" class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full ms-1">@{{ polls.reduce((sum, p) => sum + (p.pending_options ? p.pending_options.length : 0), 0) }}</span>
-                            </button>
                             <button type="button" @click="activeEngagementTab = 'fan_content'"
                                 :class="activeEngagementTab === 'fan_content' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
                                 class="engagement-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="fan_content">
@@ -3228,6 +3234,12 @@
                                 <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full ms-1">{{ $fanContentPendingCount }}</span>
                                 @endif
                                 @endif
+                            </button>
+                            <button type="button" @click="activeEngagementTab = 'polls'"
+                                :class="activeEngagementTab === 'polls' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
+                                class="engagement-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="polls">
+                                {{ __('messages.polls') }}
+                                <span v-if="polls.some(p => p.pending_options && p.pending_options.length > 0)" class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full ms-1">@{{ polls.reduce((sum, p) => sum + (p.pending_options ? p.pending_options.length : 0), 0) }}</span>
                             </button>
                             <button type="button" @click="activeEngagementTab = 'feedback'"
                                 :class="activeEngagementTab === 'feedback' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
@@ -3381,13 +3393,18 @@
                             {{ __('messages.add_poll') }}
                         </button>
                     @else
-                        <p class="text-gray-500 dark:text-gray-400 mb-2">{{ __('messages.polls_pro_only') }}</p>
-                        @if (config('app.hosted'))
-                        <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-polls')"
-                            class="text-sm text-[#4E81FA] hover:underline font-medium">
-                            {{ __('messages.upgrade') }} &rarr;
-                        </button>
-                        @endif
+                        <div class="text-center py-8">
+                            <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                            </svg>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                                {{ __('messages.polls_pro_only') }}
+                            </p>
+                            @if (config('app.hosted'))
+                            <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-polls')"
+                                class="text-[#4E81FA] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
+                            @endif
+                        </div>
                     @endif
                     </div>
 
@@ -3586,13 +3603,18 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.feedback_override_help') }}</p>
                         </div>
                     @else
-                        <p class="text-gray-500 dark:text-gray-400 mb-2">{{ __('messages.feedback_pro_only') }}</p>
-                        @if (config('app.hosted'))
-                        <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-feedback')"
-                            class="text-sm text-[#4E81FA] hover:underline font-medium">
-                            {{ __('messages.upgrade') }} &rarr;
-                        </button>
-                        @endif
+                        <div class="text-center py-8">
+                            <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+                            </svg>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                                {{ __('messages.feedback_pro_only') }}
+                            </p>
+                            @if (config('app.hosted'))
+                            <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-feedback')"
+                                class="text-[#4E81FA] hover:underline font-medium text-sm">{{ __('messages.upgrade_to_pro_plan') }}</button>
+                            @endif
+                        </div>
                     @endif
                     </div>
 
@@ -3678,6 +3700,7 @@
           individual_tickets: {{ $event->individual_tickets ? 'true' : 'false' }},
           individual_ticket_fields: {{ $event->individual_ticket_fields ? 'true' : 'false' }},
         },
+        isPro: @json($role->isPro()),
         ticketMode: @json($event->tickets_enabled ? 'tickets' : ($event->rsvp_enabled ? 'rsvp' : 'external')),
         venues: @json($venues),
         members: @json($members ?? []),
@@ -3732,7 +3755,7 @@
         isInvoiceNinjaPaymentLink: @json($user->invoiceninja_api_key && $user->invoiceninja_mode === 'payment_link'),
         activeTicketTab: @json($event->rsvp_enabled ? 'options' : 'tickets'),
         activeSettingsTab: 'privacy',
-        activeEngagementTab: 'polls',
+        activeEngagementTab: 'fan_content',
         promoCodes: (() => {
           var pcs = @json($event->promoCodes ?? []).map(pc => ({
             ...pc,

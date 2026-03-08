@@ -74,6 +74,7 @@ class Role extends Model implements MustVerifyEmail
         'request_terms',
         'request_terms_en',
         'last_notified_request_count',
+        'last_notified_poll_option_count',
         'custom_css',
         'event_custom_fields',
         'graphic_settings',

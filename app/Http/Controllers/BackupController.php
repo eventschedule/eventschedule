@@ -46,7 +46,7 @@ class BackupController extends Controller
         // Check no export already processing
         $existing = BackupJob::where('user_id', $user->id)
             ->where('type', 'export')
-            ->where('status', 'processing')
+            ->whereIn('status', ['pending', 'processing'])
             ->exists();
 
         if ($existing) {
@@ -84,7 +84,7 @@ class BackupController extends Controller
         // Check no import already processing
         $existing = BackupJob::where('user_id', $user->id)
             ->where('type', 'import')
-            ->where('status', 'processing')
+            ->whereIn('status', ['pending', 'processing'])
             ->exists();
 
         if ($existing) {
@@ -193,6 +193,11 @@ class BackupController extends Controller
         $user = $request->user();
         $filePath = $request->input('file_path');
 
+        // Path traversal protection
+        if (str_contains($filePath, '..') || str_contains($filePath, "\0")) {
+            return response()->json(['error' => __('messages.backup_invalid_file')], 422);
+        }
+
         // Validate file exists and belongs to user
         if (! str_starts_with($filePath, 'backups/'.$user->id.'/') || ! Storage::disk('local')->exists($filePath)) {
             return response()->json(['error' => __('messages.backup_invalid_file')], 422);
@@ -201,7 +206,7 @@ class BackupController extends Controller
         // Check no import already processing
         $existing = BackupJob::where('user_id', $user->id)
             ->where('type', 'import')
-            ->where('status', 'processing')
+            ->whereIn('status', ['pending', 'processing'])
             ->exists();
 
         if ($existing) {

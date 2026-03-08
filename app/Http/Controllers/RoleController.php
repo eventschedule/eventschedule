@@ -1328,6 +1328,11 @@ class RoleController extends Controller
                 ->with('error', __('messages.upgrade_to_enterprise'));
         }
 
+        if (config('app.hosted') && $role->members()->count() >= 5) {
+            return redirect()->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'team'])
+                ->with('error', __('messages.team_member_limit'));
+        }
+
         $data = [
             'role' => $role,
             'title' => __('messages.add_member'),
@@ -1346,6 +1351,10 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.upgrade_to_enterprise'));
         } elseif (! $role->isClaimed()) {
             return redirect()->back()->with('error', __('messages.email_not_verified'));
+        }
+
+        if (config('app.hosted') && $role->members()->count() >= 5) {
+            return redirect()->back()->with('error', __('messages.team_member_limit'));
         }
 
         $data = $request->validated();
@@ -1863,7 +1872,7 @@ class RoleController extends Controller
 
         $pivot = $role->users()->where('user_id', auth()->id())->first()?->pivot;
         $notificationSettings = array_merge(
-            ['new_sale' => false, 'new_request' => false, 'new_fan_content' => false, 'new_feedback' => false],
+            ['new_sale' => false, 'new_request' => false, 'new_fan_content' => false, 'new_feedback' => false, 'new_poll_option' => false],
             json_decode($pivot?->notification_settings ?? '{}', true)
         );
 
@@ -2223,6 +2232,7 @@ class RoleController extends Controller
             'new_request' => (bool) $request->input('notification_new_request'),
             'new_fan_content' => (bool) $request->input('notification_new_fan_content'),
             'new_feedback' => (bool) $request->input('notification_new_feedback'),
+            'new_poll_option' => (bool) $request->input('notification_new_poll_option'),
         ];
         $role->users()->updateExistingPivot(auth()->id(), [
             'notification_settings' => json_encode($notificationSettings),

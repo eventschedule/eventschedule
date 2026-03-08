@@ -68,8 +68,11 @@ class ProcessBackupExport implements ShouldQueue
             $zip->open($tempZip, \ZipArchive::CREATE);
             $zip->addFromString('backup.json', $jsonContent);
 
-            foreach ($result['images'] as $path => $contents) {
-                $zip->addFromString($path, $contents);
+            foreach ($result['images'] as $zipEntryPath => $storagePath) {
+                $contents = Storage::get($storagePath);
+                if ($contents !== null) {
+                    $zip->addFromString($zipEntryPath, $contents);
+                }
             }
 
             $zip->close();

@@ -10,6 +10,7 @@ use App\Models\EventPart;
 use App\Models\EventPhoto;
 use App\Models\EventPoll;
 use App\Models\EventPollVote;
+use App\Models\EventVideo;
 use App\Models\Group;
 use App\Models\Newsletter;
 use App\Models\NewsletterAbTest;
@@ -47,6 +48,7 @@ class BackupService
         'fan_videos_enabled', 'first_day_of_week', 'sponsor_logos', 'sponsor_section_title',
         'sponsor_section_title_en', 'custom_labels', 'ai_style_instructions', 'ai_content_instructions',
         'social_links', 'payment_links', 'youtube_links', 'background_image', 'header_image',
+        'profile_image_url', 'header_image_url', 'background_image_url',
     ];
 
     private const EVENT_EXPORT_EXCLUDE = [
@@ -228,6 +230,7 @@ class BackupService
         $eventData['parts'] = $this->exportParts($event);
         $eventData['polls'] = $this->exportPolls($event);
         $eventData['comments'] = $this->exportComments($event);
+        $eventData['videos'] = $this->exportVideos($event);
         $eventData['feedbacks'] = $this->exportFeedbacks($event);
         $eventData['waitlists'] = $this->exportWaitlists($event);
 
@@ -366,10 +369,23 @@ class BackupService
         })->toArray();
     }
 
+    private function exportVideos(Event $event): array
+    {
+        return EventVideo::where('event_id', $event->id)->get()->map(function ($video) {
+            return [
+                '_event_part_ref_id' => $video->event_part_id,
+                'event_date' => $video->event_date,
+                'youtube_url' => $video->youtube_url,
+                'is_approved' => $video->is_approved,
+            ];
+        })->toArray();
+    }
+
     private function exportFeedbacks(Event $event): array
     {
         return EventFeedback::where('event_id', $event->id)->get()->map(function ($feedback) {
             return [
+                '_sale_ref_id' => $feedback->sale_id,
                 'event_date' => $feedback->event_date,
                 'rating' => $feedback->rating,
                 'comment' => $feedback->comment,
@@ -444,7 +460,7 @@ class BackupService
                 $storagePath = config('filesystems.default') == 'local' ? 'public/'.$rawValue : $rawValue;
                 if (Storage::exists($storagePath)) {
                     $imageKey = 'images/'.$rawValue;
-                    $imageFiles[$imageKey] = Storage::get($storagePath);
+                    $imageFiles[$imageKey] = $storagePath;
                     $roleData['_'.$field] = $imageKey;
                 }
             }
@@ -459,7 +475,7 @@ class BackupService
                     $storagePath = config('filesystems.default') == 'local' ? 'public/'.$logoUrl : $logoUrl;
                     if (Storage::exists($storagePath)) {
                         $imageKey = 'images/'.$logoUrl;
-                        $imageFiles[$imageKey] = Storage::get($storagePath);
+                        $imageFiles[$imageKey] = $storagePath;
                         $roleData['_sponsor_logo_'.$i] = $imageKey;
                     }
                 }
@@ -474,7 +490,7 @@ class BackupService
             $storagePath = config('filesystems.default') == 'local' ? 'public/'.$rawFlyer : $rawFlyer;
             if (Storage::exists($storagePath)) {
                 $imageKey = 'images/'.$rawFlyer;
-                $imageFiles[$imageKey] = Storage::get($storagePath);
+                $imageFiles[$imageKey] = $storagePath;
                 $eventData['_flyer_image'] = $imageKey;
             }
         }
@@ -487,9 +503,10 @@ class BackupService
                 $storagePath = config('filesystems.default') == 'local' ? 'public/'.$rawPhoto : $rawPhoto;
                 if (Storage::exists($storagePath)) {
                     $imageKey = 'images/'.$rawPhoto;
-                    $imageFiles[$imageKey] = Storage::get($storagePath);
+                    $imageFiles[$imageKey] = $storagePath;
                     $photosData[] = [
                         '_photo_image' => $imageKey,
+                        '_event_part_ref_id' => $photo->event_part_id,
                         'event_date' => $photo->event_date,
                         'is_approved' => $photo->is_approved,
                     ];
@@ -616,6 +633,7 @@ class BackupService
             'sales' => ['success' => 0, 'failed' => 0, 'failures' => []],
             'promo_codes' => ['success' => 0, 'failed' => 0, 'failures' => []],
             'newsletters' => ['success' => 0, 'failed' => 0, 'failures' => []],
+            'warnings' => [],
         ];
 
         $idMap = [
@@ -631,286 +649,296 @@ class BackupService
             'polls' => [],
         ];
 
-        // Create Role + Groups in a transaction (foundational)
-        $role = null;
-        try {
-            DB::transaction(function () use ($scheduleData, $userId, &$role, &$idMap, &$report) {
-                $role = $this->importRole($scheduleData['role'] ?? [], $userId);
-                $report['schedules']['success'] = 1;
-                $report['subdomain'] = $role->subdomain;
+        return DB::transaction(function () use ($scheduleData, $userId, $includesImages, $job, &$report, &$idMap) {
+            // Create Role + Groups
+            $role = $this->importRole($scheduleData['role'] ?? [], $userId);
+            $report['schedules']['success'] = 1;
+            $report['subdomain'] = $role->subdomain;
 
-                foreach ($scheduleData['groups'] ?? [] as $groupData) {
-                    try {
-                        $group = $this->importGroup($groupData, $role);
-                        if (isset($groupData['_ref_id'])) {
-                            $idMap['groups'][$groupData['_ref_id']] = $group->id;
-                        }
-                        $report['sub_schedules']['success']++;
-                    } catch (\Exception $e) {
-                        report($e);
-                        $report['sub_schedules']['failed']++;
-                        $report['sub_schedules']['failures'][] = ($groupData['name'] ?? 'Unknown').': Import failed';
+            foreach ($scheduleData['groups'] ?? [] as $groupData) {
+                try {
+                    $group = $this->importGroup($groupData, $role);
+                    if (isset($groupData['_ref_id'])) {
+                        $idMap['groups'][$groupData['_ref_id']] = $group->id;
                     }
+                    $report['sub_schedules']['success']++;
+                } catch (\Exception $e) {
+                    report($e);
+                    $report['sub_schedules']['failed']++;
+                    $report['sub_schedules']['failures'][] = ($groupData['name'] ?? 'Unknown').': Import failed';
                 }
-            });
-        } catch (\Exception $e) {
-            report($e);
-            $report['schedules']['failed'] = 1;
-            $report['schedules']['failures'][] = ($scheduleData['role']['name'] ?? 'Unknown').': Failed to create schedule';
-
-            return $report;
-        }
-
-        if (! $role) {
-            return $report;
-        }
-
-        // Import AB Tests first (newsletters reference them)
-        foreach ($scheduleData['newsletter_ab_tests'] ?? [] as $abTestData) {
-            try {
-                $abTest = $this->importAbTest($abTestData, $role);
-                if (isset($abTestData['_ref_id'])) {
-                    $idMap['ab_tests'][$abTestData['_ref_id']] = $abTest->id;
-                }
-            } catch (\Exception $e) {
-                report($e);
             }
-        }
 
-        // Import events
-        $events = $scheduleData['events'] ?? [];
-        if (count($events) > self::MAX_EVENTS_PER_SCHEDULE) {
-            $events = array_slice($events, 0, self::MAX_EVENTS_PER_SCHEDULE);
-        }
-
-        $salesCount = 0;
-        foreach ($events as $eventData) {
-            try {
-                $event = $this->importEvent($eventData, $role, $userId, $idMap);
-                if (isset($eventData['_ref_id'])) {
-                    $idMap['events'][$eventData['_ref_id']] = $event->id;
-                }
-                $report['events']['success']++;
-
-                // Import tickets
-                $tickets = $eventData['tickets'] ?? [];
-                if (count($tickets) > self::MAX_TICKETS_PER_EVENT) {
-                    $tickets = array_slice($tickets, 0, self::MAX_TICKETS_PER_EVENT);
-                }
-                foreach ($tickets as $ticketData) {
-                    try {
-                        $ticket = $this->importTicket($ticketData, $event);
-                        if (isset($ticketData['_ref_id'])) {
-                            $idMap['tickets'][$ticketData['_ref_id']] = $ticket->id;
-                        }
-                        $report['tickets']['success']++;
-                    } catch (\Exception $e) {
-                        report($e);
-                        $report['tickets']['failed']++;
-                        $report['tickets']['failures'][] = ($ticketData['type'] ?? 'Unknown').': Import failed';
+            // Import AB Tests first (newsletters reference them)
+            foreach ($scheduleData['newsletter_ab_tests'] ?? [] as $abTestData) {
+                try {
+                    $abTest = $this->importAbTest($abTestData, $role);
+                    if (isset($abTestData['_ref_id'])) {
+                        $idMap['ab_tests'][$abTestData['_ref_id']] = $abTest->id;
                     }
+                } catch (\Exception $e) {
+                    report($e);
                 }
+            }
 
-                // Import promo codes
-                foreach ($eventData['promo_codes'] ?? [] as $promoData) {
-                    try {
-                        $promo = $this->importPromoCode($promoData, $event, $idMap);
-                        if (isset($promoData['_ref_id'])) {
-                            $idMap['promo_codes'][$promoData['_ref_id']] = $promo->id;
-                        }
-                        $report['promo_codes']['success']++;
-                    } catch (\Exception $e) {
-                        report($e);
-                        $report['promo_codes']['failed']++;
-                        $report['promo_codes']['failures'][] = ($promoData['code'] ?? 'Unknown').': Import failed';
+            // Import events
+            $events = $scheduleData['events'] ?? [];
+            if (count($events) > self::MAX_EVENTS_PER_SCHEDULE) {
+                $report['warnings'][] = __('messages.backup_truncated_events', ['limit' => number_format(self::MAX_EVENTS_PER_SCHEDULE), 'total' => number_format(count($events))]);
+                $events = array_slice($events, 0, self::MAX_EVENTS_PER_SCHEDULE);
+            }
+
+            $salesCount = 0;
+            $salesTruncated = false;
+            foreach ($events as $eventData) {
+                try {
+                    $event = $this->importEvent($eventData, $role, $userId, $idMap);
+                    if (isset($eventData['_ref_id'])) {
+                        $idMap['events'][$eventData['_ref_id']] = $event->id;
                     }
-                }
+                    $report['events']['success']++;
 
-                // Import sales
-                $sales = $eventData['sales'] ?? [];
-                foreach ($sales as $saleData) {
-                    if ($salesCount >= self::MAX_SALES_PER_SCHEDULE) {
-                        break;
+                    // Import tickets
+                    $tickets = $eventData['tickets'] ?? [];
+                    if (count($tickets) > self::MAX_TICKETS_PER_EVENT) {
+                        $report['warnings'][] = __('messages.backup_truncated_tickets', ['limit' => self::MAX_TICKETS_PER_EVENT, 'total' => count($tickets), 'event' => $eventData['name'] ?? '']);
+                        $tickets = array_slice($tickets, 0, self::MAX_TICKETS_PER_EVENT);
                     }
-                    try {
-                        $sale = $this->importSale($saleData, $event, $role, $userId, $idMap);
-                        if (isset($saleData['_ref_id'])) {
-                            $idMap['sales'][$saleData['_ref_id']] = $sale->id;
-                        }
-                        $report['sales']['success']++;
-                        $salesCount++;
-
-                        // Import sale tickets
-                        foreach ($saleData['sale_tickets'] ?? [] as $stData) {
-                            try {
-                                $this->importSaleTicket($stData, $sale, $idMap);
-                            } catch (\Exception $e) {
-                                report($e);
+                    foreach ($tickets as $ticketData) {
+                        try {
+                            $ticket = $this->importTicket($ticketData, $event);
+                            if (isset($ticketData['_ref_id'])) {
+                                $idMap['tickets'][$ticketData['_ref_id']] = $ticket->id;
                             }
+                            $report['tickets']['success']++;
+                        } catch (\Exception $e) {
+                            report($e);
+                            $report['tickets']['failed']++;
+                            $report['tickets']['failures'][] = ($ticketData['type'] ?? 'Unknown').': Import failed';
                         }
-                    } catch (\Exception $e) {
-                        report($e);
-                        $report['sales']['failed']++;
-                        $report['sales']['failures'][] = ($saleData['name'] ?? 'Unknown').': Import failed';
                     }
-                }
 
-                // Import parts
-                foreach ($eventData['parts'] ?? [] as $partData) {
-                    try {
-                        $part = $this->importPart($partData, $event);
-                        if (isset($partData['_ref_id'])) {
-                            $idMap['parts'][$partData['_ref_id']] = $part->id;
+                    // Import promo codes
+                    foreach ($eventData['promo_codes'] ?? [] as $promoData) {
+                        try {
+                            $promo = $this->importPromoCode($promoData, $event, $idMap);
+                            if (isset($promoData['_ref_id'])) {
+                                $idMap['promo_codes'][$promoData['_ref_id']] = $promo->id;
+                            }
+                            $report['promo_codes']['success']++;
+                        } catch (\Exception $e) {
+                            report($e);
+                            $report['promo_codes']['failed']++;
+                            $report['promo_codes']['failures'][] = ($promoData['code'] ?? 'Unknown').': Import failed';
                         }
-                    } catch (\Exception $e) {
-                        report($e);
                     }
-                }
 
-                // Import polls
-                foreach ($eventData['polls'] ?? [] as $pollData) {
-                    try {
-                        $poll = $this->importPoll($pollData, $event);
-                        if (isset($pollData['_ref_id'])) {
-                            $idMap['polls'][$pollData['_ref_id']] = $poll->id;
+                    // Import sales
+                    $sales = $eventData['sales'] ?? [];
+                    foreach ($sales as $saleData) {
+                        if ($salesCount >= self::MAX_SALES_PER_SCHEDULE) {
+                            $salesTruncated = true;
+                            break;
                         }
-                    } catch (\Exception $e) {
-                        report($e);
+                        try {
+                            $sale = $this->importSale($saleData, $event, $role, $userId, $idMap);
+                            if (isset($saleData['_ref_id'])) {
+                                $idMap['sales'][$saleData['_ref_id']] = $sale->id;
+                            }
+                            $report['sales']['success']++;
+                            $salesCount++;
+
+                            // Import sale tickets
+                            foreach ($saleData['sale_tickets'] ?? [] as $stData) {
+                                try {
+                                    $this->importSaleTicket($stData, $sale, $idMap);
+                                } catch (\Exception $e) {
+                                    report($e);
+                                }
+                            }
+                        } catch (\Exception $e) {
+                            report($e);
+                            $report['sales']['failed']++;
+                            $report['sales']['failures'][] = ($saleData['name'] ?? 'Unknown').': Import failed';
+                        }
                     }
-                }
 
-                // Import comments
-                foreach ($eventData['comments'] ?? [] as $commentData) {
-                    try {
-                        $this->importComment($commentData, $event, $idMap);
-                    } catch (\Exception $e) {
-                        report($e);
+                    // Import parts
+                    foreach ($eventData['parts'] ?? [] as $partData) {
+                        try {
+                            $part = $this->importPart($partData, $event);
+                            if (isset($partData['_ref_id'])) {
+                                $idMap['parts'][$partData['_ref_id']] = $part->id;
+                            }
+                        } catch (\Exception $e) {
+                            report($e);
+                        }
                     }
-                }
 
-                // Import feedbacks
-                foreach ($eventData['feedbacks'] ?? [] as $feedbackData) {
-                    try {
-                        $this->importFeedback($feedbackData, $event);
-                    } catch (\Exception $e) {
-                        report($e);
+                    // Import polls
+                    foreach ($eventData['polls'] ?? [] as $pollData) {
+                        try {
+                            $poll = $this->importPoll($pollData, $event);
+                            if (isset($pollData['_ref_id'])) {
+                                $idMap['polls'][$pollData['_ref_id']] = $poll->id;
+                            }
+                        } catch (\Exception $e) {
+                            report($e);
+                        }
                     }
-                }
 
-                // Import waitlists
-                foreach ($eventData['waitlists'] ?? [] as $wlData) {
-                    try {
-                        $this->importWaitlist($wlData, $event, $role);
-                    } catch (\Exception $e) {
-                        report($e);
+                    // Import comments
+                    foreach ($eventData['comments'] ?? [] as $commentData) {
+                        try {
+                            $this->importComment($commentData, $event, $idMap);
+                        } catch (\Exception $e) {
+                            report($e);
+                        }
                     }
-                }
 
-                // Import images if included
-                if ($includesImages) {
-                    $this->importEventImages($eventData, $event, $job);
-                }
-
-            } catch (\Exception $e) {
-                report($e);
-                $report['events']['failed']++;
-                $report['events']['failures'][] = ($eventData['name'] ?? 'Unknown').': Import failed';
-            }
-        }
-
-        // Second pass: fix Sale group_id self-references
-        foreach ($events as $eventData) {
-            foreach ($eventData['sales'] ?? [] as $saleData) {
-                $groupRefId = $saleData['_group_ref_id'] ?? null;
-                if ($groupRefId && isset($idMap['sales'][$saleData['_ref_id'] ?? null])) {
-                    $newSaleId = $idMap['sales'][$saleData['_ref_id']];
-                    $newGroupId = $idMap['sales'][$groupRefId] ?? null;
-                    if ($newGroupId) {
-                        Sale::where('id', $newSaleId)->update(['group_id' => $newGroupId]);
+                    // Import videos
+                    foreach ($eventData['videos'] ?? [] as $videoData) {
+                        try {
+                            $this->importVideo($videoData, $event, $idMap);
+                        } catch (\Exception $e) {
+                            report($e);
+                        }
                     }
-                }
-            }
-        }
 
-        // Import segments (before newsletters, so segment_ids can be remapped)
-        foreach ($scheduleData['newsletter_segments'] ?? [] as $segmentData) {
-            try {
-                $segment = $this->importSegment($segmentData, $role, $idMap);
-                if (isset($segmentData['_ref_id'])) {
-                    $idMap['segments'][$segmentData['_ref_id']] = $segment->id;
-                }
-
-                foreach ($segmentData['segment_users'] ?? [] as $userData) {
-                    try {
-                        $this->importSegmentUser($userData, $segment);
-                    } catch (\Exception $e) {
-                        report($e);
+                    // Import feedbacks
+                    foreach ($eventData['feedbacks'] ?? [] as $feedbackData) {
+                        try {
+                            $this->importFeedback($feedbackData, $event, $idMap);
+                        } catch (\Exception $e) {
+                            report($e);
+                        }
                     }
-                }
-            } catch (\Exception $e) {
-                report($e);
-            }
-        }
 
-        // Import newsletters
-        $recipientCount = 0;
-        foreach ($scheduleData['newsletters'] ?? [] as $nlData) {
-            try {
-                $newsletter = $this->importNewsletter($nlData, $role, $userId, $idMap);
-                if (isset($nlData['_ref_id'])) {
-                    $idMap['newsletters'][$nlData['_ref_id']] = $newsletter->id;
-                }
-                $report['newsletters']['success']++;
-
-                // Import recipients
-                foreach ($nlData['recipients'] ?? [] as $recipientData) {
-                    if ($recipientCount >= self::MAX_RECIPIENTS_PER_SCHEDULE) {
-                        break;
+                    // Import waitlists
+                    foreach ($eventData['waitlists'] ?? [] as $wlData) {
+                        try {
+                            $this->importWaitlist($wlData, $event, $role);
+                        } catch (\Exception $e) {
+                            report($e);
+                        }
                     }
-                    try {
-                        $this->importRecipient($recipientData, $newsletter);
-                        $recipientCount++;
-                    } catch (\Exception $e) {
-                        report($e);
-                    }
-                }
-            } catch (\Exception $e) {
-                report($e);
-                $report['newsletters']['failed']++;
-                $report['newsletters']['failures'][] = ($nlData['subject'] ?? 'Unknown').': Import failed';
-            }
-        }
 
-        // Second pass: fix Sale newsletter_id references
-        foreach ($events as $eventData) {
-            foreach ($eventData['sales'] ?? [] as $saleData) {
-                $nlRefId = $saleData['_newsletter_ref_id'] ?? null;
-                if ($nlRefId && isset($idMap['sales'][$saleData['_ref_id'] ?? null]) && isset($idMap['newsletters'][$nlRefId])) {
-                    $newSaleId = $idMap['sales'][$saleData['_ref_id']];
-                    Sale::where('id', $newSaleId)->update(['newsletter_id' => $idMap['newsletters'][$nlRefId]]);
+                    // Import images if included
+                    if ($includesImages) {
+                        $this->importEventImages($eventData, $event, $job, $idMap);
+                    }
+
+                } catch (\Exception $e) {
+                    report($e);
+                    $report['events']['failed']++;
+                    $report['events']['failures'][] = ($eventData['name'] ?? 'Unknown').': Import failed';
                 }
             }
-        }
 
-        // Import unsubscribes
-        foreach ($scheduleData['newsletter_unsubscribes'] ?? [] as $unsubData) {
-            try {
-                NewsletterUnsubscribe::create([
-                    'role_id' => $role->id,
-                    'email' => $unsubData['email'],
-                    'unsubscribed_at' => $unsubData['unsubscribed_at'] ?? now(),
-                ]);
-            } catch (\Exception $e) {
-                report($e);
+            if ($salesTruncated) {
+                $report['warnings'][] = __('messages.backup_truncated_sales', ['limit' => number_format(self::MAX_SALES_PER_SCHEDULE)]);
             }
-        }
 
-        // Import role images if included
-        if ($includesImages) {
-            $this->importRoleImages($scheduleData['role'] ?? [], $role, $job);
-        }
+            // Second pass: fix Sale group_id self-references
+            foreach ($events as $eventData) {
+                foreach ($eventData['sales'] ?? [] as $saleData) {
+                    $groupRefId = $saleData['_group_ref_id'] ?? null;
+                    if ($groupRefId && isset($idMap['sales'][$saleData['_ref_id'] ?? null])) {
+                        $newSaleId = $idMap['sales'][$saleData['_ref_id']];
+                        $newGroupId = $idMap['groups'][$groupRefId] ?? null;
+                        if ($newGroupId) {
+                            Sale::where('id', $newSaleId)->update(['group_id' => $newGroupId]);
+                        }
+                    }
+                }
+            }
 
-        return $report;
+            // Import segments (before newsletters, so segment_ids can be remapped)
+            foreach ($scheduleData['newsletter_segments'] ?? [] as $segmentData) {
+                try {
+                    $segment = $this->importSegment($segmentData, $role, $idMap);
+                    if (isset($segmentData['_ref_id'])) {
+                        $idMap['segments'][$segmentData['_ref_id']] = $segment->id;
+                    }
+
+                    foreach ($segmentData['segment_users'] ?? [] as $userData) {
+                        try {
+                            $this->importSegmentUser($userData, $segment);
+                        } catch (\Exception $e) {
+                            report($e);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    report($e);
+                }
+            }
+
+            // Import newsletters
+            $recipientCount = 0;
+            $recipientsTruncated = false;
+            foreach ($scheduleData['newsletters'] ?? [] as $nlData) {
+                try {
+                    $newsletter = $this->importNewsletter($nlData, $role, $userId, $idMap);
+                    if (isset($nlData['_ref_id'])) {
+                        $idMap['newsletters'][$nlData['_ref_id']] = $newsletter->id;
+                    }
+                    $report['newsletters']['success']++;
+
+                    // Import recipients
+                    foreach ($nlData['recipients'] ?? [] as $recipientData) {
+                        if ($recipientCount >= self::MAX_RECIPIENTS_PER_SCHEDULE) {
+                            $recipientsTruncated = true;
+                            break;
+                        }
+                        try {
+                            $this->importRecipient($recipientData, $newsletter);
+                            $recipientCount++;
+                        } catch (\Exception $e) {
+                            report($e);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    report($e);
+                    $report['newsletters']['failed']++;
+                    $report['newsletters']['failures'][] = ($nlData['subject'] ?? 'Unknown').': Import failed';
+                }
+            }
+
+            if ($recipientsTruncated) {
+                $report['warnings'][] = __('messages.backup_truncated_recipients', ['limit' => number_format(self::MAX_RECIPIENTS_PER_SCHEDULE)]);
+            }
+
+            // Second pass: fix Sale newsletter_id references
+            foreach ($events as $eventData) {
+                foreach ($eventData['sales'] ?? [] as $saleData) {
+                    $nlRefId = $saleData['_newsletter_ref_id'] ?? null;
+                    if ($nlRefId && isset($idMap['sales'][$saleData['_ref_id'] ?? null]) && isset($idMap['newsletters'][$nlRefId])) {
+                        $newSaleId = $idMap['sales'][$saleData['_ref_id']];
+                        Sale::where('id', $newSaleId)->update(['newsletter_id' => $idMap['newsletters'][$nlRefId]]);
+                    }
+                }
+            }
+
+            // Import unsubscribes
+            foreach ($scheduleData['newsletter_unsubscribes'] ?? [] as $unsubData) {
+                try {
+                    NewsletterUnsubscribe::create([
+                        'role_id' => $role->id,
+                        'email' => $unsubData['email'],
+                        'unsubscribed_at' => $unsubData['unsubscribed_at'] ?? now(),
+                    ]);
+                } catch (\Exception $e) {
+                    report($e);
+                }
+            }
+
+            // Import role images if included
+            if ($includesImages) {
+                $this->importRoleImages($scheduleData['role'] ?? [], $role, $job);
+            }
+
+            return $report;
+        });
     }
 
     private function importRole(array $data, int $userId): Role
@@ -944,6 +972,26 @@ class BackupService
         $role->subdomain = $subdomain;
         $role->user_id = $userId;
 
+        // Clear local image paths (non-http) since they reference the source system.
+        // External URLs are preserved. Local images will be restored by importRoleImages if included.
+        foreach (['profile_image_url', 'header_image_url', 'background_image_url'] as $imgField) {
+            if ($role->$imgField && ! str_starts_with($role->$imgField, 'http')) {
+                $role->$imgField = null;
+            }
+        }
+
+        // Clear local sponsor logo image paths
+        $sponsorLogos = $role->sponsor_logos;
+        if (is_array($sponsorLogos)) {
+            foreach ($sponsorLogos as $i => &$logo) {
+                if (isset($logo['image']) && $logo['image'] && ! str_starts_with($logo['image'], 'http')) {
+                    $logo['image'] = null;
+                }
+            }
+            unset($logo);
+            $role->sponsor_logos = $sponsorLogos;
+        }
+
         // Regenerate HTML fields from markdown
         $role->description_html = MarkdownUtils::convertToHtml($role->description);
         $role->description_html_en = MarkdownUtils::convertToHtml($role->description_en);
@@ -972,7 +1020,7 @@ class BackupService
         $group->name_en = $data['name_en'] ?? null;
         $group->slug = $data['slug'] ?? Str::slug($data['name'] ?? '');
         $group->color = $data['color'] ?? null;
-        $group->save();
+        $group->saveQuietly();
 
         return $group;
     }
@@ -994,7 +1042,7 @@ class BackupService
         $excludeFields = array_merge(self::EVENT_EXPORT_EXCLUDE, [
             '_ref_id', '_group_ref_id', '_is_accepted', '_flyer_image',
             'tickets', 'promo_codes', 'sales', 'parts', 'polls',
-            'comments', 'feedbacks', 'waitlists', 'photos',
+            'comments', 'videos', 'feedbacks', 'waitlists', 'photos',
             'days_of_week', 'recurring_include_dates', 'recurring_exclude_dates',
         ]);
 
@@ -1030,6 +1078,11 @@ class BackupService
         $event->short_description_html_en = MarkdownUtils::convertToHtml($event->short_description_en);
         $event->ticket_notes_html = MarkdownUtils::convertToHtml($event->ticket_notes);
         $event->payment_instructions_html = MarkdownUtils::convertToHtml($event->payment_instructions);
+
+        // Clear local flyer image path
+        if ($event->flyer_image_url && ! str_starts_with($event->flyer_image_url, 'http')) {
+            $event->flyer_image_url = null;
+        }
 
         $event->saveQuietly();
 
@@ -1104,7 +1157,7 @@ class BackupService
         $promo->expires_at = $data['expires_at'] ?? null;
         $promo->is_active = $data['is_active'] ?? true;
         $promo->ticket_ids = ! empty($newTicketIds) ? $newTicketIds : null;
-        $promo->save();
+        $promo->saveQuietly();
 
         return $promo;
     }
@@ -1156,7 +1209,7 @@ class BackupService
         // group_id set to null initially, fixed in second pass
         $sale->group_id = null;
 
-        $sale->save();
+        $sale->saveQuietly();
 
         // Preserve original created_at
         if (! empty($data['created_at'])) {
@@ -1170,6 +1223,10 @@ class BackupService
     {
         $ticketRefId = $data['_ticket_ref_id'] ?? null;
         $ticketId = $ticketRefId ? ($idMap['tickets'][$ticketRefId] ?? null) : null;
+
+        if (! $ticketId) {
+            return;
+        }
 
         SaleTicket::withoutEvents(function () use ($data, $sale, $ticketId) {
             $st = new SaleTicket;
@@ -1216,7 +1273,7 @@ class BackupService
         $poll->allow_user_options = $data['allow_user_options'] ?? false;
         $poll->require_option_approval = $data['require_option_approval'] ?? false;
         $poll->pending_options = $data['pending_options'] ?? null;
-        $poll->save();
+        $poll->saveQuietly();
 
         // Import votes (anonymous, no user_id)
         foreach ($data['votes'] ?? [] as $voteData) {
@@ -1250,11 +1307,33 @@ class BackupService
         ]);
     }
 
-    private function importFeedback(array $data, Event $event): void
+    private function importVideo(array $data, Event $event, array &$idMap): void
     {
+        $partRefId = $data['_event_part_ref_id'] ?? null;
+        $partId = $partRefId ? ($idMap['parts'][$partRefId] ?? null) : null;
+
+        EventVideo::create([
+            'event_id' => $event->id,
+            'event_part_id' => $partId,
+            'event_date' => $data['event_date'] ?? null,
+            'user_id' => null,
+            'youtube_url' => $data['youtube_url'] ?? '',
+            'is_approved' => $data['is_approved'] ?? true,
+        ]);
+    }
+
+    private function importFeedback(array $data, Event $event, array &$idMap): void
+    {
+        $saleRefId = $data['_sale_ref_id'] ?? null;
+        $saleId = $saleRefId ? ($idMap['sales'][$saleRefId] ?? null) : null;
+
+        if (! $saleId) {
+            return;
+        }
+
         EventFeedback::create([
             'event_id' => $event->id,
-            'sale_id' => null,
+            'sale_id' => $saleId,
             'event_date' => $data['event_date'] ?? null,
             'rating' => $data['rating'] ?? null,
             'comment' => $data['comment'] ?? null,
@@ -1332,7 +1411,7 @@ class BackupService
         $newsletter->open_count = $data['open_count'] ?? 0;
         $newsletter->click_count = $data['click_count'] ?? 0;
         $newsletter->type = $data['type'] ?? null;
-        $newsletter->save();
+        $newsletter->saveQuietly();
 
         return $newsletter;
     }
@@ -1367,7 +1446,7 @@ class BackupService
         $abTest->winner_selected_at = $data['winner_selected_at'] ?? null;
         $abTest->winner_variant = $data['winner_variant'] ?? null;
         $abTest->status = $data['status'] ?? 'completed';
-        $abTest->save();
+        $abTest->saveQuietly();
 
         return $abTest;
     }
@@ -1397,7 +1476,7 @@ class BackupService
             }
         }
         $segment->filter_criteria = $criteria;
-        $segment->save();
+        $segment->saveQuietly();
 
         return $segment;
     }
@@ -1432,7 +1511,7 @@ class BackupService
             }
 
             $imageData = $zip->getFromName($imageKey);
-            if ($imageData === false) {
+            if ($imageData === false || ! $this->isValidImageData($imageData)) {
                 continue;
             }
 
@@ -1459,7 +1538,7 @@ class BackupService
                 }
 
                 $imageData = $zip->getFromName($imageKey);
-                if ($imageData === false) {
+                if ($imageData === false || ! $this->isValidImageData($imageData)) {
                     continue;
                 }
 
@@ -1484,7 +1563,7 @@ class BackupService
         $zip->close();
     }
 
-    private function importEventImages(array $eventData, Event $event, BackupJob $job): void
+    private function importEventImages(array $eventData, Event $event, BackupJob $job, array &$idMap): void
     {
         $zipPath = $job->file_path;
         if (! $zipPath || ! Storage::disk('local')->exists($zipPath)) {
@@ -1501,7 +1580,7 @@ class BackupService
         $flyerKey = $eventData['_flyer_image'] ?? null;
         if ($flyerKey) {
             $imageData = $zip->getFromName($flyerKey);
-            if ($imageData !== false) {
+            if ($imageData !== false && $this->isValidImageData($imageData)) {
                 $extension = $this->safeImageExtension($flyerKey);
                 $filename = strtolower(Str::random(32).'.'.$extension);
 
@@ -1524,7 +1603,7 @@ class BackupService
             }
 
             $imageData = $zip->getFromName($photoKey);
-            if ($imageData === false) {
+            if ($imageData === false || ! $this->isValidImageData($imageData)) {
                 continue;
             }
 
@@ -1537,9 +1616,12 @@ class BackupService
                 Storage::put($filename, $imageData);
             }
 
+            $partRefId = $photoData['_event_part_ref_id'] ?? null;
+            $partId = $partRefId ? ($idMap['parts'][$partRefId] ?? null) : null;
+
             EventPhoto::create([
                 'event_id' => $event->id,
-                'event_part_id' => null,
+                'event_part_id' => $partId,
                 'event_date' => $photoData['event_date'] ?? null,
                 'user_id' => null,
                 'photo_url' => $filename,
@@ -1548,6 +1630,11 @@ class BackupService
         }
 
         $zip->close();
+    }
+
+    private function isValidImageData(string $data): bool
+    {
+        return @getimagesizefromstring($data) !== false;
     }
 
     private function safeImageExtension(string $path): string

@@ -48,5 +48,24 @@ class CleanupBackups extends Command
         if ($stale->count() > 0) {
             $this->info("Cleaned up {$stale->count()} stale import upload(s).");
         }
+
+        // Clean orphaned import uploads (uploaded but never confirmed, no BackupJob record)
+        $orphaned = 0;
+        $directories = Storage::disk('local')->directories('backups');
+        foreach ($directories as $dir) {
+            $files = Storage::disk('local')->files($dir);
+            foreach ($files as $file) {
+                if (str_contains($file, '/import-') &&
+                    Storage::disk('local')->lastModified($file) < now()->subHour()->timestamp &&
+                    ! BackupJob::where('file_path', $file)->exists()) {
+                    Storage::disk('local')->delete($file);
+                    $orphaned++;
+                }
+            }
+        }
+
+        if ($orphaned > 0) {
+            $this->info("Cleaned up {$orphaned} orphaned import upload(s).");
+        }
     }
 }
