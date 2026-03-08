@@ -3,7 +3,7 @@
         <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('messages.recent_activity') }}</h3>
     </div>
     <div class="divide-y divide-gray-100 dark:divide-gray-700/50 flex-1">
-        @forelse($recentActivity->take(5) as $activity)
+        @forelse($recentActivity as $activity)
         <div class="flex items-start gap-3 px-5 py-3">
             @if($activity['type'] === 'sale')
             <div class="mt-1 w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>

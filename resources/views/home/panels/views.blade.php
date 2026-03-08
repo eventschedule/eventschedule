@@ -16,5 +16,5 @@
         </span>
         @endif
     </div>
-    <p class="text-sm text-gray-500 dark:text-gray-400 mt-auto">{{ __('messages.total_views') }} (30d)</p>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-auto">{{ __('messages.total_views') }} ({{ $panelSettings['views']['period'] ?? 30 }}d)</p>
 </div>

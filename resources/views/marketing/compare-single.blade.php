@@ -30,20 +30,35 @@
                 "priceCurrency": "USD",
                 "description": "Everything in Free plus ticketing with QR check-ins and live dashboard, ticket waitlist, sale notifications, sales CSV export, Stripe payments, remove branding, event graphics, REST API, and webhooks.",
                 "availability": "https://schema.org/InStock"
+            },
+            {
+                "@type": "Offer",
+                "name": "Enterprise",
+                "price": "15.00",
+                "priceCurrency": "USD",
+                "description": "Everything in Pro plus AI style generation, AI content generation, AI flyer generation, WhatsApp event creation, custom CSS, white-label branding, and priority support.",
+                "availability": "https://schema.org/InStock"
             }
         ],
         "featureList": [
             "Zero platform fees on ticket sales",
             "AI-powered event import",
+            "AI flyer generation",
+            "AI style generation",
             "Two-way Google Calendar sync",
+            "CalDAV sync",
+            "iCal download",
             "Newsletter builder with A/B testing",
             "QR code ticketing and check-in",
             "Check-in dashboard",
             "Ticket waitlist",
+            "Promo and discount codes",
             "Sale notification emails",
             "Sales CSV export",
             "Open source with selfhosting option",
-            "Embeddable calendar widget",
+            "Embeddable calendar and ticket widgets",
+            "WhatsApp event creation",
+            "Custom CSS styling",
             "Fan videos and comments",
             "Team collaboration"
         ]
@@ -62,6 +77,31 @@
                     "@type": "Answer",
                     "text": "{{ str_replace('"', '\\"', $item['answer']) }}"
                 }
+            }@if (!$loop->last),@endif
+
+            @endforeach
+        ]
+    }
+    </script>
+    @php
+        $howToSteps = $switch_steps ?? [
+            ['title' => 'Create your schedule', 'description' => 'Sign up free and create your first schedule in under a minute.'],
+            ['title' => 'Add your events', 'description' => 'Paste event details for AI import or create events manually.'],
+            ['title' => 'Share and sell', 'description' => 'Share your schedule URL and start selling tickets.'],
+        ];
+    @endphp
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to switch from {{ str_replace('"', '\\"', $name) }} to Event Schedule",
+        "step": [
+            @foreach ($howToSteps as $index => $step)
+            {
+                "@type": "HowToStep",
+                "position": {{ $index + 1 }},
+                "name": "{{ str_replace('"', '\\"', $step['title']) }}",
+                "text": "{{ str_replace('"', '\\"', $step['description']) }}"
             }@if (!$loop->last),@endif
 
             @endforeach
@@ -420,7 +460,7 @@
                 ];
             @endphp
 
-            <div class="space-y-4" x-data="{ open: null }">
+            <div id="faq-accordion" class="space-y-4">
                 @foreach ($faq as $index => $item)
                     <div class="bg-gradient-to-br {{ $faqColors[$index % 3]['gradient'] }} rounded-2xl border {{ $faqColors[$index % 3]['border'] }} dark:border-white/10 shadow-sm overflow-hidden">
                         <button @click="open = open === {{ $index + 1 }} ? null : {{ $index + 1 }}" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
@@ -431,7 +471,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
-                        <div x-show="open === {{ $index + 1 }}" x-collapse>
+                        <div v-show="open === {{ $index + 1 }}" class="faq-answer">
                             <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
                                 {{ $item['answer'] }}
                             </p>
@@ -439,6 +479,17 @@
                     </div>
                 @endforeach
             </div>
+            <script {!! nonce_attr() !!}>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (window.Vue) {
+                    window.Vue.createApp({
+                        data() {
+                            return { open: null };
+                        }
+                    }).mount('#faq-accordion');
+                }
+            });
+            </script>
         </div>
     </section>
 

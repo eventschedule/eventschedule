@@ -2604,4 +2604,5 @@ return [
     'no_data_available' => 'Нет доступных данных.',
     'no_active_boosts' => 'Нет активных продвижений.',
     'dashboard_config_saved' => 'Макет панели управления сохранён',
+    'reset_defaults' => 'Сбросить настройки',
 ];

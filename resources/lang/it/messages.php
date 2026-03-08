@@ -2585,4 +2585,5 @@ return [
     'no_data_available' => 'Nessun dato disponibile.',
     'no_active_boosts' => 'Nessun boost attivo.',
     'dashboard_config_saved' => 'Layout della dashboard salvato',
+    'reset_defaults' => 'Ripristina impostazioni predefinite',
 ];

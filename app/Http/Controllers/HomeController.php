@@ -105,6 +105,7 @@ class HomeController extends Controller
         // Dashboard config
         $dashboardConfig = $this->getDashboardConfig($user);
         $visiblePanels = collect($dashboardConfig['panels'])->where('visible', true)->pluck('id')->toArray();
+        $panelSettings = collect($dashboardConfig['panels'])->keyBy('id')->toArray();
 
         // Dashboard data - skip queries for hidden panels
         $upcomingCount = 0;
@@ -121,67 +122,78 @@ class HomeController extends Controller
         $boostCampaigns = collect();
         $trafficSources = collect();
 
-        if ($roleIds->isNotEmpty()) {
-            $analyticsService = app(AnalyticsService::class);
-            $thirtyDaysAgo = now()->subDays(30)->startOfDay();
-            $now = now()->endOfDay();
+        $analyticsService = app(AnalyticsService::class);
+        $now = now()->endOfDay();
 
-            if (in_array('upcoming_count', $visiblePanels)) {
-                $upcomingCount = Event::whereIn('id', function ($query) use ($roleIds) {
-                    $query->select('event_id')
-                        ->from('event_role')
-                        ->whereIn('role_id', $roleIds)
-                        ->where('is_accepted', true);
-                })->where('starts_at', '>', now())->count();
-            }
-            if (in_array('views', $visiblePanels)) {
-                $periodStats = $analyticsService->getStatsForUser($user, $thirtyDaysAgo, $now);
-                $momComparison = $analyticsService->getMonthOverMonthComparison($user);
-                $views30d = $periodStats['period_views'] ?? 0;
-                $viewsChange = $momComparison['percentage_change'] ?? 0;
-                $sparklineData = $this->getSparklineData($user);
-            }
-            if (in_array('followers', $visiblePanels)) {
-                $followersCount = DB::table('role_user')
+        if (in_array('upcoming_count', $visiblePanels)) {
+            $upcomingCount = Event::whereIn('id', function ($query) use ($roleIds) {
+                $query->select('event_id')
+                    ->from('event_role')
                     ->whereIn('role_id', $roleIds)
-                    ->where('level', 'follower')
-                    ->count();
-                $totalEventsCount = Event::whereIn('id', function ($query) use ($roleIds) {
-                    $query->select('event_id')
-                        ->from('event_role')
-                        ->whereIn('role_id', $roleIds)
-                        ->where('is_accepted', true);
-                })->count();
-            }
-            if (in_array('upcoming_events', $visiblePanels)) {
-                $upcomingEvents = $this->getUpcomingEvents($roleIds);
-            }
-            if (in_array('recent_activity', $visiblePanels)) {
-                $recentActivity = $this->getRecentActivity($roleIds);
-            }
-            if (in_array('revenue', $visiblePanels)) {
-                $revenueStats = $analyticsService->getConversionStats($user, $thirtyDaysAgo, $now);
-            }
-            if (in_array('top_events', $visiblePanels)) {
-                $topEvents = $analyticsService->getTopEvents($user, 3, $thirtyDaysAgo, $now);
-            }
-            if (in_array('newsletters', $visiblePanels)) {
-                $latestNewsletters = Newsletter::whereIn('role_id', $roleIds)
-                    ->where('status', 'sent')
-                    ->orderByDesc('sent_at')
-                    ->limit(3)
-                    ->get();
-            }
-            if (in_array('boosts', $visiblePanels)) {
-                $boostCampaigns = BoostCampaign::whereIn('role_id', $roleIds)
-                    ->whereIn('status', ['active', 'paused'])
-                    ->latest()
-                    ->limit(3)
-                    ->get();
-            }
-            if (in_array('traffic_sources', $visiblePanels)) {
-                $trafficSources = $analyticsService->getTopReferrerDomains($user, 5, $thirtyDaysAgo, $now);
-            }
+                    ->where('is_accepted', true);
+            })->where('starts_at', '>', now())->count();
+        }
+        if (in_array('views', $visiblePanels)) {
+            $viewsPeriod = $panelSettings['views']['period'] ?? 30;
+            $viewsStart = now()->subDays($viewsPeriod)->startOfDay();
+            $periodStats = $analyticsService->getStatsForUser($user, $viewsStart, $now);
+            $momComparison = $analyticsService->getMonthOverMonthComparison($user);
+            $views30d = $periodStats['period_views'] ?? 0;
+            $viewsChange = $momComparison['percentage_change'] ?? 0;
+            $sparklineData = $this->getSparklineData($user, $viewsPeriod);
+        }
+        if (in_array('followers', $visiblePanels)) {
+            $followersCount = DB::table('role_user')
+                ->whereIn('role_id', $roleIds)
+                ->where('level', 'follower')
+                ->count();
+            $totalEventsCount = Event::whereIn('id', function ($query) use ($roleIds) {
+                $query->select('event_id')
+                    ->from('event_role')
+                    ->whereIn('role_id', $roleIds)
+                    ->where('is_accepted', true);
+            })->count();
+        }
+        if (in_array('upcoming_events', $visiblePanels)) {
+            $upcomingEventsCount = $panelSettings['upcoming_events']['count'] ?? 3;
+            $upcomingEvents = $this->getUpcomingEvents($roleIds, $upcomingEventsCount);
+        }
+        if (in_array('recent_activity', $visiblePanels)) {
+            $recentActivityCount = $panelSettings['recent_activity']['count'] ?? 5;
+            $recentActivity = $this->getRecentActivity($roleIds, $recentActivityCount);
+        }
+        if (in_array('revenue', $visiblePanels)) {
+            $revenuePeriod = $panelSettings['revenue']['period'] ?? 30;
+            $revenueStart = now()->subDays($revenuePeriod)->startOfDay();
+            $revenueStats = $analyticsService->getConversionStats($user, $revenueStart, $now);
+        }
+        if (in_array('top_events', $visiblePanels)) {
+            $topEventsCount = $panelSettings['top_events']['count'] ?? 3;
+            $topEventsPeriod = $panelSettings['top_events']['period'] ?? 30;
+            $topEventsStart = now()->subDays($topEventsPeriod)->startOfDay();
+            $topEvents = $analyticsService->getTopEvents($user, $topEventsCount, $topEventsStart, $now);
+        }
+        if (in_array('newsletters', $visiblePanels)) {
+            $newslettersCount = $panelSettings['newsletters']['count'] ?? 3;
+            $latestNewsletters = Newsletter::whereIn('role_id', $roleIds)
+                ->where('status', 'sent')
+                ->orderByDesc('sent_at')
+                ->limit($newslettersCount)
+                ->get();
+        }
+        if (in_array('boosts', $visiblePanels)) {
+            $boostsCount = $panelSettings['boosts']['count'] ?? 3;
+            $boostCampaigns = BoostCampaign::whereIn('role_id', $roleIds)
+                ->whereIn('status', ['active', 'paused'])
+                ->latest()
+                ->limit($boostsCount)
+                ->get();
+        }
+        if (in_array('traffic_sources', $visiblePanels)) {
+            $trafficCount = $panelSettings['traffic_sources']['count'] ?? 5;
+            $trafficPeriod = $panelSettings['traffic_sources']['period'] ?? 30;
+            $trafficStart = now()->subDays($trafficPeriod)->startOfDay();
+            $trafficSources = $analyticsService->getTopReferrerDomains($user, $trafficCount, $trafficStart, $now);
         }
 
         return view('home', compact(
@@ -199,6 +211,7 @@ class HomeController extends Controller
             'upcomingEvents',
             'recentActivity',
             'dashboardConfig',
+            'panelSettings',
             'revenueStats',
             'topEvents',
             'latestNewsletters',
@@ -340,13 +353,27 @@ class HomeController extends Controller
             'panels' => 'required|array',
             'panels.*.id' => 'required|string|in:upcoming_count,views,followers,upcoming_events,recent_activity,revenue,top_events,newsletters,boosts,traffic_sources',
             'panels.*.visible' => 'required|boolean',
+            'panels.*.size' => 'sometimes|integer|in:1,2',
+            'panels.*.period' => 'sometimes|integer|in:7,14,30',
+            'panels.*.count' => 'sometimes|integer|in:3,5,10',
         ]);
 
         $panels = collect($request->input('panels'))->map(function ($panel) {
-            return [
+            $item = [
                 'id' => $panel['id'],
                 'visible' => (bool) $panel['visible'],
             ];
+            if (isset($panel['size'])) {
+                $item['size'] = (int) $panel['size'];
+            }
+            if (isset($panel['period'])) {
+                $item['period'] = (int) $panel['period'];
+            }
+            if (isset($panel['count'])) {
+                $item['count'] = (int) $panel['count'];
+            }
+
+            return $item;
         })->values()->toArray();
 
         $user = $request->user();
@@ -362,28 +389,30 @@ class HomeController extends Controller
     private function getDashboardConfig($user): array
     {
         $defaults = [
-            ['id' => 'upcoming_count', 'visible' => true],
-            ['id' => 'views', 'visible' => true],
-            ['id' => 'followers', 'visible' => true],
-            ['id' => 'upcoming_events', 'visible' => true],
-            ['id' => 'recent_activity', 'visible' => true],
-            ['id' => 'revenue', 'visible' => true],
-            ['id' => 'top_events', 'visible' => false],
-            ['id' => 'newsletters', 'visible' => false],
-            ['id' => 'boosts', 'visible' => false],
-            ['id' => 'traffic_sources', 'visible' => false],
+            ['id' => 'upcoming_count', 'visible' => true, 'size' => 1],
+            ['id' => 'views', 'visible' => true, 'size' => 1, 'period' => 30],
+            ['id' => 'followers', 'visible' => true, 'size' => 1],
+            ['id' => 'revenue', 'visible' => true, 'size' => 1, 'period' => 30],
+            ['id' => 'upcoming_events', 'visible' => true, 'size' => 2, 'count' => 3],
+            ['id' => 'recent_activity', 'visible' => true, 'size' => 2, 'count' => 5],
+            ['id' => 'top_events', 'visible' => false, 'size' => 2, 'count' => 3, 'period' => 30],
+            ['id' => 'newsletters', 'visible' => false, 'size' => 2, 'count' => 3],
+            ['id' => 'boosts', 'visible' => false, 'size' => 2, 'count' => 3],
+            ['id' => 'traffic_sources', 'visible' => false, 'size' => 2, 'count' => 5, 'period' => 30],
         ];
+
+        $defaultsMap = collect($defaults)->keyBy('id')->toArray();
 
         $config = $user->dashboard_config;
 
         if (! $config || ! isset($config['panels'])) {
-            return ['panels' => $defaults];
+            return ['panels' => $defaults, 'defaultPanels' => $defaults];
         }
 
-        $validIds = ['upcoming_count', 'views', 'followers', 'upcoming_events', 'recent_activity', 'revenue', 'top_events', 'newsletters', 'boosts', 'traffic_sources'];
+        $validIds = array_keys($defaultsMap);
         $configuredIds = [];
 
-        // Keep only valid panels from config
+        // Keep only valid panels from config, merging missing keys from defaults
         $panels = [];
         foreach ($config['panels'] as $panel) {
             if (! isset($panel['id']) || ! in_array($panel['id'], $validIds)) {
@@ -393,10 +422,20 @@ class HomeController extends Controller
                 continue;
             }
             $configuredIds[] = $panel['id'];
-            $panels[] = [
+            $merged = array_merge($defaultsMap[$panel['id']], [
                 'id' => $panel['id'],
                 'visible' => (bool) ($panel['visible'] ?? true),
-            ];
+            ]);
+            if (isset($panel['size'])) {
+                $merged['size'] = (int) $panel['size'];
+            }
+            if (isset($panel['period']) && isset($defaultsMap[$panel['id']]['period'])) {
+                $merged['period'] = (int) $panel['period'];
+            }
+            if (isset($panel['count']) && isset($defaultsMap[$panel['id']]['count'])) {
+                $merged['count'] = (int) $panel['count'];
+            }
+            $panels[] = $merged;
         }
 
         // Add any missing panels at the end (future-proofing)
@@ -406,10 +445,10 @@ class HomeController extends Controller
             }
         }
 
-        return ['panels' => $panels];
+        return ['panels' => $panels, 'defaultPanels' => $defaults];
     }
 
-    private function getUpcomingEvents($roleIds)
+    private function getUpcomingEvents($roleIds, int $count = 3)
     {
         return Event::whereIn('id', function ($query) use ($roleIds) {
             $query->select('event_id')
@@ -419,12 +458,12 @@ class HomeController extends Controller
         })
             ->where('starts_at', '>', now())
             ->orderBy('starts_at')
-            ->limit(5)
+            ->limit($count)
             ->with(['roles', 'tickets'])
             ->get();
     }
 
-    private function getRecentActivity($roleIds)
+    private function getRecentActivity($roleIds, int $count = 5)
     {
         $eventIds = DB::table('event_role')
             ->whereIn('role_id', $roleIds)
@@ -488,21 +527,21 @@ class HomeController extends Controller
             });
         $activities = $activities->merge($newsletters);
 
-        // Sort by date descending, take 10
-        return $activities->sortByDesc('date')->take(10)->values();
+        // Sort by date descending
+        return $activities->sortByDesc('date')->take($count)->values();
     }
 
-    private function getSparklineData($user): array
+    private function getSparklineData($user, int $days = 30): array
     {
         $analyticsService = app(AnalyticsService::class);
-        $thirtyDaysAgo = now()->subDays(30)->startOfDay();
+        $start = now()->subDays($days)->startOfDay();
         $now = now()->endOfDay();
 
-        $viewsByPeriod = $analyticsService->getViewsByPeriod($user, 'daily', $thirtyDaysAgo, $now);
+        $viewsByPeriod = $analyticsService->getViewsByPeriod($user, 'daily', $start, $now);
 
         // Fill in missing days with 0
         $data = [];
-        $current = $thirtyDaysAgo->copy();
+        $current = $start->copy();
         $viewsMap = $viewsByPeriod->pluck('view_count', 'period')->toArray();
 
         while ($current->lte($now)) {

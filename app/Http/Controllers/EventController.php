@@ -1889,6 +1889,11 @@ class EventController extends Controller
                 $venue->save();
 
                 $user->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
+
+                if (!$user->default_role_id) {
+                    $user->default_role_id = $venue->id;
+                    $user->save();
+                }
             } elseif ($request->contact_email) {
                 $matchingUser = User::whereEmail($request->contact_email)->first();
                 if ($matchingUser) {
@@ -1896,6 +1901,11 @@ class EventController extends Controller
                     $venue->email_verified_at = $matchingUser->email_verified_at;
                     $venue->save();
                     $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
+
+                    if (!$matchingUser->default_role_id) {
+                        $matchingUser->default_role_id = $venue->id;
+                        $matchingUser->save();
+                    }
                 }
             }
         }

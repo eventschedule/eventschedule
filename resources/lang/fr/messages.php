@@ -2585,4 +2585,5 @@ return [
     'no_data_available' => 'Aucune donnée disponible.',
     'no_active_boosts' => 'Aucun boost actif.',
     'dashboard_config_saved' => 'Disposition du tableau de bord enregistrée',
+    'reset_defaults' => 'Réinitialiser par défaut',
 ];

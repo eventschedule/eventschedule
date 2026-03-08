@@ -2578,4 +2578,5 @@ return [
     'no_data_available' => 'אין נתונים זמינים.',
     'no_active_boosts' => 'אין קידומים פעילים.',
     'dashboard_config_saved' => 'פריסת לוח הבקרה נשמרה',
+    'reset_defaults' => 'איפוס לברירת מחדל',
 ];

@@ -147,6 +147,11 @@ class EventRepo
                     $venue->save();
 
                     $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
+
+                    if (!$matchingUser->default_role_id) {
+                        $matchingUser->default_role_id = $venue->id;
+                        $matchingUser->save();
+                    }
                 }
 
                 if ($followNewRoles && (! $matchingUser || $matchingUser->id != $user->id)) {
@@ -207,6 +212,11 @@ class EventRepo
                         $role->email_verified_at = $matchingUser->email_verified_at;
                         $role->save();
                         $matchingUser->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
+
+                        if (!$matchingUser->default_role_id) {
+                            $matchingUser->default_role_id = $role->id;
+                            $matchingUser->save();
+                        }
                     }
 
                     if ($followNewRoles && (! $matchingUser || $matchingUser->id != $user->id)) {

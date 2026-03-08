@@ -2585,4 +2585,5 @@ return [
     'no_data_available' => 'No hay datos disponibles.',
     'no_active_boosts' => 'No hay impulsos activos.',
     'dashboard_config_saved' => 'Diseño del panel guardado',
+    'reset_defaults' => 'Restablecer valores predeterminados',
 ];

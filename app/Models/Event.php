@@ -1086,8 +1086,6 @@ class Event extends Model
             $slug = $venueSubdomain == $subdomain ? $roleSubdomain : $venueSubdomain;
         }
 
-        // TODO supoprt custom_slug
-
         if ($date === null && $this->starts_at) {
             $date = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d');
         }

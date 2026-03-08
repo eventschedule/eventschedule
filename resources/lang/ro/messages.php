@@ -2625,4 +2625,5 @@ return [
     'no_data_available' => 'Nu sunt date disponibile.',
     'no_active_boosts' => 'Nu există promovări active.',
     'dashboard_config_saved' => 'Aspectul tabloului de bord a fost salvat',
+    'reset_defaults' => 'Resetare la valorile implicite',
 ];

@@ -150,6 +150,11 @@ class ApiScheduleController extends Controller
 
         $user->roles()->attach($role->id, ['created_at' => now(), 'level' => 'owner']);
 
+        if (!$user->default_role_id) {
+            $user->default_role_id = $role->id;
+            $user->save();
+        }
+
         AuditService::log(AuditService::SCHEDULE_CREATE, $user->id, 'Role', $role->id, null, null, $role->name);
 
         $role->load('groups');

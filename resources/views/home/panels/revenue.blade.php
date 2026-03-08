@@ -8,5 +8,5 @@
     <div class="flex-1 flex items-center justify-center">
         <p class="text-3xl font-bold text-gray-900 dark:text-white">${{ number_format($revenueStats['total_revenue'] ?? 0, 2) }}</p>
     </div>
-    <p class="text-sm text-gray-500 dark:text-gray-400 mt-auto">{{ number_format($revenueStats['total_sales'] ?? 0) }} {{ strtolower(__('messages.sales')) }} (30d)</p>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-auto">{{ number_format($revenueStats['total_sales'] ?? 0) }} {{ strtolower(__('messages.sales')) }} ({{ $panelSettings['revenue']['period'] ?? 30 }}d)</p>
 </div>

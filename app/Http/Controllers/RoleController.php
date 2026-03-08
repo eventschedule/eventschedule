@@ -1696,6 +1696,11 @@ class RoleController extends Controller
 
         $user->roles()->attach($role->id, ['created_at' => now(), 'level' => 'owner']);
 
+        if (!$user->default_role_id) {
+            $user->default_role_id = $role->id;
+            $user->save();
+        }
+
         if ($request->hasFile('profile_image')) {
             $file = $request->file('profile_image');
 

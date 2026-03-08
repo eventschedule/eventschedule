@@ -2583,4 +2583,5 @@ return [
     'no_data_available' => 'Geen gegevens beschikbaar.',
     'no_active_boosts' => 'Geen actieve boosts.',
     'dashboard_config_saved' => 'Dashboard-indeling opgeslagen',
+    'reset_defaults' => 'Standaardwaarden herstellen',
 ];

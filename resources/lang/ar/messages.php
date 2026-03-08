@@ -2586,4 +2586,5 @@ return [
     'no_data_available' => 'لا توجد بيانات متاحة.',
     'no_active_boosts' => 'لا توجد تعزيزات نشطة.',
     'dashboard_config_saved' => 'تم حفظ تخطيط لوحة المعلومات',
+    'reset_defaults' => 'إعادة التعيين إلى الافتراضي',
 ];

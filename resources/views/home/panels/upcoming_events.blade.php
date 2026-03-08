@@ -3,7 +3,7 @@
         <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('messages.upcoming_events') }}</h3>
     </div>
     <div class="divide-y divide-gray-100 dark:divide-gray-700/50 flex-1">
-        @forelse($upcomingEvents->take(3) as $event)
+        @forelse($upcomingEvents as $event)
         @php $eventRole = $event->roles->first(); @endphp
         <a href="{{ $eventRole ? route('event.edit', ['subdomain' => $eventRole->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) : '#' }}" class="flex items-center gap-4 px-5 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
             @if($event->getImageUrl())

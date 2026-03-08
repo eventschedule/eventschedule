@@ -2632,4 +2632,10 @@ return [
     'no_data_available' => 'No data available.',
     'no_active_boosts' => 'No active boosts.',
     'dashboard_config_saved' => 'Dashboard layout saved',
+    'reset_defaults' => 'Reset to Defaults',
+    'panel_size' => 'Size',
+    'panel_half_width' => 'Half',
+    'panel_full_width' => 'Full',
+    'panel_period' => 'Period',
+    'panel_items' => 'Items',
 ];

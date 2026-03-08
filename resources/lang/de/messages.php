@@ -2589,4 +2589,5 @@ return [
     'no_data_available' => 'Keine Daten verfügbar.',
     'no_active_boosts' => 'Keine aktiven Boosts.',
     'dashboard_config_saved' => 'Dashboard-Layout gespeichert',
+    'reset_defaults' => 'Auf Standardwerte zurücksetzen',
 ];

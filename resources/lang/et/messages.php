@@ -2601,4 +2601,5 @@ return [
     'no_data_available' => 'Andmed puuduvad.',
     'no_active_boosts' => 'Aktiivseid reklaame pole.',
     'dashboard_config_saved' => 'Töölaua paigutus salvestatud',
+    'reset_defaults' => 'Lähtesta vaikeseaded',
 ];

@@ -2584,4 +2584,5 @@ return [
     'no_data_available' => 'Sem dados disponíveis.',
     'no_active_boosts' => 'Nenhum impulso ativo.',
     'dashboard_config_saved' => 'Layout do painel guardado',
+    'reset_defaults' => 'Repor predefinições',
 ];
