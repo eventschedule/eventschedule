@@ -317,11 +317,9 @@
             // Update active link
             sectionLinks.forEach(link => {
                 if (link.getAttribute('data-section') === sectionId) {
-                    link.classList.add('nav-active', 'bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[var(--brand-blue)]');
-                    link.classList.remove('text-gray-700', 'dark:text-gray-300', 'font-medium', 'border-transparent');
+                    link.classList.add('nav-active');
                 } else {
-                    link.classList.remove('nav-active', 'bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[var(--brand-blue)]');
-                    link.classList.add('text-gray-700', 'dark:text-gray-300', 'font-medium', 'border-transparent');
+                    link.classList.remove('nav-active');
                 }
             });
 

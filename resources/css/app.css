@@ -281,6 +281,9 @@ div:has(+ div + .get-started-card:hover) > div {
 .section-nav-link.nav-active {
     background: linear-gradient(to bottom, #f0f1f3, #eaecef) !important;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+    border-inline-start-color: var(--brand-blue);
+    color: #111827;
+    font-weight: 700;
 }
 .dark .section-nav-link:hover:not(.nav-active) {
     background: linear-gradient(to bottom, #262626, #222222) !important;
@@ -288,6 +291,9 @@ div:has(+ div + .get-started-card:hover) > div {
 .dark .section-nav-link.nav-active {
     background: linear-gradient(to bottom, #282828, #232323) !important;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+    border-inline-start-color: var(--brand-blue);
+    color: #ffffff;
+    font-weight: 700;
 }
 
 /* Admin navigation dropdowns */

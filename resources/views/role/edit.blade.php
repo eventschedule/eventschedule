@@ -66,16 +66,18 @@
         }
 
         .dark .color-nav-button {
-            border-color: #2d2d30;
-            background: linear-gradient(to bottom, #2d2d30, #282828);
+            border-color: rgba(255, 255, 255, 0.15);
+            background: linear-gradient(to bottom, #3a3a3d, #333336);
+            color: #d1d5db;
         }
 
         .dark .color-nav-button:hover:not(:disabled) {
-            background: linear-gradient(to bottom, #3e3e42, #383838);
+            border-color: rgba(255, 255, 255, 0.25);
+            background: linear-gradient(to bottom, #454548, #3e3e42);
         }
 
         .dark .color-nav-button:active:not(:disabled) {
-            background: linear-gradient(to bottom, #252526, #222222);
+            background: linear-gradient(to bottom, #2d2d30, #282828);
         }
 
         .section-nav-link.validation-error {
@@ -4274,11 +4276,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update active link
         sectionLinks.forEach(link => {
             if (link.getAttribute('data-section') === sectionId) {
-                link.classList.add('nav-active', 'bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[var(--brand-blue)]');
-                link.classList.remove('text-gray-700', 'dark:text-gray-300', 'font-medium', 'border-transparent');
+                link.classList.add('nav-active');
             } else {
-                link.classList.remove('nav-active', 'bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[var(--brand-blue)]');
-                link.classList.add('text-gray-700', 'dark:text-gray-300', 'font-medium', 'border-transparent');
+                link.classList.remove('nav-active');
             }
         });
 
