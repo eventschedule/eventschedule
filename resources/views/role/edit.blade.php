@@ -4296,7 +4296,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function resetToFirstTab(sectionId) {
         const section = document.getElementById(sectionId);
         if (section && section.style.display === 'block') {
-            const tabs = section.querySelectorAll('[data-tab]');
+            const tabs = section.querySelectorAll('[data-tab], [data-style-tab]');
             for (const tab of tabs) {
                 if (tab.offsetParent !== null) {
                     tab.click();

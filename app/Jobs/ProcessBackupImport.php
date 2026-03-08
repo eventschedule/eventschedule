@@ -111,7 +111,7 @@ class ProcessBackupImport implements ShouldQueue
             report($e);
             $job->update([
                 'status' => 'failed',
-                'error_message' => 'Import failed. Please try again.',
+                'error_message' => 'Import failed: ' . $e->getMessage(),
                 'completed_at' => now(),
             ]);
 
@@ -130,7 +130,7 @@ class ProcessBackupImport implements ShouldQueue
         if ($job && $job->status !== 'completed') {
             $job->update([
                 'status' => 'failed',
-                'error_message' => 'Import failed. Please try again.',
+                'error_message' => 'Import failed: ' . $e->getMessage(),
                 'completed_at' => now(),
             ]);
 

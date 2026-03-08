@@ -21,12 +21,12 @@
         {{-- Tab Bar --}}
         <div class="border-b border-gray-200 dark:border-gray-700 mb-6 mt-6">
             <nav class="flex space-x-2 sm:space-x-6" aria-label="Tabs">
-                <button type="button" @click="activeTab = 'export'"
+                <button type="button" data-tab="export" @click="activeTab = 'export'"
                     :class="activeTab === 'export' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                     class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
                     {{ __('messages.backup_export') }}
                 </button>
-                <button type="button" @click="activeTab = 'import'"
+                <button type="button" data-tab="import" @click="activeTab = 'import'"
                     :class="activeTab === 'import' ? 'border-[#4E81FA] text-[#4E81FA]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                     class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
                     {{ __('messages.backup_import') }}
@@ -36,7 +36,12 @@
 
         {{-- Export Section --}}
         <div v-show="activeTab === 'export'">
-            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.backup_export_description') }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                {{ __('messages.backup_export_description') }}
+                @if (config('queue.default') !== 'sync')
+                    {{ __('messages.backup_export_email_note') }}
+                @endif
+            </p>
 
             @if (config('app.hosted'))
             <div class="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
@@ -49,8 +54,7 @@
             </div>
             @endif
 
-            <form method="POST" action="{{ route('backup.export') }}" class="mt-4 space-y-4" @submit="onExportSubmit">
-                @csrf
+            <form class="mt-4 space-y-6" @submit.prevent="onExportSubmit">
 
                 <div v-if="roles.length > 0">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.backup_select_schedules') }}</label>
@@ -75,9 +79,9 @@
             </form>
 
             {{-- Export Status --}}
-            <div v-if="exportJob" class="mt-4">
+            <div v-if="exportJob" class="mt-6">
                 <div v-if="exportJob.status === 'pending' || exportJob.status === 'processing'" class="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
-                    <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg class="animate-spin h-5 w-5 text-blue-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -85,6 +89,9 @@
                         {{ __('messages.backup_processing') }}
                         <span v-if="exportJob.progress">@{{ exportJob.progress.current_label }} (@{{ exportJob.progress.current }}/@{{ exportJob.progress.total }})</span>
                     </span>
+                    <button type="button" @click="cancelJob('export')" class="ml-auto text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                        {{ __('messages.cancel') }}
+                    </button>
                 </div>
 
                 <div v-if="exportJob.status === 'completed' && exportJob.download_url" class="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
@@ -93,8 +100,8 @@
                     </svg>
                     <span class="text-sm text-green-700 dark:text-green-300">
                         {{ __('messages.backup_export_complete') }}
-                        <a :href="exportJob.download_url" class="text-[#4E81FA] hover:underline font-medium">{{ __('messages.backup_download_button') }}</a>
-                        <span class="text-gray-500 dark:text-gray-400">({{ __('messages.backup_expires_in_7_days') }})</span>
+                        <a :href="exportJob.download_url" :download="'backup-' + new Date().toISOString().slice(0,10) + '.zip'" class="text-[#4E81FA] hover:underline font-medium">{{ __('messages.backup_download_button') }}</a>
+                        <span class="text-gray-500 dark:text-gray-400"> ({{ __('messages.backup_expires_in_7_days') }})</span>
                     </span>
                 </div>
 
@@ -192,7 +199,7 @@
                 {{-- Import Status --}}
                 <div v-if="importJob">
                     <div v-if="importJob.status === 'pending' || importJob.status === 'processing'" class="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
-                        <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <svg class="animate-spin h-5 w-5 text-blue-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
@@ -200,14 +207,26 @@
                             {{ __('messages.backup_processing') }}
                             <span v-if="importJob.progress">@{{ importJob.progress.current_label }} (@{{ importJob.progress.current }}/@{{ importJob.progress.total }})</span>
                         </span>
+                        <button type="button" @click="cancelJob('import')" class="ml-auto text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                            {{ __('messages.cancel') }}
+                        </button>
                     </div>
 
-                    <div v-if="importJob.status === 'completed'" class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+                    <div v-if="importJob.status === 'completed'" class="p-3 rounded-lg" :class="importHasErrors ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700' : 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700'">
                         <div class="flex items-center gap-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-600 dark:text-green-400">
+                            <svg v-if="importHasErrors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-amber-600 dark:text-amber-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            </svg>
+                            <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-600 dark:text-green-400">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span class="text-sm text-green-700 dark:text-green-300">{{ __('messages.backup_import_complete') }}</span>
+                            <span class="text-sm" :class="importHasErrors ? 'text-amber-700 dark:text-amber-300' : 'text-green-700 dark:text-green-300'">
+                                @if (config('queue.default') !== 'sync')
+                                    {{ __('messages.backup_import_complete') }}
+                                @else
+                                    {{ __('messages.backup_import_complete_sync') }}
+                                @endif
+                            </span>
                         </div>
                         <div v-if="importJob.report" class="mt-3 space-y-3">
                             <div v-for="(schedule, sIdx) in importJob.report" :key="sIdx" class="text-sm text-gray-700 dark:text-gray-300">
@@ -311,13 +330,46 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.pollImportStatus(initialImportJobId);
             }
         },
+        computed: {
+            importHasErrors: function() {
+                if (!this.importJob || !this.importJob.report) return false;
+                return this.importJob.report.some(function(s) { return s.error; });
+            },
+        },
         beforeUnmount: function() {
             if (this.exportPollTimer) clearInterval(this.exportPollTimer);
             if (this.importPollTimer) clearInterval(this.importPollTimer);
         },
         methods: {
             onExportSubmit: function() {
-                this.exportProcessing = true;
+                var self = this;
+                self.exportProcessing = true;
+                self.exportJob = { status: 'pending' };
+
+                fetch('{{ route("backup.export") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({
+                        role_ids: self.selectedRoleIds,
+                        include_images: document.getElementById('include_images').checked,
+                    }),
+                })
+                .then(function(r) {
+                    if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || self.exportFailedMessage); });
+                    return r.json();
+                })
+                .then(function(data) {
+                    self.pollExportStatus(data.job_id);
+                })
+                .catch(function(err) {
+                    self.exportJob = { status: 'failed', error: err.message };
+                    self.exportProcessing = false;
+                });
             },
             pollExportStatus: function(jobId) {
                 var self = this;
@@ -381,6 +433,7 @@ document.addEventListener('DOMContentLoaded', function() {
             startImport: function() {
                 var self = this;
                 self.importProcessing = true;
+                self.importJob = { status: 'pending' };
 
                 fetch('{{ route("backup.confirm") }}', {
                     method: 'POST',
@@ -427,6 +480,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.selectedImportIndices = [];
                 this.selectedFile = null;
                 if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+            },
+            cancelJob: function(type) {
+                var self = this;
+                var job = type === 'export' ? self.exportJob : self.importJob;
+                if (!job) return;
+
+                fetch('/settings/backup/cancel/' + job.id, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                })
+                .then(function(r) {
+                    if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || 'Cancel failed'); });
+                    return r.json();
+                })
+                .then(function() {
+                    if (type === 'export') {
+                        if (self.exportPollTimer) clearInterval(self.exportPollTimer);
+                        self.exportJob = null;
+                        self.exportProcessing = false;
+                    } else {
+                        if (self.importPollTimer) clearInterval(self.importPollTimer);
+                        self.importJob = null;
+                        self.importProcessing = false;
+                    }
+                })
+                .catch(function(err) {
+                    if (type === 'export') {
+                        self.exportJob = { status: 'failed', error: err.message };
+                        self.exportProcessing = false;
+                    } else {
+                        self.importJob = { status: 'failed', error: err.message };
+                        self.importProcessing = false;
+                    }
+                });
             },
             formatEntityName: function(key) {
                 var names = {

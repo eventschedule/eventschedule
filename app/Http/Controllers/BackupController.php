@@ -8,7 +8,6 @@ use App\Models\BackupJob;
 use App\Models\Role;
 use App\Services\BackupService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 
 class BackupController extends Controller
@@ -16,8 +15,7 @@ class BackupController extends Controller
     public function export(Request $request)
     {
         if (is_demo_mode()) {
-            return Redirect::to(route('profile.edit').'#section-backup')
-                ->with('error', __('messages.demo_mode_restriction'));
+            return response()->json(['error' => __('messages.demo_mode_restriction')], 403);
         }
 
         $request->validate([
@@ -33,14 +31,12 @@ class BackupController extends Controller
         $roles = Role::whereIn('id', $roleIds)->where('is_deleted', false)->get();
         foreach ($roles as $role) {
             if (! $user->isEditor($role->subdomain)) {
-                return Redirect::to(route('profile.edit').'#section-backup')
-                    ->with('error', __('messages.unauthorized'));
+                return response()->json(['error' => __('messages.unauthorized')], 403);
             }
         }
 
         if ($roles->isEmpty()) {
-            return Redirect::to(route('profile.edit').'#section-backup')
-                ->with('error', __('messages.backup_no_schedules_selected'));
+            return response()->json(['error' => __('messages.backup_no_schedules_selected')], 422);
         }
 
         // Check no export already processing
@@ -50,8 +46,7 @@ class BackupController extends Controller
             ->exists();
 
         if ($existing) {
-            return Redirect::to(route('profile.edit').'#section-backup')
-                ->with('error', __('messages.backup_already_processing'));
+            return response()->json(['error' => __('messages.backup_already_processing')], 422);
         }
 
         $job = BackupJob::create([
@@ -62,11 +57,14 @@ class BackupController extends Controller
             'include_images' => (bool) $request->input('include_images', false),
         ]);
 
-        ProcessBackupExport::dispatch($job->id);
+        if (config('queue.default') !== 'sync') {
+            ProcessBackupExport::dispatch($job->id);
+        } else {
+            set_time_limit(0);
+            ProcessBackupExport::dispatchSync($job->id);
+        }
 
-        return Redirect::to(route('profile.edit').'#section-backup')
-            ->with('status', 'backup-export-started')
-            ->with('backup_job_id', $job->id);
+        return response()->json(['job_id' => $job->id]);
     }
 
     public function upload(Request $request)
@@ -222,7 +220,12 @@ class BackupController extends Controller
             'file_path' => $filePath,
         ]);
 
-        ProcessBackupImport::dispatch($job->id, $selectedIndices);
+        if (config('queue.default') !== 'sync') {
+            ProcessBackupImport::dispatch($job->id, $selectedIndices);
+        } else {
+            set_time_limit(0);
+            ProcessBackupImport::dispatchSync($job->id, $selectedIndices);
+        }
 
         return response()->json([
             'job_id' => $job->id,
@@ -256,6 +259,29 @@ class BackupController extends Controller
         return response()->json(['message' => 'ok']);
     }
 
+    public function cancel(Request $request, BackupJob $backupJob)
+    {
+        if ($backupJob->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        if (! in_array($backupJob->status, ['pending', 'processing'])) {
+            return response()->json(['error' => __('messages.backup_not_cancellable')], 422);
+        }
+
+        $backupJob->update([
+            'status' => 'failed',
+            'error_message' => __('messages.cancelled'),
+        ]);
+
+        // Clean up uploaded file for import jobs
+        if ($backupJob->isImport() && $backupJob->file_path && Storage::disk('local')->exists($backupJob->file_path)) {
+            Storage::disk('local')->delete($backupJob->file_path);
+        }
+
+        return response()->json(['message' => 'ok']);
+    }
+
     public function download(Request $request, BackupJob $backupJob)
     {
         // Verify ownership
@@ -272,7 +298,9 @@ class BackupController extends Controller
             abort(404);
         }
 
-        return Storage::disk('local')->download($filePath, 'backup-'.now()->format('Y-m-d').'.zip');
+        return Storage::disk('local')->download($filePath, 'backup-'.now()->format('Y-m-d').'.zip', [
+            'Content-Type' => 'application/octet-stream',
+        ]);
     }
 
     public function status(Request $request, BackupJob $backupJob)

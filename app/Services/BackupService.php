@@ -55,7 +55,7 @@ class BackupService
     private const EVENT_EXPORT_EXCLUDE = [
         'id', 'user_id', 'creator_role_id', 'translation_attempts', 'last_translated_at',
         'last_notified_fan_content_count', 'created_at', 'updated_at',
-        'description_html', 'description_html_en', 'short_description_html', 'short_description_html_en',
+        'description_html', 'description_html_en',
         'ticket_notes_html', 'payment_instructions_html',
     ];
 
@@ -629,7 +629,7 @@ class BackupService
                 report($e);
                 $report[] = [
                     'name' => $scheduleName,
-                    'error' => 'Failed to import schedule.',
+                    'error' => 'Failed to import schedule. ' . $e->getMessage(),
                     'schedules' => ['success' => 0, 'failed' => 1, 'failures' => [$scheduleName.': Import failed']],
                 ];
             }
@@ -1036,10 +1036,6 @@ class BackupService
         // Regenerate HTML fields from markdown
         $role->description_html = MarkdownUtils::convertToHtml($role->description);
         $role->description_html_en = MarkdownUtils::convertToHtml($role->description_en);
-        $role->short_description_html = MarkdownUtils::convertToHtml($role->short_description);
-        $role->short_description_html_en = MarkdownUtils::convertToHtml($role->short_description_en);
-        $role->request_terms_html = MarkdownUtils::convertToHtml($role->request_terms);
-        $role->request_terms_html_en = MarkdownUtils::convertToHtml($role->request_terms_en);
 
         if ($role->custom_css) {
             $role->custom_css = CssUtils::sanitizeCss($role->custom_css);
@@ -1063,6 +1059,13 @@ class BackupService
                     throw $e;
                 }
             }
+        }
+
+        // Auto-confirm email if it matches the importing user's verified email
+        $user = \App\Models\User::find($userId);
+        if ($role->email && $user && $user->email === $role->email && $user->email_verified_at) {
+            $role->email_verified_at = now();
+            $role->saveQuietly();
         }
 
         // Attach user as owner
@@ -1133,8 +1136,6 @@ class BackupService
         // Regenerate HTML fields
         $event->description_html = MarkdownUtils::convertToHtml($event->description);
         $event->description_html_en = MarkdownUtils::convertToHtml($event->description_en);
-        $event->short_description_html = MarkdownUtils::convertToHtml($event->short_description);
-        $event->short_description_html_en = MarkdownUtils::convertToHtml($event->short_description_en);
         $event->ticket_notes_html = MarkdownUtils::convertToHtml($event->ticket_notes);
         $event->payment_instructions_html = MarkdownUtils::convertToHtml($event->payment_instructions);
 

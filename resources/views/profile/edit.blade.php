@@ -328,6 +328,9 @@
             // Sync mobile accordion headers
             syncMobileHeaders(sectionId);
 
+            // Save to localStorage for cross-page persistence
+            localStorage.setItem('lastSettingsSection', sectionId);
+
             // Update URL hash
             if (history.replaceState) {
                 history.replaceState(null, null, '#' + sectionId);
@@ -341,12 +344,29 @@
             }
         }
 
+        function resetToFirstTab(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section && section.style.display === 'block') {
+                const tabs = section.querySelectorAll('[data-tab]');
+                for (const tab of tabs) {
+                    if (tab.offsetParent !== null) {
+                        tab.click();
+                        break;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
         // Handle navigation link clicks
         sectionLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 const sectionId = this.getAttribute('data-section');
-                showSection(sectionId);
+                if (!resetToFirstTab(sectionId)) {
+                    showSection(sectionId);
+                }
             });
         });
 
@@ -354,7 +374,9 @@
         mobileHeaders.forEach(header => {
             header.addEventListener('click', function() {
                 const sectionId = this.getAttribute('data-section');
-                showSection(sectionId);
+                if (!resetToFirstTab(sectionId)) {
+                    showSection(sectionId);
+                }
             });
         });
 
@@ -363,17 +385,23 @@
             return window.matchMedia('(min-width: 1024px)').matches;
         }
 
-        // Initialize: show section based on hash or first section
+        // Initialize: show section based on hash, localStorage, or first section
         function initializeSections() {
             // Check URL hash first
             const hash = window.location.hash.replace('#', '');
             if (hash && document.getElementById(hash)) {
                 showSection(hash, true);
             } else {
-                // Show first section
-                const firstSection = sections[0];
-                if (firstSection) {
-                    showSection(firstSection.id, true);
+                // Check localStorage for last visited section
+                const saved = localStorage.getItem('lastSettingsSection');
+                if (saved && document.getElementById(saved)) {
+                    showSection(saved, true);
+                } else {
+                    // Show first section
+                    const firstSection = sections[0];
+                    if (firstSection) {
+                        showSection(firstSection.id, true);
+                    }
                 }
             }
         }
@@ -388,6 +416,25 @@
 
         // Initialize on page load
         initializeSections();
+
+        // When clicking Settings nav while already on Settings,
+        // go to last-saved section; if already there, reset to first section
+        var settingsNavLinks = document.querySelectorAll('a[href="{{ route('profile.edit') }}"]');
+        settingsNavLinks.forEach(function(link) {
+            if (link.closest('.mt-auto')) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var currentSection = document.querySelector('.section-content[style*="display: block"]');
+                    var currentId = currentSection ? currentSection.id : null;
+                    var saved = localStorage.getItem('lastSettingsSection');
+                    if (saved && saved !== currentId && document.getElementById(saved)) {
+                        showSection(saved);
+                    } else {
+                        showSection(sections[0].id);
+                    }
+                });
+            }
+        });
 
         // Highlight phone field if redirected from boost
         const urlParams = new URLSearchParams(window.location.search);
