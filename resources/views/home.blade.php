@@ -118,9 +118,9 @@
 
         @if (config('app.hosted'))
         {{-- Dashboard Header Actions with Feedback --}}
-        <div class="flex flex-col sm:flex-row items-stretch gap-3 mb-4">
+        <div class="flex flex-col sm:flex-row xl:grid xl:grid-cols-4 gap-6 mb-6">
             {{-- Feedback textarea --}}
-            <div class="flex-1">
+            <div class="flex-1 xl:col-span-3">
                 <form id="feedback-form" class="h-full">
                     @csrf
                     <div class="relative h-full">
@@ -147,7 +147,7 @@
             </div>
 
             {{-- Buttons --}}
-            <div class="flex items-start gap-3">
+            <div class="flex items-start gap-3 xl:col-span-1">
                 {{-- Customize Button --}}
                 <button type="button" x-data x-on:click="$dispatch('open-modal', 'customize-dashboard')"
                     class="inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
