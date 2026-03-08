@@ -1,15 +1,15 @@
-<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700/50 h-full flex flex-col">
-    <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700/50">
+<div class="dashboard-panel bg-white dark:bg-transparent rounded-xl shadow-sm border border-gray-200 dark:border-transparent h-full flex flex-col">
+    <div class="px-5 py-4 border-b border-gray-200 dark:border-white/[0.06]">
         <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('messages.upcoming_events') }}</h3>
     </div>
-    <div class="divide-y divide-gray-100 dark:divide-gray-700/50 flex-1">
+    <div class="divide-y divide-gray-100 dark:divide-white/[0.06] flex-1">
         @forelse($upcomingEvents as $event)
         @php $eventRole = $event->roles->first(); @endphp
-        <a href="{{ $eventRole ? route('event.edit', ['subdomain' => $eventRole->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) : '#' }}" class="flex items-center gap-4 px-5 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+        <a href="{{ $eventRole ? route('event.edit', ['subdomain' => $eventRole->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) : '#' }}" class="flex items-center gap-4 px-5 py-3 hover:bg-gray-50 dark:hover:bg-black/10 transition-colors">
             @if($event->getImageUrl())
-            <img src="{{ $event->getImageUrl() }}" alt="" class="w-12 h-12 rounded-lg object-cover flex-shrink-0">
+            <img src="{{ $event->getImageUrl() }}" alt="" class="w-12 h-12 rounded-xl object-cover flex-shrink-0">
             @else
-            <div class="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+            <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-white/[0.06] flex items-center justify-center flex-shrink-0">
                 <svg class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             </div>
             @endif

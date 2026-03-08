@@ -159,6 +159,33 @@ input[type="search"], textarea, select {
     border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
+/* Get Started panel */
+.get-started-container {
+    background: linear-gradient(to bottom, #ffffff, #f9fafb);
+}
+.dark .get-started-container {
+    background: linear-gradient(to bottom, #2d2d30, #252526);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.get-started-card:hover {
+    background: #f3f4f6;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+.dark .get-started-card:hover {
+    background: #1A1A1A;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Dashboard panels */
+.dashboard-panel {
+    background: linear-gradient(to bottom, #ffffff, #f9fafb);
+}
+.dark .dashboard-panel {
+    background: linear-gradient(to bottom, #2d2d30, #252526);
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: none;
+}
+
 /* Keep visited links blue (prevent browser default purple) */
 a.text-blue-600:visited { color: rgb(37 99 235); }
 .dark a.text-blue-600:visited { color: rgb(96 165 250); }
