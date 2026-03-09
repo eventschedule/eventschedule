@@ -256,7 +256,7 @@
                                     <div x-show="elementStatus[key] === 'complete'" x-cloak>
                                         <div class="relative">
                                             <div :class="!expandedPreviews[key] && isLongContent(key) ? 'max-h-[120px] overflow-hidden' : ''"
-                                                class="prose prose-sm dark:prose-invert max-w-none text-sm" x-html="renderMarkdown(previewResults[previewConfig[key].data_key] || '')"></div>
+                                                class="max-w-none text-sm text-gray-800 dark:text-gray-200" x-html="renderMarkdown(previewResults[previewConfig[key].data_key] || '')"></div>
                                             <div x-show="!expandedPreviews[key] && isLongContent(key)" x-cloak
                                                 class="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-gray-50 dark:from-[#252526] to-transparent"></div>
                                         </div>
@@ -452,9 +452,9 @@ document.addEventListener('alpine:init', function() {
                 // Escape HTML first
                 var escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 // Headers
-                escaped = escaped.replace(/^### (.+)$/gm, '<h3 class="text-sm font-semibold mt-2 mb-1">$1</h3>');
-                escaped = escaped.replace(/^## (.+)$/gm, '<h2 class="text-base font-semibold mt-2 mb-1">$1</h2>');
-                escaped = escaped.replace(/^# (.+)$/gm, '<h1 class="text-lg font-bold mt-2 mb-1">$1</h1>');
+                escaped = escaped.replace(/^### (.+)$/gm, '<h3 class="text-sm font-semibold mt-2 mb-1 text-gray-900 dark:text-gray-100">$1</h3>');
+                escaped = escaped.replace(/^## (.+)$/gm, '<h2 class="text-base font-semibold mt-2 mb-1 text-gray-900 dark:text-gray-100">$1</h2>');
+                escaped = escaped.replace(/^# (.+)$/gm, '<h1 class="text-lg font-bold mt-2 mb-1 text-gray-900 dark:text-gray-100">$1</h1>');
                 // Bold and italic
                 escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
                 escaped = escaped.replace(/\*(.+?)\*/g, '<em>$1</em>');
