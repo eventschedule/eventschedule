@@ -1189,7 +1189,7 @@ class GeminiUtils
 
     public static function sendImageGenerationRequest($prompt, $aspectRatio = '3:4')
     {
-        $model = 'gemini-2.5-flash-image';
+        $model = 'gemini-3-pro-image-preview';
 
         $apiKey = config('services.google.gemini_key');
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=".$apiKey;
@@ -1783,7 +1783,7 @@ class GeminiUtils
 
     private static function prepareImageGenerationRequest(string $prompt, string $aspectRatio = '3:4'): array
     {
-        $model = 'gemini-2.5-flash-image';
+        $model = 'gemini-3-pro-image-preview';
 
         $apiKey = config('services.google.gemini_key');
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=".$apiKey;

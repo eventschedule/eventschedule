@@ -65,7 +65,7 @@ class GraphicEmailService
             $textShowAll = $settings['text_show_all'] ?? false;
             $textEvents = $textShowAll
                 ? $baseQuery()->orderBy('starts_at')->get()
-                : $events;
+                : $baseQuery()->orderBy('starts_at')->limit($eventLimit)->get();
 
             // Build options array for the generator (matching web preview)
             $datePosition = $settings['date_position'] ?? null;

@@ -298,7 +298,7 @@ class GraphicController extends Controller
             if ($textShowAll) {
                 $textEvents = $baseQuery()->orderBy('starts_at')->get();
             } else {
-                $textEvents = (clone $flyerQuery)->orderBy('starts_at')->limit($eventLimit)->get();
+                $textEvents = $baseQuery()->orderBy('starts_at')->limit($eventLimit)->get();
             }
 
             if ($textEvents->isEmpty()) {
