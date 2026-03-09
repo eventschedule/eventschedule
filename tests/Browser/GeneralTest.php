@@ -41,8 +41,8 @@ class GeneralTest extends DuskTestCase
                 ->pause(500);
             $browser->script("document.querySelector('.details-tab[data-tab=\"contact\"]').click()");
             $browser->waitFor('#website', 5)
-                ->type('website', 'https://google.com')
-                ->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit()");
+                ->script("document.getElementById('website').value = 'https://google.com'");
+            $browser->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit()");
             $browser->waitForLocation('/venue/schedule', 15)
                 ->assertSee('google.com');
 
@@ -55,8 +55,8 @@ class GeneralTest extends DuskTestCase
                 ->pause(500);
             $browser->script("document.querySelector('.details-tab[data-tab=\"contact\"]').click()");
             $browser->waitFor('#website', 5)
-                ->type('website', 'https://google.com')
-                ->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit()");
+                ->script("document.getElementById('website').value = 'https://google.com'");
+            $browser->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit()");
             $browser->waitForLocation('/talent/schedule', 15)
                 ->assertSee('google.com');
 
