@@ -35,7 +35,7 @@ class HelpUtils
                 'settings-tab-advanced' => '/docs/creating-schedules#settings-advanced',
                 'integration-tab-google' => '/docs/creating-schedules#integrations-google',
                 'integration-tab-caldav' => '/docs/creating-schedules#integrations-caldav',
-                'integration-tab-feeds' => '/docs/creating-schedules#integrations-feeds',
+                'integration-tab-advanced' => '/docs/creating-schedules#integrations-advanced',
             ],
         ],
         '{subdomain}/edit-event/*' => [

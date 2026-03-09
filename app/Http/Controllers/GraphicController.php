@@ -88,6 +88,7 @@ class GraphicController extends Controller
             'overlay_text' => 'nullable|string|max:200',
             'url_include_https' => 'boolean',
             'url_include_id' => 'boolean',
+            'text_show_all' => 'boolean',
         ]);
 
         // Merge with existing settings to preserve defaults
@@ -232,30 +233,29 @@ class GraphicController extends Controller
         $eventCountSetting = $request->get('event_count', $graphicSettings['event_count'] ?? null);
         $eventLimit = $eventCountSetting ? (int) $eventCountSetting : 20; // Default max is 20
 
-        // Build the events query
-        // Only include events that have their own flyer image (not relying on role image)
-        $query = Event::with(['roles', 'tickets', 'venue'])
-            ->whereHas('roles', function ($query) use ($role) {
-                $query->where('role_id', $role->id)->where('is_accepted', true);
-            })
-            ->where('starts_at', '>=', now())
+        // Base query builder for future events belonging to this schedule
+        $baseQuery = function () use ($role, $request) {
+            return Event::with(['roles', 'tickets', 'venue'])
+                ->whereHas('roles', function ($query) use ($role) {
+                    $query->where('role_id', $role->id)->where('is_accepted', true);
+                })
+                ->where('starts_at', '>=', now())
+                ->where('is_private', false)
+                ->whereNull('event_password')
+                ->when($request->boolean('exclude_recurring', false), function ($query) {
+                    $query->whereNull('days_of_week');
+                });
+        };
+
+        // Build flyer-only query (for image generation)
+        $flyerQuery = $baseQuery()
             ->whereNotNull('flyer_image_url')
-            ->where('flyer_image_url', '!=', '')
-            ->where('is_private', false)
-            ->whereNull('event_password');
+            ->where('flyer_image_url', '!=', '');
 
-        // Only exclude recurring events if setting is true
-        if ($request->boolean('exclude_recurring', false)) {
-            $query->whereNull('days_of_week');
-        }
-
-        $events = $query->orderBy('starts_at')
-            ->limit($eventLimit)
-            ->get();
-
-        if ($events->isEmpty()) {
-            return response()->json(['error' => __('messages.no_events_found')]);
-        }
+        // Determine if text should show all events
+        $textShowAll = $request->has('text_show_all')
+            ? $request->boolean('text_show_all')
+            : ($graphicSettings['text_show_all'] ?? false);
 
         // Build options array for the generator
         $options = [
@@ -272,13 +272,41 @@ class GraphicController extends Controller
 
         // Generate image unless type=text
         if ($type !== 'text') {
-            $generator = new EventGraphicGenerator($role, $events, $layout, $directRegistration, $options);
-            $imageData = $generator->generate();
-            $response['image'] = base64_encode($imageData);
+            $flyerEvents = (clone $flyerQuery)->orderBy('starts_at')->limit($eventLimit)->get();
+
+            if ($flyerEvents->isEmpty()) {
+                // Check if there are future events at all (just without flyers)
+                $hasFutureEvents = $baseQuery()->exists();
+                $errorKey = $hasFutureEvents ? 'no_events_with_flyers' : 'no_events_found';
+
+                if ($type === 'image') {
+                    return response()->json(['error' => __('messages.'.$errorKey), 'error_type' => $errorKey]);
+                }
+
+                $response['image_error'] = __('messages.'.$errorKey);
+                $response['image_error_type'] = $errorKey;
+            } else {
+                $generator = new EventGraphicGenerator($role, $flyerEvents, $layout, $directRegistration, $options);
+                $imageData = $generator->generate();
+                $response['image'] = base64_encode($imageData);
+            }
         }
 
         // Generate text unless type=image
         if ($type !== 'image') {
+            // Use all events or flyer-only events based on text_show_all setting
+            if ($textShowAll) {
+                $textEvents = $baseQuery()->orderBy('starts_at')->get();
+            } else {
+                $textEvents = (clone $flyerQuery)->orderBy('starts_at')->limit($eventLimit)->get();
+            }
+
+            if ($textEvents->isEmpty()) {
+                $hasFutureEvents = $baseQuery()->exists();
+                $errorKey = $hasFutureEvents ? 'no_events_with_flyers' : 'no_events_found';
+                return response()->json(['error' => __('messages.' . $errorKey), 'error_type' => $errorKey]);
+            }
+
             // Get text template - use request parameter if provided, otherwise fall back to saved settings
             $textTemplate = $request->has('text_template')
                 ? $request->get('text_template', '')
@@ -295,7 +323,7 @@ class GraphicController extends Controller
             ];
 
             // Generate event text content
-            $eventText = EventTextGenerator::generate($role, $events, $directRegistration, $textTemplate, $urlSettings);
+            $eventText = EventTextGenerator::generate($role, $textEvents, $directRegistration, $textTemplate, $urlSettings);
 
             // Process text through AI if ai_prompt is set (Enterprise feature)
             // Use request parameter if provided, otherwise fall back to saved settings
@@ -376,7 +404,18 @@ class GraphicController extends Controller
             ->get();
 
         if ($events->isEmpty()) {
-            return redirect()->back()->with('error', __('messages.no_events_found'));
+            // Check if there are future events at all (just without flyers)
+            $hasFutureEvents = Event::whereHas('roles', function ($query) use ($role) {
+                $query->where('role_id', $role->id)->where('is_accepted', true);
+            })
+                ->where('starts_at', '>=', now())
+                ->where('is_private', false)
+                ->whereNull('event_password')
+                ->exists();
+
+            $errorKey = $hasFutureEvents ? 'no_events_with_flyers' : 'no_events_found';
+
+            return redirect()->back()->with('error', __('messages.'.$errorKey));
         }
 
         // Build options array for the generator

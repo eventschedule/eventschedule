@@ -1081,6 +1081,7 @@ return [
     'custom_css_enterprise_only' => 'Upgrade auf Pro, um benutzerdefiniertes CSS hinzuzufügen und Ihre Kalenderseite zu personalisieren.',
     'custom_css_grandfathered' => 'Upgrade auf Pro, um Ihr benutzerdefiniertes CSS zu bearbeiten. Ihre bestehenden Stile werden weiterhin funktionieren.',
     'custom_fields_pro_only' => 'Upgrade auf Pro, um benutzerdefinierte Felder zu Ihren Anmeldeformularen hinzuzufügen.',
+    'no_event_custom_fields' => 'Für diesen Kalender wurden keine benutzerdefinierten Felder konfiguriert. Benutzerdefinierte Felder können in den Kalendereinstellungen hinzugefügt werden.',
     'upgrade_feature_description_custom_fields' => 'Fügen Sie benutzerdefinierte Felder hinzu, um strukturierte Daten zu Ihren Veranstaltungen zu erfassen.',
     'newsletter_upgrade_enterprise' => 'Mehr benötigt? Upgraden Sie auf Enterprise für 1.000/Monat',
     'newsletter_upgrade_plan' => 'Mehr benötigt? Upgraden Sie Ihren Plan für höhere Sendelimits',
@@ -1121,6 +1122,9 @@ return [
     'url_format' => 'URL-Format',
     'url_include_https' => 'HTTPS einschließen',
     'url_include_id' => 'Event-ID einschließen',
+    'text_show_all_events' => 'Alle zukünftigen Veranstaltungen einbeziehen',
+    'text_show_all_events_help' => 'Wenn aktiviert, enthält der Text alle zukünftigen Veranstaltungen, nicht nur die auf der Grafik angezeigten.',
+    'no_events_with_flyers' => 'Keine kommenden Veranstaltungen haben Flyerbilder. Laden Sie Flyerbilder zu Ihren Veranstaltungen hoch, um eine Grafik zu erstellen.',
     'ai_prompt_custom_field' => 'KI-Prompt',
     'eg' => 'z.B.',
     'ai_prompt_example_1' => 'Extrahiere die Kleiderordnung aus den Veranstaltungsdetails',
@@ -2550,6 +2554,13 @@ return [
     'save_schedule_first_for_feeds' => 'Speichern Sie den Zeitplan zuerst, um die Feed-URLs zu sehen.',
     'copy_ical_feed' => 'iCal-Feed kopieren',
     'copy_rss_feed' => 'RSS-Feed kopieren',
+
+    // Calendar Description Template
+    'calendar_description_template' => 'Kalender-Beschreibungsvorlage',
+    'calendar_description_template_help' => 'Passen Sie die Beschreibung für Veranstaltungen an, die mit Google Kalender und CalDAV synchronisiert werden. Leer lassen, um die Veranstaltungsbeschreibung unverändert zu verwenden.',
+    'common_variables' => 'Häufige Variablen',
+    'view_all_variables' => 'Alle Variablen anzeigen',
+
     'individual_tickets' => 'Einzeltickets',
     'individual_tickets_description' => 'Erfassen Sie die Daten jedes Teilnehmers einzeln. Jeder Teilnehmer erhält eine eigene Bestätigung und einen eigenen QR-Code.',
     'individual_ticket_fields' => 'Ticketfelder pro Gast erfassen',

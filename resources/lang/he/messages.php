@@ -1072,6 +1072,7 @@ return [
     'custom_css_enterprise_only' => 'שדרגו ל-Pro כדי להוסיף CSS מותאם אישית ולהתאים אישית את דף לוח השנה.',
     'custom_css_grandfathered' => 'שדרגו ל-Pro כדי לערוך את ה-CSS המותאם אישית שלכם. הסגנונות הקיימים שלכם ימשיכו לעבוד.',
     'custom_fields_pro_only' => 'שדרגו ל-Pro כדי להוסיף שדות מותאמים אישית לטפסי ההרשמה שלכם.',
+    'no_event_custom_fields' => 'לא הוגדרו שדות מותאמים אישית ללוח זמנים זה. ניתן להוסיף שדות מותאמים אישית בהגדרות לוח הזמנים.',
     'upgrade_feature_description_custom_fields' => 'הוסף שדות מותאמים אישית לאיסוף נתונים מובנים על האירועים שלך.',
     'newsletter_upgrade_enterprise' => 'צריך יותר? שדרג ל-Enterprise עבור 1,000/חודש',
     'newsletter_upgrade_plan' => 'צריך יותר? שדרג את התוכנית שלך למגבלות שליחה גבוהות יותר',
@@ -1112,6 +1113,9 @@ return [
     'url_format' => 'פורמט כתובת URL',
     'url_include_https' => 'כלול HTTPS',
     'url_include_id' => 'כלול מזהה אירוע',
+    'text_show_all_events' => 'כלול את כל האירועים העתידיים',
+    'text_show_all_events_help' => 'כשמופעל, הטקסט כולל את כל האירועים העתידיים, לא רק אלו המוצגים בגרפיקה.',
+    'no_events_with_flyers' => 'לאף אירוע קרוב אין תמונות פלייר. העלו תמונות פלייר לאירועים שלכם כדי ליצור גרפיקה.',
     'ai_prompt_custom_field' => 'הנחיית AI',
     'eg' => 'לדוגמה,',
     'ai_prompt_example_1' => 'חלץ את קוד הלבוש מפרטי האירוע',
@@ -2539,6 +2543,13 @@ return [
     'save_schedule_first_for_feeds' => 'שמור את לוח הזמנים קודם כדי לראות את כתובות הפיד.',
     'copy_ical_feed' => 'העתק פיד iCal',
     'copy_rss_feed' => 'העתק פיד RSS',
+
+    // Calendar Description Template
+    'calendar_description_template' => 'תבנית תיאור ליומן',
+    'calendar_description_template_help' => 'התאם אישית את התיאור לאירועים המסונכרנים עם Google Calendar ו-CalDAV. השאר ריק כדי להשתמש בתיאור האירוע כפי שהוא.',
+    'common_variables' => 'משתנים נפוצים',
+    'view_all_variables' => 'הצג את כל המשתנים',
+
     'individual_tickets' => 'כרטיסים אישיים',
     'individual_tickets_description' => 'אסוף פרטים עבור כל משתתף בנפרד. כל משתתף מקבל אישור וקוד QR משלו.',
     'individual_ticket_fields' => 'איסוף שדות כרטיס לכל אורח',

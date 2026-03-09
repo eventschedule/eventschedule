@@ -115,7 +115,7 @@
                                 <a href="#integrations-email" class="doc-nav-link">Email</a>
                                 <a href="#integrations-google" class="doc-nav-link">Google Calendar</a>
                                 <a href="#integrations-caldav" class="doc-nav-link">CalDAV</a>
-                                <a href="#integrations-feeds" class="doc-nav-link">Feeds</a>
+                                <a href="#integrations-advanced" class="doc-nav-link">Advanced</a>
                             </div>
                         </div>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
@@ -391,7 +391,7 @@
                             @if (!empty($customFieldsData))
                                 {{-- Dynamic: Show user's actual custom fields --}}
                                 @foreach ($customFieldsData as $scheduleData)
-                                    <h4 class="text-md font-medium text-gray-200 mb-2">{{ $scheduleData['role_name'] }}</h4>
+                                    <h4 class="text-md font-medium text-gray-900 dark:text-white mb-2">{{ $scheduleData['role_name'] }}</h4>
                                     <div class="overflow-x-auto mb-6">
                                         <table class="doc-table">
                                             <thead>
@@ -1010,9 +1010,297 @@
                                 Once connected, the integration status shows your server host. You can disconnect at any time to stop syncing.
                             </p>
 
-                            <!-- Feeds -->
-                            <h3 id="integrations-feeds" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Feeds</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">The Feeds tab provides read-only feed URLs that let others subscribe to your schedule's events from external applications.</p>
+                            <!-- Advanced -->
+                            <h3 id="integrations-advanced" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Advanced</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">The Advanced tab contains the calendar description template and feed URLs for your schedule.</p>
+
+                            <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Calendar Description Template</h4>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                By default, events synced to Google Calendar or CalDAV use the event description as the calendar entry's description. With the <strong class="text-gray-900 dark:text-white">Calendar Description Template</strong>, you can customize what information appears using the same variable system as <a href="{{ route('marketing.docs.event_graphics') }}#available-variables" class="text-cyan-400 hover:text-cyan-300">event graphics</a>.
+                            </p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Leave the template empty to use the event description as-is (default behavior). When a template is set, all events synced outbound from Event Schedule to your connected calendar will use the interpolated template.
+                            </p>
+
+                            <div class="doc-callout doc-callout-tip mb-6">
+                                <div class="doc-callout-title">Example</div>
+                                <p>A template like:</p>
+                                <pre class="bg-gray-100 dark:bg-gray-800 rounded p-3 text-sm mt-2 mb-2"><code>{event_name}
+{date_full_dmy} {time}
+{venue} | {city}
+
+{description}
+
+{url}</code></pre>
+                                <p>Would produce a calendar description like:</p>
+                                <pre class="bg-gray-100 dark:bg-gray-800 rounded p-3 text-sm mt-2"><code>Summer Concert
+15/03/2025 20:00
+Central Park | New York
+
+Join us for a night of music...
+
+example.eventschedule.com/summer-concert</code></pre>
+                            </div>
+
+                            <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3" id="available-variables">Available Variables</h4>
+
+                            <h5 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Date & Time</h5>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{day_name}</code></td>
+                                            <td>Full day name (translated)</td>
+                                            <td>Wednesday</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{day_short}</code></td>
+                                            <td>Short day name (translated)</td>
+                                            <td>Wed</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{date_dmy}</code></td>
+                                            <td>Day/month format</td>
+                                            <td>15/3</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{date_mdy}</code></td>
+                                            <td>Month/day format</td>
+                                            <td>3/15</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{date_full_dmy}</code></td>
+                                            <td>Full date (day/month/year)</td>
+                                            <td>15/03/2025</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{date_full_mdy}</code></td>
+                                            <td>Full date (month/day/year)</td>
+                                            <td>03/15/2025</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{month}</code></td>
+                                            <td>Month number</td>
+                                            <td>3</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{month_name}</code></td>
+                                            <td>Full month name (translated)</td>
+                                            <td>March</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{month_short}</code></td>
+                                            <td>Short month name (translated)</td>
+                                            <td>Mar</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{day}</code></td>
+                                            <td>Day of month</td>
+                                            <td>15</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{year}</code></td>
+                                            <td>Year</td>
+                                            <td>2025</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{time}</code></td>
+                                            <td>Start time (uses schedule's 24h setting)</td>
+                                            <td>20:00 or 8:00 PM</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{end_time}</code></td>
+                                            <td>End time (uses schedule's 24h setting)</td>
+                                            <td>22:00 or 10:00 PM</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{duration}</code></td>
+                                            <td>Duration in hours</td>
+                                            <td>2</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h5 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Event Information</h5>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{event_name}</code></td>
+                                            <td>Event Name</td>
+                                            <td>Summer Concert</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{short_description}</code></td>
+                                            <td>Short Description</td>
+                                            <td>Live jazz with local artists</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{description}</code></td>
+                                            <td>Description</td>
+                                            <td>Join us for a night of music...</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{url}</code></td>
+                                            <td>Event URL</td>
+                                            <td>https://...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h5 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Venue Information</h5>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{venue}</code></td>
+                                            <td>Venue name (translated)</td>
+                                            <td>Central Park</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{city}</code></td>
+                                            <td>City</td>
+                                            <td>New York</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{address}</code></td>
+                                            <td>Street address</td>
+                                            <td>123 Main St</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{state}</code></td>
+                                            <td>State/Province</td>
+                                            <td>NY</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{country}</code></td>
+                                            <td>Country</td>
+                                            <td>US</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h5 class="text-sm font-semibold text-gray-900 dark:text-white mb-2"><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Ticket</a> Information</h5>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{currency}</code></td>
+                                            <td>Currency code</td>
+                                            <td>USD</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{price}</code></td>
+                                            <td>Lowest ticket price (or "Free")</td>
+                                            <td>10</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{coupon_code}</code></td>
+                                            <td>Event coupon code</td>
+                                            <td>SAVE20</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h5 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Custom Fields <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Pro</span></h5>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                If you have defined <a href="{{ marketing_url('/features/custom-fields') }}" class="text-rose-400 hover:text-rose-300">Event Custom Fields</a> in your schedule settings, you can include their values using numbered variables.
+                            </p>
+
+                            @if (!empty($customFieldsData))
+                                @foreach ($customFieldsData as $scheduleData)
+                                    <h6 class="text-sm font-medium text-gray-900 dark:text-white mb-2">{{ $scheduleData['role_name'] }}</h6>
+                                    <div class="overflow-x-auto mb-6">
+                                        <table class="doc-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Variable</th>
+                                                    <th>Field Name</th>
+                                                    <th>Type</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($scheduleData['fields'] as $index => $field)
+                                                <tr>
+                                                    <td><code class="doc-inline-code">{custom_{{ $loop->iteration }}}</code></td>
+                                                    <td>{{ $field['name'] }}</td>
+                                                    <td>{{ ucfirst(str_replace('_', ' ', $field['type'] ?? 'string')) }}</td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="overflow-x-auto mb-6">
+                                    <table class="doc-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Variable</th>
+                                                <th>Description</th>
+                                                <th>Example</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><code class="doc-inline-code">{custom_1}</code></td>
+                                                <td>Value of the 1st custom field</td>
+                                                <td>John Smith</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code class="doc-inline-code">{custom_2}</code></td>
+                                                <td>Value of the 2nd custom field</td>
+                                                <td>Room 101</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code class="doc-inline-code">{custom_3}</code></td>
+                                                <td>Value of the 3rd custom field</td>
+                                                <td>Workshop</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="3" class="text-gray-400 text-sm">...up to {custom_10}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
+
+                            <hr class="border-gray-200 dark:border-gray-700 my-8">
+
+                            <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Feeds</h4>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">The Advanced tab also provides read-only feed URLs that let others subscribe to your schedule's events from external applications.</p>
 
                             <ul class="doc-list mb-6">
                                 <li><strong class="text-gray-900 dark:text-white">iCal Feed</strong> - Subscribe to your schedule's events from any calendar app (Google Calendar, Apple Calendar, Outlook, etc.). The calendar will automatically stay up to date as you add or change events.</li>
@@ -1025,7 +1313,7 @@
 
                             <div class="doc-callout doc-callout-info mb-6">
                                 <div class="doc-callout-title">Note</div>
-                                <p>Feed URLs are only available after the schedule has been saved. Create and save your schedule first, then return to the Feeds tab to find your URLs.</p>
+                                <p>Feed URLs are only available after the schedule has been saved. Create and save your schedule first, then return to the Advanced tab to find your URLs.</p>
                             </div>
                         </section>
 

@@ -147,6 +147,8 @@
                                         document.getElementById('url_include_https_mobile')?.checked || false;
                 const urlIncludeId = document.getElementById('url_include_id')?.checked ||
                                      document.getElementById('url_include_id_mobile')?.checked || false;
+                const textShowAll = document.getElementById('text_show_all')?.checked ||
+                                    document.getElementById('text_show_all_mobile')?.checked || false;
 
                 return {
                     direct_registration: directRegistration,
@@ -159,7 +161,8 @@
                     max_per_row: maxPerRow,
                     overlay_text: overlayText,
                     url_include_https: urlIncludeHttps,
-                    url_include_id: urlIncludeId
+                    url_include_id: urlIncludeId,
+                    text_show_all: textShowAll
                 };
             }
 
@@ -278,6 +281,13 @@
                 if (urlIncludeIdDesktop && urlIncludeIdMobile) {
                     urlIncludeIdMobile.checked = urlIncludeIdDesktop.checked;
                 }
+
+                // Sync text show all
+                const textShowAllDesktop = document.getElementById('text_show_all');
+                const textShowAllMobile = document.getElementById('text_show_all_mobile');
+                if (textShowAllDesktop && textShowAllMobile) {
+                    textShowAllMobile.checked = textShowAllDesktop.checked;
+                }
             }
 
             function loadGraphic() {
@@ -298,6 +308,8 @@
                 graphicSpinner.classList.remove('hidden');
                 graphicImage.classList.add('hidden');
                 errorDiv.classList.add('hidden');
+                const noFlyersMsg = document.getElementById('noFlyersMessage');
+                if (noFlyersMsg) noFlyersMsg.classList.add('hidden');
 
                 // Get current form values instead of saved settings
                 const formSettings = getFormSettings();
@@ -312,8 +324,9 @@
                 const overlayTextParam = formSettings.overlay_text ? '&overlay_text=' + encodeURIComponent(formSettings.overlay_text) : '';
                 const urlIncludeHttpsParam = formSettings.url_include_https ? '&url_include_https=1' : '';
                 const urlIncludeIdParam = formSettings.url_include_id ? '&url_include_id=1' : '';
+                const textShowAllParam = formSettings.text_show_all ? '&text_show_all=1' : '';
 
-                const baseUrl = '{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam + urlIncludeHttpsParam + urlIncludeIdParam;
+                const baseUrl = '{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam + urlIncludeHttpsParam + urlIncludeIdParam + textShowAllParam;
 
                 let hasError = false;
 
@@ -334,7 +347,13 @@
                         return response.json();
                     })
                     .then(data => {
-                        if (data.error) throw new Error(data.error);
+                        if (data.error) {
+                            if (data.error_type === 'no_events_with_flyers') {
+                                textSpinner.classList.add('hidden');
+                                return;
+                            }
+                            throw new Error(data.error);
+                        }
                         textSpinner.classList.add('hidden');
                         textContent.classList.remove('hidden');
                         textContent.value = data.text;
@@ -356,7 +375,28 @@
                         return response.json();
                     })
                     .then(data => {
-                        if (data.error) throw new Error(data.error);
+                        if (data.error) {
+                            // Show info message for "no flyers" instead of generic error
+                            if (data.error_type === 'no_events_with_flyers') {
+                                graphicSpinner.classList.add('hidden');
+                                graphicImage.classList.add('hidden');
+                                const container = graphicImage.parentElement;
+                                let infoDiv = document.getElementById('noFlyersMessage');
+                                if (!infoDiv) {
+                                    infoDiv = document.createElement('div');
+                                    infoDiv.id = 'noFlyersMessage';
+                                    infoDiv.className = 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3';
+                                    infoDiv.innerHTML = `<div class="flex items-start gap-2"><svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg><p class="text-sm text-amber-800 dark:text-amber-300">${data.error}</p></div>`;
+                                    container.appendChild(infoDiv);
+                                }
+                                infoDiv.classList.remove('hidden');
+                                return;
+                            }
+                            throw new Error(data.error);
+                        }
+                        // Remove any previous no-flyers info message
+                        const infoDiv = document.getElementById('noFlyersMessage');
+                        if (infoDiv) infoDiv.classList.add('hidden');
                         graphicSpinner.classList.add('hidden');
                         graphicImage.classList.remove('hidden');
                         graphicImage.src = 'data:image/png;base64,' + data.image;
@@ -506,6 +546,14 @@
                     const urlIncludeId = document.getElementById(id);
                     if (urlIncludeId) {
                         urlIncludeId.checked = currentSettings.url_include_id || false;
+                    }
+                });
+
+                // Update text show all checkboxes
+                ['text_show_all', 'text_show_all_mobile'].forEach(id => {
+                    const textShowAll = document.getElementById(id);
+                    if (textShowAll) {
+                        textShowAll.checked = currentSettings.text_show_all || false;
                     }
                 });
             }
@@ -682,6 +730,9 @@
                 const urlIncludeHttps = document.getElementById('url_include_https') || document.getElementById('url_include_https_mobile');
                 const urlIncludeId = document.getElementById('url_include_id') || document.getElementById('url_include_id_mobile');
 
+                // Get text show all option
+                const textShowAll = document.getElementById('text_show_all') || document.getElementById('text_show_all_mobile');
+
                 return {
                     enabled: emailEnabled ? emailEnabled.checked : false,
                     frequency: frequency,
@@ -698,7 +749,8 @@
                     max_per_row: maxPerRow && maxPerRow.value ? parseInt(maxPerRow.value) : null,
                     overlay_text: overlayText ? overlayText.value : '',
                     url_include_https: urlIncludeHttps ? urlIncludeHttps.checked : false,
-                    url_include_id: urlIncludeId ? urlIncludeId.checked : false
+                    url_include_id: urlIncludeId ? urlIncludeId.checked : false,
+                    text_show_all: textShowAll ? textShowAll.checked : false
                 };
             }
 
@@ -1474,7 +1526,7 @@
                         <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                             <div class="flex items-center justify-between mb-3">
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.text_template') }}</h4>
-                                <a href="{{ route('marketing.docs.event_graphics') }}" target="_blank"
+                                <a href="{{ route('marketing.docs.event_graphics') }}#variables" target="_blank"
                                    class="text-xs text-blue-500 hover:text-blue-400">
                                     {{ __('messages.view_docs') }}
                                 </a>
@@ -1484,6 +1536,12 @@
                                 class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-xs font-mono resize-y"
                                 placeholder="*{day_name}* {date_dmy} | {time}&#10;*{event_name}*:&#10;{short_description}&#10;{venue} | {city}&#10;{url}"></textarea>
                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
+                        </div>
+
+                        <!-- Text Show All Events -->
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <x-toggle name="text_show_all_mobile" label="{{ __('messages.text_show_all_events') }}" />
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_show_all_events_help') }}</p>
                         </div>
 
                         <!-- AI Prompt (Enterprise Feature) -->
@@ -1793,7 +1851,7 @@
                             <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                                 <div class="flex items-center justify-between mb-3">
                                     <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.text_template') }}</h4>
-                                    <a href="{{ route('marketing.docs.event_graphics') }}" target="_blank"
+                                    <a href="{{ route('marketing.docs.event_graphics') }}#variables" target="_blank"
                                        class="text-xs text-blue-500 hover:text-blue-400">
                                         {{ __('messages.view_docs') }}
                                     </a>
@@ -1803,6 +1861,12 @@
                                     class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-xs font-mono resize-y"
                                     placeholder="*{day_name}* {date_dmy} | {time}&#10;*{event_name}*:&#10;{short_description}&#10;{venue} | {city}&#10;{url}"></textarea>
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
+                            </div>
+
+                            <!-- Text Show All Events -->
+                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <x-toggle name="text_show_all" label="{{ __('messages.text_show_all_events') }}" />
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_show_all_events_help') }}</p>
                             </div>
 
                             <!-- AI Prompt (Enterprise Feature) -->

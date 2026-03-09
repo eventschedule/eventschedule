@@ -180,6 +180,7 @@ https://example.com/event/summer-concert</code></pre>
                                     <div class="space-y-2 text-sm">
                                         <div class="flex justify-between"><code class="text-rose-300">{price}</code> <span class="text-gray-500">10 or Free</span></div>
                                         <div class="flex justify-between"><code class="text-rose-300">{currency}</code> <span class="text-gray-500">USD</span></div>
+                                        <div class="flex justify-between"><code class="text-rose-300">{coupon_code}</code> <span class="text-gray-500">SAVE20</span></div>
                                     </div>
                                 </div>
                             </div>
@@ -375,6 +376,11 @@ https://example.com/event/summer-concert</code></pre>
                                             <td>Lowest ticket price (or "Free")</td>
                                             <td>10</td>
                                         </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{coupon_code}</code></td>
+                                            <td>Event coupon code</td>
+                                            <td>SAVE20</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -387,7 +393,7 @@ https://example.com/event/summer-concert</code></pre>
                             @if (!empty($customFieldsData))
                                 {{-- Dynamic: Show user's actual custom fields --}}
                                 @foreach ($customFieldsData as $scheduleData)
-                                    <h4 class="text-md font-medium text-gray-200 mb-2">{{ $scheduleData['role_name'] }}</h4>
+                                    <h4 class="text-md font-medium text-gray-900 dark:text-white mb-2">{{ $scheduleData['role_name'] }}</h4>
                                     <div class="overflow-x-auto mb-6">
                                         <table class="doc-table">
                                             <thead>

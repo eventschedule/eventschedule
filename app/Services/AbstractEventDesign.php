@@ -1742,6 +1742,7 @@ abstract class AbstractEventDesign
                 // Ticket variables
                 '{currency}' => $event->ticket_currency_code ?? '',
                 '{price}' => EventTextGenerator::getPrice($event),
+                '{coupon_code}' => $event->coupon_code ?? '',
             ];
 
             // Add custom field replacements using stable indices

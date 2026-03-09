@@ -152,7 +152,7 @@ class SyncEventToGoogleCalendar implements ShouldQueue
             return;
         }
 
-        $success = $googleCalendarService->deleteEvent($googleEventId, $this->role->getGoogleCalendarId());
+        $success = $googleCalendarService->deleteEvent($googleEventId, $this->role->getGoogleCalendarId(), $this->role->id);
 
         if ($success) {
             $this->event->setGoogleEventIdForRole($this->role->id, null);

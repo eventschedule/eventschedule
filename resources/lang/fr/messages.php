@@ -1077,6 +1077,7 @@ return [
     'custom_css_enterprise_only' => 'Passez à Pro pour ajouter du CSS personnalisé et personnaliser votre page de calendrier.',
     'custom_css_grandfathered' => 'Passez à Pro pour modifier votre CSS personnalisé. Vos styles existants continueront de fonctionner.',
     'custom_fields_pro_only' => 'Passez à Pro pour ajouter des champs personnalisés à vos formulaires d\'inscription.',
+    'no_event_custom_fields' => 'Aucun champ personnalisé n\'a été configuré pour ce calendrier. Les champs personnalisés peuvent être ajoutés dans les paramètres du calendrier.',
     'upgrade_feature_description_custom_fields' => 'Ajoutez des champs personnalisés pour collecter des données structurées sur vos événements.',
     'newsletter_upgrade_enterprise' => 'Besoin de plus ? Passez à Enterprise pour 1 000/mois',
     'newsletter_upgrade_plan' => 'Besoin de plus ? Mettez à niveau votre plan pour des limites d\'envoi plus élevées',
@@ -1117,6 +1118,9 @@ return [
     'url_format' => 'Format d\'URL',
     'url_include_https' => 'Inclure HTTPS',
     'url_include_id' => 'Inclure l\'ID de l\'événement',
+    'text_show_all_events' => 'Inclure tous les événements à venir',
+    'text_show_all_events_help' => 'Lorsque activé, le texte inclut tous les événements à venir, pas seulement ceux affichés sur le graphique.',
+    'no_events_with_flyers' => 'Aucun événement à venir n\'a d\'images de flyer. Téléchargez des images de flyer sur vos événements pour générer un graphique.',
     'ai_prompt_custom_field' => 'Invite IA',
     'eg' => 'ex. :',
     'ai_prompt_example_1' => 'Extraire le code vestimentaire des détails de l\'événement',
@@ -2546,6 +2550,13 @@ return [
     'save_schedule_first_for_feeds' => 'Enregistrez le calendrier d\'abord pour voir les URLs des flux.',
     'copy_ical_feed' => 'Copier le flux iCal',
     'copy_rss_feed' => 'Copier le flux RSS',
+
+    // Calendar Description Template
+    'calendar_description_template' => 'Modèle de description du calendrier',
+    'calendar_description_template_help' => 'Personnalisez la description des événements synchronisés avec Google Calendar et CalDAV. Laissez vide pour utiliser la description de l\'événement telle quelle.',
+    'common_variables' => 'Variables courantes',
+    'view_all_variables' => 'Voir toutes les variables',
+
     'individual_tickets' => 'Billets individuels',
     'individual_tickets_description' => 'Collectez les informations de chaque participant. Chaque participant reçoit sa propre confirmation et son propre code QR.',
     'individual_ticket_fields' => 'Collecter les champs de billet par invité',

@@ -1077,6 +1077,7 @@ return [
     'custom_css_enterprise_only' => 'Actualiza a Pro para agregar CSS personalizado y personalizar tu página de calendario.',
     'custom_css_grandfathered' => 'Actualiza a Pro para editar tu CSS personalizado. Tus estilos existentes seguirán funcionando.',
     'custom_fields_pro_only' => 'Actualiza a Pro para agregar campos personalizados a tus formularios de registro.',
+    'no_event_custom_fields' => 'No se han configurado campos personalizados para este calendario. Los campos personalizados se pueden agregar en la configuración del calendario.',
     'upgrade_feature_description_custom_fields' => 'Agregue campos personalizados para recopilar datos estructurados en sus eventos.',
     'newsletter_upgrade_enterprise' => '¿Necesita más? Actualice a Enterprise por 1.000/mes',
     'newsletter_upgrade_plan' => '¿Necesita más? Actualice su plan para obtener límites de envío más altos',
@@ -1117,6 +1118,9 @@ return [
     'url_format' => 'Formato de URL',
     'url_include_https' => 'Incluir HTTPS',
     'url_include_id' => 'Incluir ID del evento',
+    'text_show_all_events' => 'Incluir todos los eventos futuros',
+    'text_show_all_events_help' => 'Cuando está activado, el texto incluye todos los eventos futuros, no solo los mostrados en el gráfico.',
+    'no_events_with_flyers' => 'Ningún evento próximo tiene imágenes de flyer. Suba imágenes de flyer a sus eventos para generar un gráfico.',
     'ai_prompt_custom_field' => 'Indicación de IA',
     'eg' => 'p. ej.,',
     'ai_prompt_example_1' => 'Extraer el código de vestimenta de los detalles del evento',
@@ -2546,6 +2550,13 @@ return [
     'save_schedule_first_for_feeds' => 'Guarda el calendario primero para ver las URLs de los feeds.',
     'copy_ical_feed' => 'Copiar feed iCal',
     'copy_rss_feed' => 'Copiar feed RSS',
+
+    // Calendar Description Template
+    'calendar_description_template' => 'Plantilla de descripción del calendario',
+    'calendar_description_template_help' => 'Personaliza la descripción de los eventos sincronizados con Google Calendar y CalDAV. Déjalo vacío para usar la descripción del evento tal cual.',
+    'common_variables' => 'Variables comunes',
+    'view_all_variables' => 'Ver todas las variables',
+
     'individual_tickets' => 'Entradas individuales',
     'individual_tickets_description' => 'Recopila los datos de cada asistente por separado. Cada asistente recibe su propia confirmación y código QR.',
     'individual_ticket_fields' => 'Recopilar campos de ticket por invitado',

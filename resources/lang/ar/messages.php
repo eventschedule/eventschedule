@@ -1078,6 +1078,7 @@ return [
     'custom_css_enterprise_only' => 'قم بالترقية إلى Pro لإضافة CSS مخصص وتخصيص صفحة الجدول.',
     'custom_css_grandfathered' => 'قم بالترقية إلى Pro لتعديل CSS المخصص. ستستمر أنماطك الحالية في العمل.',
     'custom_fields_pro_only' => 'قم بالترقية إلى Pro لإضافة حقول مخصصة لنماذج التسجيل الخاصة بك.',
+    'no_event_custom_fields' => 'لم يتم تكوين حقول مخصصة لهذا الجدول. يمكن إضافة الحقول المخصصة في إعدادات الجدول.',
     'upgrade_feature_description_custom_fields' => 'أضف حقولاً مخصصة لجمع بيانات منظمة عن فعالياتك.',
     'newsletter_upgrade_enterprise' => 'تحتاج المزيد؟ قم بالترقية إلى Enterprise مقابل 1,000/شهر',
     'newsletter_upgrade_plan' => 'تحتاج المزيد؟ قم بترقية خطتك للحصول على حدود إرسال أعلى',
@@ -1118,6 +1119,9 @@ return [
     'url_format' => 'تنسيق الرابط',
     'url_include_https' => 'تضمين HTTPS',
     'url_include_id' => 'تضمين معرف الحدث',
+    'text_show_all_events' => 'تضمين جميع الأحداث المستقبلية',
+    'text_show_all_events_help' => 'عند التفعيل، يتضمن النص جميع الأحداث المستقبلية، وليس فقط تلك المعروضة في الرسم.',
+    'no_events_with_flyers' => 'لا تحتوي أي أحداث قادمة على صور فلاير. قم بتحميل صور فلاير لأحداثك لإنشاء رسم.',
     'ai_prompt_custom_field' => 'موجه الذكاء الاصطناعي',
     'eg' => 'مثال:',
     'ai_prompt_example_1' => 'استخرج قواعد اللباس من تفاصيل الحدث',
@@ -2547,6 +2551,13 @@ return [
     'save_schedule_first_for_feeds' => 'احفظ الجدول أولاً لرؤية روابط الخلاصات.',
     'copy_ical_feed' => 'نسخ خلاصة iCal',
     'copy_rss_feed' => 'نسخ خلاصة RSS',
+
+    // Calendar Description Template
+    'calendar_description_template' => 'قالب وصف التقويم',
+    'calendar_description_template_help' => 'تخصيص الوصف للأحداث المتزامنة مع تقويم Google وCalDAV. اتركه فارغاً لاستخدام وصف الحدث كما هو.',
+    'common_variables' => 'المتغيرات الشائعة',
+    'view_all_variables' => 'عرض جميع المتغيرات',
+
     'individual_tickets' => 'تذاكر فردية',
     'individual_tickets_description' => 'اجمع بيانات كل حاضر على حدة. يحصل كل حاضر على تأكيد ورمز QR خاص به.',
     'individual_ticket_fields' => 'جمع حقول التذكرة لكل ضيف',

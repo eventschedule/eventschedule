@@ -1053,6 +1053,7 @@ return [
     'custom_css_enterprise_only' => 'Upgrade to Pro to add custom CSS and personalize your schedule page.',
     'custom_css_grandfathered' => 'Upgrade to Pro to edit your custom CSS. Your existing styles will continue to work.',
     'custom_fields_pro_only' => 'Upgrade to Pro to add custom fields to your registration forms.',
+    'no_event_custom_fields' => 'No custom fields have been configured for this schedule. Custom fields can be added in the schedule settings.',
     'upgrade_feature_description_custom_fields' => 'Add custom fields to collect structured data on your events.',
     'newsletter_upgrade_enterprise' => 'Need more? Upgrade to Enterprise for 1,000/month',
     'newsletter_upgrade_plan' => 'Need more? Upgrade your plan for higher sending limits',
@@ -1153,6 +1154,9 @@ return [
     'url_format' => 'URL Format',
     'url_include_https' => 'Include HTTPS',
     'url_include_id' => 'Include Event ID',
+    'text_show_all_events' => 'Include all future events',
+    'text_show_all_events_help' => 'When enabled, the text includes all future events, not just those shown on the graphic.',
+    'no_events_with_flyers' => 'No upcoming events have flyer images. Upload flyer images to your events to generate a graphic.',
     'ai_prompt_custom_field' => 'AI prompt',
     'eg' => 'e.g.,',
     'ai_prompt_example_1' => 'Extract the dress code from the event details',
@@ -2593,6 +2597,13 @@ return [
     'save_schedule_first_for_feeds' => 'Save the schedule first to see feed URLs.',
     'copy_ical_feed' => 'Copy iCal Feed',
     'copy_rss_feed' => 'Copy RSS Feed',
+
+    // Calendar Description Template
+    'calendar_description_template' => 'Calendar Description Template',
+    'calendar_description_template_help' => 'Customize the description for events synced to Google Calendar and CalDAV. Leave empty to use the event description as-is.',
+    'common_variables' => 'Common variables',
+    'view_all_variables' => 'View all variables',
+
     'individual_tickets' => 'Individual tickets',
     'individual_tickets_description' => 'Collect details for each attendee. Each attendee receives their own confirmation and QR code.',
     'individual_ticket_fields' => 'Collect ticket fields per guest',

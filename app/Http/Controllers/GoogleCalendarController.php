@@ -292,7 +292,7 @@ class GoogleCalendarController extends Controller
                     return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
                 }
 
-                $this->googleCalendarService->deleteEvent($googleEventId, $role->getGoogleCalendarId());
+                $this->googleCalendarService->deleteEvent($googleEventId, $role->getGoogleCalendarId(), $role->id);
                 $event->setGoogleEventIdForRole($role->id, null);
             }
 

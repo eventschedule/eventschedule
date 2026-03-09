@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Event;
 use App\Models\Role;
 use App\Repos\EventRepo;
+use App\Utils\EventTextGenerator;
 use App\Utils\SlugPatternUtils;
 use Carbon\Carbon;
 use HTMLPurifier;
@@ -506,11 +507,18 @@ class CalDAVService
             return null;
         }
 
+        if ($role->calendar_description_template) {
+            $event->loadMissing(['venue', 'tickets']);
+            $calDescription = EventTextGenerator::parseTemplate($role->calendar_description_template, $event, $role, false, ['url_include_https' => true]);
+        } else {
+            $calDescription = $event->description ?: '';
+        }
+
         $vcalendar = new VCalendar([
             'VEVENT' => [
                 'UID' => $uid,
                 'SUMMARY' => $event->name,
-                'DESCRIPTION' => $event->description ?: '',
+                'DESCRIPTION' => $calDescription,
                 'DTSTART' => $event->getStartDateTime(),
                 'DTEND' => $event->getStartDateTime()->copy()->addHours($event->duration ?: 2),
                 'DTSTAMP' => new \DateTime,

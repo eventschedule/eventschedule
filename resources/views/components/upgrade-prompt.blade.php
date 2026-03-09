@@ -21,11 +21,19 @@
             {{ __('messages.learn_more') }}
         </a>
         @endif
+        @if ($subdomain)
         <a href="{{ route('role.subscribe', ['subdomain' => $subdomain, 'tier' => $tier]) }}" target="_blank"
             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] shadow-sm dark:shadow-none text-[var(--brand-blue)] text-sm font-medium hover:bg-gray-50 dark:hover:bg-white/[0.10] transition-all duration-200">
             {{ $tier === 'enterprise' ? __('messages.upgrade_to_enterprise') : __('messages.upgrade_to_pro_plan') }}
             <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
+        @else
+        <a href="{{ route('marketing.pricing') }}" target="_blank"
+            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] shadow-sm dark:shadow-none text-[var(--brand-blue)] text-sm font-medium hover:bg-gray-50 dark:hover:bg-white/[0.10] transition-all duration-200">
+            {{ $tier === 'enterprise' ? __('messages.upgrade_to_enterprise') : __('messages.upgrade_to_pro_plan') }}
+            <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+        @endif
     </div>
     @endif
 </div>

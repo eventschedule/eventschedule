@@ -871,8 +871,19 @@ class BackupService
 
             // Recalculate ticket sold counts from actual imported SaleTickets
             foreach ($idMap['tickets'] as $newTicketId) {
-                $actualSold = SaleTicket::where('ticket_id', $newTicketId)->sum('quantity');
-                Ticket::where('id', $newTicketId)->update(['sold' => $actualSold]);
+                $saleTickets = SaleTicket::where('ticket_id', $newTicketId)
+                    ->with('sale:id,event_date')
+                    ->get();
+                $sold = [];
+                foreach ($saleTickets as $st) {
+                    $date = $st->sale->event_date;
+                    if ($date) {
+                        $sold[$date] = ($sold[$date] ?? 0) + $st->quantity;
+                    }
+                }
+                Ticket::where('id', $newTicketId)->update([
+                    'sold' => ! empty($sold) ? json_encode($sold) : null,
+                ]);
             }
 
             // Second pass: fix Sale group_id self-references
@@ -881,7 +892,7 @@ class BackupService
                     $groupRefId = $saleData['_group_ref_id'] ?? null;
                     if ($groupRefId && isset($idMap['sales'][$saleData['_ref_id'] ?? null])) {
                         $newSaleId = $idMap['sales'][$saleData['_ref_id']];
-                        $newGroupId = $idMap['groups'][$groupRefId] ?? null;
+                        $newGroupId = $idMap['sales'][$groupRefId] ?? null;
                         if ($newGroupId) {
                             Sale::where('id', $newSaleId)->update(['group_id' => $newGroupId]);
                         }
@@ -1166,7 +1177,7 @@ class BackupService
         $validator = Validator::make($data, [
             'type' => 'required|string|max:255',
             'quantity' => 'nullable|integer|min:0',
-            'sold' => 'nullable|integer|min:0',
+            'sold' => 'nullable',
             'price' => 'nullable|numeric|min:0',
         ]);
 

@@ -1050,6 +1050,7 @@ return [
     'custom_css_enterprise_only' => 'Uuendage Pro-le, et lisada kohandatud CSS ja isikupärastada oma kalendri lehte.',
     'custom_css_grandfathered' => 'Uuendage Pro-le, et redigeerida oma kohandatud CSS-i. Teie olemasolevad stiilid jätkavad tööd.',
     'custom_fields_pro_only' => 'Uuendage Pro-le, et lisada kohandatud väljad oma registreerimisvormidele.',
+    'no_event_custom_fields' => 'Sellele ajakavale pole kohandatud välju seadistatud. Kohandatud välju saab lisada ajakava seadetes.',
     'upgrade_feature_description_custom_fields' => 'Lisage kohandatud väljad oma ürituste struktureeritud andmete kogumiseks.',
     'newsletter_upgrade_enterprise' => 'Vajad rohkem? Uuenda Enterprise plaanile 1000/kuus',
     'newsletter_upgrade_plan' => 'Vajad rohkem? Uuenda oma plaani kõrgemate saatmislimiitide jaoks',
@@ -1150,6 +1151,9 @@ return [
     'url_format' => 'URL-i vorming',
     'url_include_https' => 'Kaasake HTTPS',
     'url_include_id' => 'Kaasa sündmuse ID',
+    'text_show_all_events' => 'Kaasa kõik tulevased sündmused',
+    'text_show_all_events_help' => 'Kui lubatud, sisaldab tekst kõiki tulevasi sündmusi, mitte ainult graafikal kuvatavaid.',
+    'no_events_with_flyers' => 'Ühelgi eelseisval sündmusel pole flaieripilte. Laadige oma sündmustele flaieripildid üles, et luua graafika.',
     'ai_prompt_custom_field' => 'AI viip',
     'eg' => 'nt',
     'ai_prompt_example_1' => 'Eraldage sündmuse üksikasjadest riietuskood',
@@ -2562,6 +2566,13 @@ return [
     'save_schedule_first_for_feeds' => 'Salvesta ajakava esmalt, et näha voo-URL-e.',
     'copy_ical_feed' => 'Kopeeri iCal-voog',
     'copy_rss_feed' => 'Kopeeri RSS-voog',
+
+    // Calendar Description Template
+    'calendar_description_template' => 'Kalendri kirjelduse mall',
+    'calendar_description_template_help' => 'Kohanda Google Calendari ja CalDAViga sünkroonitavate sündmuste kirjeldust. Jäta tühjaks, et kasutada sündmuse kirjeldust muutmata kujul.',
+    'common_variables' => 'Levinud muutujad',
+    'view_all_variables' => 'Vaata kõiki muutujaid',
+
     'individual_tickets' => 'Individuaalsed piletid',
     'individual_tickets_description' => 'Kogu iga osaleja andmed eraldi. Iga osaleja saab oma kinnituse ja QR-koodi.',
     'individual_ticket_fields' => 'Kogu piletivälju iga külalise kohta',

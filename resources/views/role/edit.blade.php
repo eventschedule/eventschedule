@@ -3097,8 +3097,8 @@
                                 <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="caldav">
                                     {{ __('messages.caldav_calendar') }}
                                 </button>
-                                <button type="button" class="integration-tab feeds-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="feeds">
-                                    {{ __('messages.feeds') }}
+                                <button type="button" class="integration-tab advanced-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="advanced">
+                                    {{ __('messages.advanced') }}
                                 </button>
                             </nav>
                         </div>
@@ -3444,8 +3444,42 @@
                             @endif
                         </div>
 
-                        <!-- Tab Content: Feeds -->
-                        <div id="integration-tab-feeds" class="integration-tab-content hidden">
+                        <!-- Tab Content: Advanced -->
+                        <div id="integration-tab-advanced" class="integration-tab-content hidden">
+                            <!-- Calendar Description Template -->
+                            <div class="mb-8">
+                                <x-input-label for="calendar_description_template" :value="__('messages.calendar_description_template')" />
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-2">{{ __('messages.calendar_description_template_help') }}</p>
+                                <textarea id="calendar_description_template" name="calendar_description_template" rows="4"
+                                    class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm text-sm"
+                                    placeholder="{{ '{event_name}' . "\n" . '{description}' . "\n" . '{venue} | {city}' . "\n" . '{url}' }}">{{ old('calendar_description_template', $role->calendar_description_template) }}</textarea>
+
+                                <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                    <p class="font-medium mb-1">{{ __('messages.common_variables') }}:</p>
+                                    <code class="text-xs">{event_name}</code>,
+                                    <code class="text-xs">{description}</code>,
+                                    <code class="text-xs">{short_description}</code>,
+                                    <code class="text-xs">{url}</code>,
+                                    <code class="text-xs">{venue}</code>,
+                                    <code class="text-xs">{city}</code>,
+                                    <code class="text-xs">{time}</code>,
+                                    <code class="text-xs">{date_dmy}</code>,
+                                    <code class="text-xs">{price}</code>
+                                    @php $customFields = $role->getEventCustomFields(); @endphp
+                                    @if (count($customFields) > 0)
+                                        <br>
+                                        @foreach ($customFields as $fieldConfig)
+                                            <code class="text-xs">{custom_{{ $fieldConfig['index'] ?? $loop->iteration }}}</code> ({{ $fieldConfig['name'] ?? '' }}){{ $loop->last ? '' : ',' }}
+                                        @endforeach
+                                    @endif
+                                    <br>
+                                    <x-link href="{{ marketing_url('/docs/event-graphics#available-variables') }}" target="_blank">{{ __('messages.view_all_variables') }}</x-link>
+                                </div>
+                            </div>
+
+                            <hr class="border-gray-200 dark:border-gray-700 mb-6">
+
+                            <!-- Feeds -->
                             <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
                                 {{ __('messages.feeds_description') }}
                             </p>
@@ -4480,9 +4514,11 @@ document.addEventListener('DOMContentLoaded', function() {
 window.addEventListener('load', function() {
     window.scrollTo(0, 0);
     requestAnimationFrame(function() {
-        var nameField = document.getElementById('name');
-        if (nameField) {
-            nameField.focus({ preventScroll: true });
+        if (isNewSchedule) {
+            var nameField = document.getElementById('name');
+            if (nameField) {
+                nameField.focus({ preventScroll: true });
+            }
         }
         window.scrollTo(0, 0);
         setTimeout(function() {

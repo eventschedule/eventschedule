@@ -35,29 +35,37 @@ class GraphicEmailService
             $eventCountSetting = $settings['event_count'] ?? null;
             $eventLimit = $eventCountSetting ? (int) $eventCountSetting : 20;
 
-            // Build the events query
-            $query = Event::with(['roles', 'tickets', 'venue'])
-                ->whereHas('roles', function ($query) use ($role) {
-                    $query->where('role_id', $role->id)->where('is_accepted', true);
-                })
-                ->where('starts_at', '>=', now())
+            // Build the base query for future events
+            $baseQuery = function () use ($role, $excludeRecurring) {
+                return Event::with(['roles', 'tickets', 'venue'])
+                    ->whereHas('roles', function ($query) use ($role) {
+                        $query->where('role_id', $role->id)->where('is_accepted', true);
+                    })
+                    ->where('starts_at', '>=', now())
+                    ->where('is_private', false)
+                    ->whereNull('event_password')
+                    ->when($excludeRecurring, function ($query) {
+                        $query->whereNull('days_of_week');
+                    });
+            };
+
+            // Flyer events are always required for the graphic image
+            $events = $baseQuery()
                 ->whereNotNull('flyer_image_url')
                 ->where('flyer_image_url', '!=', '')
-                ->where('is_private', false)
-                ->whereNull('event_password');
-
-            // Only exclude recurring events if setting is true
-            if ($excludeRecurring) {
-                $query->whereNull('days_of_week');
-            }
-
-            $events = $query->orderBy('starts_at')
+                ->orderBy('starts_at')
                 ->limit($eventLimit)
                 ->get();
 
             if ($events->isEmpty()) {
                 return false;
             }
+
+            // Determine text events: use all events if text_show_all is enabled
+            $textShowAll = $settings['text_show_all'] ?? false;
+            $textEvents = $textShowAll
+                ? $baseQuery()->orderBy('starts_at')->get()
+                : $events;
 
             // Build options array for the generator (matching web preview)
             $datePosition = $settings['date_position'] ?? null;
@@ -87,7 +95,7 @@ class GraphicEmailService
                 'url_include_https' => $settings['url_include_https'] ?? false,
                 'url_include_id' => $settings['url_include_id'] ?? false,
             ];
-            $eventText = EventTextGenerator::generate($role, $events, $directRegistration, $textTemplate, $urlSettings);
+            $eventText = EventTextGenerator::generate($role, $textEvents, $directRegistration, $textTemplate, $urlSettings);
 
             // Apply AI prompt if configured (Enterprise feature)
             $aiPrompt = trim($settings['ai_prompt'] ?? '');

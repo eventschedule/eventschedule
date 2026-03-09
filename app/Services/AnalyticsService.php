@@ -880,7 +880,7 @@ class AnalyticsService
                 ->where('status', 'paid')
                 ->whereBetween('event_date', [$start->toDateString(), $end->toDateString()]);
         })
-            ->with(['sale:id,event_id,event_date', 'sale.event:id,name,name_en,start_date', 'ticket:id,type'])
+            ->with(['sale:id,event_id,event_date', 'sale.event:id,name,name_en', 'ticket:id,type'])
             ->get();
 
         if ($saleTickets->isEmpty()) {
@@ -929,7 +929,7 @@ class AnalyticsService
             if (! isset($eventsData[$eventId])) {
                 $eventsData[$eventId] = [
                     'event_name' => $event->translatedName() ?? '',
-                    'event_date' => $event->start_date,
+                    'event_date' => $saleTicket->sale->event_date,
                     'sold' => 0,
                     'checked_in' => 0,
                 ];

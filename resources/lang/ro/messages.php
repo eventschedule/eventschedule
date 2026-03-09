@@ -1054,6 +1054,7 @@ return [
     'custom_css_enterprise_only' => 'Faceți upgrade la Pro pentru a adăuga CSS personalizat și a personaliza pagina calendarului.',
     'custom_css_grandfathered' => 'Faceți upgrade la Pro pentru a edita CSS-ul personalizat. Stilurile existente vor continua să funcționeze.',
     'custom_fields_pro_only' => 'Faceți upgrade la Pro pentru a adăuga câmpuri personalizate la formularele dvs. de înregistrare.',
+    'no_event_custom_fields' => 'Nu au fost configurate câmpuri personalizate pentru acest program. Câmpurile personalizate pot fi adăugate în setările programului.',
     'upgrade_feature_description_custom_fields' => 'Adaugă câmpuri personalizate pentru a colecta date structurate despre evenimentele tale.',
     'newsletter_upgrade_enterprise' => 'Ai nevoie de mai mult? Fă upgrade la Enterprise pentru 1.000/lună',
     'newsletter_upgrade_plan' => 'Ai nevoie de mai mult? Fă upgrade la planul tău pentru limite de trimitere mai mari',
@@ -1154,6 +1155,9 @@ return [
     'url_format' => 'Format URL',
     'url_include_https' => 'Include HTTPS',
     'url_include_id' => 'Include ID Eveniment',
+    'text_show_all_events' => 'Include toate evenimentele viitoare',
+    'text_show_all_events_help' => 'Când este activat, textul include toate evenimentele viitoare, nu doar cele afișate pe grafic.',
+    'no_events_with_flyers' => 'Niciun eveniment viitor nu are imagini de flyer. Încărcați imagini de flyer la evenimentele dvs. pentru a genera o grafică.',
     'ai_prompt_custom_field' => 'Prompt AI',
     'eg' => 'ex:',
     'ai_prompt_example_1' => 'Extrage codul vestimentar din detaliile evenimentului',
@@ -2586,6 +2590,13 @@ return [
     'save_schedule_first_for_feeds' => 'Salvează programul mai întâi pentru a vedea URL-urile fluxurilor.',
     'copy_ical_feed' => 'Copiază fluxul iCal',
     'copy_rss_feed' => 'Copiază fluxul RSS',
+
+    // Calendar Description Template
+    'calendar_description_template' => 'Șablon descriere calendar',
+    'calendar_description_template_help' => 'Personalizați descrierea evenimentelor sincronizate cu Google Calendar și CalDAV. Lăsați gol pentru a folosi descrierea evenimentului așa cum este.',
+    'common_variables' => 'Variabile comune',
+    'view_all_variables' => 'Vezi toate variabilele',
+
     'individual_tickets' => 'Bilete individuale',
     'individual_tickets_description' => 'Colectează datele fiecărui participant separat. Fiecare participant primește propria confirmare și cod QR.',
     'individual_ticket_fields' => 'Colectează câmpuri de bilet per invitat',

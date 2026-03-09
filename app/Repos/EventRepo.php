@@ -397,6 +397,17 @@ class EventRepo
         if (! $isNewEvent) {
             if ($request->filled('slug')) {
                 $event->slug = Str::slug($request->slug) ?: $event->getOriginal('slug');
+            } elseif ($currentRole?->slug_pattern
+                && str_contains($currentRole->slug_pattern, '{custom_')
+                && $event->isDirty('custom_field_values')) {
+                $event->slug = SlugPatternUtils::generateSlug(
+                    $currentRole->slug_pattern,
+                    $request->short_name ?: $request->name,
+                    $request->short_name_en ?: $request->name_en,
+                    $event,
+                    $currentRole,
+                    $venue
+                );
             } else {
                 $event->slug = $event->getOriginal('slug');
             }

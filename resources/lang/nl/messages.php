@@ -1077,6 +1077,7 @@ return [
     'custom_css_enterprise_only' => 'Upgrade naar Pro om aangepaste CSS toe te voegen en je agendapagina te personaliseren.',
     'custom_css_grandfathered' => 'Upgrade naar Pro om je aangepaste CSS te bewerken. Je bestaande stijlen blijven werken.',
     'custom_fields_pro_only' => 'Upgrade naar Pro om aangepaste velden aan je registratieformulieren toe te voegen.',
+    'no_event_custom_fields' => 'Er zijn geen aangepaste velden geconfigureerd voor dit schema. Aangepaste velden kunnen worden toegevoegd in de schema-instellingen.',
     'upgrade_feature_description_custom_fields' => 'Voeg aangepaste velden toe om gestructureerde gegevens over uw evenementen te verzamelen.',
     'newsletter_upgrade_enterprise' => 'Meer nodig? Upgrade naar Enterprise voor 1.000/maand',
     'newsletter_upgrade_plan' => 'Meer nodig? Upgrade uw plan voor hogere verzendlimieten',
@@ -1117,6 +1118,9 @@ return [
     'url_format' => 'URL-formaat',
     'url_include_https' => 'HTTPS opnemen',
     'url_include_id' => 'Evenement-ID opnemen',
+    'text_show_all_events' => 'Alle toekomstige evenementen opnemen',
+    'text_show_all_events_help' => 'Wanneer ingeschakeld, bevat de tekst alle toekomstige evenementen, niet alleen die op de afbeelding worden getoond.',
+    'no_events_with_flyers' => 'Geen aankomende evenementen hebben flyerafbeeldingen. Upload flyerafbeeldingen bij uw evenementen om een afbeelding te genereren.',
     'ai_prompt_custom_field' => 'AI-prompt',
     'eg' => 'bijv.',
     'ai_prompt_example_1' => 'Haal de dresscode uit de evenementdetails',
@@ -2544,6 +2548,13 @@ return [
     'save_schedule_first_for_feeds' => 'Sla de agenda eerst op om de feed-URL\'s te zien.',
     'copy_ical_feed' => 'iCal-feed kopiëren',
     'copy_rss_feed' => 'RSS-feed kopiëren',
+
+    // Calendar Description Template
+    'calendar_description_template' => 'Agendabeschrijvingssjabloon',
+    'calendar_description_template_help' => 'Pas de beschrijving aan voor evenementen die worden gesynchroniseerd met Google Agenda en CalDAV. Laat leeg om de evenementbeschrijving ongewijzigd te gebruiken.',
+    'common_variables' => 'Veelgebruikte variabelen',
+    'view_all_variables' => 'Alle variabelen bekijken',
+
     'individual_tickets' => 'Individuele tickets',
     'individual_tickets_description' => 'Verzamel gegevens van elke deelnemer afzonderlijk. Elke deelnemer ontvangt een eigen bevestiging en QR-code.',
     'individual_ticket_fields' => 'Ticketvelden per gast verzamelen',

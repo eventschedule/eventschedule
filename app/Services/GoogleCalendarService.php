@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\User;
 use App\Repos\EventRepo;
+use App\Utils\EventTextGenerator;
 use App\Utils\SlugPatternUtils;
 use Carbon\Carbon;
 use Google\Client;
@@ -186,7 +187,13 @@ class GoogleCalendarService
 
             $googleEvent = new GoogleEvent;
             $googleEvent->setSummary($event->name);
-            $googleEvent->setDescription($event->description);
+
+            if ($role->calendar_description_template) {
+                $event->loadMissing(['venue', 'tickets']);
+                $googleEvent->setDescription(EventTextGenerator::parseTemplate($role->calendar_description_template, $event, $role, false, ['url_include_https' => true]));
+            } else {
+                $googleEvent->setDescription($event->description);
+            }
 
             // Set start and end times
             $startDateTime = new EventDateTime;
@@ -252,7 +259,10 @@ class GoogleCalendarService
 
             $googleEvent->setSummary($event->name);
 
-            if (! empty($event->description)) {
+            if ($role->calendar_description_template) {
+                $event->loadMissing(['venue', 'tickets']);
+                $googleEvent->setDescription(EventTextGenerator::parseTemplate($role->calendar_description_template, $event, $role, false, ['url_include_https' => true]));
+            } elseif (! empty($event->description)) {
                 $googleEvent->setDescription($event->description);
             }
 
@@ -297,7 +307,7 @@ class GoogleCalendarService
     /**
      * Delete a Google Calendar event
      */
-    public function deleteEvent(string $googleEventId, string $calendarId = 'primary'): bool
+    public function deleteEvent(string $googleEventId, string $calendarId = 'primary', int $roleId = 0): bool
     {
         try {
             if (! $this->calendarService) {
@@ -306,7 +316,7 @@ class GoogleCalendarService
 
             $this->calendarService->events->delete($calendarId, $googleEventId);
 
-            UsageTrackingService::track(UsageTrackingService::GCAL_DELETE);
+            UsageTrackingService::track(UsageTrackingService::GCAL_DELETE, $roleId);
 
             return true;
 
