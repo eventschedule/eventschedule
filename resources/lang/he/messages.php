@@ -2680,4 +2680,7 @@ return [
     'panel_full_width' => 'מלא',
     'panel_period' => 'תקופה',
     'panel_items' => 'פריטים',
+    'ai_preview_description' => 'סקור את התוצאות שנוצרו. צור מחדש פריטים בודדים או קבל הכל.',
+    'regenerate' => 'צור מחדש',
+    'generation_failed' => 'היצירה נכשלה',
 ];

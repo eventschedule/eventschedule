@@ -2727,4 +2727,7 @@ return [
     'no_youtube_videos' => 'No YouTube videos',
     'no_social_links' => 'No social links',
     'no_payment_links' => 'No payment links',
+    'ai_preview_description' => 'Review the generated results. Regenerate individual items or accept all.',
+    'regenerate' => 'Regenerate',
+    'generation_failed' => 'Generation failed',
 ];

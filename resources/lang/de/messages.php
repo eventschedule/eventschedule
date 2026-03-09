@@ -2691,4 +2691,7 @@ return [
     'panel_full_width' => 'Voll',
     'panel_period' => 'Zeitraum',
     'panel_items' => 'Elemente',
+    'ai_preview_description' => 'Überprüfen Sie die generierten Ergebnisse. Generieren Sie einzelne Elemente neu oder akzeptieren Sie alle.',
+    'regenerate' => 'Neu generieren',
+    'generation_failed' => 'Generierung fehlgeschlagen',
 ];

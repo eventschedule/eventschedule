@@ -2687,4 +2687,7 @@ return [
     'panel_full_width' => 'كامل',
     'panel_period' => 'الفترة',
     'panel_items' => 'العناصر',
+    'ai_preview_description' => 'راجع النتائج المولدة. أعد توليد العناصر الفردية أو اقبل الكل.',
+    'regenerate' => 'إعادة التوليد',
+    'generation_failed' => 'فشل التوليد',
 ];

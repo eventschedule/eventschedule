@@ -2685,4 +2685,7 @@ return [
     'panel_full_width' => 'Volledig',
     'panel_period' => 'Periode',
     'panel_items' => 'Items',
+    'ai_preview_description' => 'Bekijk de gegenereerde resultaten. Genereer individuele items opnieuw of accepteer alles.',
+    'regenerate' => 'Opnieuw genereren',
+    'generation_failed' => 'Generatie mislukt',
 ];

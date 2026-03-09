@@ -2686,4 +2686,7 @@ return [
     'panel_full_width' => 'Completo',
     'panel_period' => 'Período',
     'panel_items' => 'Itens',
+    'ai_preview_description' => 'Revise os resultados gerados. Regenere itens individuais ou aceite todos.',
+    'regenerate' => 'Regenerar',
+    'generation_failed' => 'Falha na geração',
 ];

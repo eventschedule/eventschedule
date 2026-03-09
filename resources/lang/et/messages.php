@@ -2703,4 +2703,7 @@ return [
     'panel_full_width' => 'Täis',
     'panel_period' => 'Periood',
     'panel_items' => 'Elemendid',
+    'ai_preview_description' => 'Vaadake genereeritud tulemusi üle. Genereerige üksikuid elemente uuesti või nõustuge kõigiga.',
+    'regenerate' => 'Genereeri uuesti',
+    'generation_failed' => 'Genereerimine ebaõnnestus',
 ];

@@ -2687,4 +2687,7 @@ return [
     'panel_full_width' => 'Pleine',
     'panel_period' => 'Période',
     'panel_items' => 'Éléments',
+    'ai_preview_description' => 'Examinez les résultats générés. Régénérez des éléments individuels ou acceptez tout.',
+    'regenerate' => 'Régénérer',
+    'generation_failed' => 'Échec de la génération',
 ];

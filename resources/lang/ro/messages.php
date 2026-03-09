@@ -2727,4 +2727,7 @@ return [
     'panel_full_width' => 'Complet',
     'panel_period' => 'Perioadă',
     'panel_items' => 'Elemente',
+    'ai_preview_description' => 'Examinați rezultatele generate. Regenerați elemente individuale sau acceptați totul.',
+    'regenerate' => 'Regenerare',
+    'generation_failed' => 'Generarea a eșuat',
 ];

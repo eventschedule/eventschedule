@@ -1320,13 +1320,13 @@
                             </div>
 
                             <div id="image_preview" class="mt-3 relative inline-block" style="display: none;">
-                                <img id="preview_img" src="#" alt="Preview" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" @click="($el.src && !$el.src.endsWith('#')) && window.dispatchEvent(new CustomEvent('show-lightbox', {detail: $el.src}))" />
+                                <img id="preview_img" src="#" alt="Preview" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" onclick="if(this.src && !this.src.endsWith('#')) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: this.src}))" />
                                 <button type="button" id="clear-flyer-preview-btn" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                             </div>
 
                             @if ($event->flyer_image_url)
                             <div id="flyer_image_existing" class="relative inline-block mt-4 pt-1">
-                                <img src="{{ $event->flyer_image_url }}" alt="{{ __('messages.flyer_image') }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" id="flyer_preview" @click="window.dispatchEvent(new CustomEvent('show-lightbox', {detail: $el.src}))" />
+                                <img src="{{ $event->flyer_image_url }}" alt="{{ __('messages.flyer_image') }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" id="flyer_preview" onclick="window.dispatchEvent(new CustomEvent('show-lightbox', {detail: this.src}))" />
                                 <button type="button"
                                     id="delete-flyer-btn"
                                     data-url="{{ route('event.delete_image', ['subdomain' => $subdomain]) }}"
@@ -5812,6 +5812,13 @@ function deleteFlyer(url, hash, token, element) {
     :instructionsPlaceholder="__('messages.ai_additional_instructions_placeholder')"
     savedInstructions="{{ $role->ai_content_instructions }}"
     saveInstructionsField="ai_content_instructions"
+    :previewConfig="[
+        'category_id' => ['type' => 'category', 'data_key' => 'category_id'],
+        'flyer_image' => ['type' => 'image', 'data_key' => 'flyer_image_url', 'aspect' => '3:4'],
+        'short_description' => ['type' => 'text', 'data_key' => 'short_description'],
+        'description' => ['type' => 'markdown', 'data_key' => 'description'],
+    ]"
+    :categoryMap="$event_categories"
 />
 
 <script {!! nonce_attr() !!}>

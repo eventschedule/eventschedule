@@ -17,142 +17,322 @@
     'saveInstructionsField' => null,
     'imageEndpoint' => null,
     'imageElements' => [],
+    'previewConfig' => [],
+    'categoryMap' => [],
 ])
 
 <x-modal :name="$name" maxWidth="lg">
     <div class="p-6" x-data="aiGenerateModal_{{ Str::camel($name) }}">
-        <div class="text-center mb-4">
-            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 mb-3">
-                <svg class="w-6 h-6 text-[var(--brand-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-                </svg>
-            </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $title }}</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ $description }}</p>
-        </div>
 
-        <div class="mb-4">
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.ai_style_select_elements') }}</p>
-            <div class="space-y-2">
-                @foreach ($fields as $field)
-                <label class="flex items-center gap-2" :class="generationStarted ? 'opacity-60 pointer-events-none' : 'cursor-pointer'">
-                    <input type="checkbox" :checked="elements.includes('{{ $field['key'] }}')" @change="toggleElement('{{ $field['key'] }}')" :disabled="generationStarted"
-                        class="rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                    <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">{{ $field['label'] }}</span>
-                    <span class="flex items-center justify-center gap-1 shrink-0 w-4">
-                        <span x-show="fieldsWithValues.includes('{{ $field['key'] }}') && !elementStatus['{{ $field['key'] }}']" x-cloak class="w-2 h-2 rounded-full bg-[var(--brand-button-bg)]" title="{{ __('messages.has_existing_value') }}"></span>
-                        {{-- Per-element status indicators --}}
-                        <template x-if="elementStatus['{{ $field['key'] }}'] === 'generating'">
-                            <svg class="animate-spin h-4 w-4 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                        </template>
-                        <template x-if="elementStatus['{{ $field['key'] }}'] === 'complete'">
-                            <svg class="h-4 w-4 text-[var(--brand-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                        </template>
-                        <template x-if="elementStatus['{{ $field['key'] }}'] === 'error'">
-                            <span class="inline-flex items-center gap-1">
+        {{-- ===== SELECTION PHASE ===== --}}
+        <div x-show="!showPreview" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+            <div class="text-center mb-4">
+                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 mb-3">
+                    <svg class="w-6 h-6 text-[var(--brand-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $title }}</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ $description }}</p>
+            </div>
+
+            <div class="mb-4">
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.ai_style_select_elements') }}</p>
+                <div class="space-y-2">
+                    @foreach ($fields as $field)
+                    <label class="flex items-center gap-2" :class="generationStarted ? 'opacity-60 pointer-events-none' : 'cursor-pointer'">
+                        <input type="checkbox" :checked="elements.includes('{{ $field['key'] }}')" @change="toggleElement('{{ $field['key'] }}')" :disabled="generationStarted"
+                            class="rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                        <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">{{ $field['label'] }}</span>
+                        <span class="flex items-center justify-center gap-1 shrink-0 w-4">
+                            <span x-show="fieldsWithValues.includes('{{ $field['key'] }}') && !elementStatus['{{ $field['key'] }}']" x-cloak class="w-2 h-2 rounded-full bg-[var(--brand-button-bg)]" title="{{ __('messages.has_existing_value') }}"></span>
+                            {{-- Per-element status indicators --}}
+                            <template x-if="elementStatus['{{ $field['key'] }}'] === 'generating'">
+                                <svg class="animate-spin h-4 w-4 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </template>
+                            <template x-if="elementStatus['{{ $field['key'] }}'] === 'complete'">
+                                <svg class="h-4 w-4 text-[var(--brand-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </template>
+                            <template x-if="elementStatus['{{ $field['key'] }}'] === 'error'">
                                 <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
-                                <button type="button" @click="retryElement('{{ $field['key'] }}')" class="text-xs text-[var(--brand-blue)] hover:underline">{{ __('messages.retry') }}</button>
-                            </span>
-                        </template>
-                    </span>
-                </label>
-                @endforeach
+                            </template>
+                        </span>
+                    </label>
+                    @endforeach
+                </div>
             </div>
-        </div>
 
-        @if ($promptEndpoint)
-        <div class="mb-4">
-            <button type="button" @click="togglePromptEditor()" class="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors">
-                <svg class="w-4 h-4 transition-transform" :class="promptExpanded ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-                <span>{{ __('messages.ai_view_edit_prompt') }}</span>
-            </button>
-
-            <div x-show="promptExpanded" x-cloak class="mt-2">
-                <div x-show="promptLoading" class="flex items-center justify-center py-8">
-                    <svg class="animate-spin h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            @if ($promptEndpoint)
+            <div class="mb-4">
+                <button type="button" @click="togglePromptEditor()" class="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors">
+                    <svg class="w-4 h-4 transition-transform" :class="promptExpanded ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
-                </div>
-                <div x-show="!promptLoading" x-cloak>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{{ __('messages.ai_prompt_edit_hint') }}</p>
-                    <textarea x-model="customPrompt" rows="6" maxlength="5000"
-                        class="w-full font-mono text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
-                    <template x-for="imageKey in Object.keys(customImagePrompts)" :key="imageKey">
-                        <div class="mt-3">
-                            <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1" x-text="imagePromptLabels[imageKey] || imageKey"></p>
-                            <textarea x-model="customImagePrompts[imageKey]" rows="4" maxlength="5000"
-                                class="w-full font-mono text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
-                        </div>
-                    </template>
-                    <button type="button" x-show="promptEdited" x-cloak @click="resetPrompt()" class="mt-1 text-xs text-[var(--brand-blue)] hover:underline">
-                        {{ __('messages.ai_prompt_reset') }}
-                    </button>
-                </div>
-            </div>
-        </div>
-        @endif
+                    <span>{{ __('messages.ai_view_edit_prompt') }}</span>
+                </button>
 
-        @if ($showInstructions)
-        <div class="mb-4">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $instructionsLabel ?: __('messages.ai_style_instructions') }}</label>
-            <textarea x-model="styleInstructions" maxlength="500" rows="2"
-                placeholder="{{ $instructionsPlaceholder ?: __('messages.ai_style_instructions_placeholder') }}"
-                class="mt-1 w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
-            @if ($saveInstructionsField)
-            <label x-show="styleInstructions.length > 0" x-cloak class="flex items-center gap-2 mt-1.5 cursor-pointer">
-                <input type="checkbox" x-model="saveInstructions"
-                    class="rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                <span class="text-xs text-gray-600 dark:text-gray-400">{{ __('messages.ai_save_as_default') }}</span>
-            </label>
-            @endif
-        </div>
-        @endif
-
-        <div x-show="hasCheckedWithValue" x-cloak class="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
-            <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <span>{{ __('messages.ai_style_replace_warning') }}</span>
-            </p>
-        </div>
-
-        <div class="flex flex-row gap-3">
-            <button type="button" x-on:click="cancelGeneration()"
-                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-300 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-                {{ __('messages.cancel') }}
-            </button>
-            <button type="button" @click="generate()" :disabled="generating || elements.length === 0"
-                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50">
-                <template x-if="generating">
-                    <span class="inline-flex items-center">
-                        <svg class="animate-spin -ml-1 ltr:mr-2 rtl:ml-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                <div x-show="promptExpanded" x-cloak class="mt-2">
+                    <div x-show="promptLoading" class="flex items-center justify-center py-8">
+                        <svg class="animate-spin h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span x-text="generatingText"></span>
-                    </span>
-                </template>
-                <template x-if="!generating">
-                    <span class="inline-flex items-center">
-                        <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-                        </svg>
-                        {{ __('messages.generate') }}
-                    </span>
-                </template>
-            </button>
+                    </div>
+                    <div x-show="!promptLoading" x-cloak>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{{ __('messages.ai_prompt_edit_hint') }}</p>
+                        <textarea x-model="customPrompt" rows="6" maxlength="5000"
+                            class="w-full font-mono text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
+                        <template x-for="imageKey in Object.keys(customImagePrompts)" :key="imageKey">
+                            <div class="mt-3">
+                                <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1" x-text="imagePromptLabels[imageKey] || imageKey"></p>
+                                <textarea x-model="customImagePrompts[imageKey]" rows="4" maxlength="5000"
+                                    class="w-full font-mono text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
+                            </div>
+                        </template>
+                        <button type="button" x-show="promptEdited" x-cloak @click="resetPrompt()" class="mt-1 text-xs text-[var(--brand-blue)] hover:underline">
+                            {{ __('messages.ai_prompt_reset') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            @if ($showInstructions)
+            <div class="mb-4">
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $instructionsLabel ?: __('messages.ai_style_instructions') }}</label>
+                <textarea x-model="styleInstructions" maxlength="500" rows="2"
+                    placeholder="{{ $instructionsPlaceholder ?: __('messages.ai_style_instructions_placeholder') }}"
+                    class="mt-1 w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
+                @if ($saveInstructionsField)
+                <label x-show="styleInstructions.length > 0" x-cloak class="flex items-center gap-2 mt-1.5 cursor-pointer">
+                    <input type="checkbox" x-model="saveInstructions"
+                        class="rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    <span class="text-xs text-gray-600 dark:text-gray-400">{{ __('messages.ai_save_as_default') }}</span>
+                </label>
+                @endif
+            </div>
+            @endif
+
+            <div x-show="hasCheckedWithValue" x-cloak class="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span>{{ __('messages.ai_style_replace_warning') }}</span>
+                </p>
+            </div>
+
+            <div class="flex flex-row gap-3">
+                <button type="button" x-on:click="cancelGeneration()"
+                    class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-300 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                    {{ __('messages.cancel') }}
+                </button>
+                <button type="button" @click="generate()" :disabled="generating || elements.length === 0"
+                    class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50">
+                    <template x-if="generating">
+                        <span class="inline-flex items-center">
+                            <svg class="animate-spin -ml-1 ltr:mr-2 rtl:ml-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span x-text="generatingText"></span>
+                        </span>
+                    </template>
+                    <template x-if="!generating">
+                        <span class="inline-flex items-center">
+                            <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                            </svg>
+                            {{ __('messages.generate') }}
+                        </span>
+                    </template>
+                </button>
+            </div>
         </div>
+
+        {{-- ===== PREVIEW PHASE ===== --}}
+        <div x-show="showPreview" x-cloak x-transition:enter="transition ease-out duration-200 delay-150" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+            <div class="text-center mb-4">
+                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 mb-3">
+                    <svg class="w-6 h-6 text-[var(--brand-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.preview') }}</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('messages.ai_preview_description') }}</p>
+            </div>
+
+            <div class="max-h-[60vh] overflow-y-auto ltr:pr-1 rtl:pl-1 space-y-3 mb-4">
+                <template x-for="key in elements" :key="key">
+                    <div class="rounded-xl border border-gray-200 dark:border-[#2d2d30] bg-gray-50 dark:bg-[#252526] p-3 transition-all duration-200">
+                        {{-- Card header --}}
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400" x-text="fieldLabels[key] || key"></span>
+                            <span class="flex items-center">
+                                {{-- Generating spinner --}}
+                                <span x-show="elementStatus[key] === 'generating' || elementStatus[key] === 'pending'" x-cloak>
+                                    <svg class="animate-spin h-3.5 w-3.5 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </span>
+                                {{-- Regenerate button --}}
+                                <button type="button" x-show="elementStatus[key] === 'complete'" x-cloak @click="retryPreviewElement(key)"
+                                    class="inline-flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500 hover:text-[var(--brand-blue)] transition-colors">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    {{ __('messages.regenerate') }}
+                                </button>
+                                {{-- Retry button --}}
+                                <button type="button" x-show="elementStatus[key] === 'error'" x-cloak @click="retryPreviewElement(key)"
+                                    class="inline-flex items-center gap-1 text-xs text-[var(--brand-blue)] hover:underline">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    {{ __('messages.retry') }}
+                                </button>
+                            </span>
+                        </div>
+
+                        {{-- Card body --}}
+                        <div>
+                            {{-- IMAGE preview --}}
+                            <template x-if="previewConfig[key] && previewConfig[key].type === 'image'">
+                                <div>
+                                    {{-- Skeleton --}}
+                                    <div x-show="elementStatus[key] === 'generating' || elementStatus[key] === 'pending'" x-cloak>
+                                        <div x-show="previewConfig[key].aspect === '1:1'" class="w-20 h-20 animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                                        <div x-show="previewConfig[key].aspect === '3:4'" class="w-32 h-44 animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                                        <div x-show="previewConfig[key].aspect === '16:9'" class="w-full h-32 animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                                        <div x-show="!previewConfig[key].aspect" class="w-full h-32 animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                                    </div>
+                                    {{-- Actual image --}}
+                                    <div x-show="elementStatus[key] === 'complete' && previewResults[previewConfig[key].data_key]" x-cloak>
+                                        <img x-show="previewConfig[key].aspect === '1:1'" :src="previewResults[previewConfig[key].data_key]" class="w-20 h-20 rounded-lg object-cover">
+                                        <img x-show="previewConfig[key].aspect === '3:4'" :src="previewResults[previewConfig[key].data_key]" class="max-h-56 rounded-lg object-contain">
+                                        <img x-show="previewConfig[key].aspect === '16:9'" :src="previewResults[previewConfig[key].data_key]" class="w-full max-h-40 rounded-lg object-cover">
+                                        <img x-show="!previewConfig[key].aspect" :src="previewResults[previewConfig[key].data_key]" class="w-full max-h-40 rounded-lg object-cover">
+                                    </div>
+                                    {{-- Error --}}
+                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500">
+                                        {{ __('messages.generation_failed') }}
+                                    </div>
+                                </div>
+                            </template>
+
+                            {{-- TEXT preview (short_description) --}}
+                            <template x-if="previewConfig[key] && previewConfig[key].type === 'text'">
+                                <div>
+                                    <div x-show="elementStatus[key] === 'generating' || elementStatus[key] === 'pending'" x-cloak class="space-y-2">
+                                        <div class="h-3 w-full animate-pulse bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                        <div class="h-3 w-3/4 animate-pulse bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                    </div>
+                                    <div x-show="elementStatus[key] === 'complete'" x-cloak>
+                                        <p class="text-sm text-gray-800 dark:text-gray-200" x-text="previewResults[previewConfig[key].data_key]"></p>
+                                    </div>
+                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500">
+                                        {{ __('messages.generation_failed') }}
+                                    </div>
+                                </div>
+                            </template>
+
+                            {{-- MARKDOWN preview (description) --}}
+                            <template x-if="previewConfig[key] && previewConfig[key].type === 'markdown'">
+                                <div>
+                                    <div x-show="elementStatus[key] === 'generating' || elementStatus[key] === 'pending'" x-cloak class="space-y-2">
+                                        <div class="h-3 w-full animate-pulse bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                        <div class="h-3 w-5/6 animate-pulse bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                        <div class="h-3 w-full animate-pulse bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                        <div class="h-3 w-2/3 animate-pulse bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                    </div>
+                                    <div x-show="elementStatus[key] === 'complete'" x-cloak>
+                                        <div class="relative">
+                                            <div :class="!expandedPreviews[key] && isLongContent(key) ? 'max-h-[120px] overflow-hidden' : ''"
+                                                class="prose prose-sm dark:prose-invert max-w-none text-sm" x-html="renderMarkdown(previewResults[previewConfig[key].data_key] || '')"></div>
+                                            <div x-show="!expandedPreviews[key] && isLongContent(key)" x-cloak
+                                                class="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-gray-50 dark:from-[#252526] to-transparent"></div>
+                                        </div>
+                                        <button type="button" x-show="isLongContent(key)" x-cloak @click="expandedPreviews[key] = !expandedPreviews[key]"
+                                            class="mt-1 text-xs text-[var(--brand-blue)] hover:underline" x-text="expandedPreviews[key] ? '{{ __('messages.show_less') }}' : '{{ __('messages.show_more') }}'"></button>
+                                    </div>
+                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500">
+                                        {{ __('messages.generation_failed') }}
+                                    </div>
+                                </div>
+                            </template>
+
+                            {{-- COLOR preview --}}
+                            <template x-if="previewConfig[key] && previewConfig[key].type === 'color'">
+                                <div>
+                                    <div x-show="elementStatus[key] === 'generating' || elementStatus[key] === 'pending'" x-cloak>
+                                        <div class="w-8 h-8 animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                                    </div>
+                                    <div x-show="elementStatus[key] === 'complete'" x-cloak class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm" :style="'background-color: ' + (previewResults[previewConfig[key].data_key] || '#000')"></div>
+                                        <span class="text-sm font-mono text-gray-700 dark:text-gray-300" x-text="previewResults[previewConfig[key].data_key]"></span>
+                                    </div>
+                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500">
+                                        {{ __('messages.generation_failed') }}
+                                    </div>
+                                </div>
+                            </template>
+
+                            {{-- FONT preview --}}
+                            <template x-if="previewConfig[key] && previewConfig[key].type === 'font'">
+                                <div>
+                                    <div x-show="elementStatus[key] === 'generating' || elementStatus[key] === 'pending'" x-cloak>
+                                        <div class="h-4 w-40 animate-pulse bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                    </div>
+                                    <div x-show="elementStatus[key] === 'complete'" x-cloak>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300" x-text="previewResults[previewConfig[key].data_key]"></p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" :style="'font-family: \'' + (previewResults[previewConfig[key].data_key] || '') + '\', sans-serif'" x-effect="if (elementStatus[key] === 'complete' && previewResults[previewConfig[key].data_key]) loadPreviewFont(previewResults[previewConfig[key].data_key])">The quick brown fox jumps over the lazy dog</p>
+                                    </div>
+                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500">
+                                        {{ __('messages.generation_failed') }}
+                                    </div>
+                                </div>
+                            </template>
+
+                            {{-- CATEGORY preview --}}
+                            <template x-if="previewConfig[key] && previewConfig[key].type === 'category'">
+                                <div>
+                                    <div x-show="elementStatus[key] === 'generating' || elementStatus[key] === 'pending'" x-cloak>
+                                        <div class="h-6 w-28 animate-pulse bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                                    </div>
+                                    <div x-show="elementStatus[key] === 'complete'" x-cloak>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-[var(--brand-blue)]"
+                                            x-text="categoryMap[previewResults[previewConfig[key].data_key]] || previewResults[previewConfig[key].data_key]"></span>
+                                    </div>
+                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500">
+                                        {{ __('messages.generation_failed') }}
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div class="flex flex-row gap-3">
+                <button type="button" @click="discardResults()"
+                    class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-300 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                    {{ __('messages.discard') }}
+                </button>
+                <button type="button" @click="acceptResults()" :disabled="pendingRequests > 0"
+                    class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50">
+                    {{ __('messages.accept') }}
+                </button>
+            </div>
+        </div>
+
     </div>
 </x-modal>
 
@@ -162,7 +342,13 @@ document.addEventListener('alpine:init', function() {
         return {
             generating: false,
             generationStarted: false,
+            showPreview: false,
+            previewResults: {},
+            previewConfig: @json($previewConfig),
+            categoryMap: @json($categoryMap),
+            expandedPreviews: {},
             allFields: @json(collect($fields)->pluck('key')->values()),
+            fieldLabels: @json(collect($fields)->pluck('label', 'key')),
             defaultElements: @json(collect($fields)->where('has_value', false)->pluck('key')->values()),
             elements: @json(collect($fields)->where('has_value', false)->pluck('key')->values()),
             fieldsWithValues: @json(collect($fields)->where('has_value', true)->pluck('key')->values()),
@@ -213,6 +399,9 @@ document.addEventListener('alpine:init', function() {
                         self.generationStarted = false;
                         self.pendingRequests = 0;
                         self.generating = false;
+                        self.showPreview = false;
+                        self.previewResults = {};
+                        self.expandedPreviews = {};
                         @if ($promptEndpoint)
                         self.customPrompt = '';
                         self.defaultPrompt = '';
@@ -238,7 +427,110 @@ document.addEventListener('alpine:init', function() {
                 this.generationId++;
                 this.generating = false;
                 this.generationStarted = false;
+                this.showPreview = false;
+                this.previewResults = {};
                 window.dispatchEvent(new CustomEvent('close-modal', { detail: @json($name) }));
+            },
+            discardResults: function() {
+                this.generationId++;
+                this.previewResults = {};
+                this.showPreview = false;
+                this.generating = false;
+                this.generationStarted = false;
+                window.dispatchEvent(new CustomEvent('close-modal', { detail: @json($name) }));
+            },
+            acceptResults: function() {
+                window[{!! json_encode($successCallback) !!}](this.previewResults);
+                this.previewResults = {};
+                this.showPreview = false;
+                this.generating = false;
+                this.generationStarted = false;
+                window.dispatchEvent(new CustomEvent('close-modal', { detail: @json($name) }));
+            },
+            renderMarkdown: function(text) {
+                if (!text) return '';
+                // Escape HTML first
+                var escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                // Headers
+                escaped = escaped.replace(/^### (.+)$/gm, '<h3 class="text-sm font-semibold mt-2 mb-1">$1</h3>');
+                escaped = escaped.replace(/^## (.+)$/gm, '<h2 class="text-base font-semibold mt-2 mb-1">$1</h2>');
+                escaped = escaped.replace(/^# (.+)$/gm, '<h1 class="text-lg font-bold mt-2 mb-1">$1</h1>');
+                // Bold and italic
+                escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                escaped = escaped.replace(/\*(.+?)\*/g, '<em>$1</em>');
+                // Bullet lists
+                escaped = escaped.replace(/^- (.+)$/gm, '<li class="ml-4 list-disc">$1</li>');
+                // Numbered lists
+                escaped = escaped.replace(/^\d+\. (.+)$/gm, '<li class="ml-4 list-decimal">$1</li>');
+                // Line breaks
+                escaped = escaped.replace(/\n/g, '<br>');
+                return escaped;
+            },
+            isLongContent: function(key) {
+                var config = this.previewConfig[key];
+                if (!config) return false;
+                var value = this.previewResults[config.data_key];
+                if (!value) return false;
+                return value.split('\n').length > 6 || value.length > 400;
+            },
+            loadPreviewFont: function(fontFamily) {
+                if (!fontFamily) return;
+                var id = 'preview-font-' + fontFamily.replace(/\s+/g, '-').toLowerCase();
+                if (document.getElementById(id)) return;
+                var link = document.createElement('link');
+                link.id = id;
+                link.rel = 'stylesheet';
+                link.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(fontFamily) + '&display=swap';
+                document.head.appendChild(link);
+            },
+            retryPreviewElement: function(key) {
+                if (this.elementStatus[key] === 'generating' || this.elementStatus[key] === 'pending') return;
+
+                if (this.imageElementKeys.includes(key)) {
+                    this.generating = true;
+                    var extraBody = {};
+                    @if ($name === 'ai-style-generator')
+                    // Use the previewed accent color if available, otherwise form value
+                    if (this.previewResults.accent_color) {
+                        extraBody.accent_color = this.previewResults.accent_color;
+                    } else {
+                        var accentInput = document.getElementById('accent_color');
+                        if (accentInput) extraBody.accent_color = accentInput.value;
+                    }
+                    @endif
+                    this.fireImageRequest(key, extraBody);
+                } else {
+                    // Text element retry
+                    var self = this;
+                    self.generating = true;
+                    self.elementStatus[key] = 'generating';
+                    self.pendingRequests++;
+
+                    var body = Object.assign({}, self.getBaseBody(), { elements: [key] });
+                    var genId = self.generationId;
+
+                    self.makeRequest(@json($endpoint), body)
+                    .then(function(data) {
+                        if (genId !== self.generationId) return;
+                        if (data.success) {
+                            Object.assign(self.previewResults, data);
+                            self.elementStatus[key] = 'complete';
+                        } else {
+                            self.elementStatus[key] = 'error';
+                        }
+                    })
+                    .catch(function() {
+                        if (genId !== self.generationId) return;
+                        self.elementStatus[key] = 'error';
+                    })
+                    .finally(function() {
+                        if (genId !== self.generationId) return;
+                        self.pendingRequests--;
+                        if (self.pendingRequests <= 0) {
+                            self.generating = false;
+                        }
+                    });
+                }
             },
             getBaseBody: function() {
                 var body = {};
@@ -334,11 +626,6 @@ document.addEventListener('alpine:init', function() {
             checkComplete: function() {
                 if (this.pendingRequests <= 0) {
                     this.generating = false;
-                    var hasErrors = Object.values(this.elementStatus).some(function(s) { return s === 'error'; });
-                    if (!hasErrors) {
-                        this.generationStarted = false;
-                        window.dispatchEvent(new CustomEvent('close-modal', { detail: @json($name) }));
-                    }
                 }
             },
             fireImageRequest: function(imageKey, extraBody) {
@@ -360,7 +647,7 @@ document.addEventListener('alpine:init', function() {
                 .then(function(data) {
                     if (genId !== self.generationId) return;
                     if (data.success) {
-                        window[{!! json_encode($successCallback) !!}](data);
+                        Object.assign(self.previewResults, data);
                         self.elementStatus[imageKey] = 'complete';
                     } else {
                         self.elementStatus[imageKey] = 'error';
@@ -376,25 +663,13 @@ document.addEventListener('alpine:init', function() {
                     self.checkComplete();
                 });
             },
-            retryElement: function(key) {
-                if (!this.imageElementKeys.includes(key)) return;
-                if (this.elementStatus[key] === 'generating') return;
-                this.generating = true;
-                this.generationStarted = true;
-
-                var extraBody = {};
-                @if ($name === 'ai-style-generator')
-                var accentInput = document.getElementById('accent_color');
-                if (accentInput) extraBody.accent_color = accentInput.value;
-                @endif
-
-                this.fireImageRequest(key, extraBody);
-            },
             generate: function() {
                 if (this.elements.length === 0) return;
                 this.generating = true;
                 this.generationStarted = true;
                 this.elementStatus = {};
+                this.previewResults = {};
+                this.expandedPreviews = {};
                 var self = this;
                 var genId = ++this.generationId;
 
@@ -411,16 +686,9 @@ document.addEventListener('alpine:init', function() {
                     .then(function(data) {
                         if (genId !== self.generationId) return;
                         if (data.success) {
-                            window[{!! json_encode($successCallback) !!}](data);
+                            Object.assign(self.previewResults, data);
                             self.elements.forEach(function(el) { self.elementStatus[el] = 'complete'; });
-
-                            @if ($partialErrorMessage)
-                            if (data.image_error) {
-                                alert(@json($partialErrorMessage));
-                            }
-                            @endif
-
-                            window.dispatchEvent(new CustomEvent('close-modal', { detail: @json($name) }));
+                            self.showPreview = true;
                         } else {
                             self.elements.forEach(function(el) { self.elementStatus[el] = 'error'; });
                             alert(data.error || @json($errorMessage));
@@ -464,8 +732,11 @@ document.addEventListener('alpine:init', function() {
                     .then(function(data) {
                         if (genId !== self.generationId) return;
                         if (data.success) {
-                            window[{!! json_encode($successCallback) !!}](data);
+                            Object.assign(self.previewResults, data);
                             textElements.forEach(function(el) { self.elementStatus[el] = 'complete'; });
+
+                            // Show preview as soon as text results arrive
+                            self.showPreview = true;
 
                             // For style modal: pass generated accent_color to image requests
                             var imageExtra = {};
@@ -475,6 +746,8 @@ document.addEventListener('alpine:init', function() {
                             fireImages(imageExtra);
                         } else {
                             textElements.forEach(function(el) { self.elementStatus[el] = 'error'; });
+                            // Show preview even on text error so user can retry
+                            self.showPreview = true;
                             // Still fire images using form's current values
                             var imageExtra = {};
                             @if ($name === 'ai-style-generator')
@@ -490,6 +763,8 @@ document.addEventListener('alpine:init', function() {
                         if (err.message === 'rate_limit') {
                             alert(@json(__('messages.ai_rate_limit')));
                         }
+                        // Show preview so user can retry
+                        self.showPreview = true;
                         // Still fire images
                         var imageExtra = {};
                         @if ($name === 'ai-style-generator')
@@ -500,6 +775,7 @@ document.addEventListener('alpine:init', function() {
                     });
                 } else {
                     // Only images selected, no text request needed
+                    self.showPreview = true;
                     var imageExtra = {};
                     @if ($name === 'ai-style-generator')
                     var accentInput = document.getElementById('accent_color');

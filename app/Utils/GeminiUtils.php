@@ -11,11 +11,7 @@ class GeminiUtils
 {
     private static function sendRequest($prompt, $imageData = null)
     {
-        if (str_starts_with($prompt, 'Translate')) {
-            $model = 'gemini-2.0-flash';
-        } else {
-            $model = 'gemini-2.5-flash';
-        }
+        $model = 'gemini-2.5-flash';
 
         $apiKey = config('services.google.gemini_key');
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=".$apiKey;
@@ -1189,23 +1185,25 @@ class GeminiUtils
 
     public static function sendImageGenerationRequest($prompt, $aspectRatio = '3:4')
     {
-        $model = 'gemini-3-pro-image-preview';
+        $model = 'imagen-4.0-generate-001';
 
         $apiKey = config('services.google.gemini_key');
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=".$apiKey;
-
-        $parts = [];
-        $parts[] = ['text' => $prompt];
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:predict";
 
         $data = [
-            'contents' => [
-                [
-                    'parts' => $parts,
-                ],
+            'instances' => [
+                ['prompt' => $prompt],
             ],
-            'generationConfig' => [
-                'responseModalities' => ['TEXT', 'IMAGE'],
-                'imageConfig' => ['aspectRatio' => $aspectRatio],
+            'parameters' => [
+                'sampleCount' => 1,
+                'aspectRatio' => $aspectRatio,
+                'personGeneration' => 'allow_adult',
+                'includeRaiReason' => true,
+                'sampleImageSize' => '2K',
+                'outputOptions' => [
+                    'mimeType' => 'image/jpeg',
+                    'compressionQuality' => 90,
+                ],
             ],
         ];
 
@@ -1213,7 +1211,7 @@ class GeminiUtils
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
-            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'x-goog-api-key: '.$apiKey],
             CURLOPT_POSTFIELDS => json_encode($data),
             CURLOPT_TIMEOUT => 60,
         ]);
@@ -1282,15 +1280,19 @@ class GeminiUtils
             throw new \Exception('Invalid JSON response from Gemini image generation API');
         }
 
-        // Look for image data in response parts
-        $parts = $data['candidates'][0]['content']['parts'] ?? [];
-        foreach ($parts as $part) {
-            if (isset($part['inlineData']['data'])) {
-                return base64_decode($part['inlineData']['data']);
-            }
+        $prediction = $data['predictions'][0] ?? null;
+        if ($prediction && isset($prediction['raiFilteredReason'])) {
+            \Log::warning('Imagen image filtered by safety: '.$prediction['raiFilteredReason']);
+
+            return null;
         }
 
-        \Log::error('No image data in Gemini image generation response: '.json_encode($data));
+        $imageData = $prediction['bytesBase64Encoded'] ?? null;
+        if ($imageData) {
+            return base64_decode($imageData);
+        }
+
+        \Log::error('No image data in Imagen response: '.json_encode($data));
 
         return null;
     }
@@ -1783,20 +1785,25 @@ class GeminiUtils
 
     private static function prepareImageGenerationRequest(string $prompt, string $aspectRatio = '3:4'): array
     {
-        $model = 'gemini-3-pro-image-preview';
+        $model = 'imagen-4.0-generate-001';
 
         $apiKey = config('services.google.gemini_key');
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=".$apiKey;
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:predict";
 
         $data = [
-            'contents' => [
-                [
-                    'parts' => [['text' => $prompt]],
-                ],
+            'instances' => [
+                ['prompt' => $prompt],
             ],
-            'generationConfig' => [
-                'responseModalities' => ['TEXT', 'IMAGE'],
-                'imageConfig' => ['aspectRatio' => $aspectRatio],
+            'parameters' => [
+                'sampleCount' => 1,
+                'aspectRatio' => $aspectRatio,
+                'personGeneration' => 'allow_adult',
+                'includeRaiReason' => true,
+                'sampleImageSize' => '2K',
+                'outputOptions' => [
+                    'mimeType' => 'image/jpeg',
+                    'compressionQuality' => 90,
+                ],
             ],
         ];
 
@@ -1804,7 +1811,7 @@ class GeminiUtils
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
-            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'x-goog-api-key: '.$apiKey],
             CURLOPT_POSTFIELDS => json_encode($data),
             CURLOPT_TIMEOUT => 60,
         ]);
@@ -1848,14 +1855,19 @@ class GeminiUtils
             return null;
         }
 
-        $parts = $data['candidates'][0]['content']['parts'] ?? [];
-        foreach ($parts as $part) {
-            if (isset($part['inlineData']['data'])) {
-                return base64_decode($part['inlineData']['data']);
-            }
+        $prediction = $data['predictions'][0] ?? null;
+        if ($prediction && isset($prediction['raiFilteredReason'])) {
+            \Log::warning('Imagen image filtered by safety: '.$prediction['raiFilteredReason']);
+
+            return null;
         }
 
-        \Log::error('No image data in Gemini image generation response: '.json_encode($data));
+        $imageData = $prediction['bytesBase64Encoded'] ?? null;
+        if ($imageData) {
+            return base64_decode($imageData);
+        }
+
+        \Log::error('No image data in Imagen response: '.json_encode($data));
 
         return null;
     }

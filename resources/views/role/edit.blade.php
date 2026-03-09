@@ -1314,13 +1314,13 @@
                                 </div>
 
                                 <div id="profile_image_preview_clear" class="relative inline-block pt-3" style="display: none;">
-                                    <img id="profile_image_preview" src="#" alt="Profile Image Preview" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" @click="if($el.src && !$el.src.endsWith('#')) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: $el.src}))" />
+                                    <img id="profile_image_preview" src="#" alt="Profile Image Preview" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" onclick="if(this.src && !this.src.endsWith('#')) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: this.src}))" />
                                     <button type="button" data-clear-file-input="profile_image" data-clear-preview="profile_image_preview" data-clear-filename="profile_image_filename" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                                 </div>
 
                                 @if ($role->profile_image_url)
                                 <div id="profile_image_existing" class="relative inline-block mt-4 pt-1" data-show-on-delete="profile_image_choose">
-                                    <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" @click="window.dispatchEvent(new CustomEvent('show-lightbox', {detail: '{{ $role->profile_image_url }}'}))" />
+                                    <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" onclick="window.dispatchEvent(new CustomEvent('show-lightbox', {detail: '{{ $role->profile_image_url }}'}))" />
                                     <button type="button"
                                         data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}"
                                         data-delete-image-token="{{ csrf_token() }}"
@@ -1436,7 +1436,7 @@
                                         <span id="header_image_url_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
                                     </div>
                                     <div id="header_image_url_preview_clear" class="relative inline-block pt-3" style="display: none;">
-                                        <img id="header_image_url_preview" src="#" alt="Header Image Preview" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" @click="if($el.src && !$el.src.endsWith('#')) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: $el.src}))" />
+                                        <img id="header_image_url_preview" src="#" alt="Header Image Preview" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" onclick="if(this.src && !this.src.endsWith('#')) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: this.src}))" />
                                         <button type="button" id="clear-header-file-btn" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -1453,11 +1453,11 @@
                                     src="{{ $role->header_image && $role->header_image !== 'none' ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}"
                                     alt="Header Image Preview"
                                     style="max-height:120px; {{ $effectiveHeaderImage && $effectiveHeaderImage !== 'none' ? '' : 'display:none;' }}"
-                                    class="pt-3 cursor-pointer" @click="if($el.src) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: $el.src}))" />
+                                    class="pt-3 cursor-pointer" onclick="if(this.src) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: this.src}))" />
 
                                 @if ($role->header_image_url)
                                 <div id="delete_header_image_button" class="relative inline-block mt-4 pt-1" style="display: {{ $effectiveHeaderImage ? 'none' : 'block' }};">
-                                    <img src="{{ $role->header_image_url }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" @click="window.dispatchEvent(new CustomEvent('show-lightbox', {detail: '{{ $role->header_image_url }}'}))" />
+                                    <img src="{{ $role->header_image_url }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" onclick="window.dispatchEvent(new CustomEvent('show-lightbox', {detail: '{{ $role->header_image_url }}'}))" />
                                     <button type="button"
                                         data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}"
                                         data-delete-image-token="{{ csrf_token() }}"
@@ -1563,14 +1563,14 @@
                                     </p>
 
                                     <div id="background_image_preview_clear" class="relative inline-block pt-3" style="display: none;">
-                                        <img id="background_image_preview" src="" alt="Background Image Preview" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" @click="if($el.src && $el.src !== window.location.href) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: $el.src}))" />
+                                        <img id="background_image_preview" src="" alt="Background Image Preview" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" onclick="if(this.src && this.src !== window.location.href) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: this.src}))" />
                                         <button type="button" data-clear-file-input="background_image_url" data-clear-preview="background_image_preview" data-clear-filename="background_image_url_filename" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                                     </div>
                                 </div>
 
                                 @if ($role->background_image_url)
                                 <div id="background_image_existing" class="relative inline-block mt-4 pt-1">
-                                    <img src="{{ $role->background_image_url }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" @click="window.dispatchEvent(new CustomEvent('show-lightbox', {detail: '{{ $role->background_image_url }}'}))" />
+                                    <img src="{{ $role->background_image_url }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" onclick="window.dispatchEvent(new CustomEvent('show-lightbox', {detail: '{{ $role->background_image_url }}'}))" />
                                     <button type="button"
                                         data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}"
                                         data-delete-image-token="{{ csrf_token() }}"
@@ -2281,7 +2281,7 @@
                                             <input type="file" id="new_sponsor_logo_input" accept="image/*"
                                                 class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--brand-button-bg)] file:text-white hover:file:bg-[var(--brand-button-bg-hover)]"
                                                 />
-                                            <img id="sponsor_logo_preview" src="#" alt="Logo Preview" style="max-height:120px; display:none;" class="mt-2 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" @click="if($el.src && !$el.src.endsWith('#')) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: $el.src}))" />
+                                            <img id="sponsor_logo_preview" src="#" alt="Logo Preview" style="max-height:120px; display:none;" class="mt-2 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" onclick="if(this.src && !this.src.endsWith('#')) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: this.src}))" />
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2">
@@ -6429,6 +6429,13 @@ document.addEventListener('DOMContentLoaded', function() {
     savedInstructions="{{ $role->ai_style_instructions }}"
     saveInstructionsField="ai_style_instructions"
     :errorMessage="__('messages.ai_style_generation_failed')"
+    :previewConfig="[
+        'profile_image' => ['type' => 'image', 'data_key' => 'profile_image_url', 'aspect' => '1:1'],
+        'header_image' => ['type' => 'image', 'data_key' => 'header_image_url', 'aspect' => '16:9'],
+        'accent_color' => ['type' => 'color', 'data_key' => 'accent_color'],
+        'font' => ['type' => 'font', 'data_key' => 'font_family'],
+        'background_image' => ['type' => 'image', 'data_key' => 'background_image_url', 'aspect' => '16:9'],
+    ]"
 />
 
 <script {!! nonce_attr() !!}>
@@ -6595,6 +6602,10 @@ window.handleAiStyleResults = function(data) {
     savedInstructions="{{ $role->ai_content_instructions }}"
     saveInstructionsField="ai_content_instructions"
     :errorMessage="__('messages.ai_details_generation_failed')"
+    :previewConfig="[
+        'short_description' => ['type' => 'text', 'data_key' => 'short_description'],
+        'description' => ['type' => 'markdown', 'data_key' => 'description'],
+    ]"
 />
 
 <script {!! nonce_attr() !!}>
