@@ -28,12 +28,21 @@ class WaitlistController extends Controller
             abort(403);
         }
 
-        // Only allow joining waitlist if tickets are actually sold out
-        if (! $event->allTicketsSoldOut($request->event_date)) {
-            return response()->json([
-                'success' => false,
-                'message' => __('messages.tickets_available'),
-            ]);
+        // Only allow joining waitlist if actually sold out
+        if ($event->rsvp_enabled) {
+            if (! $event->isRsvpFull($request->event_date)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.registration_available'),
+                ]);
+            }
+        } else {
+            if (! $event->allTicketsSoldOut($request->event_date)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.tickets_available'),
+                ]);
+            }
         }
 
         // Check for existing active entry (waiting or notified)
@@ -77,9 +86,13 @@ class WaitlistController extends Controller
             throw $e;
         }
 
+        $message = $event->rsvp_enabled
+            ? __('messages.waitlist_rsvp_joined')
+            : __('messages.waitlist_joined');
+
         return response()->json([
             'success' => true,
-            'message' => __('messages.waitlist_joined'),
+            'message' => $message,
         ]);
     }
 

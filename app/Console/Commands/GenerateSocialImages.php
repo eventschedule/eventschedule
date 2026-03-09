@@ -104,6 +104,21 @@ class GenerateSocialImages extends Command
         'brown-paper-tickets-alternative' => '/brown-paper-tickets-alternative',
         'splash-alternative' => '/splash-alternative',
 
+        // Replacement pages
+        'replace' => '/replace',
+        'google-forms-replacement' => '/google-forms-replacement',
+        'mailchimp-replacement' => '/mailchimp-replacement',
+        'canva-replacement' => '/canva-replacement',
+        'linktree-replacement' => '/linktree-replacement',
+        'google-sheets-replacement' => '/google-sheets-replacement',
+        'calendly-replacement' => '/calendly-replacement',
+        'surveymonkey-replacement' => '/surveymonkey-replacement',
+        'doodle-replacement' => '/doodle-replacement',
+        'qr-code-generator-replacement' => '/qr-code-generator-replacement',
+        'squarespace-replacement' => '/squarespace-replacement',
+        'notion-replacement' => '/notion-replacement',
+        'trello-replacement' => '/trello-replacement',
+
         // Deployment options
         'selfhost' => '/selfhost',
         'saas' => '/saas',

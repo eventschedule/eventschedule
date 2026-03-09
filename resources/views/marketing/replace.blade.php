@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Tools Event Schedule Replaces | Stop Stitching Together Workarounds</x-slot>
+    <x-slot name="title">Tools Event Schedule Replaces | All-in-One Event Management Platform</x-slot>
     <x-slot name="description">Replace Google Forms, Mailchimp, Canva, Notion, Trello, and other general-purpose tools with Event Schedule. Purpose-built event management with ticketing, event pages, and AI features.</x-slot>
     <x-slot name="breadcrumbTitle">Replace</x-slot>
 
@@ -8,7 +8,7 @@
     {
         "@context": "https://schema.org",
         "@type": "ItemList",
-        "name": "Tools Event Schedule Replaces",
+        "name": "Replace Your Event Tools with Event Schedule",
         "description": "General-purpose tools that Event Schedule can replace for event management.",
         "url": "{{ config('app.url') }}/replace",
         "numberOfItems": 12,
@@ -50,8 +50,8 @@
             </div>
 
             <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight animate-reveal delay-100" style="opacity: 0;">
-                Tools Event Schedule<br>
-                <span class="text-gradient">replaces</span>
+                Replace Your Event Tools<br>
+                <span class="text-gradient">with Event Schedule</span>
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto animate-reveal delay-200" style="opacity: 0;">
@@ -80,7 +80,7 @@
                         </svg>
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Save money</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Stop paying for separate tools. Zero platform fees on ticket sales, and a free plan that covers most needs.</p>
+                    <p class="text-gray-500 dark:text-gray-400">One plan from $5/month replaces $50+ in separate tools. Zero platform fees on ticket sales, and a free plan that covers most needs.</p>
                 </div>
 
                 <div class="rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 p-8">
@@ -90,7 +90,7 @@
                         </svg>
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Save time</h3>
-                    <p class="text-gray-500 dark:text-gray-400">No more copying data between tools. Events, tickets, attendees, and emails all live in one place.</p>
+                    <p class="text-gray-500 dark:text-gray-400">Import events in seconds with AI instead of manual entry. Events, tickets, attendees, and emails all live in one place.</p>
                 </div>
 
                 <div class="rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 p-8">
@@ -100,7 +100,7 @@
                         </svg>
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Stay connected</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Ticketing, newsletters, graphics, and calendar sync in one platform. Everything works together automatically.</p>
+                    <p class="text-gray-500 dark:text-gray-400">Ticketing, newsletters, graphics, and two-way Google Calendar sync in one platform. Ticket buyers become subscribers automatically.</p>
                 </div>
             </div>
         </div>
@@ -117,7 +117,7 @@
                     One platform, many tools replaced
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-                    See how Event Schedule replaces the general-purpose tools you have been using for events.
+                    Replace Google Forms, Mailchimp, Canva, Calendly, and more with a single event management platform.
                 </p>
             </div>
 

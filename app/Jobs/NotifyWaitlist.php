@@ -35,9 +35,15 @@ class NotifyWaitlist implements ShouldQueue
             return;
         }
 
-        // Check if tickets are actually available
-        if ($event->allTicketsSoldOut($this->eventDate)) {
-            return;
+        // Check if availability has opened up
+        if ($event->rsvp_enabled) {
+            if ($event->isRsvpFull($this->eventDate)) {
+                return;
+            }
+        } else {
+            if ($event->allTicketsSoldOut($this->eventDate)) {
+                return;
+            }
         }
 
         // Find the oldest waiting entry and atomically mark as notified

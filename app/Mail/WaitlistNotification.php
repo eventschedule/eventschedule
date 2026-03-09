@@ -45,16 +45,21 @@ class WaitlistNotification extends Mailable
             }
         }
 
+        $subject = $this->event->rsvp_enabled
+            ? __('messages.waitlist_spots_available')
+            : __('messages.waitlist_tickets_available');
+
         return new Envelope(
-            subject: __('messages.waitlist_tickets_available').' - '.$this->event->name,
+            subject: $subject.' - '.$this->event->name,
             from: new Address($fromAddress, $fromName),
         );
     }
 
     public function content(): Content
     {
+        $isRsvp = (bool) $this->event->rsvp_enabled;
         $eventUrl = $this->event->getGuestUrl($this->entry->subdomain, $this->entry->event_date);
-        $eventUrl .= (str_contains($eventUrl, '?') ? '&' : '?').'tickets=true';
+        $eventUrl .= (str_contains($eventUrl, '?') ? '&' : '?').($isRsvp ? 'rsvp=true' : 'tickets=true');
 
         return new Content(
             view: 'emails.waitlist_notification',
@@ -64,6 +69,7 @@ class WaitlistNotification extends Mailable
                 'event' => $this->event,
                 'role' => $this->role,
                 'eventUrl' => $eventUrl,
+                'isRsvp' => $isRsvp,
                 'unsubscribeUrl' => $this->role ? route('role.unsubscribe', ['subdomain' => $this->role->subdomain]) : '',
             ]
         );

@@ -774,7 +774,7 @@
                   class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
               @if ($event->isRsvpFull($date))
-                {{ __('messages.registration_full') }}
+                {{ __('messages.join_waitlist') }}
               @else
                 {{ $role->customLabel('register') }}
               @endif
@@ -922,7 +922,11 @@
               <div class="flex-1">
                 <div class="flex flex-col gap-4">
                   <h2 class="text-[28px] leading-snug text-gray-900 dark:text-gray-100">
-                    {{ $role->customLabel('register') }}
+                    @if ($event->isRsvpFull($date))
+                        {{ __('messages.join_waitlist') }}
+                    @else
+                        {{ $role->customLabel('register') }}
+                    @endif
                   </h2>
                   <div class="text-base text-gray-700 dark:text-gray-300">
                     @include('event.rsvp', ['event' => $event, 'subdomain' => $subdomain])
@@ -1883,7 +1887,7 @@
                 class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                 style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
             @if ($event->isRsvpFull($date))
-              {{ __('messages.registration_full') }}
+              {{ __('messages.join_waitlist') }}
             @else
               {{ $role->customLabel('register') }}
             @endif

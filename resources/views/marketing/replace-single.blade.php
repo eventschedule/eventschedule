@@ -1,8 +1,8 @@
 <x-marketing-layout>
-    <x-slot name="title">{{ $short_name ?? $name }} Alternative for Events | Event Schedule</x-slot>
+    <x-slot name="title">{{ $short_name ?? $name }} Replacement for Events | Event Schedule</x-slot>
     <x-slot name="description">{{ $description }}</x-slot>
     <x-slot name="keywords">{{ $keywords }}</x-slot>
-    <x-slot name="breadcrumbTitle">{{ $short_name ?? $name }} Alternative</x-slot>
+    <x-slot name="breadcrumbTitle">{{ $short_name ?? $name }} Replacement</x-slot>
 
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
@@ -322,7 +322,7 @@
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                                 {{ $item['question'] }}
                             </h3>
-                            <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" :class="{ 'rotate-180': open === {{ $index + 1 }} }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4 faq-chevron" :class="{ 'rotate-180': open === {{ $index + 1 }} }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
@@ -340,11 +340,19 @@
                     window.Vue.createApp({
                         data() {
                             return { open: null };
+                        },
+                        mounted() {
+                            this.$el.classList.add('vue-ready');
                         }
                     }).mount('#faq-accordion');
                 }
             });
             </script>
+            <style {!! nonce_attr() !!}>
+                #faq-accordion:not(.vue-ready) .faq-answer { display: block !important; }
+                #faq-accordion:not(.vue-ready) .faq-chevron { display: none; }
+                #faq-accordion:not(.vue-ready) button { cursor: default; }
+            </style>
         </div>
     </section>
 
@@ -401,13 +409,34 @@
     </section>
     @endif
 
+    <!-- Transition -->
+    <div class="section-fade-to-{{ !empty($related_features) ? 'white' : 'gray' }} h-24"></div>
+
+    <!-- Cross-link to Compare -->
+    <section class="bg-{{ !empty($related_features) ? 'white dark:bg-[#0a0a0f]' : 'gray-100 dark:bg-[#0f0f14]' }} py-24">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                Looking for direct platform comparisons?
+            </h2>
+            <p class="text-lg text-gray-500 dark:text-gray-400 mb-8">
+                See how Event Schedule compares to other event platforms like Eventbrite, Luma, and Ticket Tailor.
+            </p>
+            <a href="{{ route('marketing.compare') }}" class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-lg transition-colors">
+                View platform comparisons
+                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+            </a>
+        </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="relative bg-gradient-to-br from-blue-600 to-sky-700 py-24 overflow-hidden">
         <div class="absolute inset-0 grid-overlay"></div>
 
         <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-                Ready to switch?
+                Ready to replace {{ $name }}?
             </h2>
             <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
                 Create your free schedule today. No credit card required, no platform fees ever.

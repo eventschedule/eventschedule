@@ -5737,6 +5737,27 @@ document.addEventListener('DOMContentLoaded', function() {
             handle: '.custom-field-drag-handle',
             animation: 150,
             ghostClass: 'opacity-50',
+            onEnd: function() {
+                // Update hidden index inputs to reflect new DOM order
+                var items = customFieldsList.querySelectorAll('.event-custom-field-item');
+                var usedIndices = [];
+                items.forEach(function(item) {
+                    var idx = parseInt(item.dataset.fieldIndex);
+                    if (idx) usedIndices.push(idx);
+                });
+                var nextIdx = 1;
+                items.forEach(function(item) {
+                    var existingIdx = parseInt(item.dataset.fieldIndex);
+                    if (!existingIdx) {
+                        // Assign next available index for new fields
+                        while (usedIndices.indexOf(nextIdx) !== -1) nextIdx++;
+                        item.dataset.fieldIndex = nextIdx;
+                        var input = item.querySelector('input[name$="[index]"]');
+                        if (input) input.value = nextIdx;
+                        usedIndices.push(nextIdx);
+                    }
+                });
+            },
         });
     }
 

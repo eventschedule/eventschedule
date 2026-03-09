@@ -887,6 +887,14 @@ class AnalyticsService
             return ['has_data' => false];
         }
 
+        // Determine timezone for arrival hours
+        $timezone = null;
+        if ($roleId) {
+            $timezone = Role::where('id', $roleId)->value('timezone');
+        } elseif ($roleIds->isNotEmpty()) {
+            $timezone = Role::where('id', $roleIds->first())->value('timezone');
+        }
+
         $totalSold = 0;
         $totalCheckedIn = 0;
         $arrivalHours = array_fill(0, 24, 0);
@@ -906,7 +914,9 @@ class AnalyticsService
             foreach ($seats as $timestamp) {
                 if ($timestamp !== null) {
                     $checkedIn++;
-                    $hour = (int) date('G', $timestamp);
+                    $hour = $timezone
+                        ? Carbon::createFromTimestamp($timestamp)->setTimezone($timezone)->hour
+                        : (int) date('G', $timestamp);
                     $arrivalHours[$hour]++;
                 }
             }

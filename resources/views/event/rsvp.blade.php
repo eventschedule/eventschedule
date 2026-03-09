@@ -44,6 +44,9 @@
                     individualTickets: @json((bool) $event->individual_tickets),
                     rsvpQuantity: 1,
                     guests: [],
+                    waitlistSubmitting: false,
+                    waitlistMessage: '',
+                    waitlistSuccess: false,
                 };
             },
             created() {
@@ -231,6 +234,37 @@
                         }
                     } catch (e) {}
                 },
+                joinWaitlist() {
+                    if (!this.name.trim() || !this.email.trim() || this.waitlistSubmitting) return;
+                    this.waitlistSubmitting = true;
+                    this.waitlistMessage = '';
+
+                    fetch(@json(route('waitlist.join', ['subdomain' => $subdomain])), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            event_id: @json(\App\Utils\UrlUtils::encodeId($event->id)),
+                            event_date: @json($date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d')),
+                            name: this.name.trim(),
+                            email: this.email.trim(),
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.waitlistSubmitting = false;
+                        this.waitlistMessage = data.message;
+                        this.waitlistSuccess = data.success;
+                    })
+                    .catch(() => {
+                        this.waitlistSubmitting = false;
+                        this.waitlistMessage = @json(__('messages.error'));
+                        this.waitlistSuccess = false;
+                    });
+                },
             },
         }).mount('#rsvp-form');
     });
@@ -239,8 +273,47 @@
 
 <div id="rsvp-form">
     @if ($event->isRsvpFull($date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d')))
-        <div class="text-center py-4">
-            <p class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.rsvp_full') }}</p>
+        <div>
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            <div v-if="!waitlistSuccess">
+                <div class="mb-6">
+                    <label for="waitlist_name" class="text-gray-900 dark:text-gray-100">{{ __('messages.name') . ' *' }}</label>
+                    <input type="text" id="waitlist_name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+                        v-model="name" required autocomplete="name" />
+                </div>
+                <div class="mb-6">
+                    <label for="waitlist_email" class="text-gray-900 dark:text-gray-100">{{ __('messages.email') . ' *' }}</label>
+                    <input type="email" id="waitlist_email" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+                        v-model="email" required autocomplete="email" />
+                </div>
+            </div>
+
+            <div v-if="waitlistMessage" class="mb-4 p-4 rounded-lg text-sm" :class="waitlistSuccess ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300'">
+                @{{ waitlistMessage }}
+            </div>
+            <div v-if="!waitlistSuccess" class="flex justify-end items-center pt-2 gap-8">
+                @if (! request()->embed)
+                <button type="button"
+                    @click="hideForm"
+                    class="px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+                    {{ strtoupper(__('messages.cancel')) }}
+                </button>
+                @endif
+                <button type="button" @click="joinWaitlist"
+                    :disabled="!name.trim() || !email.trim() || waitlistSubmitting"
+                    class="inline-flex items-center justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                    <span v-if="waitlistSubmitting">{{ strtoupper(__('messages.processing')) }}</span>
+                    <span v-else>{{ strtoupper(__('messages.join_waitlist')) }}</span>
+                </button>
+            </div>
+            @if (! request()->embed)
+            <div v-else class="flex justify-end pt-2">
+                <button type="button" @click="hideForm" class="px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+                    {{ strtoupper(__('messages.back')) }}
+                </button>
+            </div>
+            @endif
         </div>
     @else
     <form action="{{ route('event.rsvp', ['subdomain' => $subdomain]) }}" method="post" v-on:submit="validateForm">
