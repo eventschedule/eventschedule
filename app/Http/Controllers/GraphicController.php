@@ -304,7 +304,8 @@ class GraphicController extends Controller
             if ($textEvents->isEmpty()) {
                 $hasFutureEvents = $baseQuery()->exists();
                 $errorKey = $hasFutureEvents ? 'no_events_with_flyers' : 'no_events_found';
-                return response()->json(['error' => __('messages.' . $errorKey), 'error_type' => $errorKey]);
+
+                return response()->json(['error' => __('messages.'.$errorKey), 'error_type' => $errorKey]);
             }
 
             // Get text template - use request parameter if provided, otherwise fall back to saved settings
@@ -481,7 +482,7 @@ class GraphicController extends Controller
 
             $prompt = "Transform the following event list text according to this instruction: \"{$aiPrompt}\"\n\nEvent metadata (use this to inform your transformation):\n{$metadata}\n\nEvent List:\n{$text}\n\nReturn only the transformed text as a JSON string with a single key 'text'.";
 
-            $response = GeminiUtils::sendPrompt($prompt);
+            $response = GeminiUtils::sendPrompt($prompt, disableThinking: true);
 
             if ($response && isset($response[0]['text'])) {
                 return $response[0]['text'];

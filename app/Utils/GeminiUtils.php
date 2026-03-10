@@ -12,7 +12,7 @@ class GeminiUtils
 {
     private static array $styleDescriptionCache = [];
 
-    private static function sendRequest($prompt, $imageData = null)
+    private static function sendRequest($prompt, $imageData = null, $disableThinking = false)
     {
         $model = 'gemini-2.5-flash';
 
@@ -25,9 +25,10 @@ class GeminiUtils
                     'parts' => [],
                 ],
             ],
-            'generationConfig' => [
-                'response_mime_type' => 'application/json',
-            ],
+            'generationConfig' => array_merge(
+                ['response_mime_type' => 'application/json'],
+                $disableThinking ? ['thinking_config' => ['thinking_budget' => 0]] : []
+            ),
         ];
 
         // Add image data if provided
@@ -56,11 +57,30 @@ class GeminiUtils
             CURLOPT_POST => true,
             CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
             CURLOPT_POSTFIELDS => json_encode($data),
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 55,
         ]);
 
         $response = curl_exec($ch);
+        $curlErrno = curl_errno($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+
+        if ($curlErrno === CURLE_OPERATION_TIMEDOUT) {
+            $exception = new \Exception('Gemini API request timed out');
+
+            \Sentry\withScope(function (\Sentry\State\Scope $scope) use ($exception, $prompt): void {
+                $scope->setLevel(\Sentry\Severity::warning());
+                $scope->setTag('service', 'gemini');
+                $scope->setTag('error_type', 'timeout');
+                $scope->setContext('gemini_api', [
+                    'prompt_preview' => substr($prompt, 0, 100),
+                ]);
+                \Sentry\captureException($exception);
+            });
+
+            return null;
+        }
 
         if ($httpCode !== 200) {
             \Log::error('Gemini API error response: '.$response);
@@ -150,9 +170,9 @@ class GeminiUtils
     /**
      * Send a simple text prompt to Gemini and return the response
      */
-    public static function sendPrompt($prompt)
+    public static function sendPrompt($prompt, $disableThinking = false)
     {
-        return self::sendRequest($prompt);
+        return self::sendRequest($prompt, null, $disableThinking);
     }
 
     public static function parseEvent($role, $details, $file = null)
