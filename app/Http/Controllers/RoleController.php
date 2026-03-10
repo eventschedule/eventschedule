@@ -527,6 +527,9 @@ class RoleController extends Controller
                 $startAtDate = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
                 $month = $startAtDate->month;
                 $year = $startAtDate->year;
+                if (! $event->days_of_week) {
+                    $date = $startAtDate->format('Y-m-d');
+                }
             }
         }
 

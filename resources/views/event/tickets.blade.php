@@ -24,7 +24,7 @@
                 return {
                     createAccount: @json((bool) old('create_account', false)),
                     tickets: @json($event->tickets->filter(fn($t) => !$t->isSalesEnded())->values()->map(function ($ticket) {
-                        $data = $ticket->toData(request()->date);
+                        $data = $ticket->toData($date ?? request()->date);
                         $data['selectedQty'] = (int) (old('tickets')[$data['id']] ?? 0);
                         $data['custom_fields'] = $ticket->custom_fields ?? [];
                         $data['custom_values'] = (object) (old('ticket_custom_values')[$data['id']] ?? []);

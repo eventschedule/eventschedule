@@ -455,6 +455,12 @@ class TicketController extends Controller
             $sale = DB::transaction(function () use ($request, $event, $user, $subdomain, $isPaymentLink) {
                 // Check ticket availability with row locking (skip for payment link mode)
                 if (! $isPaymentLink) {
+                    // Resolve event_date for one-time events (hidden field may be empty)
+                    $eventDate = $request->event_date;
+                    if (! $eventDate && $event->starts_at) {
+                        $eventDate = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
+                    }
+
                     foreach ($request->tickets as $ticketId => $quantity) {
                         if ($quantity > 0) {
                             // Lock the ticket row to prevent concurrent modifications
@@ -473,10 +479,10 @@ class TicketController extends Controller
                                 if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
                                     // Lock all tickets for combined mode
                                     $lockedTickets = $event->tickets()->lockForUpdate()->get();
-                                    $totalSold = $lockedTickets->sum(function ($ticket) use ($request) {
+                                    $totalSold = $lockedTickets->sum(function ($ticket) use ($eventDate) {
                                         $ticketSold = $ticket->sold ? json_decode($ticket->sold, true) : [];
 
-                                        return $ticketSold[$request->event_date] ?? 0;
+                                        return $ticketSold[$eventDate] ?? 0;
                                     });
                                     // In combined mode, the total quantity is the same as individual quantity
                                     $totalQuantity = $event->getSameTicketQuantity();
@@ -489,7 +495,7 @@ class TicketController extends Controller
                                     }
                                 } else {
                                     $sold = json_decode($ticketModel->sold, true);
-                                    $soldCount = $sold[$request->event_date] ?? 0;
+                                    $soldCount = $sold[$eventDate] ?? 0;
                                     $remainingTickets = $ticketModel->quantity - $soldCount;
 
                                     if ($quantity > $remainingTickets) {
