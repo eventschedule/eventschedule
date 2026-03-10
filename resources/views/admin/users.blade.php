@@ -17,7 +17,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_users')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalUsers) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalUsers) }}</p>
                 <div class="mt-4 flex items-center text-sm w-full">
                     <span class="{{ $usersChangePercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
                         {{ $usersChangePercent >= 0 ? '+' : '' }}{{ $usersChangePercent }}%

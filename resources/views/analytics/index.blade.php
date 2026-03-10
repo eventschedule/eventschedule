@@ -80,7 +80,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.total_revenue') }}</p>
                 </div>
-                <p class="text-2xl font-bold text-green-600 dark:text-green-400 text-center">{{ number_format($conversionStats['total_revenue'], 2) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-green-600 dark:text-green-400 text-center">{{ number_format($conversionStats['total_revenue'], 2) }}</p>
             </div>
             {{-- Conversion Rate --}}
             <div class="ap-card rounded-xl p-6 flex flex-col items-center">
@@ -103,7 +103,7 @@
                         </span>
                     </p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ $conversionStats['conversion_rate'] }}%</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ $conversionStats['conversion_rate'] }}%</p>
             </div>
             {{-- Revenue per View --}}
             <div class="ap-card rounded-xl p-6 flex flex-col items-center">
@@ -126,7 +126,7 @@
                         </span>
                     </p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($conversionStats['revenue_per_view'], 2) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($conversionStats['revenue_per_view'], 2) }}</p>
             </div>
         </div>
         @endif
@@ -458,7 +458,7 @@
                         </div>
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.tickets_sold') }}</p>
                     </div>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($checkinStats['total_sold']) }}</p>
+                    <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($checkinStats['total_sold']) }}</p>
                 </div>
                 {{-- Checked In --}}
                 <div class="ap-card rounded-xl p-6 flex flex-col items-center">
@@ -471,7 +471,7 @@
                         </div>
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.checked_in') }}</p>
                     </div>
-                    <p class="text-2xl font-bold text-green-600 dark:text-green-400 text-center">{{ number_format($checkinStats['total_checked_in']) }}</p>
+                    <p class="dashboard-stat-value text-3xl font-bold text-green-600 dark:text-green-400 text-center">{{ number_format($checkinStats['total_checked_in']) }}</p>
                 </div>
                 {{-- Attendance Rate --}}
                 <div class="ap-card rounded-xl p-6 flex flex-col items-center">
@@ -484,7 +484,7 @@
                         </div>
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.attendance_rate') }}</p>
                     </div>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ $checkinStats['attendance_rate'] }}%</p>
+                    <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ $checkinStats['attendance_rate'] }}%</p>
                 </div>
                 {{-- No-Shows --}}
                 <div class="ap-card rounded-xl p-6 flex flex-col items-center">
@@ -497,7 +497,7 @@
                         </div>
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.no_shows') }}</p>
                     </div>
-                    <p class="text-2xl font-bold text-red-600 dark:text-red-400 text-center">{{ $checkinStats['no_show_rate'] }}%</p>
+                    <p class="dashboard-stat-value text-3xl font-bold text-red-600 dark:text-red-400 text-center">{{ $checkinStats['no_show_rate'] }}%</p>
                 </div>
             </div>
 
@@ -598,7 +598,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.total_views') }}</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalViews) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalViews) }}</p>
             </div>
             {{-- Views in Period --}}
             <div class="ap-card rounded-xl p-6 flex flex-col items-center">
@@ -611,7 +611,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.views_in_period') }}</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($periodComparison ? $periodComparison['current_period'] : $momComparison['this_month']) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($periodComparison ? $periodComparison['current_period'] : $momComparison['this_month']) }}</p>
             </div>
             @if ($periodComparison)
             {{-- Previous Period --}}
@@ -625,7 +625,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.views_previous_period') }}</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($periodComparison['previous_period']) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($periodComparison['previous_period']) }}</p>
             </div>
             {{-- Change Percentage --}}
             <div class="ap-card rounded-xl p-6 flex flex-col items-center">
@@ -644,7 +644,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.' . $periodComparison['comparison_label']) }}</p>
                 </div>
-                <p class="text-2xl font-bold {{ $periodComparison['percentage_change'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} text-center">
+                <p class="dashboard-stat-value text-3xl font-bold {{ $periodComparison['percentage_change'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} text-center">
                     {{ $periodComparison['percentage_change'] >= 0 ? '+' : '' }}{{ $periodComparison['percentage_change'] }}%
                 </p>
             </div>
@@ -671,7 +671,7 @@
                         </span>
                     </p>
                 </div>
-                <p class="text-2xl font-bold text-purple-600 dark:text-purple-400 text-center">{{ number_format($appearanceViews) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-purple-600 dark:text-purple-400 text-center">{{ number_format($appearanceViews) }}</p>
             </div>
             @endif
         </div>

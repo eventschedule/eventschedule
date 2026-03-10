@@ -18,7 +18,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_users')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalUsers) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalUsers) }}</p>
                 <div class="mt-4 flex items-center text-sm w-full">
                     <span class="{{ $usersChangePercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
                         {{ $usersChangePercent >= 0 ? '+' : '' }}{{ $usersChangePercent }}%
@@ -40,7 +40,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_schedules')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalSchedules) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalSchedules) }}</p>
                 <div class="mt-4 flex items-center text-sm w-full">
                     <span class="{{ $schedulesChangePercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
                         {{ $schedulesChangePercent >= 0 ? '+' : '' }}{{ $schedulesChangePercent }}%
@@ -62,7 +62,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_events')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalEvents) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalEvents) }}</p>
                 <div class="mt-4 flex items-center text-sm w-full">
                     <span class="{{ $eventsChangePercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
                         {{ $eventsChangePercent >= 0 ? '+' : '' }}{{ $eventsChangePercent }}%
@@ -273,7 +273,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.email_signups')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($emailUsersInPeriod) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($emailUsersInPeriod) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400 w-full">@lang('messages.in_period')</p>
             </div>
             <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
@@ -286,7 +286,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.google_signups')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($googleUsersInPeriod) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($googleUsersInPeriod) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400 w-full">@lang('messages.in_period')</p>
             </div>
             <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
@@ -299,7 +299,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.hybrid_signups')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($hybridUsersInPeriod) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($hybridUsersInPeriod) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400 w-full">@lang('messages.in_period')</p>
             </div>
         </div>
@@ -316,7 +316,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_custom_domains')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalCustomDomains) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalCustomDomains) }}</p>
             </div>
             <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
                 <div class="flex items-center gap-3 mb-3 self-start">
@@ -328,7 +328,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_domains')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($activeCount) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($activeCount) }}</p>
             </div>
             <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
                 <div class="flex items-center gap-3 mb-3 self-start">
@@ -340,7 +340,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.pending_domains')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($pendingCount) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($pendingCount) }}</p>
             </div>
         </div>
 
@@ -356,7 +356,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.pending_jobs')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($pendingJobsCount) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($pendingJobsCount) }}</p>
             </div>
             <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
                 <div class="flex items-center gap-3 mb-3 self-start">
@@ -368,7 +368,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.failed_jobs')</p>
                 </div>
-                <p class="text-2xl font-bold {{ $failedJobsCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }} text-center">{{ number_format($failedJobsCount) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold {{ $failedJobsCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }} text-center">{{ number_format($failedJobsCount) }}</p>
             </div>
         </div>
     </div>

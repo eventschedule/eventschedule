@@ -16,7 +16,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.free')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($freeCount) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($freeCount) }}</p>
             </div>
 
             {{-- Pro Count --}}
@@ -30,7 +30,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.pro')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($proCount) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($proCount) }}</p>
             </div>
 
             {{-- Enterprise Count --}}
@@ -44,7 +44,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.enterprise')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($enterpriseCount) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($enterpriseCount) }}</p>
             </div>
         </div>
 
@@ -61,7 +61,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.stripe_paid')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($stripePaidCount) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($stripePaidCount) }}</p>
             </div>
 
             {{-- Manual --}}
@@ -75,7 +75,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.manual')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($manualPlanCount) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($manualPlanCount) }}</p>
             </div>
 
             {{-- On Trial --}}
@@ -89,7 +89,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.on_free_trial')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($trialCount) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($trialCount) }}</p>
             </div>
 
             {{-- Expiring Soon --}}
@@ -103,7 +103,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.expiring_soon')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($expiringSoon) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($expiringSoon) }}</p>
             </div>
         </div>
 

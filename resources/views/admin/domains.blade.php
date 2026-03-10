@@ -16,7 +16,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalCustomDomains) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalCustomDomains) }}</p>
             </div>
 
             {{-- Direct Mode --}}
@@ -30,7 +30,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.custom_domain_mode_direct')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($directCount) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($directCount) }}</p>
             </div>
 
             {{-- Active --}}
@@ -44,7 +44,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.domain_active')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($activeCount) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($activeCount) }}</p>
             </div>
 
             {{-- Pending --}}
@@ -58,7 +58,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.domain_pending')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($pendingCount) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($pendingCount) }}</p>
             </div>
         </div>
 

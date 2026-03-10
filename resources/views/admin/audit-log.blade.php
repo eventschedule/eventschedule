@@ -15,7 +15,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_entries')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalEntries) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalEntries) }}</p>
             </div>
             <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
                 <div class="flex items-center gap-3 mb-3 self-start">
@@ -27,7 +27,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.entries_today')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($entriesToday) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($entriesToday) }}</p>
             </div>
             <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
                 <div class="flex items-center gap-3 mb-3 self-start">
@@ -39,7 +39,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.failed_auth_today')</p>
                 </div>
-                <p class="text-2xl font-bold {{ $failedAuthToday > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }} text-center">{{ number_format($failedAuthToday) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold {{ $failedAuthToday > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }} text-center">{{ number_format($failedAuthToday) }}</p>
             </div>
             <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
                 <div class="flex items-center gap-3 mb-3 self-start">
@@ -51,7 +51,7 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.unique_ips_today')</p>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($uniqueIpsToday) }}</p>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($uniqueIpsToday) }}</p>
             </div>
         </div>
 
