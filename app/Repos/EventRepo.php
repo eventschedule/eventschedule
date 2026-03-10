@@ -398,8 +398,7 @@ class EventRepo
             if ($request->filled('slug')) {
                 $event->slug = Str::slug($request->slug) ?: $event->getOriginal('slug');
             } elseif ($currentRole?->slug_pattern
-                && str_contains($currentRole->slug_pattern, '{custom_')
-                && $event->isDirty('custom_field_values')) {
+                && self::slugPatternFieldsChanged($currentRole->slug_pattern, $event)) {
                 $event->slug = SlugPatternUtils::generateSlug(
                     $currentRole->slug_pattern,
                     $request->short_name ?: $request->name,
@@ -1013,5 +1012,34 @@ class EventRepo
         }
 
         return $event;
+    }
+
+    private static function slugPatternFieldsChanged(string $pattern, Event $event): bool
+    {
+        // Date/time variables -> starts_at/ends_at
+        if (preg_match('/\{(day|month|year|day_name|day_short|date_dmy|date_mdy|date_full_dmy|date_full_mdy|month_name|month_short|time|end_time|duration)\}/', $pattern)
+            && $event->isDirty(['starts_at', 'ends_at'])) {
+            return true;
+        }
+
+        // Event name variable -> name/short_name
+        if (str_contains($pattern, '{event_name}')
+            && $event->isDirty(['name', 'short_name', 'name_en', 'short_name_en'])) {
+            return true;
+        }
+
+        // Venue variables -> venue_id
+        if (preg_match('/\{(venue|city|address|state|country)\}/', $pattern)
+            && $event->isDirty('venue_id')) {
+            return true;
+        }
+
+        // Custom field variables -> custom_field_values
+        if (str_contains($pattern, '{custom_')
+            && $event->isDirty('custom_field_values')) {
+            return true;
+        }
+
+        return false;
     }
 }
