@@ -775,19 +775,51 @@
 
     <div id="tooltip" class="hidden fixed z-50 px-3 py-2 text-sm text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg pointer-events-none max-w-xs"></div>
 
-    <div x-data="{ lightboxOpen: false, lightboxSrc: '' }"
-        @show-lightbox.window="lightboxSrc = $event.detail; lightboxOpen = true; document.body.style.overflow = 'hidden'"
-        @keydown.escape.window="if (lightboxOpen) { lightboxOpen = false; document.body.style.overflow = ''; }">
-        <template x-teleport="body">
-            <div x-show="lightboxOpen" x-cloak
-                @click.self="lightboxOpen = false; document.body.style.overflow = ''"
-                class="fixed inset-0 z-[70] flex items-center justify-center bg-black/90">
-                <button @click="lightboxOpen = false; document.body.style.overflow = ''"
-                    class="absolute top-3 ltr:right-3 rtl:left-3 text-white/80 hover:text-white text-4xl leading-none z-10 w-10 h-10 flex items-center justify-center">&times;</button>
-                <img :src="lightboxSrc" class="max-w-[96vw] max-h-[90vh] object-contain pointer-events-none" alt="">
-            </div>
-        </template>
+    <div id="es-lightbox" style="display:none" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/90">
+        <button id="es-lightbox-close" class="absolute top-3 ltr:right-3 rtl:left-3 text-white/80 hover:text-white text-4xl leading-none z-10 w-10 h-10 flex items-center justify-center">&times;</button>
+        <img id="es-lightbox-img" class="max-w-[96vw] max-h-[90vh] object-contain pointer-events-none" src="" alt="">
     </div>
+
+    <script {!! nonce_attr() !!}>
+        (function() {
+            var overlay = document.getElementById('es-lightbox');
+            var img = document.getElementById('es-lightbox-img');
+            var closeBtn = document.getElementById('es-lightbox-close');
+
+            function open(src) {
+                img.src = src;
+                overlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+
+            function close() {
+                overlay.style.display = 'none';
+                img.src = '';
+                document.body.style.overflow = '';
+            }
+
+            document.addEventListener('click', function(e) {
+                var el = e.target.closest('[data-lightbox-src]');
+                if (!el) return;
+                var src = el.getAttribute('data-lightbox-src') || el.src;
+                if (src && src !== '#' && !src.endsWith('#') && src !== window.location.href) {
+                    open(src);
+                }
+            });
+
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) close();
+            });
+
+            closeBtn.addEventListener('click', close);
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && overlay.style.display !== 'none') close();
+            });
+
+            window.showLightbox = open;
+        })();
+    </script>
 
     @if (config('app.is_testing'))
         <style {!! nonce_attr() !!}>

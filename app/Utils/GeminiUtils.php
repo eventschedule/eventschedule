@@ -6,9 +6,12 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Services\UsageTrackingService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class GeminiUtils
 {
+    private static array $styleDescriptionCache = [];
+
     private static function sendRequest($prompt, $imageData = null)
     {
         $model = 'gemini-2.5-flash';
@@ -1297,14 +1300,20 @@ class GeminiUtils
         return null;
     }
 
-    public static function generateEventFlyer(Event $event, ?string $styleInstructions = null): ?string
+    public static function generateEventFlyer(Event $event, ?string $styleInstructions = null, ?Role $role = null): ?string
     {
-        $prompt = self::buildFlyerPrompt($event, $styleInstructions);
+        $profileStyleDescription = null;
+        $referenceRole = $role ?: $event->roles->first();
+        if ($referenceRole && ($referenceRole->getAttributes()['profile_image_url'] ?? null)) {
+            $profileStyleDescription = self::getProfileImageStyleDescription($referenceRole);
+        }
+
+        $prompt = self::buildFlyerPrompt($event, $styleInstructions, $profileStyleDescription);
 
         return self::sendImageGenerationRequest($prompt);
     }
 
-    private static function buildFlyerPrompt(Event $event, ?string $styleInstructions): string
+    private static function buildFlyerPrompt(Event $event, ?string $styleInstructions, ?string $profileStyleDescription = null): string
     {
         $config = config('ai_prompts.event_flyer');
 
@@ -1355,11 +1364,50 @@ class GeminiUtils
         $prompt .= $config['layout'];
         $prompt .= str_replace(':category_hint', $categoryName ? " ({$categoryName})" : '', $config['design']);
 
+        if ($profileStyleDescription) {
+            $prompt .= str_replace(':style_description', $profileStyleDescription, $config['style_reference']);
+        }
+
         if ($styleInstructions) {
             $prompt .= str_replace(':instructions', $styleInstructions, $config['style_instructions']);
         }
 
         return $prompt;
+    }
+
+    public static function getProfileImageStyleDescription(Role $role): ?string
+    {
+        if (isset(self::$styleDescriptionCache[$role->id])) {
+            return self::$styleDescriptionCache[$role->id];
+        }
+
+        try {
+            $rawPath = $role->getAttributes()['profile_image_url'] ?? null;
+            if (! $rawPath || str_starts_with($rawPath, 'demo_')) {
+                return null;
+            }
+
+            $storagePath = config('filesystems.default') == 'local' ? 'public/'.$rawPath : $rawPath;
+            $imageBytes = Storage::get($storagePath);
+
+            if (! $imageBytes) {
+                return null;
+            }
+
+            $result = self::sendRequest(config('ai_prompts.describe_style.prompt'), $imageBytes);
+
+            if (! $result || ! isset($result['style'])) {
+                return null;
+            }
+
+            self::$styleDescriptionCache[$role->id] = $result['style'];
+
+            return $result['style'];
+        } catch (\Exception $e) {
+            \Log::warning('Failed to get profile image style description: '.$e->getMessage(), ['role_id' => $role->id]);
+
+            return null;
+        }
     }
 
     public static function generateScheduleStyle(Role $role, array $elements, ?string $styleInstructions, array $currentValues, ?string $customPrompt = null): array
@@ -1388,6 +1436,11 @@ class GeminiUtils
 
         // Step 2: Generate images in parallel, passing accent color for cohesive results
         if (! empty($imageElements)) {
+            $profileStyleDescription = null;
+            if (! in_array('profile_image', $imageElements) && ($role->getAttributes()['profile_image_url'] ?? null)) {
+                $profileStyleDescription = self::getProfileImageStyleDescription($role);
+            }
+
             try {
                 $imageRequests = [];
                 foreach ($imageElements as $element) {
@@ -1395,10 +1448,10 @@ class GeminiUtils
                         $prompt = self::buildProfileImagePrompt($role, $accentColor, $styleInstructions);
                         $imageRequests[$element] = self::prepareImageGenerationRequest($prompt, '1:1');
                     } elseif ($element === 'header_image') {
-                        $prompt = self::buildHeaderImagePrompt($role, $accentColor, $styleInstructions);
+                        $prompt = self::buildHeaderImagePrompt($role, $accentColor, $styleInstructions, $profileStyleDescription);
                         $imageRequests[$element] = self::prepareImageGenerationRequest($prompt, '16:9');
                     } elseif ($element === 'background_image') {
-                        $prompt = self::buildBackgroundImagePrompt($role, $accentColor, $styleInstructions);
+                        $prompt = self::buildBackgroundImagePrompt($role, $accentColor, $styleInstructions, $profileStyleDescription);
                         $imageRequests[$element] = self::prepareImageGenerationRequest($prompt, '16:9');
                     }
                 }
@@ -1735,7 +1788,7 @@ class GeminiUtils
         return $prompt;
     }
 
-    public static function buildHeaderImagePrompt(Role $role, string $accentColor, ?string $styleInstructions): string
+    public static function buildHeaderImagePrompt(Role $role, string $accentColor, ?string $styleInstructions, ?string $profileStyleDescription = null): string
     {
         $config = config('ai_prompts.header_image');
         $v = self::getVisualDirection($role);
@@ -1753,6 +1806,11 @@ class GeminiUtils
         }
 
         $prompt .= str_replace(':accent_color', $accentColor, $config['color']);
+
+        if ($profileStyleDescription) {
+            $prompt .= str_replace(':style_description', $profileStyleDescription, $config['style_reference']);
+        }
+
         $prompt .= $config['constraints'];
 
         if ($styleInstructions) {
@@ -1762,7 +1820,7 @@ class GeminiUtils
         return $prompt;
     }
 
-    public static function buildBackgroundImagePrompt(Role $role, string $accentColor, ?string $styleInstructions): string
+    public static function buildBackgroundImagePrompt(Role $role, string $accentColor, ?string $styleInstructions, ?string $profileStyleDescription = null): string
     {
         $config = config('ai_prompts.background_image');
         $v = self::getVisualDirection($role);
@@ -1772,6 +1830,10 @@ class GeminiUtils
 
         if (! empty($v['motifs'])) {
             $prompt .= str_replace(':motifs', $v['motifs'], $config['motifs']);
+        }
+
+        if ($profileStyleDescription) {
+            $prompt .= str_replace(':style_description', $profileStyleDescription, $config['style_reference']);
         }
 
         $prompt .= $config['constraints'];
@@ -1914,14 +1976,16 @@ class GeminiUtils
 
     public static function generateScheduleHeaderImage(Role $role, string $accentColor, ?string $styleInstructions): ?string
     {
-        $prompt = self::buildHeaderImagePrompt($role, $accentColor, $styleInstructions);
+        $profileStyleDescription = self::getProfileImageStyleDescription($role);
+        $prompt = self::buildHeaderImagePrompt($role, $accentColor, $styleInstructions, $profileStyleDescription);
 
         return self::sendImageGenerationRequest($prompt, '16:9');
     }
 
     public static function generateScheduleBackgroundImage(Role $role, string $accentColor, ?string $styleInstructions): ?string
     {
-        $prompt = self::buildBackgroundImagePrompt($role, $accentColor, $styleInstructions);
+        $profileStyleDescription = self::getProfileImageStyleDescription($role);
+        $prompt = self::buildBackgroundImagePrompt($role, $accentColor, $styleInstructions, $profileStyleDescription);
 
         return self::sendImageGenerationRequest($prompt, '16:9');
     }

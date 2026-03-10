@@ -1320,13 +1320,13 @@
                             </div>
 
                             <div id="image_preview" class="mt-3 relative inline-block" style="display: none;">
-                                <img id="preview_img" src="#" alt="Preview" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" onclick="if(this.src && !this.src.endsWith('#')) window.dispatchEvent(new CustomEvent('show-lightbox', {detail: this.src}))" />
+                                <img id="preview_img" src="#" alt="Preview" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" data-lightbox-src />
                                 <button type="button" id="clear-flyer-preview-btn" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                             </div>
 
                             @if ($event->flyer_image_url)
                             <div id="flyer_image_existing" class="relative inline-block mt-4 pt-1">
-                                <img src="{{ $event->flyer_image_url }}" alt="{{ __('messages.flyer_image') }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" id="flyer_preview" onclick="window.dispatchEvent(new CustomEvent('show-lightbox', {detail: this.src}))" />
+                                <img src="{{ $event->flyer_image_url }}" alt="{{ __('messages.flyer_image') }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" id="flyer_preview" data-lightbox-src="{{ $event->flyer_image_url }}" />
                                 <button type="button"
                                     id="delete-flyer-btn"
                                     data-url="{{ route('event.delete_image', ['subdomain' => $subdomain]) }}"
@@ -3049,49 +3049,17 @@
                             <!-- Settings Tabs -->
                             <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
                                 <nav class="-mb-px flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide">
-                                    <button type="button" @click="activeSettingsTab = 'privacy'"
-                                        :class="activeSettingsTab === 'privacy' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                        class="settings-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="privacy">
-                                        {{ __('messages.privacy') }}
-                                    </button>
                                     <button type="button" @click="activeSettingsTab = 'custom_fields'"
                                         :class="activeSettingsTab === 'custom_fields' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
                                         class="settings-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="custom_fields">
                                         {{ __('messages.custom_fields') }}
                                     </button>
+                                    <button type="button" @click="activeSettingsTab = 'privacy'"
+                                        :class="activeSettingsTab === 'privacy' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
+                                        class="settings-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="privacy">
+                                        {{ __('messages.privacy') }}
+                                    </button>
                                 </nav>
-                            </div>
-
-                            <!-- Privacy Tab -->
-                            <div v-show="activeSettingsTab === 'privacy'">
-                            @if ($role->isEnterprise())
-                                <div class="mb-6">
-                                    <div class="flex items-center gap-3">
-                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                            <input type="hidden" name="is_private" :value="event.is_private ? 1 : 0">
-                                            <input id="is_private" name="is_private" type="checkbox" v-model="event.is_private" :value="1"
-                                                class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                        </label>
-                                        <label for="is_private" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                            {{ __('messages.private_event') }}
-                                        </label>
-                                    </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 ms-14">{{ __('messages.private_event_help') }}</p>
-                                </div>
-
-                                <div class="mb-6" v-show="event.is_private">
-                                    <x-input-label for="event_password" :value="__('messages.event_password')" />
-                                    <x-text-input id="event_password" name="event_password" type="text" class="mt-1 block w-full"
-                                        v-model="event.event_password" maxlength="255" />
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.event_password_help') }}</p>
-                                </div>
-                            @else
-                                <x-upgrade-prompt tier="enterprise" :learnMoreUrl="route('marketing.private_events')" :subdomain="$subdomain">
-                                    {{ __('messages.upgrade_enterprise_privacy') }}
-                                </x-upgrade-prompt>
-                            @endif
                             </div>
 
                             <!-- Custom Fields Tab -->
@@ -3190,6 +3158,38 @@
                                     {{ __('messages.custom_fields_pro_only') }}
                                 </x-upgrade-prompt>
                                 @endif
+                            </div>
+
+                            <!-- Privacy Tab -->
+                            <div v-show="activeSettingsTab === 'privacy'">
+                            @if ($role->isEnterprise())
+                                <div class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input type="hidden" name="is_private" :value="event.is_private ? 1 : 0">
+                                            <input id="is_private" name="is_private" type="checkbox" v-model="event.is_private" :value="1"
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="is_private" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.private_event') }}
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 ms-14">{{ __('messages.private_event_help') }}</p>
+                                </div>
+
+                                <div class="mb-6" v-show="event.is_private">
+                                    <x-input-label for="event_password" :value="__('messages.event_password')" />
+                                    <x-text-input id="event_password" name="event_password" type="text" class="mt-1 block w-full"
+                                        v-model="event.event_password" maxlength="255" />
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.event_password_help') }}</p>
+                                </div>
+                            @else
+                                <x-upgrade-prompt tier="enterprise" :learnMoreUrl="route('marketing.private_events')" :subdomain="$subdomain">
+                                    {{ __('messages.upgrade_enterprise_privacy') }}
+                                </x-upgrade-prompt>
+                            @endif
                             </div>
                         </div>
                     </div>
@@ -3740,7 +3740,7 @@
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
         isInvoiceNinjaPaymentLink: @json($user->invoiceninja_api_key && $user->invoiceninja_mode === 'payment_link'),
         activeTicketTab: @json($event->rsvp_enabled ? 'options' : 'tickets'),
-        activeSettingsTab: 'privacy',
+        activeSettingsTab: 'custom_fields',
         activeEngagementTab: 'fan_content',
         promoCodes: (() => {
           var pcs = @json($event->promoCodes ?? []).map(pc => ({

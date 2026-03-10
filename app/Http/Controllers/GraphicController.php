@@ -331,7 +331,7 @@ class GraphicController extends Controller
                 ? trim($request->get('ai_prompt', ''))
                 : trim($graphicSettings['ai_prompt'] ?? '');
             if ($role->isEnterprise() && ! empty($aiPrompt) && config('services.google.gemini_key')) {
-                $aiProcessedText = $this->processTextWithAI($eventText, $aiPrompt);
+                $aiProcessedText = $this->processTextWithAI($eventText, $aiPrompt, $textEvents);
                 if ($aiProcessedText) {
                     $eventText = $aiProcessedText;
                 }
@@ -442,10 +442,44 @@ class GraphicController extends Controller
             ->header('Expires', '0');
     }
 
-    private function processTextWithAI($text, $aiPrompt)
+    private function processTextWithAI($text, $aiPrompt, $events)
     {
         try {
-            $prompt = "Transform the following event list text according to this instruction: \"{$aiPrompt}\"\n\nEvent List:\n{$text}\n\nReturn only the transformed text as a JSON string with a single key 'text'.";
+            // Build structured metadata so the AI can reference event properties
+            $metadataLines = [];
+            $eventIndex = 1;
+            foreach ($events as $event) {
+                $fields = [
+                    'name' => $event->translatedName(),
+                    'short_description' => $event->translatedShortDescription() ?? '',
+                    'venue' => $event->venue ? ($event->venue->translatedName() ?? '') : '',
+                    'city' => $event->venue ? ($event->venue->translatedCity() ?? '') : '',
+                    'address' => $event->venue ? ($event->venue->address1 ?? '') : '',
+                    'state' => $event->venue ? ($event->venue->state ?? '') : '',
+                    'country' => $event->venue ? ($event->venue->country ?? '') : '',
+                    'price' => EventTextGenerator::getPrice($event),
+                    'currency' => $event->ticket_currency_code ?? '',
+                    'coupon_code' => $event->coupon_code ?? '',
+                ];
+
+                // Add custom field values
+                $customFieldValues = $event->custom_field_values ?? [];
+                $fieldIndex = 1;
+                foreach ($customFieldValues as $key => $value) {
+                    $fields['custom_'.$fieldIndex] = $value;
+                    $fieldIndex++;
+                }
+
+                $parts = [];
+                foreach ($fields as $key => $value) {
+                    $parts[] = $key.'="'.$value.'"';
+                }
+                $metadataLines[] = 'Event '.$eventIndex.': '.implode(', ', $parts);
+                $eventIndex++;
+            }
+            $metadata = implode("\n", $metadataLines);
+
+            $prompt = "Transform the following event list text according to this instruction: \"{$aiPrompt}\"\n\nEvent metadata (use this to inform your transformation):\n{$metadata}\n\nEvent List:\n{$text}\n\nReturn only the transformed text as a JSON string with a single key 'text'.";
 
             $response = GeminiUtils::sendPrompt($prompt);
 

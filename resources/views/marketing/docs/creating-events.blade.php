@@ -82,8 +82,8 @@
                         <div class="doc-nav-group">
                             <a href="#event-settings" class="doc-nav-group-header doc-nav-link">Event Settings <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
                             <div class="doc-nav-group-items">
-                                <a href="#privacy" class="doc-nav-link">Privacy</a>
                                 <a href="#custom-fields" class="doc-nav-link">Custom Fields</a>
+                                <a href="#privacy" class="doc-nav-link">Privacy</a>
                             </div>
                         </div>
                         <div class="doc-nav-group">
@@ -480,7 +480,34 @@
                                 </svg>
                                 Event Settings
                             </h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Configure event-level privacy and custom data fields.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Configure custom data fields and event-level privacy.</p>
+                        </section>
+
+                        <!-- Custom Fields -->
+                        <section id="custom-fields" class="doc-section">
+                            <h2 class="doc-heading">Custom Fields <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Pro</span></h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Add custom data fields to your events to capture additional information beyond the standard fields.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Setting Up Custom Fields</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong></li>
+                                <li>Scroll to <strong class="text-gray-900 dark:text-white">Custom Fields</strong></li>
+                                <li>Add fields with a name and type (string, multiline string, switch, date, dropdown, or multiselect)</li>
+                                <li>Save your settings</li>
+                            </ol>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Once configured, custom fields appear on the event creation and edit forms. You can define up to 10 custom fields per schedule.</p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Use Cases</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Track performer names, room numbers, age restrictions, dress codes, or any event-specific data. Custom field values are available as variables in <a href="{{ route('marketing.docs.event_graphics') }}#variables" class="text-cyan-400 hover:text-cyan-300">event graphics text templates</a>.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Field Types</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">String:</strong> Single-line text input. <strong class="text-gray-900 dark:text-white">Multiline String:</strong> Multi-line text area. <strong class="text-gray-900 dark:text-white">Switch:</strong> On/off toggle. <strong class="text-gray-900 dark:text-white">Date:</strong> Date picker. <strong class="text-gray-900 dark:text-white">Dropdown:</strong> Single select from predefined options. <strong class="text-gray-900 dark:text-white">Multiselect:</strong> Multiple selections from predefined options.</p>
+                                </div>
+                            </div>
                         </section>
 
                         <!-- Privacy -->
@@ -511,33 +538,6 @@
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
                                 <p>For schedule-level settings, see <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="text-cyan-400 hover:text-cyan-300">Advanced Settings</a>.</p>
-                            </div>
-                        </section>
-
-                        <!-- Custom Fields -->
-                        <section id="custom-fields" class="doc-section">
-                            <h2 class="doc-heading">Custom Fields <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Pro</span></h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Add custom data fields to your events to capture additional information beyond the standard fields.</p>
-
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Setting Up Custom Fields</h3>
-                            <ol class="doc-list doc-list-numbered mb-6">
-                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Profile &rarr; Edit</strong></li>
-                                <li>Scroll to <strong class="text-gray-900 dark:text-white">Custom Fields</strong></li>
-                                <li>Add fields with a name and type (string, multiline string, switch, date, dropdown, or multiselect)</li>
-                                <li>Save your settings</li>
-                            </ol>
-
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">Once configured, custom fields appear on the event creation and edit forms. You can define up to 10 custom fields per schedule.</p>
-
-                            <div class="space-y-4 mb-6">
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Use Cases</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Track performer names, room numbers, age restrictions, dress codes, or any event-specific data. Custom field values are available as variables in <a href="{{ route('marketing.docs.event_graphics') }}#variables" class="text-cyan-400 hover:text-cyan-300">event graphics text templates</a>.</p>
-                                </div>
-                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Field Types</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">String:</strong> Single-line text input. <strong class="text-gray-900 dark:text-white">Multiline String:</strong> Multi-line text area. <strong class="text-gray-900 dark:text-white">Switch:</strong> On/off toggle. <strong class="text-gray-900 dark:text-white">Date:</strong> Date picker. <strong class="text-gray-900 dark:text-white">Dropdown:</strong> Single select from predefined options. <strong class="text-gray-900 dark:text-white">Multiselect:</strong> Multiple selections from predefined options.</p>
-                                </div>
                             </div>
                         </section>
 

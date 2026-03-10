@@ -1359,7 +1359,7 @@ class EventController extends Controller
         }
 
         try {
-            $imageData = GeminiUtils::generateEventFlyer($event, $request->input('style_instructions'));
+            $imageData = GeminiUtils::generateEventFlyer($event, $request->input('style_instructions'), $role);
 
             if (! $imageData) {
                 return response()->json(['error' => __('messages.ai_flyer_generation_failed')], 500);
@@ -1530,7 +1530,7 @@ class EventController extends Controller
                 }
 
                 try {
-                    $imageData = GeminiUtils::generateEventFlyer($event, $request->input('style_instructions'));
+                    $imageData = GeminiUtils::generateEventFlyer($event, $request->input('style_instructions'), $role);
 
                     if ($imageData) {
                         $filename = ImageUtils::saveImageData($imageData, 'generated_flyer.png', 'flyer_');
@@ -1896,7 +1896,7 @@ class EventController extends Controller
 
                 $user->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
 
-                if (!$user->default_role_id) {
+                if (! $user->default_role_id) {
                     $user->default_role_id = $venue->id;
                     $user->save();
                 }
@@ -1908,7 +1908,7 @@ class EventController extends Controller
                     $venue->save();
                     $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
 
-                    if (!$matchingUser->default_role_id) {
+                    if (! $matchingUser->default_role_id) {
                         $matchingUser->default_role_id = $venue->id;
                         $matchingUser->save();
                     }

@@ -1538,12 +1538,6 @@
                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
                         </div>
 
-                        <!-- Text Show All Events -->
-                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                            <x-toggle name="text_show_all_mobile" label="{{ __('messages.text_show_all_events') }}" />
-                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_show_all_events_help') }}</p>
-                        </div>
-
                         <!-- AI Prompt (Enterprise Feature) -->
                         @if ($isEnterprise)
                         <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
@@ -1574,6 +1568,12 @@
                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_ai_prompt') }}</p>
                         </div>
                         @endif
+
+                        <!-- Text Show All Events -->
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <x-toggle name="text_show_all_mobile" label="{{ __('messages.text_show_all_events') }}" />
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_show_all_events_help') }}</p>
+                        </div>
 
                         <!-- URL Format Section -->
                         <div class="mb-5">
@@ -1863,12 +1863,6 @@
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_template_help') }}</p>
                             </div>
 
-                            <!-- Text Show All Events -->
-                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-                                <x-toggle name="text_show_all" label="{{ __('messages.text_show_all_events') }}" />
-                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_show_all_events_help') }}</p>
-                            </div>
-
                             <!-- AI Prompt (Enterprise Feature) -->
                             @if ($isEnterprise)
                             <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
@@ -1899,6 +1893,12 @@
                                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.enterprise_feature_ai_prompt') }}</p>
                             </div>
                             @endif
+
+                            <!-- Text Show All Events -->
+                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <x-toggle name="text_show_all" label="{{ __('messages.text_show_all_events') }}" />
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_show_all_events_help') }}</p>
+                            </div>
 
                             <!-- URL Format Section -->
                             <div class="mb-5">

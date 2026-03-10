@@ -45,6 +45,11 @@ return [
         'layout' => "\nLAYOUT (top to bottom):\n- Top third: event name in large, bold, high-contrast typography (at least 3x larger than body text).\n- Middle: date, time, and venue clearly separated in medium type.\n- Bottom third: remaining details (description, performers, ticket price) in highly legible smaller type.\n",
         'design' => "\nDESIGN DIRECTIVES:\n- Background: rich color or modern gradient inspired by the event category:category_hint. Do not use plain white.\n- Incorporate subtle, category-appropriate geometric or abstract elements to set the mood.\n- Typography must be professional with generous kerning and line spacing.\n- High contrast between text and background is mandatory.\n- Do not include AI-generated photos of people or faces.\n- Overall aesthetic should be premium, clean, and optimized for digital sharing.\n",
         'style_instructions' => "\nCustom style instructions: :instructions\n",
+        'style_reference' => "\nSTYLE REFERENCE: The schedule's profile image uses this visual style: :style_description. Generate an image that matches this style while following all other instructions above.",
+    ],
+
+    'describe_style' => [
+        'prompt' => 'Describe the visual style of this image in 2-3 sentences. Focus on: color palette, artistic style (flat vector, watercolor, geometric, etc.), mood, and dominant shapes or motifs. Return JSON: {"style": "your description"}',
     ],
 
     'profile_image' => [
@@ -65,6 +70,7 @@ return [
         'color' => "\nColor palette: Use :accent_color as the base, subtly shifting across the width of the banner through 2 to 3 related analog tones.",
         'constraints' => "\n\nCRITICAL CONSTRAINTS:\n- Absolutely no text, letters, words, numbers, people, or faces.\n- Full bleed with no padding, borders, or vignettes.\n- Keep the aesthetic professional, modern, and mature. No photorealism.",
         'style_preferences' => "\n\nStyle preferences: :instructions",
+        'style_reference' => "\nSTYLE REFERENCE: The schedule's profile image uses this visual style: :style_description. Generate an image that matches this style while following all other instructions above.",
     ],
 
     'background_image' => [
@@ -73,6 +79,7 @@ return [
         'motifs' => "\nOptional hint of motifs (must look like a faint watermark, barely visible): :motifs.",
         'constraints' => "\n\nCRITICAL CONSTRAINTS:\n- Absolutely no text, letters, words, numbers, people, or faces.\n- High legibility priority: Black or dark text must be easily readable over every single part of the image.\n- No bold shapes, zero high-contrast elements, and no vivid or saturated colors.\n- Full bleed with no padding or borders.",
         'style_preferences' => "\n\nStyle preferences: :instructions",
+        'style_reference' => "\nSTYLE REFERENCE: The schedule's profile image uses this visual style: :style_description. Generate an image that matches this style while following all other instructions above.",
     ],
 
     'event_parse' => [
