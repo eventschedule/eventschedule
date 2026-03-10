@@ -799,7 +799,7 @@
     }
 
     @php
-        $eventEditUrl = $event->exists ? $event->getGuestUrl($subdomain, false, true) : '';
+        $eventEditUrl = $event->exists ? $event->getGuestUrl($subdomain, false, true, false) : '';
         if ($event->exists && $role->direct_registration && $event->registration_url) {
             if (str_contains($eventEditUrl, '?')) {
                 $eventEditUrl = str_replace('?', '/?', $eventEditUrl);

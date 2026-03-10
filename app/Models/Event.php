@@ -1005,9 +1005,9 @@ class Event extends Model
         return '';
     }
 
-    public function getGuestUrl($subdomain = false, $date = null, $useCustomDomain = false)
+    public function getGuestUrl($subdomain = false, $date = null, $useCustomDomain = false, $includeId = true)
     {
-        $data = $this->getGuestUrlData($subdomain, $date);
+        $data = $this->getGuestUrlData($subdomain, $date, $includeId);
 
         if (! $data['subdomain']) {
             \Log::error('No subdomain found for event '.$this->id);
@@ -1047,7 +1047,7 @@ class Event extends Model
         return $url ? $url.'/photos' : '';
     }
 
-    public function getGuestUrlData($subdomain = false, $date = null)
+    public function getGuestUrlData($subdomain = false, $date = null, $includeId = true)
     {
         $venueSubdomain = $this->venue && $this->venue->isClaimed() ? $this->venue->subdomain : null;
         $roleSubdomain = $this->role() && $this->role()->isClaimed() ? $this->role()->subdomain : null;
@@ -1093,8 +1093,11 @@ class Event extends Model
         $data = [
             'subdomain' => $subdomain,
             'slug' => $slug,
-            'id' => UrlUtils::encodeId($this->id),  // Always include ID
         ];
+
+        if ($includeId) {
+            $data['id'] = UrlUtils::encodeId($this->id);
+        }
 
         // Only include date for recurring events
         if ($date && $this->days_of_week) {
