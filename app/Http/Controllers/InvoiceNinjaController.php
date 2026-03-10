@@ -256,6 +256,10 @@ class InvoiceNinjaController extends Controller
             // Create SaleTickets from webhook line items (payment link mode)
             if ($sale->saleTickets()->count() === 0) {
                 $lineItems = $payload['line_items'] ?? [];
+
+                // Lock ticket rows to prevent overselling (same pattern as TicketController::checkout)
+                $lockedTickets = $event->tickets()->lockForUpdate()->get();
+
                 foreach ($lineItems as $lineItem) {
                     $productId = $lineItem['product_id'] ?? null;
                     $quantity = (int) ($lineItem['quantity'] ?? 0);
@@ -263,9 +267,29 @@ class InvoiceNinjaController extends Controller
                         continue;
                     }
 
-                    $ticket = $event->tickets()->where('invoiceninja_product_id', $productId)->first();
+                    $ticket = $lockedTickets->where('invoiceninja_product_id', $productId)->first();
                     if (! $ticket) {
                         continue;
+                    }
+
+                    // Check availability - cap quantity to what's remaining (customer already paid)
+                    if ($ticket->quantity > 0) {
+                        $sold = $ticket->sold ? json_decode($ticket->sold, true) : [];
+                        $soldCount = $sold[$sale->event_date] ?? 0;
+                        $remaining = $ticket->quantity - $soldCount;
+                        if ($quantity > $remaining) {
+                            \Log::warning('Invoice Ninja payment link oversell prevented', [
+                                'event_id' => $event->id,
+                                'ticket_id' => $ticket->id,
+                                'requested' => $quantity,
+                                'remaining' => $remaining,
+                                'sale_id' => $sale->id,
+                            ]);
+                            $quantity = max(0, $remaining);
+                            if ($quantity <= 0) {
+                                continue;
+                            }
+                        }
                     }
 
                     $sale->saleTickets()->create([
