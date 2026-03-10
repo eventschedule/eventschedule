@@ -30,7 +30,7 @@
         @endif
 
         {{-- Segment Info --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6 mb-6">
+        <div class="ap-card sm:rounded-xl p-6 mb-6">
             <form method="POST" action="{{ route('newsletter.segment.update', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}">
                 @csrf
                 @method('PUT')
@@ -57,7 +57,7 @@
 
         {{-- Add Subscriber (manual segments only) --}}
         @if ($segment->type === 'manual')
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6 mb-6">
+        <div class="ap-card sm:rounded-xl p-6 mb-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.add_subscriber') }}</h3>
             <form method="POST" action="{{ route('newsletter.segment.user.store', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
                 class="flex flex-col sm:flex-row gap-3">
@@ -77,7 +77,7 @@
         @endif
 
         {{-- Subscribers Table --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6">
+        <div class="ap-card sm:rounded-xl p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
                 {{ __('messages.subscribers') }} ({{ number_format($recipientCount) }})
             </h3>

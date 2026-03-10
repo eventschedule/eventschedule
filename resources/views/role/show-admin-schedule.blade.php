@@ -10,7 +10,7 @@
     <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pt-5">
         @foreach($unscheduled as $event)
         @if(! $event->starts_at)
-        <li class="col-span-1 flex flex-col divide-y divide-gray-200 dark:divide-gray-700 rounded-lg bg-white dark:bg-gray-800 text-center shadow">
+        <li class="ap-card col-span-1 flex flex-col divide-y divide-gray-200 dark:divide-gray-700 rounded-lg text-center">
             <x-link href="{{ $event->role()->getGuestUrl() }}" target="_blank" class="block">
                 <div class="flex flex-1 flex-col p-8">
                     @if ($event->role()->profile_image_url)

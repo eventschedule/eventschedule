@@ -31,7 +31,7 @@
         @endif
 
         {{-- Segment Target --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6 mb-6">
+        <div class="ap-card sm:rounded-xl p-6 mb-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.segments') }}</h3>
 
             <div class="space-y-3">
@@ -63,7 +63,7 @@
         </div>
 
         {{-- Import Method Tabs --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl overflow-hidden">
+        <div class="ap-card sm:rounded-xl overflow-hidden">
             <div class="border-b border-gray-200 dark:border-gray-700">
                 <nav class="flex -mb-px overflow-x-auto scrollbar-hide">
                     <button @click="tab = 'form'" :class="tab === 'form' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="px-6 py-3 border-b-2 font-medium text-sm transition-colors">

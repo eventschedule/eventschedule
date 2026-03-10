@@ -36,7 +36,7 @@
 
 <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pt-5">
     @foreach($requests as $event)
-    <li class="col-span-1 flex flex-col divide-y divide-gray-200 dark:divide-gray-700 rounded-lg bg-white dark:bg-gray-800 text-center shadow">
+    <li class="ap-card col-span-1 flex flex-col divide-y divide-gray-200 dark:divide-gray-700 rounded-lg text-center">
         <div class="flex flex-1 flex-col p-8 items-center">
             {{-- Profile Image --}}
             @if ($role->isVenue() || $role->isCurator())

@@ -136,7 +136,7 @@
 
         @if (config('app.hosted'))
         {{-- Dashboard Header Actions with Feedback --}}
-        <div class="flex flex-col sm:flex-row xl:grid xl:grid-cols-4 gap-6 mb-6">
+        <div class="flex flex-col sm:flex-row xl:grid xl:grid-cols-4 gap-4 mb-4">
             {{-- Feedback textarea --}}
             <div class="flex-1 xl:col-span-3">
                 <form id="feedback-form" class="h-full">
@@ -273,7 +273,7 @@
         @endif
 
         {{-- Configurable Dashboard Panels --}}
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
             @foreach($dashboardConfig['panels'] as $panel)
                 @if($panel['visible'])
                     <div class="{{ ($panel['size'] ?? 2) === 1 ? 'lg:col-span-1' : 'lg:col-span-2' }}">
@@ -284,7 +284,7 @@
         </div>
 
         {{-- Calendar (always shown) --}}
-        <div class="mb-6">
+        <div class="mb-4">
             @include('role/partials/calendar', ['route' => 'home', 'tab' => ''])
         </div>
 

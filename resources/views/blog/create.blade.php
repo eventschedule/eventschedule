@@ -136,7 +136,7 @@
         <form method="POST" action="{{ route('blog.store') }}" class="mt-8 space-y-8">
             @csrf
 
-            <div class="bg-white dark:bg-gray-800 shadow ring-1 ring-black/5 dark:ring-white/10 sm:rounded-xl">
+            <div class="ap-card sm:rounded-xl">
                 <div class="px-4 py-5 sm:p-6">
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <!-- Title -->
@@ -240,7 +240,7 @@
             </div>
 
             <!-- SEO Section -->
-            <div class="bg-white dark:bg-gray-800 shadow ring-1 ring-black/5 dark:ring-white/10 sm:rounded-xl">
+            <div class="ap-card sm:rounded-xl">
                 <div class="px-4 py-5 sm:p-6">
                     <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.seo_settings') }}</h3>
 

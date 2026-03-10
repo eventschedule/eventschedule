@@ -17,7 +17,7 @@
         @if ($segments->count())
         <div class="space-y-4 mb-8">
             @foreach ($segments as $segment)
-            <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6">
+            <div class="ap-card sm:rounded-xl p-6">
                 <div class="flex justify-between items-center">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 min-w-0">{{ $segment->name }}</h3>
                     <div class="shrink-0 space-x-3">
@@ -48,7 +48,7 @@
         @endif
 
         {{-- Create New Segment --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-xl p-6">
+        <div class="ap-card sm:rounded-xl p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.create_segment') }}</h3>
 
             <form method="POST" action="{{ route('newsletter.segment.store', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" x-data="{ segmentType: 'all_followers' }">

@@ -141,7 +141,7 @@
             @endif
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 border border-gray-100 dark:border-gray-700">
+        <div class="ap-card rounded-xl p-8">
             {{-- Plan Selection (Monthly/Yearly) --}}
             <div class="mb-8">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.select_plan') }}</h3>

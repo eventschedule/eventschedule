@@ -1,4 +1,4 @@
-<div class="dashboard-panel bg-white dark:bg-transparent rounded-2xl shadow-sm border border-gray-200 dark:border-transparent h-full flex flex-col overflow-hidden">
+<div class="ap-card rounded-xl h-full flex flex-col overflow-hidden">
     <div class="dashboard-panel-header px-5 py-4">
         <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('messages.upcoming_events') }}</h3>
     </div>

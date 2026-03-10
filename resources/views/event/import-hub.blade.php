@@ -41,7 +41,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {{-- Eventbrite Import Card --}}
         @if ($role->isPro())
-            <a href="{{ route('event.show_import_eventbrite', ['subdomain' => $role->subdomain]) }}" class="group block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[var(--brand-blue)] p-6 transition-all duration-200 hover:shadow-md">
+            <a href="{{ route('event.show_import_eventbrite', ['subdomain' => $role->subdomain]) }}" class="ap-card group block rounded-xl hover:border-[var(--brand-blue)] p-6 transition-all duration-200 hover:shadow-md">
                 <div class="flex items-start gap-4">
                     <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-[#F05537]/10 flex items-center justify-center">
                         <svg class="w-6 h-6 text-[#F05537]" viewBox="0 0 24 24" fill="currentColor">
@@ -62,7 +62,7 @@
                 </div>
             </a>
         @else
-            <div class="block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 opacity-60">
+            <div class="ap-card block rounded-xl p-6 opacity-60">
                 <div class="flex items-start gap-4">
                     <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-[#F05537]/10 flex items-center justify-center">
                         <svg class="w-6 h-6 text-[#F05537]" viewBox="0 0 24 24" fill="currentColor">
@@ -90,7 +90,7 @@
             $canUseAiImport = $role->isEnterprise() || !config('app.hosted');
         @endphp
         @if ($canUseAiImport)
-            <a href="{{ route('event.show_import_ai', ['subdomain' => $role->subdomain]) }}" class="group block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[var(--brand-blue)] p-6 transition-all duration-200 hover:shadow-md">
+            <a href="{{ route('event.show_import_ai', ['subdomain' => $role->subdomain]) }}" class="ap-card group block rounded-xl hover:border-[var(--brand-blue)] p-6 transition-all duration-200 hover:shadow-md">
                 <div class="flex items-start gap-4">
                     <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
                         <svg class="w-6 h-6 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -111,7 +111,7 @@
                 </div>
             </a>
         @else
-            <div class="block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 opacity-60">
+            <div class="ap-card block rounded-xl p-6 opacity-60">
                 <div class="flex items-start gap-4">
                     <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
                         <svg class="w-6 h-6 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

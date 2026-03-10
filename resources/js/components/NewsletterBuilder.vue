@@ -27,7 +27,7 @@
             </div>
 
             <div class="space-y-2">
-                    <div v-show="activeSection === 'content'" class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
+                    <div v-show="activeSection === 'content'" class="ap-card sm:rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
 
                         <!-- Subject -->
                         <div>
@@ -385,7 +385,7 @@
                     </div>
 
                     <!-- STYLE SECTION -->
-                    <div v-show="activeSection === 'style'" class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
+                    <div v-show="activeSection === 'style'" class="ap-card sm:rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
 
                         <!-- Template -->
                         <div>
@@ -502,7 +502,7 @@
                     </div>
 
                     <!-- SETTINGS SECTION -->
-                    <div v-show="activeSection === 'settings'" class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
+                    <div v-show="activeSection === 'settings'" class="ap-card sm:rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
 
                         <!-- Recipients -->
                         <div>
@@ -593,7 +593,7 @@
         <!-- Right: Always-visible live preview -->
         <div class="hidden lg:block">
             <div class="lg:sticky lg:top-20">
-                <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden">
+                <div class="ap-card sm:rounded-lg overflow-hidden">
                     <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                         <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ t.preview }}</h3>
                     </div>

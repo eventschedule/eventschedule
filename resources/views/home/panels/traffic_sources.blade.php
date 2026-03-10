@@ -1,4 +1,4 @@
-<div class="dashboard-panel bg-white dark:bg-transparent rounded-2xl shadow-sm border border-gray-200 dark:border-transparent h-full flex flex-col overflow-hidden">
+<div class="ap-card rounded-xl h-full flex flex-col overflow-hidden">
     <div class="dashboard-panel-header px-5 py-4">
         <div class="flex items-center gap-3">
             <div class="dashboard-icon p-2 rounded-xl bg-teal-50 dark:bg-teal-500/10" style="--icon-glow: rgba(20, 184, 166, 0.15)">
