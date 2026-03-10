@@ -1,12 +1,12 @@
-<div class="dashboard-panel bg-white dark:bg-transparent rounded-xl shadow-sm border border-gray-200 dark:border-transparent h-full flex flex-col">
-    <div class="px-5 py-4 border-b border-gray-200 dark:border-white/[0.06]">
+<div class="dashboard-panel bg-white dark:bg-transparent rounded-2xl shadow-sm border border-gray-200 dark:border-transparent h-full flex flex-col overflow-hidden">
+    <div class="dashboard-panel-header px-5 py-4">
         <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('messages.recent_activity') }}</h3>
     </div>
     <div class="divide-y divide-gray-100 dark:divide-white/[0.06] flex-1">
         @forelse($recentActivity as $activity)
         <div class="flex items-start gap-3 px-5 py-3">
             @if($activity['type'] === 'sale')
-            <div class="mt-1 w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>
+            <div class="activity-dot-green mt-1 w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>
             <div class="min-w-0 flex-1">
                 <p class="text-sm text-gray-700 dark:text-gray-300">
                     {{ __('messages.new_ticket_sale') }}
@@ -20,7 +20,7 @@
                 <p class="text-xs text-gray-400 mt-0.5">{{ $activity['date']->diffForHumans() }}</p>
             </div>
             @elseif($activity['type'] === 'follower')
-            <div class="mt-1 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></div>
+            <div class="activity-dot-blue mt-1 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></div>
             <div class="min-w-0 flex-1">
                 <p class="text-sm text-gray-700 dark:text-gray-300">
                     @if($activity['description'])
@@ -31,7 +31,7 @@
                 <p class="text-xs text-gray-400 mt-0.5">{{ $activity['date']->diffForHumans() }}</p>
             </div>
             @elseif($activity['type'] === 'newsletter')
-            <div class="mt-1 w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></div>
+            <div class="activity-dot-amber mt-1 w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></div>
             <div class="min-w-0 flex-1">
                 <p class="text-sm text-gray-700 dark:text-gray-300">
                     <span class="font-medium text-gray-900 dark:text-white">{{ $activity['description'] }}</span>

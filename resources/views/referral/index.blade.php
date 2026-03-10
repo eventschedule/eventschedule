@@ -35,19 +35,19 @@
 
         {{-- Stats --}}
         <div id="referral-dashboard" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div class="ap-card rounded-lg border border-gray-200 dark:border-transparent p-4 text-center">
                 <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $totalReferrals }}</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.total_referrals') }}</div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div class="ap-card rounded-lg border border-gray-200 dark:border-transparent p-4 text-center">
                 <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $awaitingSubscription }}</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.awaiting_subscription') }}</div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div class="ap-card rounded-lg border border-gray-200 dark:border-transparent p-4 text-center">
                 <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $awaitingQualification }}</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.awaiting_qualification') }}</div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div class="ap-card rounded-lg border border-gray-200 dark:border-transparent p-4 text-center">
                 <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $creditsEarned }}</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.credits_earned') }}</div>
             </div>
@@ -64,7 +64,7 @@
             </h3>
 
             @foreach ($qualifiedCredits as $credit)
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-3 last:mb-0">
+            <div class="ap-card rounded-lg border border-gray-200 dark:border-transparent p-4 mb-3 last:mb-0">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $credit->plan_type === 'enterprise' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' }}">
@@ -95,7 +95,7 @@
         @endif
 
         {{-- How It Works --}}
-        <div id="referral-how-it-works" class="mb-8 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div id="referral-how-it-works" class="mb-8 ap-card rounded-lg border border-gray-200 dark:border-transparent p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('messages.how_it_works') }}</h3>
             <div class="grid md:grid-cols-3 gap-6">
                 <div class="text-center">
@@ -123,7 +123,7 @@
 
         {{-- Referral History --}}
         @if ($referralHistory->isNotEmpty())
-        <div id="referral-history" class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div id="referral-history" class="ap-card rounded-lg border border-gray-200 dark:border-transparent overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('messages.referral_history') }}</h3>
             </div>

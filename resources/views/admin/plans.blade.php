@@ -6,125 +6,104 @@
         {{-- Row 1: Plan Breakdown --}}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {{-- Free Count --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-full">
-                            <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-gray-100 dark:bg-gray-500/10"
+                         style="--icon-glow: rgba(107, 114, 128, 0.15)">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                     </div>
-                    <div class="ms-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.free')</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($freeCount) }}</p>
-                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.free')</p>
                 </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($freeCount) }}</p>
             </div>
 
             {{-- Pro Count --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
-                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                            </svg>
-                        </div>
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10"
+                         style="--icon-glow: rgba(59, 130, 246, 0.15)">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                        </svg>
                     </div>
-                    <div class="ms-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.pro')</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($proCount) }}</p>
-                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.pro')</p>
                 </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($proCount) }}</p>
             </div>
 
             {{-- Enterprise Count --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="p-3 bg-purple-100 dark:bg-purple-900 rounded-full">
-                            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
-                        </div>
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-purple-50 dark:bg-purple-500/10"
+                         style="--icon-glow: rgba(168, 85, 247, 0.15)">
+                        <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
                     </div>
-                    <div class="ms-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.enterprise')</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($enterpriseCount) }}</p>
-                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.enterprise')</p>
                 </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($enterpriseCount) }}</p>
             </div>
         </div>
 
         {{-- Row 2: Payment/Status Breakdown --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {{-- Stripe Paid --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="p-3 bg-green-100 dark:bg-green-900 rounded-full">
-                            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                            </svg>
-                        </div>
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-green-50 dark:bg-green-500/10"
+                         style="--icon-glow: rgba(34, 197, 94, 0.15)">
+                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
                     </div>
-                    <div class="ms-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.stripe_paid')</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($stripePaidCount) }}</p>
-                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.stripe_paid')</p>
                 </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($stripePaidCount) }}</p>
             </div>
 
             {{-- Manual --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="p-3 bg-indigo-100 dark:bg-indigo-900 rounded-full">
-                            <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                        </div>
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-indigo-50 dark:bg-indigo-500/10"
+                         style="--icon-glow: rgba(99, 102, 241, 0.15)">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
                     </div>
-                    <div class="ms-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.manual')</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($manualPlanCount) }}</p>
-                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.manual')</p>
                 </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($manualPlanCount) }}</p>
             </div>
 
             {{-- On Trial --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-full">
-                            <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-yellow-50 dark:bg-yellow-500/10"
+                         style="--icon-glow: rgba(234, 179, 8, 0.15)">
+                        <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                     </div>
-                    <div class="ms-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.on_free_trial')</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($trialCount) }}</p>
-                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.on_free_trial')</p>
                 </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($trialCount) }}</p>
             </div>
 
             {{-- Expiring Soon --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="p-3 bg-amber-100 dark:bg-amber-900 rounded-full">
-                            <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                        </div>
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-amber-50 dark:bg-amber-500/10"
+                         style="--icon-glow: rgba(245, 158, 11, 0.15)">
+                        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
                     </div>
-                    <div class="ms-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.expiring_soon')</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($expiringSoon) }}</p>
-                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.expiring_soon')</p>
                 </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($expiringSoon) }}</p>
             </div>
         </div>
 

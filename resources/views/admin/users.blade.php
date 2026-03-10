@@ -7,21 +7,18 @@
 
         {{-- User Count with Period Comparison --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="ap-card rounded-xl shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
-                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                        </div>
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10"
+                         style="--icon-glow: rgba(59, 130, 246, 0.15)">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
                     </div>
-                    <div class="ms-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_users')</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalUsers) }}</p>
-                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_users')</p>
                 </div>
-                <div class="mt-4 flex items-center text-sm">
+                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalUsers) }}</p>
+                <div class="mt-4 flex items-center text-sm w-full">
                     <span class="{{ $usersChangePercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
                         {{ $usersChangePercent >= 0 ? '+' : '' }}{{ $usersChangePercent }}%
                     </span>

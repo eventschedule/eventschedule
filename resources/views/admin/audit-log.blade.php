@@ -5,65 +5,53 @@
 
         {{-- Summary Stats --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="ap-card rounded-xl shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-full">
-                            <svg class="w-6 h-6 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </div>
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-gray-100 dark:bg-gray-500/10"
+                         style="--icon-glow: rgba(107, 114, 128, 0.15)">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
                     </div>
-                    <div class="ms-4">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_entries')</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalEntries) }}</p>
-                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_entries')</p>
                 </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalEntries) }}</p>
             </div>
-            <div class="ap-card rounded-xl shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
-                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10"
+                         style="--icon-glow: rgba(59, 130, 246, 0.15)">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
                     </div>
-                    <div class="ms-4">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.entries_today')</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($entriesToday) }}</p>
-                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.entries_today')</p>
                 </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($entriesToday) }}</p>
             </div>
-            <div class="ap-card rounded-xl shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="p-3 {{ $failedAuthToday > 0 ? 'bg-red-100 dark:bg-red-900' : 'bg-gray-100 dark:bg-gray-700' }} rounded-full">
-                            <svg class="w-6 h-6 {{ $failedAuthToday > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                        </div>
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl {{ $failedAuthToday > 0 ? 'bg-red-50 dark:bg-red-500/10' : 'bg-gray-100 dark:bg-gray-500/10' }}"
+                         style="--icon-glow: {{ $failedAuthToday > 0 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(107, 114, 128, 0.15)' }}">
+                        <svg class="w-5 h-5 {{ $failedAuthToday > 0 ? 'text-red-500' : 'text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
                     </div>
-                    <div class="ms-4">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.failed_auth_today')</p>
-                        <p class="text-2xl font-bold {{ $failedAuthToday > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">{{ number_format($failedAuthToday) }}</p>
-                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.failed_auth_today')</p>
                 </div>
+                <p class="text-2xl font-bold {{ $failedAuthToday > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }} text-center">{{ number_format($failedAuthToday) }}</p>
             </div>
-            <div class="ap-card rounded-xl shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="p-3 bg-indigo-100 dark:bg-indigo-900 rounded-full">
-                            <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                            </svg>
-                        </div>
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-indigo-50 dark:bg-indigo-500/10"
+                         style="--icon-glow: rgba(99, 102, 241, 0.15)">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        </svg>
                     </div>
-                    <div class="ms-4">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.unique_ips_today')</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($uniqueIpsToday) }}</p>
-                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.unique_ips_today')</p>
                 </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($uniqueIpsToday) }}</p>
             </div>
         </div>
 

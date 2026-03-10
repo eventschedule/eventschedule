@@ -6,71 +6,59 @@
         {{-- Statistics Cards --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {{-- Total Custom Domains --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-full">
-                            <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                            </svg>
-                        </div>
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-gray-100 dark:bg-gray-500/10"
+                         style="--icon-glow: rgba(107, 114, 128, 0.15)">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        </svg>
                     </div>
-                    <div class="ms-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total')</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalCustomDomains) }}</p>
-                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total')</p>
                 </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalCustomDomains) }}</p>
             </div>
 
             {{-- Direct Mode --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
-                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                            </svg>
-                        </div>
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10"
+                         style="--icon-glow: rgba(59, 130, 246, 0.15)">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
                     </div>
-                    <div class="ms-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.custom_domain_mode_direct')</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($directCount) }}</p>
-                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.custom_domain_mode_direct')</p>
                 </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($directCount) }}</p>
             </div>
 
             {{-- Active --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="p-3 bg-green-100 dark:bg-green-900 rounded-full">
-                            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-green-50 dark:bg-green-500/10"
+                         style="--icon-glow: rgba(34, 197, 94, 0.15)">
+                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                     </div>
-                    <div class="ms-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.domain_active')</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeCount) }}</p>
-                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.domain_active')</p>
                 </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($activeCount) }}</p>
             </div>
 
             {{-- Pending --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-full">
-                            <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-yellow-50 dark:bg-yellow-500/10"
+                         style="--icon-glow: rgba(234, 179, 8, 0.15)">
+                        <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                     </div>
-                    <div class="ms-4 flex-1">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.domain_pending')</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($pendingCount) }}</p>
-                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.domain_pending')</p>
                 </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($pendingCount) }}</p>
             </div>
         </div>
 

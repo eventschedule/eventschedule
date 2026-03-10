@@ -1,5 +1,5 @@
-<div class="dashboard-panel bg-white dark:bg-transparent rounded-xl shadow-sm border border-gray-200 dark:border-transparent h-full flex flex-col">
-    <div class="px-5 py-4 border-b border-gray-200 dark:border-white/[0.06]">
+<div class="dashboard-panel bg-white dark:bg-transparent rounded-2xl shadow-sm border border-gray-200 dark:border-transparent h-full flex flex-col overflow-hidden">
+    <div class="dashboard-panel-header px-5 py-4">
         <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('messages.panel_newsletters') }}</h3>
     </div>
     <div class="divide-y divide-gray-100 dark:divide-white/[0.06] flex-1">

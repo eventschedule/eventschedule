@@ -73,6 +73,7 @@ The AP uses a refined dark/light design language. Follow these principles when b
 - **Outline-style icons** - Prefer thin stroke/outline icons (not filled) in the AP. Use consistent sizing (`h-5 w-5` or `h-6 w-6`).
 - **Smooth transitions** - All interactive elements should use `transition-all duration-200`. Hover effects can include subtle scale (`hover:scale-105`) and shadow changes.
 - **Light mode surfaces** - Use white (`bg-white`) for cards/surfaces with subtle borders (`border-gray-200`). Use `bg-gray-50`/`bg-gray-100` for secondary surfaces and hover states.
+- **Dashboard-style stat icons** - For stat cards with icons, use the `dashboard-icon` class with `p-2 rounded-xl`, subtle backgrounds (`bg-{color}-50 dark:bg-{color}-500/10`), a `--icon-glow` CSS variable, and `w-5 h-5` icons. Place the icon + label in a `flex items-center gap-3 mb-3` row at the top, with the stat value below. Never use `rounded-full` circles or saturated `bg-{color}-100 dark:bg-{color}-900` backgrounds for panel icons.
 
 ## Build & Development Commands
 
