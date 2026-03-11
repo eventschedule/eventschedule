@@ -78,6 +78,7 @@ jobs:
           sed -i 's/APP_DEBUG=.*/APP_DEBUG=true/' .env
           sed -i 's/SESSION_SECURE_COOKIE=.*/SESSION_SECURE_COOKIE=false/' .env
           echo "" >> .env && echo "IS_NEXUS=true" >> .env
+          echo "DEBUGBAR_ENABLED=false" >> .env
 
       - name: Generate application key
         run: php artisan key:generate
