@@ -117,7 +117,7 @@
                                         <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                                         @endif
 
-                                        <button @click="open = false; if (confirm('{{ __('messages.are_you_sure') }}')) location.href = '{{ route('role.unfollow', ['subdomain' => $role->subdomain]) }}'"
+                                        <button @click="open = false; if (confirm('{{ addslashes(__('messages.are_you_sure')) }}')) location.href = '{{ route('role.unfollow', ['subdomain' => $role->subdomain]) }}'"
                                                 class="flex items-center px-4 py-2 text-sm text-red-700 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
                                                 role="menuitem">
                                             <svg class="w-4 h-4 me-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

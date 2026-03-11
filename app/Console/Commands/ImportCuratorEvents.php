@@ -32,32 +32,18 @@ class ImportCuratorEvents extends Command
 
     public function handle()
     {
-        if (! config('services.google.gemini_key')) {
-            $this->error('No Gemini API key found. Please add GEMINI_API_KEY to your .env file.');
-
-            return 1;
-        }
-
         $roleId = $this->option('role_id');
         $debug = $this->option('debug');
         $test = $this->option('test');
         $providedUrls = $this->option('urls');
         $providedCities = $this->option('cities');
 
-        if ($debug) {
-            $this->info('Debug mode enabled - verbose logging will be shown');
-        }
-
-        if ($test) {
-            $this->warn('Test mode enabled - processing one new event from each URL');
-        }
-
         // Decode ID if it's an encoded string
         if ($roleId && ! is_numeric($roleId)) {
             $roleId = UrlUtils::decodeId($roleId);
         }
 
-        // Get curator roles with import configuration
+        // Check for curator roles before checking API key
         $query = Role::whereNotNull('import_config');
 
         if ($roleId) {
@@ -67,9 +53,21 @@ class ImportCuratorEvents extends Command
         $curatorRoles = $query->get();
 
         if ($curatorRoles->isEmpty()) {
-            $this->error('No curator roles with import configuration found.');
-
             return 0;
+        }
+
+        if (! config('services.google.gemini_key') && ! config('services.openai.api_key')) {
+            $this->error('No Gemini API key found. Please add GEMINI_API_KEY to your .env file.');
+
+            return 1;
+        }
+
+        if ($debug) {
+            $this->info('Debug mode enabled - verbose logging will be shown');
+        }
+
+        if ($test) {
+            $this->warn('Test mode enabled - processing one new event from each URL');
         }
 
         $this->info("Found {$curatorRoles->count()} curator role(s) with import configuration.");

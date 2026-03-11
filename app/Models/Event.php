@@ -436,6 +436,11 @@ class Event extends Model
         return $this->hasMany(EventFeedback::class);
     }
 
+    public function carpoolOffers()
+    {
+        return $this->hasMany(CarpoolOffer::class);
+    }
+
     public function isFeedbackEnabled()
     {
         if (! is_null($this->feedback_enabled)) {

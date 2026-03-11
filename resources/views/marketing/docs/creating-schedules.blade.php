@@ -106,6 +106,7 @@
                                 <a href="#engagement-requests" class="doc-nav-link">Requests</a>
                                 <a href="#engagement-fan-content" class="doc-nav-link">Fan Content</a>
                                 <a href="#engagement-feedback" class="doc-nav-link">Feedback</a>
+                                <a href="#engagement-carpool" class="doc-nav-link">Carpool</a>
                             </div>
                         </div>
                         <a href="#auto-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Auto Import</a>
@@ -226,7 +227,7 @@
                                 </div>
                             </div>
                             <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6">
-                                <p class="text-sm text-blue-800 dark:text-blue-300"><strong>Note:</strong> Selfhosted installations require a <x-link href="https://ai.google.dev/" target="_blank">Gemini API key</x-link> configured in the environment settings for AI features to work.</p>
+                                <p class="text-sm text-blue-800 dark:text-blue-300"><strong>Note:</strong> Selfhosted installations require a <x-link href="https://ai.google.dev/" target="_blank">Gemini API key</x-link> and an <x-link href="https://platform.openai.com/" target="_blank">OpenAI API key</x-link> configured in the environment settings for AI features to work.</p>
                             </div>
                         </section>
 
@@ -882,6 +883,23 @@
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Email Settings Required</div>
                                 <p>On the hosted platform, feedback emails require <a href="#integrations-email" class="text-cyan-400 hover:text-cyan-300">Email settings</a> to be configured.</p>
+                            </div>
+
+                            <h3 id="engagement-carpool" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Carpool</h3>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Enable Carpool</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Turn on carpool matching to let attendees coordinate rides to and from your events. When enabled, a carpool link appears on the event page where attendees can offer rides or request a spot.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How It Works</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Drivers create ride offers specifying their city, direction (to event, from event, or round trip), available spots, and optional departure time and meeting point. Attendees browse available offers and request a spot. Drivers then approve or decline requests, and approved riders receive the driver's contact information.</p>
+                                </div>
+                            </div>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Pro Feature</div>
+                                <p>Carpool matching is available on the <strong class="text-gray-900 dark:text-white">Pro</strong> plan and above.</p>
                             </div>
                         </section>
 

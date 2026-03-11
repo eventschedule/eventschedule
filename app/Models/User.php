@@ -62,6 +62,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'admin_newsletter_unsubscribed_at',
         'default_role_id',
         'dashboard_config',
+        'carpool_agreed_at',
+        'carpool_notifications_enabled',
     ];
 
     /**
@@ -163,6 +165,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'two_factor_confirmed_at' => 'datetime',
             'admin_newsletter_unsubscribed_at' => 'datetime',
             'dashboard_config' => 'array',
+            'carpool_agreed_at' => 'datetime',
+            'carpool_notifications_enabled' => 'boolean',
         ];
     }
 
@@ -203,6 +207,31 @@ class User extends Authenticatable implements MustVerifyEmail
     public function following()
     {
         return $this->roles()->wherePivot('level', 'follower');
+    }
+
+    public function carpoolOffers()
+    {
+        return $this->hasMany(CarpoolOffer::class);
+    }
+
+    public function carpoolRequests()
+    {
+        return $this->hasMany(CarpoolRequest::class);
+    }
+
+    public function hasAgreedToCarpool()
+    {
+        return $this->carpool_agreed_at !== null;
+    }
+
+    public function carpoolRating()
+    {
+        return once(fn () => CarpoolReview::where('reviewed_user_id', $this->id)->avg('rating'));
+    }
+
+    public function carpoolReviewCount()
+    {
+        return once(fn () => CarpoolReview::where('reviewed_user_id', $this->id)->count());
     }
 
     public function venues()

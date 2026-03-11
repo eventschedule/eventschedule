@@ -29,7 +29,7 @@ class Translate extends Command
 
     public function handle()
     {
-        if (! config('services.google.gemini_key')) {
+        if (! config('services.google.gemini_key') && ! config('services.openai.api_key')) {
             $this->info('No Gemini API key found, skipping...');
 
             return;

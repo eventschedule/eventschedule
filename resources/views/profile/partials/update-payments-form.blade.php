@@ -148,9 +148,11 @@
                     </label>
                 </div>
 
+                @if(Route::has('marketing.docs.tickets'))
                 <p class="mt-2 ms-6 text-xs text-gray-500 dark:text-gray-500">
                     <x-link href="{{ route('marketing.docs.tickets') }}#invoiceninja-modes" target="_blank">{{ __('messages.learn_more') }}</x-link>
                 </p>
+                @endif
 
                 <div class="flex items-center gap-4 pt-4">
                     @if (is_demo_mode())

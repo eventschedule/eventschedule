@@ -852,6 +852,31 @@
             </div>
 
         @endif
+        {{-- Carpool link --}}
+        @php
+            $carpoolRole = ($role->isPro() && $role->carpool_enabled) ? $role : null;
+        @endphp
+        @if ($carpoolRole && (!$event->days_of_week || $date))
+        @php
+            $carpoolUrl = config('app.hosted')
+                ? route('carpool.index', ['subdomain' => $carpoolRole->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)])
+                : '/' . $carpoolRole->subdomain . '/carpool/' . \App\Utils\UrlUtils::encodeId($event->id);
+            if ($date) {
+                $carpoolUrl .= '/' . $date;
+            }
+            $carpoolCount = $event->carpoolOffers()->where('status', 'active')
+                ->when($date, fn ($q) => $q->where('event_date', $date))
+                ->count();
+        @endphp
+        <a href="{{ $carpoolUrl }}"
+           class="flex-shrink-0 h-[42px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors px-3"
+           title="{{ __('messages.carpool') }}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+            </svg>
+            <span class="text-sm font-medium">{{ __('messages.carpool') }}@if ($carpoolCount > 0) ({{ $carpoolCount }})@endif</span>
+        </a>
+        @endif
         {{-- Share button --}}
         <button type="button"
                 data-share-title="{{ $event->translatedName() }}"

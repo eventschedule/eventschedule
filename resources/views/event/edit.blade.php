@@ -1177,7 +1177,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                             </svg>
                             {{ __('messages.details') }}
-                            @if (config('services.google.gemini_key') && !is_demo_mode())
+                            @if ((config('services.google.gemini_key') || config('services.openai.api_key')) && !is_demo_mode())
                                 @if ($role->isEnterprise())
                                     <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'ai-event-details')"
                                         class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600"
@@ -2077,7 +2077,7 @@
                                 + {{ __('messages.add_part') }}
                             </button>
 
-                            @if (config('services.google.gemini_key'))
+                            @if (config('services.google.gemini_key') || config('services.openai.api_key'))
                             <div class="flex flex-wrap gap-2">
                                 <x-secondary-button type="button" @click="$refs.partsImageInput.click()" v-bind:disabled="parsingParts">
                                     <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2095,7 +2095,7 @@
                             @endif
                         </div>
 
-                        @if (config('services.google.gemini_key'))
+                        @if (config('services.google.gemini_key') || config('services.openai.api_key'))
                         <div v-if="showPartsTextInput" class="mt-4">
                             <textarea v-model="partsText" rows="4" class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" placeholder="{{ __('messages.paste_setlist_or_agenda') }}"></textarea>
                             <div class="mt-2">
@@ -2430,7 +2430,7 @@
                             <div v-show="event.tickets_enabled || event.rsvp_enabled">
 
                                 <!-- Upgrade banner for non-Pro users selecting Tickets -->
-                                <x-upgrade-prompt tier="pro" :learnMoreUrl="route('marketing.ticketing')" :subdomain="$subdomain" v-show="event.tickets_enabled && !isPro" class="mb-4">
+                                <x-upgrade-prompt tier="pro" :learnMoreUrl="config('app.hosted') ? route('marketing.ticketing') : null" :subdomain="$subdomain" v-show="event.tickets_enabled && !isPro" class="mb-4">
                                     {{ __('messages.requires_pro_plan') }}
                                 </x-upgrade-prompt>
 
@@ -2583,7 +2583,7 @@
                                 </div>
                                 </template>
                                 <template v-else>
-                                <x-upgrade-prompt tier="pro" :learnMoreUrl="route('marketing.ticketing')" :subdomain="$subdomain" v-show="event.rsvp_enabled" class="mb-6">
+                                <x-upgrade-prompt tier="pro" :learnMoreUrl="config('app.hosted') ? route('marketing.ticketing') : null" :subdomain="$subdomain" v-show="event.rsvp_enabled" class="mb-6">
                                     <x-slot:icon>
                                         <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" />
@@ -3154,7 +3154,7 @@
                                     {{ __('messages.no_event_custom_fields') }}
                                 </p>
                                 @else
-                                <x-upgrade-prompt tier="pro" :learnMoreUrl="route('marketing.custom_fields')" :subdomain="$subdomain">
+                                <x-upgrade-prompt tier="pro" :learnMoreUrl="config('app.hosted') ? route('marketing.custom_fields') : null" :subdomain="$subdomain">
                                     {{ __('messages.custom_fields_pro_only') }}
                                 </x-upgrade-prompt>
                                 @endif
@@ -3186,7 +3186,7 @@
                                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.event_password_help') }}</p>
                                 </div>
                             @else
-                                <x-upgrade-prompt tier="enterprise" :learnMoreUrl="route('marketing.private_events')" :subdomain="$subdomain">
+                                <x-upgrade-prompt tier="enterprise" :learnMoreUrl="config('app.hosted') ? route('marketing.private_events') : null" :subdomain="$subdomain">
                                     {{ __('messages.upgrade_enterprise_privacy') }}
                                 </x-upgrade-prompt>
                             @endif
@@ -3240,6 +3240,13 @@
                                 class="engagement-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="feedback">
                                 {{ __('messages.feedback') }}
                             </button>
+                            @if ($role->carpool_enabled)
+                            <button type="button" @click="activeEngagementTab = 'carpool'"
+                                :class="activeEngagementTab === 'carpool' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
+                                class="engagement-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="carpool">
+                                {{ __('messages.carpool') }}
+                            </button>
+                            @endif
                         </nav>
                     </div>
 
@@ -3387,7 +3394,7 @@
                             {{ __('messages.add_poll') }}
                         </button>
                     @else
-                        <x-upgrade-prompt tier="pro" :learnMoreUrl="route('marketing.polls')" :subdomain="$subdomain">
+                        <x-upgrade-prompt tier="pro" :learnMoreUrl="config('app.hosted') ? route('marketing.polls') : null" :subdomain="$subdomain">
                             <x-slot:icon>
                                 <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
@@ -3593,7 +3600,7 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.feedback_override_help') }}</p>
                         </div>
                     @else
-                        <x-upgrade-prompt tier="pro" :learnMoreUrl="route('marketing.feedback')" :subdomain="$subdomain">
+                        <x-upgrade-prompt tier="pro" :learnMoreUrl="config('app.hosted') ? route('marketing.feedback') : null" :subdomain="$subdomain">
                             <x-slot:icon>
                                 <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
@@ -3603,6 +3610,55 @@
                         </x-upgrade-prompt>
                     @endif
                     </div>
+
+                    @if ($role->carpool_enabled)
+                    <div v-show="activeEngagementTab === 'carpool'">
+                        @php
+                            $carpoolOffers = $event->carpoolOffers()->with(['user', 'approvedRequests', 'reports.reporter'])->where('status', 'active')->get();
+                            $carpoolReports = \App\Models\CarpoolReport::whereIn('carpool_offer_id', $carpoolOffers->pluck('id'))->with(['reporter', 'reported', 'offer'])->get();
+                        @endphp
+
+                        @if ($carpoolOffers->count() > 0)
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.carpool_active_offers') }}: {{ $carpoolOffers->count() }}</p>
+                        <div class="space-y-3 mb-4">
+                            @foreach ($carpoolOffers as $carpoolOffer)
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $carpoolOffer->user->name }}</span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 ms-2">{{ $carpoolOffer->city }} &middot; {{ $carpoolOffer->directionLabel() }}</span>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $carpoolOffer->approvedRequests->count() }}/{{ $carpoolOffer->total_spots }} {{ __('messages.carpool_spots') }}</p>
+                                    </div>
+                                    <form method="POST" action="{{ route('carpool.admin_remove_offer', ['subdomain' => $role->subdomain, 'offer_hash' => \App\Utils\UrlUtils::encodeId($carpoolOffer->id)]) }}" onsubmit="return confirm('{{ addslashes(__('messages.are_you_sure')) }}')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">{{ __('messages.carpool_remove_offer') }}</button>
+                                    </form>
+                                </div>
+                                @php $offerReports = $carpoolReports->where('carpool_offer_id', $carpoolOffer->id); @endphp
+                                @if ($offerReports->count() > 0)
+                                <div class="mt-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-2">
+                                    <p class="text-xs font-medium text-red-700 dark:text-red-400 mb-1">{{ __('messages.carpool_reports') }} ({{ $offerReports->count() }})</p>
+                                    @foreach ($offerReports as $report)
+                                    <div class="flex items-start justify-between">
+                                        <p class="text-xs text-red-600 dark:text-red-300">{{ $report->reporter->name }}: {{ $report->reason }}</p>
+                                        <form method="POST" action="{{ route('carpool.admin_dismiss_report', ['subdomain' => $role->subdomain, 'report_hash' => \App\Utils\UrlUtils::encodeId($report->id)]) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 ms-2 whitespace-nowrap">{{ __('messages.carpool_dismiss_report') }}</button>
+                                        </form>
+                                    </div>
+                                    @endforeach
+                                </div>
+                                @endif
+                            </div>
+                            @endforeach
+                        </div>
+                        @else
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.carpool_no_offers') }}</p>
+                        @endif
+                    </div>
+                    @endif
 
                 </div>
             </div>
@@ -4232,7 +4288,10 @@
           body: formData,
           headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
-        .then(r => r.json())
+        .then(r => {
+          if (r.status === 429) throw new Error(@json(__('messages.ai_rate_limit')));
+          return r.json();
+        })
         .then(data => {
           this.parsingParts = false;
           event.target.value = '';
@@ -4250,10 +4309,10 @@
             }
           }
         })
-        .catch(() => {
+        .catch(err => {
           this.parsingParts = false;
           event.target.value = '';
-          alert(@json(__('messages.error')));
+          alert(err.message || @json(__('messages.error')));
         });
       },
       parsePartsFromText() {
@@ -4272,7 +4331,10 @@
           body: formData,
           headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
-        .then(r => r.json())
+        .then(r => {
+          if (r.status === 429) throw new Error(@json(__('messages.ai_rate_limit')));
+          return r.json();
+        })
         .then(data => {
           this.parsingParts = false;
           if (data.error) {
@@ -4285,9 +4347,9 @@
             }
           }
         })
-        .catch(() => {
+        .catch(err => {
           this.parsingParts = false;
-          alert(@json(__('messages.error')));
+          alert(err.message || @json(__('messages.error')));
         });
       },
       acceptParsedParts() {
@@ -5765,6 +5827,7 @@ function deleteFlyer(url, hash, token, element) {
 }
 </script>
 
+@if(config('app.hosted'))
 <x-upgrade-modal name="upgrade-polls" tier="pro" :subdomain="$subdomain" learnMoreUrl="{{ route('marketing.polls') }}">
     {{ __('messages.polls_pro_only') }}
 </x-upgrade-modal>
@@ -5784,8 +5847,9 @@ function deleteFlyer(url, hash, token, element) {
 <x-upgrade-modal name="upgrade-privacy" tier="enterprise" :subdomain="$subdomain" learnMoreUrl="{{ route('marketing.private_events') }}">
     {{ __('messages.upgrade_feature_description_privacy') }}
 </x-upgrade-modal>
+@endif
 
-@if (config('services.google.gemini_key') && !is_demo_mode() && $role->isEnterprise())
+@if ((config('services.google.gemini_key') || config('services.openai.api_key')) && !is_demo_mode() && $role->isEnterprise())
 @php
     $aiFields = [
         ['key' => 'category_id', 'label' => __('messages.category'), 'has_value' => (bool)$event->category_id],
@@ -5930,9 +5994,11 @@ window.handleAiEventDetailsResults = function(data) {
 </script>
 @endif
 
+@if(config('app.hosted'))
 <x-upgrade-modal name="upgrade-ai-details" tier="enterprise" :subdomain="$subdomain" learnMoreUrl="{{ route('marketing.ai') }}">
     {{ __('messages.upgrade_feature_description_ai_details') }}
 </x-upgrade-modal>
+@endif
 
 @if ($event->exists && $role->isPro() && !$event->is_private)
     @include('components.embed-ticket-modal')

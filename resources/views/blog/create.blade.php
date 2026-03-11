@@ -97,7 +97,7 @@
             </div>
         </div>
 
-        @if (! config('services.google.gemini_key'))
+        @if (! config('services.google.gemini_key') && ! config('services.openai.api_key'))
         <div class="mt-8">
             <x-gemini-setup-guide />
         </div>

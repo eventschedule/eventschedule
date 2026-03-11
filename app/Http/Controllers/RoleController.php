@@ -31,6 +31,7 @@ use App\Services\UsageTrackingService;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\ImageUtils;
+use App\Utils\OpenAIUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Endroid\QrCode\QrCode;
@@ -73,6 +74,7 @@ class RoleController extends Controller
                 Storage::delete($path);
 
                 $role->profile_image_url = null;
+
                 $role->save();
             }
         } elseif ($request->image_type == 'background') {
@@ -84,6 +86,7 @@ class RoleController extends Controller
                 Storage::delete($path);
 
                 $role->background_image_url = null;
+
                 $role->save();
             }
         } elseif ($request->image_type == 'header') {
@@ -95,6 +98,7 @@ class RoleController extends Controller
                 Storage::delete($path);
 
                 $role->header_image_url = null;
+
                 $role->save();
             }
         }
@@ -1734,6 +1738,7 @@ class RoleController extends Controller
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->profile_image_url = $filename;
+
             $role->save();
         }
 
@@ -1760,6 +1765,7 @@ class RoleController extends Controller
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->header_image_url = $filename;
+
             $role->save();
         }
 
@@ -1789,6 +1795,7 @@ class RoleController extends Controller
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->background_image_url = $filename;
+
             $role->save();
         }
 
@@ -2382,6 +2389,7 @@ class RoleController extends Controller
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->profile_image_url = $filename;
+
             $role->save();
         }
 
@@ -2408,6 +2416,7 @@ class RoleController extends Controller
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->header_image_url = $filename;
+
             $role->save();
         }
 
@@ -2437,6 +2446,7 @@ class RoleController extends Controller
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->background_image_url = $filename;
+
             $role->save();
         }
 
@@ -2450,6 +2460,7 @@ class RoleController extends Controller
                 Storage::delete($path);
             }
             $role->profile_image_url = $request->input('ai_profile_image');
+
             $role->save();
         }
 
@@ -2462,6 +2473,7 @@ class RoleController extends Controller
                 Storage::delete($path);
             }
             $role->header_image_url = $request->input('ai_header_image');
+
             $role->save();
         }
 
@@ -2476,6 +2488,7 @@ class RoleController extends Controller
             $role->background_image_url = $request->input('ai_background_image');
             $role->background = 'image';
             $role->background_image = null;
+
             $role->save();
         }
 
@@ -2558,6 +2571,11 @@ class RoleController extends Controller
 
         if (is_demo_mode()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $imageElements = array_intersect($request->input('elements', []), ['profile_image', 'header_image', 'background_image']);
+        if (! empty($imageElements) && ! config('services.openai.api_key') && ! config('services.google.gemini_key')) {
+            return response()->json(['error' => __('messages.openai_key_required')], 422);
         }
 
         $request->validate([
@@ -2825,10 +2843,14 @@ class RoleController extends Controller
         $styleInstructions = $request->input('style_instructions');
         $customPrompt = $request->input('custom_prompt');
 
+        if (! config('services.openai.api_key') && ! config('services.google.gemini_key')) {
+            return response()->json(['error' => __('messages.openai_key_required')], 422);
+        }
+
         try {
             if ($customPrompt) {
                 $aspectRatio = $imageType === 'profile_image' ? '1:1' : '16:9';
-                $imageData = GeminiUtils::sendImageGenerationRequest($customPrompt, $aspectRatio);
+                $imageData = OpenAIUtils::sendImageGenerationRequest($customPrompt, $aspectRatio);
             } elseif ($imageType === 'profile_image') {
                 $imageData = GeminiUtils::generateScheduleProfileImage($role, $accentColor, $styleInstructions);
             } elseif ($imageType === 'header_image') {
@@ -2897,10 +2919,14 @@ class RoleController extends Controller
         $styleInstructions = $request->input('style_instructions');
         $customPrompt = $request->input('custom_prompt');
 
+        if (! config('services.openai.api_key') && ! config('services.google.gemini_key')) {
+            return response()->json(['error' => __('messages.openai_key_required')], 422);
+        }
+
         try {
             if ($customPrompt) {
                 $aspectRatio = $imageType === 'profile_image' ? '1:1' : '16:9';
-                $imageData = GeminiUtils::sendImageGenerationRequest($customPrompt, $aspectRatio);
+                $imageData = OpenAIUtils::sendImageGenerationRequest($customPrompt, $aspectRatio);
             } elseif ($imageType === 'profile_image') {
                 $imageData = GeminiUtils::generateScheduleProfileImage($tempRole, $accentColor, $styleInstructions);
             } elseif ($imageType === 'header_image') {
@@ -2937,7 +2963,6 @@ class RoleController extends Controller
             return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
         }
     }
-
 
     public function generateScheduleDetails(Request $request, $subdomain)
     {
@@ -3007,6 +3032,11 @@ class RoleController extends Controller
 
         if (config('app.hosted') && ! auth()->user()->isAdmin()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $imageElements = array_intersect($request->input('elements', []), ['profile_image', 'header_image', 'background_image']);
+        if (! empty($imageElements) && ! config('services.openai.api_key') && ! config('services.google.gemini_key')) {
+            return response()->json(['error' => __('messages.openai_key_required')], 422);
         }
 
         $request->validate([

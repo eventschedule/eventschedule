@@ -36,6 +36,8 @@
                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ $description }}</p>
             </div>
 
+            <div>
+
             <div class="mb-4">
                 <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.ai_style_select_elements') }}</p>
                 <div class="space-y-2">
@@ -47,7 +49,7 @@
                         <span class="flex items-center justify-center gap-1 shrink-0 w-4">
                             <span x-show="fieldsWithValues.includes('{{ $field['key'] }}') && !elementStatus['{{ $field['key'] }}']" x-cloak class="w-2 h-2 rounded-full bg-[var(--brand-button-bg)]" title="{{ __('messages.has_existing_value') }}"></span>
                             {{-- Per-element status indicators --}}
-                            <template x-if="elementStatus['{{ $field['key'] }}'] === 'generating'">
+                            <template x-if="elementStatus['{{ $field['key'] }}'] === 'generating' || elementStatus['{{ $field['key'] }}'] === 'pending'">
                                 <svg class="animate-spin h-4 w-4 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -154,6 +156,8 @@
                         </span>
                     </template>
                 </button>
+            </div>
+
             </div>
         </div>
 
@@ -364,7 +368,7 @@ document.addEventListener('alpine:init', function() {
             defaultPrompt: '',
             defaultImagePrompts: {},
             customImagePrompts: {},
-            imagePromptLabels: { profile_image: '{{ __('messages.profile_image') }}', header_image: '{{ __('messages.header_image') }}', background_image: '{{ __('messages.background_image') }}' },
+            imagePromptLabels: { profile_image: @json(__('messages.profile_image')), header_image: @json(__('messages.header_image')), background_image: @json(__('messages.background_image')), flyer_image: @json(__('messages.flyer_image')) },
             promptExpanded: false,
             promptLoading: false,
             promptFetched: false,
@@ -411,6 +415,7 @@ document.addEventListener('alpine:init', function() {
                         self.promptLoading = false;
                         self.promptFetched = false;
                         @endif
+
                     }
                 });
             },
@@ -480,7 +485,7 @@ document.addEventListener('alpine:init', function() {
                 var link = document.createElement('link');
                 link.id = id;
                 link.rel = 'stylesheet';
-                link.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(fontFamily) + '&display=swap';
+                link.href = 'https://fonts.googleapis.com/css?family=' + encodeURIComponent(fontFamily) + '&display=swap';
                 document.head.appendChild(link);
             },
             retryPreviewElement: function(key) {
@@ -519,9 +524,12 @@ document.addEventListener('alpine:init', function() {
                             self.elementStatus[key] = 'error';
                         }
                     })
-                    .catch(function() {
+                    .catch(function(err) {
                         if (genId !== self.generationId) return;
                         self.elementStatus[key] = 'error';
+                        if (err.message === 'rate_limit') {
+                            alert(@json(__('messages.ai_rate_limit')));
+                        }
                     })
                     .finally(function() {
                         if (genId !== self.generationId) return;
@@ -653,9 +661,12 @@ document.addEventListener('alpine:init', function() {
                         self.elementStatus[imageKey] = 'error';
                     }
                 })
-                .catch(function() {
+                .catch(function(err) {
                     if (genId !== self.generationId) return;
                     self.elementStatus[imageKey] = 'error';
+                    if (err.message === 'rate_limit') {
+                        alert(@json(__('messages.ai_rate_limit')));
+                    }
                 })
                 .finally(function() {
                     if (genId !== self.generationId) return;
@@ -711,50 +722,35 @@ document.addEventListener('alpine:init', function() {
                     return;
                 }
 
-                // Separate AJAX: text first, then images
-                textElements.forEach(function(el) { self.elementStatus[el] = 'generating'; });
-                selectedImages.forEach(function(el) { self.elementStatus[el] = 'pending'; });
+                // Fire all requests in parallel
+                self.elements.forEach(function(el) { self.elementStatus[el] = 'generating'; });
+                self.showPreview = true;
 
-                var fireImages = function(extraBody) {
-                    if (selectedImages.length === 0) {
-                        self.checkComplete();
-                        return;
-                    }
-                    selectedImages.forEach(function(imageKey) {
-                        self.fireImageRequest(imageKey, extraBody);
-                    });
-                };
+                // Gather accent_color from form for image requests
+                var imageExtra = {};
+                @if ($name === 'ai-style-generator')
+                var accentInput = document.getElementById('accent_color');
+                if (accentInput) imageExtra.accent_color = accentInput.value;
+                @endif
 
+                // Fire image requests immediately
+                selectedImages.forEach(function(imageKey) {
+                    self.fireImageRequest(imageKey, imageExtra);
+                });
+
+                // Fire text request
                 if (textElements.length > 0) {
-                    var body = Object.assign({}, this.getBaseBody(), { elements: textElements });
+                    self.pendingRequests++;
+                    var body = Object.assign({}, self.getBaseBody(), { elements: textElements });
 
-                    this.makeRequest(@json($endpoint), body)
+                    self.makeRequest(@json($endpoint), body)
                     .then(function(data) {
                         if (genId !== self.generationId) return;
                         if (data.success) {
                             Object.assign(self.previewResults, data);
                             textElements.forEach(function(el) { self.elementStatus[el] = 'complete'; });
-
-                            // Show preview as soon as text results arrive
-                            self.showPreview = true;
-
-                            // For style modal: pass generated accent_color to image requests
-                            var imageExtra = {};
-                            if (data.accent_color) {
-                                imageExtra.accent_color = data.accent_color;
-                            }
-                            fireImages(imageExtra);
                         } else {
                             textElements.forEach(function(el) { self.elementStatus[el] = 'error'; });
-                            // Show preview even on text error so user can retry
-                            self.showPreview = true;
-                            // Still fire images using form's current values
-                            var imageExtra = {};
-                            @if ($name === 'ai-style-generator')
-                            var accentInput = document.getElementById('accent_color');
-                            if (accentInput) imageExtra.accent_color = accentInput.value;
-                            @endif
-                            fireImages(imageExtra);
                         }
                     })
                     .catch(function(err) {
@@ -763,25 +759,15 @@ document.addEventListener('alpine:init', function() {
                         if (err.message === 'rate_limit') {
                             alert(@json(__('messages.ai_rate_limit')));
                         }
-                        // Show preview so user can retry
-                        self.showPreview = true;
-                        // Still fire images
-                        var imageExtra = {};
-                        @if ($name === 'ai-style-generator')
-                        var accentInput = document.getElementById('accent_color');
-                        if (accentInput) imageExtra.accent_color = accentInput.value;
-                        @endif
-                        fireImages(imageExtra);
+                    })
+                    .finally(function() {
+                        if (genId !== self.generationId) return;
+                        self.pendingRequests--;
+                        self.checkComplete();
                     });
-                } else {
-                    // Only images selected, no text request needed
-                    self.showPreview = true;
-                    var imageExtra = {};
-                    @if ($name === 'ai-style-generator')
-                    var accentInput = document.getElementById('accent_color');
-                    if (accentInput) imageExtra.accent_color = accentInput.value;
-                    @endif
-                    fireImages(imageExtra);
+                } else if (selectedImages.length === 0) {
+                    // Nothing selected at all
+                    self.generating = false;
                 }
             }
         };

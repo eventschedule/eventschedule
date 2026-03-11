@@ -942,7 +942,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                             </svg>
                             {{ __('messages.details') }}
-                            @if (config('services.google.gemini_key') && !is_demo_mode())
+                            @if ((config('services.google.gemini_key') || config('services.openai.api_key')) && !is_demo_mode())
                                 @if ($role->isEnterprise())
                                     <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'ai-schedule-details')"
                                         class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600"
@@ -1248,7 +1248,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 3 3 0 005.78-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
                         </svg>
                         {{ __('messages.schedule_style') }}
-                        @if (config('services.google.gemini_key') && !is_demo_mode())
+                        @if ((config('services.google.gemini_key') || config('services.openai.api_key')) && !is_demo_mode())
                             @if ($role->isEnterprise())
                                 <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'ai-style-generator')"
                                     class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600"
@@ -2163,7 +2163,7 @@
                             {{ __('messages.event_custom_fields_graphic_help') }}
                         </p>
                         @else
-                        <x-upgrade-prompt tier="pro" :learnMoreUrl="route('marketing.custom_fields')" :subdomain="$role->subdomain">
+                        <x-upgrade-prompt tier="pro" :learnMoreUrl="config('app.hosted') ? route('marketing.custom_fields') : null" :subdomain="$role->subdomain">
                             <x-slot:icon>
                                 <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -2302,7 +2302,7 @@
 
                             <div id="new-sponsor-inputs-container"></div>
                         @else
-                            <x-upgrade-prompt tier="pro" :learnMoreUrl="route('marketing.custom_css')" :subdomain="$role->subdomain">
+                            <x-upgrade-prompt tier="pro" :learnMoreUrl="config('app.hosted') ? route('marketing.custom_css') : null" :subdomain="$role->subdomain">
                                 <x-slot:icon>
                                     <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
@@ -2377,7 +2377,7 @@
                             @endforeach
                         </div>
                         @else
-                        <x-upgrade-prompt tier="pro" :learnMoreUrl="route('marketing.custom_labels')" :subdomain="$role->subdomain">
+                        <x-upgrade-prompt tier="pro" :learnMoreUrl="config('app.hosted') ? route('marketing.custom_labels') : null" :subdomain="$role->subdomain">
                             <x-slot:icon>
                                 <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
@@ -2810,6 +2810,9 @@
                                 <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="feedback">
                                     {{ __('messages.feedback') }}
                                 </button>
+                                <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="carpool">
+                                    {{ __('messages.carpool') }}
+                                </button>
                             </nav>
                         </div>
 
@@ -2961,6 +2964,32 @@
 
                         </div>
                         <!-- End Tab Content: Feedback -->
+
+                        <!-- Tab Content: Carpool -->
+                        <div id="engagement-tab-carpool" class="engagement-tab-content hidden">
+
+                        @if (! $role->isPro())
+                            <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span>{{ __('messages.carpool_pro_only') }}</span>
+                                </p>
+                            </div>
+                        @endif
+
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.carpool_help') }}</p>
+                        <div class="mb-6">
+                            <x-toggle name="carpool_enabled"
+                                label="{{ __('messages.carpool_enabled') }}"
+                                checked="{{ old('carpool_enabled', $role->carpool_enabled) }}"
+                                help="{{ __('messages.carpool_enabled_help') }}"
+                                :disabled="! $role->isPro()" />
+                        </div>
+
+                        </div>
+                        <!-- End Tab Content: Carpool -->
                     </div>
                 </div>
 
@@ -6385,7 +6414,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </script>
 
-@if (config('services.google.gemini_key') && !is_demo_mode() && $role->isEnterprise())
+@if ((config('services.google.gemini_key') || config('services.openai.api_key')) && !is_demo_mode() && $role->isEnterprise())
 <x-ai-generate-modal
     name="ai-style-generator"
     :title="__('messages.ai_style_generator')"
@@ -6556,11 +6585,13 @@ window.handleAiStyleResults = function(data) {
 </script>
 @endif
 
+@if(config('app.hosted'))
 <x-upgrade-modal name="upgrade-ai-style" tier="enterprise" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.ai') }}">
     {{ __('messages.upgrade_feature_description_ai_style') }}
 </x-upgrade-modal>
+@endif
 
-@if (config('services.google.gemini_key') && !is_demo_mode() && $role->isEnterprise())
+@if ((config('services.google.gemini_key') || config('services.openai.api_key')) && !is_demo_mode() && $role->isEnterprise())
 <x-ai-generate-modal
     name="ai-schedule-details"
     :title="__('messages.ai_details_generator')"
@@ -6626,6 +6657,7 @@ window.handleAiScheduleDetailsResults = function(data) {
 </script>
 @endif
 
+@if(config('app.hosted'))
 <x-upgrade-modal name="upgrade-ai-details" tier="enterprise" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.ai') }}">
     {{ __('messages.upgrade_feature_description_ai_details') }}
 </x-upgrade-modal>
@@ -6641,3 +6673,4 @@ window.handleAiScheduleDetailsResults = function(data) {
 <x-upgrade-modal name="upgrade-custom-domain" tier="enterprise" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.custom_domain') }}">
     {{ __('messages.upgrade_feature_description_custom_domain') }}
 </x-upgrade-modal>
+@endif

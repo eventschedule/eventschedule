@@ -273,7 +273,7 @@
                                     {{ __('messages.import_events') }}
                                 </div>
                             </a>
-                            @if (config('services.google.gemini_key'))
+                            @if (config('services.google.gemini_key') || config('services.openai.api_key'))
                             @if ($role->isEnterprise())
                             <a href="{{ route('event.scan_agenda', ['subdomain' => $role->subdomain]) }}" class="lg:hidden group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                 <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -539,6 +539,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (embedLink) {
         embedLink.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             openEmbedModal();
         });
     }
@@ -556,6 +557,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 @include('components.embed-modal')
 
+@if(config('app.hosted'))
 <x-upgrade-modal name="upgrade-scan-agenda" tier="enterprise" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.ai') }}">
     {{ __('messages.upgrade_feature_description_scan_agenda') }}
 </x-upgrade-modal>
@@ -563,5 +565,6 @@ document.addEventListener('DOMContentLoaded', function() {
 <x-upgrade-modal name="upgrade-availability" tier="enterprise" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.availability') }}">
     {{ __('messages.upgrade_feature_description_availability') }}
 </x-upgrade-modal>
+@endif
 
 </x-app-admin-layout>

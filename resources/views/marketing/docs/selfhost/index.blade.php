@@ -200,7 +200,7 @@
                             </svg>
                         </div>
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">AI Setup</h2>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Connect Google Gemini to enable AI-powered event importing, agenda scanning, and translations.</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Connect Google Gemini and OpenAI to enable AI-powered event importing, agenda scanning, translations, and image generation.</p>
                         <div class="mt-auto inline-flex items-center text-sm font-medium text-violet-600 dark:text-violet-400">
                             Read Guide
                             <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">

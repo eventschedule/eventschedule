@@ -178,6 +178,7 @@ class AppController extends Controller
                 \Artisan::call('app:translate');
                 \Artisan::call('app:send-graphic-emails');
                 \Artisan::call('app:send-feedback-requests');
+                \Artisan::call('app:send-carpool-reminders');
 
                 if (config('app.hosted')) {
                     \Artisan::call('app:setup-demo');

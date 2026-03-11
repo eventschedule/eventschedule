@@ -54,7 +54,7 @@
                 </div>
                 <div class="mb-4">
                     <span class="text-3xl font-bold text-gray-900 dark:text-gray-100" x-text="'$' + prices.pro[selectedPlan]"></span>
-                    <span class="text-sm text-gray-500 dark:text-gray-400" x-text="selectedPlan === 'yearly' ? '/{{ __('messages.year') }}' : '/{{ __('messages.month') }}'"></span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400" x-text="selectedPlan === 'yearly' ? '/' + '{{ __('messages.year') }}' : '/' + '{{ __('messages.month') }}'"></span>
                 </div>
                 <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                     <li class="flex items-center gap-2">
@@ -101,7 +101,7 @@
                 </div>
                 <div class="mb-4">
                     <span class="text-3xl font-bold text-gray-900 dark:text-gray-100" x-text="'$' + prices.enterprise[selectedPlan]"></span>
-                    <span class="text-sm text-gray-500 dark:text-gray-400" x-text="selectedPlan === 'yearly' ? '/{{ __('messages.year') }}' : '/{{ __('messages.month') }}'"></span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400" x-text="selectedPlan === 'yearly' ? '/' + '{{ __('messages.year') }}' : '/' + '{{ __('messages.month') }}'"></span>
                 </div>
                 <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                     <li class="flex items-center gap-2">

@@ -353,7 +353,7 @@
             {{ __('messages.view_event') }}
           </a>
           <form action="{{ route('rsvp.cancel', ['sale_id' => \App\Utils\UrlUtils::encodeId($sale->id)]) }}" method="POST"
-                onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                onsubmit="return confirm('{{ addslashes(__('messages.are_you_sure')) }}')">
             @csrf
             <input type="hidden" name="secret" value="{{ $sale->secret }}">
             <button type="submit" class="text-[13px] text-red-400 print:text-red-600 hover:text-red-300 transition-colors font-medium">

@@ -331,7 +331,7 @@ class GraphicController extends Controller
             $aiPrompt = $request->has('ai_prompt')
                 ? trim($request->get('ai_prompt', ''))
                 : trim($graphicSettings['ai_prompt'] ?? '');
-            if ($role->isEnterprise() && ! empty($aiPrompt) && config('services.google.gemini_key')) {
+            if ($role->isEnterprise() && ! empty($aiPrompt) && (config('services.google.gemini_key') || config('services.openai.api_key'))) {
                 $aiProcessedText = $this->processTextWithAI($eventText, $aiPrompt, $textEvents);
                 if ($aiProcessedText) {
                     $eventText = $aiProcessedText;

@@ -236,7 +236,7 @@
                                 </div>
                             </div>
                             <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6">
-                                <p class="text-sm text-blue-800 dark:text-blue-300"><strong>Note:</strong> Selfhosted installations require a <x-link href="https://ai.google.dev/" target="_blank">Gemini API key</x-link> configured in the environment settings for AI features to work.</p>
+                                <p class="text-sm text-blue-800 dark:text-blue-300"><strong>Note:</strong> Selfhosted installations require a <x-link href="https://ai.google.dev/" target="_blank">Gemini API key</x-link> and an <x-link href="https://platform.openai.com/" target="_blank">OpenAI API key</x-link> configured in the environment settings for AI style features to work.</p>
                             </div>
                         </section>
 

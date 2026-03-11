@@ -43,13 +43,9 @@ return [
     'event_flyer' => [
         'intro' => "Create a professional event flyer/poster design prompt. Every piece of text must exactly match the details provided below.\n\nEVENT DETAILS:\nEvent name: :event_name\n",
         'layout' => "\nLAYOUT (top to bottom):\n- Top third: event name in large, bold, high-contrast typography (at least 3x larger than body text).\n- Middle: date, time, and venue clearly separated in medium type.\n- Bottom third: remaining details (description, performers, ticket price) in highly legible smaller type.\n",
-        'design' => "\nDESIGN DIRECTIVES:\n- Background: rich color or modern gradient inspired by the event category:category_hint. Do not use plain white.\n- Incorporate subtle, category-appropriate geometric or abstract elements to set the mood.\n- Typography must be professional with generous kerning and line spacing.\n- High contrast between text and background is mandatory.\n- Do not include AI-generated photos of people or faces.\n- Overall aesthetic should be premium, clean, and optimized for digital sharing.\n",
+        'design' => "\nDESIGN DIRECTIVES:\n- Background: rich color or modern gradient inspired by the event category:category_hint. Do not use plain white.\n- Incorporate subtle, category-appropriate geometric or abstract elements to set the mood.\n- Typography must be professional with generous kerning and line spacing.\n- High contrast between text and background is mandatory.\n- Do not include AI-generated photos of people or faces.\n- All names (event name, performer names, venue name) must be spelled exactly as provided in the event details above. Do not alter, abbreviate, or substitute any name.\n- Do not invent or add any performers, artists, speakers, or participants not listed in the event details above.\n- Overall aesthetic should be premium, clean, and optimized for digital sharing.\n",
         'style_instructions' => "\nCustom style instructions: :instructions\n",
         'style_reference' => "\nSTYLE REFERENCE: The schedule's profile image uses this visual style: :style_description. Generate an image that matches this style while following all other instructions above.",
-    ],
-
-    'describe_style' => [
-        'prompt' => 'Describe the visual style of this image in 2-3 sentences. Focus on: color palette, artistic style (flat vector, watercolor, geometric, etc.), mood, and dominant shapes or motifs. Return JSON: {"style": "your description"}',
     ],
 
     'profile_image' => [

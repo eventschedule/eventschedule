@@ -479,7 +479,7 @@
                             <svg aria-hidden="true" class="w-4 h-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
-                            Powered by Google Gemini
+                            Powered by Google Gemini & OpenAI
                         </li>
                     </ul>
                 </div>

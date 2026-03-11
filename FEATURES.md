@@ -67,6 +67,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Sale notification emails | `EmailService::sendNewSaleNotification()` | Opt-in email alerts when tickets sell |
 | Sales CSV export | `TicketController::exportSales()` | Export sales data with custom fields |
 | Post-event feedback | `FeedbackController`, `$role->isPro()` | Collect star ratings and comments from attendees after events |
+| Carpool matching | `CarpoolController`, `$role->isPro()` | Let attendees offer and request rides to events with driver approval, contact sharing, and reviews |
 | Embed ticket widget | `edit.blade.php`, `$role->isPro()` | Embed ticket purchase or RSVP form on external websites via iframe |
 | Promo/discount codes | `PromoCodeController`, tied to ticketing gate | Percentage or fixed discounts with usage limits and expiration dates |
 | Eventbrite import | EventbriteController, $role->isPro() | Import events from Eventbrite |
@@ -82,8 +83,8 @@ Gated by `$role->isEnterprise()`.
 | Feature | Gate location | Notes |
 |---------|--------------|-------|
 | AI event parsing | `EventController:1019`, `$role->isEnterprise()` | Parse event details from text/images via Gemini |
-| AI flyer generation | `EventController`, `$role->isEnterprise()` | Generate event flyer images from event details via Gemini |
-| AI style generation | `RoleController`, `$role->isEnterprise()` | Generate cohesive schedule branding (profile/header/background images, accent color, font) via Gemini |
+| AI flyer generation | `EventController`, `$role->isEnterprise()` | Generate event flyer images from event details via OpenAI DALL-E |
+| AI style generation | `RoleController`, `$role->isEnterprise()` | Generate cohesive schedule branding (profile/header/background images via OpenAI DALL-E, accent color and font via Gemini) |
 | AI schedule details generation | `RoleController::generateScheduleDetails`, `$role->isEnterprise()` | Generate schedule short description and description via Gemini |
 | AI event details generation | `EventController::generateEventDetails`, `$role->isEnterprise()` | Generate event category, short description, and description via Gemini |
 | Agenda scanning | `EventController:1594`, `$role->isEnterprise()` | Scan agendas to auto-create event parts |

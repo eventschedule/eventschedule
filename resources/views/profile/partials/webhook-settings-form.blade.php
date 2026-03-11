@@ -97,7 +97,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                             </button>
                             {{-- Delete --}}
-                            <form method="POST" action="{{ route('webhooks.destroy', \App\Utils\UrlUtils::encodeId($webhook->id)) }}" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                            <form method="POST" action="{{ route('webhooks.destroy', \App\Utils\UrlUtils::encodeId($webhook->id)) }}" onsubmit="return confirm('{{ addslashes(__('messages.are_you_sure')) }}')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700" title="{{ __('messages.delete') }}">
@@ -141,7 +141,7 @@
                                 <x-primary-button>{{ __('messages.save') }}</x-primary-button>
                             </div>
                         </form>
-                        <form method="POST" action="{{ route('webhooks.regenerate_secret', \App\Utils\UrlUtils::encodeId($webhook->id)) }}" class="mt-2" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                        <form method="POST" action="{{ route('webhooks.regenerate_secret', \App\Utils\UrlUtils::encodeId($webhook->id)) }}" class="mt-2" onsubmit="return confirm('{{ addslashes(__('messages.are_you_sure')) }}')">
                             @csrf
                             <button type="submit" class="text-sm text-gray-600 dark:text-gray-400 underline hover:text-gray-900 dark:hover:text-gray-200">{{ __('messages.regenerate_secret') }}</button>
                         </form>

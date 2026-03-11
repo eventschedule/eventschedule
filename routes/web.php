@@ -9,6 +9,7 @@ use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BoostController;
 use App\Http\Controllers\CalDAVController;
+use App\Http\Controllers\CarpoolController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\EventbriteController;
 use App\Http\Controllers\EventController;
@@ -80,6 +81,19 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         // Feed subscription endpoints
         Route::get('/feed/ical', [FeedController::class, 'icalFeed'])->name('feed.ical');
         Route::get('/feed/rss', [FeedController::class, 'rssFeed'])->name('feed.rss');
+        // Carpool
+        Route::get('/carpool/{event_hash}', [CarpoolController::class, 'index'])->name('carpool.index');
+        Route::get('/carpool/{event_hash}/{date}', [CarpoolController::class, 'index'])->name('carpool.index_date')->where(['date' => '\d{4}-\d{2}-\d{2}']);
+        Route::post('/carpool/{event_hash}/agree', [CarpoolController::class, 'agreeDisclaimer'])->name('carpool.agree_disclaimer')->middleware('throttle:5,1');
+        Route::post('/carpool/{event_hash}/offer', [CarpoolController::class, 'storeOffer'])->name('carpool.store_offer')->middleware('throttle:10,60');
+        Route::post('/carpool/{event_hash}/offer/{offer_hash}/cancel', [CarpoolController::class, 'cancelOffer'])->name('carpool.cancel_offer');
+        Route::post('/carpool/{event_hash}/offer/{offer_hash}/spots', [CarpoolController::class, 'updateSpots'])->name('carpool.update_spots');
+        Route::post('/carpool/{event_hash}/offer/{offer_hash}/request', [CarpoolController::class, 'requestRide'])->name('carpool.request_ride')->middleware('throttle:10,60');
+        Route::post('/carpool/{event_hash}/request/{request_hash}/cancel', [CarpoolController::class, 'cancelRequest'])->name('carpool.cancel_request');
+        Route::post('/carpool/{event_hash}/offer/{offer_hash}/approve/{request_hash}', [CarpoolController::class, 'approveRequest'])->name('carpool.approve');
+        Route::post('/carpool/{event_hash}/offer/{offer_hash}/decline/{request_hash}', [CarpoolController::class, 'declineRequest'])->name('carpool.decline');
+        Route::post('/carpool/{event_hash}/offer/{offer_hash}/review', [CarpoolController::class, 'storeReview'])->name('carpool.store_review')->middleware('throttle:5,60');
+        Route::post('/carpool/{event_hash}/offer/{offer_hash}/report/{user_hash}', [CarpoolController::class, 'report'])->name('carpool.report')->middleware('throttle:5,60');
         // Photo gallery
         Route::get('/{slug}/{id}/{date}/photos', [EventController::class, 'photoGallery'])->where(['date' => '\d{4}-\d{2}-\d{2}', 'id' => '[A-Za-z0-9+=]+']);
         Route::get('/{slug}/{id}/photos', [EventController::class, 'photoGallery'])->where(['id' => '[A-Za-z0-9+=]+']);
@@ -161,6 +175,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/following', [RoleController::class, 'following'])->name('following');
     Route::post('/following/bulk-unfollow', [RoleController::class, 'bulkUnfollow'])->name('following.bulk-unfollow');
     Route::get('/tickets', [TicketController::class, 'tickets'])->name('tickets');
+    Route::get('/my-carpools', [CarpoolController::class, 'myCarpools'])->name('my_carpools');
     Route::get('/sales', [TicketController::class, 'sales'])->name('sales');
     Route::get('/sales/export', [TicketController::class, 'exportSales'])->name('sales.export');
     Route::get('/sales/export-feedback', [FeedbackController::class, 'export'])->name('sales.export_feedback')->middleware('throttle:10,1');
@@ -316,8 +331,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{subdomain}/import/eventbrite', [EventbriteController::class, 'show'])->name('event.show_import_eventbrite');
     Route::post('/{subdomain}/import/eventbrite/connect', [EventbriteController::class, 'connect'])->name('event.eventbrite_connect')->middleware('throttle:10,1');
     Route::post('/{subdomain}/import/eventbrite/import', [EventbriteController::class, 'import'])->name('event.eventbrite_import')->middleware('throttle:60,1');
-    Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse');
-    Route::post('/{subdomain}/parse-event-parts', [EventController::class, 'parseEventParts'])->name('event.parse_parts');
+    Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse')->middleware('throttle:10,1');
+    Route::post('/{subdomain}/parse-event-parts', [EventController::class, 'parseEventParts'])->name('event.parse_parts')->middleware('throttle:10,1');
     Route::post('/{subdomain}/generate-flyer', [EventController::class, 'generateFlyer'])->name('event.generate_flyer')->middleware('throttle:5,1');
     Route::post('/{subdomain}/generate-style', [RoleController::class, 'generateStyle'])->name('role.generate_style')->middleware('throttle:5,1');
     Route::post('/{subdomain}/generate-style-image', [RoleController::class, 'generateStyleImage'])->name('role.generate_style_image')->middleware('throttle:5,1');
@@ -344,6 +359,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/{subdomain}/approve-photo/{hash}', [EventController::class, 'approvePhoto'])->name('event.approve_photo');
     Route::delete('/{subdomain}/reject-photo/{hash}', [EventController::class, 'rejectPhoto'])->name('event.reject_photo');
     Route::get('/{subdomain}/download-photos/{event_hash}', [EventController::class, 'downloadPhotos'])->name('event.download_photos')->middleware('throttle:5,1');
+    Route::delete('/{subdomain}/carpool/remove-offer/{offer_hash}', [CarpoolController::class, 'adminRemoveOffer'])->name('carpool.admin_remove_offer');
+    Route::delete('/{subdomain}/carpool/dismiss-report/{report_hash}', [CarpoolController::class, 'adminDismissReport'])->name('carpool.admin_dismiss_report');
 
     Route::post('/{subdomain}/polls/{event_hash}', [EventController::class, 'storePoll'])->name('event.store_poll');
     Route::put('/{subdomain}/polls/{event_hash}/{poll_hash}', [EventController::class, 'updatePoll'])->name('event.update_poll');
@@ -1210,6 +1227,19 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     // Feed subscription endpoints
     Route::get('/{subdomain}/feed/ical', [FeedController::class, 'icalFeed'])->name('feed.ical');
     Route::get('/{subdomain}/feed/rss', [FeedController::class, 'rssFeed'])->name('feed.rss');
+    // Carpool
+    Route::get('/{subdomain}/carpool/{event_hash}', [CarpoolController::class, 'index'])->name('carpool.index');
+    Route::get('/{subdomain}/carpool/{event_hash}/{date}', [CarpoolController::class, 'index'])->name('carpool.index_date')->where(['date' => '\d{4}-\d{2}-\d{2}']);
+    Route::post('/{subdomain}/carpool/{event_hash}/agree', [CarpoolController::class, 'agreeDisclaimer'])->name('carpool.agree_disclaimer')->middleware('throttle:5,1');
+    Route::post('/{subdomain}/carpool/{event_hash}/offer', [CarpoolController::class, 'storeOffer'])->name('carpool.store_offer')->middleware('throttle:10,60');
+    Route::post('/{subdomain}/carpool/{event_hash}/offer/{offer_hash}/cancel', [CarpoolController::class, 'cancelOffer'])->name('carpool.cancel_offer');
+    Route::post('/{subdomain}/carpool/{event_hash}/offer/{offer_hash}/spots', [CarpoolController::class, 'updateSpots'])->name('carpool.update_spots');
+    Route::post('/{subdomain}/carpool/{event_hash}/offer/{offer_hash}/request', [CarpoolController::class, 'requestRide'])->name('carpool.request_ride')->middleware('throttle:10,60');
+    Route::post('/{subdomain}/carpool/{event_hash}/request/{request_hash}/cancel', [CarpoolController::class, 'cancelRequest'])->name('carpool.cancel_request');
+    Route::post('/{subdomain}/carpool/{event_hash}/offer/{offer_hash}/approve/{request_hash}', [CarpoolController::class, 'approveRequest'])->name('carpool.approve');
+    Route::post('/{subdomain}/carpool/{event_hash}/offer/{offer_hash}/decline/{request_hash}', [CarpoolController::class, 'declineRequest'])->name('carpool.decline');
+    Route::post('/{subdomain}/carpool/{event_hash}/offer/{offer_hash}/review', [CarpoolController::class, 'storeReview'])->name('carpool.store_review')->middleware('throttle:5,60');
+    Route::post('/{subdomain}/carpool/{event_hash}/offer/{offer_hash}/report/{user_hash}', [CarpoolController::class, 'report'])->name('carpool.report')->middleware('throttle:5,60');
     // Photo gallery
     Route::get('/{subdomain}/{slug}/{id}/{date}/photos', [EventController::class, 'photoGallery'])->where(['date' => '\d{4}-\d{2}-\d{2}', 'id' => '[A-Za-z0-9+=]+']);
     Route::get('/{subdomain}/{slug}/{id}/photos', [EventController::class, 'photoGallery'])->where(['id' => '[A-Za-z0-9+=]+']);

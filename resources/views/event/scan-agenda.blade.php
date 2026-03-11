@@ -243,7 +243,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         },
                         body: formData,
                     })
-                    .then(r => r.json())
+                    .then(r => {
+                        if (r.status === 429) throw new Error(@json(__('messages.ai_rate_limit')));
+                        return r.json();
+                    })
                     .then(data => {
                         if (data.error) {
                             errorMessage.value = data.error;
@@ -270,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                     .catch(err => {
                         console.error('Parse error:', err);
-                        errorMessage.value = @json(__("messages.event_parsing_failed"));
+                        errorMessage.value = err.message || @json(__("messages.event_parsing_failed"));
                         state.value = 'camera';
                         cameraStarted.value = false;
                     });

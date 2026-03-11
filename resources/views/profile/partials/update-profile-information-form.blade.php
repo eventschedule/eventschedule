@@ -164,6 +164,12 @@
                 </div>
                 @endif
             </div>
+
+            <div>
+                <x-toggle name="carpool_notifications_enabled" label="{{ __('messages.carpool_notifications') }}"
+                    checked="{{ old('carpool_notifications_enabled', $user->carpool_notifications_enabled) }}" />
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.carpool_notifications_help') }}</p>
+            </div>
         </div>
 
         <!-- Localization Tab -->

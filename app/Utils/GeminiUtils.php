@@ -6,15 +6,36 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Services\UsageTrackingService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Storage;
 
 class GeminiUtils
 {
-    private static array $styleDescriptionCache = [];
-
-    private static function sendRequest($prompt, $imageData = null, $disableThinking = false)
+    private static function sendRequest($prompt, $imageData = null, $disableThinking = false, $purpose = 'content')
     {
-        $model = 'gemini-2.5-flash';
+        $textProvider = config('services.ai.text_provider', 'gemini');
+
+        if ($textProvider === 'openai') {
+            if (config('services.openai.api_key')) {
+                return OpenAIUtils::sendTextRequest($prompt, $imageData, $disableThinking, $purpose);
+            }
+            if (! config('services.google.gemini_key')) {
+                return null;
+            }
+        } else {
+            if (! config('services.google.gemini_key')) {
+                if (config('services.openai.api_key')) {
+                    return OpenAIUtils::sendTextRequest($prompt, $imageData, $disableThinking, $purpose);
+                }
+
+                return null;
+            }
+        }
+
+        $modelKey = $purpose === 'translation' ? 'gemini_translation_model' : 'gemini_content_model';
+        $model = config("services.google.{$modelKey}", 'gemini-2.5-flash');
+
+        if (config('app.is_testing')) {
+            \Log::info('AI request', ['provider' => 'gemini', 'model' => $model, 'type' => 'text', 'purpose' => $purpose]);
+        }
 
         $apiKey = config('services.google.gemini_key');
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=".$apiKey;
@@ -170,9 +191,9 @@ class GeminiUtils
     /**
      * Send a simple text prompt to Gemini and return the response
      */
-    public static function sendPrompt($prompt, $disableThinking = false)
+    public static function sendPrompt($prompt, $disableThinking = false, $purpose = 'content')
     {
-        return self::sendRequest($prompt, null, $disableThinking);
+        return self::sendRequest($prompt, null, $disableThinking, $purpose);
     }
 
     public static function parseEvent($role, $details, $file = null)
@@ -918,7 +939,7 @@ class GeminiUtils
 
         $prompt = str_replace([':from', ':to', ':glossary'], [$from, $to, $glossaryInstruction], $config['base'])."\n{$text}";
 
-        $response = self::sendRequest($prompt);
+        $response = self::sendRequest($prompt, null, false, 'translation');
 
         // Handle quota exceeded or other errors gracefully
         if ($response === null || empty($response)) {
@@ -970,7 +991,7 @@ class GeminiUtils
         $prompt = str_replace([':from', ':names'], [$fromLanguage, json_encode($groupNames)], config('ai_prompts.translate_group_names.base'));
 
         try {
-            $response = self::sendRequest($prompt);
+            $response = self::sendRequest($prompt, null, false, 'translation');
 
             // Handle quota exceeded or other errors gracefully
             if ($response === null || empty($response)) {
@@ -1008,7 +1029,7 @@ class GeminiUtils
         $prompt = str_replace([':from', ':names'], [$fromLanguage, json_encode($fieldNames)], config('ai_prompts.translate_custom_field_names.base'));
 
         try {
-            $response = self::sendRequest($prompt);
+            $response = self::sendRequest($prompt, null, false, 'translation');
 
             // Handle quota exceeded or other errors gracefully
             if ($response === null || empty($response)) {
@@ -1045,7 +1066,7 @@ class GeminiUtils
         $prompt = str_replace([':from', ':values'], [$fromLanguage, json_encode($optionValues)], config('ai_prompts.translate_custom_field_options.base'));
 
         try {
-            $response = self::sendRequest($prompt);
+            $response = self::sendRequest($prompt, null, false, 'translation');
 
             if ($response === null || empty($response)) {
                 return [];
@@ -1208,7 +1229,11 @@ class GeminiUtils
 
     public static function sendImageGenerationRequest($prompt, $aspectRatio = '3:4')
     {
-        $model = 'imagen-4.0-generate-001';
+        $model = config('services.google.gemini_image_model', 'imagen-4.0-generate-001');
+
+        if (config('app.is_testing')) {
+            \Log::info('AI request', ['provider' => 'gemini', 'model' => $model, 'type' => 'image']);
+        }
 
         $apiKey = config('services.google.gemini_key');
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:predict";
@@ -1320,20 +1345,21 @@ class GeminiUtils
         return null;
     }
 
-    public static function generateEventFlyer(Event $event, ?string $styleInstructions = null, ?Role $role = null): ?string
+    public static function generateEventFlyer(Event $event, ?string $styleInstructions = null, ?Role $role = null, ?string $customPrompt = null): ?string
     {
-        $profileStyleDescription = null;
-        $referenceRole = $role ?: $event->roles->first();
-        if ($referenceRole && ($referenceRole->getAttributes()['profile_image_url'] ?? null)) {
-            $profileStyleDescription = self::getProfileImageStyleDescription($referenceRole);
+        if ($customPrompt) {
+            return OpenAIUtils::sendImageGenerationRequest($customPrompt);
         }
 
-        $prompt = self::buildFlyerPrompt($event, $styleInstructions, $profileStyleDescription);
+        $referenceRole = $role ?: $event->roles->first();
+        $styleDescription = $referenceRole ? self::buildStyleContext($referenceRole) : null;
 
-        return self::sendImageGenerationRequest($prompt);
+        $prompt = self::buildFlyerPrompt($event, $styleInstructions, $styleDescription, $referenceRole);
+
+        return OpenAIUtils::sendImageGenerationRequest($prompt);
     }
 
-    private static function buildFlyerPrompt(Event $event, ?string $styleInstructions, ?string $profileStyleDescription = null): string
+    public static function buildFlyerPrompt(Event $event, ?string $styleInstructions, ?string $profileStyleDescription = null, ?Role $referenceRole = null): string
     {
         $config = config('ai_prompts.event_flyer');
 
@@ -1371,6 +1397,9 @@ class GeminiUtils
         }
 
         $performers = $event->roles->filter(fn ($r) => $r->type === 'talent');
+        if ($referenceRole && $referenceRole->type === 'talent' && ! $performers->contains('id', $referenceRole->id)) {
+            $performers = $performers->push($referenceRole);
+        }
         if ($performers->isNotEmpty()) {
             $performerNames = $performers->pluck('name')->implode(', ');
             $prompt .= "Performers: {$performerNames}\n";
@@ -1379,6 +1408,8 @@ class GeminiUtils
         $ticket = $event->tickets->first();
         if ($ticket && $ticket->price > 0) {
             $prompt .= 'Ticket price: '.MoneyUtils::format($ticket->price, $event->ticket_currency_code)."\n";
+        } else {
+            $prompt .= "Do not show a price on the flyer.\n";
         }
 
         $prompt .= $config['layout'];
@@ -1395,39 +1426,17 @@ class GeminiUtils
         return $prompt;
     }
 
-    public static function getProfileImageStyleDescription(Role $role): ?string
+    public static function buildStyleContext(Role $role): ?string
     {
-        if (isset(self::$styleDescriptionCache[$role->id])) {
-            return self::$styleDescriptionCache[$role->id];
+        $parts = [];
+        if ($role->accent_color) {
+            $parts[] = "Accent color: {$role->accent_color}";
+        }
+        if ($role->font_family) {
+            $parts[] = "Font family: {$role->font_family}";
         }
 
-        try {
-            $rawPath = $role->getAttributes()['profile_image_url'] ?? null;
-            if (! $rawPath || str_starts_with($rawPath, 'demo_')) {
-                return null;
-            }
-
-            $storagePath = config('filesystems.default') == 'local' ? 'public/'.$rawPath : $rawPath;
-            $imageBytes = Storage::get($storagePath);
-
-            if (! $imageBytes) {
-                return null;
-            }
-
-            $result = self::sendRequest(config('ai_prompts.describe_style.prompt'), $imageBytes);
-
-            if (! $result || ! isset($result['style'])) {
-                return null;
-            }
-
-            self::$styleDescriptionCache[$role->id] = $result['style'];
-
-            return $result['style'];
-        } catch (\Exception $e) {
-            \Log::warning('Failed to get profile image style description: '.$e->getMessage(), ['role_id' => $role->id]);
-
-            return null;
-        }
+        return ! empty($parts) ? implode('. ', $parts).'.' : null;
     }
 
     public static function generateScheduleStyle(Role $role, array $elements, ?string $styleInstructions, array $currentValues, ?string $customPrompt = null): array
@@ -1457,8 +1466,8 @@ class GeminiUtils
         // Step 2: Generate images in parallel, passing accent color for cohesive results
         if (! empty($imageElements)) {
             $profileStyleDescription = null;
-            if (! in_array('profile_image', $imageElements) && ($role->getAttributes()['profile_image_url'] ?? null)) {
-                $profileStyleDescription = self::getProfileImageStyleDescription($role);
+            if (! in_array('profile_image', $imageElements)) {
+                $profileStyleDescription = self::buildStyleContext($role);
             }
 
             try {
@@ -1466,17 +1475,17 @@ class GeminiUtils
                 foreach ($imageElements as $element) {
                     if ($element === 'profile_image') {
                         $prompt = self::buildProfileImagePrompt($role, $accentColor, $styleInstructions);
-                        $imageRequests[$element] = self::prepareImageGenerationRequest($prompt, '1:1');
+                        $imageRequests[$element] = OpenAIUtils::prepareImageGenerationRequest($prompt, '1:1');
                     } elseif ($element === 'header_image') {
                         $prompt = self::buildHeaderImagePrompt($role, $accentColor, $styleInstructions, $profileStyleDescription);
-                        $imageRequests[$element] = self::prepareImageGenerationRequest($prompt, '16:9');
+                        $imageRequests[$element] = OpenAIUtils::prepareImageGenerationRequest($prompt, '16:9');
                     } elseif ($element === 'background_image') {
                         $prompt = self::buildBackgroundImagePrompt($role, $accentColor, $styleInstructions, $profileStyleDescription);
-                        $imageRequests[$element] = self::prepareImageGenerationRequest($prompt, '16:9');
+                        $imageRequests[$element] = OpenAIUtils::prepareImageGenerationRequest($prompt, '16:9');
                     }
                 }
 
-                $imageResponses = self::executeParallelImageRequests($imageRequests);
+                $imageResponses = OpenAIUtils::executeParallelImageRequests($imageRequests);
 
                 foreach ($imageResponses as $element => $imageData) {
                     if ($imageData) {
@@ -1865,9 +1874,13 @@ class GeminiUtils
         return $prompt;
     }
 
-    private static function prepareImageGenerationRequest(string $prompt, string $aspectRatio = '3:4'): array
+    public static function prepareImageGenerationRequest(string $prompt, string $aspectRatio = '3:4'): array
     {
-        $model = 'imagen-4.0-generate-001';
+        $model = config('services.google.gemini_image_model', 'imagen-4.0-generate-001');
+
+        if (config('app.is_testing')) {
+            \Log::info('AI request', ['provider' => 'gemini', 'model' => $model, 'type' => 'image']);
+        }
 
         $apiKey = config('services.google.gemini_key');
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:predict";
@@ -1901,7 +1914,7 @@ class GeminiUtils
         return [$ch, $prompt];
     }
 
-    private static function processImageGenerationResponse(string $response, int $httpCode, string $prompt): ?string
+    public static function processImageGenerationResponse(string $response, int $httpCode, string $prompt): ?string
     {
         if ($httpCode !== 200) {
             \Log::error('Gemini image generation API error response: '.$response);
@@ -1954,7 +1967,7 @@ class GeminiUtils
         return null;
     }
 
-    private static function executeParallelImageRequests(array $requests): array
+    public static function executeParallelImageRequests(array $requests): array
     {
         $mh = curl_multi_init();
         $handles = [];
@@ -1991,23 +2004,23 @@ class GeminiUtils
     {
         $prompt = self::buildProfileImagePrompt($role, $accentColor, $styleInstructions);
 
-        return self::sendImageGenerationRequest($prompt, '1:1');
+        return OpenAIUtils::sendImageGenerationRequest($prompt, '1:1');
     }
 
     public static function generateScheduleHeaderImage(Role $role, string $accentColor, ?string $styleInstructions): ?string
     {
-        $profileStyleDescription = self::getProfileImageStyleDescription($role);
+        $profileStyleDescription = self::buildStyleContext($role);
         $prompt = self::buildHeaderImagePrompt($role, $accentColor, $styleInstructions, $profileStyleDescription);
 
-        return self::sendImageGenerationRequest($prompt, '16:9');
+        return OpenAIUtils::sendImageGenerationRequest($prompt, '16:9');
     }
 
     public static function generateScheduleBackgroundImage(Role $role, string $accentColor, ?string $styleInstructions): ?string
     {
-        $profileStyleDescription = self::getProfileImageStyleDescription($role);
+        $profileStyleDescription = self::buildStyleContext($role);
         $prompt = self::buildBackgroundImagePrompt($role, $accentColor, $styleInstructions, $profileStyleDescription);
 
-        return self::sendImageGenerationRequest($prompt, '16:9');
+        return OpenAIUtils::sendImageGenerationRequest($prompt, '16:9');
     }
 
     public static function generateBlogPost($topic, $parentPageUrl = null, $parentPageTitle = null, $features = [])

@@ -68,7 +68,7 @@
                     {{ __('messages.blog_posts_description') }}
                 </p>
             </div>
-            @if (config('services.google.gemini_key'))
+            @if (config('services.google.gemini_key') || config('services.openai.api_key'))
             <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
                 <x-brand-link href="{{ route('blog.create') }}">
                     <svg class="-ml-0.5 mr-2 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -84,7 +84,7 @@
             <x-gemini-setup-guide />
         </div>
 
-        @if (config('services.google.gemini_key'))
+        @if (config('services.google.gemini_key') || config('services.openai.api_key'))
         <div class="mt-8 flow-root">
             <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                 <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">

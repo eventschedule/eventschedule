@@ -209,7 +209,7 @@ TWILIO_FROM_NUMBER=+1234567890</code></pre>
                             </div>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-6">Event Creation</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">When WhatsApp is configured, organizers with verified phone numbers and Enterprise plans can send messages to create events. AI parses both text messages and images (such as flyers) using Gemini to extract event details automatically.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">When WhatsApp is configured, organizers with verified phone numbers and Enterprise plans can send messages to create events. AI parses both text messages and images (such as flyers) to extract event details automatically.</p>
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">For user-facing instructions on creating events via WhatsApp, see the <a href="{{ route('marketing.docs.creating_events') }}#whatsapp" class="text-cyan-400 hover:text-cyan-300">Creating Events guide</a>.</p>
                         </section>

@@ -35,11 +35,19 @@ return [
         ],
     ],
 
+    'ai' => [
+        'text_provider' => env('AI_TEXT_PROVIDER', 'gemini'),
+        'image_provider' => env('AI_IMAGE_PROVIDER', 'openai'),
+    ],
+
     'google' => [
         'backend' => env('BACKEND_GOOGLE_KEY'),
         'maps' => env('MAPS_API_KEY'),
         'analytics' => env('ANALYTICS_ID'),
         'gemini_key' => env('GEMINI_API_KEY'),
+        'gemini_translation_model' => env('GEMINI_TRANSLATION_MODEL', 'gemini-2.5-flash'),
+        'gemini_content_model' => env('GEMINI_CONTENT_MODEL', 'gemini-2.5-pro'),
+        'gemini_image_model' => env('GEMINI_IMAGE_MODEL', 'imagen-4.0-ultra-generate-001'),
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
@@ -84,6 +92,13 @@ return [
         'api_token' => env('DO_API_TOKEN'),
         'app_id' => env('DO_APP_ID'),
         'app_hostname' => env('DO_APP_HOSTNAME'),
+    ],
+
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'translation_model' => env('OPENAI_TRANSLATION_MODEL', 'gpt-4o'),
+        'content_model' => env('OPENAI_CONTENT_MODEL', 'o3'),
+        'image_model' => env('OPENAI_IMAGE_MODEL', 'gpt-image-1.5'),
     ],
 
     'meta' => [

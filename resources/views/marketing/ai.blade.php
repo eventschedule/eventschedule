@@ -60,7 +60,7 @@
                 "name": "How does WhatsApp event creation work?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Send a text message or photo of a flyer to your schedule's WhatsApp number. AI parses the details using Gemini, auto-generates a flyer, and adds the event to your schedule automatically."
+                    "text": "Send a text message or photo of a flyer to your schedule's WhatsApp number. AI parses the details, auto-generates a flyer, and adds the event to your schedule automatically."
                 }
             },
             {
@@ -802,7 +802,7 @@
         </div>
     </section>
 
-    <!-- Powered by Google Gemini -->
+    <!-- Powered by Google Gemini & OpenAI -->
     <section class="bg-gray-50 dark:bg-[#0f0f14] py-24 border-t border-gray-200 dark:border-white/5">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
@@ -812,17 +812,17 @@
                     </svg>
                 </div>
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Powered by Google Gemini
+                    Powered by Google Gemini & OpenAI
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-                    Fast, accurate AI that works with text and images in any language.
+                    Gemini handles text parsing and generation, while OpenAI DALL-E creates stunning images.
                 </p>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
                 <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 text-center">
-                    <div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Free tier</div>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Google offers a generous free tier for Gemini API</p>
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Best of both</div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Gemini for text, OpenAI for image generation</p>
                 </div>
                 <div class="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-200 dark:border-white/10 text-center">
                     <div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Fast</div>
@@ -840,7 +840,7 @@
 
             <div class="text-center">
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Selfhosted users bring their own Gemini API key.
+                    Selfhosted users bring their own API keys.
                     <x-link href="{{ route('marketing.docs.selfhost.ai') }}">Learn more</x-link>
                 </p>
             </div>
@@ -1012,7 +1012,7 @@
                     </button>
                     <div x-show="open === 5" x-collapse>
                         <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Send a text message or photo of a flyer to your schedule's WhatsApp number. AI parses the details using Gemini, auto-generates a flyer, and adds the event to your schedule automatically.
+                            Send a text message or photo of a flyer to your schedule's WhatsApp number. AI parses the details, auto-generates a flyer, and adds the event to your schedule automatically.
                         </p>
                     </div>
                 </div>
@@ -1177,7 +1177,7 @@
             "llms.txt AI discovery",
             "agents.json workflows",
             "Webhook notifications",
-            "Google Gemini powered"
+            "AI powered"
         ],
         "url": "{{ url()->current() }}",
         "provider": {

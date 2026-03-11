@@ -45,7 +45,7 @@
                     dir="auto"
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                     placeholder="{{ __('messages.deletion_feedback_placeholder') }}"
-                ></textarea>
+                >{{ old('feedback') }}</textarea>
             </div>
 
             @if(auth()->user()->hasPassword())

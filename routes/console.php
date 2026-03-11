@@ -93,6 +93,10 @@ Schedule::call(function () {
 })->daily()->at('12:00')->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
+    Artisan::call('app:send-carpool-reminders');
+})->hourly()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
     if (config('app.hosted')) {
         Artisan::call('app:generate-daily-blog-post');
     }

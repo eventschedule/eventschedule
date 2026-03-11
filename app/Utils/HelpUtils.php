@@ -26,6 +26,7 @@ class HelpUtils
                 'engagement-tab-feedback' => '/docs/creating-schedules#engagement-feedback',
                 'engagement-tab-fan_content' => '/docs/creating-schedules#engagement-fan-content',
                 'engagement-tab-requests' => '/docs/creating-schedules#engagement-requests',
+                'engagement-tab-carpool' => '/docs/creating-schedules#engagement-carpool',
                 'section-auto-import' => '/docs/creating-schedules#auto-import',
                 'section-integrations' => '/docs/creating-schedules#integrations',
                 'integration-tab-email' => '/docs/creating-schedules#integrations-email',

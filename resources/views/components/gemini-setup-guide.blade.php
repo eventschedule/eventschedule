@@ -1,4 +1,4 @@
-@if (! config('services.google.gemini_key'))
+@if (! config('services.google.gemini_key') && ! config('services.openai.api_key'))
 <div class="bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-900/20 dark:via-orange-900/20 dark:to-yellow-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6 shadow-sm">
     <div class="flex items-start gap-4">
         <div class="flex-shrink-0">
@@ -51,6 +51,8 @@
             </p>
             <div class="mt-3 bg-gray-900 dark:bg-gray-950 rounded-lg p-2 overflow-x-auto">
                 <code class="text-xs text-green-400 whitespace-nowrap">GEMINI_API_KEY=your_api_key_here</code>
+                <div class="mt-1 text-xs text-gray-500">{{ __('messages.or') }}</div>
+                <code class="text-xs text-green-400 whitespace-nowrap">OPENAI_API_KEY=your_api_key_here</code>
             </div>
         </div>
 

@@ -1526,10 +1526,12 @@
                         <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                             <div class="flex items-center justify-between mb-3">
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.text_template') }}</h4>
+                                @if(Route::has('marketing.docs.event_graphics'))
                                 <a href="{{ route('marketing.docs.event_graphics') }}#variables" target="_blank"
                                    class="text-xs text-blue-500 hover:text-blue-400">
                                     {{ __('messages.view_docs') }}
                                 </a>
+                                @endif
                             </div>
                             <textarea id="text_template_mobile" rows="5"
                                 aria-label="{{ __('messages.text_template') }}"
@@ -1851,10 +1853,12 @@
                             <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                                 <div class="flex items-center justify-between mb-3">
                                     <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.text_template') }}</h4>
+                                    @if(Route::has('marketing.docs.event_graphics'))
                                     <a href="{{ route('marketing.docs.event_graphics') }}#variables" target="_blank"
                                        class="text-xs text-blue-500 hover:text-blue-400">
                                         {{ __('messages.view_docs') }}
                                     </a>
+                                    @endif
                                 </div>
                                 <textarea id="text_template" rows="5"
                                     aria-label="{{ __('messages.text_template') }}"
@@ -2112,6 +2116,7 @@
             </div>
         </div>
     </div>
+@if(config('app.hosted'))
 <x-upgrade-modal name="upgrade-ai-prompt" tier="enterprise" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.event_graphics') }}">
     {{ __('messages.upgrade_feature_description_ai_prompt') }}
 </x-upgrade-modal>
@@ -2119,5 +2124,6 @@
 <x-upgrade-modal name="upgrade-email-scheduling" tier="enterprise" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.newsletters') }}">
     {{ __('messages.upgrade_feature_description_email_scheduling') }}
 </x-upgrade-modal>
+@endif
 
 </x-app-admin-layout>

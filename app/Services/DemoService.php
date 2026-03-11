@@ -132,9 +132,6 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
 
 ✨ **Mmm... free events page.** Create your own schedule at [eventschedule.com](https://eventschedule.com) - no donuts required (but encouraged).';
             $role->accept_requests = false;
-            $role->plan_type = 'pro';
-            $role->plan_expires = now()->addYear()->format('Y-m-d');
-            $role->trial_ends_at = now()->addYear();
             $role->social_links = self::getRandomDemoSocialLinks();
             $role->header_image_url = 'demo_header_town.jpg';
             $role->profile_image_url = 'demo_profile_donuts.jpg';
@@ -571,8 +568,6 @@ An ancient and totally-not-secret society bringing exclusive entertainment to ou
             $role->background_colors = $talentData['background_colors'];
             $role->background_rotation = $talentData['background_rotation'];
             $role->accent_color = $talentData['accent_color'] ?? null;
-            $role->plan_type = 'pro';
-            $role->plan_expires = now()->addYear()->format('Y-m-d');
             $role->social_links = self::getRandomDemoSocialLinks();
             $role->description = $talentData['description'];
             if (! empty($talentData['profile_image'])) {
@@ -780,9 +775,6 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             $role->background_colors = $venueData['background_colors'];
             $role->accent_color = $venueData['accent_color'];
             $role->accept_requests = false;
-            $role->plan_type = 'pro';
-            $role->plan_expires = now()->addYear()->format('Y-m-d');
-            $role->trial_ends_at = now()->addYear();
             $role->social_links = self::getRandomDemoSocialLinks();
             $role->description = $venueData['description'];
             if (! empty($venueData['header_image'])) {
@@ -2383,8 +2375,6 @@ The state\'s premier entertainment venue. Home of the Capital City Goofballs and
             $role->background = 'gradient';
             $role->background_colors = $scheduleData['background_colors'];
             $role->accent_color = $scheduleData['accent_color'];
-            $role->plan_type = 'pro';
-            $role->plan_expires = now()->addYear()->format('Y-m-d');
 
             // Apply optional styling fields
             if (! empty($scheduleData['header_image'])) {

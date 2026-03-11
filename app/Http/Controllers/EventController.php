@@ -1326,8 +1326,13 @@ class EventController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
+        if (! config('services.openai.api_key') && ! config('services.google.gemini_key')) {
+            return response()->json(['error' => __('messages.openai_key_required')], 422);
+        }
+
         $request->validate([
             'style_instructions' => 'nullable|string|max:500',
+            'custom_prompt' => 'nullable|string|max:5000',
             'name' => 'nullable|string',
             'starts_at' => 'nullable|string',
             'duration' => 'nullable|numeric',
@@ -1359,7 +1364,7 @@ class EventController extends Controller
         }
 
         try {
-            $imageData = GeminiUtils::generateEventFlyer($event, $request->input('style_instructions'), $role);
+            $imageData = GeminiUtils::generateEventFlyer($event, $request->input('style_instructions'), $role, $request->input('custom_prompt'));
 
             if (! $imageData) {
                 return response()->json(['error' => __('messages.ai_flyer_generation_failed')], 500);
@@ -1430,20 +1435,42 @@ class EventController extends Controller
 
         $request->validate([
             'elements' => 'required|array|min:1',
-            'elements.*' => 'in:category_id,short_description,description',
+            'elements.*' => 'in:category_id,short_description,description,flyer_image',
             'name' => 'required|string',
         ]);
 
-        $prompt = GeminiUtils::buildEventDetailsPrompt(
-            $request->input('name'),
-            $request->input('short_description'),
-            $request->input('schedule_name', $role->name),
-            $request->input('schedule_type', $role->type),
-            $request->input('elements'),
-            $request->input('description')
-        );
+        $elements = $request->input('elements');
+        $textElements = array_values(array_filter($elements, fn ($el) => $el !== 'flyer_image'));
 
-        return response()->json(['success' => true, 'prompt' => $prompt]);
+        $prompt = ! empty($textElements)
+            ? GeminiUtils::buildEventDetailsPrompt(
+                $request->input('name'),
+                $request->input('short_description'),
+                $request->input('schedule_name', $role->name),
+                $request->input('schedule_type', $role->type),
+                $textElements,
+                $request->input('description')
+            )
+            : '';
+
+        $response = ['success' => true, 'prompt' => $prompt];
+
+        if (in_array('flyer_image', $elements)) {
+            $event = new Event;
+            $event->name = $request->input('name');
+            $event->starts_at = $request->input('starts_at');
+            $event->duration = $request->input('duration');
+            $event->short_description = $request->input('short_description');
+            $event->category_id = $request->input('category_id');
+            $event->setRelation('roles', collect([]));
+            $event->setRelation('tickets', collect([]));
+
+            $styleDescription = GeminiUtils::buildStyleContext($role);
+            $flyerPrompt = GeminiUtils::buildFlyerPrompt($event, $request->input('style_instructions'), $styleDescription, $role);
+            $response['image_prompts'] = ['flyer_image' => $flyerPrompt];
+        }
+
+        return response()->json($response);
     }
 
     public function generateEventDetails(Request $request, $subdomain)
@@ -1464,133 +1491,38 @@ class EventController extends Controller
 
         $request->validate([
             'elements' => 'required|array|min:1',
-            'elements.*' => 'in:category_id,short_description,description,flyer_image',
+            'elements.*' => 'in:category_id,short_description,description',
             'name' => 'required|string',
-            'event_id' => 'nullable|string',
             'style_instructions' => 'nullable|string|max:500',
             'custom_prompt' => 'nullable|string|max:5000',
-            'starts_at' => 'nullable|string',
-            'duration' => 'nullable|numeric',
-            'category_id' => 'nullable|integer',
             'save_instructions' => 'nullable|boolean',
         ]);
 
-        $allElements = $request->input('elements');
-        $textElements = array_values(array_filter($allElements, fn ($el) => $el !== 'flyer_image'));
-        $wantsFlyer = in_array('flyer_image', $allElements);
-
-        $results = [];
-        $imageError = false;
+        $elements = $request->input('elements');
 
         try {
-            if (! empty($textElements)) {
-                $textResults = GeminiUtils::generateEventDetails(
-                    $request->input('name'),
-                    $request->input('short_description'),
-                    $request->input('schedule_name', $role->name),
-                    $request->input('schedule_type', $role->type),
-                    $textElements,
-                    $request->input('description'),
-                    $request->input('custom_prompt'),
-                    $request->input('style_instructions')
-                );
-
-                if (empty($textResults)) {
-                    if (! $wantsFlyer) {
-                        return response()->json(['error' => __('messages.ai_details_generation_failed')], 500);
-                    }
-                } else {
-                    $results = $textResults;
-                    UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_EVENT_DETAILS, $role->id);
-                }
-            }
-
-            if ($wantsFlyer) {
-                $eventId = UrlUtils::decodeId($request->input('event_id'));
-
-                if ($eventId) {
-                    $event = Event::with(['roles', 'tickets'])->findOrFail($eventId);
-
-                    if ($request->user()->cannot('update', $event)) {
-                        return response()->json(['error' => __('messages.not_authorized')], 403);
-                    }
-
-                    if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
-                        return response()->json(['error' => __('messages.not_authorized')], 404);
-                    }
-                } else {
-                    $event = new Event;
-                    $event->name = $request->input('name');
-                    $event->starts_at = $request->input('starts_at');
-                    $event->duration = $request->input('duration');
-                    $event->short_description = $request->input('short_description');
-                    $event->category_id = $request->input('category_id');
-                    $event->setRelation('roles', collect([]));
-                    $event->setRelation('tickets', collect([]));
-                }
-
-                try {
-                    $imageData = GeminiUtils::generateEventFlyer($event, $request->input('style_instructions'), $role);
-
-                    if ($imageData) {
-                        $filename = ImageUtils::saveImageData($imageData, 'generated_flyer.png', 'flyer_');
-
-                        if ($eventId) {
-                            if ($event->flyer_image_url) {
-                                $path = $event->getAttributes()['flyer_image_url'];
-                                if (config('filesystems.default') == 'local') {
-                                    $path = 'public/'.$path;
-                                }
-                                Storage::delete($path);
-                            }
-
-                            $event->flyer_image_url = $filename;
-                            $event->save();
-                        }
-
-                        UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_FLYER, $role->id);
-
-                        if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
-                            $flyerUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
-                        } elseif (config('filesystems.default') == 'local') {
-                            $flyerUrl = url('/storage/'.$filename);
-                        } else {
-                            $flyerUrl = $filename;
-                        }
-
-                        $results['flyer_image_url'] = $flyerUrl;
-                        $results['delete_url'] = route('event.delete_image', ['subdomain' => $subdomain]);
-
-                        if (! $eventId) {
-                            $results['flyer_image_filename'] = $filename;
-                        }
-                    } else {
-                        $imageError = true;
-                    }
-                } catch (\Exception $e) {
-                    \Log::error('AI flyer generation failed: '.$e->getMessage(), [
-                        'role_id' => $role->id,
-                    ]);
-                    $imageError = true;
-                }
-
-                if ($imageError && empty($results)) {
-                    return response()->json(['error' => __('messages.ai_flyer_generation_failed')], 500);
-                }
-            }
+            $results = GeminiUtils::generateEventDetails(
+                $request->input('name'),
+                $request->input('short_description'),
+                $request->input('schedule_name', $role->name),
+                $request->input('schedule_type', $role->type),
+                $elements,
+                $request->input('description'),
+                $request->input('custom_prompt'),
+                $request->input('style_instructions')
+            );
 
             if (empty($results)) {
                 return response()->json(['error' => __('messages.ai_details_generation_failed')], 500);
             }
+
+            UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_EVENT_DETAILS, $role->id);
 
             if ($request->input('save_instructions')) {
                 $role->update(['ai_content_instructions' => $request->input('style_instructions', '')]);
             }
 
             $results['success'] = true;
-            if ($imageError) {
-                $results['image_error'] = true;
-            }
 
             return response()->json($results);
         } catch (\Illuminate\Database\QueryException $e) {

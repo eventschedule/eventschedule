@@ -56,7 +56,7 @@
     }
 </style>
 
-@if (! config('services.google.gemini_key'))
+@if (! config('services.google.gemini_key') && ! config('services.openai.api_key'))
 <div class="ap-card p-4 sm:p-8 shadow-md rounded-lg">
     <div class="max-w-3xl mx-auto">
         <x-gemini-setup-guide />
@@ -128,7 +128,7 @@
                                     @dragleave.prevent="dragLeaveDetails"
                                     @drop.prevent="handleDetailsImageDrop"
                                     @dragend="dragEndDetails"
-                                    autofocus {{ config('services.google.gemini_key') ? '' : 'disabled' }}
+                                    autofocus {{ (config('services.google.gemini_key') || config('services.openai.api_key')) ? '' : 'disabled' }}
                                     :class="['mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm transition-all duration-200', 
                                         isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-200 dark:ring-blue-800' : '']"
                                     dir="auto"
@@ -1507,6 +1507,9 @@
 
                     // Handle HTTP error responses before trying to parse JSON
                     if (!response.ok) {
+                        if (response.status === 429) {
+                            throw new Error(@json(__('messages.ai_rate_limit')));
+                        }
                         if (response.status === 405) {
                             throw new Error('Invalid request method');
                         }

@@ -89,6 +89,7 @@ class RoleUpdateRequest extends FormRequest
             'fan_comments_enabled' => ['nullable', 'boolean'],
             'fan_photos_enabled' => ['nullable', 'boolean'],
             'fan_videos_enabled' => ['nullable', 'boolean'],
+            'carpool_enabled' => ['nullable', 'boolean'],
             'feedback_delay_hours' => ['nullable', 'integer', 'in:1,2,6,12,24,48'],
             'new_sponsor_logos.*' => ['image', 'max:2500'],
             'new_sponsor_names.*' => ['nullable', 'string', 'max:100'],

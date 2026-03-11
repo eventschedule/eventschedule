@@ -99,7 +99,7 @@ class GraphicEmailService
 
             // Apply AI prompt if configured (Enterprise feature)
             $aiPrompt = trim($settings['ai_prompt'] ?? '');
-            if ($role->isEnterprise() && ! empty($aiPrompt) && config('services.google.gemini_key')) {
+            if ($role->isEnterprise() && ! empty($aiPrompt) && (config('services.google.gemini_key') || config('services.openai.api_key'))) {
                 $transformedText = $this->applyAiPrompt($eventText, $aiPrompt);
                 if ($transformedText) {
                     $eventText = $transformedText;
