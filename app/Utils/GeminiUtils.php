@@ -347,6 +347,12 @@ class GeminiUtils
         foreach ($fields as $field => $note) {
             $prompt .= $field.($note ? " ({$note})" : '').",\n";
         }
+        // Add language preservation instruction
+        if ($role->language_code && $role->language_code !== 'en') {
+            $langName = config('app.supported_languages')[$role->language_code] ?? $role->language_code;
+            $prompt .= "\nIMPORTANT: The input is in " . ucfirst($langName) . ". Keep event_name, short_description, event_details, event_address, event_city, event_state, venue_name, and performer_name in the original " . ucfirst($langName) . ". Only the _en fields should contain English translations.\n";
+        }
+
         $prompt .= $details;
 
         $now = Carbon::now(auth()->user() ? auth()->user()->timezone : 'UTC');
