@@ -138,11 +138,17 @@ class NewsletterSegment extends Model
             return collect();
         }
 
-        return TicketWaitlist::where('subdomain', $this->role->subdomain)
+        $query = TicketWaitlist::where('subdomain', $this->role->subdomain)
             ->whereIn('status', ['waiting', 'notified'])
             ->whereNotNull('email')
-            ->where('email', '!=', '')
-            ->select('email', 'name')
+            ->where('email', '!=', '');
+
+        $criteria = $this->filter_criteria;
+        if (! empty($criteria['event_id'])) {
+            $query->where('event_id', $criteria['event_id']);
+        }
+
+        return $query->select('email', 'name')
             ->distinct('email')
             ->get()
             ->map(fn ($entry) => (object) [

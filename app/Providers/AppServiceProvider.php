@@ -80,10 +80,16 @@ class AppServiceProvider extends ServiceProvider
                 'curators' => $allRoles
                     ->where('type', 'curator')
                     ->whereIn('pivot.level', ['owner', 'admin', 'viewer']),
-                'hasCarpoolActivity' => auth()->check() && (
-                    \App\Models\CarpoolOffer::where('user_id', auth()->id())->exists()
-                    || \App\Models\CarpoolRequest::where('user_id', auth()->id())->exists()
-                ),
+                'hasCarpoolActivity' => auth()->check() && (function () {
+                    if (session()->has('has_carpool_activity')) {
+                        return session('has_carpool_activity');
+                    }
+                    $has = \App\Models\CarpoolOffer::where('user_id', auth()->id())->exists()
+                        || \App\Models\CarpoolRequest::where('user_id', auth()->id())->exists();
+                    session(['has_carpool_activity' => $has]);
+
+                    return $has;
+                })(),
             ]);
         });
 

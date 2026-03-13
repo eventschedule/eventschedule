@@ -1425,6 +1425,7 @@ return [
     'segments' => 'Segments',
     'create_segment' => 'Creer un segment',
     'segment_created' => 'Segment cree',
+    'optional_filter_by_event' => 'Filtrer optionnellement par un evenement specifique',
     'segment_updated' => 'Segment mis a jour',
     'segment_deleted' => 'Segment supprime',
     'segment_in_use' => 'Ce segment est utilise par une newsletter en brouillon ou programmee',

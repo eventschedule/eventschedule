@@ -1448,6 +1448,7 @@ return [
     'segments' => 'Segments',
     'create_segment' => 'Create Segment',
     'segment_created' => 'Segment created',
+    'optional_filter_by_event' => 'Optionally filter by a specific event',
     'segment_updated' => 'Segment updated',
     'segment_deleted' => 'Segment deleted',
     'segment_in_use' => 'This segment is used by a draft or scheduled newsletter',

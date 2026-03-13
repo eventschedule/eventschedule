@@ -1427,6 +1427,7 @@ return [
     'segments' => 'פלחים',
     'create_segment' => 'יצירת פלח',
     'segment_created' => 'הפלח נוצר',
+    'optional_filter_by_event' => 'סנן לפי אירוע ספציפי (אופציונלי)',
     'segment_updated' => 'הפלח עודכן',
     'segment_deleted' => 'הפלח נמחק',
     'segment_in_use' => 'פלח זה בשימוש על ידי ניוזלטר בטיוטה או מתוזמן',

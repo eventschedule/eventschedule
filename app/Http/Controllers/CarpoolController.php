@@ -208,6 +208,8 @@ class CarpoolController extends Controller
             return redirect()->back()->with('error', __('messages.error'));
         }
 
+        session(['has_carpool_activity' => true]);
+
         return redirect()->back()->with('success', __('messages.carpool_offer_created'));
     }
 
@@ -236,8 +238,9 @@ class CarpoolController extends Controller
         }
 
         $approvedRequests = collect();
+        $pendingRequests = collect();
 
-        $result = DB::transaction(function () use ($offer, &$approvedRequests) {
+        $result = DB::transaction(function () use ($offer, &$approvedRequests, &$pendingRequests) {
             $locked = CarpoolOffer::lockForUpdate()->find($offer->id);
 
             if ($locked->status !== 'active') {
@@ -247,7 +250,8 @@ class CarpoolController extends Controller
             $locked->status = 'cancelled';
             $locked->save();
 
-            // Cancel all pending requests
+            // Collect pending requests before cancelling them
+            $pendingRequests = $locked->pendingRequests()->with('user')->get();
             $locked->requests()->where('status', 'pending')->update(['status' => 'cancelled']);
 
             // Cancel approved requests
@@ -266,6 +270,18 @@ class CarpoolController extends Controller
 
         // Notify approved riders (outside transaction)
         foreach ($approvedRequests as $carpoolRequest) {
+            $this->sendCarpoolEmail(
+                $carpoolRequest->user,
+                $role,
+                'carpool_offer_cancelled',
+                $event,
+                $offer,
+                $carpoolRequest
+            );
+        }
+
+        // Notify pending riders (outside transaction)
+        foreach ($pendingRequests as $carpoolRequest) {
             $this->sendCarpoolEmail(
                 $carpoolRequest->user,
                 $role,
@@ -315,6 +331,11 @@ class CarpoolController extends Controller
 
         $result = DB::transaction(function () use ($offer, $newSpots) {
             $locked = CarpoolOffer::lockForUpdate()->find($offer->id);
+
+            if ($locked->status !== 'active') {
+                return 'not_active';
+            }
+
             $approvedCount = $locked->approvedRequests()->count();
 
             if ($newSpots < $approvedCount) {
@@ -326,6 +347,10 @@ class CarpoolController extends Controller
 
             return 'ok';
         });
+
+        if ($result === 'not_active') {
+            return redirect()->back()->with('error', __('messages.carpool_offer_not_available'));
+        }
 
         if ($result === 'below_approved') {
             return redirect()->back()->with('error', __('messages.carpool_spots_below_approved'));
@@ -430,6 +455,8 @@ class CarpoolController extends Controller
             $offer,
             $carpoolRequest
         );
+
+        session(['has_carpool_activity' => true]);
 
         return redirect()->back()->with('success', __('messages.carpool_request_sent'));
     }
@@ -759,16 +786,24 @@ class CarpoolController extends Controller
 
         $role = $offer->event->roles->firstWhere('subdomain', $subdomain);
 
-        $approvedRequests = $offer->approvedRequests()->with('user')->get();
+        $approvedRequests = collect();
+        $pendingRequests = collect();
 
-        DB::transaction(function () use ($offer) {
-            $offer->update(['status' => 'cancelled']);
-            $offer->requests()->whereIn('status', ['pending', 'approved'])->update(['status' => 'cancelled']);
+        DB::transaction(function () use ($offer, &$approvedRequests, &$pendingRequests) {
+            $locked = CarpoolOffer::lockForUpdate()->find($offer->id);
+            $locked->update(['status' => 'cancelled']);
+
+            $pendingRequests = $locked->pendingRequests()->with('user')->get();
+            $approvedRequests = $locked->approvedRequests()->with('user')->get();
+            $locked->requests()->whereIn('status', ['pending', 'approved'])->update(['status' => 'cancelled']);
         });
 
-        // Notify approved riders after successful cancellation
+        // Notify riders after successful cancellation
         if ($role) {
             foreach ($approvedRequests as $carpoolRequest) {
+                $this->sendCarpoolEmail($carpoolRequest->user, $role, 'carpool_offer_cancelled', $offer->event, $offer, $carpoolRequest);
+            }
+            foreach ($pendingRequests as $carpoolRequest) {
                 $this->sendCarpoolEmail($carpoolRequest->user, $role, 'carpool_offer_cancelled', $offer->event, $offer, $carpoolRequest);
             }
         }

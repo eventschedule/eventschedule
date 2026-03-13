@@ -42,8 +42,8 @@ class CaptureUtmParameters
                 $response->cookie('utm_referrer_url', $referrerUrl, 60 * 24 * 30, '/', null, true, true, false, 'Lax');
             }
 
-            // Capture landing page on first visit
-            if (! $request->session()->has('utm_landing_page')) {
+            // Capture landing page on first visit (GET only)
+            if ($request->isMethod('GET') && ! $request->session()->has('utm_landing_page')) {
                 $landingPage = mb_substr($request->path(), 0, 2048);
                 $request->session()->put('utm_landing_page', $landingPage);
                 $response->cookie('utm_landing_page', $landingPage, 60 * 24 * 30, '/', null, true, true, false, 'Lax');
@@ -52,22 +52,26 @@ class CaptureUtmParameters
             return $response;
         }
 
+        $response = $next($request);
+
         // Capture referrer independently of UTM params (first-touch), filtering same-domain
         if (! $request->session()->has('utm_referrer_url')) {
             $referer = $request->header('Referer');
             if ($referer && ! $this->isSameDomain($referer, $request)) {
                 $referrerUrl = mb_substr(trim($referer), 0, 2048);
                 $request->session()->put('utm_referrer_url', $referrerUrl);
+                $response->cookie('utm_referrer_url', $referrerUrl, 60 * 24 * 30, '/', null, true, true, false, 'Lax');
             }
         }
 
-        // Capture landing page on first visit (even without UTM params)
-        if (! $request->session()->has('utm_landing_page')) {
+        // Capture landing page on first visit (GET only, even without UTM params)
+        if ($request->isMethod('GET') && ! $request->session()->has('utm_landing_page')) {
             $landingPage = mb_substr($request->path(), 0, 2048);
             $request->session()->put('utm_landing_page', $landingPage);
+            $response->cookie('utm_landing_page', $landingPage, 60 * 24 * 30, '/', null, true, true, false, 'Lax');
         }
 
-        return $next($request);
+        return $response;
     }
 
     private function hasUtmParams(Request $request): bool
@@ -87,7 +91,29 @@ class CaptureUtmParameters
             return false;
         }
 
-        return strcasecmp($refererHost, $request->getHost()) === 0;
+        $refererBase = $this->getBaseDomain($refererHost);
+        $requestBase = $this->getBaseDomain($request->getHost());
+
+        return strcasecmp($refererBase, $requestBase) === 0;
+    }
+
+    private function getBaseDomain(string $host): string
+    {
+        // Remove port if present
+        $host = strtolower(preg_replace('/:\d+$/', '', $host));
+
+        // IP addresses or localhost - return as-is
+        if (filter_var($host, FILTER_VALIDATE_IP) || $host === 'localhost') {
+            return $host;
+        }
+
+        // Extract last two segments (e.g., eventschedule.com from sub.eventschedule.com)
+        $parts = explode('.', $host);
+        if (count($parts) >= 2) {
+            return implode('.', array_slice($parts, -2));
+        }
+
+        return $host;
     }
 
     private function sanitize(?string $value): ?string

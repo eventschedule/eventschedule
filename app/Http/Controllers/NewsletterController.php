@@ -565,7 +565,20 @@ class NewsletterController extends Controller
 
         $groups = $role->groups()->orderBy('name')->get();
 
-        return view('newsletter.segments', compact('role', 'segments', 'groups'));
+        $eventsData = $role->events()
+            ->where('is_accepted', true)
+            ->where('name', '!=', '')
+            ->whereNotNull('name')
+            ->orderBy('starts_at', 'desc')
+            ->get()
+            ->map(fn ($event) => [
+                'id' => UrlUtils::encodeId($event->id),
+                'name' => $event->translatedName(),
+                'starts_at' => $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format('D, M j, Y') : null,
+                'image_url' => $event->getImageUrl(),
+            ]);
+
+        return view('newsletter.segments', compact('role', 'segments', 'groups', 'eventsData'));
     }
 
     public function storeSegment(Request $request)
@@ -580,11 +593,16 @@ class NewsletterController extends Controller
             'emails' => 'nullable|string',
         ]);
 
+        $filterCriteria = $validated['filter_criteria'] ?? null;
+        if (! empty($filterCriteria['event_id'])) {
+            $filterCriteria['event_id'] = UrlUtils::decodeId($filterCriteria['event_id']);
+        }
+
         $segment = NewsletterSegment::create([
             'role_id' => $role->id,
             'name' => $validated['name'],
             'type' => $validated['type'],
-            'filter_criteria' => $validated['filter_criteria'] ?? null,
+            'filter_criteria' => $filterCriteria,
         ]);
 
         // Add manual users if provided
@@ -674,6 +692,11 @@ class NewsletterController extends Controller
             $subscribers = $segment->resolveRecipients()->take(50);
         }
 
+        $eventName = null;
+        if (in_array($segment->type, ['ticket_buyers', 'waitlist']) && ! empty($segment->filter_criteria['event_id'])) {
+            $eventName = \App\Models\Event::find($segment->filter_criteria['event_id'])?->translatedName();
+        }
+
         return view('newsletter.segment-edit', [
             'role' => $role,
             'segment' => $segment,
@@ -681,6 +704,7 @@ class NewsletterController extends Controller
             'recipientCount' => $recipientCount,
             'sortBy' => $sortBy,
             'sortDir' => $sortDir,
+            'eventName' => $eventName,
         ]);
     }
 

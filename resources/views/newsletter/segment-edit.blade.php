@@ -42,6 +42,9 @@
 
                     <div class="flex flex-wrap gap-x-8 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
                         <span>{{ __('messages.type') }}: {{ $segment->type === 'all_followers' ? __('messages.all_followers') : ($segment->type === 'ticket_buyers' ? __('messages.ticket_buyers') : ($segment->type === 'manual' ? __('messages.manual') : ($segment->type === 'waitlist' ? __('messages.waitlist') : __('messages.subschedule')))) }}</span>
+                        @if (!empty($eventName))
+                        <span>{{ __('messages.event') }}: {{ $eventName }}</span>
+                        @endif
                         <span>{{ __('messages.recipients') }}: {{ number_format($recipientCount) }}</span>
                         <span>{{ __('messages.created') }}: {{ $segment->created_at->format('M j, Y') }}</span>
                     </div>

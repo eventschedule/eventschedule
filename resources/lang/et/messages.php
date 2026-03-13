@@ -1438,6 +1438,7 @@ return [
     'segments' => 'Segmendid',
     'create_segment' => 'Loo segment',
     'segment_created' => 'Segment loodud',
+    'optional_filter_by_event' => 'Valikuliselt filtreeri kindla sundmuse jargi',
     'segment_updated' => 'Segmenti värskendati',
     'segment_deleted' => 'Segment kustutatud',
     'segment_in_use' => 'Seda segmenti kasutab mustandi või ajastatud uudiskiri',

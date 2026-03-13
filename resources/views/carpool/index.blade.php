@@ -327,14 +327,14 @@
 
                     @if (! $eventEnded)
                     <div class="flex gap-2">
-                        <button type="button" @click="editSpotsOfferId = editSpotsOfferId === {{ $offer->id }} ? null : {{ $offer->id }}" class="px-2.5 py-1 text-xs rounded-md border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-[#d1d5db] hover:bg-gray-50 dark:hover:bg-[#252526] font-medium">{{ __('messages.carpool_edit_spots') }}</button>
+                        <button type="button" @click="editSpotsOfferId = editSpotsOfferId === '{{ \App\Utils\UrlUtils::encodeId($offer->id) }}' ? null : '{{ \App\Utils\UrlUtils::encodeId($offer->id) }}'" class="px-2.5 py-1 text-xs rounded-md border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-[#d1d5db] hover:bg-gray-50 dark:hover:bg-[#252526] font-medium">{{ __('messages.carpool_edit_spots') }}</button>
                         <form method="POST" action="{{ route('carpool.cancel_offer', ['subdomain' => $subdomain, 'event_hash' => $eventHash, 'offer_hash' => \App\Utils\UrlUtils::encodeId($offer->id)]) }}">
                             @csrf
                             <button type="submit" class="px-2.5 py-1 text-xs rounded-md border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium" onclick="return confirm({{ Js::from(__('messages.carpool_cancel_offer_confirm')) }})">{{ __('messages.carpool_cancel_offer') }}</button>
                         </form>
                     </div>
 
-                    <div v-show="editSpotsOfferId === {{ $offer->id }}" class="mt-3">
+                    <div v-show="editSpotsOfferId === '{{ \App\Utils\UrlUtils::encodeId($offer->id) }}'" class="mt-3">
                         <form method="POST" action="{{ route('carpool.update_spots', ['subdomain' => $subdomain, 'event_hash' => $eventHash, 'offer_hash' => \App\Utils\UrlUtils::encodeId($offer->id)]) }}" class="flex items-end gap-2">
                             @csrf
                             <div>

@@ -67,7 +67,7 @@ class CarpoolOffer extends Model
 
     public function availableSpots()
     {
-        return max(0, $this->total_spots - $this->approvedRequests()->count());
+        return max(0, $this->total_spots - $this->approvedRequests->count());
     }
 
     public function isFull()

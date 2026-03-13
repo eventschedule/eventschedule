@@ -28,17 +28,17 @@
                 </div>
             </div>
 
-            <div class="ap-card rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6 text-center">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_users_7_days')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeUsers7Days) }}</p>
             </div>
 
-            <div class="ap-card rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6 text-center">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_users_30_days')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeUsers30Days) }}</p>
             </div>
 
-            <div class="ap-card rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6 text-center">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.newsletter_subscribers')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($newsletterSubscribed) }}</p>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ number_format($newsletterUnsubscribed) }} @lang('messages.unsubscribed')</p>
@@ -182,6 +182,7 @@
         </div>
 
         {{-- Top UTM Sources & Top Referrers (All Time) --}}
+        @if($topUtmSources->count() > 0 || $topReferrerDomains->count() > 0)
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             @if($topUtmSources->count() > 0)
                 <div class="ap-card rounded-xl shadow p-6">
@@ -201,6 +202,7 @@
                 </div>
             @endif
         </div>
+        @endif
 
         {{-- Recent Signups --}}
         <div class="ap-card rounded-xl shadow p-6">

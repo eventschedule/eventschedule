@@ -1426,6 +1426,7 @@ return [
     'segments' => 'الشرائح',
     'create_segment' => 'إنشاء شريحة',
     'segment_created' => 'تم إنشاء الشريحة',
+    'optional_filter_by_event' => 'تصفية اختيارية حسب حدث معين',
     'segment_updated' => 'تم تحديث الشريحة',
     'segment_deleted' => 'تم حذف الشريحة',
     'segment_in_use' => 'هذا القسم مستخدم في نشرة بريدية مسودة أو مجدولة',

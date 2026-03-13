@@ -1432,6 +1432,7 @@ return [
     'segments' => 'Segmenten',
     'create_segment' => 'Segment maken',
     'segment_created' => 'Segment aangemaakt',
+    'optional_filter_by_event' => 'Optioneel filteren op een specifiek evenement',
     'segment_updated' => 'Segment bijgewerkt',
     'segment_deleted' => 'Segment verwijderd',
     'segment_in_use' => 'Dit segment wordt gebruikt door een concept- of geplande nieuwsbrief',

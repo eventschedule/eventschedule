@@ -1425,6 +1425,7 @@ return [
     'segments' => 'Segmentos',
     'create_segment' => 'Crear segmento',
     'segment_created' => 'Segmento creado',
+    'optional_filter_by_event' => 'Filtrar opcionalmente por un evento especifico',
     'segment_updated' => 'Segmento actualizado',
     'segment_deleted' => 'Segmento eliminado',
     'segment_in_use' => 'Este segmento esta siendo usado por un boletin en borrador o programado',

@@ -1449,6 +1449,7 @@ return [
     'segments' => 'Segmente',
     'create_segment' => 'Creează Segment',
     'segment_created' => 'Segment creat',
+    'optional_filter_by_event' => 'Filtrare optionala dupa un eveniment specific',
     'segment_updated' => 'Segment actualizat',
     'segment_deleted' => 'Segment șters',
     'segment_in_use' => 'Acest segment este folosit de un buletin informativ în ciornă sau programat',

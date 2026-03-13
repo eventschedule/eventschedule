@@ -7,28 +7,28 @@
 
         {{-- Revenue & Sales Cards --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="ap-card rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6 text-center">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_revenue')</p>
                 <p class="mt-2 text-2xl font-bold text-green-600 dark:text-green-400">${{ number_format($totalRevenue, 2) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">+${{ number_format($revenueInPeriod, 2) }} @lang('messages.in_period')</p>
             </div>
-            <div class="ap-card rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6 text-center">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_sales')</p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalSales) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">+{{ number_format($salesInPeriod) }} @lang('messages.in_period')</p>
             </div>
-            <div class="ap-card rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6 text-center">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.refund_rate')</p>
                 <p class="mt-2 text-2xl font-bold {{ $refundRate > 5 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">{{ $refundRate }}%</p>
             </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="ap-card rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6 text-center">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.pending_revenue')</p>
                 <p class="mt-2 text-2xl font-bold text-amber-600 dark:text-amber-400">${{ number_format($pendingRevenue, 2) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ number_format($pendingSales) }} @lang('messages.pending_sales')</p>
             </div>
-            <div class="ap-card rounded-xl shadow p-6">
+            <div class="ap-card rounded-xl shadow p-6 text-center">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.boost_markup_revenue')</p>
                 <p class="mt-2 text-2xl font-bold text-green-600 dark:text-green-400">${{ number_format($boostMarkupTotal, 2) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">+${{ number_format($boostMarkupInPeriod, 2) }} @lang('messages.in_period')</p>
