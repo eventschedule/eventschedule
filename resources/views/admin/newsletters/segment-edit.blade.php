@@ -1,5 +1,5 @@
 <x-app-admin-layout>
-    <div class="space-y-6">
+    <div class="space-y-4">
         @include('admin.partials._navigation', ['active' => 'newsletters'])
 
         <div class="flex justify-between items-center mb-6">

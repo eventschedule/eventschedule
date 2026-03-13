@@ -1,9 +1,9 @@
 <x-app-admin-layout>
 
-    <div class="space-y-6">
+    <div class="space-y-4">
         @include('admin.partials._navigation', ['active' => 'plans'])
 
-    <div class="max-w-3xl mx-auto space-y-6">
+    <div class="max-w-3xl mx-auto space-y-4">
         {{-- Header --}}
         <div class="flex items-center justify-between">
             <div>
@@ -53,7 +53,7 @@
             @csrf
             @method('PUT')
 
-            <div class="p-6 space-y-6">
+            <div class="p-6 space-y-4">
                 {{-- Plan Type --}}
                 <div>
                     <label for="plan_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.plan_type')</label>

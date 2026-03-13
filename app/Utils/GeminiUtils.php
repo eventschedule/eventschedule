@@ -350,7 +350,7 @@ class GeminiUtils
         // Add language preservation instruction
         if ($role->language_code && $role->language_code !== 'en') {
             $langName = config('app.supported_languages')[$role->language_code] ?? $role->language_code;
-            $prompt .= "\nIMPORTANT: The input is in " . ucfirst($langName) . ". Keep event_name, short_description, event_details, event_address, event_city, event_state, venue_name, and performer_name in the original " . ucfirst($langName) . ". Only the _en fields should contain English translations.\n";
+            $prompt .= "\nIMPORTANT: The input is in ".ucfirst($langName).'. Keep event_name, short_description, event_details, event_address, event_city, event_state, venue_name, and performer_name in the original '.ucfirst($langName).". Only the _en fields should contain English translations.\n";
         }
 
         $prompt .= $details;
@@ -1338,7 +1338,7 @@ class GeminiUtils
         if ($prediction && isset($prediction['raiFilteredReason'])) {
             \Log::warning('Imagen image filtered by safety: '.$prediction['raiFilteredReason']);
 
-            return null;
+            throw new \App\Exceptions\ContentModerationException($prediction['raiFilteredReason']);
         }
 
         $imageData = $prediction['bytesBase64Encoded'] ?? null;
@@ -1960,7 +1960,7 @@ class GeminiUtils
         if ($prediction && isset($prediction['raiFilteredReason'])) {
             \Log::warning('Imagen image filtered by safety: '.$prediction['raiFilteredReason']);
 
-            return null;
+            throw new \App\Exceptions\ContentModerationException($prediction['raiFilteredReason']);
         }
 
         $imageData = $prediction['bytesBase64Encoded'] ?? null;
@@ -1998,7 +1998,12 @@ class GeminiUtils
             curl_multi_remove_handle($mh, $ch);
             curl_close($ch);
 
-            $results[$key] = self::processImageGenerationResponse($response, $httpCode, $prompt);
+            try {
+                $results[$key] = self::processImageGenerationResponse($response, $httpCode, $prompt);
+            } catch (\Exception $e) {
+                \Log::error('Gemini parallel image generation failed for '.$key.': '.$e->getMessage());
+                $results[$key] = null;
+            }
         }
 
         curl_multi_close($mh);

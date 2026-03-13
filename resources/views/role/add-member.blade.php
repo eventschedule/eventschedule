@@ -5,12 +5,12 @@
     </h2>
 
     <form method="post" action="{{ route('role.store_member', ['subdomain' => $role->subdomain]) }}"
-        class="mt-6 space-y-6">
+        class="mt-6 space-y-4">
         @csrf
         @method('post')
 
         <div class="py-5">
-            <div class="max-w-7xl mx-auto space-y-6">
+            <div class="max-w-7xl mx-auto space-y-4">
                 <div class="ap-card p-4 sm:p-8 sm:rounded-xl">
                     <div class="max-w-xl">
 
@@ -45,7 +45,7 @@
             </div>
         </div>
 
-        <div class="max-w-7xl mx-auto space-y-6">
+        <div class="max-w-7xl mx-auto space-y-4">
             <div class="flex items-center gap-4">
                 <x-primary-button>{{ __('messages.save') }}</x-primary-button>
 

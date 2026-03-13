@@ -1408,6 +1408,8 @@ class EventController extends Controller
             }
 
             return response()->json($response);
+        } catch (\App\Exceptions\ContentModerationException $e) {
+            return response()->json(['error' => __('messages.ai_content_moderation_blocked')], 422);
         } catch (\Illuminate\Database\QueryException $e) {
             report($e);
 

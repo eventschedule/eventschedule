@@ -1,7 +1,7 @@
 {{-- Summary card --}}
 @if ($feedbackCount > 0)
 <div class="ap-card rounded-xl shadow ring-1 ring-black/5 p-6 mb-6">
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.feedback_average_rating') }}</p>
             <div class="flex items-center gap-2 mt-1">

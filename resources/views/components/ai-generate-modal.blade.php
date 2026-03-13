@@ -226,8 +226,7 @@
                                         <img x-show="!previewConfig[key].aspect" :src="previewResults[previewConfig[key].data_key]" class="w-full max-h-40 rounded-lg object-cover">
                                     </div>
                                     {{-- Error --}}
-                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500">
-                                        {{ __('messages.generation_failed') }}
+                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500" x-text="elementErrors[key] || '{{ __('messages.generation_failed') }}'">
                                     </div>
                                 </div>
                             </template>
@@ -242,8 +241,7 @@
                                     <div x-show="elementStatus[key] === 'complete'" x-cloak>
                                         <p class="text-sm text-gray-800 dark:text-gray-200" x-text="previewResults[previewConfig[key].data_key]"></p>
                                     </div>
-                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500">
-                                        {{ __('messages.generation_failed') }}
+                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500" x-text="elementErrors[key] || '{{ __('messages.generation_failed') }}'">
                                     </div>
                                 </div>
                             </template>
@@ -267,8 +265,7 @@
                                         <button type="button" x-show="isLongContent(key)" x-cloak @click="expandedPreviews[key] = !expandedPreviews[key]"
                                             class="mt-1 text-xs text-[var(--brand-blue)] hover:underline" x-text="expandedPreviews[key] ? '{{ __('messages.show_less') }}' : '{{ __('messages.show_more') }}'"></button>
                                     </div>
-                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500">
-                                        {{ __('messages.generation_failed') }}
+                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500" x-text="elementErrors[key] || '{{ __('messages.generation_failed') }}'">
                                     </div>
                                 </div>
                             </template>
@@ -283,8 +280,7 @@
                                         <div class="w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm" :style="'background-color: ' + (previewResults[previewConfig[key].data_key] || '#000')"></div>
                                         <span class="text-sm font-mono text-gray-700 dark:text-gray-300" x-text="previewResults[previewConfig[key].data_key]"></span>
                                     </div>
-                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500">
-                                        {{ __('messages.generation_failed') }}
+                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500" x-text="elementErrors[key] || '{{ __('messages.generation_failed') }}'">
                                     </div>
                                 </div>
                             </template>
@@ -299,8 +295,7 @@
                                         <p class="text-sm text-gray-700 dark:text-gray-300" x-text="previewResults[previewConfig[key].data_key]"></p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" :style="'font-family: \'' + (previewResults[previewConfig[key].data_key] || '') + '\', sans-serif'" x-effect="if (elementStatus[key] === 'complete' && previewResults[previewConfig[key].data_key]) loadPreviewFont(previewResults[previewConfig[key].data_key])">The quick brown fox jumps over the lazy dog</p>
                                     </div>
-                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500">
-                                        {{ __('messages.generation_failed') }}
+                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500" x-text="elementErrors[key] || '{{ __('messages.generation_failed') }}'">
                                     </div>
                                 </div>
                             </template>
@@ -315,8 +310,7 @@
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-[var(--brand-blue)]"
                                             x-text="categoryMap[previewResults[previewConfig[key].data_key]] || previewResults[previewConfig[key].data_key]"></span>
                                     </div>
-                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500">
-                                        {{ __('messages.generation_failed') }}
+                                    <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500" x-text="elementErrors[key] || '{{ __('messages.generation_failed') }}'">
                                     </div>
                                 </div>
                             </template>
@@ -360,6 +354,7 @@ document.addEventListener('alpine:init', function() {
             saveInstructions: false,
             generatingText: @json(__('messages.generating')),
             elementStatus: {},
+            elementErrors: {},
             pendingRequests: 0,
             imageElementKeys: @json($imageElements),
             generationId: 0,
@@ -400,6 +395,7 @@ document.addEventListener('alpine:init', function() {
                         self.styleInstructions = @json($savedInstructions ?? '');
                         self.saveInstructions = false;
                         self.elementStatus = {};
+                        self.elementErrors = {};
                         self.generationStarted = false;
                         self.pendingRequests = 0;
                         self.generating = false;
@@ -522,6 +518,7 @@ document.addEventListener('alpine:init', function() {
                             self.elementStatus[key] = 'complete';
                         } else {
                             self.elementStatus[key] = 'error';
+                            if (data.error) self.elementErrors[key] = data.error;
                         }
                     })
                     .catch(function(err) {
@@ -659,6 +656,7 @@ document.addEventListener('alpine:init', function() {
                         self.elementStatus[imageKey] = 'complete';
                     } else {
                         self.elementStatus[imageKey] = 'error';
+                        if (data.error) self.elementErrors[imageKey] = data.error;
                     }
                 })
                 .catch(function(err) {
@@ -679,6 +677,7 @@ document.addEventListener('alpine:init', function() {
                 this.generating = true;
                 this.generationStarted = true;
                 this.elementStatus = {};
+                this.elementErrors = {};
                 this.previewResults = {};
                 this.expandedPreviews = {};
                 var self = this;
@@ -701,7 +700,7 @@ document.addEventListener('alpine:init', function() {
                             self.elements.forEach(function(el) { self.elementStatus[el] = 'complete'; });
                             self.showPreview = true;
                         } else {
-                            self.elements.forEach(function(el) { self.elementStatus[el] = 'error'; });
+                            self.elements.forEach(function(el) { self.elementStatus[el] = 'error'; if (data.error) self.elementErrors[el] = data.error; });
                             alert(data.error || @json($errorMessage));
                         }
                     })
@@ -750,7 +749,7 @@ document.addEventListener('alpine:init', function() {
                             Object.assign(self.previewResults, data);
                             textElements.forEach(function(el) { self.elementStatus[el] = 'complete'; });
                         } else {
-                            textElements.forEach(function(el) { self.elementStatus[el] = 'error'; });
+                            textElements.forEach(function(el) { self.elementStatus[el] = 'error'; if (data.error) self.elementErrors[el] = data.error; });
                         }
                     })
                     .catch(function(err) {

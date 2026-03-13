@@ -41,7 +41,7 @@
         </div>
         @endif
 
-        <div class="lg:grid lg:grid-cols-2 lg:gap-8">
+        <div class="lg:grid lg:grid-cols-2 lg:gap-4">
         <div>
 
         {{-- Event summary --}}

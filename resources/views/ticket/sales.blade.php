@@ -38,20 +38,20 @@
                     </div>
                 </div>
 
-                <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-                    <x-brand-link href="#" id="export-sales" class="w-full sm:w-auto">
+                <div class="flex gap-3">
+                    <x-secondary-link href="#" id="export-sales">
                         <svg class="-ms-0.5 me-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
                         </svg>
                         {{ __('messages.export') }}
-                    </x-brand-link>
-                    <x-brand-link href="{{ route('checkin.index') }}" class="w-full sm:w-auto">
+                    </x-secondary-link>
+                    <x-secondary-link href="{{ route('checkin.index') }}">
                         <svg class="-ms-0.5 me-2 h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                         </svg>
                         {{ __('messages.checkin_dashboard') }}
-                    </x-brand-link>
-                    <x-brand-link href="{{ route('ticket.scan') }}" class="w-full sm:w-auto">
+                    </x-secondary-link>
+                    <x-brand-link href="{{ route('ticket.scan') }}">
                         <svg class="-ms-0.5 me-2 h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
                             <path
                                 d="M4,4H10V10H4V4M20,4V10H14V4H20M14,15H16V13H14V11H16V13H18V11H20V13H18V15H20V18H18V20H16V18H13V20H11V16H14V15M16,15V18H18V15H16M4,20V14H10V20H4M6,6V8H8V6H6M16,6V8H18V6H16M6,16V18H8V16H6M4,11H6V13H4V11M9,11H13V15H11V13H9V11M11,6H13V10H11V6M2,2V6H0V2A2,2 0 0,1 2,0H6V2H2M22,0A2,2 0 0,1 24,2V6H22V2H18V0H22M2,18V22H6V24H2A2,2 0 0,1 0,22V18H2M22,22V18H24V22A2,2 0 0,1 22,24H18V22H22Z" />

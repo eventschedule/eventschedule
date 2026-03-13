@@ -68,7 +68,7 @@
         </div>
 
         {{-- Detailed metrics --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             {{-- Budget utilization --}}
             <div class="ap-card shadow-md rounded-lg p-6">
                 <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.budget_utilization') }}</h3>

@@ -1943,6 +1943,11 @@ class RoleController extends Controller
             $request->files->remove('new_sponsor_logos');
         }
 
+        // Guard carpool_enabled behind Pro plan
+        if (! $role->isPro()) {
+            $request->merge(['carpool_enabled' => $role->carpool_enabled]);
+        }
+
         // Guard custom_domain behind Enterprise plan
         if (! $role->isEnterprise()) {
             $request->merge([
@@ -2877,6 +2882,8 @@ class RoleController extends Controller
             $response[$imageType.'_filename'] = $filename;
 
             return response()->json($response);
+        } catch (\App\Exceptions\ContentModerationException $e) {
+            return response()->json(['error' => __('messages.ai_content_moderation_blocked')], 422);
         } catch (\Illuminate\Database\QueryException $e) {
             report($e);
 
@@ -2953,6 +2960,8 @@ class RoleController extends Controller
             $response[$imageType.'_filename'] = $filename;
 
             return response()->json($response);
+        } catch (\App\Exceptions\ContentModerationException $e) {
+            return response()->json(['error' => __('messages.ai_content_moderation_blocked')], 422);
         } catch (\Illuminate\Database\QueryException $e) {
             report($e);
 

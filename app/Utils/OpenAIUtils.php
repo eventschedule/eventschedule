@@ -313,11 +313,11 @@ class OpenAIUtils
                 $errorMessage = $errorData['error']['message'] ?? 'Unknown error';
                 $errorCode = $errorData['error']['code'] ?? null;
 
-                // Content policy violation - return null (like Gemini RAI filter)
-                if ($errorCode === 'content_policy_violation') {
+                // Content policy violation or moderation block
+                if ($errorCode === 'content_policy_violation' || $errorCode === 'moderation_blocked') {
                     \Log::warning('OpenAI image filtered by content policy: '.$errorMessage);
 
-                    return null;
+                    throw new \App\Exceptions\ContentModerationException($errorMessage);
                 }
 
                 // Rate limit

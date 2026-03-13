@@ -3,7 +3,7 @@
         <script src="{{ asset('js/chart.min.js') }}" {!! nonce_attr() !!}></script>
     </x-slot>
 
-    <div class="space-y-6">
+    <div class="space-y-4">
         @include('admin.partials._navigation', ['active' => 'newsletters'])
 
         <div class="flex justify-between items-center mb-6">
@@ -46,7 +46,7 @@
         </div>
 
         {{-- Charts --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
             <div class="ap-card rounded-xl shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.opens_over_time') }}</h3>
                 <canvas id="openChart"></canvas>

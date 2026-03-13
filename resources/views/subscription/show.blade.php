@@ -41,7 +41,7 @@
         @endif
 
         {{-- Tier Selection Cards --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             {{-- Pro Card --}}
             <button type="button" @click="selectedTier = 'pro'" class="relative rounded-xl border-2 p-6 text-left transition-all cursor-pointer" :class="selectedTier === 'pro' ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-600' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'">
                 <div class="flex items-center justify-between mb-4">

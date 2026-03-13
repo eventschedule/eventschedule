@@ -1,5 +1,5 @@
 <x-app-admin-layout>
-    <div class="space-y-6">
+    <div class="space-y-4">
 
         {{-- Navigation --}}
         @include('admin.partials._navigation', ['active' => 'boost'])
@@ -92,7 +92,7 @@
         @endif
 
         {{-- Two-column: Status Donut + Top Boosters --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {{-- Status Distribution --}}
             <div class="ap-card rounded-xl shadow p-6">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">@lang('messages.status_distribution')</h3>

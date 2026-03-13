@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Utils\UrlUtils;
 use Illuminate\Database\Eloquent\Model;
 
 class Newsletter extends Model
@@ -150,28 +151,7 @@ class Newsletter extends Model
 
     public static function detectPlatform(string $url): string
     {
-        $host = strtolower(parse_url($url, PHP_URL_HOST) ?? '');
-        $host = preg_replace('/^www\./', '', $host);
-
-        $map = [
-            'facebook.com' => 'facebook',
-            'fb.com' => 'facebook',
-            'instagram.com' => 'instagram',
-            'twitter.com' => 'twitter',
-            'x.com' => 'twitter',
-            'youtube.com' => 'youtube',
-            'youtu.be' => 'youtube',
-            'tiktok.com' => 'tiktok',
-            'linkedin.com' => 'linkedin',
-        ];
-
-        foreach ($map as $domain => $platform) {
-            if ($host === $domain || str_ends_with($host, '.'.$domain)) {
-                return $platform;
-            }
-        }
-
-        return 'website';
+        return UrlUtils::detectPlatform($url);
     }
 
     public static function defaultStyleSettings(): array

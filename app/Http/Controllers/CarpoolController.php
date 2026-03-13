@@ -158,19 +158,6 @@ class CarpoolController extends Controller
 
         $direction = $request->input('direction');
 
-        // Check for duplicate active offer
-        $existingOffer = CarpoolOffer::where('event_id', $event->id)
-            ->where('user_id', $user->id)
-            ->where('direction', $direction)
-            ->where('status', 'active')
-            ->when($isRecurring, fn ($q) => $q->where('event_date', $eventDate))
-            ->when(! $isRecurring, fn ($q) => $q->whereNull('event_date'))
-            ->exists();
-
-        if ($existingOffer) {
-            return redirect()->back()->with('error', __('messages.carpool_duplicate_offer'));
-        }
-
         // Check timing
         $startDateTime = $event->getStartDateTime($eventDate);
         $endDateTime = $event->getEndDateTime($eventDate);
@@ -184,18 +171,42 @@ class CarpoolController extends Controller
         }
 
         try {
-            CarpoolOffer::create([
-                'event_id' => $event->id,
-                'user_id' => $user->id,
-                'role_id' => $role->id,
-                'event_date' => $isRecurring ? $eventDate : null,
-                'direction' => $direction,
-                'city' => $request->input('city'),
-                'departure_time' => $request->input('departure_time'),
-                'meeting_point' => $request->input('meeting_point'),
-                'total_spots' => $request->input('total_spots'),
-                'note' => $request->input('note'),
-            ]);
+            $result = DB::transaction(function () use ($user, $event, $direction, $isRecurring, $eventDate, $request, $role) {
+                // Lock user's offers for this event to serialize concurrent creates
+                CarpoolOffer::where('event_id', $event->id)
+                    ->where('user_id', $user->id)
+                    ->lockForUpdate()
+                    ->get();
+
+                $existingOffer = CarpoolOffer::where('event_id', $event->id)
+                    ->where('user_id', $user->id)
+                    ->where('direction', $direction)
+                    ->where('status', 'active')
+                    ->when($isRecurring, fn ($q) => $q->where('event_date', $eventDate))
+                    ->when(! $isRecurring, fn ($q) => $q->whereNull('event_date'))
+                    ->exists();
+
+                if ($existingOffer) {
+                    return null;
+                }
+
+                return CarpoolOffer::create([
+                    'event_id' => $event->id,
+                    'user_id' => $user->id,
+                    'role_id' => $role->id,
+                    'event_date' => $isRecurring ? $eventDate : null,
+                    'direction' => $direction,
+                    'city' => $request->input('city'),
+                    'departure_time' => $request->input('departure_time'),
+                    'meeting_point' => $request->input('meeting_point'),
+                    'total_spots' => $request->input('total_spots'),
+                    'note' => $request->input('note'),
+                ]);
+            });
+
+            if (! $result) {
+                return redirect()->back()->with('error', __('messages.carpool_duplicate_offer'));
+            }
         } catch (\Illuminate\Database\QueryException $e) {
             report($e);
 
@@ -226,20 +237,32 @@ class CarpoolController extends Controller
 
         $approvedRequests = collect();
 
-        DB::transaction(function () use ($offer, &$approvedRequests) {
-            $offer->status = 'cancelled';
-            $offer->save();
+        $result = DB::transaction(function () use ($offer, &$approvedRequests) {
+            $locked = CarpoolOffer::lockForUpdate()->find($offer->id);
+
+            if ($locked->status !== 'active') {
+                return false;
+            }
+
+            $locked->status = 'cancelled';
+            $locked->save();
 
             // Cancel all pending requests
-            $offer->requests()->where('status', 'pending')->update(['status' => 'cancelled']);
+            $locked->requests()->where('status', 'pending')->update(['status' => 'cancelled']);
 
             // Cancel approved requests
-            $approvedRequests = $offer->approvedRequests()->with('user')->get();
+            $approvedRequests = $locked->approvedRequests()->with('user')->get();
             foreach ($approvedRequests as $carpoolRequest) {
                 $carpoolRequest->status = 'cancelled';
                 $carpoolRequest->save();
             }
+
+            return true;
         });
+
+        if (! $result) {
+            return redirect()->back()->with('error', __('messages.carpool_offer_not_available'));
+        }
 
         // Notify approved riders (outside transaction)
         foreach ($approvedRequests as $carpoolRequest) {
@@ -414,12 +437,24 @@ class CarpoolController extends Controller
             abort(403);
         }
 
-        $wasApproved = $carpoolRequest->status === 'approved';
-        $carpoolRequest->status = 'cancelled';
-        $carpoolRequest->save();
+        $result = DB::transaction(function () use ($carpoolRequest) {
+            $locked = CarpoolRequest::lockForUpdate()->find($carpoolRequest->id);
+            if (! in_array($locked->status, ['pending', 'approved'])) {
+                return null;
+            }
+            $wasApproved = $locked->status === 'approved';
+            $locked->status = 'cancelled';
+            $locked->save();
+
+            return $wasApproved;
+        });
+
+        if ($result === null) {
+            return redirect()->back()->with('error', __('messages.carpool_request_already_cancelled'));
+        }
 
         // Notify driver if rider was already approved
-        if ($wasApproved) {
+        if ($result) {
             $offer = $carpoolRequest->offer;
             $this->sendCarpoolEmail(
                 $offer->user,
@@ -693,10 +728,7 @@ class CarpoolController extends Controller
 
         $role = $offer->event->roles->firstWhere('subdomain', $subdomain);
 
-        $approvedRequests = collect();
-        if ($role) {
-            $approvedRequests = $offer->approvedRequests()->with('user')->get();
-        }
+        $approvedRequests = $offer->approvedRequests()->with('user')->get();
 
         DB::transaction(function () use ($offer) {
             $offer->update(['status' => 'cancelled']);
@@ -704,8 +736,10 @@ class CarpoolController extends Controller
         });
 
         // Notify approved riders after successful cancellation
-        foreach ($approvedRequests as $carpoolRequest) {
-            $this->sendCarpoolEmail($carpoolRequest->user, $role, 'carpool_offer_cancelled', $offer->event, $offer, $carpoolRequest);
+        if ($role) {
+            foreach ($approvedRequests as $carpoolRequest) {
+                $this->sendCarpoolEmail($carpoolRequest->user, $role, 'carpool_offer_cancelled', $offer->event, $offer, $carpoolRequest);
+            }
         }
 
         return redirect()->back()->with('message', __('messages.carpool_offer_removed'));

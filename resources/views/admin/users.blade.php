@@ -1,6 +1,6 @@
 <x-app-admin-layout>
 
-    <div class="space-y-6">
+    <div class="space-y-4">
         @include('admin.partials._navigation', ['active' => 'users'])
 
         @include('admin.partials._date-range-filter', ['range' => $range])
@@ -46,11 +46,11 @@
         </div>
 
         {{-- User Signup Method Breakdown --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {{-- Signup Method Donut Chart --}}
             <div class="ap-card rounded-xl shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.signup_method_breakdown') (@lang('messages.all_time'))</h3>
-                <div class="flex items-center gap-6">
+                <div class="flex items-center gap-4">
                     <div class="w-48 h-48">
                         <canvas id="signupMethodChart"></canvas>
                     </div>
@@ -124,7 +124,7 @@
         </div>
 
         {{-- UTM Attribution Section --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {{-- UTM Summary Card + Bar Chart --}}
             <div class="ap-card rounded-xl shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.utm_attribution') (@lang('messages.selected_period'))</h3>
@@ -182,7 +182,7 @@
         </div>
 
         {{-- Top UTM Sources & Top Referrers (All Time) --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             @if($topUtmSources->count() > 0)
                 <div class="ap-card rounded-xl shadow p-6">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.top_sources') (@lang('messages.all_time'))</h3>

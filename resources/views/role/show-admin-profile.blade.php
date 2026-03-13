@@ -20,7 +20,7 @@
 @endif
 
 <div class="pt-5 container mx-auto">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
     <div class="ap-card divide-y divide-gray-100 dark:divide-[#2d2d30] overflow-hidden rounded-lg text-sm shadow ring-1 ring-black/5 dark:ring-[#2d2d30]">
         <div class="relative flex items-center py-6 px-4 gap-x-6">

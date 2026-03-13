@@ -1,6 +1,5 @@
 @php
     $links = $block['data']['links'] ?? [];
-    $iconBaseUrl = 'https://cdn.eventschedule.com/img/social';
     $template = $template ?? 'modern';
 @endphp
 @if (count($links))
@@ -10,13 +9,19 @@
             <tr>
                 @foreach ($links as $link)
                 @if (!empty($link['url']) && !empty($link['platform']))
-                @php $label = ucfirst($link['platform']); $initial = $link['platform'] === 'website' ? '🔗' : strtoupper(substr($link['platform'], 0, 1)); @endphp
+                @php
+                    $platform = $link['platform'];
+                    $label = ucfirst($platform);
+                    $iconUrl = url('/images/social-icons/' . $platform . '.png');
+                @endphp
                 @if ($template === 'classic')
                 <td style="padding: 0 8px;">
                     <a href="{{ $link['url'] }}" style="text-decoration: none;">
                         <table role="presentation" cellpadding="0" cellspacing="0" style="background-color: {{ $style['accentColor'] }}; border-radius: 4px;">
                             <tr>
-                                <td style="width: 32px; height: 32px; text-align: center; vertical-align: middle; color: #ffffff; font-size: 14px; font-family: '{{ $style['fontFamily'] }}', sans-serif;">{{ $initial }}</td>
+                                <td style="width: 32px; height: 32px; text-align: center; vertical-align: middle;">
+                                    <img src="{{ $iconUrl }}" alt="{{ $label }}" width="16" height="16" style="display: block; margin: 0 auto;" />
+                                </td>
                             </tr>
                         </table>
                     </a>
@@ -30,7 +35,9 @@
                     <a href="{{ $link['url'] }}" style="text-decoration: none;">
                         <table role="presentation" cellpadding="0" cellspacing="0" style="background-color: {{ $style['accentColor'] }}; border-radius: 50%;">
                             <tr>
-                                <td style="width: 40px; height: 40px; text-align: center; vertical-align: middle; color: #ffffff; font-size: 18px; font-family: '{{ $style['fontFamily'] }}', sans-serif;">{{ $initial }}</td>
+                                <td style="width: 40px; height: 40px; text-align: center; vertical-align: middle;">
+                                    <img src="{{ $iconUrl }}" alt="{{ $label }}" width="20" height="20" style="display: block; margin: 0 auto;" />
+                                </td>
                             </tr>
                         </table>
                     </a>
@@ -40,7 +47,9 @@
                     <a href="{{ $link['url'] }}" style="text-decoration: none;">
                         <table role="presentation" cellpadding="0" cellspacing="0" style="background-color: {{ $style['accentColor'] }}; border-radius: 50%;">
                             <tr>
-                                <td style="width: 24px; height: 24px; text-align: center; vertical-align: middle; color: #ffffff; font-size: 11px; font-family: '{{ $style['fontFamily'] }}', sans-serif;">{{ $initial }}</td>
+                                <td style="width: 24px; height: 24px; text-align: center; vertical-align: middle;">
+                                    <img src="{{ $iconUrl }}" alt="{{ $label }}" width="14" height="14" style="display: block; margin: 0 auto;" />
+                                </td>
                             </tr>
                         </table>
                     </a>
@@ -51,7 +60,9 @@
                     <a href="{{ $link['url'] }}" style="text-decoration: none;">
                         <table role="presentation" cellpadding="0" cellspacing="0" style="background-color: {{ $style['accentColor'] }}; border-radius: 50%;">
                             <tr>
-                                <td style="width: 32px; height: 32px; text-align: center; vertical-align: middle; color: #ffffff; font-size: 14px; font-family: '{{ $style['fontFamily'] }}', sans-serif;">{{ $initial }}</td>
+                                <td style="width: 32px; height: 32px; text-align: center; vertical-align: middle;">
+                                    <img src="{{ $iconUrl }}" alt="{{ $label }}" width="16" height="16" style="display: block; margin: 0 auto;" />
+                                </td>
                             </tr>
                         </table>
                     </a>

@@ -319,7 +319,7 @@
                 @endif
                 
                 <!-- Card body -->
-                <div class="grid lg:grid-cols-2 gap-6">
+                <div class="grid lg:grid-cols-2 gap-4">
                     <!-- Left column: Form fields -->
                     <div class="space-y-4">
                         <!-- Show matching event if found for this specific event -->

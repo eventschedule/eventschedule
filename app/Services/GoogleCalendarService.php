@@ -190,7 +190,7 @@ class GoogleCalendarService
 
             if ($role->calendar_description_template) {
                 $event->loadMissing(['venue', 'tickets']);
-                $googleEvent->setDescription(EventTextGenerator::parseTemplate($role->calendar_description_template, $event, $role, false, ['url_include_https' => true]));
+                $googleEvent->setDescription(EventTextGenerator::parseTemplate($role->calendar_description_template, $event, $role, false, ['url_include_https' => false]));
             } else {
                 $googleEvent->setDescription($event->description);
             }
@@ -261,7 +261,7 @@ class GoogleCalendarService
 
             if ($role->calendar_description_template) {
                 $event->loadMissing(['venue', 'tickets']);
-                $googleEvent->setDescription(EventTextGenerator::parseTemplate($role->calendar_description_template, $event, $role, false, ['url_include_https' => true]));
+                $googleEvent->setDescription(EventTextGenerator::parseTemplate($role->calendar_description_template, $event, $role, false, ['url_include_https' => false]));
             } elseif (! empty($event->description)) {
                 $googleEvent->setDescription($event->description);
             }

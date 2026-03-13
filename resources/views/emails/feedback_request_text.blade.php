@@ -11,6 +11,18 @@
 
 {{ __('messages.feedback_submit') }}: {{ $feedbackUrl }}
 
+@if($event->isFanContentEnabled() && $event->getGuestUrl())
+@php
+    $types = [];
+    if ($event->isFanPhotosEnabled()) $types[] = mb_strtolower(__('messages.fan_photos_enabled'));
+    if ($event->isFanVideosEnabled()) $types[] = mb_strtolower(__('messages.fan_videos_enabled'));
+    if ($event->isFanCommentsEnabled()) $types[] = mb_strtolower(__('messages.fan_comments_enabled'));
+@endphp
+{{ __('messages.feedback_share_content') }}
+{{ __('messages.feedback_share_content_description', ['types' => implode(', ', $types)]) }}
+{{ __('messages.feedback_share_content_link') }}: {{ $event->getGuestUrl() }}#event-media-section
+@endif
+
 @php
     $emailSettings = $role ? $role->getEmailSettings() : [];
     $supportEmail = !empty($emailSettings['from_address']) ? $emailSettings['from_address'] : ($event->user?->email ?? config('mail.from.address'));

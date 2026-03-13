@@ -46,7 +46,7 @@
         @if ($abTest && $abTest->newsletters->count() >= 2)
         <div class="ap-card rounded-xl p-6 mb-8">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.ab_test_results') }}</h3>
-            <div class="grid grid-cols-2 gap-6">
+            <div class="grid grid-cols-2 gap-4">
                 @foreach ($abTest->newsletters->whereIn('ab_variant', ['A', 'B']) as $variant)
                 <div class="p-4 rounded-lg {{ $abTest->winner_variant === $variant->ab_variant ? 'bg-green-50 dark:bg-green-900/20 border-2 border-green-500' : 'bg-gray-50 dark:bg-gray-700' }}">
                     <div class="flex justify-between items-center mb-2">
@@ -77,7 +77,7 @@
         @endif
 
         {{-- Charts --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
             <div class="ap-card rounded-xl p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.opens_over_time') }}</h3>
                 <canvas id="openChart"></canvas>
