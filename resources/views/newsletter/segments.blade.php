@@ -32,7 +32,7 @@
                     </div>
                 </div>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    {{ __('messages.type') }}: {{ $segment->type === 'all_followers' ? __('messages.all_followers') : ($segment->type === 'ticket_buyers' ? __('messages.ticket_buyers') : ($segment->type === 'manual' ? __('messages.manual') : __('messages.group'))) }}
+                    {{ __('messages.type') }}: {{ $segment->type === 'all_followers' ? __('messages.all_followers') : ($segment->type === 'ticket_buyers' ? __('messages.ticket_buyers') : ($segment->type === 'manual' ? __('messages.manual') : ($segment->type === 'waitlist' ? __('messages.waitlist') : __('messages.subschedule')))) }}
                 </p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ __('messages.recipients') }}: {{ number_format($segment->recipient_count) }}
@@ -65,6 +65,19 @@
                             <option value="all_followers">{{ __('messages.all_followers') }}</option>
                             <option value="ticket_buyers">{{ __('messages.ticket_buyers') }}</option>
                             <option value="manual">{{ __('messages.manual') }}</option>
+                            <option value="waitlist">{{ __('messages.waitlist') }}</option>
+                            @if ($groups->count())
+                            <option value="group">{{ __('messages.subschedule') }}</option>
+                            @endif
+                        </select>
+                    </div>
+
+                    <div x-show="segmentType === 'group'" x-cloak>
+                        <x-input-label :value="__('messages.subschedule')" />
+                        <select name="filter_criteria[group_id]" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                            @foreach ($groups as $group)
+                            <option value="{{ $group->id }}">{{ $group->name }}</option>
+                            @endforeach
                         </select>
                     </div>
 

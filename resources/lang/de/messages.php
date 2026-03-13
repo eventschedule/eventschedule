@@ -560,6 +560,7 @@ return [
     'all_categories' => 'Alle Kategorien',
     'search_events' => 'Veranstaltungen suchen...',
     'no_events_found' => 'Keine Veranstaltungen gefunden',
+    'subschedule' => 'Unterzeitplan',
     'subschedules' => 'Unterzeitpläne',
     'customize' => 'Anpassen',
     'slug' => 'Kennung',

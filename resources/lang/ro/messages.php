@@ -609,6 +609,7 @@ return [
     'load_more' => 'Încarcă Mai Mult',
     'category' => 'Categorie',
     'all_categories' => 'Toate Categoriile',
+    'subschedule' => 'Sub-program',
     'subschedules' => 'Sub-programe',
     'customize' => 'Personalizare',
     'subschedules_help' => 'Creează sub-programe pentru a organiza evenimentele pe categorii. Fiecare sub-program primește propriul URL.',

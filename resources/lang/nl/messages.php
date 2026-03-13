@@ -393,6 +393,7 @@ return [
     'all_categories' => 'Alle Categorieën',
     'search_events' => 'Zoek evenementen...',
     'no_events_found' => 'Geen evenementen gevonden',
+    'subschedule' => 'Subschema',
     'subschedules' => 'Subschema\'s',
     'customize' => 'Aanpassen',
     'slug' => 'Identificatie',

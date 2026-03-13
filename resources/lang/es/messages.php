@@ -564,6 +564,7 @@ return [
     'all_categories' => 'Todas las Categorías',
     'search_events' => 'Buscar eventos...',
     'no_events_found' => 'No se encontraron eventos',
+    'subschedule' => 'Subhorario',
     'subschedules' => 'Subhorarios',
     'customize' => 'Personalizar',
     'slug' => 'Identificador',

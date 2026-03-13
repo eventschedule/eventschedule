@@ -86,6 +86,7 @@
                         </div>
                         <a href="#options" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Options</a>
                         <a href="#promo-codes" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Promo Codes</a>
+                        <a href="#add-ons" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Add-ons</a>
                         <div class="doc-nav-group">
                             <a href="#managing-sales" class="doc-nav-group-header doc-nav-link">Managing Sales <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
                             <div class="doc-nav-group-items">
@@ -485,6 +486,37 @@
                                 <div class="doc-callout-title">Invoice Ninja Payment Link Mode</div>
                                 <p>When using Invoice Ninja in payment link mode, only one promo code per event is supported and it applies to all ticket types. Use invoice mode for multiple promo codes with per-ticket targeting.</p>
                             </div>
+                        </section>
+
+                        <!-- Add-ons -->
+                        <section id="add-ons" class="doc-section">
+                            <h2 class="doc-heading">Add-ons</h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Add-ons are optional purchasable items that customers can include with their ticket order, such as parking passes, merchandise, or meal packages.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Creating an Add-on</h3>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Edit your event</li>
+                                <li>Go to the <strong class="text-gray-900 dark:text-white">Tickets &rarr; Add-ons</strong> tab</li>
+                                <li>Click <strong class="text-gray-900 dark:text-white">"+ Add Add-on"</strong></li>
+                                <li>Fill in the add-on details and save the event</li>
+                            </ol>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add-on Fields</h3>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Name:</strong> The name displayed to customers (e.g., "Parking Pass", "Event T-Shirt")</li>
+                                <li><strong class="text-gray-900 dark:text-white">Price:</strong> The price per unit (leave blank or set to 0 for free add-ons)</li>
+                                <li><strong class="text-gray-900 dark:text-white">Quantity:</strong> The total number available (leave blank for unlimited)</li>
+                                <li><strong class="text-gray-900 dark:text-white">Description:</strong> An optional description with additional details</li>
+                            </ul>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">How Add-ons Work</h3>
+                            <ul class="doc-list mb-6">
+                                <li>Add-ons appear in the checkout form only after the customer selects at least one ticket</li>
+                                <li>Customers choose a quantity for each add-on (or leave it at 0 to skip)</li>
+                                <li>Add-on totals are added to the ticket total at checkout</li>
+                                <li>Promo codes do not apply to add-ons</li>
+                                <li>Add-ons are tracked separately in sales records and confirmation emails</li>
+                            </ul>
                         </section>
 
                         <!-- Managing Sales -->

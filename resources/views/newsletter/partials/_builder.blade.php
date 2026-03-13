@@ -30,8 +30,10 @@ foreach (($segments ?? collect()) as $segment) {
             $segmentTypeLabels[$segment->id] = __('messages.ticket_buyers');
         } elseif ($segment->type === 'manual') {
             $segmentTypeLabels[$segment->id] = __('messages.manual');
+        } elseif ($segment->type === 'waitlist') {
+            $segmentTypeLabels[$segment->id] = __('messages.waitlist');
         } else {
-            $segmentTypeLabels[$segment->id] = __('messages.group');
+            $segmentTypeLabels[$segment->id] = __('messages.subschedule');
         }
     }
 }

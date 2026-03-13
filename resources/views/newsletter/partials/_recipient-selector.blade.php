@@ -11,7 +11,7 @@
             <div>
                 <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $segment->name }}</span>
                 <span class="text-xs text-gray-500 dark:text-gray-400 {{ is_rtl() ? 'me-2' : 'ms-2' }}">
-                    ({{ $segment->type === 'all_followers' ? __('messages.all_followers') : ($segment->type === 'ticket_buyers' ? __('messages.ticket_buyers') : ($segment->type === 'manual' ? __('messages.manual') : __('messages.group'))) }})
+                    ({{ $segment->type === 'all_followers' ? __('messages.all_followers') : ($segment->type === 'ticket_buyers' ? __('messages.ticket_buyers') : ($segment->type === 'manual' ? __('messages.manual') : ($segment->type === 'waitlist' ? __('messages.waitlist') : __('messages.subschedule')))) }})
                 </span>
             </div>
         </div>

@@ -399,6 +399,7 @@ return [
     'all_categories' => 'Todas as Categorias',
     'search_events' => 'Buscar eventos...',
     'no_events_found' => 'Nenhum evento encontrado',
+    'subschedule' => 'Sub-agenda',
     'subschedules' => 'Sub-agendas',
     'customize' => 'Personalizar',
     'slug' => 'Identificador',

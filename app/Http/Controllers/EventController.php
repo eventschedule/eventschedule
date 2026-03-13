@@ -297,6 +297,7 @@ class EventController extends Controller
                 $event->require_phone = $defaultTickets['require_phone'] ?? false;
                 $event->country_code_phone = $defaultTickets['country_code_phone'] ?? false;
                 $event->individual_tickets = $defaultTickets['individual_tickets'] ?? false;
+                $event->individual_ticket_fields = $defaultTickets['individual_ticket_fields'] ?? false;
                 $event->custom_fields = $defaultTickets['custom_fields'] ?? null;
                 $event->tickets = $defaultTickets['tickets'] ?? [new Ticket];
                 $event->addons = $defaultTickets['addons'] ?? [];
@@ -703,6 +704,7 @@ class EventController extends Controller
                 'require_phone' => $event->require_phone,
                 'country_code_phone' => $event->country_code_phone,
                 'individual_tickets' => $event->individual_tickets,
+                'individual_ticket_fields' => $event->individual_ticket_fields,
                 'custom_fields' => $event->custom_fields,
                 'tickets' => $event->tickets->map(function ($ticket) {
                     return [
@@ -965,6 +967,7 @@ class EventController extends Controller
                 'require_phone' => $event->require_phone,
                 'country_code_phone' => $event->country_code_phone,
                 'individual_tickets' => $event->individual_tickets,
+                'individual_ticket_fields' => $event->individual_ticket_fields,
                 'custom_fields' => $event->custom_fields,
                 'tickets' => $event->tickets->map(function ($ticket) {
                     return [

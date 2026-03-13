@@ -401,6 +401,7 @@ return [
     'all_categories' => 'Tutte le Categorie',
     'search_events' => 'Cerca eventi...',
     'no_events_found' => 'Nessun evento trovato',
+    'subschedule' => 'Sottoprogramma',
     'subschedules' => 'Sottoprogrammi',
     'customize' => 'Personalizza',
     'slug' => 'Identificatore',

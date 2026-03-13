@@ -563,7 +563,9 @@ class NewsletterController extends Controller
             $segment->recipient_count = $segment->recipientCount();
         }
 
-        return view('newsletter.segments', compact('role', 'segments'));
+        $groups = $role->groups()->orderBy('name')->get();
+
+        return view('newsletter.segments', compact('role', 'segments', 'groups'));
     }
 
     public function storeSegment(Request $request)
@@ -573,7 +575,7 @@ class NewsletterController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:all_followers,ticket_buyers,manual,group',
+            'type' => 'required|in:all_followers,ticket_buyers,manual,group,waitlist',
             'filter_criteria' => 'nullable|array',
             'emails' => 'nullable|string',
         ]);

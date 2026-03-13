@@ -609,6 +609,7 @@ return [
     'load_more' => 'Load More',
     'category' => 'Category',
     'all_categories' => 'All Categories',
+    'subschedule' => 'Sub-schedule',
     'subschedules' => 'Sub-schedules',
     'customize' => 'Customize',
     'subschedules_help' => 'Create sub-schedules to organize events into categories. Each sub-schedule gets its own URL.',

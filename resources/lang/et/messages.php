@@ -607,6 +607,7 @@ return [
     'load_more' => 'Laadige rohkem',
     'category' => 'Kategooria',
     'all_categories' => 'Kõik kategooriad',
+    'subschedule' => 'Alamplaan',
     'subschedules' => 'Alamplaanid',
     'customize' => 'Kohanda',
     'subschedules_help' => 'Looge alamkavasid sündmuste kategooriatesse jaotamiseks. Iga alamkava saab oma URL-i.',

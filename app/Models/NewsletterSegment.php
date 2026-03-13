@@ -35,6 +35,7 @@ class NewsletterSegment extends Model
             'ticket_buyers' => $this->resolveTicketBuyers(),
             'manual' => $this->resolveManual(),
             'group' => $this->resolveGroup(),
+            'waitlist' => $this->resolveWaitlist(),
             'all_users' => $this->resolveAllUsers(),
             'plan_tier' => $this->resolvePlanTier(),
             'signup_date' => $this->resolveSignupDate(),
@@ -128,6 +129,26 @@ class NewsletterSegment extends Model
                 'user_id' => $sale->user_id,
                 'email' => strtolower($sale->email),
                 'name' => $sale->name,
+            ]);
+    }
+
+    protected function resolveWaitlist(): Collection
+    {
+        if (! $this->role) {
+            return collect();
+        }
+
+        return TicketWaitlist::where('subdomain', $this->role->subdomain)
+            ->whereIn('status', ['waiting', 'notified'])
+            ->whereNotNull('email')
+            ->where('email', '!=', '')
+            ->select('email', 'name')
+            ->distinct('email')
+            ->get()
+            ->map(fn ($entry) => (object) [
+                'user_id' => null,
+                'email' => strtolower($entry->email),
+                'name' => $entry->name,
             ]);
     }
 

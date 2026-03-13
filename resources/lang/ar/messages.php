@@ -552,6 +552,7 @@ return [
     'all_categories' => 'جميع الفئات',
     'search_events' => 'البحث عن الفعاليات...',
     'no_events_found' => 'لم يتم العثور على فعاليات',
+    'subschedule' => 'جدول فرعي',
     'subschedules' => 'الجداول الفرعية',
     'customize' => 'تخصيص',
     'slug' => 'المعرف',

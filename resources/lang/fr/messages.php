@@ -564,6 +564,7 @@ return [
     'all_categories' => 'Toutes les catégories',
     'search_events' => 'Rechercher des événements...',
     'no_events_found' => 'Aucun événement trouvé',
+    'subschedule' => 'Sous-planning',
     'subschedules' => 'Sous-plannings',
     'customize' => 'Personnaliser',
     'slug' => 'Identifiant',

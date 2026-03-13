@@ -525,6 +525,14 @@
                 }
             }
 
+            var linksTab = e.target.closest('.links-tab');
+            if (linksTab) {
+                var tabKey = 'links-tab-' + linksTab.getAttribute('data-tab');
+                if (anchorMap[tabKey]) {
+                    updateHelpLinks(anchorMap[tabKey]);
+                }
+            }
+
             var ticketModeRadio = e.target.closest('.ticket-mode-radio');
             if (ticketModeRadio) {
                 var modeKey = 'ticket-mode-' + ticketModeRadio.value;

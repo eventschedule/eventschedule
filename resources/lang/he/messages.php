@@ -361,6 +361,7 @@ return [
     'all_categories' => 'כל הקטגוריות',
     'search_events' => 'חפש אירועים...',
     'no_events_found' => 'לא נמצאו אירועים',
+    'subschedule' => 'לוח זמנים משני',
     'subschedules' => 'לוחות זמנים משניים',
     'customize' => 'התאמה אישית',
     'slug' => 'מזהה',
