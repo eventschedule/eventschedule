@@ -165,3 +165,4 @@ Contributions are welcome! Please open an [issue](https://github.com/eventschedu
 ## License
 
 Event Schedule is licensed under the [Attribution Assurance License (AAL)](LICENSE).
+
