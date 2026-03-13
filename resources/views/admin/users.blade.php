@@ -50,7 +50,7 @@
             {{-- Signup Method Donut Chart --}}
             <div class="ap-card rounded-xl shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.signup_method_breakdown') (@lang('messages.all_time'))</h3>
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-6">
                     <div class="w-48 h-48">
                         <canvas id="signupMethodChart"></canvas>
                     </div>

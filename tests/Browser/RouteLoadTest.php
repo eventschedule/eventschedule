@@ -67,6 +67,9 @@ class RouteLoadTest extends DuskTestCase
                 '/features/white-label',
                 '/features/custom-css',
                 '/features/custom-domain',
+                '/features/custom-labels',
+                '/features/feedback',
+                '/features/availability',
 
                 // Integration pages
                 '/google-calendar',
@@ -231,6 +234,7 @@ class RouteLoadTest extends DuskTestCase
                 '/newsletter-import',
                 '/boost',
                 '/boost/create',
+                '/my-carpools',
                 '/referrals',
                 '/scan',
                 '/checkin',
@@ -247,7 +251,6 @@ class RouteLoadTest extends DuskTestCase
                 "/{$subdomain}/schedule",
                 "/{$subdomain}/availability",
                 "/{$subdomain}/requests",
-                "/{$subdomain}/profile",
                 "/{$subdomain}/followers",
                 "/{$subdomain}/team",
                 "/{$subdomain}/plan",

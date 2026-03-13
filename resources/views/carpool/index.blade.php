@@ -171,11 +171,11 @@
                     </div>
 
                     <div class="flex gap-3">
-                        <button type="submit" class="px-4 py-3 text-base rounded-lg text-white font-medium" style="background-color: {{ $accentColor }};">
-                            {{ __('messages.carpool_create_offer') }}
-                        </button>
                         <button type="button" @click="showOfferForm = false" class="px-4 py-3 text-base rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-[#d1d5db] font-medium">
                             {{ __('messages.cancel') }}
+                        </button>
+                        <button type="submit" class="px-4 py-3 text-base rounded-lg text-white font-medium" style="background-color: {{ $accentColor }};">
+                            {{ __('messages.carpool_create_offer') }}
                         </button>
                     </div>
                 </form>

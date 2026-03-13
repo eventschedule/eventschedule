@@ -172,18 +172,13 @@ class CarpoolController extends Controller
 
         try {
             $result = DB::transaction(function () use ($user, $event, $direction, $isRecurring, $eventDate, $request, $role) {
-                // Lock user's offers for this event to serialize concurrent creates
-                CarpoolOffer::where('event_id', $event->id)
-                    ->where('user_id', $user->id)
-                    ->lockForUpdate()
-                    ->get();
-
                 $existingOffer = CarpoolOffer::where('event_id', $event->id)
                     ->where('user_id', $user->id)
                     ->where('direction', $direction)
                     ->where('status', 'active')
                     ->when($isRecurring, fn ($q) => $q->where('event_date', $eventDate))
                     ->when(! $isRecurring, fn ($q) => $q->whereNull('event_date'))
+                    ->lockForUpdate()
                     ->exists();
 
                 if ($existingOffer) {

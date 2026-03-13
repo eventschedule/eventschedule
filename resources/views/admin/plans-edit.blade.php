@@ -53,7 +53,7 @@
             @csrf
             @method('PUT')
 
-            <div class="p-6 space-y-4">
+            <div class="p-6 space-y-6">
                 {{-- Plan Type --}}
                 <div>
                     <label for="plan_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.plan_type')</label>
