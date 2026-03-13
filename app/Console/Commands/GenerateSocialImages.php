@@ -49,6 +49,10 @@ class GenerateSocialImages extends Command
         'features-white-label' => '/features/white-label',
         'features-custom-css' => '/features/custom-css',
         'features-custom-domain' => '/features/custom-domain',
+        'features-custom-labels' => '/features/custom-labels',
+        'features-embed-tickets' => '/features/embed-tickets',
+        'features-availability' => '/features/availability',
+        'features-feedback' => '/features/feedback',
 
         // Integration pages
         'google-calendar' => '/google-calendar',
@@ -103,6 +107,14 @@ class GenerateSocialImages extends Command
         'dice-alternative' => '/dice-alternative',
         'brown-paper-tickets-alternative' => '/brown-paper-tickets-alternative',
         'splash-alternative' => '/splash-alternative',
+        'sched-alternative' => '/sched-alternative',
+        'whova-alternative' => '/whova-alternative',
+        'accelevents-alternative' => '/accelevents-alternative',
+        'tito-alternative' => '/tito-alternative',
+        'addevent-alternative' => '/addevent-alternative',
+        'pretix-alternative' => '/pretix-alternative',
+        'humanitix-alternative' => '/humanitix-alternative',
+        'eventzilla-alternative' => '/eventzilla-alternative',
 
         // Replacement pages
         'replace' => '/replace',

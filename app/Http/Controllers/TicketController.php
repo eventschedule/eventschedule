@@ -505,6 +505,29 @@ class TicketController extends Controller
                             }
                         }
                     }
+
+                    // Check add-on availability
+                    $addonSelections = $request->input('addons', []);
+                    foreach ($addonSelections as $addonId => $addonQty) {
+                        $addonQty = (int) $addonQty;
+                        if ($addonQty > 0) {
+                            $addonModel = $event->addons()->lockForUpdate()->find(UrlUtils::decodeId($addonId));
+
+                            if (! $addonModel) {
+                                throw new \Exception(__('messages.ticket_not_found'));
+                            }
+
+                            if ($addonModel->quantity > 0) {
+                                $sold = $addonModel->sold ? json_decode($addonModel->sold, true) : [];
+                                $soldCount = $sold[$eventDate] ?? 0;
+                                $remaining = $addonModel->quantity - $soldCount;
+
+                                if ($addonQty > $remaining) {
+                                    throw new \Exception(__('messages.tickets_not_available'));
+                                }
+                            }
+                        }
+                    }
                 }
 
                 $sale = new Sale;
@@ -665,6 +688,29 @@ class TicketController extends Controller
                             }
                         }
 
+                        $subtotal = $sale->calculateTotal();
+                        $sale->payment_amount = $subtotal;
+                    }
+
+                    // Create SaleTickets for add-ons (attach to primary sale only)
+                    $addonSelections = $request->input('addons', []);
+                    $hasAddons = false;
+                    foreach ($addonSelections as $addonId => $addonQty) {
+                        $addonQty = (int) $addonQty;
+                        if ($addonQty > 0) {
+                            $addonModel = $event->addons()->findOrFail(UrlUtils::decodeId($addonId));
+                            $sale->saleTickets()->create([
+                                'ticket_id' => $addonModel->id,
+                                'quantity' => $addonQty,
+                                'seats' => json_encode(array_fill(1, $addonQty, null)),
+                            ]);
+                            $hasAddons = true;
+                        }
+                    }
+
+                    // Recalculate subtotal if add-ons were added
+                    if ($hasAddons) {
+                        $sale->load('saleTickets.ticket');
                         $subtotal = $sale->calculateTotal();
                         $sale->payment_amount = $subtotal;
                     }
@@ -1150,10 +1196,13 @@ class TicketController extends Controller
             $stripeSaleTickets = $sale->saleTickets;
         }
 
-        // Calculate discount ratio for eligible tickets
+        // Calculate discount ratio for eligible tickets (exclude add-ons)
         $eligibleSubtotal = 0;
         if ($promoCode && $discount > 0) {
             foreach ($stripeSaleTickets as $saleTicket) {
+                if ($saleTicket->ticket->is_addon) {
+                    continue;
+                }
                 if ($promoCode->appliesToTicket($saleTicket->ticket_id)) {
                     $eligibleSubtotal += $saleTicket->ticket->price * $saleTicket->quantity;
                 }
@@ -1169,7 +1218,7 @@ class TicketController extends Controller
 
         foreach ($stripeSaleTickets as $index => $saleTicket) {
             $unitPrice = $saleTicket->ticket->price;
-            if ($promoCode && $discount > 0 && $promoCode->appliesToTicket($saleTicket->ticket_id)) {
+            if ($promoCode && $discount > 0 && ! $saleTicket->ticket->is_addon && $promoCode->appliesToTicket($saleTicket->ticket_id)) {
                 $unitPrice = $unitPrice * $discountRatio;
                 $lastEligibleIndex = count($lineItems);
             }
@@ -1416,7 +1465,23 @@ class TicketController extends Controller
                     }
                 }
 
-                $optionalProductIds = $event->tickets->pluck('invoiceninja_product_id')->filter()->values()->toArray();
+                // Create IN products for add-ons
+                foreach ($event->addons as $addon) {
+                    if (! $addon->invoiceninja_product_id) {
+                        $productKey = $addon->type ?: __('messages.add_on');
+                        $product = $invoiceNinja->createProduct(
+                            $productKey,
+                            $addon->description ?: $productKey,
+                            $addon->price
+                        );
+                        $addon->invoiceninja_product_id = $product['id'];
+                        $addon->save();
+                    }
+                }
+
+                $optionalProductIds = $event->tickets->pluck('invoiceninja_product_id')
+                    ->merge($event->addons->pluck('invoiceninja_product_id'))
+                    ->filter()->values()->toArray();
 
                 $encodedEventId = UrlUtils::encodeId($event->id);
                 $subscriptionName = 'ES-'.($event->name ?: $encodedEventId).'-'.time();

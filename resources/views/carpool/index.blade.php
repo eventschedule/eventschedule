@@ -279,6 +279,7 @@
                                 <p class="text-xs text-gray-500 dark:text-[#9ca3af] mt-0.5 italic">{{ $pendingReq->message }}</p>
                                 @endif
                             </div>
+                            @if (! $eventEnded)
                             <div class="flex gap-2">
                                 <form method="POST" action="{{ route('carpool.approve', ['subdomain' => $subdomain, 'event_hash' => $eventHash, 'offer_hash' => \App\Utils\UrlUtils::encodeId($offer->id), 'request_hash' => \App\Utils\UrlUtils::encodeId($pendingReq->id)]) }}">
                                     @csrf
@@ -289,6 +290,7 @@
                                     <button type="submit" class="px-2.5 py-1 text-xs rounded-md bg-red-600 text-white hover:bg-red-700 font-medium">{{ __('messages.decline') }}</button>
                                 </form>
                             </div>
+                            @endif
                         </div>
                         @endforeach
                     </div>
@@ -323,12 +325,31 @@
                     </div>
                     @endif
 
+                    @if (! $eventEnded)
                     <div class="flex gap-2">
+                        <button type="button" @click="editSpotsOfferId = editSpotsOfferId === {{ $offer->id }} ? null : {{ $offer->id }}" class="px-2.5 py-1 text-xs rounded-md border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-[#d1d5db] hover:bg-gray-50 dark:hover:bg-[#252526] font-medium">{{ __('messages.carpool_edit_spots') }}</button>
                         <form method="POST" action="{{ route('carpool.cancel_offer', ['subdomain' => $subdomain, 'event_hash' => $eventHash, 'offer_hash' => \App\Utils\UrlUtils::encodeId($offer->id)]) }}">
                             @csrf
                             <button type="submit" class="px-2.5 py-1 text-xs rounded-md border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium" onclick="return confirm({{ Js::from(__('messages.carpool_cancel_offer_confirm')) }})">{{ __('messages.carpool_cancel_offer') }}</button>
                         </form>
                     </div>
+
+                    <div v-show="editSpotsOfferId === {{ $offer->id }}" class="mt-3">
+                        <form method="POST" action="{{ route('carpool.update_spots', ['subdomain' => $subdomain, 'event_hash' => $eventHash, 'offer_hash' => \App\Utils\UrlUtils::encodeId($offer->id)]) }}" class="flex items-end gap-2">
+                            @csrf
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 dark:text-[#9ca3af] mb-1">{{ __('messages.carpool_spots') }}</label>
+                                <select name="total_spots" class="px-2 py-1 text-sm rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-[#2d2d30] dark:text-[#d1d5db] focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]">
+                                    @for ($i = 1; $i <= 10; $i++)
+                                    <option value="{{ $i }}" {{ $offer->total_spots === $i ? 'selected' : '' }}>{{ $i }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                            <button type="submit" class="px-2.5 py-1 text-xs rounded-md text-white font-medium" style="background-color: {{ $accentColor }};">{{ __('messages.save') }}</button>
+                            <button type="button" @click="editSpotsOfferId = null" class="px-2.5 py-1 text-xs rounded-md border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-[#d1d5db] hover:bg-gray-50 dark:hover:bg-[#252526] font-medium">{{ __('messages.cancel') }}</button>
+                        </form>
+                    </div>
+                    @endif
                 </div>
 
                 {{-- Other user's offer: request/status --}}
@@ -339,18 +360,22 @@
                         @if ($myRequest->status === 'pending')
                         <div class="flex items-center justify-between">
                             <span class="text-sm text-amber-600 dark:text-amber-400 font-medium">{{ __('messages.carpool_request_pending') }}</span>
+                            @if (! $eventEnded)
                             <form method="POST" action="{{ route('carpool.cancel_request', ['subdomain' => $subdomain, 'event_hash' => $eventHash, 'request_hash' => \App\Utils\UrlUtils::encodeId($myRequest->id)]) }}">
                                 @csrf
                                 <button type="submit" class="px-2.5 py-1 text-xs rounded-md border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-[#d1d5db] hover:bg-gray-50 dark:hover:bg-[#252526] font-medium">{{ __('messages.cancel') }}</button>
                             </form>
+                            @endif
                         </div>
                         @elseif ($myRequest->status === 'approved')
                         <div class="flex items-center justify-between">
                             <span class="text-sm text-green-600 dark:text-green-400 font-medium">{{ __('messages.carpool_request_approved_status') }}</span>
+                            @if (! $eventEnded)
                             <form method="POST" action="{{ route('carpool.cancel_request', ['subdomain' => $subdomain, 'event_hash' => $eventHash, 'request_hash' => \App\Utils\UrlUtils::encodeId($myRequest->id)]) }}">
                                 @csrf
                                 <button type="submit" class="px-2.5 py-1 text-xs rounded-md border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-[#d1d5db] hover:bg-gray-50 dark:hover:bg-[#252526] font-medium" onclick="return confirm({{ Js::from(__('messages.carpool_cancel_request_confirm')) }})">{{ __('messages.carpool_withdraw') }}</button>
                             </form>
+                            @endif
                         </div>
                         @elseif ($myRequest->status === 'declined')
                         <div>
@@ -488,6 +513,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         showOfferForm: false,
                         reportOfferId: null,
                         reportRiderKey: null,
+                        editSpotsOfferId: null,
                     };
                 }
             }).mount('#carpool-app');

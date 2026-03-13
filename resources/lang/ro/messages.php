@@ -2768,6 +2768,7 @@ return [
     'carpool_cancel_offer_confirm' => 'Ești sigur că vrei să anulezi această ofertă de cursă? Pasagerii aprobați vor fi notificați.',
     'carpool_spots_updated' => 'Locurile disponibile au fost actualizate.',
     'carpool_spots_below_approved' => 'Nu poți seta locurile sub numărul de pasageri aprobați.',
+    'carpool_edit_spots' => 'Editare locuri',
     'carpool_request_spot' => 'Solicită un loc',
     'carpool_request_sent' => 'Cererea ta de cursă a fost trimisă șoferului.',
     'carpool_request_cancelled' => 'Cererea ta de cursă a fost anulată.',

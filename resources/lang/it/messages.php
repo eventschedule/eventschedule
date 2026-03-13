@@ -2728,6 +2728,7 @@ return [
     'carpool_cancel_offer_confirm' => 'Sei sicuro di voler annullare questa offerta di passaggio? I passeggeri approvati saranno avvisati.',
     'carpool_spots_updated' => 'Posti disponibili aggiornati.',
     'carpool_spots_below_approved' => 'Non è possibile impostare i posti al di sotto del numero di passeggeri approvati.',
+    'carpool_edit_spots' => 'Modifica posti',
     'carpool_request_spot' => 'Richiedi un posto',
     'carpool_request_sent' => 'La tua richiesta di passaggio è stata inviata al conducente.',
     'carpool_request_cancelled' => 'La tua richiesta di passaggio è stata annullata.',
@@ -2808,4 +2809,9 @@ return [
     'carpool_notifications' => 'Notifiche passaggio condiviso',
     'carpool_notifications_help' => 'Ricevi notifiche via e-mail sulle richieste e gli aggiornamenti dei passaggi condivisi.',
     'report' => 'Segnala',
+
+    'add_ons' => 'Extra',
+    'add_on' => 'Extra',
+    'add_add_on' => 'Aggiungi extra',
+    'add_ons_help' => 'Articoli opzionali che i clienti possono aggiungere al loro acquisto (ad es. parcheggio, merchandising, pacchetti pasto).',
 ];

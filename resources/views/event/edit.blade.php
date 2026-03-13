@@ -2457,6 +2457,11 @@
                                             class="ticket-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="promo_codes">
                                             {{ __('messages.promo_codes') }}
                                         </button>
+                                        <button type="button" @click="activeTicketTab = 'add_ons'"
+                                            :class="activeTicketTab === 'add_ons' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
+                                            class="ticket-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="add_ons">
+                                            {{ __('messages.add_ons') }}
+                                        </button>
                                     </nav>
                                 </div>
 
@@ -2927,6 +2932,48 @@
                                         + {{ __('messages.add_promo_code') }}
                                     </button>
                                 </div>
+                                </div>
+
+                                <!-- Add-ons Tab -->
+                                <div v-show="activeTicketTab === 'add_ons'">
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.add_ons_help') }}</p>
+
+                                    <div v-for="(addon, aIndex) in addons" :key="aIndex" class="mb-4 p-4 bg-gray-50 dark:bg-[#252526] rounded-lg">
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.name') }} *</label>
+                                                <input type="text" v-model="addon.type" :name="`addons[${aIndex}][type]`" required
+                                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.price') }}</label>
+                                                <input type="number" v-model="addon.price" :name="`addons[${aIndex}][price]`" step="0.01" min="0"
+                                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.quantity') }}</label>
+                                                <input type="number" v-model="addon.quantity" :name="`addons[${aIndex}][quantity]`" min="0" :placeholder="'{{ __('messages.unlimited') }}'"
+                                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm">
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.description') }}</label>
+                                            <textarea v-model="addon.description" :name="`addons[${aIndex}][description]`" rows="2"
+                                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm"></textarea>
+                                        </div>
+                                        <div class="mt-2 flex justify-between items-center">
+                                            <input type="hidden" :name="`addons[${aIndex}][id]`" :value="addon.id">
+                                            <div></div>
+                                            <button type="button" @click="removeAddon(aIndex)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                {{ __('messages.remove') }}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <button type="button" @click="addAddon"
+                                        class="mt-2 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
+                                        + {{ __('messages.add_add_on') }}
+                                    </button>
                                 </div>
 
                                 <!-- Phone Number -->
@@ -3821,6 +3868,13 @@
           }
           return pcs;
         })(),
+        addons: @json($event->addons ?? []).map(addon => ({
+          id: addon.id || null,
+          type: addon.type || '',
+          quantity: addon.quantity || null,
+          price: addon.price || null,
+          description: addon.description || '',
+        })),
         formSubmitAttempted: false,
         isSaving: false,
         isDirty: false,
@@ -4539,6 +4593,18 @@
         if (this.promoCodes.length > 0) {
           this.$nextTick(() => { this.initAllPromoDatePickers(); });
         }
+      },
+      addAddon() {
+        this.addons.push({
+          id: null,
+          type: '',
+          quantity: null,
+          price: null,
+          description: '',
+        });
+      },
+      removeAddon(index) {
+        this.addons.splice(index, 1);
       },
       copyPromoLink(promoCode) {
         if (!promoCode.code) return;

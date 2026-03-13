@@ -2768,6 +2768,7 @@ return [
     'carpool_cancel_offer_confirm' => 'Are you sure you want to cancel this ride offer? Approved riders will be notified.',
     'carpool_spots_updated' => 'Available spots updated.',
     'carpool_spots_below_approved' => 'Cannot set spots below the number of approved riders.',
+    'carpool_edit_spots' => 'Edit spots',
     'carpool_request_spot' => 'Request a spot',
     'carpool_request_sent' => 'Your ride request has been sent to the driver.',
     'carpool_request_cancelled' => 'Your ride request has been cancelled.',
@@ -2850,4 +2851,9 @@ return [
     'carpool_dismiss_report' => 'Dismiss',
     'carpool_notifications' => 'Carpool notifications',
     'carpool_notifications_help' => 'Receive email notifications about carpool ride requests and updates.',
+
+    'add_ons' => 'Add-ons',
+    'add_on' => 'Add-on',
+    'add_add_on' => 'Add add-on',
+    'add_ons_help' => 'Optional items customers can add to their purchase (e.g. parking, merchandise, meal packages).',
 ];

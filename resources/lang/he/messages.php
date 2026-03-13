@@ -2721,6 +2721,7 @@ return [
     'carpool_cancel_offer_confirm' => 'האם אתה בטוח שברצונך לבטל את הצעת הנסיעה? נוסעים מאושרים יקבלו הודעה.',
     'carpool_spots_updated' => 'המקומות הפנויים עודכנו.',
     'carpool_spots_below_approved' => 'לא ניתן להגדיר מקומות מתחת למספר הנוסעים המאושרים.',
+    'carpool_edit_spots' => 'עריכת מקומות',
     'carpool_request_spot' => 'בקש מקום',
     'carpool_request_sent' => 'בקשת הנסיעה שלך נשלחה לנהג.',
     'carpool_request_cancelled' => 'בקשת הנסיעה שלך בוטלה.',
@@ -2801,4 +2802,9 @@ return [
     'carpool_notifications' => 'התראות שיתוף נסיעות',
     'carpool_notifications_help' => 'קבלת התראות בדוא"ל על בקשות ועדכונים של שיתוף נסיעות.',
     'report' => 'דווח',
+
+    'add_ons' => 'תוספות',
+    'add_on' => 'תוספת',
+    'add_add_on' => 'הוסף תוספת',
+    'add_ons_help' => 'פריטים אופציונליים שלקוחות יכולים להוסיף לרכישה שלהם (למשל, חניה, מוצרים, חבילות ארוחות).',
 ];

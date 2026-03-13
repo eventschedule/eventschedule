@@ -137,7 +137,7 @@
         "@id": "{{ config('app.url') }}/#website",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
-        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}",
+        "description": "The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.",
         "publisher": {
             "@id": "{{ config('app.url') }}/#organization"
         }
@@ -150,6 +150,7 @@
         "@id": "{{ config('app.url') }}/#organization",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
+        "description": "Event Schedule is an open-source platform for sharing events, selling tickets, and bringing communities together.",
         "logo": {
             "@type": "ImageObject",
             "url": "{{ config('app.url') }}/images/dark_logo.png",

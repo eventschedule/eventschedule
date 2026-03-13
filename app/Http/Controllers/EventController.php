@@ -256,6 +256,19 @@ class EventController extends Controller
                 return $ticket;
             }, $clonedData['tickets']);
 
+            // Set cloned add-ons
+            if (! empty($clonedData['addons'])) {
+                $event->addons = array_map(function ($addonData) {
+                    $addon = new Ticket;
+                    foreach ($addonData as $key => $value) {
+                        $addon->$key = $value;
+                    }
+                    $addon->is_addon = true;
+
+                    return $addon;
+                }, $clonedData['addons']);
+            }
+
             // Set cloned venue
             if ($clonedData['venue_id']) {
                 $venueId = UrlUtils::decodeId($clonedData['venue_id']);
@@ -286,6 +299,7 @@ class EventController extends Controller
                 $event->individual_tickets = $defaultTickets['individual_tickets'] ?? false;
                 $event->custom_fields = $defaultTickets['custom_fields'] ?? null;
                 $event->tickets = $defaultTickets['tickets'] ?? [new Ticket];
+                $event->addons = $defaultTickets['addons'] ?? [];
                 $defaultPromoCodes = $defaultTickets['promo_codes'] ?? [];
             } else {
                 $event->ticket_currency_code = MoneyUtils::getCurrencyForCountry($role->country_code);
@@ -420,7 +434,7 @@ class EventController extends Controller
         }
 
         $event_id = UrlUtils::decodeId($hash);
-        $event = Event::with(['tickets', 'roles', 'creatorRole', 'curators', 'parts'])->findOrFail($event_id);
+        $event = Event::with(['tickets', 'addons', 'roles', 'creatorRole', 'curators', 'parts'])->findOrFail($event_id);
         $user = $request->user();
 
         if ($user->cannot('update', $event)) {
@@ -460,6 +474,17 @@ class EventController extends Controller
             $clonedTickets = [new \App\Models\Ticket];
         }
 
+        // Clone add-ons (reset sold quantities)
+        $clonedAddons = [];
+        foreach ($event->addons as $addon) {
+            $clonedAddons[] = [
+                'type' => $addon->type,
+                'quantity' => $addon->quantity,
+                'price' => $addon->price,
+                'description' => $addon->description,
+            ];
+        }
+
         // Prepare venue and members
         $venue = $event->venue;
         $selectedMembers = [];
@@ -497,6 +522,7 @@ class EventController extends Controller
             'cloned_event' => [
                 'event' => $clonedEventData,
                 'tickets' => $clonedTickets,
+                'addons' => $clonedAddons,
                 'venue_id' => $venue ? UrlUtils::encodeId($venue->id) : null,
                 'selected_members' => $selectedMembers,
                 'curators' => $curatorIds,
@@ -515,7 +541,7 @@ class EventController extends Controller
         }
 
         $event_id = UrlUtils::decodeId($hash);
-        $event = Event::with(['creatorRole', 'curators', 'parts', 'promoCodes'])->findOrFail($event_id);
+        $event = Event::with(['creatorRole', 'curators', 'parts', 'promoCodes', 'addons'])->findOrFail($event_id);
         $user = $request->user();
 
         if ($user->cannot('update', $event)) {
@@ -664,7 +690,7 @@ class EventController extends Controller
 
         if ($request->has('save_default_tickets')) {
             $role = Role::subdomain($subdomain)->firstOrFail();
-            $event->load('promoCodes');
+            $event->load(['promoCodes', 'addons']);
             $defaultTickets = [
                 'currency_code' => $event->ticket_currency_code,
                 'payment_method' => $event->payment_method,
@@ -685,6 +711,14 @@ class EventController extends Controller
                         'price' => $ticket->price,
                         'description' => $ticket->description,
                         'custom_fields' => $ticket->custom_fields,
+                    ];
+                })->toArray(),
+                'addons' => $event->addons->map(function ($addon) {
+                    return [
+                        'type' => $addon->type,
+                        'quantity' => $addon->quantity,
+                        'price' => $addon->price,
+                        'description' => $addon->description,
                     ];
                 })->toArray(),
                 'promo_codes' => $event->promoCodes->map(function ($pc) {
@@ -918,7 +952,7 @@ class EventController extends Controller
 
         if ($request->has('save_default_tickets')) {
             $role = Role::subdomain($subdomain)->firstOrFail();
-            $event->load('promoCodes');
+            $event->load(['promoCodes', 'addons']);
             $defaultTickets = [
                 'currency_code' => $event->ticket_currency_code,
                 'payment_method' => $event->payment_method,
@@ -939,6 +973,14 @@ class EventController extends Controller
                         'price' => $ticket->price,
                         'description' => $ticket->description,
                         'custom_fields' => $ticket->custom_fields,
+                    ];
+                })->toArray(),
+                'addons' => $event->addons->map(function ($addon) {
+                    return [
+                        'type' => $addon->type,
+                        'quantity' => $addon->quantity,
+                        'price' => $addon->price,
+                        'description' => $addon->description,
                     ];
                 })->toArray(),
                 'promo_codes' => $event->promoCodes->map(function ($pc) {

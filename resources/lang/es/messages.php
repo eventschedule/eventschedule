@@ -2728,6 +2728,7 @@ return [
     'carpool_cancel_offer_confirm' => '¿Estás seguro de que deseas cancelar esta oferta de viaje? Los pasajeros aprobados serán notificados.',
     'carpool_spots_updated' => 'Plazas disponibles actualizadas.',
     'carpool_spots_below_approved' => 'No se pueden establecer menos plazas que el número de pasajeros aprobados.',
+    'carpool_edit_spots' => 'Editar plazas',
     'carpool_request_spot' => 'Solicitar una plaza',
     'carpool_request_sent' => 'Tu solicitud de viaje ha sido enviada al conductor.',
     'carpool_request_cancelled' => 'Tu solicitud de viaje ha sido cancelada.',
@@ -2808,4 +2809,9 @@ return [
     'carpool_notifications' => 'Notificaciones de viaje compartido',
     'carpool_notifications_help' => 'Recibir notificaciones por correo electrónico sobre solicitudes y actualizaciones de viajes compartidos.',
     'report' => 'Reportar',
+
+    'add_ons' => 'Complementos',
+    'add_on' => 'Complemento',
+    'add_add_on' => 'Agregar complemento',
+    'add_ons_help' => 'Artículos opcionales que los clientes pueden agregar a su compra (por ejemplo, estacionamiento, mercancía, paquetes de comida).',
 ];

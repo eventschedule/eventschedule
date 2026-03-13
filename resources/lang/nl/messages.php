@@ -2726,6 +2726,7 @@ return [
     'carpool_cancel_offer_confirm' => 'Weet je zeker dat je dit ritaanbod wilt annuleren? Goedgekeurde meerijders worden op de hoogte gesteld.',
     'carpool_spots_updated' => 'Beschikbare plekken bijgewerkt.',
     'carpool_spots_below_approved' => 'Kan het aantal plekken niet lager instellen dan het aantal goedgekeurde meerijders.',
+    'carpool_edit_spots' => 'Plekken bewerken',
     'carpool_request_spot' => 'Plek aanvragen',
     'carpool_request_sent' => 'Je aanvraag is naar de bestuurder gestuurd.',
     'carpool_request_cancelled' => 'Je aanvraag is geannuleerd.',
@@ -2806,4 +2807,9 @@ return [
     'carpool_notifications' => 'Carpoolmeldingen',
     'carpool_notifications_help' => 'Ontvang e-mailmeldingen over carpoolverzoeken en updates.',
     'report' => 'Melden',
+
+    'add_ons' => 'Extra\'s',
+    'add_on' => 'Extra',
+    'add_add_on' => 'Extra toevoegen',
+    'add_ons_help' => 'Optionele items die klanten aan hun aankoop kunnen toevoegen (bijv. parkeren, merchandise, maaltijdpakketten).',
 ];

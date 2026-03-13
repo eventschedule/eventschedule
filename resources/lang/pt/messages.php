@@ -2727,6 +2727,7 @@ return [
     'carpool_cancel_offer_confirm' => 'Tem certeza de que deseja cancelar esta oferta de carona? Os passageiros aprovados serão notificados.',
     'carpool_spots_updated' => 'Vagas disponíveis atualizadas.',
     'carpool_spots_below_approved' => 'Não é possível definir as vagas abaixo do número de passageiros aprovados.',
+    'carpool_edit_spots' => 'Editar vagas',
     'carpool_request_spot' => 'Solicitar uma vaga',
     'carpool_request_sent' => 'Sua solicitação de carona foi enviada ao motorista.',
     'carpool_request_cancelled' => 'Sua solicitação de carona foi cancelada.',
@@ -2807,4 +2808,9 @@ return [
     'carpool_notifications' => 'Notificações de carona',
     'carpool_notifications_help' => 'Receber notificações por e-mail sobre pedidos e atualizações de caronas.',
     'report' => 'Denunciar',
+
+    'add_ons' => 'Complementos',
+    'add_on' => 'Complemento',
+    'add_add_on' => 'Adicionar complemento',
+    'add_ons_help' => 'Itens opcionais que os clientes podem adicionar à sua compra (por exemplo, estacionamento, produtos, pacotes de refeição).',
 ];

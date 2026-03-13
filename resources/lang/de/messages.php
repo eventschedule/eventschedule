@@ -2732,6 +2732,7 @@ return [
     'carpool_cancel_offer_confirm' => 'Sind Sie sicher, dass Sie dieses Fahrtangebot stornieren möchten? Bestätigte Mitfahrer werden benachrichtigt.',
     'carpool_spots_updated' => 'Verfügbare Plätze aktualisiert.',
     'carpool_spots_below_approved' => 'Die Anzahl der Plätze kann nicht unter die Anzahl der bestätigten Mitfahrer gesetzt werden.',
+    'carpool_edit_spots' => 'Plätze bearbeiten',
     'carpool_request_spot' => 'Platz anfragen',
     'carpool_request_sent' => 'Ihre Mitfahranfrage wurde an den Fahrer gesendet.',
     'carpool_request_cancelled' => 'Ihre Mitfahranfrage wurde zurückgezogen.',
@@ -2812,4 +2813,9 @@ return [
     'carpool_notifications' => 'Fahrgemeinschaft-Benachrichtigungen',
     'carpool_notifications_help' => 'E-Mail-Benachrichtigungen über Mitfahranfragen und Aktualisierungen erhalten.',
     'report' => 'Melden',
+
+    'add_ons' => 'Zusatzoptionen',
+    'add_on' => 'Zusatzoption',
+    'add_add_on' => 'Zusatzoption hinzufügen',
+    'add_ons_help' => 'Optionale Artikel, die Kunden zu ihrem Kauf hinzufügen können (z. B. Parkplatz, Merchandise, Verpflegungspakete).',
 ];

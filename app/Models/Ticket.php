@@ -26,11 +26,13 @@ class Ticket extends Model
         'description',
         'sales_end_at',
         'custom_fields',
+        'is_addon',
     ];
 
     protected $casts = [
         'custom_fields' => 'array',
         'sales_end_at' => 'datetime',
+        'is_addon' => 'boolean',
     ];
 
     public function isSalesEnded()

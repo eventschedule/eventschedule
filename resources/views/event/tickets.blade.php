@@ -65,6 +65,11 @@
                     oldGuests: @json(old('guests', [])),
                     oldGuestTicketCustomValues: @json(old('guest_ticket_custom_values', [])),
                     hasError: @json(session('error') || $errors->any()),
+                    addons: @json(($event->addons ?? collect())->map(function ($addon) use ($date) {
+                        $data = $addon->toData($date ?? request()->date);
+                        $data['selectedQty'] = (int) (old('addons')[$data['id']] ?? 0);
+                        return $data;
+                    })),
                 };
             },
             created() {
@@ -162,9 +167,13 @@
             },
             computed: {
                 subtotalAmount() {
-                    return this.tickets.reduce((total, ticket) => {
+                    var ticketTotal = this.tickets.reduce((total, ticket) => {
                         return total + (ticket.price * ticket.selectedQty);
                     }, 0);
+                    var addonTotal = this.addons.reduce((total, addon) => {
+                        return total + (addon.price * addon.selectedQty);
+                    }, 0);
+                    return ticketTotal + addonTotal;
                 },
                 totalAmount() {
                     return Math.max(0, this.subtotalAmount - this.discountAmount);
@@ -986,6 +995,33 @@
                         </label>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Add-ons -->
+        <div v-if="addons.length > 0 && totalSelectedTickets > 0 && !isPaymentLinkMode && !isAllSoldOut" class="mb-6">
+            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.add_ons') }}</h3>
+            <div v-for="(addon, aIndex) in addons" :key="addon.id" class="mb-3 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4 border-gray-300 dark:border-gray-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-base font-medium text-gray-900 dark:text-gray-100">@{{ addon.type }}</h4>
+                        <p v-if="addon.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="addon.description"></p>
+                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100"><template v-if="addon.price == 0">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(addon.price) }}</template></p>
+                    </div>
+                    <div>
+                        <p v-if="getAvailableQuantity(addon) === 0" class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>
+                        <select v-else
+                            v-model="addon.selectedQty"
+                            class="block w-24 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-center font-medium"
+                        >
+                            <option :value="0">0</option>
+                            <template v-for="n in getAvailableQuantity(addon)">
+                                <option :value="n">@{{ n }}</option>
+                            </template>
+                        </select>
+                    </div>
+                </div>
+                <input type="hidden" :name="`addons[${addon.id}]`" :value="addon.selectedQty">
             </div>
         </div>
 

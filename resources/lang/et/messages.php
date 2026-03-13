@@ -2744,6 +2744,7 @@ return [
     'carpool_cancel_offer_confirm' => 'Kas oled kindel, et soovid selle sõidupakkumise tühistada? Kinnitatud sõitjaid teavitatakse.',
     'carpool_spots_updated' => 'Vabad kohad uuendatud.',
     'carpool_spots_below_approved' => 'Kohtade arvu ei saa määrata alla kinnitatud sõitjate arvu.',
+    'carpool_edit_spots' => 'Muuda kohti',
     'carpool_request_spot' => 'Küsi kohta',
     'carpool_request_sent' => 'Sinu sõidusoov on saadetud juhile.',
     'carpool_request_cancelled' => 'Sinu sõidusoov on tühistatud.',
@@ -2824,4 +2825,9 @@ return [
     'carpool_notifications' => 'Ühissõidu teavitused',
     'carpool_notifications_help' => 'Saa e-posti teavitusi ühissõidu taotluste ja uuenduste kohta.',
     'report' => 'Teata',
+
+    'add_ons' => 'Lisad',
+    'add_on' => 'Lisa',
+    'add_add_on' => 'Lisa lisavalik',
+    'add_ons_help' => 'Valikulised esemed, mida kliendid saavad oma ostule lisada (nt parkimine, meened, toidupaketid).',
 ];

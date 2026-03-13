@@ -176,6 +176,10 @@ class Sale extends Model
     public function quantity()
     {
         return $this->saleTickets->sum(function ($saleTicket) {
+            if ($saleTicket->ticket && $saleTicket->ticket->is_addon) {
+                return 0;
+            }
+
             return $saleTicket->quantity;
         });
     }
@@ -224,6 +228,7 @@ class Sale extends Model
                 'quantity' => $saleTicket->quantity,
                 'price' => (float) $saleTicket->ticket->price,
                 'type' => $saleTicket->ticket->type,
+                'is_addon' => (bool) $saleTicket->ticket->is_addon,
             ];
         })->values();
 

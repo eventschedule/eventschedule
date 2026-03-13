@@ -2728,6 +2728,7 @@ return [
     'carpool_cancel_offer_confirm' => 'Êtes-vous sûr de vouloir annuler cette offre de trajet ? Les passagers approuvés seront notifiés.',
     'carpool_spots_updated' => 'Places disponibles mises à jour.',
     'carpool_spots_below_approved' => 'Impossible de définir un nombre de places inférieur au nombre de passagers approuvés.',
+    'carpool_edit_spots' => 'Modifier les places',
     'carpool_request_spot' => 'Demander une place',
     'carpool_request_sent' => 'Votre demande de trajet a été envoyée au conducteur.',
     'carpool_request_cancelled' => 'Votre demande de trajet a été annulée.',
@@ -2808,4 +2809,9 @@ return [
     'carpool_notifications' => 'Notifications de covoiturage',
     'carpool_notifications_help' => 'Recevoir des notifications par e-mail concernant les demandes et mises à jour de covoiturage.',
     'report' => 'Signaler',
+
+    'add_ons' => 'Suppléments',
+    'add_on' => 'Supplément',
+    'add_add_on' => 'Ajouter un supplément',
+    'add_ons_help' => 'Articles optionnels que les clients peuvent ajouter à leur achat (par exemple, parking, produits dérivés, formules repas).',
 ];

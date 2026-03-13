@@ -374,17 +374,24 @@ class CarpoolController extends Controller
         ]);
 
         // Check for existing cancelled/declined request and reuse it
-        $existingRequest = CarpoolRequest::where('carpool_offer_id', $offer->id)
-            ->where('user_id', $user->id)
-            ->whereIn('status', ['cancelled', 'declined'])
-            ->first();
+        $existingRequest = DB::transaction(function () use ($offer, $user, $request) {
+            $existing = CarpoolRequest::lockForUpdate()
+                ->where('carpool_offer_id', $offer->id)
+                ->where('user_id', $user->id)
+                ->whereIn('status', ['cancelled', 'declined'])
+                ->first();
+
+            if ($existing) {
+                $existing->status = 'pending';
+                $existing->message = $request->input('message');
+                $existing->reminder_sent_at = null;
+                $existing->save();
+            }
+
+            return $existing;
+        });
 
         if ($existingRequest) {
-            $existingRequest->status = 'pending';
-            $existingRequest->message = $request->input('message');
-            $existingRequest->reminder_sent_at = null;
-            $existingRequest->save();
-
             $this->sendCarpoolEmail(
                 $offer->user,
                 $role,

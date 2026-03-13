@@ -59,7 +59,7 @@ class ApiEventController extends Controller
             self::MAX_PER_PAGE
         );
 
-        $events = Event::with(['roles', 'tickets', 'parts'])
+        $events = Event::with(['roles', 'tickets', 'addons', 'parts'])
             ->whereHas('roles', function ($q) {
                 $q->whereIn('roles.id', auth()->user()->roles()
                     ->wherePivotIn('level', ['owner', 'admin'])
@@ -154,7 +154,7 @@ class ApiEventController extends Controller
 
     public function show(Request $request, $id)
     {
-        $event = Event::with(['roles', 'tickets', 'parts'])->find(UrlUtils::decodeId($id));
+        $event = Event::with(['roles', 'tickets', 'addons', 'parts'])->find(UrlUtils::decodeId($id));
 
         if (! $event) {
             return response()->json(['error' => 'Event not found'], 404);
@@ -278,7 +278,7 @@ class ApiEventController extends Controller
 
         $event = $this->eventRepo->saveEvent($role, $request, null);
 
-        $event->load(['roles', 'tickets', 'parts']);
+        $event->load(['roles', 'tickets', 'addons', 'parts']);
 
         return response()->json([
             'data' => $event->toApiData(),
@@ -290,7 +290,7 @@ class ApiEventController extends Controller
 
     public function update(Request $request, $id)
     {
-        $event = Event::with(['roles', 'tickets', 'parts'])->find(UrlUtils::decodeId($id));
+        $event = Event::with(['roles', 'tickets', 'addons', 'parts'])->find(UrlUtils::decodeId($id));
 
         if (! $event) {
             return response()->json(['error' => 'Event not found'], 404);
@@ -456,7 +456,7 @@ class ApiEventController extends Controller
 
         $event = $this->eventRepo->saveEvent($currentRole, $request, $event);
 
-        $event->load(['roles', 'tickets', 'parts']);
+        $event->load(['roles', 'tickets', 'addons', 'parts']);
 
         return response()->json([
             'data' => $event->toApiData(),
@@ -567,7 +567,7 @@ class ApiEventController extends Controller
 
     public function flyer(Request $request, $event_id)
     {
-        $event = Event::with(['roles', 'tickets', 'parts'])->find(UrlUtils::decodeId($event_id));
+        $event = Event::with(['roles', 'tickets', 'addons', 'parts'])->find(UrlUtils::decodeId($event_id));
 
         if (! $event) {
             return response()->json(['error' => 'Event not found'], 404);

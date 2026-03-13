@@ -65,6 +65,9 @@ class PromoCode extends Model
         $eligibleSubtotal = 0;
 
         foreach ($saleTickets as $saleTicket) {
+            if ($saleTicket->ticket && $saleTicket->ticket->is_addon) {
+                continue;
+            }
             if ($this->appliesToTicket($saleTicket->ticket_id)) {
                 $eligibleSubtotal += $saleTicket->ticket->price * $saleTicket->quantity;
             }

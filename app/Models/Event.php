@@ -96,10 +96,11 @@ class Event extends Model
             $model->payment_instructions_html = MarkdownUtils::convertToHtml($model->payment_instructions);
 
             if ($model->isDirty('starts_at') && ! $model->days_of_week) {
-                $model->load(['tickets', 'sales']);
+                $model->load(['tickets', 'addons', 'sales']);
 
                 DB::transaction(function () use ($model) {
-                    $model->tickets->each(function ($ticket) use ($model) {
+                    $allTickets = $model->tickets->merge($model->addons);
+                    $allTickets->each(function ($ticket) use ($model) {
                         if ($ticket->sold) {
                             $sold = json_decode($ticket->sold, true);
                             if ($oldDate = array_key_first($sold)) {
@@ -235,7 +236,12 @@ class Event extends Model
 
     public function tickets()
     {
-        return $this->hasMany(Ticket::class)->where('is_deleted', false)->orderBy('price', 'desc');
+        return $this->hasMany(Ticket::class)->where('is_deleted', false)->where('is_addon', false)->orderBy('price', 'desc');
+    }
+
+    public function addons()
+    {
+        return $this->hasMany(Ticket::class)->where('is_deleted', false)->where('is_addon', true)->orderBy('price', 'desc');
     }
 
     public function promoCodes()
@@ -1408,6 +1414,18 @@ class Event extends Model
                     'sales_end_at' => $ticket->sales_end_at ? $ticket->sales_end_at->toIso8601String() : null,
                 ];
             })->values();
+
+            if ($this->relationLoaded('addons')) {
+                $data->addons = $this->addons->map(function ($addon) {
+                    return [
+                        'id' => UrlUtils::encodeId($addon->id),
+                        'type' => $addon->type,
+                        'price' => $addon->price,
+                        'quantity' => $addon->quantity,
+                        'description' => $addon->description,
+                    ];
+                })->values();
+            }
         }
 
         $data->members = $this->members()->mapWithKeys(function ($member) {

@@ -258,7 +258,8 @@ class InvoiceNinjaController extends Controller
                 $lineItems = $payload['line_items'] ?? [];
 
                 // Lock ticket rows to prevent overselling (same pattern as TicketController::checkout)
-                $lockedTickets = $event->tickets()->lockForUpdate()->get();
+                $lockedTickets = $event->tickets()->lockForUpdate()->get()
+                    ->merge($event->addons()->lockForUpdate()->get());
 
                 foreach ($lineItems as $lineItem) {
                     $productId = $lineItem['product_id'] ?? null;
