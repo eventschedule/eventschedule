@@ -106,7 +106,7 @@
                 'ticket_price' => $event->ticket_price,
                 'ticket_currency_code' => $event->ticket_currency_code,
                 'coupon_code' => $event->coupon_code,
-                'description_excerpt' => Str::words(strip_tags($curatorTranslation && $curatorTranslation->description_html_translated ? $curatorTranslation->description_html_translated : $event->translatedDescription()), 25, '...'),
+                'description_excerpt' => Str::words(html_entity_decode(strip_tags($curatorTranslation && $curatorTranslation->description_html_translated ? $curatorTranslation->description_html_translated : $event->translatedDescription())), 25, '...'),
                 'duration' => $event->duration,
                 'parts' => $event->parts->map(fn($part) => [
                     'id' => \App\Utils\UrlUtils::encodeId($part->id),

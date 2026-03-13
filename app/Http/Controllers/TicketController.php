@@ -98,7 +98,8 @@ class TicketController extends Controller
     public function sales()
     {
         $filter = strtolower(request()->filter ?? '');
-        $query = $this->salesQuery($filter);
+        $includePast = request()->query('include_past') == 1;
+        $query = $this->salesQuery($filter, includePast: $includePast);
 
         $sortBy = request()->get('sort_by', '');
         $sortDir = strtolower(request()->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
@@ -161,7 +162,7 @@ class TicketController extends Controller
         }
     }
 
-    private function salesQuery(?string $filter, bool $primaryOnly = true)
+    private function salesQuery(?string $filter, bool $primaryOnly = true, bool $includePast = false)
     {
         $user = auth()->user();
 
@@ -170,6 +171,13 @@ class TicketController extends Controller
             ->whereHas('event', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             });
+
+        if (! $includePast) {
+            $query->where('event_date', '>=', now()->subDay()->startOfDay())
+                ->whereHas('event', function ($eq) {
+                    $eq->where('starts_at', '>=', now()->subDay()->startOfDay());
+                });
+        }
 
         if ($primaryOnly) {
             $query->where(function ($q) {
@@ -269,7 +277,8 @@ class TicketController extends Controller
     public function exportSales()
     {
         $filter = strtolower(request()->filter ?? '');
-        $sales = $this->salesQuery($filter, primaryOnly: false)->orderBy('created_at', 'DESC')->get();
+        $includePast = request()->query('include_past') == 1;
+        $sales = $this->salesQuery($filter, primaryOnly: false, includePast: $includePast)->orderBy('created_at', 'DESC')->get();
 
         // First pass: collect unique custom field names
         $customFieldNames = [];
@@ -307,14 +316,18 @@ class TicketController extends Controller
             fwrite($handle, "\xEF\xBB\xBF");
 
             // Header row
-            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Transaction Reference', 'Payment Method', 'Status', 'Date', 'Group ID'];
+            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Add-ons', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Transaction Reference', 'Payment Method', 'Status', 'Date', 'Group ID'];
             $headers = array_merge($headers, $customFieldNames);
             fputcsv($handle, $headers);
 
             // Second pass: write data rows
             foreach ($sales as $sale) {
-                $tickets = $sale->saleTickets->map(function ($st) {
-                    return ($st->ticket ? $st->ticket->type : '').' x'.$st->quantity;
+                $tickets = $sale->saleTickets->filter(fn($st) => $st->ticket && !$st->ticket->is_addon)->map(function ($st) {
+                    return ($st->ticket->type ?: '').' x'.$st->quantity;
+                })->implode(', ');
+
+                $addons = $sale->saleTickets->filter(fn($st) => $st->ticket && $st->ticket->is_addon)->map(function ($st) {
+                    return ($st->ticket->type ?: '').' x'.$st->quantity;
                 })->implode(', ');
 
                 $row = [
@@ -324,6 +337,7 @@ class TicketController extends Controller
                     $sale->event->name,
                     $sale->event_date,
                     $tickets,
+                    $addons,
                     $sale->quantity(),
                     number_format($sale->payment_amount, 2, '.', ''),
                     $sale->event->ticket_currency_code,
@@ -1229,7 +1243,7 @@ class TicketController extends Controller
                 'price_data' => [
                     'currency' => $event->ticket_currency_code,
                     'product_data' => [
-                        'name' => $saleTicket->ticket->type ? $saleTicket->ticket->type : __('messages.tickets'),
+                        'name' => $saleTicket->ticket->type ?: ($saleTicket->ticket->is_addon ? __('messages.add_on') : __('messages.tickets')),
                         ...$saleTicket->ticket->description ? ['description' => $saleTicket->ticket->description] : [],
                     ],
                     'unit_amount' => $unitAmountCents,

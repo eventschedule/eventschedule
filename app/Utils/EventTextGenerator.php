@@ -200,7 +200,7 @@ class EventTextGenerator
                 }
 
                 // Return lowest price
-                return $prices->min();
+                return floatval($prices->min());
             }
         }
 
@@ -210,7 +210,7 @@ class EventTextGenerator
                 return __('messages.free');
             }
 
-            return $event->ticket_price;
+            return floatval($event->ticket_price);
         }
 
         return '';

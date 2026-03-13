@@ -553,6 +553,7 @@ return [
     'curator_schedules' => 'Kurator Zeitpläne',
     'event_created_by' => 'Veranstaltung erstellt von :user',
     'show_past_events' => 'Vergangene Events anzeigen',
+    'include_past_events' => 'Vergangene Events einschließen',
     'past_events' => 'Vergangene Events',
     'load_more' => 'Mehr Laden',
     'category' => 'Kategorie',

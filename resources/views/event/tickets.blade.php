@@ -239,7 +239,7 @@
                     this.isSubmitting = true;
                 },
                 getAvailableQuantity(ticket) {
-                    if (!this.isCombinedMode) {
+                    if (ticket.is_addon || !this.isCombinedMode) {
                         return ticket.quantity;
                     }
                     
@@ -323,6 +323,7 @@
                     try {
                         const state = {
                             ticketQtys: {},
+                            addonQtys: {},
                             name: this.name,
                             email: this.email,
                             phone: this.phone,
@@ -342,6 +343,9 @@
                                 state.ticketCustomValues[t.id] = t.custom_values;
                             }
                         });
+                        this.addons.forEach(a => {
+                            state.addonQtys[a.id] = a.selectedQty;
+                        });
                         sessionStorage.setItem(this.storageKey, JSON.stringify(state));
                     } catch (e) {}
                 },
@@ -357,6 +361,15 @@
                             this.tickets.forEach(t => {
                                 if (state.ticketQtys[t.id] !== undefined) {
                                     t.selectedQty = Math.min(state.ticketQtys[t.id], t.quantity);
+                                }
+                            });
+                        }
+
+                        // Restore add-on quantities
+                        if (state.addonQtys) {
+                            this.addons.forEach(a => {
+                                if (state.addonQtys[a.id] !== undefined) {
+                                    a.selectedQty = Math.min(state.addonQtys[a.id], a.quantity);
                                 }
                             });
                         }

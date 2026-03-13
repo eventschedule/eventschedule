@@ -386,6 +386,7 @@ return [
     'curator_schedules' => 'Curator roosters',
     'event_created_by' => 'Evenement aangemaakt door :user',
     'show_past_events' => 'Toon eerdere evenementen',
+    'include_past_events' => 'Eerdere evenementen opnemen',
     'past_events' => 'Eerdere evenementen',
     'load_more' => 'Meer Laden',
     'category' => 'Categorie',

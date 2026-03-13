@@ -354,6 +354,7 @@ return [
     'curator_schedules' => 'לוחות זמנים של אוֹצֵר',
     'event_created_by' => 'אירוע נוצר ע"י המשתמש',
     'show_past_events' => 'הצג אירועים קודמים',
+    'include_past_events' => 'כלול אירועים קודמים',
     'past_events' => 'אירועים קודמים',
     'load_more' => 'טען עוד',
     'category' => 'קטגוריה',

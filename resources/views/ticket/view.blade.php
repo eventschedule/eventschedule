@@ -265,11 +265,15 @@
         </div>
 
         {{-- Ticket Types Section --}}
-        @if ($sale->saleTickets->count() > 0)
+        @php
+            $regularTickets = $sale->saleTickets->filter(fn($st) => !$st->ticket->is_addon);
+            $addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket->is_addon);
+        @endphp
+        @if ($regularTickets->count() > 0)
         <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50">
           <h2 class="text-[11px] uppercase tracking-wider text-white/50 print-text-gray font-semibold mb-[12px]">{{ __('messages.tickets') }}</h2>
           <div class="space-y-[8px]">
-            @foreach ($sale->saleTickets as $saleTicket)
+            @foreach ($regularTickets as $saleTicket)
               <div class="flex items-center justify-between">
                 <span class="text-[14px] text-white print-text-dark font-medium">{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</span>
                 <span class="px-[12px] py-[4px] rounded-full bg-violet-500/20 print:bg-violet-100 text-violet-300 print:text-violet-700 text-[12px] font-semibold">
@@ -286,6 +290,21 @@
               </div>
             </div>
           @endif
+        </div>
+        @endif
+        @if ($addonTickets->count() > 0)
+        <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50">
+          <h2 class="text-[11px] uppercase tracking-wider text-white/50 print-text-gray font-semibold mb-[12px]">{{ __('messages.add_ons') }}</h2>
+          <div class="space-y-[8px]">
+            @foreach ($addonTickets as $saleTicket)
+              <div class="flex items-center justify-between">
+                <span class="text-[14px] text-white print-text-dark font-medium">{{ $saleTicket->ticket->type ?: __('messages.add_on') }}</span>
+                <span class="px-[12px] py-[4px] rounded-full bg-violet-500/20 print:bg-violet-100 text-violet-300 print:text-violet-700 text-[12px] font-semibold">
+                  x{{ $saleTicket->quantity }}
+                </span>
+              </div>
+            @endforeach
+          </div>
         </div>
         @endif
         @endif

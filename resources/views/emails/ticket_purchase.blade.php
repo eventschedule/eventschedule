@@ -25,12 +25,27 @@
             @endif
         </div>
 
-        @if ($sale->saleTickets->count() > 0)
+        @php
+            $regularTickets = $sale->saleTickets->filter(fn($st) => !$st->ticket->is_addon);
+            $addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket->is_addon);
+        @endphp
+        @if ($regularTickets->count() > 0)
         <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #4E81FA;">{{ __('messages.ticket_details') }}</h3>
-            @foreach ($sale->saleTickets as $saleTicket)
+            @foreach ($regularTickets as $saleTicket)
                 <p style="margin: 10px 0;">
                     <strong>{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</strong>
+                    x {{ $saleTicket->quantity }}
+                </p>
+            @endforeach
+        </div>
+        @endif
+        @if ($addonTickets->count() > 0)
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #4E81FA;">{{ __('messages.add_ons') }}</h3>
+            @foreach ($addonTickets as $saleTicket)
+                <p style="margin: 10px 0;">
+                    <strong>{{ $saleTicket->ticket->type ?: __('messages.add_on') }}</strong>
                     x {{ $saleTicket->quantity }}
                 </p>
             @endforeach

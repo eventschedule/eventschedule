@@ -394,6 +394,7 @@ return [
     'curator_schedules' => 'Programmi curatore',
     'event_created_by' => 'Evento creato da :user',
     'show_past_events' => 'Mostra eventi passati',
+    'include_past_events' => 'Includi eventi passati',
     'past_events' => 'Eventi passati',
     'load_more' => 'Carica Altro',
     'category' => 'Categoria',

@@ -557,6 +557,7 @@ return [
     'curator_schedules' => 'Plannings de l\'organisateur',
     'event_created_by' => 'Événement créé par :user',
     'show_past_events' => 'Afficher les événements passés',
+    'include_past_events' => 'Inclure les événements passés',
     'past_events' => 'Événements passés',
     'load_more' => 'Charger plus',
     'category' => 'Catégorie',

@@ -192,8 +192,8 @@ class SlugPatternUtils
             });
 
             if (! $prices->isEmpty()) {
-                $min = $prices->min();
-                $max = $prices->max();
+                $min = floatval($prices->min());
+                $max = floatval($prices->max());
 
                 if ($min === $max) {
                     return (string) $min;
@@ -205,7 +205,7 @@ class SlugPatternUtils
 
         // Check for external event price (when tickets are disabled)
         if (! $event->tickets_enabled && $event->ticket_price !== null) {
-            return (string) $event->ticket_price;
+            return (string) floatval($event->ticket_price);
         }
 
         return '';

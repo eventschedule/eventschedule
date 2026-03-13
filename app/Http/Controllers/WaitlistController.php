@@ -100,12 +100,20 @@ class WaitlistController extends Controller
     {
         $user = auth()->user();
         $filter = strtolower($request->filter ?? '');
+        $includePast = $request->query('include_past') == 1;
 
         $query = TicketWaitlist::with('event')
             ->whereHas('event', function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             })
             ->whereIn('status', ['waiting', 'notified']);
+
+        if (! $includePast) {
+            $query->where('event_date', '>=', now()->subDay()->startOfDay())
+                ->whereHas('event', function ($eq) {
+                    $eq->where('starts_at', '>=', now()->subDay()->startOfDay());
+                });
+        }
 
         if ($filter) {
             $query->where(function ($q) use ($filter) {

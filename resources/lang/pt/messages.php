@@ -392,6 +392,7 @@ return [
     'curator_schedules' => 'Horários do curador',
     'event_created_by' => 'Evento criado por :user',
     'show_past_events' => 'Mostrar eventos passados',
+    'include_past_events' => 'Incluir eventos passados',
     'past_events' => 'Eventos passados',
     'load_more' => 'Carregar Mais',
     'category' => 'Categoria',

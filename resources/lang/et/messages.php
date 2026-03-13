@@ -602,6 +602,7 @@ return [
     'curator_schedules' => 'Kuraatorite ajakavad',
     'event_created_by' => 'Sündmuse lõi :user',
     'show_past_events' => 'Näita mineviku sündmusi',
+    'include_past_events' => 'Kaasa mineviku sündmused',
     'past_events' => 'Möödunud sündmused',
     'load_more' => 'Laadige rohkem',
     'category' => 'Kategooria',

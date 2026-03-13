@@ -257,7 +257,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
 
               {{-- Description below --}}
               @if($role->translatedDescription())
-              @php $descPreview = \Illuminate\Support\Str::words(strip_tags($role->translatedDescription()), 5, '...'); @endphp
+              @php $descPreview = \Illuminate\Support\Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...'); @endphp
               <div class="w-full mt-2">
                 <div x-data="{ expanded: false, long: false, collapse() { if (window.scrollY < 5) { this.expanded = false; return; } window.scrollTo({ top: 0, behavior: 'smooth' }); let f = 0; const check = () => { if (window.scrollY < 5 || f++ > 300) this.expanded = false; else requestAnimationFrame(check); }; requestAnimationFrame(check); } }"
                      x-init="$nextTick(() => { long = $refs.content.scrollHeight > $refs.content.clientHeight })"
@@ -454,7 +454,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
 
               {{-- Description below (full width) --}}
               @if($role->translatedDescription())
-              @php $descPreviewDesktop = \Illuminate\Support\Str::words(strip_tags($role->translatedDescription()), 5, '...'); @endphp
+              @php $descPreviewDesktop = \Illuminate\Support\Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...'); @endphp
               <div x-data="{ expanded: false, long: false, collapse() { if (window.scrollY < 5) { this.expanded = false; return; } window.scrollTo({ top: 0, behavior: 'smooth' }); let f = 0; const check = () => { if (window.scrollY < 5 || f++ > 300) this.expanded = false; else requestAnimationFrame(check); }; requestAnimationFrame(check); } }"
                    x-init="$nextTick(() => { long = $refs.content.scrollHeight > $refs.content.clientHeight })"
                    class="mt-2 text-sm text-[#33383C] dark:text-gray-300">

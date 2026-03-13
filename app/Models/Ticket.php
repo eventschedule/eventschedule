@@ -67,6 +67,7 @@ class Ticket extends Model
         $data['id'] = UrlUtils::encodeId($this->id);
         $data['event_id'] = UrlUtils::encodeId($this->event_id);
         $data['type'] = $this->type;
+        $data['is_addon'] = (bool) $this->is_addon;
         $data['quantity'] = $this->quantity;
         $data['price'] = $this->price;
         $data['description'] = $this->description ? UrlUtils::convertUrlsToLinks($this->description_html ?? $this->description) : null;
@@ -75,7 +76,7 @@ class Ticket extends Model
         $sold = $sold[$date] ?? 0;
 
         // Handle combined mode logic
-        if ($this->event && $this->event->total_tickets_mode === 'combined' && $this->event->hasSameTicketQuantities()) {
+        if ($this->event && !$this->is_addon && $this->event->total_tickets_mode === 'combined' && $this->event->hasSameTicketQuantities()) {
             $totalSold = $this->event->tickets->sum(function ($ticket) use ($date) {
                 $ticketSold = $ticket->sold ? json_decode($ticket->sold, true) : [];
 

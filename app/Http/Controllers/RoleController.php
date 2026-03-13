@@ -927,7 +927,7 @@ class RoleController extends Controller
             'recurring_end_value' => $event->recurring_end_value,
             'start_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
             'is_online' => ! empty($event->event_url),
-            'description_excerpt' => Str::words(strip_tags($event->translatedDescription()), 25, '...'),
+            'description_excerpt' => Str::words(html_entity_decode(strip_tags($event->translatedDescription())), 25, '...'),
             'duration' => $event->duration,
             'parts' => $event->parts->map(fn ($part) => [
                 'name' => $part->name,

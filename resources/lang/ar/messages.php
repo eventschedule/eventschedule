@@ -545,6 +545,7 @@ return [
     'curator_schedules' => 'جداول المنسق',
     'event_created_by' => 'تم إنشاء الحدث بواسطة :user',
     'show_past_events' => 'عرض الأحداث السابقة',
+    'include_past_events' => 'تضمين الأحداث السابقة',
     'past_events' => 'الأحداث السابقة',
     'load_more' => 'تحميل المزيد',
     'category' => 'الفئة',

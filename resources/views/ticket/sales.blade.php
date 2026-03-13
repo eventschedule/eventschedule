@@ -38,7 +38,8 @@
                     </div>
                 </div>
 
-                <div class="flex gap-3">
+                <div class="flex items-center gap-3">
+                    <x-toggle name="include_past_sales" id="include-past-sales" :label="__('messages.include_past_events')" />
                     <x-secondary-link href="#" id="export-sales">
                         <svg class="-ms-0.5 me-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
@@ -69,6 +70,9 @@
 
     @if ($waitlistCount > 0)
     <div id="waitlist-panel" style="display: none;">
+        <div class="mb-4">
+            <x-toggle name="include_past_waitlist" id="include-past-waitlist" :label="__('messages.include_past_events')" />
+        </div>
         <div id="waitlist-table">
             @include('ticket.waitlist_table', ['entries' => $waitlistEntries ?? collect()])
         </div>
@@ -130,12 +134,15 @@ document.getElementById('tab-waitlist').addEventListener('click', function() {
 
 function loadWaitlist(url) {
     var fetchUrl = url || '{{ route("waitlist.index") }}';
+    var u = new URL(fetchUrl, window.location.origin);
     if (waitlistSortBy) {
-        var u = new URL(fetchUrl, window.location.origin);
         u.searchParams.set('sort_by', waitlistSortBy);
         u.searchParams.set('sort_dir', waitlistSortDir);
-        fetchUrl = u.toString();
     }
+    if (document.getElementById('include-past-waitlist').checked) {
+        u.searchParams.set('include_past', '1');
+    }
+    fetchUrl = u.toString();
     fetch(fetchUrl, {
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
     })
@@ -154,6 +161,10 @@ function bindWaitlistPagination() {
         });
     });
 }
+
+document.getElementById('include-past-waitlist').addEventListener('change', function() {
+    loadWaitlist();
+});
 
 function handleWaitlistRemove(entryId) {
     if (!confirm(@json(__("messages.are_you_sure")))) return;
@@ -272,7 +283,12 @@ const clearButton = document.getElementById('clear-filter');
 document.getElementById('export-sales').addEventListener('click', function(e) {
     e.preventDefault();
     const filter = document.getElementById('filter').value;
-    window.location.href = '{{ route("sales.export") }}' + (filter ? '?filter=' + encodeURIComponent(filter) : '');
+    var exportUrl = '{{ route("sales.export") }}';
+    var params = [];
+    if (filter) params.push('filter=' + encodeURIComponent(filter));
+    if (document.getElementById('include-past-sales').checked) params.push('include_past=1');
+    if (params.length) exportUrl += '?' + params.join('&');
+    window.location.href = exportUrl;
 });
 
 // Show/hide clear button based on input content
@@ -297,10 +313,18 @@ if (filterInput.value) {
     clearButton.style.display = 'block';
 }
 
+// Toggle past events for sales
+document.getElementById('include-past-sales').addEventListener('change', function() {
+    updateResults(filterInput.value);
+});
+
 function updateResults(value) {
     var url = window.location.pathname + '?filter=' + encodeURIComponent(value);
     if (salesSortBy) {
         url += '&sort_by=' + encodeURIComponent(salesSortBy) + '&sort_dir=' + encodeURIComponent(salesSortDir);
+    }
+    if (document.getElementById('include-past-sales').checked) {
+        url += '&include_past=1';
     }
     fetch(url, {
         headers: {

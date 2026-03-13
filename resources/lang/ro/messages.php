@@ -604,6 +604,7 @@ return [
     'curator_schedules' => 'Programe Curator',
     'event_created_by' => 'Eveniment creat de :user',
     'show_past_events' => 'Arată Evenimente Trecute',
+    'include_past_events' => 'Include Evenimente Trecute',
     'past_events' => 'Evenimente Trecute',
     'load_more' => 'Încarcă Mai Mult',
     'category' => 'Categorie',

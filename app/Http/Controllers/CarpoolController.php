@@ -162,11 +162,11 @@ class CarpoolController extends Controller
         $startDateTime = $event->getStartDateTime($eventDate);
         $endDateTime = $event->getEndDateTime($eventDate);
 
-        if ($direction === 'to_event' && $startDateTime && $startDateTime->isPast()) {
+        if (in_array($direction, ['to_event', 'round_trip']) && $startDateTime && $startDateTime->isPast()) {
             return redirect()->back()->with('error', __('messages.carpool_event_started'));
         }
 
-        if (in_array($direction, ['from_event', 'round_trip']) && $endDateTime && $endDateTime->isPast()) {
+        if ($direction === 'from_event' && $endDateTime && $endDateTime->isPast()) {
             return redirect()->back()->with('error', __('messages.carpool_event_ended'));
         }
 
@@ -228,6 +228,11 @@ class CarpoolController extends Controller
 
         if ($offer->user_id !== $user->id) {
             abort(403);
+        }
+
+        $endDateTime = $event->getEndDateTime($offer->event_date);
+        if ($endDateTime && $endDateTime->isPast()) {
+            return redirect()->back()->with('error', __('messages.carpool_event_ended'));
         }
 
         $approvedRequests = collect();
@@ -293,6 +298,11 @@ class CarpoolController extends Controller
             abort(403);
         }
 
+        $endDateTime = $event->getEndDateTime($offer->event_date);
+        if ($endDateTime && $endDateTime->isPast()) {
+            return redirect()->back()->with('error', __('messages.carpool_event_ended'));
+        }
+
         if ($offer->status !== 'active') {
             return redirect()->back()->with('error', __('messages.carpool_offer_not_available'));
         }
@@ -351,13 +361,9 @@ class CarpoolController extends Controller
             return redirect()->back()->with('error', __('messages.carpool_offer_not_available'));
         }
 
-        if ($offer->isFull()) {
-            return redirect()->back()->with('error', __('messages.carpool_offer_full'));
-        }
-
         $direction = $offer->direction;
 
-        if ($direction === 'to_event') {
+        if (in_array($direction, ['to_event', 'round_trip'])) {
             $startDateTime = $event->getStartDateTime($offer->event_date);
             if ($startDateTime && $startDateTime->isPast()) {
                 return redirect()->back()->with('error', __('messages.carpool_event_started'));
@@ -373,47 +379,46 @@ class CarpoolController extends Controller
             'message' => ['nullable', 'string', 'max:500'],
         ]);
 
-        // Check for existing cancelled/declined request and reuse it
-        $existingRequest = DB::transaction(function () use ($offer, $user, $request) {
-            $existing = CarpoolRequest::lockForUpdate()
-                ->where('carpool_offer_id', $offer->id)
-                ->where('user_id', $user->id)
-                ->whereIn('status', ['cancelled', 'declined'])
-                ->first();
-
-            if ($existing) {
-                $existing->status = 'pending';
-                $existing->message = $request->input('message');
-                $existing->reminder_sent_at = null;
-                $existing->save();
-            }
-
-            return $existing;
-        });
-
-        if ($existingRequest) {
-            $this->sendCarpoolEmail(
-                $offer->user,
-                $role,
-                'carpool_ride_requested',
-                $event,
-                $offer,
-                $existingRequest
-            );
-
-            return redirect()->back()->with('success', __('messages.carpool_request_sent'));
-        }
-
         try {
-            $carpoolRequest = CarpoolRequest::create([
-                'carpool_offer_id' => $offer->id,
-                'user_id' => $user->id,
-                'message' => $request->input('message'),
-            ]);
+            $carpoolRequest = DB::transaction(function () use ($offer, $user, $request) {
+                // Check fullness atomically inside transaction
+                $approvedCount = CarpoolRequest::where('carpool_offer_id', $offer->id)
+                    ->where('status', 'approved')
+                    ->count();
+                if ($approvedCount >= $offer->total_spots) {
+                    return 'full';
+                }
+
+                // Check for existing cancelled/declined request and reuse it
+                $existing = CarpoolRequest::lockForUpdate()
+                    ->where('carpool_offer_id', $offer->id)
+                    ->where('user_id', $user->id)
+                    ->whereIn('status', ['cancelled', 'declined'])
+                    ->first();
+
+                if ($existing) {
+                    $existing->status = 'pending';
+                    $existing->message = $request->input('message');
+                    $existing->reminder_sent_at = null;
+                    $existing->save();
+
+                    return $existing;
+                }
+
+                return CarpoolRequest::create([
+                    'carpool_offer_id' => $offer->id,
+                    'user_id' => $user->id,
+                    'message' => $request->input('message'),
+                ]);
+            });
         } catch (\Illuminate\Database\QueryException $e) {
             report($e);
 
             return redirect()->back()->with('error', __('messages.carpool_already_requested'));
+        }
+
+        if ($carpoolRequest === 'full') {
+            return redirect()->back()->with('error', __('messages.carpool_offer_full'));
         }
 
         // Notify driver
@@ -446,6 +451,11 @@ class CarpoolController extends Controller
 
         if ($carpoolRequest->user_id !== $user->id) {
             abort(403);
+        }
+
+        $endDateTime = $event->getEndDateTime($carpoolRequest->offer->event_date);
+        if ($endDateTime && $endDateTime->isPast()) {
+            return redirect()->back()->with('error', __('messages.carpool_event_ended'));
         }
 
         $result = DB::transaction(function () use ($carpoolRequest) {
@@ -497,6 +507,11 @@ class CarpoolController extends Controller
 
         if ($offer->user_id !== $user->id) {
             abort(403);
+        }
+
+        $endDateTime = $event->getEndDateTime($offer->event_date);
+        if ($endDateTime && $endDateTime->isPast()) {
+            return redirect()->back()->with('error', __('messages.carpool_event_ended'));
         }
 
         $carpoolRequest = CarpoolRequest::findOrFail(UrlUtils::decodeId($request_hash));
@@ -574,6 +589,11 @@ class CarpoolController extends Controller
 
         if ($offer->user_id !== $user->id) {
             abort(403);
+        }
+
+        $endDateTime = $event->getEndDateTime($offer->event_date);
+        if ($endDateTime && $endDateTime->isPast()) {
+            return redirect()->back()->with('error', __('messages.carpool_event_ended'));
         }
 
         $carpoolRequest = CarpoolRequest::findOrFail(UrlUtils::decodeId($request_hash));

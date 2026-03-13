@@ -603,6 +603,7 @@ return [
     'curator_schedules' => 'Расписание кураторов',
     'event_created_by' => 'Событие создано :user',
     'show_past_events' => 'Показать прошедшие события',
+    'include_past_events' => 'Включить прошедшие события',
     'past_events' => 'Прошлые события',
     'load_more' => 'Загрузить больше',
     'category' => 'Категория',
