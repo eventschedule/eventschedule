@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Jobs\SendQueuedEmail;
 use App\Mail\CarpoolNotification;
+use App\Models\CarpoolOffer;
 use App\Models\CarpoolRequest;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -64,6 +65,9 @@ class SendCarpoolReminders extends Command
             }
 
             $sent = DB::transaction(function () use ($carpoolRequest, $offer, $role, $event, $now) {
+                // Lock offer row to serialize per-offer processing
+                CarpoolOffer::lockForUpdate()->find($offer->id);
+
                 $locked = CarpoolRequest::lockForUpdate()->find($carpoolRequest->id);
                 if ($locked->reminder_sent_at) {
                     return false; // Already processed by concurrent run
