@@ -172,9 +172,15 @@ class CarpoolController extends Controller
 
         try {
             $result = DB::transaction(function () use ($user, $event, $direction, $isRecurring, $eventDate, $request, $role) {
+                $directionsToCheck = match ($direction) {
+                    'round_trip' => ['round_trip', 'to_event', 'from_event'],
+                    'to_event' => ['to_event', 'round_trip'],
+                    'from_event' => ['from_event', 'round_trip'],
+                };
+
                 $existingOffer = CarpoolOffer::where('event_id', $event->id)
                     ->where('user_id', $user->id)
-                    ->where('direction', $direction)
+                    ->whereIn('direction', $directionsToCheck)
                     ->where('status', 'active')
                     ->when($isRecurring, fn ($q) => $q->where('event_date', $eventDate))
                     ->when(! $isRecurring, fn ($q) => $q->whereNull('event_date'))
@@ -406,11 +412,17 @@ class CarpoolController extends Controller
 
         try {
             $carpoolRequest = DB::transaction(function () use ($offer, $user, $request) {
+                $lockedOffer = CarpoolOffer::lockForUpdate()->find($offer->id);
+
+                if ($lockedOffer->status !== 'active') {
+                    return 'not_active';
+                }
+
                 // Check fullness atomically inside transaction
                 $approvedCount = CarpoolRequest::where('carpool_offer_id', $offer->id)
                     ->where('status', 'approved')
                     ->count();
-                if ($approvedCount >= $offer->total_spots) {
+                if ($approvedCount >= $lockedOffer->total_spots) {
                     return 'full';
                 }
 
@@ -440,6 +452,10 @@ class CarpoolController extends Controller
             report($e);
 
             return redirect()->back()->with('error', __('messages.carpool_already_requested'));
+        }
+
+        if ($carpoolRequest === 'not_active') {
+            return redirect()->back()->with('error', __('messages.carpool_offer_not_available'));
         }
 
         if ($carpoolRequest === 'full') {

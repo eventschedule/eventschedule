@@ -25,7 +25,7 @@
                     createAccount: @json((bool) old('create_account', false)),
                     tickets: @json($event->tickets->filter(fn($t) => !$t->isSalesEnded())->values()->map(function ($ticket) {
                         $data = $ticket->toData($date ?? request()->date);
-                        $data['selectedQty'] = (int) (old('tickets')[$data['id']] ?? 0);
+                        $data['selectedQty'] = min((int) (old('tickets')[$data['id']] ?? 0), $data['quantity']);
                         $data['custom_fields'] = $ticket->custom_fields ?? [];
                         $data['custom_values'] = (object) (old('ticket_custom_values')[$data['id']] ?? []);
                         $data['multiselect_values'] = (object) [];
@@ -67,7 +67,7 @@
                     hasError: @json(session('error') || $errors->any()),
                     addons: @json(($event->addons ?? collect())->map(function ($addon) use ($date) {
                         $data = $addon->toData($date ?? request()->date);
-                        $data['selectedQty'] = (int) (old('addons')[$data['id']] ?? 0);
+                        $data['selectedQty'] = min((int) (old('addons')[$data['id']] ?? 0), $data['quantity']);
                         return $data;
                     })),
                 };
@@ -263,6 +263,9 @@
                 onTicketChange() {
                     this.updateTicketQuantities();
                     this.rebuildGuests();
+                    if (this.totalSelectedTickets === 0) {
+                        this.addons.forEach(a => a.selectedQty = 0);
+                    }
                     if (this.promoCodeValid) {
                         this.applyPromoCode();
                     }

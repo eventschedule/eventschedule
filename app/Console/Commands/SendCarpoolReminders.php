@@ -6,6 +6,7 @@ use App\Jobs\SendQueuedEmail;
 use App\Mail\CarpoolNotification;
 use App\Models\CarpoolRequest;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class SendCarpoolReminders extends Command
@@ -62,19 +63,31 @@ class SendCarpoolReminders extends Command
                 continue;
             }
 
-            // Send reminder to rider
-            $this->sendReminder($carpoolRequest->user, $role, $event, $offer, $carpoolRequest);
+            $sent = DB::transaction(function () use ($carpoolRequest, $offer, $role, $event, $now) {
+                $locked = CarpoolRequest::lockForUpdate()->find($carpoolRequest->id);
+                if ($locked->reminder_sent_at) {
+                    return false; // Already processed by concurrent run
+                }
 
-            // Send reminder to driver (only once per offer)
-            if (! $offer->approvedRequests()
-                ->whereNotNull('reminder_sent_at')
-                ->exists()) {
-                $this->sendReminder($offer->user, $role, $event, $offer, $carpoolRequest);
+                // Send reminder to rider
+                $this->sendReminder($locked->user, $role, $event, $offer, $locked);
+
+                // Send reminder to driver (only once per offer)
+                if (! $offer->approvedRequests()
+                    ->whereNotNull('reminder_sent_at')
+                    ->exists()) {
+                    $this->sendReminder($offer->user, $role, $event, $offer, $locked);
+                }
+
+                $locked->reminder_sent_at = $now;
+                $locked->save();
+
+                return true;
+            });
+
+            if ($sent) {
+                $sentCount++;
             }
-
-            $carpoolRequest->reminder_sent_at = $now;
-            $carpoolRequest->save();
-            $sentCount++;
         }
 
         if ($sentCount > 0) {

@@ -566,7 +566,7 @@ class NewsletterController extends Controller
         $groups = $role->groups()->orderBy('name')->get();
 
         $eventsData = $role->events()
-            ->where('is_accepted', true)
+            ->where('event_role.is_accepted', true)
             ->where('name', '!=', '')
             ->whereNotNull('name')
             ->orderBy('starts_at', 'desc')
