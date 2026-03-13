@@ -45,14 +45,16 @@ class SendCarpoolReminders extends Command
             }
 
             $eventDate = $offer->event_date;
-            $startDateTime = $event->getStartDateTime($eventDate);
+            $relevantDateTime = $offer->direction === 'from_event'
+                ? $event->getEndDateTime($eventDate)
+                : $event->getStartDateTime($eventDate);
 
-            if (! $startDateTime) {
+            if (! $relevantDateTime) {
                 continue;
             }
 
-            // Only send reminders for events starting within 24 hours
-            if ($startDateTime->isBefore($now) || $startDateTime->isAfter($tomorrow)) {
+            // Only send reminders for events within 24 hours
+            if ($relevantDateTime->isBefore($now) || $relevantDateTime->isAfter($tomorrow)) {
                 continue;
             }
 

@@ -333,6 +333,31 @@
                     </div>
                 </div>
 
+                <!-- Sale Notifications -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-lime-100 to-green-100 dark:from-lime-900 dark:to-green-900 border border-lime-200 dark:border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-lime-500/20 text-lime-700 dark:text-lime-300 text-sm font-medium mb-4">
+                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        Sale Alerts
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Know when you sell</h2>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Get an email whenever a ticket sells. Buyer details, ticket types, and payment status, right in your inbox.</p>
+
+                    <div class="bg-lime-500/10 rounded-xl p-4 border border-lime-400/20">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-8 h-8 rounded-full bg-lime-500/20 flex items-center justify-center">
+                                <svg aria-hidden="true" class="w-4 h-4 text-lime-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div class="text-gray-900 dark:text-white text-sm font-medium">New sale!</div>
+                        </div>
+                        <div class="text-gray-500 dark:text-gray-400 text-xs">2x VIP - Jazz Night</div>
+                        <div class="text-lime-600 dark:text-lime-300 text-xs mt-1">$150.00 - Paid</div>
+                    </div>
+                </div>
+
                 <!-- Free Event Registration -->
                 <div class="bento-card lg:col-span-3 relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 border border-green-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-3 gap-8 items-center">
@@ -370,31 +395,6 @@
                                 <div class="text-center mt-3 text-gray-500 dark:text-gray-400 text-xs">12 of 50 spots remaining</div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Sale Notifications -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-lime-100 to-green-100 dark:from-lime-900 dark:to-green-900 border border-lime-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-lime-500/20 text-lime-700 dark:text-lime-300 text-sm font-medium mb-4">
-                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </svg>
-                        Sale Alerts
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Know when you sell</h2>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Get an email whenever a ticket sells. Buyer details, ticket types, and payment status, right in your inbox.</p>
-
-                    <div class="bg-lime-500/10 rounded-xl p-4 border border-lime-400/20">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="w-8 h-8 rounded-full bg-lime-500/20 flex items-center justify-center">
-                                <svg aria-hidden="true" class="w-4 h-4 text-lime-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <div class="text-gray-900 dark:text-white text-sm font-medium">New sale!</div>
-                        </div>
-                        <div class="text-gray-500 dark:text-gray-400 text-xs">2x VIP - Jazz Night</div>
-                        <div class="text-lime-600 dark:text-lime-300 text-xs mt-1">$150.00 - Paid</div>
                     </div>
                 </div>
 

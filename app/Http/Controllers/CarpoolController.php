@@ -355,9 +355,18 @@ class CarpoolController extends Controller
             return redirect()->back()->with('error', __('messages.carpool_offer_full'));
         }
 
-        $endDateTime = $event->getEndDateTime($offer->event_date);
-        if ($endDateTime && $endDateTime->isPast()) {
-            return redirect()->back()->with('error', __('messages.carpool_event_ended'));
+        $direction = $offer->direction;
+
+        if ($direction === 'to_event') {
+            $startDateTime = $event->getStartDateTime($offer->event_date);
+            if ($startDateTime && $startDateTime->isPast()) {
+                return redirect()->back()->with('error', __('messages.carpool_event_started'));
+            }
+        } else {
+            $endDateTime = $event->getEndDateTime($offer->event_date);
+            if ($endDateTime && $endDateTime->isPast()) {
+                return redirect()->back()->with('error', __('messages.carpool_event_ended'));
+            }
         }
 
         $request->validate([
