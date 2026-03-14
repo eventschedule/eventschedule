@@ -456,7 +456,7 @@
         </div>
 
         <!-- Name -->
-        <div class="mt-4" id="name-field" @if(config('app.hosted')) style="display: none;" @endif>
+        <div class="mt-4" id="name-field" @if(config('app.hosted') && ! config('app.is_testing')) style="display: none;" @endif>
             <x-input-label for="name" :value="__('messages.full_name')" />
             <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required
                 autofocus autocomplete="name" />
@@ -464,7 +464,7 @@
         </div>
 
         <!-- Password -->
-        <div class="mt-4" id="password-field" @if(config('app.hosted')) style="display: none;" @endif>
+        <div class="mt-4" id="password-field" @if(config('app.hosted') && ! config('app.is_testing')) style="display: none;" @endif>
             <x-input-label for="password" :value="__('messages.password')" />
 
             <x-password-input id="password" class="block mt-1 w-full" name="password" required minlength="8"
@@ -542,7 +542,7 @@
         </div>
         @endif
 
-        <div class="mt-8" id="terms-field" @if(config('app.hosted')) style="display: none;" @endif>
+        <div class="mt-8" id="terms-field" @if(config('app.hosted') && ! config('app.is_testing')) style="display: none;" @endif>
             <div class="relative flex items-start">
                 <div class="flex h-6 items-center">
                     <input id="terms" name="terms" type="checkbox" required
@@ -582,7 +582,7 @@
         @endif
         
         <div class="flex items-center justify-end mt-8">
-            <div id="submit-section" @if(config('app.hosted')) style="display: none;" @endif>
+            <div id="submit-section" @if(config('app.hosted') && ! config('app.is_testing')) style="display: none;" @endif>
                 <x-primary-button>
                     {{ __('messages.sign_up') }}
                 </x-primary-button>

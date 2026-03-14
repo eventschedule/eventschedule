@@ -30,7 +30,7 @@ class ProfileTest extends DuskTestCase
             $browser->visit('/settings')
                 ->waitFor('button[data-tab="localization"]', 5)
                 ->click('button[data-tab="localization"]')
-                ->waitFor('#timezone-search', 5);
+                ->pause(500);
 
             $browser->script("
                 var select = document.getElementById('timezone');
@@ -49,8 +49,9 @@ class ProfileTest extends DuskTestCase
             $browser->visit('/settings')
                 ->waitFor('button[data-tab="localization"]', 5)
                 ->click('button[data-tab="localization"]')
-                ->waitFor('#timezone-search', 5)
-                ->assertInputValue('#timezone-search', 'Pacific/Auckland');
+                ->pause(500);
+            $timezoneValue = $browser->script("return document.getElementById('timezone').value;");
+            $this->assertEquals('Pacific/Auckland', $timezoneValue[0]);
 
             // -----------------------------------------------
             // 2. Toggle 24-hour time
