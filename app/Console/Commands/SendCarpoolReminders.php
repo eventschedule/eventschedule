@@ -69,7 +69,7 @@ class SendCarpoolReminders extends Command
                 CarpoolOffer::lockForUpdate()->find($offer->id);
 
                 $locked = CarpoolRequest::lockForUpdate()->find($carpoolRequest->id);
-                if ($locked->reminder_sent_at) {
+                if (! $locked || $locked->reminder_sent_at) {
                     return false; // Already processed by concurrent run
                 }
 

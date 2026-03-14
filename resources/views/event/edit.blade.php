@@ -3665,6 +3665,12 @@
                             $carpoolReports = \App\Models\CarpoolReport::whereIn('carpool_offer_id', $carpoolOffers->pluck('id'))->with(['reporter', 'reported', 'offer'])->get();
                         @endphp
 
+                        @if (session('message'))
+                        <div class="mb-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-400 text-sm">
+                            {{ session('message') }}
+                        </div>
+                        @endif
+
                         @if ($carpoolOffers->count() > 0)
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.carpool_active_offers') }}: {{ $carpoolOffers->count() }}</p>
                         <div class="space-y-3 mb-4">
