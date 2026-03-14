@@ -7,32 +7,27 @@
 
         {{-- Revenue & Sales Cards --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="ap-card rounded-xl shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 text-start">@lang('messages.total_revenue')</p>
-                <p class="mt-2 text-2xl font-bold text-green-600 dark:text-green-400 text-center">${{ number_format($totalRevenue, 2) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-center">+${{ number_format($revenueInPeriod, 2) }} @lang('messages.in_period')</p>
-            </div>
-            <div class="ap-card rounded-xl shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 text-start">@lang('messages.total_sales')</p>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalSales) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-center">+{{ number_format($salesInPeriod) }} @lang('messages.in_period')</p>
-            </div>
-            <div class="ap-card rounded-xl shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 text-start">@lang('messages.refund_rate')</p>
-                <p class="mt-2 text-2xl font-bold {{ $refundRate > 5 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }} text-center">{{ $refundRate }}%</p>
-            </div>
+            <x-stat-panel label="{{ __('messages.total_revenue') }}" color="green">
+                ${{ number_format($totalRevenue, 2) }}
+                <x-slot:subtitle>+${{ number_format($revenueInPeriod, 2) }} @lang('messages.in_period')</x-slot:subtitle>
+            </x-stat-panel>
+            <x-stat-panel label="{{ __('messages.total_sales') }}">
+                {{ number_format($totalSales) }}
+                <x-slot:subtitle>+{{ number_format($salesInPeriod) }} @lang('messages.in_period')</x-slot:subtitle>
+            </x-stat-panel>
+            <x-stat-panel label="{{ __('messages.refund_rate') }}" :color="$refundRate > 5 ? 'red' : null">
+                {{ $refundRate }}%
+            </x-stat-panel>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="ap-card rounded-xl shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 text-start">@lang('messages.pending_revenue')</p>
-                <p class="mt-2 text-2xl font-bold text-amber-600 dark:text-amber-400 text-center">${{ number_format($pendingRevenue, 2) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-center">{{ number_format($pendingSales) }} @lang('messages.pending_sales')</p>
-            </div>
-            <div class="ap-card rounded-xl shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 text-start">@lang('messages.boost_markup_revenue')</p>
-                <p class="mt-2 text-2xl font-bold text-green-600 dark:text-green-400 text-center">${{ number_format($boostMarkupTotal, 2) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-center">+${{ number_format($boostMarkupInPeriod, 2) }} @lang('messages.in_period')</p>
-            </div>
+            <x-stat-panel label="{{ __('messages.pending_revenue') }}" color="amber">
+                ${{ number_format($pendingRevenue, 2) }}
+                <x-slot:subtitle>{{ number_format($pendingSales) }} @lang('messages.pending_sales')</x-slot:subtitle>
+            </x-stat-panel>
+            <x-stat-panel label="{{ __('messages.boost_markup_revenue') }}" color="green">
+                ${{ number_format($boostMarkupTotal, 2) }}
+                <x-slot:subtitle>+${{ number_format($boostMarkupInPeriod, 2) }} @lang('messages.in_period')</x-slot:subtitle>
+            </x-stat-panel>
         </div>
 
         @if (config('app.hosted'))
@@ -61,18 +56,15 @@
 
         {{-- More Subscription Details --}}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="ap-card rounded-xl shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.trialing_subscriptions')</p>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($trialingSubscriptions) }}</p>
-            </div>
-            <div class="ap-card rounded-xl shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.canceled_subscriptions')</p>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($canceledSubscriptions) }}</p>
-            </div>
-            <div class="ap-card rounded-xl shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.expired_trials_no_sub')</p>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($expiredTrialsNoSub) }}</p>
-            </div>
+            <x-stat-panel label="{{ __('messages.trialing_subscriptions') }}">
+                {{ number_format($trialingSubscriptions) }}
+            </x-stat-panel>
+            <x-stat-panel label="{{ __('messages.canceled_subscriptions') }}">
+                {{ number_format($canceledSubscriptions) }}
+            </x-stat-panel>
+            <x-stat-panel label="{{ __('messages.expired_trials_no_sub') }}">
+                {{ number_format($expiredTrialsNoSub) }}
+            </x-stat-panel>
         </div>
         @endif
 

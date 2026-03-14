@@ -101,7 +101,7 @@ class SendCarpoolReminders extends Command
 
     protected function sendReminder($recipient, $role, $event, $offer, $carpoolRequest): void
     {
-        if (! $recipient->carpool_notifications_enabled) {
+        if (! $recipient->carpool_notifications_enabled || $recipient->is_subscribed === false) {
             return;
         }
 

@@ -239,6 +239,11 @@ class ApiEventController extends Controller
                 'event_parts.*.description' => 'nullable|string|max:1000',
                 'event_parts.*.start_time' => 'nullable|string',
                 'event_parts.*.end_time' => 'nullable|string',
+                'addons' => 'nullable|array',
+                'addons.*.type' => 'required_with:addons|string|max:255',
+                'addons.*.quantity' => 'nullable|integer|min:0',
+                'addons.*.price' => 'nullable|numeric|min:0',
+                'addons.*.description' => 'nullable|string|max:1000',
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -257,7 +262,7 @@ class ApiEventController extends Controller
             'schedule_type', 'recurring_frequency', 'recurring_interval',
             'recurring_end_type', 'recurring_end_value', 'days_of_week',
             'venue_id', 'venue_name', 'venue_address1',
-            'members', 'schedule', 'tickets', 'event_parts',
+            'members', 'schedule', 'tickets', 'event_parts', 'addons',
         ]));
 
         // Convert UTC starts_at to user's local timezone (saveEvent converts local back to UTC)
@@ -345,6 +350,11 @@ class ApiEventController extends Controller
                 'event_parts.*.description' => 'nullable|string|max:1000',
                 'event_parts.*.start_time' => 'nullable|string',
                 'event_parts.*.end_time' => 'nullable|string',
+                'addons' => 'nullable|array',
+                'addons.*.type' => 'required_with:addons|string|max:255',
+                'addons.*.quantity' => 'nullable|integer|min:0',
+                'addons.*.price' => 'nullable|numeric|min:0',
+                'addons.*.description' => 'nullable|string|max:1000',
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -363,7 +373,7 @@ class ApiEventController extends Controller
             'schedule_type', 'recurring_frequency', 'recurring_interval',
             'recurring_end_type', 'recurring_end_value', 'days_of_week',
             'venue_id', 'venue_name', 'venue_address1',
-            'members', 'schedule', 'tickets', 'event_parts',
+            'members', 'schedule', 'tickets', 'event_parts', 'addons',
         ]));
 
         // Determine the current role from the event's roles (first where user is owner/admin)

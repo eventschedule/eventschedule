@@ -76,44 +76,36 @@
 
         {{-- Activity Stats --}}
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="ap-card rounded-xl shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 text-start">@lang('messages.active_users_7_days')</p>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($activeUsers7Days) }}</p>
-            </div>
-            <div class="ap-card rounded-xl shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 text-start">@lang('messages.active_users_30_days')</p>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($activeUsers30Days) }}</p>
-            </div>
-            <div class="ap-card rounded-xl shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 text-start">@lang('messages.upcoming_online_events')</p>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($upcomingOnlineEvents) }}</p>
-            </div>
-            <div class="ap-card rounded-xl shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 text-start">@lang('messages.private_events')</p>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($privateEvents) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-center">{{ number_format($passwordProtectedEvents) }} @lang('messages.with_password')</p>
-            </div>
+            <x-stat-panel label="{{ __('messages.active_users_7_days') }}">
+                {{ number_format($activeUsers7Days) }}
+            </x-stat-panel>
+            <x-stat-panel label="{{ __('messages.active_users_30_days') }}">
+                {{ number_format($activeUsers30Days) }}
+            </x-stat-panel>
+            <x-stat-panel label="{{ __('messages.upcoming_online_events') }}">
+                {{ number_format($upcomingOnlineEvents) }}
+            </x-stat-panel>
+            <x-stat-panel label="{{ __('messages.private_events') }}">
+                {{ number_format($privateEvents) }}
+                <x-slot:subtitle>{{ number_format($passwordProtectedEvents) }} @lang('messages.with_password')</x-slot:subtitle>
+            </x-stat-panel>
         </div>
 
         {{-- Boost & Newsletter Stats --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="ap-card rounded-xl shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 text-start">@lang('messages.stripe_paid')</p>
-                <p class="mt-2 text-2xl font-bold text-green-600 dark:text-green-400 text-center">{{ number_format($stripePaidCount) }}</p>
-            </div>
-            <div class="ap-card rounded-xl shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 text-start">@lang('messages.active_boost_campaigns')</p>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($activeBoostCampaigns) }}</p>
-            </div>
-            <div class="ap-card rounded-xl shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 text-start">@lang('messages.boost_markup_revenue')</p>
-                <p class="mt-2 text-2xl font-bold text-green-600 dark:text-green-400 text-center">${{ number_format($boostMarkupRevenue, 2) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-center">@lang('messages.in_period')</p>
-            </div>
-            <div class="ap-card rounded-xl shadow p-6">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 text-start">@lang('messages.newsletter_subscribers')</p>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($newsletterSubscribers) }}</p>
-            </div>
+            <x-stat-panel label="{{ __('messages.stripe_paid') }}" color="green">
+                {{ number_format($stripePaidCount) }}
+            </x-stat-panel>
+            <x-stat-panel label="{{ __('messages.active_boost_campaigns') }}">
+                {{ number_format($activeBoostCampaigns) }}
+            </x-stat-panel>
+            <x-stat-panel label="{{ __('messages.boost_markup_revenue') }}" color="green">
+                ${{ number_format($boostMarkupRevenue, 2) }}
+                <x-slot:subtitle>@lang('messages.in_period')</x-slot:subtitle>
+            </x-stat-panel>
+            <x-stat-panel label="{{ __('messages.newsletter_subscribers') }}">
+                {{ number_format($newsletterSubscribers) }}
+            </x-stat-panel>
         </div>
 
         {{-- Events by Country --}}
@@ -274,7 +266,7 @@
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.email_signups')</p>
                 </div>
                 <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($emailUsersInPeriod) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 w-full text-center">@lang('messages.in_period')</p>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 w-full text-center">@lang('messages.in_period')</p>
             </div>
             <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
                 <div class="flex items-center gap-3 mb-3 self-start">
@@ -287,7 +279,7 @@
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.google_signups')</p>
                 </div>
                 <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($googleUsersInPeriod) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 w-full text-center">@lang('messages.in_period')</p>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 w-full text-center">@lang('messages.in_period')</p>
             </div>
             <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
                 <div class="flex items-center gap-3 mb-3 self-start">
@@ -300,7 +292,7 @@
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.hybrid_signups')</p>
                 </div>
                 <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($hybridUsersInPeriod) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 w-full text-center">@lang('messages.in_period')</p>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 w-full text-center">@lang('messages.in_period')</p>
             </div>
         </div>
 

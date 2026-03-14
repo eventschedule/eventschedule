@@ -847,6 +847,9 @@ class CarpoolController extends Controller
     public function myCarpools(Request $request)
     {
         $user = auth()->user();
+        if (! $user) {
+            abort(403);
+        }
 
         $myOffers = CarpoolOffer::where('user_id', $user->id)
             ->with(['event.roles', 'role', 'approvedRequests', 'pendingRequests'])
@@ -867,7 +870,7 @@ class CarpoolController extends Controller
             return;
         }
 
-        if (! $recipient->carpool_notifications_enabled) {
+        if (! $recipient->carpool_notifications_enabled || $recipient->is_subscribed === false) {
             return;
         }
 

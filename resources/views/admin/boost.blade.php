@@ -7,49 +7,40 @@
 
         {{-- Summary Metric Cards --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="ap-card rounded-xl shadow p-4">
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-start">@lang('messages.total_campaigns')</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalCampaignsAllTime) }}</p>
-                <p class="text-xs text-gray-400 dark:text-gray-500 text-center">{{ number_format($totalCampaignsInPeriod) }} @lang('messages.in_period')</p>
-            </div>
-            <div class="ap-card rounded-xl shadow p-4">
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-start">@lang('messages.active_campaigns')</p>
-                <p class="text-2xl font-bold text-green-600 dark:text-green-400 text-center">{{ number_format($activeCampaigns) }}</p>
-            </div>
-            <div class="ap-card rounded-xl shadow p-4">
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-start">@lang('messages.markup_revenue')</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">${{ number_format($markupRevenue, 2) }}</p>
-            </div>
+            <x-stat-panel label="{{ __('messages.total_campaigns') }}" padding="p-4">
+                {{ number_format($totalCampaignsAllTime) }}
+                <x-slot:subtitle>{{ number_format($totalCampaignsInPeriod) }} @lang('messages.in_period')</x-slot:subtitle>
+            </x-stat-panel>
+            <x-stat-panel label="{{ __('messages.active_campaigns') }}" color="green" padding="p-4">
+                {{ number_format($activeCampaigns) }}
+            </x-stat-panel>
+            <x-stat-panel label="{{ __('messages.markup_revenue') }}" padding="p-4">
+                ${{ number_format($markupRevenue, 2) }}
+            </x-stat-panel>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="ap-card rounded-xl shadow p-4">
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-start">@lang('messages.total_ad_spend')</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">${{ number_format($totalAdSpend, 2) }}</p>
-            </div>
-            <div class="ap-card rounded-xl shadow p-4">
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-start">@lang('messages.total_refunds')</p>
-                <p class="text-2xl font-bold text-red-600 dark:text-red-400 text-center">${{ number_format($totalRefunds, 2) }}</p>
-            </div>
+            <x-stat-panel label="{{ __('messages.total_ad_spend') }}" padding="p-4">
+                ${{ number_format($totalAdSpend, 2) }}
+            </x-stat-panel>
+            <x-stat-panel label="{{ __('messages.total_refunds') }}" color="red" padding="p-4">
+                ${{ number_format($totalRefunds, 2) }}
+            </x-stat-panel>
         </div>
 
         {{-- Average Performance Cards --}}
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="ap-card rounded-xl shadow p-4">
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-start">@lang('messages.avg_ctr')</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($avgCtr, 2) }}%</p>
-            </div>
-            <div class="ap-card rounded-xl shadow p-4">
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-start">@lang('messages.avg_cpc')</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">${{ number_format($avgCpc, 2) }}</p>
-            </div>
-            <div class="ap-card rounded-xl shadow p-4">
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-start">@lang('messages.avg_cpm')</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">${{ number_format($avgCpm, 2) }}</p>
-            </div>
-            <div class="ap-card rounded-xl shadow p-4">
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-start">@lang('messages.rejection_rate')</p>
-                <p class="text-2xl font-bold {{ $rejectionRate > 20 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }} text-center">{{ number_format($rejectionRate, 1) }}%</p>
-            </div>
+            <x-stat-panel label="{{ __('messages.avg_ctr') }}" padding="p-4">
+                {{ number_format($avgCtr, 2) }}%
+            </x-stat-panel>
+            <x-stat-panel label="{{ __('messages.avg_cpc') }}" padding="p-4">
+                ${{ number_format($avgCpc, 2) }}
+            </x-stat-panel>
+            <x-stat-panel label="{{ __('messages.avg_cpm') }}" padding="p-4">
+                ${{ number_format($avgCpm, 2) }}
+            </x-stat-panel>
+            <x-stat-panel label="{{ __('messages.rejection_rate') }}" :color="$rejectionRate > 20 ? 'red' : null" padding="p-4">
+                {{ number_format($rejectionRate, 1) }}%
+            </x-stat-panel>
         </div>
 
         {{-- Alerts --}}

@@ -28,21 +28,18 @@
                 </div>
             </div>
 
-            <div class="ap-card rounded-xl shadow p-6 text-center">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_users_7_days')</p>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeUsers7Days) }}</p>
-            </div>
+            <x-stat-panel label="{{ __('messages.active_users_7_days') }}">
+                {{ number_format($activeUsers7Days) }}
+            </x-stat-panel>
 
-            <div class="ap-card rounded-xl shadow p-6 text-center">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.active_users_30_days')</p>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeUsers30Days) }}</p>
-            </div>
+            <x-stat-panel label="{{ __('messages.active_users_30_days') }}">
+                {{ number_format($activeUsers30Days) }}
+            </x-stat-panel>
 
-            <div class="ap-card rounded-xl shadow p-6 text-center">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.newsletter_subscribers')</p>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($newsletterSubscribed) }}</p>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ number_format($newsletterUnsubscribed) }} @lang('messages.unsubscribed')</p>
-            </div>
+            <x-stat-panel label="{{ __('messages.newsletter_subscribers') }}">
+                {{ number_format($newsletterSubscribed) }}
+                <x-slot:subtitle>{{ number_format($newsletterUnsubscribed) }} @lang('messages.unsubscribed')</x-slot:subtitle>
+            </x-stat-panel>
         </div>
 
         {{-- User Signup Method Breakdown --}}
@@ -109,15 +106,15 @@
                 <div class="mt-4 grid grid-cols-3 gap-4 text-center">
                     <div>
                         <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ number_format($emailUsersInPeriod) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.email')</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.email')</p>
                     </div>
                     <div>
                         <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ number_format($googleUsersInPeriod) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.google')</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.google')</p>
                     </div>
                     <div>
                         <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ number_format($hybridUsersInPeriod) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.hybrid')</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.hybrid')</p>
                     </div>
                 </div>
             </div>

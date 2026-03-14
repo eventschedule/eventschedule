@@ -26,9 +26,12 @@
             <h1 class="text-xl font-semibold text-gray-900 dark:text-white mb-1">{{ __('messages.carpool') }}</h1>
             <p class="text-lg text-gray-700 dark:text-[#d1d5db]">{{ $event->name }}</p>
             @if ($date)
-            <p class="text-sm text-gray-500 dark:text-[#9ca3af] mt-1">
-                {{ $event->getStartDateTime($date, true)->translatedFormat('F j, Y') }}
-            </p>
+                @php $startDt = $event->getStartDateTime($date, true); @endphp
+                @if ($startDt)
+                <p class="text-sm text-gray-500 dark:text-[#9ca3af] mt-1">
+                    {{ $startDt->translatedFormat('F j, Y') }}
+                </p>
+                @endif
             @elseif ($event->starts_at)
             <p class="text-sm text-gray-500 dark:text-[#9ca3af] mt-1">
                 {{ $event->getStartDateTime(null, true)->translatedFormat('F j, Y') }}
