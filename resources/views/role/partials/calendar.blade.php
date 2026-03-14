@@ -2868,7 +2868,7 @@ const calendarApp = createApp({
         },
         navigateToEvent(event, e) {
             // Don't navigate if clicking on the edit link or a form/button
-            if (!e?.target || e.target.closest('a') || e.target.closest('form') || e.target.closest('button')) return;
+            if (!e?.target || e.target?.closest('a') || e.target?.closest('form') || e.target?.closest('button')) return;
 
             // Check if direct registration is enabled AND event has registration URL
             if (this.directRegistration && event.registration_url) {

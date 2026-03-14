@@ -799,7 +799,7 @@
             }
 
             document.addEventListener('click', function(e) {
-                var el = e.target.closest('[data-lightbox-src]');
+                var el = e.target?.closest('[data-lightbox-src]');
                 if (!el) return;
                 var src = el.getAttribute('data-lightbox-src') || el.src;
                 if (src && src !== '#' && !src.endsWith('#') && src !== window.location.href) {
