@@ -135,39 +135,39 @@
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-[#d1d5db] mb-1">{{ __('messages.carpool_direction') }} <span class="text-red-500">*</span></label>
                         <select name="direction" required class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-[#2d2d30] dark:text-[#d1d5db] focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]">
-                            <option value="to_event">{{ __('messages.carpool_to_event') }}</option>
-                            <option value="from_event">{{ __('messages.carpool_from_event') }}</option>
-                            <option value="round_trip">{{ __('messages.carpool_round_trip') }}</option>
+                            <option value="to_event" {{ old('direction') === 'to_event' ? 'selected' : '' }}>{{ __('messages.carpool_to_event') }}</option>
+                            <option value="from_event" {{ old('direction') === 'from_event' ? 'selected' : '' }}>{{ __('messages.carpool_from_event') }}</option>
+                            <option value="round_trip" {{ old('direction') === 'round_trip' ? 'selected' : '' }}>{{ __('messages.carpool_round_trip') }}</option>
                         </select>
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-[#d1d5db] mb-1">{{ __('messages.carpool_city') }} <span class="text-red-500">*</span></label>
-                        <input type="text" name="city" required maxlength="255" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-[#2d2d30] dark:text-[#d1d5db] focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]" placeholder="{{ __('messages.carpool_city_placeholder') }}">
+                        <input type="text" name="city" value="{{ old('city') }}" required maxlength="255" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-[#2d2d30] dark:text-[#d1d5db] focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]" placeholder="{{ __('messages.carpool_city_placeholder') }}">
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-[#d1d5db] mb-1">{{ __('messages.carpool_departure_time') }}</label>
-                        <input type="time" name="departure_time" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-[#2d2d30] dark:text-[#d1d5db] focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]">
+                        <input type="time" name="departure_time" value="{{ old('departure_time') }}" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-[#2d2d30] dark:text-[#d1d5db] focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]">
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-[#d1d5db] mb-1">{{ __('messages.carpool_meeting_point') }}</label>
-                        <input type="text" name="meeting_point" maxlength="255" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-[#2d2d30] dark:text-[#d1d5db] focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]" placeholder="{{ __('messages.carpool_meeting_point_placeholder') }}">
+                        <input type="text" name="meeting_point" value="{{ old('meeting_point') }}" maxlength="255" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-[#2d2d30] dark:text-[#d1d5db] focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]" placeholder="{{ __('messages.carpool_meeting_point_placeholder') }}">
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-[#d1d5db] mb-1">{{ __('messages.carpool_spots') }} <span class="text-red-500">*</span></label>
                         <select name="total_spots" required class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-[#2d2d30] dark:text-[#d1d5db] focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]">
                             @for ($i = 1; $i <= 10; $i++)
-                            <option value="{{ $i }}">{{ $i }}</option>
+                            <option value="{{ $i }}" {{ (int) old('total_spots', 1) === $i ? 'selected' : '' }}>{{ $i }}</option>
                             @endfor
                         </select>
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-[#d1d5db] mb-1">{{ __('messages.carpool_note') }}</label>
-                        <textarea name="note" maxlength="500" rows="2" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-[#2d2d30] dark:text-[#d1d5db] focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]" placeholder="{{ __('messages.carpool_note_placeholder') }}"></textarea>
+                        <textarea name="note" maxlength="500" rows="2" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-[#2d2d30] dark:text-[#d1d5db] focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]" placeholder="{{ __('messages.carpool_note_placeholder') }}">{{ old('note') }}</textarea>
                     </div>
 
                     <div class="flex gap-3">
@@ -510,7 +510,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return {
                         filter: 'all',
                         cityFilter: '',
-                        showOfferForm: false,
+                        showOfferForm: {{ $errors->any() ? 'true' : 'false' }},
                         reportOfferId: null,
                         reportRiderKey: null,
                         editSpotsOfferId: null,

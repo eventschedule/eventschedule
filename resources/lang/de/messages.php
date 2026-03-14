@@ -2753,6 +2753,7 @@ return [
     'carpool_already_requested' => 'Sie haben bereits einen Platz für diese Fahrt angefragt.',
     'carpool_must_agree' => 'Sie müssen zuerst den Haftungsausschluss für Fahrgemeinschaften akzeptieren.',
     'carpool_date_required' => 'Für wiederkehrende Veranstaltungen ist ein Datum erforderlich.',
+    'carpool_invalid_date' => 'Das ausgewählte Datum ist kein gültiger Termin dieser Veranstaltung.',
     'carpool_event_started' => 'Diese Veranstaltung hat bereits begonnen.',
     'carpool_event_ended' => 'Diese Veranstaltung ist bereits beendet.',
     'carpool_contact_info' => 'Kontaktinformationen',

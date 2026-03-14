@@ -2749,6 +2749,7 @@ return [
     'carpool_already_requested' => 'Hai già richiesto un posto per questo passaggio.',
     'carpool_must_agree' => 'Devi prima accettare la clausola di responsabilità per il carpooling.',
     'carpool_date_required' => 'È necessaria una data per gli eventi ricorrenti.',
+    'carpool_invalid_date' => 'La data selezionata non corrisponde a un\'occorrenza valida di questo evento.',
     'carpool_event_started' => 'Questo evento è già iniziato.',
     'carpool_event_ended' => 'Questo evento è già terminato.',
     'carpool_contact_info' => 'Informazioni di contatto',

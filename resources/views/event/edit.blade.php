@@ -3871,8 +3871,8 @@
         addons: @json($event->addons ?? []).map(addon => ({
           id: addon.id || null,
           type: addon.type || '',
-          quantity: addon.quantity || null,
-          price: addon.price || null,
+          quantity: addon.quantity ?? null,
+          price: addon.price ?? null,
           description: addon.description || '',
         })),
         formSubmitAttempted: false,

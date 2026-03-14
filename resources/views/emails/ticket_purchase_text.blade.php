@@ -11,10 +11,21 @@
 {{ __('messages.attendee') }}: {{ $sale->name }}
 {{ __('messages.number_of_attendees') }}: {{ $sale->quantity() }}
 
+@php
+$regularTickets = $sale->saleTickets->filter(fn($st) => !$st->ticket->is_addon);
+$addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket->is_addon);
+@endphp
 {{ __('messages.ticket_details') }}
-@foreach ($sale->saleTickets as $saleTicket)
+@foreach ($regularTickets as $saleTicket)
 {{ $saleTicket->ticket->type ?: __('messages.ticket') }} x {{ $saleTicket->quantity }}
 @endforeach
+@if ($addonTickets->count() > 0)
+
+{{ __('messages.add_ons') }}
+@foreach ($addonTickets as $saleTicket)
+{{ $saleTicket->ticket->type ?: __('messages.add_on') }} x {{ $saleTicket->quantity }}
+@endforeach
+@endif
 
 {{ __('messages.view_your_tickets') }}: {{ $ticketUrl }}
 

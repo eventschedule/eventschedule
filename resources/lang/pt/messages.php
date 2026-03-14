@@ -2748,6 +2748,7 @@ return [
     'carpool_already_requested' => 'Você já solicitou uma vaga nesta carona.',
     'carpool_must_agree' => 'Você deve aceitar o aviso de responsabilidade primeiro.',
     'carpool_date_required' => 'Uma data é necessária para eventos recorrentes.',
+    'carpool_invalid_date' => 'A data selecionada não é uma ocorrência válida deste evento.',
     'carpool_event_started' => 'Este evento já começou.',
     'carpool_event_ended' => 'Este evento já terminou.',
     'carpool_contact_info' => 'Informações de contato',

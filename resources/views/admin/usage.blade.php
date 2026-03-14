@@ -36,14 +36,14 @@
                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">@lang('messages.over_limit')</span>
                     @endif
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($cat['period_total']) }}</p>
-                <div class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($cat['period_total']) }}</p>
+                <div class="mt-1 text-sm text-gray-500 dark:text-gray-400 text-center">
                     @lang('messages.today'): {{ number_format($cat['today_total']) }}
                     @if ($cat['limit'])
                     / {{ number_format($cat['limit']) }}
                     @endif
                 </div>
-                <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                <div class="text-xs text-gray-400 dark:text-gray-500 mt-1 text-center">
                     @lang('messages.avg_per_day', ['avg' => $cat['daily_avg']])
                 </div>
             </div>

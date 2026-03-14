@@ -2749,6 +2749,7 @@ return [
     'carpool_already_requested' => 'Ya has solicitado una plaza en este viaje.',
     'carpool_must_agree' => 'Primero debes aceptar el aviso legal del viaje compartido.',
     'carpool_date_required' => 'Se requiere una fecha para eventos recurrentes.',
+    'carpool_invalid_date' => 'La fecha seleccionada no es una ocurrencia válida de este evento.',
     'carpool_event_started' => 'Este evento ya ha comenzado.',
     'carpool_event_ended' => 'Este evento ya ha finalizado.',
     'carpool_contact_info' => 'Información de contacto',

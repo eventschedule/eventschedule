@@ -156,6 +156,10 @@ class CarpoolController extends Controller
             return redirect()->back()->with('error', __('messages.carpool_date_required'));
         }
 
+        if ($isRecurring && $eventDate && ! $event->matchesDate(\Carbon\Carbon::parse($eventDate))) {
+            return redirect()->back()->with('error', __('messages.carpool_invalid_date'));
+        }
+
         $direction = $request->input('direction');
 
         // Check timing
@@ -238,7 +242,7 @@ class CarpoolController extends Controller
             abort(403);
         }
 
-        $endDateTime = $event->getEndDateTime($offer->event_date);
+        $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'));
         if ($endDateTime && $endDateTime->isPast()) {
             return redirect()->back()->with('error', __('messages.carpool_event_ended'));
         }
@@ -320,7 +324,7 @@ class CarpoolController extends Controller
             abort(403);
         }
 
-        $endDateTime = $event->getEndDateTime($offer->event_date);
+        $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'));
         if ($endDateTime && $endDateTime->isPast()) {
             return redirect()->back()->with('error', __('messages.carpool_event_ended'));
         }
@@ -395,12 +399,12 @@ class CarpoolController extends Controller
         $direction = $offer->direction;
 
         if (in_array($direction, ['to_event', 'round_trip'])) {
-            $startDateTime = $event->getStartDateTime($offer->event_date);
+            $startDateTime = $event->getStartDateTime($offer->event_date?->format('Y-m-d'));
             if ($startDateTime && $startDateTime->isPast()) {
                 return redirect()->back()->with('error', __('messages.carpool_event_started'));
             }
         } else {
-            $endDateTime = $event->getEndDateTime($offer->event_date);
+            $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'));
             if ($endDateTime && $endDateTime->isPast()) {
                 return redirect()->back()->with('error', __('messages.carpool_event_ended'));
             }
@@ -496,7 +500,7 @@ class CarpoolController extends Controller
             abort(403);
         }
 
-        $endDateTime = $event->getEndDateTime($carpoolRequest->offer->event_date);
+        $endDateTime = $event->getEndDateTime($carpoolRequest->offer->event_date?->format('Y-m-d'));
         if ($endDateTime && $endDateTime->isPast()) {
             return redirect()->back()->with('error', __('messages.carpool_event_ended'));
         }
@@ -552,7 +556,7 @@ class CarpoolController extends Controller
             abort(403);
         }
 
-        $endDateTime = $event->getEndDateTime($offer->event_date);
+        $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'));
         if ($endDateTime && $endDateTime->isPast()) {
             return redirect()->back()->with('error', __('messages.carpool_event_ended'));
         }
@@ -634,7 +638,7 @@ class CarpoolController extends Controller
             abort(403);
         }
 
-        $endDateTime = $event->getEndDateTime($offer->event_date);
+        $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'));
         if ($endDateTime && $endDateTime->isPast()) {
             return redirect()->back()->with('error', __('messages.carpool_event_ended'));
         }
@@ -689,7 +693,7 @@ class CarpoolController extends Controller
         }
 
         // Check event has ended
-        $endDateTime = $event->getEndDateTime($offer->event_date);
+        $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'));
         if (! $endDateTime || $endDateTime->isFuture()) {
             return redirect()->back()->with('error', __('messages.carpool_review_not_yet'));
         }
@@ -794,13 +798,13 @@ class CarpoolController extends Controller
 
     public function adminRemoveOffer(Request $request, $subdomain, $offer_hash)
     {
-        $offer = CarpoolOffer::with('event.roles')->findOrFail(UrlUtils::decodeId($offer_hash));
+        $offer = CarpoolOffer::with(['event', 'role'])->findOrFail(UrlUtils::decodeId($offer_hash));
 
         if ($request->user()->cannot('update', $offer->event)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        $role = $offer->event->roles->firstWhere('subdomain', $subdomain);
+        $role = $offer->role;
 
         $approvedRequests = collect();
         $pendingRequests = collect();

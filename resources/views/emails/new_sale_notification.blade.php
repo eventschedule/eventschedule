@@ -54,14 +54,26 @@
                         $allSaleTickets = $allSaleTickets->merge($gs->saleTickets);
                     }
                 }
-                $ticketSummary = $allSaleTickets->groupBy(fn($st) => $st->ticket->name)
+                $regularTickets = $allSaleTickets->filter(fn($st) => !$st->ticket->is_addon);
+                $addonTickets = $allSaleTickets->filter(fn($st) => $st->ticket->is_addon);
+                $ticketSummary = $regularTickets->groupBy(fn($st) => $st->ticket->type)
+                    ->map(fn($group) => $group->sum('quantity'));
+                $addonSummary = $addonTickets->groupBy(fn($st) => $st->ticket->type)
                     ->map(fn($group) => $group->sum('quantity'));
             @endphp
-            @foreach ($ticketSummary as $ticketName => $qty)
+            @foreach ($ticketSummary as $ticketType => $qty)
             <p style="margin: 0 0 5px 0; font-size: 14px; color: #333;">
-                {{ $ticketName }} x {{ $qty }}
+                {{ $ticketType ?: __('messages.ticket') }} x {{ $qty }}
             </p>
             @endforeach
+            @if ($addonSummary->count() > 0)
+            <p style="margin: 10px 0 5px 0; font-size: 13px; color: #666; font-weight: bold;">{{ __('messages.add_ons') }}:</p>
+            @foreach ($addonSummary as $addonType => $qty)
+            <p style="margin: 0 0 5px 0; font-size: 14px; color: #333;">
+                {{ $addonType ?: __('messages.add_on') }} x {{ $qty }}
+            </p>
+            @endforeach
+            @endif
 
             <hr style="border: none; border-top: 1px solid #eee; margin: 15px 0;">
 

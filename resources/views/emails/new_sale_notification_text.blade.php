@@ -26,12 +26,23 @@ if (!empty($groupedSales) && $groupedSales->count() > 0) {
         $allSaleTickets = $allSaleTickets->merge($gs->saleTickets);
     }
 }
-$ticketSummary = $allSaleTickets->groupBy(fn($st) => $st->ticket->name)
+$regularTickets = $allSaleTickets->filter(fn($st) => !$st->ticket->is_addon);
+$addonTickets = $allSaleTickets->filter(fn($st) => $st->ticket->is_addon);
+$ticketSummary = $regularTickets->groupBy(fn($st) => $st->ticket->type)
+    ->map(fn($group) => $group->sum('quantity'));
+$addonSummary = $addonTickets->groupBy(fn($st) => $st->ticket->type)
     ->map(fn($group) => $group->sum('quantity'));
 @endphp
-@foreach ($ticketSummary as $ticketName => $qty)
-{{ $ticketName }} x {{ $qty }}
+@foreach ($ticketSummary as $ticketType => $qty)
+{{ $ticketType ?: __('messages.ticket') }} x {{ $qty }}
 @endforeach
+@if ($addonSummary->count() > 0)
+
+{{ __('messages.add_ons') }}:
+@foreach ($addonSummary as $addonType => $qty)
+{{ $addonType ?: __('messages.add_on') }} x {{ $qty }}
+@endforeach
+@endif
 
 {{ __('messages.total') }}: {{ $total }}
 {{ __('messages.status') }}: {{ $paymentStatus }}

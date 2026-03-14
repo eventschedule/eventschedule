@@ -46,7 +46,7 @@ class SendCarpoolReminders extends Command
                 continue;
             }
 
-            $eventDate = $offer->event_date;
+            $eventDate = $offer->event_date?->format('Y-m-d');
             $relevantDateTime = $offer->direction === 'from_event'
                 ? $event->getEndDateTime($eventDate)
                 : $event->getStartDateTime($eventDate);

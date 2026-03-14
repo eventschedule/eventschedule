@@ -2749,6 +2749,7 @@ return [
     'carpool_already_requested' => 'لقد طلبت مقعدًا في هذه الرحلة بالفعل.',
     'carpool_must_agree' => 'يجب عليك الموافقة على إخلاء مسؤولية مشاركة الركوب أولاً.',
     'carpool_date_required' => 'التاريخ مطلوب للفعاليات المتكررة.',
+    'carpool_invalid_date' => 'التاريخ المحدد ليس موعدًا صالحًا لهذه الفعالية.',
     'carpool_event_started' => 'هذه الفعالية بدأت بالفعل.',
     'carpool_event_ended' => 'هذه الفعالية انتهت بالفعل.',
     'carpool_contact_info' => 'معلومات الاتصال',

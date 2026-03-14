@@ -430,6 +430,20 @@ class ApiEventController extends Controller
             $request->merge(['tickets' => $existingTickets]);
         }
 
+        // Preserve existing add-ons if not being changed
+        if (! $request->has('addons') && $event->tickets_enabled) {
+            $existingAddons = $event->addons->map(function ($addon) {
+                return [
+                    'id' => $addon->id,
+                    'type' => $addon->type,
+                    'quantity' => $addon->quantity,
+                    'price' => $addon->price,
+                    'description' => $addon->description,
+                ];
+            })->toArray();
+            $request->merge(['addons' => $existingAddons]);
+        }
+
         // Preserve existing event parts if not being changed
         if (! $request->has('event_parts')) {
             $existingParts = $event->parts->map(function ($part) {

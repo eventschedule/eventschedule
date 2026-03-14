@@ -2765,6 +2765,7 @@ return [
     'carpool_already_requested' => 'Oled juba küsinud kohta sellesse sõitu.',
     'carpool_must_agree' => 'Pead kõigepealt nõustuma sõidujagamise vastutusest loobumisega.',
     'carpool_date_required' => 'Korduvate ürituste puhul on kuupäev kohustuslik.',
+    'carpool_invalid_date' => 'Valitud kuupäev ei ole selle ürituse kehtiv toimumiskord.',
     'carpool_event_started' => 'See üritus on juba alanud.',
     'carpool_event_ended' => 'See üritus on juba lõppenud.',
     'carpool_contact_info' => 'Kontaktandmed',

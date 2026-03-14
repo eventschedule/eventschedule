@@ -2749,6 +2749,7 @@ return [
     'carpool_already_requested' => 'Vous avez déjà demandé une place sur ce trajet.',
     'carpool_must_agree' => 'Vous devez d\'abord accepter la clause de non-responsabilité du covoiturage.',
     'carpool_date_required' => 'Une date est requise pour les événements récurrents.',
+    'carpool_invalid_date' => 'La date sélectionnée ne correspond pas à une occurrence de cet événement.',
     'carpool_event_started' => 'Cet événement a déjà commencé.',
     'carpool_event_ended' => 'Cet événement est déjà terminé.',
     'carpool_contact_info' => 'Coordonnées',

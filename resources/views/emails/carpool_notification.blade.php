@@ -33,7 +33,7 @@
 
             @if ($offer->event_date)
             <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">
-                {{ $event->getStartDateTime($offer->event_date, true)?->translatedFormat('F j, Y') }}
+                {{ $event->getStartDateTime($offer->event_date?->format('Y-m-d'), true)?->translatedFormat('F j, Y') }}
             </p>
             @endif
 

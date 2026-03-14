@@ -2742,6 +2742,7 @@ return [
     'carpool_already_requested' => 'כבר ביקשת מקום בנסיעה זו.',
     'carpool_must_agree' => 'עליך להסכים לתנאי שיתוף הנסיעות תחילה.',
     'carpool_date_required' => 'נדרש תאריך לאירועים חוזרים.',
+    'carpool_invalid_date' => 'התאריך שנבחר אינו מועד תקף של אירוע זה.',
     'carpool_event_started' => 'אירוע זה כבר התחיל.',
     'carpool_event_ended' => 'אירוע זה כבר הסתיים.',
     'carpool_contact_info' => 'פרטי התקשרות',

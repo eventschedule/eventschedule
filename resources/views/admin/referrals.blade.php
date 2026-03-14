@@ -5,29 +5,29 @@
 
         {{-- Stats --}}
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <div class="ap-card rounded-lg border border-gray-200 p-4 text-center">
-                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $totalReferrals }}</div>
+            <div class="ap-card rounded-lg border border-gray-200 p-4">
                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.total_referrals') }}</div>
+                <div class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ $totalReferrals }}</div>
             </div>
-            <div class="ap-card rounded-lg border border-gray-200 p-4 text-center">
-                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $pending }}</div>
+            <div class="ap-card rounded-lg border border-gray-200 p-4">
                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pending') }}</div>
+                <div class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ $pending }}</div>
             </div>
-            <div class="ap-card rounded-lg border border-gray-200 p-4 text-center">
-                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $subscribed }}</div>
+            <div class="ap-card rounded-lg border border-gray-200 p-4">
                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.status_subscribed') }}</div>
+                <div class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ $subscribed }}</div>
             </div>
-            <div class="ap-card rounded-lg border border-gray-200 p-4 text-center">
-                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $qualified }}</div>
+            <div class="ap-card rounded-lg border border-gray-200 p-4">
                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.qualified') }}</div>
+                <div class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ $qualified }}</div>
             </div>
-            <div class="ap-card rounded-lg border border-gray-200 p-4 text-center">
-                <div class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ $credited }}</div>
+            <div class="ap-card rounded-lg border border-gray-200 p-4">
                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.credited') }}</div>
+                <div class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 text-center">{{ $credited }}</div>
             </div>
-            <div class="ap-card rounded-lg border border-gray-200 p-4 text-center">
-                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $conversionRate }}%</div>
+            <div class="ap-card rounded-lg border border-gray-200 p-4">
                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.conversion_rate') }}</div>
+                <div class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ $conversionRate }}%</div>
             </div>
         </div>
 

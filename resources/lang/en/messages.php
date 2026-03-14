@@ -2789,6 +2789,7 @@ return [
     'carpool_already_requested' => 'You have already requested a spot on this ride.',
     'carpool_must_agree' => 'You must agree to the carpool disclaimer first.',
     'carpool_date_required' => 'A date is required for recurring events.',
+    'carpool_invalid_date' => 'The selected date is not a valid occurrence of this event.',
     'carpool_event_started' => 'This event has already started.',
     'carpool_event_ended' => 'This event has already ended.',
     'carpool_contact_info' => 'Contact information',

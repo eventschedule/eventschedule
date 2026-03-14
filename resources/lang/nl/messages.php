@@ -2747,6 +2747,7 @@ return [
     'carpool_already_requested' => 'Je hebt al een plek aangevraagd voor deze rit.',
     'carpool_must_agree' => 'Je moet eerst de disclaimer voor carpoolen accepteren.',
     'carpool_date_required' => 'Een datum is vereist voor terugkerende evenementen.',
+    'carpool_invalid_date' => 'De geselecteerde datum is geen geldig moment van dit evenement.',
     'carpool_event_started' => 'Dit evenement is al begonnen.',
     'carpool_event_ended' => 'Dit evenement is al afgelopen.',
     'carpool_contact_info' => 'Contactgegevens',

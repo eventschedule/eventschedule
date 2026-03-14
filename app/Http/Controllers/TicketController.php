@@ -722,10 +722,12 @@ class TicketController extends Controller
                         }
                     }
 
-                    // Recalculate subtotal if add-ons were added
+                    // Add add-on total to subtotal if add-ons were added
                     if ($hasAddons) {
                         $sale->load('saleTickets.ticket');
-                        $subtotal = $sale->calculateTotal();
+                        $addonTotal = $sale->saleTickets->filter(fn($st) => $st->ticket->is_addon)
+                            ->sum(fn($st) => $st->ticket->price * $st->quantity);
+                        $subtotal += $addonTotal;
                         $sale->payment_amount = $subtotal;
                     }
 
@@ -1413,8 +1415,8 @@ class TicketController extends Controller
             $lineItems = [];
             foreach ($invoiceSaleTickets as $saleTicket) {
                 $lineItems[] = [
-                    'product_key' => $saleTicket->ticket->type,
-                    'notes' => $saleTicket->ticket->description ?: $saleTicket->ticket->type,
+                    'product_key' => $saleTicket->ticket->type ?: ($saleTicket->ticket->is_addon ? __('messages.add_on') : __('messages.tickets')),
+                    'notes' => $saleTicket->ticket->description ?: ($saleTicket->ticket->type ?: ($saleTicket->ticket->is_addon ? __('messages.add_on') : __('messages.tickets'))),
                     'quantity' => $saleTicket->quantity,
                     'cost' => $saleTicket->ticket->price,
                 ];

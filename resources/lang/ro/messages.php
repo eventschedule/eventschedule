@@ -2789,6 +2789,7 @@ return [
     'carpool_already_requested' => 'Ai solicitat deja un loc în această cursă.',
     'carpool_must_agree' => 'Trebuie să accepți mai întâi declarația de declinare a responsabilității.',
     'carpool_date_required' => 'O dată este necesară pentru evenimentele recurente.',
+    'carpool_invalid_date' => 'Data selectată nu este o apariție validă a acestui eveniment.',
     'carpool_event_started' => 'Acest eveniment a început deja.',
     'carpool_event_ended' => 'Acest eveniment s-a încheiat deja.',
     'carpool_contact_info' => 'Informații de contact',

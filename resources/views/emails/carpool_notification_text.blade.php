@@ -16,7 +16,7 @@
 
 {{ $event->name }}
 @if ($offer->event_date)
-{{ $event->getStartDateTime($offer->event_date, true)?->translatedFormat('F j, Y') }}
+{{ $event->getStartDateTime($offer->event_date?->format('Y-m-d'), true)?->translatedFormat('F j, Y') }}
 @endif
 
 {{ __('messages.carpool_direction') }}: {{ $offer->directionLabel() }}

@@ -20,25 +20,25 @@
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
             <div class="ap-card rounded-xl p-6">
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.sent') }}</p>
-                <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ number_format($newsletter->sent_count) }}</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-gray-100 text-center">{{ number_format($newsletter->sent_count) }}</p>
             </div>
             <div class="ap-card rounded-xl p-6">
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.opens') }}</p>
-                <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ number_format($newsletter->open_count) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
+                <p class="text-3xl font-bold text-gray-900 dark:text-gray-100 text-center">{{ number_format($newsletter->open_count) }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
                     {{ $newsletter->sent_count > 0 ? round(($newsletter->open_count / $newsletter->sent_count) * 100, 1) . '%' : '-' }}
                 </p>
             </div>
             <div class="ap-card rounded-xl p-6">
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.clicks') }}</p>
-                <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ number_format($newsletter->click_count) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
+                <p class="text-3xl font-bold text-gray-900 dark:text-gray-100 text-center">{{ number_format($newsletter->click_count) }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
                     {{ $newsletter->sent_count > 0 ? round(($newsletter->click_count / $newsletter->sent_count) * 100, 1) . '%' : '-' }}
                 </p>
             </div>
             <div class="ap-card rounded-xl p-6">
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.failed') }}</p>
-                <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ number_format($newsletter->recipients()->where('status', 'failed')->count()) }}</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-gray-100 text-center">{{ number_format($newsletter->recipients()->where('status', 'failed')->count()) }}</p>
             </div>
         </div>
 
