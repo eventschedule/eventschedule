@@ -1216,7 +1216,7 @@ class Event extends Model
             $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
         }
 
-        if ($date) {
+        if ($date && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
             $customDate = Carbon::parse($date);
             $startAt->setDate($customDate->year, $customDate->month, $customDate->day);
         }

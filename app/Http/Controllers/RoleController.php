@@ -418,6 +418,9 @@ class RoleController extends Controller
         $selectedGroup = null;
         // Support both path params and query params (backwards compatibility)
         $date = $date ?: ($request->date ? date('Y-m-d', strtotime($request->date)) : null);
+        if ($date && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            $date = null;
+        }
         $eventIdParam = $id ? UrlUtils::decodeId($id) : ($request->id ? UrlUtils::decodeId($request->id) : null);
 
         if ($date && $date != '1970-01-01') {

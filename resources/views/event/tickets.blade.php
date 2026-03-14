@@ -136,6 +136,8 @@
                     const renderTurnstile = () => {
                         const checkTurnstile = () => {
                             if (typeof turnstile !== 'undefined') {
+                                const container = document.getElementById('turnstile-checkout-widget');
+                                if (!container) return;
                                 this.turnstileWidgetId = turnstile.render('#turnstile-checkout-widget', {
                                     sitekey: this.turnstileSiteKey,
                                     size: 'flexible',

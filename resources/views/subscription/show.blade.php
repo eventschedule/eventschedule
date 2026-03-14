@@ -12,7 +12,9 @@
             enterprise: { monthly: '{{ config('services.stripe_platform.enterprise_price_monthly_amount') }}', yearly: '{{ config('services.stripe_platform.enterprise_price_yearly_amount') }}' }
         }
     }">
-        <h2 class="pb-4 text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight" x-text="selectedTier === 'enterprise' ? '{{ __('messages.enterprise_plan') }}' : '{{ __('messages.subscribe_to_pro') }}'">
+        <h2 class="pb-4 text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
+            <span x-show="selectedTier === 'enterprise'" x-cloak>{{ __('messages.enterprise_plan') }}</span>
+            <span x-show="selectedTier !== 'enterprise'">{{ __('messages.subscribe_to_pro') }}</span>
         </h2>
 
         {{-- Free Trial Badge --}}
@@ -54,7 +56,10 @@
                 </div>
                 <div class="mb-4">
                     <span class="text-3xl font-bold text-gray-900 dark:text-gray-100" x-text="'$' + prices.pro[selectedPlan]"></span>
-                    <span class="text-sm text-gray-500 dark:text-gray-400" x-text="selectedPlan === 'yearly' ? '/' + '{{ __('messages.year') }}' : '/' + '{{ __('messages.month') }}'"></span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                        <span x-show="selectedPlan === 'yearly'" x-cloak>/{{ __('messages.year') }}</span>
+                        <span x-show="selectedPlan !== 'yearly'">/{{ __('messages.month') }}</span>
+                    </span>
                 </div>
                 <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                     <li class="flex items-center gap-2">
@@ -101,7 +106,10 @@
                 </div>
                 <div class="mb-4">
                     <span class="text-3xl font-bold text-gray-900 dark:text-gray-100" x-text="'$' + prices.enterprise[selectedPlan]"></span>
-                    <span class="text-sm text-gray-500 dark:text-gray-400" x-text="selectedPlan === 'yearly' ? '/' + '{{ __('messages.year') }}' : '/' + '{{ __('messages.month') }}'"></span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                        <span x-show="selectedPlan === 'yearly'" x-cloak>/{{ __('messages.year') }}</span>
+                        <span x-show="selectedPlan !== 'yearly'">/{{ __('messages.month') }}</span>
+                    </span>
                 </div>
                 <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                     <li class="flex items-center gap-2">

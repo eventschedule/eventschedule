@@ -951,8 +951,9 @@ class EventRepo
 
         // Parse dates with timezone context - local timezone first, then UTC as fallback
         $roleTimezone = $subdomainRole?->timezone ?? config('app.timezone');
-        $eventDateLocal = $date ? Carbon::parse($date, $roleTimezone) : null;
-        $eventDateUtc = $date ? Carbon::parse($date, 'UTC') : null;
+        $validDate = $date && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date);
+        $eventDateLocal = $validDate ? Carbon::parse($date, $roleTimezone) : null;
+        $eventDateUtc = $validDate ? Carbon::parse($date, 'UTC') : null;
 
         if ($subdomainRole && $lookupEventId) {
             $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'addons', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
