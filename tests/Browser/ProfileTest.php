@@ -33,9 +33,14 @@ class ProfileTest extends DuskTestCase
                 ->pause(500);
 
             $browser->script("
-                var select = document.getElementById('timezone');
-                select.value = 'Pacific/Auckland';
-                select.dispatchEvent(new Event('change', { bubbles: true }));
+                var options = document.querySelectorAll('select[name=\"timezone\"] option');
+                for (var i = 0; i < options.length; i++) {
+                    if (options[i].value === 'Pacific/Auckland') {
+                        options[i].selected = true;
+                        break;
+                    }
+                }
+                document.getElementById('timezone').dispatchEvent(new Event('change', { bubbles: true }));
             ");
 
             $browser->scrollIntoView('button[type="submit"]')

@@ -77,14 +77,13 @@ class GeneralTest extends DuskTestCase
             $browser->visit('/venue/add-event?date='.date('Y-m-d'))
                 ->waitFor('#event_name', 10)
                 ->pause(500)
-                ->type('name', 'Venue Event');
+                ->script("document.getElementById('event_name').value = 'Venue Event'; document.getElementById('event_name').dispatchEvent(new Event('input'))");
             $browser->script("document.querySelector('a[data-section=\"section-participants\"]').click()");
             $browser->waitFor('#selected_member', 5)
                 ->select('#selected_member')
                 ->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit()");
             $browser->waitForLocation('/venue/schedule', 15)
-                ->pause(1000)
-                ->assertSee('Venue Event');
+                ->waitForText('Venue Event', 15);
         });
     }
 }
