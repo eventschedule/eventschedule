@@ -235,14 +235,10 @@ class PageView
 
         $cacheKey = "analytics_view:{$roleId}:{$ipHash}";
 
-        // Use atomic increment to avoid race conditions
+        // Atomically create key with TTL if it doesn't exist, then increment
         $secondsUntilMidnight = now()->endOfDay()->diffInSeconds(now());
+        Cache::add($cacheKey, 0, $secondsUntilMidnight);
         $viewCount = Cache::increment($cacheKey);
-
-        // Set expiry on first increment (increment creates key with no expiry)
-        if ($viewCount === 1) {
-            Cache::put($cacheKey, 1, $secondsUntilMidnight);
-        }
 
         return $viewCount > $maxViewsPerIpPerRole;
     }

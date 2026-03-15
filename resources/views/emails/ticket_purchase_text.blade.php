@@ -1,8 +1,8 @@
-{{ $sale->calculateTotal() == 0 ? __('messages.ticket_reservation_confirmation') : __('messages.ticket_purchase_confirmation') }}
+{{ $sale->payment_amount == 0 ? __('messages.ticket_reservation_confirmation') : __('messages.ticket_purchase_confirmation') }}
 
 {{ __('messages.hello') }} {{ $sale->name }},
 
-{{ $sale->calculateTotal() == 0 ? __('messages.thank_you_for_reserving_tickets') : __('messages.thank_you_for_purchasing_tickets') }}
+{{ $sale->payment_amount == 0 ? __('messages.thank_you_for_reserving_tickets') : __('messages.thank_you_for_purchasing_tickets') }}
 
 {{ $event->name }}
 
@@ -12,8 +12,8 @@
 {{ __('messages.number_of_attendees') }}: {{ $sale->quantity() }}
 
 @php
-$regularTickets = $sale->saleTickets->filter(fn($st) => !$st->ticket->is_addon);
-$addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket->is_addon);
+$regularTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && !$st->ticket->is_addon);
+$addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && $st->ticket->is_addon);
 @endphp
 {{ __('messages.ticket_details') }}
 @foreach ($regularTickets as $saleTicket)

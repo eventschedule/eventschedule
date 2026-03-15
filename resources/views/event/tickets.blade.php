@@ -516,7 +516,10 @@
                             tickets: ticketData,
                         }),
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) throw new Error('Request failed');
+                        return response.json();
+                    })
                     .then(data => {
                         this.isValidatingPromo = false;
                         this.promoCodeValid = data.valid;
@@ -562,7 +565,10 @@
                             email: this.email.trim(),
                         }),
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) throw new Error('Request failed');
+                        return response.json();
+                    })
                     .then(data => {
                         this.waitlistSubmitting = false;
                         this.waitlistMessage = data.message;
@@ -930,7 +936,7 @@
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ ticket.type }}</h3>
                     <p v-if="ticket.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="ticket.description"></p>
-                    <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium text-gray-900 dark:text-gray-100"><template v-if="ticket.price == 0">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(ticket.price) }}</template></p>
+                    <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium text-gray-900 dark:text-gray-100"><template v-if="!ticket.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(ticket.price) }}</template></p>
                 </div>
                 <div>
                     <p v-if="getAvailableQuantity(ticket) === 0" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>
@@ -1024,7 +1030,7 @@
                     <div>
                         <h4 class="text-base font-medium text-gray-900 dark:text-gray-100">@{{ addon.type }}</h4>
                         <p v-if="addon.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="addon.description"></p>
-                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100"><template v-if="addon.price == 0">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(addon.price) }}</template></p>
+                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100"><template v-if="!addon.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(addon.price) }}</template></p>
                     </div>
                     <div>
                         <p v-if="getAvailableQuantity(addon) === 0" class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>

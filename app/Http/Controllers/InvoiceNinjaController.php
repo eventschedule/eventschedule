@@ -275,9 +275,19 @@ class InvoiceNinjaController extends Controller
 
                     // Check availability - cap quantity to what's remaining (customer already paid)
                     if ($ticket->quantity > 0) {
-                        $sold = $ticket->sold ? json_decode($ticket->sold, true) : [];
-                        $soldCount = $sold[$sale->event_date] ?? 0;
-                        $remaining = $ticket->quantity - $soldCount;
+                        if (! $ticket->is_addon && $event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
+                            $totalSold = $lockedTickets->filter(fn ($t) => ! $t->is_addon)->sum(function ($t) use ($sale) {
+                                $ticketSold = $t->sold ? (json_decode($t->sold, true) ?? []) : [];
+
+                                return $ticketSold[$sale->event_date] ?? 0;
+                            });
+                            $totalQuantity = $event->getSameTicketQuantity();
+                            $remaining = $totalQuantity - $totalSold;
+                        } else {
+                            $sold = $ticket->sold ? json_decode($ticket->sold, true) : [];
+                            $soldCount = $sold[$sale->event_date] ?? 0;
+                            $remaining = $ticket->quantity - $soldCount;
+                        }
                         if ($quantity > $remaining) {
                             \Log::warning('Invoice Ninja payment link oversell prevented', [
                                 'event_id' => $event->id,

@@ -282,6 +282,7 @@
                             },
                             body: JSON.stringify({ event_id: '{{ $event->hashedId() }}' }),
                         });
+                        if (!res.ok) throw new Error('Request failed');
                         const data = await res.json();
                         if (data.headline) headlineInput.value = data.headline;
                         if (data.primary_text) primaryTextInput.value = data.primary_text;
@@ -370,6 +371,7 @@
             }
             searchTimer = setTimeout(async () => {
                 const res = await fetch('{{ route("boost.search_interests") }}?q=' + encodeURIComponent(q));
+                if (!res.ok) throw new Error('Request failed');
                 const data = await res.json();
                 if (data.length > 0) {
                     interestResults.innerHTML = data.map((i, idx) =>
@@ -417,6 +419,7 @@
                 }),
             });
 
+            if (!response.ok) throw new Error('Request failed');
             const data = await response.json();
             if (data.error) {
                 document.getElementById('payment-errors').textContent = data.error;
@@ -521,6 +524,7 @@
                         body: formData,
                     });
 
+                    if (!response.ok) throw new Error('Request failed');
                     const data = await response.json();
 
                     if (data.redirect) {
@@ -556,6 +560,7 @@
                     body: formData,
                 });
 
+                if (!response.ok) throw new Error('Request failed');
                 const data = await response.json();
 
                 if (data.redirect) {

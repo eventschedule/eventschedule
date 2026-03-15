@@ -296,7 +296,10 @@
                         password: password
                     })
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Request failed');
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         if (data.has_existing_user) {

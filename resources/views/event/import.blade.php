@@ -2092,9 +2092,10 @@
                         },
                         body: formData
                     });
-                    
+
+                    if (!response.ok) throw new Error('Request failed');
                     const data = await response.json();
-                    
+
                     if (data.success && data.filename) {
                         // Update the social_image property for the specific event
                         this.preview.parsed[idx].social_image = data.filename;
@@ -2203,15 +2204,16 @@
                         }
                     });
 
+                    if (!response.ok) throw new Error('Request failed');
                     const data = await response.json();
-                    
+
                     if (data.success) {
                         this.savedEvents[idx] = true;
                         this.savedEventData[idx] = {
                             view_url: data.event_url || this.preview.parsed[idx].event_url,
                             is_curated: true
                         };
-                        
+
                         // Update the is_curated flag in the preview data
                         this.preview.parsed[idx].is_curated = true;
                         
@@ -2275,15 +2277,16 @@
                         }
                     });
 
+                    if (!response.ok) throw new Error('Request failed');
                     const data = await response.json();
-                    
+
                     if (data.success) {
                         this.savedEvents[idx] = true;
                         this.savedEventData[idx] = {
                             view_url: data.event_url || this.preview.parsed[idx].event_url,
                             is_curated: true
                         };
-                        
+
                         Toastify({
                             text: @json(__("messages.curate_event")),
                             duration: 3000,
@@ -2634,7 +2637,8 @@
                         : `{{ route('role.search_youtube', ['subdomain' => $role->subdomain]) }}`;
                     
                     
-                    const response = await fetch(`${endpoint}?q=${encodeURIComponent(performer.name)}`);                    
+                    const response = await fetch(`${endpoint}?q=${encodeURIComponent(performer.name)}`);
+                    if (!response.ok) throw new Error('Request failed');
                     const data = await response.json();
                     
                     if (data.success && data.videos) {

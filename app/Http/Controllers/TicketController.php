@@ -322,11 +322,11 @@ class TicketController extends Controller
 
             // Second pass: write data rows
             foreach ($sales as $sale) {
-                $tickets = $sale->saleTickets->filter(fn($st) => $st->ticket && !$st->ticket->is_addon)->map(function ($st) {
+                $tickets = $sale->saleTickets->filter(fn ($st) => $st->ticket && ! $st->ticket->is_addon)->map(function ($st) {
                     return ($st->ticket->type ?: '').' x'.$st->quantity;
                 })->implode(', ');
 
-                $addons = $sale->saleTickets->filter(fn($st) => $st->ticket && $st->ticket->is_addon)->map(function ($st) {
+                $addons = $sale->saleTickets->filter(fn ($st) => $st->ticket && $st->ticket->is_addon)->map(function ($st) {
                     return ($st->ticket->type ?: '').' x'.$st->quantity;
                 })->implode(', ');
 
@@ -725,8 +725,8 @@ class TicketController extends Controller
                     // Add add-on total to subtotal if add-ons were added
                     if ($hasAddons) {
                         $sale->load('saleTickets.ticket');
-                        $addonTotal = $sale->saleTickets->filter(fn($st) => $st->ticket->is_addon)
-                            ->sum(fn($st) => $st->ticket->price * $st->quantity);
+                        $addonTotal = $sale->saleTickets->filter(fn ($st) => $st->ticket->is_addon)
+                            ->sum(fn ($st) => $st->ticket->price * $st->quantity);
                         $subtotal += $addonTotal;
                         $sale->payment_amount = $subtotal;
                     }
@@ -1779,7 +1779,8 @@ class TicketController extends Controller
             return response()->json(['error' => __('messages.you_are_not_authorized_to_scan_this_ticket')], 200);
         }
 
-        if (Carbon::parse($sale->event_date)->format('Y-m-d') !== now()->format('Y-m-d')) {
+        $eventTimezone = $event->creatorRole?->timezone ?? config('app.timezone');
+        if (Carbon::parse($sale->event_date)->format('Y-m-d') !== now($eventTimezone)->format('Y-m-d')) {
             return response()->json(['error' => __('messages.this_ticket_is_not_valid_for_today')], 200);
         }
 

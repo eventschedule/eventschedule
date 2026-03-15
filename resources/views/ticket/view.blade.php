@@ -266,8 +266,8 @@
 
         {{-- Ticket Types Section --}}
         @php
-            $regularTickets = $sale->saleTickets->filter(fn($st) => !$st->ticket->is_addon);
-            $addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket->is_addon);
+            $regularTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && !$st->ticket->is_addon);
+            $addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && $st->ticket->is_addon);
         @endphp
         @if ($regularTickets->count() > 0)
         <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50">
@@ -314,7 +314,7 @@
           $hasEventCustomFields = $event->custom_fields && count($event->custom_fields) > 0;
           $hasTicketCustomFields = false;
           foreach ($sale->saleTickets as $st) {
-            if ($st->ticket->custom_fields && count($st->ticket->custom_fields) > 0) {
+            if ($st->ticket && $st->ticket->custom_fields && count($st->ticket->custom_fields) > 0) {
               $hasTicketCustomFields = true;
               break;
             }
@@ -343,7 +343,7 @@
 
             {{-- Ticket-level Custom Fields --}}
             @foreach ($sale->saleTickets as $saleTicket)
-              @if ($saleTicket->ticket->custom_fields && count($saleTicket->ticket->custom_fields) > 0)
+              @if ($saleTicket->ticket && $saleTicket->ticket->custom_fields && count($saleTicket->ticket->custom_fields) > 0)
                 <div class="mt-[12px] pt-[12px] border-t border-white/10 print:border-slate-200">
                   <p class="text-[11px] text-violet-400 print:text-violet-600 font-semibold mb-[8px]">{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</p>
                   @php $ticketFallbackIndex = 1; @endphp

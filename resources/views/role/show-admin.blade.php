@@ -482,6 +482,10 @@ function syncEventsFromDropdown() {
         sync_direction: syncDirection
     };
 
+    const btn = document.getElementById('sync-events-link');
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; }
+
     fetch('{{ url('/google-calendar/sync/' . $role->subdomain) }}', {
         method: 'POST',
         headers: {
@@ -502,8 +506,10 @@ function syncEventsFromDropdown() {
         alert(@json(__("messages.sync_error")) + ': ' + error.message);
     })
     .finally(() => {
-        event.target.innerHTML = originalText;
-        event.target.disabled = false;
+        if (btn) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
     });
 }
 

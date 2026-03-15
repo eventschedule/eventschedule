@@ -3978,7 +3978,10 @@
             'Accept': 'application/json',
           }
         })
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) throw new Error('Request failed');
+          return response.json();
+        })
         .then(data => {
           this.venueSearchResults = data;
         })
@@ -4029,7 +4032,10 @@
             'Accept': 'application/json',
           }
         })
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) throw new Error('Request failed');
+          return response.json();
+        })
         .then(data => {
           this.memberSearchResults = data;
         })
@@ -4350,6 +4356,7 @@
         })
         .then(r => {
           if (r.status === 429) throw new Error(@json(__('messages.ai_rate_limit')));
+          if (!r.ok) throw new Error('Request failed');
           return r.json();
         })
         .then(data => {
@@ -4393,6 +4400,7 @@
         })
         .then(r => {
           if (r.status === 429) throw new Error(@json(__('messages.ai_rate_limit')));
+          if (!r.ok) throw new Error('Request failed');
           return r.json();
         })
         .then(data => {

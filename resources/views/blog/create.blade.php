@@ -29,7 +29,10 @@
                         topic: topic
                     })
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Request failed');
+                    return response.json();
+                })
                 .then(data => {
                     if (data.error) {
                         alert(@json(__('messages.error')) + ': ' + data.error);

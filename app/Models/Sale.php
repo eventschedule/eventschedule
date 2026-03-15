@@ -80,12 +80,14 @@ class Sale extends Model
             }
 
             if ($sale->isDirty('status') && in_array($sale->status, ['cancelled', 'refunded', 'expired'])) {
-                if ($sale->payment_method === 'rsvp') {
+                if ($sale->payment_method === 'rsvp' && $sale->event) {
                     $sale->event->updateRsvpSold($sale->event_date, -1);
                     AnalyticsEventsDaily::decrementSale($sale->event_id, 0);
                 } else {
                     foreach ($sale->saleTickets as $saleTicket) {
-                        $saleTicket->ticket->updateSold($sale->event_date, -$saleTicket->quantity);
+                        if ($saleTicket->ticket) {
+                            $saleTicket->ticket->updateSold($sale->event_date, -$saleTicket->quantity);
+                        }
                     }
                 }
 
@@ -222,15 +224,16 @@ class Sale extends Model
         $data->updated_at = $this->updated_at ? $this->updated_at->toIso8601String() : null;
 
         // Include tickets
-        $data->tickets = $this->saleTickets->map(function ($saleTicket) {
-            return [
-                'ticket_id' => UrlUtils::encodeId($saleTicket->ticket_id),
-                'quantity' => $saleTicket->quantity,
-                'price' => (float) $saleTicket->ticket->price,
-                'type' => $saleTicket->ticket->type,
-                'is_addon' => (bool) $saleTicket->ticket->is_addon,
-            ];
-        })->values();
+        $data->tickets = $this->saleTickets->filter(fn ($saleTicket) => $saleTicket->ticket)
+            ->map(function ($saleTicket) {
+                return [
+                    'ticket_id' => UrlUtils::encodeId($saleTicket->ticket_id),
+                    'quantity' => $saleTicket->quantity,
+                    'price' => (float) $saleTicket->ticket->price,
+                    'type' => $saleTicket->ticket->type,
+                    'is_addon' => (bool) $saleTicket->ticket->is_addon,
+                ];
+            })->values();
 
         $data->total_quantity = $this->quantity();
         $data->group_id = $this->group_id ? UrlUtils::encodeId($this->group_id) : null;

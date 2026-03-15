@@ -196,6 +196,7 @@
                 searchTimer = setTimeout(async function() {
                     try {
                         const res = await fetch('{{ route("admin.users.search") }}?q=' + encodeURIComponent(q));
+                        if (!res.ok) throw new Error('Request failed');
                         const data = await res.json();
 
                         if (data.length > 0) {

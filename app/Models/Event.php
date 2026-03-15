@@ -955,10 +955,13 @@ class Event extends Model
 
     public function updateRsvpSold($date, $quantity)
     {
-        $sold = $this->rsvp_sold ? json_decode($this->rsvp_sold, true) : [];
-        $sold[$date] = max(0, ($sold[$date] ?? 0) + $quantity);
-        $this->rsvp_sold = json_encode($sold);
-        $this->save();
+        DB::transaction(function () use ($date, $quantity) {
+            $event = Event::lockForUpdate()->find($this->id);
+            $sold = $event->rsvp_sold ? json_decode($event->rsvp_sold, true) : [];
+            $sold[$date] = max(0, ($sold[$date] ?? 0) + $quantity);
+            $event->rsvp_sold = json_encode($sold);
+            $event->save();
+        });
     }
 
     public function getImageUrl()

@@ -146,7 +146,10 @@ function loadWaitlist(url) {
     fetch(fetchUrl, {
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
     })
-    .then(response => response.text())
+    .then(response => {
+        if (!response.ok) throw new Error('Request failed');
+        return response.text();
+    })
     .then(html => {
         document.getElementById('waitlist-table').innerHTML = html;
         bindWaitlistPagination();
@@ -177,7 +180,10 @@ function handleWaitlistRemove(entryId) {
             'X-Requested-With': 'XMLHttpRequest'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error('Request failed');
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             loadWaitlist();
@@ -217,7 +223,10 @@ function loadFeedback(url) {
     fetch(fetchUrl, {
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
     })
-    .then(response => response.text())
+    .then(response => {
+        if (!response.ok) throw new Error('Request failed');
+        return response.text();
+    })
     .then(html => {
         document.getElementById('feedback-table').innerHTML = html;
         bindFeedbackPagination();
@@ -331,7 +340,10 @@ function updateResults(value) {
             'X-Requested-With': 'XMLHttpRequest'
         }
     })
-    .then(response => response.text())
+    .then(response => {
+        if (!response.ok) throw new Error('Request failed');
+        return response.text();
+    })
     .then(html => {
         const salesTable = document.getElementById('sales-table');
         if (salesTable) {
@@ -354,7 +366,10 @@ function handleAction(saleId, action) {
         },
         body: JSON.stringify({ action: action })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error('Request failed');
+        return response.json();
+    })
     .then(data => {
         if (data.error) {
             alert(data.error);
@@ -444,7 +459,10 @@ function resendEmail(saleId) {
             'X-Requested-With': 'XMLHttpRequest'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error('Request failed');
+        return response.json();
+    })
     .then(data => {
         if (data.error) {
             Toastify({

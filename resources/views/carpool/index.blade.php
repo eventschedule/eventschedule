@@ -187,6 +187,15 @@
 
             {{-- Offers list --}}
             @forelse ($offers as $offer)
+            @php
+                $offerExpired = false;
+                if (in_array($offer->direction, ['to_event', 'round_trip'])) {
+                    $st = $event->getStartDateTime($date);
+                    $offerExpired = $st && $st->isPast();
+                } else {
+                    $offerExpired = $eventEnded;
+                }
+            @endphp
             <div class="bg-white/95 dark:bg-[#2d2d30]/95 backdrop-blur-sm rounded-2xl p-5 mb-4 carpool-offer" data-direction="{{ $offer->direction }}" data-city="{{ strtolower($offer->city) }}" v-show="(filter === 'all' || filter === '{{ $offer->direction }}') && (cityFilter === '' || {{ json_encode(strtolower($offer->city)) }}.includes(cityFilter.toLowerCase()))">
 
                 <div class="flex items-start justify-between mb-3">
@@ -383,7 +392,7 @@
                         @elseif ($myRequest->status === 'declined')
                         <div>
                             <span class="text-sm text-red-600 dark:text-red-400 font-medium">{{ __('messages.carpool_request_declined_status') }}</span>
-                            @if (! $eventEnded && ! $offer->isFull())
+                            @if (! $offerExpired && ! $offer->isFull())
                             <form method="POST" action="{{ route('carpool.request_ride', ['subdomain' => $subdomain, 'event_hash' => $eventHash, 'offer_hash' => \App\Utils\UrlUtils::encodeId($offer->id)]) }}" class="mt-2">
                                 @csrf
                                 <div class="flex items-end gap-2">
@@ -398,7 +407,7 @@
                             @endif
                         </div>
                         @endif
-                    @elseif (! $eventEnded && ! $offer->isFull())
+                    @elseif (! $offerExpired && ! $offer->isFull())
                     {{-- Request form --}}
                     <form method="POST" action="{{ route('carpool.request_ride', ['subdomain' => $subdomain, 'event_hash' => $eventHash, 'offer_hash' => \App\Utils\UrlUtils::encodeId($offer->id)]) }}">
                         @csrf
@@ -513,7 +522,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return {
                         filter: 'all',
                         cityFilter: '',
-                        showOfferForm: {{ $errors->any() ? 'true' : 'false' }},
+                        showOfferForm: {{ $errors->has('direction') || $errors->has('city') || $errors->has('total_spots') ? 'true' : 'false' }},
                         reportOfferId: null,
                         reportRiderKey: null,
                         editSpotsOfferId: null,

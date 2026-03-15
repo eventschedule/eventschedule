@@ -64,7 +64,7 @@ class SendCarpoolReminders extends Command
                 continue;
             }
 
-            $sent = DB::transaction(function () use ($carpoolRequest, $offer, $role, $event, $now) {
+            $sent = DB::transaction(function () use ($carpoolRequest, $offer, $now) {
                 // Lock offer row to serialize per-offer processing
                 CarpoolOffer::lockForUpdate()->find($offer->id);
 
@@ -73,21 +73,26 @@ class SendCarpoolReminders extends Command
                     return false; // Already processed by concurrent run
                 }
 
-                // Send reminder to rider
-                $this->sendReminder($locked->user, $role, $event, $offer, $locked);
-
-                // Send reminder to driver (only once per offer)
-                if (! $offer->approvedRequests()
+                // Check if driver reminder is needed (only once per offer)
+                $sendDriverReminder = ! $offer->approvedRequests()
                     ->whereNotNull('reminder_sent_at')
-                    ->exists()) {
-                    $this->sendReminder($offer->user, $role, $event, $offer, $locked);
-                }
+                    ->exists();
 
                 $locked->reminder_sent_at = $now;
                 $locked->save();
 
-                return true;
+                return ['sendDriverReminder' => $sendDriverReminder];
             });
+
+            // Dispatch emails outside the transaction to prevent
+            // queued jobs from being pushed before the commit
+            if ($sent) {
+                $this->sendReminder($carpoolRequest->user, $role, $event, $offer, $carpoolRequest);
+
+                if ($sent['sendDriverReminder']) {
+                    $this->sendReminder($offer->user, $role, $event, $offer, $carpoolRequest);
+                }
+            }
 
             if ($sent) {
                 $sentCount++;

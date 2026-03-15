@@ -169,6 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
             async loadTalentRoles() {
                 try {
                     const response = await fetch(`{{ url('/' . $role->subdomain . '/match-videos') }}`);
+                    if (!response.ok) throw new Error('Request failed');
                     const data = await response.json();
                     this.talentRoles = data.map(role => ({
                         ...role,
@@ -195,6 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 try {
                     const response = await fetch(`{{ url('/' . $role->subdomain . '/search-youtube') }}?q=${encodeURIComponent(role.name)}`);
+                    if (!response.ok) throw new Error('Request failed');
                     const data = await response.json();
                     
                     if (data.success && data.videos) {
@@ -251,7 +253,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             }))
                         })
                     });
-                    
+                    if (!response.ok) throw new Error('Request failed');
+
                     const data = await response.json();
                     
                     if (data.success) {
@@ -279,7 +282,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             videos: []
                         })
                     });
-                    
+                    if (!response.ok) throw new Error('Request failed');
+
                     const data = await response.json();
                     
                     if (data.success) {

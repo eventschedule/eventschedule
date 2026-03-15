@@ -377,7 +377,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     fetch('/settings/backup/status/' + jobId, {
                         headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
                     })
-                    .then(function(r) { return r.json(); })
+                    .then(function(r) {
+                        if (!r.ok) throw new Error('Request failed');
+                        return r.json();
+                    })
                     .then(function(data) {
                         self.exportJob = data;
                         if (data.status === 'completed' || data.status === 'failed') {
@@ -537,7 +540,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     fetch('/settings/backup/status/' + jobId, {
                         headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
                     })
-                    .then(function(r) { return r.json(); })
+                    .then(function(r) {
+                        if (!r.ok) throw new Error('Request failed');
+                        return r.json();
+                    })
                     .then(function(data) {
                         self.importJob = data;
                         if (data.status === 'completed' || data.status === 'failed') {

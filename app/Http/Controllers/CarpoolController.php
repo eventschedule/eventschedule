@@ -50,6 +50,14 @@ class CarpoolController extends Controller
             abort(404);
         }
 
+        if (! $isRecurring && $date) {
+            abort(404);
+        }
+
+        if ($isRecurring && ! $event->matchesDate(\Carbon\Carbon::parse($date))) {
+            abort(404);
+        }
+
         $query = CarpoolOffer::where('event_id', $event->id)
             ->where('status', 'active')
             ->with(['user', 'approvedRequests.user', 'pendingRequests.user']);
@@ -90,6 +98,7 @@ class CarpoolController extends Controller
         $allUserIds = $offers->pluck('user_id');
         foreach ($offers as $offer) {
             $allUserIds = $allUserIds->merge($offer->pendingRequests->pluck('user_id'));
+            $allUserIds = $allUserIds->merge($offer->approvedRequests->pluck('user_id'));
         }
         $allUserIds = $allUserIds->unique()->values();
 
@@ -455,7 +464,11 @@ class CarpoolController extends Controller
         } catch (\Illuminate\Database\QueryException $e) {
             report($e);
 
-            return redirect()->back()->with('error', __('messages.carpool_already_requested'));
+            if ($e->errorInfo[1] == 1062) {
+                return redirect()->back()->with('error', __('messages.carpool_already_requested'));
+            }
+
+            return redirect()->back()->with('error', __('messages.error'));
         }
 
         if ($carpoolRequest === 'not_active') {
@@ -737,7 +750,11 @@ class CarpoolController extends Controller
         } catch (\Illuminate\Database\QueryException $e) {
             report($e);
 
-            return redirect()->back()->with('error', __('messages.carpool_already_reviewed'));
+            if ($e->errorInfo[1] == 1062) {
+                return redirect()->back()->with('error', __('messages.carpool_already_reviewed'));
+            }
+
+            return redirect()->back()->with('error', __('messages.error'));
         }
 
         return redirect()->back()->with('success', __('messages.carpool_review_submitted'));
@@ -790,7 +807,11 @@ class CarpoolController extends Controller
         } catch (\Illuminate\Database\QueryException $e) {
             report($e);
 
-            return redirect()->back()->with('error', __('messages.carpool_already_reported'));
+            if ($e->errorInfo[1] == 1062) {
+                return redirect()->back()->with('error', __('messages.carpool_already_reported'));
+            }
+
+            return redirect()->back()->with('error', __('messages.error'));
         }
 
         return redirect()->back()->with('success', __('messages.carpool_report_submitted'));

@@ -360,6 +360,7 @@
                             },
                             body: JSON.stringify({ panels: this.panels })
                         });
+                        if (!response.ok) throw new Error('Request failed');
                         const data = await response.json();
                         if (data.success) {
                             window.location.reload();
@@ -525,7 +526,7 @@
                             },
                             body: formData
                         });
-                        
+                        if (!response.ok) throw new Error('Request failed');
                         const data = await response.json();
                         
                         if (data.success) {

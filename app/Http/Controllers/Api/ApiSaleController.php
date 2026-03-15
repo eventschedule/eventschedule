@@ -151,21 +151,27 @@ class ApiSaleController extends Controller
         switch ($request->action) {
             case 'mark_paid':
                 if ($sale->status === 'unpaid') {
-                    $sale->status = 'paid';
-                    $sale->transaction_reference = 'Manual payment (API)';
-                    $sale->save();
-                    $actionPerformed = true;
-
-                    AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-                    if ($sale->group_id && $sale->isPrimarySale()) {
-                        $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                        for ($i = 0; $i < $guestCount; $i++) {
-                            AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
+                    DB::transaction(function () use ($sale) {
+                        $sale = Sale::lockForUpdate()->find($sale->id);
+                        if ($sale->status !== 'unpaid') {
+                            return;
                         }
-                    }
-                    if ($sale->discount_amount > 0) {
-                        AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
-                    }
+                        $sale->status = 'paid';
+                        $sale->transaction_reference = 'Manual payment (API)';
+                        $sale->save();
+
+                        AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+                        if ($sale->group_id && $sale->isPrimarySale()) {
+                            $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
+                            for ($i = 0; $i < $guestCount; $i++) {
+                                AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
+                            }
+                        }
+                        if ($sale->discount_amount > 0) {
+                            AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+                        }
+                    });
+                    $actionPerformed = true;
                 }
                 break;
 
@@ -339,6 +345,8 @@ class ApiSaleController extends Controller
                 // Note: status parameter is intentionally not accepted from API input for security
                 // Sales are always created as 'unpaid' and must go through proper payment flow
                 'event_date' => 'nullable|date_format:Y-m-d',
+                'addons' => 'nullable|array',
+                'addons.*' => 'integer|min:0',
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -348,7 +356,7 @@ class ApiSaleController extends Controller
         }
 
         $eventId = UrlUtils::decodeId($request->event_id);
-        $event = Event::with(['roles', 'tickets', 'creatorRole'])->find($eventId);
+        $event = Event::with(['roles', 'tickets', 'addons', 'creatorRole'])->find($eventId);
 
         if (! $event) {
             return response()->json(['error' => 'Event not found'], 404);
@@ -496,6 +504,35 @@ class ApiSaleController extends Controller
                         'quantity' => $quantity,
                         'seats' => json_encode(array_fill(1, $quantity, null)),
                     ]);
+                }
+
+                // Create SaleTickets for add-ons
+                $addonSelections = $request->input('addons', []);
+                foreach ($addonSelections as $addonId => $addonQty) {
+                    $addonQty = (int) $addonQty;
+                    if ($addonQty > 0) {
+                        $addonModel = $event->addons()->lockForUpdate()->find(UrlUtils::decodeId($addonId));
+
+                        if (! $addonModel) {
+                            throw new \RuntimeException('Add-on not found: '.$addonId);
+                        }
+
+                        if ($addonModel->quantity > 0) {
+                            $sold = $addonModel->sold ? json_decode($addonModel->sold, true) : [];
+                            $soldCount = $sold[$eventDate] ?? 0;
+                            $remaining = $addonModel->quantity - $soldCount;
+
+                            if ($addonQty > $remaining) {
+                                throw new \RuntimeException('Add-on not available: '.$addonId.'. Remaining: '.$remaining);
+                            }
+                        }
+
+                        $sale->saleTickets()->create([
+                            'ticket_id' => $addonModel->id,
+                            'quantity' => $addonQty,
+                            'seats' => json_encode(array_fill(1, $addonQty, null)),
+                        ]);
+                    }
                 }
 
                 // Calculate and set payment amount

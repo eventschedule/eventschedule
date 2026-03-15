@@ -137,8 +137,9 @@ class CreateBoostCampaign implements ShouldBeUnique, ShouldQueue
         $campaign->refresh();
         $campaign->loadMissing(['user']);
 
-        // Don't overwrite if already handled (cancelled, etc.)
-        if (! in_array($campaign->status, ['active', 'pending_payment'])) {
+        // Don't overwrite if already handled (cancelled, failed with error, etc.)
+        if (! in_array($campaign->status, ['active', 'pending_payment'])
+            || $campaign->meta_status === 'ERROR') {
             return;
         }
 

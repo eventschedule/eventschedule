@@ -54,8 +54,8 @@
                         $allSaleTickets = $allSaleTickets->merge($gs->saleTickets);
                     }
                 }
-                $regularTickets = $allSaleTickets->filter(fn($st) => !$st->ticket->is_addon);
-                $addonTickets = $allSaleTickets->filter(fn($st) => $st->ticket->is_addon);
+                $regularTickets = $allSaleTickets->filter(fn($st) => $st->ticket && !$st->ticket->is_addon);
+                $addonTickets = $allSaleTickets->filter(fn($st) => $st->ticket && $st->ticket->is_addon);
                 $ticketSummary = $regularTickets->groupBy(fn($st) => $st->ticket->type)
                     ->map(fn($group) => $group->sum('quantity'));
                 $addonSummary = $addonTickets->groupBy(fn($st) => $st->ticket->type)

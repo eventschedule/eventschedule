@@ -55,7 +55,7 @@ class TicketPurchase extends Mailable
             }
         }
 
-        $subjectKey = $this->sale->calculateTotal() == 0
+        $subjectKey = $this->sale->payment_amount == 0
             ? 'messages.ticket_reservation_confirmation'
             : 'messages.ticket_purchase_confirmation';
 

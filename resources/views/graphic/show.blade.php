@@ -763,7 +763,10 @@
                     },
                     body: JSON.stringify(settings)
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Request failed');
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         currentSettings = data.settings;
@@ -875,7 +878,10 @@
                         body: JSON.stringify({})
                     });
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Request failed');
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         showNotification(@json(__("messages.test_email_sent")), 'success');
@@ -973,7 +979,10 @@
                     },
                     body: formData
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Request failed');
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         // Update preview for both desktop and mobile
@@ -1029,7 +1038,10 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                     }
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Request failed');
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         // Hide preview for both desktop and mobile

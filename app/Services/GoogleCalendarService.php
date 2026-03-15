@@ -106,7 +106,7 @@ class GoogleCalendarService
             // Only refresh if token expires in the next 1 minute (reduced from 5 minutes)
             $minutesUntilExpiry = now()->diffInMinutes($expiresAt);
 
-            if ($minutesUntilExpiry > 1) {
+            if ($expiresAt->isFuture() && $minutesUntilExpiry > 1) {
                 // Token is still valid for more than 1 minute, no need to refresh
                 $this->setAccessToken([
                     'access_token' => $user->google_token,

@@ -13,7 +13,9 @@ class SendWebhook implements ShouldQueue
 {
     use Queueable;
 
-    public int $tries = 1;
+    public int $tries = 3;
+
+    public array $backoff = [30, 60];
 
     protected Webhook $webhook;
 
@@ -41,17 +43,22 @@ class SendWebhook implements ShouldQueue
 
         try {
             // SSRF prevention: block private IPs in hosted mode only
+            $resolvedIp = null;
             if (config('app.hosted')) {
                 $host = parse_url($this->webhook->url, PHP_URL_HOST);
-                if ($host && $this->isPrivateHost($host)) {
-                    $responseBody = 'Blocked: private/reserved IP address';
-                    $this->logDelivery($responseStatus, $responseBody, false, $startTime);
+                if ($host) {
+                    $resolvedIp = gethostbyname($host);
+                    if (($resolvedIp === $host && ! filter_var($host, FILTER_VALIDATE_IP))
+                        || ! filter_var($resolvedIp, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                        $responseBody = 'Blocked: private/reserved IP address';
+                        $this->logDelivery($responseStatus, $responseBody, false, $startTime);
 
-                    return;
+                        return;
+                    }
                 }
             }
 
-            $response = Http::timeout(5)
+            $httpClient = Http::timeout(5)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
                     'X-Webhook-Signature' => 'sha256='.$signature,
@@ -59,17 +66,39 @@ class SendWebhook implements ShouldQueue
                     'X-Webhook-Timestamp' => $timestamp,
                     'User-Agent' => 'EventSchedule-Webhook/1.0',
                 ])
-                ->withBody($jsonBody, 'application/json')
-                ->post($this->webhook->url);
+                ->withBody($jsonBody, 'application/json');
+
+            // Pin to the resolved IP to prevent DNS rebinding attacks
+            if ($resolvedIp) {
+                $parsed = parse_url($this->webhook->url);
+                $pinnedUrl = $parsed['scheme'].'://'.$resolvedIp
+                    .(isset($parsed['port']) ? ':'.$parsed['port'] : '')
+                    .($parsed['path'] ?? '/')
+                    .(isset($parsed['query']) ? '?'.$parsed['query'] : '');
+                $response = $httpClient
+                    ->withHeaders(['Host' => $parsed['host']])
+                    ->withOptions(['verify' => false])
+                    ->post($pinnedUrl);
+            } else {
+                $response = $httpClient->post($this->webhook->url);
+            }
 
             $responseStatus = $response->status();
             $responseBody = substr($response->body(), 0, 500);
             $success = $response->successful();
         } catch (\Exception $e) {
             $responseBody = substr($e->getMessage(), 0, 500);
+            $this->logDelivery($responseStatus, $responseBody, false, $startTime);
+
+            throw $e;
         }
 
         $this->logDelivery($responseStatus, $responseBody, $success, $startTime);
+
+        // Retry on server errors (5xx)
+        if ($responseStatus && $responseStatus >= 500) {
+            throw new \RuntimeException("Webhook returned HTTP {$responseStatus}");
+        }
     }
 
     protected function logDelivery(?int $responseStatus, ?string $responseBody, bool $success, float $startTime): void
@@ -95,15 +124,5 @@ class SendWebhook implements ShouldQueue
                 'error' => $e->getMessage(),
             ]);
         }
-    }
-
-    protected function isPrivateHost(string $host): bool
-    {
-        $ip = gethostbyname($host);
-        if ($ip === $host && ! filter_var($host, FILTER_VALIDATE_IP)) {
-            return true;
-        }
-
-        return ! filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
     }
 }

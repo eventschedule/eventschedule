@@ -301,6 +301,7 @@
                     body: formData,
                 });
 
+                if (!response.ok) throw new Error('Request failed');
                 const data = await response.json();
 
                 if (data.redirect) {
@@ -338,6 +339,7 @@
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 body: formData,
             });
+            if (!response.ok) throw new Error('Request failed');
             return await response.json();
         }
 
@@ -365,6 +367,7 @@
                 }),
             });
 
+            if (!response.ok) throw new Error('Request failed');
             const data = await response.json();
             if (data.error) {
                 document.getElementById('payment-errors').textContent = data.error;
@@ -523,6 +526,7 @@
                         body: formData,
                     });
 
+                    if (!response.ok) throw new Error('Request failed');
                     const data = await response.json();
 
                     if (data.redirect) {

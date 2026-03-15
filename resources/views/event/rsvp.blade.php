@@ -253,7 +253,10 @@
                             email: this.email.trim(),
                         }),
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) throw new Error('Request failed');
+                        return response.json();
+                    })
                     .then(data => {
                         this.waitlistSubmitting = false;
                         this.waitlistMessage = data.message;

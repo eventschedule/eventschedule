@@ -976,7 +976,10 @@ function fetchPreview() {
         body: formData,
         signal: previewAbortController.signal,
     })
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) throw new Error('Preview failed');
+        return r.json();
+    })
     .then(data => {
         if (livePreviewFrame.value) livePreviewFrame.value.srcdoc = data.html;
         previewLoading.value = false;
@@ -991,10 +994,16 @@ function openPreviewInNewTab() {
     formData.delete('_method');
     formData.append('_token', props.csrfToken);
     fetch(props.previewUrl, { method: 'POST', body: formData })
-        .then(r => r.json())
+        .then(r => {
+            if (!r.ok) throw new Error('Preview failed');
+            return r.json();
+        })
         .then(data => {
             const w = window.open('', '_blank');
             if (w) { w.document.write(data.html); w.document.close(); }
+        })
+        .catch(() => {
+            alert(t.general_error || 'Something went wrong');
         });
 }
 
@@ -1010,7 +1019,8 @@ function confirmSend() {
         fetch(form.action, {
             method: 'POST',
             body: formData,
-        }).then(() => {
+        }).then(response => {
+            if (!response.ok) throw new Error('Save failed');
             const sendForm = document.createElement('form');
             sendForm.method = 'POST';
             sendForm.action = props.routes.send;
@@ -1021,6 +1031,8 @@ function confirmSend() {
             sendForm.appendChild(token);
             document.body.appendChild(sendForm);
             sendForm.submit();
+        }).catch(() => {
+            alert(t.general_error || 'Something went wrong');
         });
     }
 }

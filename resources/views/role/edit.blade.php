@@ -3822,7 +3822,10 @@ function testImport() {
             cities: cities
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error('Request failed');
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             // Create a modal to show the detailed output
@@ -4111,7 +4114,10 @@ function syncEvents() {
         },
         body: JSON.stringify(requestBody),
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error('Request failed');
+        return response.json();
+    })
     .then(data => {
         hideSyncStatus();
         if (data.error) {
@@ -4257,7 +4263,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     email_settings: emailSettings
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Request failed');
+                return response.json();
+            })
             .then(data => {
                 sendTestEmailBtn.disabled = false;
                 sendTestEmailBtn.textContent = @json(__('messages.send_test_email'), JSON_UNESCAPED_UNICODE);
@@ -4902,7 +4911,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     password: password
                 }),
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Request failed');
+                return response.json();
+            })
             .then(data => {
                 caldavTestBtn.disabled = false;
                 caldavTestBtn.textContent = @json(__('messages.test_connection'), JSON_UNESCAPED_UNICODE);
@@ -4937,7 +4949,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 password: password
             }),
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error('Request failed');
+            return response.json();
+        })
         .then(data => {
             if (data.success && data.calendars && data.calendars.length > 0) {
                 // Populate calendar select
@@ -4998,7 +5013,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     sync_direction: syncDirection
                 }),
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Request failed');
+                return response.json();
+            })
             .then(data => {
                 caldavConnectBtn.disabled = false;
                 caldavConnectBtn.textContent = @json(__('messages.connect'), JSON_UNESCAPED_UNICODE);
@@ -5036,7 +5054,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         sync_direction: syncDirection
                     }),
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Request failed');
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         // Show brief success feedback
@@ -5075,7 +5096,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 },
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Request failed');
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     // Reload page to show disconnected state

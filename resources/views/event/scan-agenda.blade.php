@@ -245,6 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                     .then(r => {
                         if (r.status === 429) throw new Error(@json(__('messages.ai_rate_limit')));
+                        if (!r.ok) throw new Error('Request failed');
                         return r.json();
                     })
                     .then(data => {
@@ -373,7 +374,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         parts: partsToSend,
                     }),
                 })
-                .then(r => r.json())
+                .then(r => {
+                    if (!r.ok) throw new Error('Request failed');
+                    return r.json();
+                })
                 .then(data => {
                     if (data.error) {
                         errorMessage.value = data.error;
