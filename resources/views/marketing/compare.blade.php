@@ -165,12 +165,13 @@
                                     ['Promo/discount codes', 'Yes (Pro)', 'Yes', 'No', 'No', 'No'],
                                     ['Post-event feedback', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
                                     ['Embed ticket widget', 'Yes (Pro)', 'Yes', 'No', 'Yes', 'No'],
+                                    ['Individual tickets', 'Yes (Pro)', 'Yes', 'No', 'No', 'No'],
                                 ],
                                 'Integrations' => [
                                     ['Google Calendar sync', 'Yes (Free)', 'No native 2-way sync', 'Yes', 'No', 'N/A'],
                                     ['CalDAV sync', 'Yes (Free)', 'No', 'No', 'No', 'No'],
                                     ['Newsletters', 'Yes (Free)', 'Yes', 'Yes', 'No', 'No'],
-                                    ['Embed calendar on website', 'Yes (Free)', 'Yes', 'No', 'Yes', 'No'],
+                                    ['Embed calendar on website', 'Yes (Free)', 'Yes', 'No', 'Yes', 'Yes (limited styling)'],
                                 ],
                                 'Customization' => [
                                     ['Custom domains', 'Yes (Enterprise)', 'No', 'Yes (Plus)', 'Yes (paid)', 'No'],
@@ -189,6 +190,8 @@
                                     ['Availability management', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
                                     ['WhatsApp event creation', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
                                     ['Email scheduling', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
+                                    ['Carpool matching', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
+                                    ['Sponsor/partner logos', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
                                 ],
                                 'Platform' => [
                                     ['REST API', 'Yes (Pro)', 'Yes', 'Yes (Plus)', 'Yes', 'Yes'],

@@ -290,86 +290,7 @@
 
         {{-- Customize Dashboard Modal --}}
         <x-modal name="customize-dashboard" maxWidth="lg">
-            <div x-data='{
-                panels: @json($dashboardConfig["panels"]),
-                defaultPanels: @json($dashboardConfig["defaultPanels"]),
-                labels: {
-                    upcoming_count: @json(__("messages.panel_upcoming_count")),
-                    views: @json(__("messages.panel_views")),
-                    followers: @json(__("messages.panel_followers")),
-                    upcoming_events: @json(__("messages.panel_upcoming_events")),
-                    recent_activity: @json(__("messages.panel_recent_activity")),
-                    revenue: @json(__("messages.panel_revenue")),
-                    top_events: @json(__("messages.panel_top_events")),
-                    newsletters: @json(__("messages.panel_newsletters")),
-                    boosts: @json(__("messages.panel_boosts")),
-                    traffic_sources: @json(__("messages.panel_traffic_sources"))
-                },
-                panelMeta: {
-                    upcoming_count: { defaultSize: 1 },
-                    views: { defaultSize: 1, periods: [7, 14, 30] },
-                    followers: { defaultSize: 1 },
-                    revenue: { defaultSize: 1, periods: [7, 14, 30] },
-                    upcoming_events: { defaultSize: 2, counts: [3, 5] },
-                    recent_activity: { defaultSize: 2, counts: [5, 10] },
-                    top_events: { defaultSize: 2, counts: [3, 5], periods: [7, 14, 30] },
-                    newsletters: { defaultSize: 2, counts: [3, 5] },
-                    boosts: { defaultSize: 2, counts: [3, 5] },
-                    traffic_sources: { defaultSize: 2, counts: [3, 5, 10], periods: [7, 14, 30] }
-                },
-                expandedPanel: null,
-                saving: false,
-                sortableInstance: null,
-                init() {
-                    this.$nextTick(() => this.initSortable());
-                },
-                initSortable() {
-                    const list = this.$refs.panelList;
-                    if (!list || typeof Sortable === "undefined") return;
-                    if (this.sortableInstance) this.sortableInstance.destroy();
-                    this.sortableInstance = Sortable.create(list, {
-                        handle: ".drag-handle",
-                        animation: 150,
-                        ghostClass: "opacity-50",
-                        fallbackOnBody: true,
-                        onStart: (evt) => {
-                            this._childOrder = [...evt.from.children];
-                        },
-                        onEnd: (evt) => {
-                            this._childOrder.forEach(child => evt.from.appendChild(child));
-                            const item = this.panels.splice(evt.oldIndex, 1)[0];
-                            this.panels.splice(evt.newIndex, 0, item);
-                        }
-                    });
-                },
-                toggleSettings(panelId) {
-                    this.expandedPanel = this.expandedPanel === panelId ? null : panelId;
-                },
-                resetDefaults() {
-                    this.panels = JSON.parse(JSON.stringify(this.defaultPanels));
-                },
-                async save() {
-                    this.saving = true;
-                    try {
-                        const response = await fetch(@json(route("home.save_config")), {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                "X-CSRF-TOKEN": document.querySelector("meta[name=\"csrf-token\"]")?.getAttribute("content") || "",
-                                "Accept": "application/json"
-                            },
-                            body: JSON.stringify({ panels: this.panels })
-                        });
-                        if (!response.ok) throw new Error('Request failed');
-                        const data = await response.json();
-                        if (data.success) {
-                            window.location.reload();
-                        }
-                    } catch (e) {
-                        this.saving = false;
-                    }
-                }
-            }'>
+            <div x-data="customizeDashboard()">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('messages.customize_dashboard') }}</h3>
                     <button type="button" x-on:click="$dispatch('close')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -482,6 +403,90 @@
     @endif
     <script src="{{ asset('js/sortable.min.js') }}" {!! nonce_attr() !!}></script>
     <script {!! nonce_attr() !!}>
+        function customizeDashboard() {
+            return {
+                panels: {{ Js::from($dashboardConfig['panels']) }},
+                defaultPanels: {{ Js::from($dashboardConfig['defaultPanels']) }},
+                labels: {{ Js::from([
+                    'upcoming_count' => __('messages.panel_upcoming_count'),
+                    'views' => __('messages.panel_views'),
+                    'followers' => __('messages.panel_followers'),
+                    'upcoming_events' => __('messages.panel_upcoming_events'),
+                    'recent_activity' => __('messages.panel_recent_activity'),
+                    'revenue' => __('messages.panel_revenue'),
+                    'top_events' => __('messages.panel_top_events'),
+                    'newsletters' => __('messages.panel_newsletters'),
+                    'boosts' => __('messages.panel_boosts'),
+                    'traffic_sources' => __('messages.panel_traffic_sources'),
+                ]) }},
+                panelMeta: {
+                    upcoming_count: { defaultSize: 1 },
+                    views: { defaultSize: 1, periods: [7, 14, 30] },
+                    followers: { defaultSize: 1 },
+                    revenue: { defaultSize: 1, periods: [7, 14, 30] },
+                    upcoming_events: { defaultSize: 2, counts: [3, 5] },
+                    recent_activity: { defaultSize: 2, counts: [5, 10] },
+                    top_events: { defaultSize: 2, counts: [3, 5], periods: [7, 14, 30] },
+                    newsletters: { defaultSize: 2, counts: [3, 5] },
+                    boosts: { defaultSize: 2, counts: [3, 5] },
+                    traffic_sources: { defaultSize: 2, counts: [3, 5, 10], periods: [7, 14, 30] }
+                },
+                expandedPanel: null,
+                saving: false,
+                sortableInstance: null,
+                saveConfigUrl: {{ Js::from(route('home.save_config')) }},
+                init() {
+                    this.$nextTick(() => this.initSortable());
+                },
+                initSortable() {
+                    const list = this.$refs.panelList;
+                    if (!list || typeof Sortable === 'undefined') return;
+                    if (this.sortableInstance) this.sortableInstance.destroy();
+                    this.sortableInstance = Sortable.create(list, {
+                        handle: '.drag-handle',
+                        animation: 150,
+                        ghostClass: 'opacity-50',
+                        fallbackOnBody: true,
+                        onStart: (evt) => {
+                            this._childOrder = [...evt.from.children];
+                        },
+                        onEnd: (evt) => {
+                            this._childOrder.forEach(child => evt.from.appendChild(child));
+                            const item = this.panels.splice(evt.oldIndex, 1)[0];
+                            this.panels.splice(evt.newIndex, 0, item);
+                        }
+                    });
+                },
+                toggleSettings(panelId) {
+                    this.expandedPanel = this.expandedPanel === panelId ? null : panelId;
+                },
+                resetDefaults() {
+                    this.panels = JSON.parse(JSON.stringify(this.defaultPanels));
+                },
+                async save() {
+                    this.saving = true;
+                    try {
+                        const response = await fetch(this.saveConfigUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({ panels: this.panels })
+                        });
+                        if (!response.ok) throw new Error('Request failed');
+                        const data = await response.json();
+                        if (data.success) {
+                            window.location.reload();
+                        }
+                    } catch (e) {
+                        this.saving = false;
+                    }
+                }
+            };
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const feedbackForm = document.getElementById('feedback-form');
             const feedbackTextarea = document.getElementById('feedback-textarea');

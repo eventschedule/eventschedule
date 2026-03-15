@@ -55,13 +55,48 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto animate-reveal delay-200" style="opacity: 0;">
-                Stop stitching together general-purpose tools for event management. Event Schedule was built for this.
+                You are using 5 tools to do what one platform was built for. Ticketing, calendars, graphics, emails, and event pages - all in one place.
             </p>
         </div>
     </section>
 
-    <!-- Why Consolidate -->
+    <!-- Before/After Consolidation Visual -->
     <section class="bg-white dark:bg-[#0a0a0f] py-24">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+                <!-- Before: Scattered tools -->
+                <div class="rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 p-8 text-center">
+                    <div class="text-sm font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-6">Before</div>
+                    <div class="flex flex-wrap justify-center gap-3 mb-8">
+                        <span class="px-3 py-1.5 rounded-lg bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-sm text-gray-600 dark:text-gray-400">Google Forms</span>
+                        <span class="px-3 py-1.5 rounded-lg bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-sm text-gray-600 dark:text-gray-400">Mailchimp</span>
+                        <span class="px-3 py-1.5 rounded-lg bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-sm text-gray-600 dark:text-gray-400">Canva</span>
+                        <span class="px-3 py-1.5 rounded-lg bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-sm text-gray-600 dark:text-gray-400">Calendly</span>
+                        <span class="px-3 py-1.5 rounded-lg bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-sm text-gray-600 dark:text-gray-400">Linktree</span>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-900 dark:text-white mb-1">5 tools</div>
+                    <div class="text-lg text-gray-500 dark:text-gray-400">~$50+/mo combined</div>
+                </div>
+
+                <!-- After: Event Schedule -->
+                <div class="rounded-2xl border border-blue-200 dark:border-blue-500/30 bg-blue-50/50 dark:bg-blue-500/5 p-8 text-center">
+                    <div class="text-sm font-medium text-blue-500 dark:text-blue-400 uppercase tracking-wider mb-6">After</div>
+                    <div class="flex flex-wrap justify-center gap-3 mb-8">
+                        <span class="px-3 py-1.5 rounded-lg bg-blue-100 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-500/30 text-sm font-medium text-blue-700 dark:text-blue-300">Ticketing</span>
+                        <span class="px-3 py-1.5 rounded-lg bg-blue-100 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-500/30 text-sm font-medium text-blue-700 dark:text-blue-300">Newsletters</span>
+                        <span class="px-3 py-1.5 rounded-lg bg-blue-100 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-500/30 text-sm font-medium text-blue-700 dark:text-blue-300">Graphics</span>
+                        <span class="px-3 py-1.5 rounded-lg bg-blue-100 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-500/30 text-sm font-medium text-blue-700 dark:text-blue-300">Calendar</span>
+                        <span class="px-3 py-1.5 rounded-lg bg-blue-100 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-500/30 text-sm font-medium text-blue-700 dark:text-blue-300">Event Pages</span>
+                    </div>
+                    <div class="text-3xl font-bold text-gradient mb-1">1 platform</div>
+                    <div class="text-lg text-gray-500 dark:text-gray-400">From $5/mo</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Consolidate -->
+    <section class="bg-white dark:bg-[#0a0a0f] py-24 pt-0">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -79,6 +114,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
+                    <div class="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mb-2">$50+/mo</div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Save money</h3>
                     <p class="text-gray-500 dark:text-gray-400">One plan from $5/month replaces $50+ in separate tools. Zero platform fees on ticket sales, and a free plan that covers most needs.</p>
                 </div>
@@ -89,6 +125,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                     </div>
+                    <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">30 sec</div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Save time</h3>
                     <p class="text-gray-500 dark:text-gray-400">Import events in seconds with AI instead of manual entry. Events, tickets, attendees, and emails all live in one place.</p>
                 </div>
@@ -99,6 +136,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                         </svg>
                     </div>
+                    <div class="text-3xl font-bold text-sky-600 dark:text-sky-400 mb-2">0% fees</div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Stay connected</h3>
                     <p class="text-gray-500 dark:text-gray-400">Ticketing, newsletters, graphics, and two-way Google Calendar sync in one platform. Ticket buyers become subscribers automatically.</p>
                 </div>
@@ -121,138 +159,66 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <a href="{{ route('marketing.replace_google_forms') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Google Forms</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Replace manual registration forms with built-in ticketing, payments, and automatic confirmations.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Learn more
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
+            @php
+                $toolGroups = [
+                    [
+                        'label' => 'Registration & Forms',
+                        'tools' => [
+                            ['name' => 'Google Forms', 'route' => 'marketing.replace_google_forms', 'desc' => 'Replace manual registration forms with built-in ticketing, payments, and automatic confirmations.', 'icon' => 'clipboard', 'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20', 'icon_color' => 'text-emerald-600 dark:text-emerald-400'],
+                            ['name' => 'SurveyMonkey', 'route' => 'marketing.replace_surveymonkey', 'desc' => 'Replace repurposed survey forms with purpose-built event registration, ticketing, and attendee management.', 'icon' => 'clipboard', 'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20', 'icon_color' => 'text-emerald-600 dark:text-emerald-400'],
+                            ['name' => 'Doodle', 'route' => 'marketing.replace_doodle', 'desc' => 'Replace date polling with a full event platform. Create, publish, and sell tickets for events in one place.', 'icon' => 'calendar', 'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20', 'icon_color' => 'text-emerald-600 dark:text-emerald-400'],
+                        ],
+                    ],
+                    [
+                        'label' => 'Marketing & Communication',
+                        'tools' => [
+                            ['name' => 'Mailchimp', 'route' => 'marketing.replace_mailchimp', 'desc' => 'Replace a separate email tool with built-in newsletters, A/B testing, and integrated attendee data.', 'icon' => 'mail', 'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20', 'icon_color' => 'text-violet-600 dark:text-violet-400'],
+                            ['name' => 'Canva', 'route' => 'marketing.replace_canva', 'desc' => 'Replace manual flyer design with auto-generated event graphics and AI-powered flyers.', 'icon' => 'image', 'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20', 'icon_color' => 'text-amber-600 dark:text-amber-400'],
+                            ['name' => 'Linktree', 'route' => 'marketing.replace_linktree', 'desc' => 'Replace a list of links with a schedule page that shows events, sells tickets, and collects subscribers.', 'icon' => 'link', 'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20', 'icon_color' => 'text-blue-600 dark:text-blue-400'],
+                        ],
+                    ],
+                    [
+                        'label' => 'Scheduling & Tracking',
+                        'tools' => [
+                            ['name' => 'Calendly', 'route' => 'marketing.replace_calendly', 'desc' => 'Replace appointment scheduling with public event pages, ticketing, and a shareable event calendar.', 'icon' => 'calendar', 'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20', 'icon_color' => 'text-rose-600 dark:text-rose-400'],
+                            ['name' => 'Google Sheets', 'route' => 'marketing.replace_google_sheets', 'desc' => 'Replace spreadsheet tracking with automatic attendee management, sales dashboards, and CSV exports.', 'icon' => 'chart', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
+                            ['name' => 'QR Code Generators', 'route' => 'marketing.replace_qr_code_generators', 'desc' => 'Replace standalone QR tools with tickets that include built-in QR codes and a live check-in dashboard.', 'icon' => 'qr', 'icon_bg' => 'bg-indigo-100 dark:bg-indigo-500/20', 'icon_color' => 'text-indigo-600 dark:text-indigo-400'],
+                        ],
+                    ],
+                    [
+                        'label' => 'Planning & Websites',
+                        'tools' => [
+                            ['name' => 'Squarespace', 'route' => 'marketing.replace_squarespace', 'desc' => 'Replace a full website builder with ready-made event pages, integrated ticketing, and no plugins needed.', 'icon' => 'globe', 'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20', 'icon_color' => 'text-blue-600 dark:text-blue-400'],
+                            ['name' => 'Notion', 'route' => 'marketing.replace_notion', 'desc' => 'Replace internal workspace planning with public event pages, built-in ticketing, and automatic calendar sync.', 'icon' => 'code', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
+                            ['name' => 'Trello', 'route' => 'marketing.replace_trello', 'desc' => 'Replace task boards with a full event platform. Public event pages, ticketing, and payments built in.', 'icon' => 'layout', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
+                        ],
+                    ],
+                ];
+            @endphp
 
-                <a href="{{ route('marketing.replace_mailchimp') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Mailchimp</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Replace a separate email tool with built-in newsletters, A/B testing, and integrated attendee data.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Learn more
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.replace_canva') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Canva</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Replace manual flyer design with auto-generated event graphics and AI-powered flyers.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Learn more
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.replace_linktree') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Linktree</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Replace a list of links with a schedule page that shows events, sells tickets, and collects subscribers.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Learn more
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.replace_google_sheets') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Google Sheets</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Replace spreadsheet tracking with automatic attendee management, sales dashboards, and CSV exports.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Learn more
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.replace_calendly') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Calendly</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Replace appointment scheduling with public event pages, ticketing, and a shareable event calendar.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Learn more
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.replace_surveymonkey') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">SurveyMonkey</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Replace repurposed survey forms with purpose-built event registration, ticketing, and attendee management.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Learn more
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.replace_doodle') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Doodle</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Replace date polling with a full event platform. Create, publish, and sell tickets for events in one place.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Learn more
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.replace_qr_code_generators') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">QR Code Generators</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Replace standalone QR tools with tickets that include built-in QR codes and a live check-in dashboard.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Learn more
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.replace_squarespace') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Squarespace</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Replace a full website builder with ready-made event pages, integrated ticketing, and no plugins needed.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Learn more
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.replace_notion') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Notion</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Replace internal workspace planning with public event pages, built-in ticketing, and automatic calendar sync.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Learn more
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.replace_trello') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Trello</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Replace task boards with a full event platform. Public event pages, ticketing, and payments built in.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Learn more
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
+            <div class="space-y-12">
+                @foreach ($toolGroups as $group)
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">{{ $group['label'] }}</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            @foreach ($group['tools'] as $tool)
+                                <a href="{{ route($tool['route']) }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
+                                    <div class="w-10 h-10 rounded-xl {{ $tool['icon_bg'] }} flex items-center justify-center mb-4">
+                                        <x-marketing-icon :icon="$tool['icon']" :class="'w-5 h-5 ' . $tool['icon_color']" />
+                                    </div>
+                                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">{{ $tool['name'] }}</h3>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">{{ $tool['desc'] }}</p>
+                                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
+                                        Learn more
+                                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                        </svg>
+                                    </span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endforeach
             </div>
         </div>
     </section>
@@ -262,16 +228,17 @@
 
     <!-- Cross-link to Compare -->
     <section class="bg-white dark:bg-[#0a0a0f] py-24">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                Looking for direct platform comparisons?
-            </h2>
-            <p class="text-lg text-gray-500 dark:text-gray-400 mb-8">
-                See how Event Schedule compares to other event platforms like Eventbrite, Luma, and Ticket Tailor.
-            </p>
-            <a href="{{ route('marketing.compare') }}" class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-lg transition-colors">
-                View platform comparisons
-                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <a href="{{ route('marketing.compare') }}" class="group flex items-center justify-between p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">
+                        Looking for direct platform comparisons?
+                    </h2>
+                    <p class="text-gray-500 dark:text-gray-400">
+                        See how Event Schedule compares to Eventbrite, Luma, and Ticket Tailor.
+                    </p>
+                </div>
+                <svg aria-hidden="true" class="w-6 h-6 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex-shrink-0 ml-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
             </a>

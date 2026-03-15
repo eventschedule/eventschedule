@@ -546,6 +546,7 @@ document.addEventListener('DOMContentLoaded', function() {
         embedLink.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
+            hidePopUp();
             openEmbedModal();
         });
     }

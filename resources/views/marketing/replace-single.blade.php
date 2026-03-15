@@ -155,18 +155,18 @@
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Why {{ $name }} falls short for events
+                    Where {{ $name }} limits you for events
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-                    {{ $name }} was not built for event management. Here is where it leaves you stuck.
+                    {{ $name }} was not built for event management. Here is where it leaves gaps.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
                 @foreach ($pain_points as $pain)
                     <div class="flex items-start gap-4 p-6 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10">
-                        <svg aria-hidden="true" class="w-6 h-6 text-red-500 dark:text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        <svg aria-hidden="true" class="w-5 h-5 text-amber-500 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
                         </svg>
                         <span class="text-gray-700 dark:text-gray-300">{{ $pain }}</span>
                     </div>
@@ -233,7 +233,7 @@
                 </div>
 
                 <!-- Why switch to ES -->
-                <div>
+                <div class="rounded-2xl border border-blue-200 dark:border-blue-500/20 bg-blue-50/50 dark:bg-blue-500/5 p-8">
                     <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">
                         Why switch to Event Schedule?
                     </h2>
@@ -414,16 +414,17 @@
 
     <!-- Cross-link to Compare -->
     <section class="bg-{{ !empty($related_features) ? 'white dark:bg-[#0a0a0f]' : 'gray-100 dark:bg-[#0f0f14]' }} py-24">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                Looking for direct platform comparisons?
-            </h2>
-            <p class="text-lg text-gray-500 dark:text-gray-400 mb-8">
-                See how Event Schedule compares to other event platforms like Eventbrite, Luma, and Ticket Tailor.
-            </p>
-            <a href="{{ route('marketing.compare') }}" class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-lg transition-colors">
-                View platform comparisons
-                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <a href="{{ route('marketing.compare') }}" class="group flex items-center justify-between p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-{{ !empty($related_features) ? 'gray-50' : 'white' }} dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">
+                        Looking for direct platform comparisons?
+                    </h2>
+                    <p class="text-gray-500 dark:text-gray-400">
+                        See how Event Schedule compares to Eventbrite, Luma, and Ticket Tailor.
+                    </p>
+                </div>
+                <svg aria-hidden="true" class="w-6 h-6 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex-shrink-0 ml-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
             </a>

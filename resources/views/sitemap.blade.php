@@ -418,6 +418,12 @@
         <priority>0.8</priority>
     </url>
     <url>
+        <loc>{{ url('/features/carpool') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
         <loc>{{ url('/saas') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
