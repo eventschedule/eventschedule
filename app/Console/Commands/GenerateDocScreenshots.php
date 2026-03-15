@@ -224,7 +224,7 @@ class GenerateDocScreenshots extends Command
                 ['id' => 'creating-schedules--section-engagement', 'route' => '/simpsons/edit', 'section' => 'section-engagement'],
                 ['id' => 'creating-schedules--section-auto-import', 'route' => '/simpsons/edit', 'section' => 'section-auto-import'],
                 ['id' => 'creating-schedules--section-integrations', 'route' => '/simpsons/edit', 'section' => 'section-integrations'],
-                ['id' => 'creating-schedules--section-email-settings', 'route' => '/simpsons/edit', 'script' => "document.querySelector('a[data-section=\"section-integrations\"]').click(); document.querySelector('.integration-tab[data-tab=\"email\"]').click()"],
+                ['id' => 'creating-schedules--section-email-settings', 'route' => '/simpsons/edit', 'script' => "document.querySelector('a[data-section=\"section-integrations\"]').click(); setTimeout(() => document.querySelector('.integration-tab[data-tab=\"email\"]').click(), 500)"],
             ],
             'creating-events' => [
                 ['id' => 'creating-events--schedule-tab', 'route' => '/simpsons/schedule'],
