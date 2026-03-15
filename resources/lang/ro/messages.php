@@ -2853,4 +2853,8 @@ return [
     'carpool_notifications' => 'Notificări transport partajat',
     'carpool_notifications_help' => 'Primește notificări prin e-mail despre cererile și actualizările de transport partajat.',
     'report' => 'Raportează',
+    'add_ons' => 'Suplimente',
+    'add_on' => 'Supliment',
+    'add_add_on' => 'Adaugă supliment',
+    'add_ons_help' => 'Articole opționale pe care clienții le pot adăuga la achiziția lor (de ex. parcare, produse, pachete de masă).',
 ];
