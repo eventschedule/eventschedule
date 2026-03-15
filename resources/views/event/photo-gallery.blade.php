@@ -36,7 +36,7 @@
                       if (shareState !== 'idle') return;
                       if (navigator.share) {
                         shareState = 'sharing';
-                        navigator.share({ title: $event.currentTarget.dataset.shareTitle, url: window.location.href }).finally(() => shareState = 'idle');
+                        navigator.share({ title: $event.currentTarget.dataset.shareTitle, url: window.location.href }).catch(function(){}).finally(() => shareState = 'idle');
                       } else {
                         navigator.clipboard.writeText(window.location.href);
                         shareState = 'copied';
@@ -248,7 +248,7 @@
                 if (shareState !== 'idle') return;
                 if (navigator.share) {
                   shareState = 'sharing';
-                  navigator.share({ title: $event.currentTarget.dataset.shareTitle, url: window.location.href }).finally(() => shareState = 'idle');
+                  navigator.share({ title: $event.currentTarget.dataset.shareTitle, url: window.location.href }).catch(function(){}).finally(() => shareState = 'idle');
                 } else {
                   navigator.clipboard.writeText(window.location.href);
                   shareState = 'copied';

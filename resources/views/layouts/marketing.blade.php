@@ -41,6 +41,9 @@
                             )) {
                                 return null;
                             }
+                            if (event.exception.values[i].value && event.exception.values[i].value.indexOf('Share canceled') !== -1) {
+                                return null;
+                            }
                         }
                     }
                     return event;
