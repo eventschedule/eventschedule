@@ -1014,7 +1014,6 @@ function confirmSend() {
 
         // Save content via fetch, then POST to send
         const formData = new FormData(form);
-        formData.delete('_method');
 
         fetch(form.action, {
             method: 'POST',
