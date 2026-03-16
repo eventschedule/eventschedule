@@ -79,7 +79,7 @@
             <form method="POST" action="{{ route('carpool.agree_disclaimer', ['subdomain' => $subdomain, 'event_hash' => $eventHash]) }}">
                 @csrf
                 <label class="flex items-start gap-3 mb-4 cursor-pointer">
-                    <input type="checkbox" name="agree" value="1" class="mt-1 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" required>
+                    <input type="checkbox" name="agree" value="1" class="mt-1 rounded border-gray-300 dark:border-gray-500 dark:bg-[#1e1e1e] text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" required>
                     <span class="text-sm text-gray-700 dark:text-[#d1d5db]">{{ __('messages.carpool_disclaimer_checkbox', ['app' => config('app.name')]) }}</span>
                 </label>
                 <button type="submit" class="px-4 py-3 text-base rounded-lg text-white font-medium" style="background-color: {{ $accentColor }};">

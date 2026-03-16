@@ -1456,15 +1456,15 @@
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.layout_type') }}</h4>
                             <div class="flex flex-row flex-wrap gap-x-4 gap-y-2">
                                 <label class="flex items-center cursor-pointer group">
-                                    <input type="radio" name="layout_mobile" value="grid" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-gray-700" checked>
+                                    <input type="radio" name="layout_mobile" value="grid" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-[#1e1e1e]" checked>
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.grid_layout') }}</span>
                                 </label>
                                 <label class="flex items-center cursor-pointer group">
-                                    <input type="radio" name="layout_mobile" value="row" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-gray-700">
+                                    <input type="radio" name="layout_mobile" value="row" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-[#1e1e1e]">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.row_layout') }}</span>
                                 </label>
                                 <label class="flex items-center cursor-pointer group">
-                                    <input type="radio" name="layout_mobile" value="list" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-gray-700">
+                                    <input type="radio" name="layout_mobile" value="list" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-[#1e1e1e]">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.list_layout') }}</span>
                                 </label>
                             </div>
@@ -1594,11 +1594,11 @@
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.url_format') }}</h4>
                             <div class="flex flex-col gap-2">
                                 <label class="flex items-center cursor-pointer group">
-                                    <input type="checkbox" id="url_include_https_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-gray-700">
+                                    <input type="checkbox" id="url_include_https_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-[#1e1e1e]">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.url_include_https') }}</span>
                                 </label>
                                 <label class="flex items-center cursor-pointer group">
-                                    <input type="checkbox" id="url_include_id_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-gray-700">
+                                    <input type="checkbox" id="url_include_id_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-[#1e1e1e]">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.url_include_id') }}</span>
                                 </label>
                             </div>
@@ -1612,7 +1612,7 @@
                         <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.recurring_events') }}</h4>
                             <label class="flex items-center cursor-pointer group">
-                                <input type="checkbox" id="exclude_recurring_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-gray-700">
+                                <input type="checkbox" id="exclude_recurring_mobile" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-[#1e1e1e]">
                                 <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.exclude_recurring_events') }}</span>
                             </label>
                         </div>
@@ -1648,7 +1648,7 @@
                                             <div class="flex flex-wrap gap-2">
                                                 @foreach ([0 => __('messages.sun'), 1 => __('messages.mon'), 2 => __('messages.tue'), 3 => __('messages.wed'), 4 => __('messages.thu'), 5 => __('messages.fri'), 6 => __('messages.sat')] as $dayVal => $dayLabel)
                                                     <label class="inline-flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300">
-                                                        <input type="checkbox" class="weekly-day-checkbox rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:bg-gray-700" value="{{ $dayVal }}" data-form="mobile">
+                                                        <input type="checkbox" class="weekly-day-checkbox rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:bg-[#1e1e1e]" value="{{ $dayVal }}" data-form="mobile">
                                                         {{ $dayLabel }}
                                                     </label>
                                                 @endforeach
@@ -1783,15 +1783,15 @@
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.layout_type') }}</h4>
                                 <div class="flex flex-row flex-wrap gap-x-4 gap-y-2">
                                     <label class="flex items-center cursor-pointer group">
-                                        <input type="radio" name="layout" value="grid" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-gray-700" checked>
+                                        <input type="radio" name="layout" value="grid" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-[#1e1e1e]" checked>
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.grid_layout') }}</span>
                                     </label>
                                     <label class="flex items-center cursor-pointer group">
-                                        <input type="radio" name="layout" value="row" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-gray-700">
+                                        <input type="radio" name="layout" value="row" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-[#1e1e1e]">
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.row_layout') }}</span>
                                     </label>
                                     <label class="flex items-center cursor-pointer group">
-                                        <input type="radio" name="layout" value="list" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-gray-700">
+                                        <input type="radio" name="layout" value="list" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-[var(--brand-blue)] dark:bg-[#1e1e1e]">
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.list_layout') }}</span>
                                     </label>
                                 </div>
@@ -1921,11 +1921,11 @@
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.url_format') }}</h4>
                                 <div class="flex flex-col gap-2">
                                     <label class="flex items-center cursor-pointer group">
-                                        <input type="checkbox" id="url_include_https" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-gray-700">
+                                        <input type="checkbox" id="url_include_https" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-[#1e1e1e]">
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.url_include_https') }}</span>
                                     </label>
                                     <label class="flex items-center cursor-pointer group">
-                                        <input type="checkbox" id="url_include_id" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-gray-700">
+                                        <input type="checkbox" id="url_include_id" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-[#1e1e1e]">
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.url_include_id') }}</span>
                                     </label>
                                 </div>
@@ -1939,7 +1939,7 @@
                             <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.recurring_events') }}</h4>
                                 <label class="flex items-center cursor-pointer group">
-                                    <input type="checkbox" id="exclude_recurring" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-gray-700">
+                                    <input type="checkbox" id="exclude_recurring" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-[var(--brand-blue)] dark:bg-[#1e1e1e]">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">{{ __('messages.exclude_recurring_events') }}</span>
                                 </label>
                             </div>
@@ -1975,7 +1975,7 @@
                                                 <div class="flex flex-wrap gap-2">
                                                     @foreach ([0 => __('messages.sun'), 1 => __('messages.mon'), 2 => __('messages.tue'), 3 => __('messages.wed'), 4 => __('messages.thu'), 5 => __('messages.fri'), 6 => __('messages.sat')] as $dayVal => $dayLabel)
                                                         <label class="inline-flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300">
-                                                            <input type="checkbox" class="weekly-day-checkbox rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:bg-gray-700" value="{{ $dayVal }}" data-form="desktop">
+                                                            <input type="checkbox" class="weekly-day-checkbox rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:bg-[#1e1e1e]" value="{{ $dayVal }}" data-form="desktop">
                                                             {{ $dayLabel }}
                                                         </label>
                                                     @endforeach
