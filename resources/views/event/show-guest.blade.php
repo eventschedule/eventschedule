@@ -861,7 +861,7 @@
             $carpoolUrl = config('app.hosted')
                 ? route('carpool.index', ['subdomain' => $carpoolRole->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)])
                 : '/' . $carpoolRole->subdomain . '/carpool/' . \App\Utils\UrlUtils::encodeId($event->id);
-            if ($date) {
+            if ($date && $event->days_of_week) {
                 $carpoolUrl .= '/' . $date;
             }
             $carpoolCount = $event->carpoolOffers()->where('status', 'active')
