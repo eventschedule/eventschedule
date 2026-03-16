@@ -17,7 +17,7 @@
 @elseif ($blockType === 'events' && !empty($block['data']['resolvedEvents']))
 @foreach ($block['data']['resolvedEvents'] as $event)
 * {{ $event->name }}
-  {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format(($role?->use_24_hour_time ?? false) ? 'M j, Y - H:i' : 'M j, Y - g:i A') : '' }}
+  {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->setTimezone($role->timezone ?? 'UTC')->format(($role?->use_24_hour_time ?? false) ? 'M j, Y - H:i' : 'M j, Y - g:i A') : '' }}
   {{ $event->getGuestUrl() }}
 
 @endforeach
