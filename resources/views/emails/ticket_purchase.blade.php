@@ -47,6 +47,9 @@
                 <p style="margin: 10px 0;">
                     <strong>{{ $saleTicket->ticket->type ?: __('messages.add_on') }}</strong>
                     x {{ $saleTicket->quantity }}
+                    @if ($saleTicket->ticket->url)
+                        <br><a href="{{ $saleTicket->ticket->url }}" style="color: #4E81FA; font-size: 13px;">{{ $saleTicket->ticket->url }}</a>
+                    @endif
                 </p>
             @endforeach
         </div>

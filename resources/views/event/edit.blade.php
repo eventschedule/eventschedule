@@ -2962,6 +2962,11 @@
                                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm"></textarea>
                                         </div>
                                         <div class="mt-3">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.url') }}</label>
+                                            <input type="url" v-model="addon.url" :name="`addons[${aIndex}][url]`" placeholder="https://..."
+                                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm" />
+                                        </div>
+                                        <div class="mt-3">
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.image') }}</label>
                                             <div v-if="addon.image_url" class="mb-2 relative inline-block">
                                                 <img :src="addon.image_url" :alt="addon.type" style="max-height: 80px" class="rounded-lg border border-gray-200 dark:border-gray-600" />
@@ -3903,6 +3908,7 @@
           price: addon.price ?? null,
           description: addon.description || '',
           image_url: addon.image_url || null,
+          url: addon.url || '',
           remove_image: false,
         })),
         formSubmitAttempted: false,
@@ -4640,6 +4646,7 @@
           price: null,
           description: '',
           image_url: null,
+          url: '',
           remove_image: false,
         });
       },

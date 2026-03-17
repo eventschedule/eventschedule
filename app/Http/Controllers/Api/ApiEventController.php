@@ -244,6 +244,7 @@ class ApiEventController extends Controller
                 'addons.*.quantity' => 'nullable|integer|min:0',
                 'addons.*.price' => 'nullable|numeric|min:0',
                 'addons.*.description' => 'nullable|string|max:1000',
+                'addons.*.url' => 'nullable|url|max:2000',
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -355,6 +356,7 @@ class ApiEventController extends Controller
                 'addons.*.quantity' => 'nullable|integer|min:0',
                 'addons.*.price' => 'nullable|numeric|min:0',
                 'addons.*.description' => 'nullable|string|max:1000',
+                'addons.*.url' => 'nullable|url|max:2000',
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -449,6 +451,7 @@ class ApiEventController extends Controller
                     'quantity' => $addon->quantity,
                     'price' => $addon->price,
                     'description' => $addon->description,
+                    'url' => $addon->url,
                 ];
             })->toArray();
             $request->merge(['addons' => $existingAddons]);

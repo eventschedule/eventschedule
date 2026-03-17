@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::table('tickets', function (Blueprint $table) {
             $table->string('image_url')->nullable()->after('description_html');
+            $table->string('url', 2000)->nullable()->after('image_url');
         });
     }
 
@@ -17,6 +18,7 @@ return new class extends Migration
     {
         Schema::table('tickets', function (Blueprint $table) {
             $table->dropColumn('image_url');
+            $table->dropColumn('url');
         });
     }
 };

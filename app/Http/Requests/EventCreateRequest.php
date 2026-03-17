@@ -17,6 +17,7 @@ class EventCreateRequest extends FormRequest
             'flyer_image_url' => ['image', 'max:2500'],
 
             'addons.*.image' => ['nullable', 'image', 'max:2500'],
+            'addons.*.url' => ['nullable', 'url', 'max:2000'],
         ];
     }
 }

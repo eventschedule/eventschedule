@@ -804,6 +804,7 @@ class EventRepo
                             'quantity' => $data['quantity'] ?? null,
                             'price' => $data['price'] ?? null,
                             'description' => $data['description'] ?? null,
+                            'url' => $data['url'] ?? null,
                         ]);
                         $addonIds[] = $addon->id;
                     }
@@ -814,6 +815,7 @@ class EventRepo
                         'quantity' => $data['quantity'] ?? null,
                         'price' => $data['price'] ?? null,
                         'description' => $data['description'] ?? null,
+                        'url' => $data['url'] ?? null,
                         'is_addon' => true,
                     ]);
                     $addonIds[] = $addon->id;

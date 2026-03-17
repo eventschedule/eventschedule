@@ -24,6 +24,9 @@ $addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && $st->ticket
 {{ __('messages.add_ons') }}
 @foreach ($addonTickets as $saleTicket)
 {{ $saleTicket->ticket->type ?: __('messages.add_on') }} x {{ $saleTicket->quantity }}
+@if ($saleTicket->ticket->url)
+{{ $saleTicket->ticket->url }}
+@endif
 @endforeach
 @endif
 

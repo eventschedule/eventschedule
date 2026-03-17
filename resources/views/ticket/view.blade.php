@@ -298,7 +298,16 @@
           <div class="space-y-[8px]">
             @foreach ($addonTickets as $saleTicket)
               <div class="flex items-center justify-between">
-                <span class="text-[14px] text-white print-text-dark font-medium">{{ $saleTicket->ticket->type ?: __('messages.add_on') }}</span>
+                <div>
+                  <span class="text-[14px] text-white print-text-dark font-medium">{{ $saleTicket->ticket->type ?: __('messages.add_on') }}</span>
+                  @if ($saleTicket->ticket->url)
+                    <br>
+                    <a href="{{ $saleTicket->ticket->url }}" target="_blank" rel="noopener noreferrer" class="text-[12px] text-blue-400 print:text-blue-600 hover:underline inline-flex items-center gap-1 break-all">
+                      {{ $saleTicket->ticket->url }}
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                  @endif
+                </div>
                 <span class="px-[12px] py-[4px] rounded-full bg-violet-500/20 print:bg-violet-100 text-violet-300 print:text-violet-700 text-[12px] font-semibold">
                   x{{ $saleTicket->quantity }}
                 </span>

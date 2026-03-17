@@ -28,6 +28,7 @@ class Ticket extends Model
         'custom_fields',
         'is_addon',
         'image_url',
+        'url',
     ];
 
     protected $casts = [
@@ -88,6 +89,7 @@ class Ticket extends Model
         $data['price'] = $this->price;
         $data['description'] = $this->description ? UrlUtils::convertUrlsToLinks($this->description_html ?? $this->description) : null;
         $data['image_url'] = $this->image_url ?: null;
+        $data['url'] = $this->url ?: null;
 
         $sold = $this->sold ? json_decode($this->sold, true) : [];
         $sold = $sold[$date] ?? 0;
