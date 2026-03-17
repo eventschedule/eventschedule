@@ -2961,6 +2961,28 @@
                                             <textarea v-model="addon.description" :name="`addons[${aIndex}][description]`" rows="2"
                                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm"></textarea>
                                         </div>
+                                        <div class="mt-3">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.image') }}</label>
+                                            <div v-if="addon.image_url" class="mb-2 relative inline-block">
+                                                <img :src="addon.image_url" :alt="addon.type" style="max-height: 80px" class="rounded-lg border border-gray-200 dark:border-gray-600" />
+                                                <button type="button" @click="removeAddonImage(aIndex)" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                </button>
+                                            </div>
+                                            <div v-if="!addon.image_url">
+                                                <button type="button" @click="$refs['addon_image_' + aIndex].click()"
+                                                    class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
+                                                    <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                    </svg>
+                                                    {{ __('messages.choose_file') }}
+                                                </button>
+                                            </div>
+                                            <input type="file" :ref="'addon_image_' + aIndex" :name="`addons[${aIndex}][image]`"
+                                                accept="image/png, image/jpeg, image/gif, image/webp" class="hidden"
+                                                @change="onAddonFileChange(aIndex, $event)" />
+                                            <input type="hidden" :name="`addons[${aIndex}][remove_image]`" :value="addon.remove_image ? 1 : 0" />
+                                        </div>
                                         <div class="mt-2 flex justify-between items-center">
                                             <input type="hidden" :name="`addons[${aIndex}][id]`" :value="addon.id">
                                             <div></div>
@@ -3880,6 +3902,8 @@
           quantity: addon.quantity ?? null,
           price: addon.price ?? null,
           description: addon.description || '',
+          image_url: addon.image_url || null,
+          remove_image: false,
         })),
         formSubmitAttempted: false,
         isSaving: false,
@@ -4615,10 +4639,23 @@
           quantity: null,
           price: null,
           description: '',
+          image_url: null,
+          remove_image: false,
         });
       },
       removeAddon(index) {
         this.addons.splice(index, 1);
+      },
+      removeAddonImage(aIndex) {
+        this.addons[aIndex].remove_image = true;
+        this.addons[aIndex].image_url = null;
+      },
+      onAddonFileChange(aIndex, event) {
+        var file = event.target.files[0];
+        if (file) {
+          this.addons[aIndex].image_url = URL.createObjectURL(file);
+          this.addons[aIndex].remove_image = false;
+        }
       },
       copyPromoLink(promoCode) {
         if (!promoCode.code) return;

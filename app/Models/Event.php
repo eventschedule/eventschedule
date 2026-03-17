@@ -1426,6 +1426,7 @@ class Event extends Model
                         'price' => $addon->price,
                         'quantity' => $addon->quantity,
                         'description' => $addon->description,
+                        'image_url' => $addon->image_url ?: null,
                     ];
                 })->values();
             }

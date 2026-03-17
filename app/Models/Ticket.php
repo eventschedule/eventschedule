@@ -27,6 +27,7 @@ class Ticket extends Model
         'sales_end_at',
         'custom_fields',
         'is_addon',
+        'image_url',
     ];
 
     protected $casts = [
@@ -50,6 +51,21 @@ class Ticket extends Model
         return $this->belongsTo(Event::class);
     }
 
+    public function getImageUrlAttribute($value)
+    {
+        if (! $value) {
+            return '';
+        }
+
+        if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$value;
+        } elseif (config('filesystems.default') == 'local') {
+            return url('/storage/'.$value);
+        } else {
+            return $value;
+        }
+    }
+
     public function updateSold($date, $quantity)
     {
         \DB::transaction(function () use ($date, $quantity) {
@@ -71,12 +87,13 @@ class Ticket extends Model
         $data['quantity'] = $this->quantity;
         $data['price'] = $this->price;
         $data['description'] = $this->description ? UrlUtils::convertUrlsToLinks($this->description_html ?? $this->description) : null;
+        $data['image_url'] = $this->image_url ?: null;
 
         $sold = $this->sold ? json_decode($this->sold, true) : [];
         $sold = $sold[$date] ?? 0;
 
         // Handle combined mode logic
-        if ($this->event && !$this->is_addon && $this->event->total_tickets_mode === 'combined' && $this->event->hasSameTicketQuantities()) {
+        if ($this->event && ! $this->is_addon && $this->event->total_tickets_mode === 'combined' && $this->event->hasSameTicketQuantities()) {
             $totalSold = $this->event->tickets->sum(function ($ticket) use ($date) {
                 $ticketSold = $ticket->sold ? json_decode($ticket->sold, true) : [];
 

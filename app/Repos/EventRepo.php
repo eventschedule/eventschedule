@@ -791,7 +791,7 @@ class EventRepo
             $addonData = $request->input('addons', []);
             $addonIds = [];
 
-            foreach ($addonData as $data) {
+            foreach ($addonData as $index => $data) {
                 if (empty($data['type'])) {
                     continue;
                 }
@@ -818,12 +818,85 @@ class EventRepo
                     ]);
                     $addonIds[] = $addon->id;
                 }
+
+                // Handle addon image removal
+                if (! empty($data['remove_image'])) {
+                    $rawImageUrl = $addon->getAttributes()['image_url'] ?? null;
+                    if ($rawImageUrl) {
+                        $path = $rawImageUrl;
+                        if (config('filesystems.default') == 'local') {
+                            $path = 'public/'.$path;
+                        }
+                        Storage::delete($path);
+                    }
+                    $addon->update(['image_url' => null]);
+                }
+
+                // Handle addon image upload
+                if ($request->hasFile("addons.{$index}.image")) {
+                    $file = $request->file("addons.{$index}.image");
+
+                    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                    $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                    $extension = strtolower($file->getClientOriginalExtension());
+                    if (! in_array($extension, $allowedExtensions) || ! in_array($file->getMimeType(), $allowedMimeTypes)) {
+                        throw ValidationException::withMessages([
+                            "addons.{$index}.image" => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp',
+                        ]);
+                    }
+
+                    // Delete old image if exists
+                    $rawImageUrl = $addon->getAttributes()['image_url'] ?? null;
+                    if ($rawImageUrl) {
+                        $path = $rawImageUrl;
+                        if (config('filesystems.default') == 'local') {
+                            $path = 'public/'.$path;
+                        }
+                        Storage::delete($path);
+                    }
+
+                    $filename = strtolower('addon_'.Str::random(32).'.'.$extension);
+                    $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+
+                    $addon->update(['image_url' => $filename]);
+                }
+            }
+
+            // Clean up images for addons being soft-deleted
+            $addonsToDelete = $event->addons()
+                ->whereNotIn('id', $addonIds)
+                ->whereNotNull('image_url')
+                ->get();
+            foreach ($addonsToDelete as $addonToDelete) {
+                $rawImageUrl = $addonToDelete->getAttributes()['image_url'] ?? null;
+                if ($rawImageUrl) {
+                    $path = $rawImageUrl;
+                    if (config('filesystems.default') == 'local') {
+                        $path = 'public/'.$path;
+                    }
+                    Storage::delete($path);
+                }
             }
 
             $event->addons()
                 ->whereNotIn('id', $addonIds)
                 ->update(['is_deleted' => true]);
         } else {
+            // Clean up images for all addons before soft-deleting
+            $addonsWithImages = $event->addons()
+                ->whereNotNull('image_url')
+                ->get();
+            foreach ($addonsWithImages as $addonToDelete) {
+                $rawImageUrl = $addonToDelete->getAttributes()['image_url'] ?? null;
+                if ($rawImageUrl) {
+                    $path = $rawImageUrl;
+                    if (config('filesystems.default') == 'local') {
+                        $path = 'public/'.$path;
+                    }
+                    Storage::delete($path);
+                }
+            }
+
             $event->addons()->update(['is_deleted' => true]);
         }
 

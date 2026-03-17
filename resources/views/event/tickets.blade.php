@@ -1027,10 +1027,14 @@
             <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.add_ons') }}</h3>
             <div v-for="(addon, aIndex) in addons" :key="addon.id" class="mb-3 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4 border-gray-300 dark:border-gray-500">
                 <div class="flex items-center justify-between">
-                    <div>
-                        <h4 class="text-base font-medium text-gray-900 dark:text-gray-100">@{{ addon.type }}</h4>
-                        <p v-if="addon.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="addon.description"></p>
-                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100"><template v-if="!addon.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(addon.price) }}</template></p>
+                    <div class="flex items-center gap-3">
+                        <img v-if="addon.image_url" :src="addon.image_url" :alt="addon.type"
+                            class="w-14 h-14 rounded-lg object-cover flex-shrink-0 border border-gray-200 dark:border-gray-600" />
+                        <div>
+                            <h4 class="text-base font-medium text-gray-900 dark:text-gray-100">@{{ addon.type }}</h4>
+                            <p v-if="addon.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="addon.description"></p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100"><template v-if="!addon.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(addon.price) }}</template></p>
+                        </div>
                     </div>
                     <div>
                         <p v-if="getAvailableQuantity(addon) === 0" class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>
