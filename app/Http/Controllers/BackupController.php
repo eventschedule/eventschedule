@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Services\BackupService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 class BackupController extends Controller
 {
@@ -317,11 +318,14 @@ class BackupController extends Controller
         ];
 
         if ($backupJob->isCompleted() && $backupJob->isExport() && $backupJob->hasDownload()) {
-            $response['download_url'] = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            $previousRootUrl = config('app.url');
+            URL::forceRootUrl(rtrim(app_url('/'), '/'));
+            $response['download_url'] = URL::temporarySignedRoute(
                 'backup.download',
                 $backupJob->file_expires_at,
                 ['backupJob' => $backupJob->id]
             );
+            URL::forceRootUrl($previousRootUrl);
             $response['expires_at'] = $backupJob->file_expires_at->toIso8601String();
         }
 

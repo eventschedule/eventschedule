@@ -89,11 +89,14 @@ class ProcessBackupExport implements ShouldQueue
             ]);
 
             // Send email
+            $previousRootUrl = config('app.url');
+            URL::forceRootUrl(rtrim(app_url('/'), '/'));
             $downloadUrl = URL::temporarySignedRoute(
                 'backup.download',
                 $expiresAt,
                 ['backupJob' => $job->id]
             );
+            URL::forceRootUrl($previousRootUrl);
 
             $scheduleNames = $roles->pluck('name')->toArray();
 

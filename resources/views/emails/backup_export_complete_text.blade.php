@@ -7,7 +7,7 @@
 - {{ $name }}
 @endforeach
 
-{{ __('messages.backup_download_button') }}: {{ $downloadUrl }}
+{{ __('messages.backup_download_button') }}: {!! $downloadUrl !!}
 
 {{ __('messages.backup_download_expires', ['date' => $expiresAt->format('F j, Y')]) }}
 

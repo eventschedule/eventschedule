@@ -62,7 +62,7 @@
 
             @if (! empty($schedule['subdomain']))
             <p style="margin-top: 15px; margin-bottom: 0;">
-                <a href="{{ config('app.hosted') ? 'https://' . $schedule['subdomain'] . '.' . config('app.domain') . '/schedule' : url('/' . $schedule['subdomain'] . '/schedule') }}" style="color: #4E81FA;">{{ __('messages.backup_view_schedule') }}</a>
+                <a href="{{ config('app.hosted') ? 'https://' . $schedule['subdomain'] . '.' . _base_domain() . '/schedule' : url('/' . $schedule['subdomain'] . '/schedule') }}" style="color: #4E81FA;">{{ __('messages.backup_view_schedule') }}</a>
             </p>
             @endif
             @endif
