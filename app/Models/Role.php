@@ -103,6 +103,7 @@ class Role extends Model implements MustVerifyEmail
         'custom_labels',
         'ai_style_instructions',
         'ai_content_instructions',
+        'hide_past_events',
     ];
 
     /**
@@ -133,6 +134,7 @@ class Role extends Model implements MustVerifyEmail
         'trial_reminder_sent_at' => 'datetime',
         'renewal_reminder_sent_at' => 'datetime',
         'custom_labels' => 'array',
+        'hide_past_events' => 'boolean',
     ];
 
     /**

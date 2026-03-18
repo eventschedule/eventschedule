@@ -112,6 +112,8 @@ return [
     'accept_requests_help_talent' => 'Permettre a d\'autres de demander a vous reserver.',
     'direct_registration' => 'Lien Direct vers l\'Inscription',
     'first_day_of_week' => 'Premier Jour de la Semaine',
+    'hide_past_events' => 'Masquer les Événements Passés',
+    'hide_past_events_help' => 'Lorsqu\'activé, les événements passés ne seront pas affichés sur le calendrier public.',
     'direct_registration_help' => 'Lorsqu\'activé, cliquer sur les événements du calendrier ou les graphiques d\'événements ouvrira l\'URL d\'inscription (pour les événements qui en ont une) au lieu de la page de détails de l\'événement.',
     'request_terms' => 'Conditions de demande',
     'enter_request_terms' => 'Entrez les termes et conditions pour les demandes d\'événements...',

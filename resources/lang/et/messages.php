@@ -120,6 +120,8 @@ return [
     'accept_requests_help_talent' => 'Lubage teistel teid broneerida.',
     'direct_registration' => 'Otsene link registreerimisele',
     'first_day_of_week' => 'Nädala Esimene Päev',
+    'hide_past_events' => 'Peida Möödunud Sündmused',
+    'hide_past_events_help' => 'Kui see on lubatud, ei kuvata möödunud sündmusi avalikus kalendris.',
     'direct_registration_help' => 'Kui see on lubatud, avatakse kalendris sündmustele klõpsates või sündmuste graafikates registreerimise URL (sündmuste puhul, millel see on) sündmuse üksikasjade lehe asemel.',
     'request_terms' => 'Tingimused taotluseks',
     'enter_request_terms' => 'Sisestage sündmusetaotluste nõuded ja tingimused...',

@@ -2695,6 +2695,14 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('first_day_of_week')" />
                             </div>
 
+                            <div class="mb-6">
+                                <x-toggle name="hide_past_events"
+                                    label="{{ __('messages.hide_past_events') }}"
+                                    checked="{{ old('hide_past_events', $role->hide_past_events) }}"
+                                    help="{{ __('messages.hide_past_events_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('hide_past_events')" />
+                            </div>
+
                         @if (isset($availableCurators) && $availableCurators->count() > 0 && !$role->isCurator())
                             <div class="mb-6">
                                 <x-input-label :value="__('messages.default_curator_schedules')" />

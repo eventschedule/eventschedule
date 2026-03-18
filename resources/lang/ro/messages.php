@@ -120,6 +120,8 @@ return [
     'accept_requests_help_talent' => 'Permite altora să solicite să te rezerve.',
     'direct_registration' => 'Link Direct către Înregistrare',
     'first_day_of_week' => 'Prima Zi a Săptămânii',
+    'hide_past_events' => 'Ascunde Evenimentele Trecute',
+    'hide_past_events_help' => 'Când este activat, evenimentele trecute nu vor fi afișate în calendarul public.',
     'direct_registration_help' => 'Când este activat, apăsarea pe evenimente din calendar sau din graficele de evenimente va deschide URL-ul de înregistrare (pentru evenimentele care au unul) în loc de pagina de detalii a evenimentului.',
     'request_terms' => 'Termeni pentru Cereri',
     'enter_request_terms' => 'Introduceți termenii și condițiile pentru cererile de evenimente...',

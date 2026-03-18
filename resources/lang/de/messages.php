@@ -464,6 +464,8 @@ return [
     'accept_requests_help_talent' => 'Erlauben Sie anderen, Sie zu buchen.',
     'direct_registration' => 'Direkt zur Anmeldung verlinken',
     'first_day_of_week' => 'Erster Wochentag',
+    'hide_past_events' => 'Vergangene Veranstaltungen ausblenden',
+    'hide_past_events_help' => 'Wenn aktiviert, werden vergangene Veranstaltungen nicht im öffentlichen Kalender angezeigt.',
     'direct_registration_help' => 'Wenn aktiviert, öffnet das Klicken auf Veranstaltungen im Kalender oder die Veranstaltungsgrafiken die Anmelde-URL (für Veranstaltungen, die eine haben) anstelle der Veranstaltungsdetailseite.',
     'request_terms' => 'Anfragebedingungen',
     'enter_request_terms' => 'Geben Sie die Bedingungen für Veranstaltungsanfragen ein...',

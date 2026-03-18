@@ -114,6 +114,8 @@ return [
     'accept_requests_help_talent' => 'Sta anderen toe om u te boeken.',
     'direct_registration' => 'Direct Linken naar Registratie',
     'first_day_of_week' => 'Eerste Dag van de Week',
+    'hide_past_events' => 'Verberg Afgelopen Evenementen',
+    'hide_past_events_help' => 'Wanneer ingeschakeld, worden afgelopen evenementen niet weergegeven op de openbare agenda.',
     'direct_registration_help' => 'Wanneer ingeschakeld, opent het klikken op evenementen in de kalender of de evenementafbeeldingen de registratie-URL (voor evenementen die er een hebben) in plaats van de evenementdetailpagina.',
     'request_terms' => 'Verzoek Voorwaarden',
     'enter_request_terms' => 'Voer voorwaarden in voor evenement verzoeken...',

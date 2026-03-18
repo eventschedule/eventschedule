@@ -12,12 +12,20 @@ return new class extends Migration
             $table->boolean('sell_after_start')->default(false);
             $table->boolean('show_unavailable_tickets')->default(false);
         });
+
+        Schema::table('roles', function (Blueprint $table) {
+            $table->boolean('hide_past_events')->default(false);
+        });
     }
 
     public function down(): void
     {
         Schema::table('events', function (Blueprint $table) {
             $table->dropColumn(['sell_after_start', 'show_unavailable_tickets']);
+        });
+
+        Schema::table('roles', function (Blueprint $table) {
+            $table->dropColumn('hide_past_events');
         });
     }
 };

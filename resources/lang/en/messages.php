@@ -120,6 +120,8 @@ return [
     'accept_requests_help_talent' => 'Allow others to request to book you.',
     'direct_registration' => 'Link Directly to Registration',
     'first_day_of_week' => 'First Day of Week',
+    'hide_past_events' => 'Hide Past Events',
+    'hide_past_events_help' => 'When enabled, past events will not be shown on the public schedule.',
     'direct_registration_help' => 'When enabled, clicking events on the calendar or the event graphics will open the registration URL (for events that have one) instead of the event detail page.',
     'request_terms' => 'Request Terms',
     'enter_request_terms' => 'Enter terms and conditions for event requests...',

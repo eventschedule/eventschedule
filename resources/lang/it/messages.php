@@ -117,6 +117,8 @@ return [
     'accept_requests_help_talent' => 'Consenti ad altri di richiedere di prenotarti.',
     'direct_registration' => 'Collegamento Diretto alla Registrazione',
     'first_day_of_week' => 'Primo Giorno della Settimana',
+    'hide_past_events' => 'Nascondi Eventi Passati',
+    'hide_past_events_help' => 'Quando abilitato, gli eventi passati non verranno mostrati nel calendario pubblico.',
     'direct_registration_help' => 'Quando abilitato, cliccando sugli eventi nel calendario o nelle grafiche degli eventi si aprirà l\'URL di registrazione (per gli eventi che ne hanno uno) invece della pagina dei dettagli dell\'evento.',
     'request_terms' => 'Termini di Richiesta',
     'enter_request_terms' => 'Inserisci i termini e le condizioni per le richieste di eventi...',

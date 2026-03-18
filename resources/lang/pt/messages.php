@@ -115,6 +115,8 @@ return [
     'accept_requests_help_talent' => 'Permita que outros solicitem reservar você.',
     'direct_registration' => 'Link Direto para Registro',
     'first_day_of_week' => 'Primeiro Dia da Semana',
+    'hide_past_events' => 'Ocultar Eventos Passados',
+    'hide_past_events_help' => 'Quando ativado, os eventos passados não serão exibidos no calendário público.',
     'direct_registration_help' => 'Quando ativado, clicar em eventos no calendário ou nos gráficos de eventos abrirá a URL de registro (para eventos que possuem uma) em vez da página de detalhes do evento.',
     'request_terms' => 'Termos de Solicitação',
     'enter_request_terms' => 'Digite os termos e condições para solicitações de eventos...',

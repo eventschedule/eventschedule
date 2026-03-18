@@ -418,7 +418,7 @@ class RoleController extends Controller
         $selectedGroup = null;
         // Support both path params and query params (backwards compatibility)
         $date = $date ?: ($request->date ? date('Y-m-d', strtotime($request->date)) : null);
-        if ($date && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        if ($date && ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
             $date = null;
         }
         $eventIdParam = $id ? UrlUtils::decodeId($id) : ($request->id ? UrlUtils::decodeId($request->id) : null);
@@ -641,7 +641,7 @@ class RoleController extends Controller
         // Fetch past non-recurring events only for graphic mode (otherwise loaded via Ajax)
         $pastEvents = collect();
         $hasMorePastEvents = false;
-        if (request()->graphic) {
+        if (request()->graphic && ! $role->hide_past_events) {
             if ($role->isCurator()) {
                 $pastEvents = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
                     ->where('starts_at', '<', Carbon::now('UTC'))
@@ -833,6 +833,10 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->with('groups')->first();
 
         if (! $role || ! $role->isClaimed()) {
+            return response()->json(['events' => [], 'has_more' => false]);
+        }
+
+        if ($role->hide_past_events) {
             return response()->json(['events' => [], 'has_more' => false]);
         }
 
@@ -1043,48 +1047,53 @@ class RoleController extends Controller
                 ->get();
         }
 
-        if ($role->isCurator()) {
-            $pastEvents = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->where('starts_at', '<', Carbon::now('UTC'))
-                ->whereNull('days_of_week')
-                ->whereIn('id', function ($query) use ($role) {
-                    $query->select('event_id')
-                        ->from('event_role')
-                        ->where('role_id', $role->id)
-                        ->where('is_accepted', true);
-                })
-                ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
-                    $q->where(function ($q) use ($unlockedEventIds) {
-                        $q->where('is_private', false);
-                        if ($unlockedEventIds) {
-                            $q->orWhereIn('id', $unlockedEventIds);
-                        }
-                    });
-                })
-                ->orderByDesc('starts_at')
-                ->limit(51)
-                ->get();
-        } else {
-            $pastEvents = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->where('starts_at', '<', Carbon::now('UTC'))
-                ->whereNull('days_of_week')
-                ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
-                ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
-                    $q->where(function ($q) use ($unlockedEventIds) {
-                        $q->where('is_private', false);
-                        if ($unlockedEventIds) {
-                            $q->orWhereIn('id', $unlockedEventIds);
-                        }
-                    });
-                })
-                ->orderByDesc('starts_at')
-                ->limit(51)
-                ->get();
-        }
+        $pastEvents = collect();
+        $hasMorePastEvents = false;
 
-        $hasMorePastEvents = $pastEvents->count() > 50;
-        if ($hasMorePastEvents) {
-            $pastEvents = $pastEvents->take(50);
+        if (! $role->hide_past_events) {
+            if ($role->isCurator()) {
+                $pastEvents = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
+                    ->where('starts_at', '<', Carbon::now('UTC'))
+                    ->whereNull('days_of_week')
+                    ->whereIn('id', function ($query) use ($role) {
+                        $query->select('event_id')
+                            ->from('event_role')
+                            ->where('role_id', $role->id)
+                            ->where('is_accepted', true);
+                    })
+                    ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                        $q->where(function ($q) use ($unlockedEventIds) {
+                            $q->where('is_private', false);
+                            if ($unlockedEventIds) {
+                                $q->orWhereIn('id', $unlockedEventIds);
+                            }
+                        });
+                    })
+                    ->orderByDesc('starts_at')
+                    ->limit(51)
+                    ->get();
+            } else {
+                $pastEvents = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
+                    ->where('starts_at', '<', Carbon::now('UTC'))
+                    ->whereNull('days_of_week')
+                    ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
+                    ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                        $q->where(function ($q) use ($unlockedEventIds) {
+                            $q->where('is_private', false);
+                            if ($unlockedEventIds) {
+                                $q->orWhereIn('id', $unlockedEventIds);
+                            }
+                        });
+                    })
+                    ->orderByDesc('starts_at')
+                    ->limit(51)
+                    ->get();
+            }
+
+            $hasMorePastEvents = $pastEvents->count() > 50;
+            if ($hasMorePastEvents) {
+                $pastEvents = $pastEvents->take(50);
+            }
         }
 
         return $this->buildCalendarResponse($events, $pastEvents, $hasMorePastEvents, $role, $subdomain, (int) $month, (int) $year, $timezone, $role->first_day_of_week ?? 0);
