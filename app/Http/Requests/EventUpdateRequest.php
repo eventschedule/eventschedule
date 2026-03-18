@@ -34,6 +34,8 @@ class EventUpdateRequest extends FormRequest
             'event_sponsor_names.*' => ['nullable', 'string', 'max:100'],
             'event_sponsor_urls.*' => ['nullable', 'url', 'max:500'],
             'event_sponsor_tiers.*' => ['nullable', 'string', 'in:gold,silver,bronze'],
+
+            'existing_event_sponsors' => ['nullable', 'string', 'json'],
         ];
     }
 }

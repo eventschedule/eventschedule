@@ -3347,7 +3347,7 @@
                                                     <x-input-label :value="__('messages.sponsor_tier')" />
                                                     <select id="event_sponsor_tier_input" v-model="sponsorForm.tier"
                                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm">
-                                                        <option value="">—</option>
+                                                        <option value="">-</option>
                                                         <option value="gold">{{ __('messages.gold') }}</option>
                                                         <option value="silver">{{ __('messages.silver') }}</option>
                                                         <option value="bronze">{{ __('messages.bronze') }}</option>
@@ -4049,6 +4049,7 @@
         sponsorLogoPreview: null,
         sponsorLogoFile: null,
         editingSponsorIndex: -1,
+        eventSponsorSortableInstance: null,
         eventSponsorFileCounter: 0,
         eventSponsors: @json($eventSponsorsWithUrls),
         promoCodes: (() => {
@@ -4264,7 +4265,10 @@
       initEventSponsorSortable() {
         var el = document.getElementById('event-sponsors-list');
         if (el && typeof Sortable !== 'undefined') {
-          Sortable.create(el, {
+          if (this.eventSponsorSortableInstance) {
+            this.eventSponsorSortableInstance.destroy();
+          }
+          this.eventSponsorSortableInstance = Sortable.create(el, {
             handle: '.drag-handle',
             animation: 150,
             ghostClass: 'opacity-50',

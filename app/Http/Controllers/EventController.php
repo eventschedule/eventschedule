@@ -459,6 +459,7 @@ class EventController extends Controller
 
         // Reset fields that shouldn't be cloned
         $clonedEventData['flyer_image_url'] = null;
+        $clonedEventData['sponsor_logos'] = null;
 
         // Clone tickets (reset sold quantities)
         $clonedTickets = [];
