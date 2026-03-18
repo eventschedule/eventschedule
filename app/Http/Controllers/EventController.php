@@ -298,6 +298,8 @@ class EventController extends Controller
                 $event->country_code_phone = $defaultTickets['country_code_phone'] ?? false;
                 $event->individual_tickets = $defaultTickets['individual_tickets'] ?? false;
                 $event->individual_ticket_fields = $defaultTickets['individual_ticket_fields'] ?? false;
+                $event->sell_after_start = $defaultTickets['sell_after_start'] ?? false;
+                $event->show_unavailable_tickets = $defaultTickets['show_unavailable_tickets'] ?? false;
                 $event->custom_fields = $defaultTickets['custom_fields'] ?? null;
                 $event->tickets = $defaultTickets['tickets'] ?? [new Ticket];
                 $event->addons = $defaultTickets['addons'] ?? [];
@@ -706,6 +708,8 @@ class EventController extends Controller
                 'country_code_phone' => $event->country_code_phone,
                 'individual_tickets' => $event->individual_tickets,
                 'individual_ticket_fields' => $event->individual_ticket_fields,
+                'sell_after_start' => $event->sell_after_start,
+                'show_unavailable_tickets' => $event->show_unavailable_tickets,
                 'custom_fields' => $event->custom_fields,
                 'tickets' => $event->tickets->map(function ($ticket) {
                     return [
@@ -969,6 +973,8 @@ class EventController extends Controller
                 'country_code_phone' => $event->country_code_phone,
                 'individual_tickets' => $event->individual_tickets,
                 'individual_ticket_fields' => $event->individual_ticket_fields,
+                'sell_after_start' => $event->sell_after_start,
+                'show_unavailable_tickets' => $event->show_unavailable_tickets,
                 'custom_fields' => $event->custom_fields,
                 'tickets' => $event->tickets->map(function ($ticket) {
                     return [

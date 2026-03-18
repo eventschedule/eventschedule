@@ -61,6 +61,8 @@ class Event extends Model
         'country_code_phone',
         'individual_tickets',
         'individual_ticket_fields',
+        'sell_after_start',
+        'show_unavailable_tickets',
         'sponsor_mode',
         'sponsor_logos',
     ];
@@ -86,6 +88,8 @@ class Event extends Model
         'country_code_phone' => 'boolean',
         'individual_tickets' => 'boolean',
         'individual_ticket_fields' => 'boolean',
+        'sell_after_start' => 'boolean',
+        'show_unavailable_tickets' => 'boolean',
     ];
 
     protected static function boot()
@@ -874,20 +878,27 @@ class Event extends Model
     {
         // For recurring events, check if the specific occurrence is in the past
         if ($this->days_of_week && $date) {
-            $startDateTime = $this->getStartDateTime($date, true);
-            if ($startDateTime->isPast()) {
+            if ($this->sell_after_start) {
+                if ($this->getEndDateTime($date, true)->isPast()) {
+                    return false;
+                }
+            } elseif ($this->getStartDateTime($date, true)->isPast()) {
                 return false;
             }
         }
 
         // For non-recurring events, check if the event start time is in the past
         if (! $this->days_of_week && $this->starts_at) {
-            if (Carbon::parse($this->starts_at)->isPast()) {
+            if ($this->sell_after_start) {
+                if ($this->getEndDateTime(null, true)->isPast()) {
+                    return false;
+                }
+            } elseif (Carbon::parse($this->starts_at)->isPast()) {
                 return false;
             }
         }
 
-        if ($this->tickets->isNotEmpty() && $this->allTicketSalesEnded()) {
+        if ($this->tickets->isNotEmpty() && $this->allTicketSalesEnded() && ! $this->show_unavailable_tickets) {
             return false;
         }
 

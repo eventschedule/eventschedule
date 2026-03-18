@@ -368,8 +368,14 @@ class ApiSaleController extends Controller
         }
 
         // Check if non-recurring event is in the past
-        if (! $event->days_of_week && $event->starts_at && Carbon::parse($event->starts_at)->isPast()) {
-            return response()->json(['error' => 'Cannot sell tickets for events in the past'], 422);
+        if (! $event->days_of_week && $event->starts_at) {
+            if ($event->sell_after_start) {
+                if ($event->getEndDateTime(null, true)->isPast()) {
+                    return response()->json(['error' => 'Cannot sell tickets for events in the past'], 422);
+                }
+            } elseif (Carbon::parse($event->starts_at)->isPast()) {
+                return response()->json(['error' => 'Cannot sell tickets for events in the past'], 422);
+            }
         }
 
         // Verify event has tickets enabled and is Pro
@@ -422,8 +428,11 @@ class ApiSaleController extends Controller
 
         // Check if recurring event occurrence is in the past
         if ($event->days_of_week) {
-            $startDateTime = $event->getStartDateTime($eventDate, true);
-            if ($startDateTime->isPast()) {
+            if ($event->sell_after_start) {
+                if ($event->getEndDateTime($eventDate, true)->isPast()) {
+                    return response()->json(['error' => 'Cannot sell tickets for events in the past'], 422);
+                }
+            } elseif ($event->getStartDateTime($eventDate, true)->isPast()) {
                 return response()->json(['error' => 'Cannot sell tickets for events in the past'], 422);
             }
         }

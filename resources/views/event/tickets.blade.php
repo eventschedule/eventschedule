@@ -23,12 +23,13 @@
             data() {
                 return {
                     createAccount: @json((bool) old('create_account', false)),
-                    tickets: @json($event->tickets->filter(fn($t) => !$t->isSalesEnded())->values()->map(function ($ticket) {
+                    tickets: @json($event->tickets->filter(fn($t) => !$t->isSalesEnded() || $event->show_unavailable_tickets)->values()->map(function ($ticket) use ($date) {
                         $data = $ticket->toData($date ?? request()->date);
                         $data['selectedQty'] = min((int) (old('tickets')[$data['id']] ?? 0), $data['quantity']);
                         $data['custom_fields'] = $ticket->custom_fields ?? [];
                         $data['custom_values'] = (object) (old('ticket_custom_values')[$data['id']] ?? []);
                         $data['multiselect_values'] = (object) [];
+                        $data['sales_ended'] = $ticket->isSalesEnded();
                         return $data;
                     })),
                     eventCustomFields: @json($event->custom_fields ?? []),
@@ -210,7 +211,9 @@
                 },
                 isAllSoldOut() {
                     if (this.allSoldOut) return true;
-                    return this.tickets.length > 0 && this.tickets.every(t => this.getAvailableQuantity(t) === 0);
+                    const activeTickets = this.tickets.filter(t => !t.sales_ended);
+                    if (activeTickets.length === 0) return this.tickets.length > 0;
+                    return activeTickets.every(t => this.getAvailableQuantity(t) === 0);
                 },
                 storageKey() {
                     return 'checkout_form_' + @json(\App\Utils\UrlUtils::encodeId($event->id));
@@ -931,7 +934,8 @@
             </div>
         </div>
 
-        <div v-if="!isPaymentLinkMode && !isAllSoldOut" v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-6 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4" style="border-inline-start-color: {{ $accentColor }}">
+        <template v-for="(ticket, index) in tickets" :key="ticket.id">
+        <div v-if="!isPaymentLinkMode && (!isAllSoldOut || ticket.sales_ended)" class="mb-6 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4" :class="{'opacity-50': ticket.sales_ended}" style="border-inline-start-color: {{ $accentColor }}">
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ ticket.type }}</h3>
@@ -939,7 +943,8 @@
                     <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium text-gray-900 dark:text-gray-100"><template v-if="!ticket.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(ticket.price) }}</template></p>
                 </div>
                 <div>
-                    <p v-if="getAvailableQuantity(ticket) === 0" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>
+                    <p v-if="ticket.sales_ended" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sales_ended') }}</p>
+                    <p v-else-if="getAvailableQuantity(ticket) === 0" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>
                     <p v-else>
                     <select
                         v-model="ticket.selectedQty"
@@ -1021,6 +1026,7 @@
                 </div>
             </div>
         </div>
+        </template>
 
         <!-- Add-ons -->
         <div v-if="addons.length > 0 && totalSelectedTickets > 0 && !isPaymentLinkMode && !isAllSoldOut" class="mb-6">

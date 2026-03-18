@@ -2806,6 +2806,40 @@
                                         <input type="hidden" name="expire_unpaid_tickets" value="0"/>
                                     </div>
                                 </div>
+
+                                <div class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input id="sell_after_start_checkbox" type="checkbox"
+                                                v-model="event.sell_after_start"
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="sell_after_start_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.sell_after_start') }}
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.sell_after_start_help') }}</p>
+                                    <input type="hidden" name="sell_after_start" :value="event.sell_after_start ? 1 : 0">
+                                </div>
+
+                                <div class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input id="show_unavailable_tickets_checkbox" type="checkbox"
+                                                v-model="event.show_unavailable_tickets"
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="show_unavailable_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.show_unavailable_tickets') }}
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.show_unavailable_tickets_help') }}</p>
+                                    <input type="hidden" name="show_unavailable_tickets" :value="event.show_unavailable_tickets ? 1 : 0">
+                                </div>
                                 </div>
 
                                 <!-- Promo Codes Tab -->
@@ -3987,6 +4021,8 @@
           country_code_phone: {{ $event->country_code_phone ? 'true' : 'false' }},
           individual_tickets: {{ $event->individual_tickets ? 'true' : 'false' }},
           individual_ticket_fields: {{ $event->individual_ticket_fields ? 'true' : 'false' }},
+          sell_after_start: {{ $event->sell_after_start ? 'true' : 'false' }},
+          show_unavailable_tickets: {{ $event->show_unavailable_tickets ? 'true' : 'false' }},
           sponsor_mode: @json($event->sponsor_mode ?? 'default'),
         },
         isPro: @json($role->isPro()),

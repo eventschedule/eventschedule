@@ -448,6 +448,8 @@
                                 <li><strong class="text-gray-900 dark:text-white">Terms URL:</strong> Link to your terms and conditions. Buyers must agree before purchasing.</li>
                                 <li><strong class="text-gray-900 dark:text-white">Ticket sales end:</strong> Set a date and time per ticket type when sales automatically stop. Use this to create time-based pricing tiers (e.g. early bird ending before regular tickets).</li>
                                 <li><strong class="text-gray-900 dark:text-white">Expire unpaid tickets:</strong> Automatically release unpaid tickets after a set number of hours, making them available for other buyers</li>
+                                <li><strong class="text-gray-900 dark:text-white">Allow sales after event starts:</strong> Continue selling tickets until the event ends (start time plus duration) instead of stopping at the start time</li>
+                                <li><strong class="text-gray-900 dark:text-white">Show unavailable tickets:</strong> Display sold out and expired ticket types to visitors in a disabled state, so they can see what was offered</li>
                             </ul>
                         </section>
 
