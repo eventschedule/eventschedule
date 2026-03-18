@@ -9,6 +9,7 @@ use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
 {
@@ -60,6 +61,8 @@ class Event extends Model
         'country_code_phone',
         'individual_tickets',
         'individual_ticket_fields',
+        'sponsor_mode',
+        'sponsor_logos',
     ];
 
     protected $hidden = ['event_password'];
@@ -216,6 +219,20 @@ class Event extends Model
                 DB::table('parsed_event_urls')
                     ->where('url', $event->registration_url)
                     ->delete();
+            }
+
+            // Clean up event sponsor logo files
+            if ($event->sponsor_logos) {
+                $sponsors = json_decode($event->sponsor_logos, true) ?: [];
+                foreach ($sponsors as $sponsor) {
+                    if (! empty($sponsor['logo']) && ! str_starts_with($sponsor['logo'], 'demo_')) {
+                        $path = $sponsor['logo'];
+                        if (config('filesystems.default') == 'local') {
+                            $path = 'public/'.$path;
+                        }
+                        Storage::delete($path);
+                    }
+                }
             }
 
             // Sync deletion to Google Calendar and CalDAV for all roles that have sync enabled
@@ -1017,6 +1034,60 @@ class Event extends Model
         }
 
         return '';
+    }
+
+    public function getSponsorLogos(): array
+    {
+        if (! $this->sponsor_logos) {
+            return [];
+        }
+
+        $sponsors = json_decode($this->sponsor_logos, true);
+
+        if (! is_array($sponsors)) {
+            return [];
+        }
+
+        $useTranslation = session()->has('translate') || request()->lang == 'en';
+
+        foreach ($sponsors as &$sponsor) {
+            if (! empty($sponsor['logo'])) {
+                $filename = $sponsor['logo'];
+
+                if (str_starts_with($filename, 'demo_')) {
+                    $sponsor['logo_url'] = url('/images/demo/'.$filename);
+                } elseif (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                    $sponsor['logo_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
+                } elseif (config('filesystems.default') == 'local') {
+                    $sponsor['logo_url'] = url('/storage/'.$filename);
+                } else {
+                    $sponsor['logo_url'] = $filename;
+                }
+            } else {
+                $sponsor['logo_url'] = '';
+            }
+
+            if ($useTranslation && ! empty($sponsor['name_en'])) {
+                $sponsor['display_name'] = $sponsor['name_en'];
+            } else {
+                $sponsor['display_name'] = $sponsor['name'] ?? '';
+            }
+        }
+
+        return $sponsors;
+    }
+
+    public function getEffectiveSponsorLogos($role): array
+    {
+        if ($this->sponsor_mode === 'none') {
+            return [];
+        }
+
+        if ($this->sponsor_mode === 'custom') {
+            return $this->getSponsorLogos();
+        }
+
+        return $role->getSponsorLogos();
     }
 
     public function getGuestUrl($subdomain = false, $date = null, $useCustomDomain = false, $includeId = true)

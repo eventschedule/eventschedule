@@ -3128,6 +3128,13 @@
                                         class="settings-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="custom_fields">
                                         {{ __('messages.custom_fields') }}
                                     </button>
+                                    @if ($role->isPro())
+                                    <button type="button" @click="activeSettingsTab = 'sponsors'"
+                                        :class="activeSettingsTab === 'sponsors' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
+                                        class="settings-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="sponsors">
+                                        {{ __('messages.sponsors') }}
+                                    </button>
+                                    @endif
                                     <button type="button" @click="activeSettingsTab = 'privacy'"
                                         :class="activeSettingsTab === 'privacy' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
                                         class="settings-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="privacy">
@@ -3233,6 +3240,147 @@
                                 </x-upgrade-prompt>
                                 @endif
                             </div>
+
+                            <!-- Sponsors Tab -->
+                            @if ($role->isPro())
+                            <div v-show="activeSettingsTab === 'sponsors'">
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.event_sponsor_mode_help') }}</p>
+
+                                <input type="hidden" name="sponsor_mode" :value="event.sponsor_mode">
+
+                                <div class="space-y-2 mb-6">
+                                    <label class="flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors"
+                                        :class="event.sponsor_mode === 'default' ? 'border-[var(--brand-blue)] bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
+                                        @click="event.sponsor_mode = 'default'">
+                                        <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                                            :class="event.sponsor_mode === 'default' ? 'border-[var(--brand-blue)]' : 'border-gray-400'">
+                                            <div v-show="event.sponsor_mode === 'default'" class="w-2 h-2 rounded-full bg-[var(--brand-blue)]"></div>
+                                        </div>
+                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.use_schedule_default') }}</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors"
+                                        :class="event.sponsor_mode === 'none' ? 'border-[var(--brand-blue)] bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
+                                        @click="event.sponsor_mode = 'none'">
+                                        <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                                            :class="event.sponsor_mode === 'none' ? 'border-[var(--brand-blue)]' : 'border-gray-400'">
+                                            <div v-show="event.sponsor_mode === 'none'" class="w-2 h-2 rounded-full bg-[var(--brand-blue)]"></div>
+                                        </div>
+                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.show_no_sponsors') }}</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors"
+                                        :class="event.sponsor_mode === 'custom' ? 'border-[var(--brand-blue)] bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
+                                        @click="event.sponsor_mode = 'custom'">
+                                        <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                                            :class="event.sponsor_mode === 'custom' ? 'border-[var(--brand-blue)]' : 'border-gray-400'">
+                                            <div v-show="event.sponsor_mode === 'custom'" class="w-2 h-2 rounded-full bg-[var(--brand-blue)]"></div>
+                                        </div>
+                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.customize_sponsors') }}</span>
+                                    </label>
+                                </div>
+
+                                <div v-show="event.sponsor_mode === 'custom'">
+                                    <input type="hidden" name="existing_event_sponsors" :value="JSON.stringify(eventSponsors.filter(s => !s.newFile))">
+                                    <div id="new-event-sponsor-inputs-container"></div>
+
+                                    <!-- Sponsor list -->
+                                    <div id="event-sponsors-list" class="space-y-3 mb-6">
+                                        <div v-for="(sponsor, index) in eventSponsors" :key="index"
+                                            class="sponsor-item flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
+                                            :class="{'ring-2 ring-[var(--brand-blue)]': editingSponsorIndex === index}">
+                                            <div class="drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0">
+                                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                                                </svg>
+                                            </div>
+                                            <div class="flex-shrink-0 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden" style="width: 120px; height: 80px;">
+                                                <img v-if="sponsor.logo_url" :src="sponsor.logo_url" :alt="sponsor.name || ''" class="max-w-full max-h-full object-contain" />
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">@{{ sponsor.name || '' }}</div>
+                                                <span v-if="sponsor.tier === 'gold'" class="inline-block text-xs px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">{{ __('messages.gold') }}</span>
+                                                <span v-if="sponsor.tier === 'silver'" class="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300">{{ __('messages.silver') }}</span>
+                                                <span v-if="sponsor.tier === 'bronze'" class="inline-block text-xs px-1.5 py-0.5 rounded bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300">{{ __('messages.bronze') }}</span>
+                                                <div v-if="sponsor.url" class="text-xs text-gray-500 dark:text-gray-400 truncate">@{{ sponsor.url }}</div>
+                                            </div>
+                                            <button type="button" @click="editEventSponsor(index)" class="flex-shrink-0 text-gray-400 hover:text-[var(--brand-blue)] transition-colors">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+                                            <button type="button" @click="removeEventSponsor(index)" class="flex-shrink-0 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Limit message -->
+                                    <div v-if="eventSponsors.length >= 12" class="mb-4">
+                                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                            <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                </svg>
+                                                <span>{{ __('messages.max_sponsors_reached') }}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Add/Edit sponsor form -->
+                                    <div v-if="eventSponsors.length < 12 || editingSponsorIndex >= 0">
+                                        <div class="p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg border-dashed">
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                                <div>
+                                                    <x-input-label for="event_sponsor_name_input" :value="__('messages.sponsor_name')" />
+                                                    <input type="text" id="event_sponsor_name_input" maxlength="100" v-model="sponsorForm.name"
+                                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
+                                                </div>
+                                                <div>
+                                                    <x-input-label for="event_sponsor_url_input" :value="__('messages.sponsor_url')" />
+                                                    <input type="url" id="event_sponsor_url_input" maxlength="500" v-model="sponsorForm.url"
+                                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
+                                                </div>
+                                            </div>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                                <div>
+                                                    <x-input-label :value="__('messages.sponsor_tier')" />
+                                                    <select id="event_sponsor_tier_input" v-model="sponsorForm.tier"
+                                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm">
+                                                        <option value="">—</option>
+                                                        <option value="gold">{{ __('messages.gold') }}</option>
+                                                        <option value="silver">{{ __('messages.silver') }}</option>
+                                                        <option value="bronze">{{ __('messages.bronze') }}</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.logo') }} <span v-show="editingSponsorIndex < 0">*</span></label>
+                                                    <input type="file" ref="eventSponsorLogoInput" accept="image/*" @change="previewEventSponsorLogo"
+                                                        class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--brand-button-bg)] file:text-white hover:file:bg-[var(--brand-button-bg-hover)]" />
+                                                    <img v-if="sponsorLogoPreview" :src="sponsorLogoPreview" alt="Logo Preview" style="max-height:120px;" class="mt-2 rounded-lg border border-gray-200 dark:border-gray-600" />
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <button type="button" @click="addOrSaveEventSponsor"
+                                                    class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[var(--brand-button-bg)] rounded-lg hover:bg-[var(--brand-button-bg-hover)] transition-colors">
+                                                    <svg v-if="editingSponsorIndex < 0" class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                                    </svg>
+                                                    <svg v-else class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                    <span>@{{ editingSponsorIndex >= 0 ? @json(__('messages.save')) : @json(__('messages.add_sponsor')) }}</span>
+                                                </button>
+                                                <button v-if="editingSponsorIndex >= 0" type="button" @click="cancelEditEventSponsor"
+                                                    class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                                    {{ __('messages.cancel') }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
 
                             <!-- Privacy Tab -->
                             <div v-show="activeSettingsTab === 'privacy'">
@@ -3797,6 +3945,24 @@
     @endif
 
 
+@php
+    $eventSponsorsWithUrls = collect(json_decode($event->sponsor_logos ?? '[]', true) ?: [])->map(function ($s) {
+        $logoUrl = '';
+        if (!empty($s['logo'])) {
+            if (str_starts_with($s['logo'], 'demo_')) {
+                $logoUrl = url('/images/demo/' . $s['logo']);
+            } elseif (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                $logoUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $s['logo'];
+            } elseif (config('filesystems.default') == 'local') {
+                $logoUrl = url('/storage/' . $s['logo']);
+            } else {
+                $logoUrl = $s['logo'];
+            }
+        }
+        return array_merge($s, ['logo_url' => $logoUrl]);
+    })->values()->toArray();
+@endphp
+
 </div>
 
 <script {!! nonce_attr() !!}>
@@ -3821,6 +3987,7 @@
           country_code_phone: {{ $event->country_code_phone ? 'true' : 'false' }},
           individual_tickets: {{ $event->individual_tickets ? 'true' : 'false' }},
           individual_ticket_fields: {{ $event->individual_ticket_fields ? 'true' : 'false' }},
+          sponsor_mode: @json($event->sponsor_mode ?? 'default'),
         },
         isPro: @json($role->isPro()),
         ticketMode: @json($event->tickets_enabled ? 'tickets' : ($event->rsvp_enabled ? 'rsvp' : 'external')),
@@ -3878,6 +4045,12 @@
         activeTicketTab: @json($event->rsvp_enabled ? 'options' : 'tickets'),
         activeSettingsTab: 'custom_fields',
         activeEngagementTab: 'fan_content',
+        sponsorForm: { name: '', url: '', tier: '' },
+        sponsorLogoPreview: null,
+        sponsorLogoFile: null,
+        editingSponsorIndex: -1,
+        eventSponsorFileCounter: 0,
+        eventSponsors: @json($eventSponsorsWithUrls),
         promoCodes: (() => {
           var pcs = @json($event->promoCodes ?? []).map(pc => ({
             ...pc,
@@ -3973,6 +4146,136 @@
       }
     },
     methods: {
+      previewEventSponsorLogo(e) {
+        var file = e.target.files[0];
+        if (!file) {
+          this.sponsorLogoPreview = null;
+          this.sponsorLogoFile = null;
+          return;
+        }
+        this.sponsorLogoFile = file;
+        var reader = new FileReader();
+        reader.onload = (ev) => { this.sponsorLogoPreview = ev.target.result; };
+        reader.readAsDataURL(file);
+      },
+      addOrSaveEventSponsor() {
+        var name = (this.sponsorForm.name || '').trim();
+        var url = (this.sponsorForm.url || '').trim();
+        var tier = this.sponsorForm.tier || '';
+
+        if (this.editingSponsorIndex >= 0) {
+          // Editing existing
+          var sponsor = this.eventSponsors[this.editingSponsorIndex];
+          sponsor.name = name;
+          sponsor.url = url || null;
+          sponsor.tier = tier;
+          if (this.sponsorLogoFile) {
+            sponsor.logo_url = this.sponsorLogoPreview;
+            sponsor.newFile = this.sponsorLogoFile;
+          }
+          this.cancelEditEventSponsor();
+        } else {
+          // Adding new
+          if (!this.sponsorLogoFile) return;
+          if (this.eventSponsors.length >= 12) return;
+          this.eventSponsors.push({
+            name: name,
+            logo: '',
+            logo_url: this.sponsorLogoPreview,
+            url: url || null,
+            tier: tier,
+            newFile: this.sponsorLogoFile,
+          });
+          this.resetSponsorForm();
+        }
+        this.syncEventSponsorInputs();
+      },
+      editEventSponsor(index) {
+        this.editingSponsorIndex = index;
+        var sponsor = this.eventSponsors[index];
+        this.sponsorForm.name = sponsor.name || '';
+        this.sponsorForm.url = sponsor.url || '';
+        this.sponsorForm.tier = sponsor.tier || '';
+        this.sponsorLogoPreview = null;
+        this.sponsorLogoFile = null;
+        if (this.$refs.eventSponsorLogoInput) this.$refs.eventSponsorLogoInput.value = '';
+      },
+      removeEventSponsor(index) {
+        if (this.editingSponsorIndex === index) {
+          this.cancelEditEventSponsor();
+        } else if (this.editingSponsorIndex > index) {
+          this.editingSponsorIndex--;
+        }
+        this.eventSponsors.splice(index, 1);
+        this.syncEventSponsorInputs();
+      },
+      cancelEditEventSponsor() {
+        this.editingSponsorIndex = -1;
+        this.resetSponsorForm();
+      },
+      resetSponsorForm() {
+        this.sponsorForm = { name: '', url: '', tier: '' };
+        this.sponsorLogoPreview = null;
+        this.sponsorLogoFile = null;
+        if (this.$refs.eventSponsorLogoInput) this.$refs.eventSponsorLogoInput.value = '';
+      },
+      syncEventSponsorInputs() {
+        // Rebuild hidden file inputs for new/changed logos
+        var container = document.getElementById('new-event-sponsor-inputs-container');
+        if (!container) return;
+        container.innerHTML = '';
+        var existing = [];
+        var newIdx = 0;
+        this.eventSponsors.forEach((sponsor) => {
+          if (sponsor.newFile) {
+            var dt = new DataTransfer();
+            dt.items.add(sponsor.newFile);
+            var fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.name = 'event_sponsor_logos[' + newIdx + ']';
+            fileInput.style.display = 'none';
+            fileInput.files = dt.files;
+            container.appendChild(fileInput);
+
+            var nameInput = document.createElement('input');
+            nameInput.type = 'hidden';
+            nameInput.name = 'event_sponsor_names[' + newIdx + ']';
+            nameInput.value = sponsor.name || '';
+            container.appendChild(nameInput);
+
+            var urlInput = document.createElement('input');
+            urlInput.type = 'hidden';
+            urlInput.name = 'event_sponsor_urls[' + newIdx + ']';
+            urlInput.value = sponsor.url || '';
+            container.appendChild(urlInput);
+
+            var tierInput = document.createElement('input');
+            tierInput.type = 'hidden';
+            tierInput.name = 'event_sponsor_tiers[' + newIdx + ']';
+            tierInput.value = sponsor.tier || '';
+            container.appendChild(tierInput);
+            newIdx++;
+          } else {
+            existing.push({ name: sponsor.name || '', logo: sponsor.logo || '', url: sponsor.url || null, tier: sponsor.tier || '' });
+          }
+        });
+        // Update the hidden existing sponsors input via Vue data (bound in template)
+      },
+      initEventSponsorSortable() {
+        var el = document.getElementById('event-sponsors-list');
+        if (el && typeof Sortable !== 'undefined') {
+          Sortable.create(el, {
+            handle: '.drag-handle',
+            animation: 150,
+            ghostClass: 'opacity-50',
+            onEnd: (evt) => {
+              var item = this.eventSponsors.splice(evt.oldIndex, 1)[0];
+              this.eventSponsors.splice(evt.newIndex, 0, item);
+              this.syncEventSponsorInputs();
+            }
+          });
+        }
+      },
       showBoostError() {
         alert(this.boostDynamicReason);
       },
@@ -5341,10 +5644,19 @@
           this.destroyAllPartEditors();
         }
       },
+      'event.sponsor_mode'(newVal) {
+        if (newVal === 'custom') {
+          this.$nextTick(() => this.initEventSponsorSortable());
+        }
+        if (newVal !== 'custom') {
+          this.cancelEditEventSponsor();
+        }
+      },
     },
     mounted() {
       this.showMemberTypeRadio = this.selectedMembers.length === 0;
       this.$nextTick(() => updateRecurringFieldVisibility());
+      this.$nextTick(() => this.initEventSponsorSortable());
 
       const isCloned = @json($isCloned ?? false);
 

@@ -28,6 +28,12 @@ class EventUpdateRequest extends FormRequest
 
             'addons.*.image' => ['nullable', 'image', 'max:2500'],
             'addons.*.url' => ['nullable', 'url', 'max:2000'],
+
+            'sponsor_mode' => ['nullable', 'string', 'in:default,none,custom'],
+            'event_sponsor_logos.*' => ['image', 'max:2500'],
+            'event_sponsor_names.*' => ['nullable', 'string', 'max:100'],
+            'event_sponsor_urls.*' => ['nullable', 'url', 'max:500'],
+            'event_sponsor_tiers.*' => ['nullable', 'string', 'in:gold,silver,bronze'],
         ];
     }
 }

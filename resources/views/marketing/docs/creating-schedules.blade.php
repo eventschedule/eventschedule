@@ -469,6 +469,11 @@
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Drag and drop sponsors to change their display order on the public schedule page.</p>
                                 </div>
                             </div>
+
+                            <div class="doc-callout doc-callout-tip mt-4">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>You can also override sponsors for individual events. See <a href="{{ route('marketing.docs.creating_events') }}#sponsors" class="text-cyan-400 hover:text-cyan-300">Per-Event Sponsors</a>.</p>
+                            </div>
                         </section>
 
                         <!-- Custom Labels -->

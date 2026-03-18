@@ -60,7 +60,7 @@ class BackupService
     ];
 
     private const MAX_SCHEDULES = 50;
-    
+
     private const MAX_EVENTS_PER_SCHEDULE = 10000;
 
     private const MAX_TICKETS_PER_EVENT = 10000;
@@ -493,6 +493,20 @@ class BackupService
                 $imageKey = 'images/'.$rawFlyer;
                 $imageFiles[$imageKey] = $storagePath;
                 $eventData['_flyer_image'] = $imageKey;
+            }
+        }
+
+        // Event sponsor logos
+        $eventSponsorLogos = json_decode($event->getAttributes()['sponsor_logos'] ?? '[]', true) ?: [];
+        foreach ($eventSponsorLogos as $i => $logo) {
+            $logoFile = $logo['logo'] ?? null;
+            if ($logoFile && ! str_starts_with($logoFile, 'http')) {
+                $storagePath = config('filesystems.default') == 'local' ? 'public/'.$logoFile : $logoFile;
+                if (Storage::exists($storagePath)) {
+                    $imageKey = 'images/'.$logoFile;
+                    $imageFiles[$imageKey] = $storagePath;
+                    $eventData['_event_sponsor_logo_'.$i] = $imageKey;
+                }
             }
         }
 
@@ -1159,6 +1173,18 @@ class BackupService
             $event->flyer_image_url = null;
         }
 
+        // Clear local event sponsor logo image paths
+        if ($event->sponsor_logos) {
+            $eventSponsorLogos = json_decode($event->sponsor_logos, true) ?: [];
+            foreach ($eventSponsorLogos as &$logo) {
+                if (isset($logo['logo']) && $logo['logo'] && ! str_starts_with($logo['logo'], 'http')) {
+                    $logo['logo'] = null;
+                }
+            }
+            unset($logo);
+            $event->sponsor_logos = ! empty($eventSponsorLogos) ? json_encode($eventSponsorLogos) : null;
+        }
+
         $event->saveQuietly();
 
         // Attach to role via pivot
@@ -1666,6 +1692,40 @@ class BackupService
                 }
 
                 $event->flyer_image_url = $filename;
+                $event->saveQuietly();
+            }
+        }
+
+        // Event sponsor logos
+        if ($event->sponsor_logos) {
+            $eventSponsorLogos = json_decode($event->sponsor_logos, true) ?: [];
+            $updated = false;
+            foreach ($eventSponsorLogos as $i => &$logo) {
+                $imageKey = $eventData['_event_sponsor_logo_'.$i] ?? null;
+                if (! $imageKey) {
+                    continue;
+                }
+
+                $imageData = $zip->getFromName($imageKey);
+                if ($imageData === false || ! $this->isValidImageData($imageData)) {
+                    continue;
+                }
+
+                $extension = $this->safeImageExtension($imageKey);
+                $filename = strtolower(Str::random(32).'.'.$extension);
+
+                if (config('filesystems.default') == 'local') {
+                    Storage::put('public/'.$filename, $imageData);
+                } else {
+                    Storage::put($filename, $imageData);
+                }
+
+                $logo['logo'] = $filename;
+                $updated = true;
+            }
+            unset($logo);
+            if ($updated) {
+                $event->sponsor_logos = json_encode($eventSponsorLogos);
                 $event->saveQuietly();
             }
         }

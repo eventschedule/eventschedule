@@ -1802,6 +1802,18 @@
     </div>
   </div>
 
+  @php
+    $eventSponsors = $event->getEffectiveSponsorLogos($role);
+  @endphp
+  @if (!empty($eventSponsors))
+    <div class="container mx-auto max-w-5xl px-0 sm:px-5 pb-8">
+      <x-sponsor-grid
+          :sponsors="$eventSponsors"
+          :title="$role->translatedSponsorSectionTitle()"
+          :maxWidth="($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem'" />
+    </div>
+  @endif
+
   {{-- Shared photo lightbox --}}
   @if ($allPhotoData->count() > 0)
   <div x-data="{

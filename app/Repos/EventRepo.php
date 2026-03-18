@@ -532,6 +532,86 @@ class EventRepo
             }
         }
 
+        // Handle event sponsor logos (Pro feature)
+        if ($currentRole && $currentRole->isPro() && ! is_demo_mode()) {
+            $sponsorMode = $request->input('sponsor_mode', 'default');
+            $event->sponsor_mode = in_array($sponsorMode, ['default', 'none', 'custom']) ? $sponsorMode : 'default';
+
+            if ($sponsorMode === 'custom') {
+                $oldSponsors = json_decode($event->getOriginal('sponsor_logos') ?? '[]', true) ?: [];
+                $oldLogoFiles = array_filter(array_column($oldSponsors, 'logo'));
+
+                // Process existing sponsors (reordered via drag-and-drop)
+                $existingSponsorsJson = $request->input('existing_event_sponsors', '[]');
+                $sponsors = json_decode($existingSponsorsJson, true) ?: [];
+
+                // Process new sponsor uploads
+                $newFiles = $request->file('event_sponsor_logos', []);
+                $newNames = $request->input('event_sponsor_names', []);
+                $newUrls = $request->input('event_sponsor_urls', []);
+                $newTiers = $request->input('event_sponsor_tiers', []);
+
+                $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+                $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+
+                foreach ($newFiles as $index => $file) {
+                    if (count($sponsors) >= 12) {
+                        break;
+                    }
+
+                    $extension = strtolower($file->getClientOriginalExtension());
+                    if (! in_array($extension, $allowedExtensions) || ! in_array($file->getMimeType(), $allowedMimeTypes)) {
+                        continue;
+                    }
+
+                    $filename = strtolower('sponsor_'.Str::random(32).'.'.$extension);
+                    $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+
+                    $sponsors[] = [
+                        'name' => $newNames[$index] ?? '',
+                        'logo' => $filename,
+                        'url' => ! empty($newUrls[$index]) ? $newUrls[$index] : null,
+                        'tier' => $newTiers[$index] ?? '',
+                    ];
+                }
+
+                // Cap at 12
+                $sponsors = array_slice($sponsors, 0, 12);
+
+                // Delete orphaned logo files
+                $currentLogoFiles = array_filter(array_column($sponsors, 'logo'));
+                $orphanedFiles = array_diff($oldLogoFiles, $currentLogoFiles);
+                foreach ($orphanedFiles as $orphanedFile) {
+                    if (str_starts_with($orphanedFile, 'demo_')) {
+                        continue;
+                    }
+                    $path = $orphanedFile;
+                    if (config('filesystems.default') == 'local') {
+                        $path = 'public/'.$path;
+                    }
+                    Storage::delete($path);
+                }
+
+                $event->sponsor_logos = ! empty($sponsors) ? json_encode(array_values($sponsors)) : null;
+            } else {
+                // Switching away from custom: clean up old logo files
+                $oldSponsors = json_decode($event->getOriginal('sponsor_logos') ?? '[]', true) ?: [];
+                foreach ($oldSponsors as $sponsor) {
+                    if (! empty($sponsor['logo']) && ! str_starts_with($sponsor['logo'], 'demo_')) {
+                        $path = $sponsor['logo'];
+                        if (config('filesystems.default') == 'local') {
+                            $path = 'public/'.$path;
+                        }
+                        Storage::delete($path);
+                    }
+                }
+                $event->sponsor_logos = null;
+            }
+        } else {
+            $event->sponsor_mode = null;
+            $event->sponsor_logos = null;
+        }
+
         $event->save();
 
         if ($venue) {

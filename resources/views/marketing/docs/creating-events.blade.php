@@ -84,6 +84,7 @@
                             <div class="doc-nav-group-items">
                                 <a href="#custom-fields" class="doc-nav-link">Custom Fields</a>
                                 <a href="#privacy" class="doc-nav-link">Privacy</a>
+                                <a href="#sponsors" class="doc-nav-link">Sponsors</a>
                             </div>
                         </div>
                         <div class="doc-nav-group">
@@ -480,7 +481,7 @@
                                 </svg>
                                 Event Settings
                             </h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Configure custom data fields and event-level privacy.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Configure custom data fields, sponsors, and event-level privacy.</p>
                         </section>
 
                         <!-- Custom Fields -->
@@ -538,6 +539,35 @@
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
                                 <p>For schedule-level settings, see <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="text-cyan-400 hover:text-cyan-300">Advanced Settings</a>.</p>
+                            </div>
+                        </section>
+
+                        <!-- Sponsors -->
+                        <section id="sponsors" class="doc-section">
+                            <h2 class="doc-heading">Sponsors <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Pro</span></h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Override sponsor display for individual events. By default, events inherit the sponsors configured on the schedule.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Sponsor Mode</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">In the <strong class="text-gray-900 dark:text-white">Sponsors</strong> tab under Event Settings, choose one of three modes:</p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Use Schedule Default</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">The event page displays the same sponsors configured on the schedule. This is the default.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show No Sponsors</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Hide sponsors entirely on this event's page.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Customize</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Define event-specific sponsors. Add logos, names, URLs, and tiers just like schedule-level sponsors. Up to 12 sponsors per event.</p>
+                                </div>
+                            </div>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>To set default sponsors for all events, configure them at the schedule level. See <a href="{{ route('marketing.docs.creating_schedules') }}#customize-sponsors" class="text-cyan-400 hover:text-cyan-300">Schedule Sponsors</a>.</p>
                             </div>
                         </section>
 
