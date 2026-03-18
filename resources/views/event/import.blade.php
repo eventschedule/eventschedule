@@ -1631,8 +1631,8 @@
                                 this.eventVenueTypes[idx] = 'use_existing';
                                 this.eventSelectedVenues[idx] = matchedUserVenue;
                             } else if (this.venues.length > 0) {
-                                // Has connected venues but no match - default to create_new
-                                this.eventVenueTypes[idx] = 'create_new';
+                                // Has connected venues but no match - default to use_existing
+                                this.eventVenueTypes[idx] = 'use_existing';
                                 this.eventSelectedVenues[idx] = null;
                             } else if (event.venue_id) {
                                 // Guest user with venue match (displayed as text, not dropdown)
