@@ -172,12 +172,11 @@
                         }
                     })
                     .catch((error) => {
-                        this.errorMessage = error.message;
+                        this.errorMessage = error.message || @json(__('messages.an_error_occurred'));
                     });
                 },
                 onScanFailure(error) {
                     console.warn(`Scan failed: ${error}`);
-                    this.errorMessage = error.message;
                 },
                 startNewScan() {
                     this.scanResult = null;
@@ -203,7 +202,9 @@
                         this.scanResult = true;
                         this.eventDetails = {"attendee":"Test Attendee","event":"Test Schedule","date":"Saturday, January 25th \u2022 8:00 PM","tickets":[{"type":"VIP","seats":{"1":null,"2":null}}]};
                     @else
-                        this.qrScanner.render(this.onScanSuccess, this.onScanFailure);
+                        this.qrScanner.render(this.onScanSuccess, this.onScanFailure).catch((error) => {
+                            console.warn('QR scanner render failed:', error);
+                        });
                     @endif
                 }
             },
