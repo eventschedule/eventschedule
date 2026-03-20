@@ -722,9 +722,16 @@ html[data-es-view="list"] #calendar-panel-wrapper {
         }
       </style>
 
+      @php $sponsorLogos = $role->getSponsorLogos(); @endphp
+
+      <x-sponsor-grid
+          :sponsors="$sponsorLogos"
+          :title="$role->translatedSponsorSectionTitle()"
+          :maxWidth="($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem'" />
+
       <section aria-label="{{ $role->customLabel('events') }}">
       <div
-        class="calendar-panel-border mt-2 md:mt-6 mb-6 px-0 md:px-6 lg:px-16 pt-0 md:pt-4 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
+        class="calendar-panel-border {{ empty($sponsorLogos) ? 'mt-2 md:mt-6' : '' }} mb-6 px-0 md:px-6 lg:px-16 pt-0 md:pt-4 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
         id="calendar-panel-wrapper"
         data-view-width
         style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"
@@ -758,11 +765,6 @@ html[data-es-view="list"] #calendar-panel-wrapper {
           </div>
         @endif
       @endif
-
-      <x-sponsor-grid
-          :sponsors="$role->getSponsorLogos()"
-          :title="$role->translatedSponsorSectionTitle()"
-          :maxWidth="($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem'" />
 
     </div>
   </main>

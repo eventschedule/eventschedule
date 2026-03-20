@@ -2,14 +2,14 @@
 
 @if (!empty($sponsors))
 <div
-    class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl px-6 lg:px-16 py-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
+    class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl px-6 lg:px-16 py-6 mt-2 md:mt-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
     data-view-width
     style="max-width: {{ $maxWidth }}"
 >
     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center mb-6">
         {{ $title }}
     </h3>
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8 place-content-center">
+    <div class="grid {{ count($sponsors) === 1 ? 'grid-cols-1' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4' }} gap-8 place-content-center">
         @foreach ($sponsors as $sponsor)
             @php
                 $sizeStyles = 'max-height: 5rem; max-width: 160px;';
