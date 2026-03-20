@@ -247,14 +247,14 @@ class EventController extends Controller
             $event->creator_role_id = $role->id;
 
             // Set cloned tickets
-            $event->tickets = array_map(function ($ticketData) {
+            $event->tickets = collect(array_map(function ($ticketData) {
                 $ticket = new Ticket;
                 foreach ($ticketData as $key => $value) {
                     $ticket->$key = $value;
                 }
 
                 return $ticket;
-            }, $clonedData['tickets']);
+            }, $clonedData['tickets']));
 
             // Set cloned add-ons
             if (! empty($clonedData['addons'])) {
@@ -301,13 +301,13 @@ class EventController extends Controller
                 $event->sell_after_start = $defaultTickets['sell_after_start'] ?? false;
                 $event->show_unavailable_tickets = $defaultTickets['show_unavailable_tickets'] ?? false;
                 $event->custom_fields = $defaultTickets['custom_fields'] ?? null;
-                $event->tickets = $defaultTickets['tickets'] ?? [new Ticket];
+                $event->tickets = collect($defaultTickets['tickets'] ?? [new Ticket]);
                 $event->addons = $defaultTickets['addons'] ?? [];
                 $defaultPromoCodes = $defaultTickets['promo_codes'] ?? [];
             } else {
                 $event->ticket_currency_code = MoneyUtils::getCurrencyForCountry($role->country_code);
                 $event->payment_method = 'cash';
-                $event->tickets = [new Ticket];
+                $event->tickets = collect([new Ticket]);
             }
 
             // Load the last event created by the user with a category set and set its category
@@ -553,7 +553,7 @@ class EventController extends Controller
         }
 
         if ($event->tickets->count() == 0) {
-            $event->tickets = [new Ticket];
+            $event->tickets = collect([new Ticket]);
         }
 
         // Use the creator role's subdomain to determine the correct groups/sub-schedules
