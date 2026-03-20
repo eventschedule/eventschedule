@@ -1029,7 +1029,7 @@
         </template>
 
         <!-- Add-ons -->
-        <div v-if="addons.length > 0 && totalSelectedTickets > 0 && !isPaymentLinkMode && !isAllSoldOut" class="mb-6">
+        <div v-if="addons.length > 0 && !isPaymentLinkMode && !isAllSoldOut" class="mb-6">
             <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.add_ons') }}</h3>
             <div v-for="(addon, aIndex) in addons" :key="addon.id" class="mb-3 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4 border-gray-300 dark:border-gray-500">
                 <div class="flex items-center justify-between">
