@@ -724,10 +724,14 @@ html[data-es-view="list"] #calendar-panel-wrapper {
 
       @php $sponsorLogos = $role->getSponsorLogos(); @endphp
 
-      <x-sponsor-grid
-          :sponsors="$sponsorLogos"
-          :title="$role->translatedSponsorSectionTitle()"
-          :maxWidth="($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem'" />
+      @if (!empty($sponsorLogos))
+      <div class="mt-2 md:mt-6 mb-6">
+          <x-sponsor-grid
+              :sponsors="$sponsorLogos"
+              :title="$role->translatedSponsorSectionTitle()"
+              :maxWidth="($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem'" />
+      </div>
+      @endif
 
       <section aria-label="{{ $role->customLabel('events') }}">
       <div

@@ -1809,11 +1809,9 @@
           $eventSponsors = $event->getEffectiveSponsorLogos($role);
         @endphp
         @if (!empty($eventSponsors))
-          <div>
-            <x-sponsor-grid
-                :sponsors="$eventSponsors"
-                :title="$role->translatedSponsorSectionTitle()" />
-          </div>
+          <x-sponsor-grid
+              :sponsors="$eventSponsors"
+              :title="$role->translatedSponsorSectionTitle()" />
         @endif
 
         {{-- End of content section --}}

@@ -2,7 +2,7 @@
 
 @if (!empty($sponsors))
 <div
-    class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl px-6 lg:px-16 py-6 mt-2 md:mt-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
+    class="w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl px-6 py-6 transition-[max-width] duration-300 ease-in-out mx-auto"
     data-view-width
     style="max-width: {{ $maxWidth }}"
 >
