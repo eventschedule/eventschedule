@@ -272,7 +272,6 @@
                             <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Ticket Settings</h4>
                             <ul class="doc-list mb-6">
                                 <li><strong class="text-gray-900 dark:text-white">Quantity:</strong> Limit how many tickets can be sold (leave blank for unlimited)</li>
-                                <li><strong class="text-gray-900 dark:text-white">Per-person limit:</strong> Limit how many one person can buy</li>
                                 <li><strong class="text-gray-900 dark:text-white">Sales start date:</strong> Schedule when a ticket type becomes available for purchase</li>
                                 <li><strong class="text-gray-900 dark:text-white">Sales end date:</strong> Set a per-ticket-type cutoff to stop selling at a specific time</li>
                                 <li><strong class="text-gray-900 dark:text-white">Combined inventory:</strong> Set a total ticket limit across all ticket types for your event</li>
@@ -445,13 +444,14 @@
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Additional Settings</h3>
                             <ul class="doc-list">
+                                <li><strong class="text-gray-900 dark:text-white">Ask for phone number:</strong> Add a phone number field to the checkout form. You can make it required and optionally include a country code selector.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Individual tickets:</strong> Each attendee receives their own confirmation and QR code. When enabled, you can also collect custom ticket fields per guest.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Allow sales after event starts:</strong> Continue selling tickets until the event ends (start time plus duration) instead of stopping at the start time</li>
+                                <li><strong class="text-gray-900 dark:text-white">Configure sales dates:</strong> Enable per-ticket-type start and end dates to schedule when each ticket type becomes available or stops selling</li>
+                                <li><strong class="text-gray-900 dark:text-white">Show unavailable tickets:</strong> Display sold out and expired ticket types to visitors in a disabled state, so they can see what was offered</li>
+                                <li><strong class="text-gray-900 dark:text-white">Expire unpaid tickets:</strong> Automatically release unpaid tickets after a set number of hours, making them available for other buyers</li>
                                 <li><strong class="text-gray-900 dark:text-white">Ticket notes:</strong> Add notes that appear on the ticket (e.g., parking instructions, what to bring)</li>
                                 <li><strong class="text-gray-900 dark:text-white">Terms URL:</strong> Link to your terms and conditions. Buyers must agree before purchasing.</li>
-                                <li><strong class="text-gray-900 dark:text-white">Ticket sales start:</strong> Set a date and time per ticket type when sales automatically begin. Use this to schedule ticket releases (e.g. early bird tickets available starting a specific date).</li>
-                                <li><strong class="text-gray-900 dark:text-white">Ticket sales end:</strong> Set a date and time per ticket type when sales automatically stop. Use this to create time-based pricing tiers (e.g. early bird ending before regular tickets).</li>
-                                <li><strong class="text-gray-900 dark:text-white">Expire unpaid tickets:</strong> Automatically release unpaid tickets after a set number of hours, making them available for other buyers</li>
-                                <li><strong class="text-gray-900 dark:text-white">Allow sales after event starts:</strong> Continue selling tickets until the event ends (start time plus duration) instead of stopping at the start time</li>
-                                <li><strong class="text-gray-900 dark:text-white">Show unavailable tickets:</strong> Display sold out and expired ticket types to visitors in a disabled state, so they can see what was offered</li>
                             </ul>
                         </section>
 
