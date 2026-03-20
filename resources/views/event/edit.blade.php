@@ -2528,6 +2528,156 @@
                                 <!-- Options Tab -->
                                 <div v-show="activeTicketTab === 'options' || event.rsvp_enabled">
 
+                                <!-- Phone Number -->
+                                <div class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input id="ask_phone_checkbox" type="checkbox"
+                                                v-model="event.ask_phone"
+                                                class="sr-only peer"
+                                                @change="event.ask_phone || (event.require_phone = false, event.country_code_phone = false)">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="ask_phone_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.ask_for_phone_number') }}
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.ask_for_phone_number_help') }}</p>
+                                    <div class="flex items-center gap-4 mt-2 ms-14" v-if="event.ask_phone">
+                                        <div class="flex items-center">
+                                            <input type="checkbox" v-model="event.require_phone" id="require_phone_checkbox" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                                            <label for="require_phone_checkbox" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" v-model="event.country_code_phone" id="country_code_phone_checkbox" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                                            <label for="country_code_phone_checkbox" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.country_code') }}</label>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="ask_phone" :value="event.ask_phone ? 1 : 0">
+                                    <input type="hidden" name="require_phone" :value="event.require_phone ? 1 : 0">
+                                    <input type="hidden" name="country_code_phone" :value="event.country_code_phone ? 1 : 0">
+                                </div>
+
+                                <!-- Individual Tickets -->
+                                <div class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input id="individual_tickets_checkbox" type="checkbox"
+                                                v-model="event.individual_tickets"
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="individual_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.individual_tickets') }}
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.individual_tickets_description') }}</p>
+                                    <input type="hidden" name="individual_tickets" :value="event.individual_tickets ? 1 : 0">
+
+                                    <!-- Individual Ticket Fields sub-toggle -->
+                                    <div v-show="event.individual_tickets" class="mt-3 ms-14">
+                                        <div class="flex items-center gap-3">
+                                            <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                                <input id="individual_ticket_fields_checkbox" type="checkbox"
+                                                    v-model="event.individual_ticket_fields"
+                                                    class="sr-only peer">
+                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                                <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                            </label>
+                                            <label for="individual_ticket_fields_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                                {{ __('messages.individual_ticket_fields') }}
+                                            </label>
+                                        </div>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.individual_ticket_fields_description') }}</p>
+                                        <input type="hidden" name="individual_ticket_fields" :value="event.individual_ticket_fields ? 1 : 0">
+                                    </div>
+                                </div>
+
+                                <!-- Ticket-only toggles -->
+                                <div v-show="event.tickets_enabled" class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input id="sell_after_start_checkbox" type="checkbox"
+                                                v-model="event.sell_after_start"
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="sell_after_start_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.sell_after_start') }}
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.sell_after_start_help') }}</p>
+                                    <input type="hidden" name="sell_after_start" :value="event.sell_after_start ? 1 : 0">
+                                </div>
+
+                                <div v-show="event.tickets_enabled" class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input id="show_sales_dates_checkbox" type="checkbox"
+                                                v-model="showSalesDates"
+                                                class="sr-only peer"
+                                                @change="onToggleSalesDates">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="show_sales_dates_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.configure_sales_dates') }}
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.configure_sales_dates_help') }}</p>
+                                </div>
+
+                                <div v-show="event.tickets_enabled" class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input id="show_unavailable_tickets_checkbox" type="checkbox"
+                                                v-model="event.show_unavailable_tickets"
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="show_unavailable_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.show_unavailable_tickets') }}
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.show_unavailable_tickets_help') }}</p>
+                                    <input type="hidden" name="show_unavailable_tickets" :value="event.show_unavailable_tickets ? 1 : 0">
+                                </div>
+
+                                <div v-if="hasLimitedPaidTickets" v-show="event.tickets_enabled">
+                                    <div class="mb-6">
+                                        <div class="flex items-center gap-3">
+                                            <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                                <input id="expire_unpaid_tickets_checkbox" name="expire_unpaid_tickets_checkbox" type="checkbox"
+                                                    v-model="showExpireUnpaid"
+                                                    class="sr-only peer"
+                                                    @change="toggleExpireUnpaid">
+                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                                <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                            </label>
+                                            <label for="expire_unpaid_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                                {{ __('messages.expire_unpaid_tickets') }}
+                                            </label>
+                                        </div>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.expire_unpaid_tickets_help') }}</p>
+                                    </div>
+
+                                    <div class="mb-6" v-if="showExpireUnpaid">
+                                        <x-input-label for="expire_unpaid_tickets" :value="__('messages.after_number_of_hours')" />
+                                        <x-text-input id="expire_unpaid_tickets" name="expire_unpaid_tickets" type="number" class="mt-1 block w-full"
+                                            :value="old('expire_unpaid_tickets', $event->expire_unpaid_tickets)"
+                                            v-model="event.expire_unpaid_tickets"
+                                            autocomplete="off" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('expire_unpaid_tickets')" />
+                                    </div>
+                                    <div v-else>
+                                        <input type="hidden" name="expire_unpaid_tickets" value="0"/>
+                                    </div>
+                                </div>
+
                                 <!-- Event-level Custom Fields -->
                                 <template v-if="isPro">
                                 <div class="mb-6">
@@ -2807,87 +2957,6 @@
                                     </p>
                                 </div>
 
-                                <div class="mb-6">
-                                    <div class="flex items-center gap-3">
-                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                            <input id="sell_after_start_checkbox" type="checkbox"
-                                                v-model="event.sell_after_start"
-                                                class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                        </label>
-                                        <label for="sell_after_start_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                            {{ __('messages.sell_after_start') }}
-                                        </label>
-                                    </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.sell_after_start_help') }}</p>
-                                    <input type="hidden" name="sell_after_start" :value="event.sell_after_start ? 1 : 0">
-                                </div>
-
-                                <div class="mb-6">
-                                    <div class="flex items-center gap-3">
-                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                            <input id="show_sales_dates_checkbox" type="checkbox"
-                                                v-model="showSalesDates"
-                                                class="sr-only peer"
-                                                @change="onToggleSalesDates">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                        </label>
-                                        <label for="show_sales_dates_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                            {{ __('messages.configure_sales_dates') }}
-                                        </label>
-                                    </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.configure_sales_dates_help') }}</p>
-                                </div>
-
-                                <div class="mb-6">
-                                    <div class="flex items-center gap-3">
-                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                            <input id="show_unavailable_tickets_checkbox" type="checkbox"
-                                                v-model="event.show_unavailable_tickets"
-                                                class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                        </label>
-                                        <label for="show_unavailable_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                            {{ __('messages.show_unavailable_tickets') }}
-                                        </label>
-                                    </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.show_unavailable_tickets_help') }}</p>
-                                    <input type="hidden" name="show_unavailable_tickets" :value="event.show_unavailable_tickets ? 1 : 0">
-                                </div>
-
-                                <div v-if="hasLimitedPaidTickets">
-                                    <div class="mb-6">
-                                        <div class="flex items-center gap-3">
-                                            <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                                <input id="expire_unpaid_tickets_checkbox" name="expire_unpaid_tickets_checkbox" type="checkbox"
-                                                    v-model="showExpireUnpaid"
-                                                    class="sr-only peer"
-                                                    @change="toggleExpireUnpaid">
-                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                                <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                            </label>
-                                            <label for="expire_unpaid_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                                {{ __('messages.expire_unpaid_tickets') }}
-                                            </label>
-                                        </div>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.expire_unpaid_tickets_help') }}</p>
-                                    </div>
-
-                                    <div class="mb-6" v-if="showExpireUnpaid">
-                                        <x-input-label for="expire_unpaid_tickets" :value="__('messages.after_number_of_hours')" />
-                                        <x-text-input id="expire_unpaid_tickets" name="expire_unpaid_tickets" type="number" class="mt-1 block w-full"
-                                            :value="old('expire_unpaid_tickets', $event->expire_unpaid_tickets)"
-                                            v-model="event.expire_unpaid_tickets"
-                                            autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('expire_unpaid_tickets')" />
-                                    </div>
-                                    <div v-else>
-                                        <input type="hidden" name="expire_unpaid_tickets" value="0"/>
-                                    </div>
-                                </div>
                                 </div>
 
                                 <!-- Promo Codes Tab -->
@@ -3083,77 +3152,6 @@
                                         class="mt-2 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
                                         + {{ __('messages.add_add_on') }}
                                     </button>
-                                </div>
-
-                                <!-- Phone Number -->
-                                <div v-show="activeTicketTab === 'options' || event.rsvp_enabled">
-                                <div class="mt-6">
-                                    <div class="flex items-center gap-3">
-                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                            <input id="ask_phone_checkbox" type="checkbox"
-                                                v-model="event.ask_phone"
-                                                class="sr-only peer"
-                                                @change="event.ask_phone || (event.require_phone = false, event.country_code_phone = false)">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                        </label>
-                                        <label for="ask_phone_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                            {{ __('messages.ask_for_phone_number') }}
-                                        </label>
-                                    </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.ask_for_phone_number_help') }}</p>
-                                    <div class="flex items-center gap-4 mt-2 ms-14" v-if="event.ask_phone">
-                                        <div class="flex items-center">
-                                            <input type="checkbox" v-model="event.require_phone" id="require_phone_checkbox" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
-                                            <label for="require_phone_checkbox" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <input type="checkbox" v-model="event.country_code_phone" id="country_code_phone_checkbox" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
-                                            <label for="country_code_phone_checkbox" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.country_code') }}</label>
-                                        </div>
-                                    </div>
-                                    <input type="hidden" name="ask_phone" :value="event.ask_phone ? 1 : 0">
-                                    <input type="hidden" name="require_phone" :value="event.require_phone ? 1 : 0">
-                                    <input type="hidden" name="country_code_phone" :value="event.country_code_phone ? 1 : 0">
-                                </div>
-                                </div>
-
-                                <!-- Individual Tickets -->
-                                <div v-show="activeTicketTab === 'options' || event.rsvp_enabled">
-                                <div class="mt-6">
-                                    <div class="flex items-center gap-3">
-                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                            <input id="individual_tickets_checkbox" type="checkbox"
-                                                v-model="event.individual_tickets"
-                                                class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                        </label>
-                                        <label for="individual_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                            {{ __('messages.individual_tickets') }}
-                                        </label>
-                                    </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.individual_tickets_description') }}</p>
-                                    <input type="hidden" name="individual_tickets" :value="event.individual_tickets ? 1 : 0">
-
-                                    <!-- Individual Ticket Fields sub-toggle -->
-                                    <div v-show="event.individual_tickets" class="mt-3 ms-14">
-                                        <div class="flex items-center gap-3">
-                                            <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                                <input id="individual_ticket_fields_checkbox" type="checkbox"
-                                                    v-model="event.individual_ticket_fields"
-                                                    class="sr-only peer">
-                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                                <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                            </label>
-                                            <label for="individual_ticket_fields_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                                {{ __('messages.individual_ticket_fields') }}
-                                            </label>
-                                        </div>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.individual_ticket_fields_description') }}</p>
-                                        <input type="hidden" name="individual_ticket_fields" :value="event.individual_ticket_fields ? 1 : 0">
-                                    </div>
-                                </div>
                                 </div>
 
                                 </div><!-- /disabled state wrapper -->
