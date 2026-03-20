@@ -830,6 +830,7 @@ class EventRepo
                     }
                 }
 
+                $salesStartAt = ! empty($data['sales_start_at']) ? $data['sales_start_at'] : null;
                 $salesEndAt = ! empty($data['sales_end_at']) ? $data['sales_end_at'] : null;
 
                 if (! empty($data['id'])) {
@@ -841,6 +842,7 @@ class EventRepo
                             'quantity' => $data['quantity'] ?? null,
                             'price' => $data['price'] ?? null,
                             'description' => $data['description'] ?? null,
+                            'sales_start_at' => $salesStartAt,
                             'sales_end_at' => $salesEndAt,
                             'custom_fields' => $ticketCustomFields,
                         ]);
@@ -852,6 +854,7 @@ class EventRepo
                         'quantity' => $data['quantity'] ?? null,
                         'price' => $data['price'] ?? null,
                         'description' => $data['description'] ?? null,
+                        'sales_start_at' => $salesStartAt,
                         'sales_end_at' => $salesEndAt,
                         'custom_fields' => $ticketCustomFields,
                     ]);

@@ -24,6 +24,7 @@ class Ticket extends Model
         'sold',
         'price',
         'description',
+        'sales_start_at',
         'sales_end_at',
         'custom_fields',
         'is_addon',
@@ -33,9 +34,15 @@ class Ticket extends Model
 
     protected $casts = [
         'custom_fields' => 'array',
+        'sales_start_at' => 'datetime',
         'sales_end_at' => 'datetime',
         'is_addon' => 'boolean',
     ];
+
+    public function isSalesNotStarted()
+    {
+        return $this->sales_start_at && $this->sales_start_at->isFuture();
+    }
 
     public function isSalesEnded()
     {

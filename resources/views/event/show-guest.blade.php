@@ -816,6 +816,17 @@
                   <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
               </svg>
               </button>
+        @elseif ($event->allTicketSalesNotStarted() && $event->tickets_enabled)
+              <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.sales_not_started') }}</span>
+              <button type="button"
+                  class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                  style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
+                  id="menu-button" aria-expanded="true" aria-haspopup="true">
+              {{ $role->customLabel('add_to_calendar') }}
+              <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+              </svg>
+              </button>
         @else
               <button type="button"
                   class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
@@ -1958,6 +1969,8 @@
         @endif
       @elseif ($event->allTicketSalesEnded() && $event->tickets_enabled)
         <span class="flex-1 text-center text-sm text-gray-500 dark:text-gray-400 py-3">{{ __('messages.ticket_sales_ended') }}</span>
+      @elseif ($event->allTicketSalesNotStarted() && $event->tickets_enabled)
+        <span class="flex-1 text-center text-sm text-gray-500 dark:text-gray-400 py-3">{{ __('messages.sales_not_started') }}</span>
       @else
         <button type="button"
             id="mobile-calendar-cta"

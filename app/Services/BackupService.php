@@ -248,6 +248,7 @@ class BackupService
                 'sold' => $ticket->sold,
                 'price' => $ticket->price,
                 'description' => $ticket->description,
+                'sales_start_at' => $ticket->sales_start_at,
                 'sales_end_at' => $ticket->sales_end_at,
                 'custom_fields' => $ticket->custom_fields,
             ];
@@ -1218,6 +1219,7 @@ class BackupService
         $ticket->sold = $data['sold'] ?? null;
         $ticket->price = $data['price'] ?? 0;
         $ticket->description = $data['description'] ?? null;
+        $ticket->sales_start_at = $data['sales_start_at'] ?? null;
         $ticket->sales_end_at = $data['sales_end_at'] ?? null;
         $ticket->custom_fields = $data['custom_fields'] ?? null;
         $ticket->description_html = MarkdownUtils::convertToHtml($data['description'] ?? null);

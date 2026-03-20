@@ -902,6 +902,10 @@ class Event extends Model
             return false;
         }
 
+        if ($this->tickets->isNotEmpty() && $this->allTicketSalesNotStarted() && ! $this->show_unavailable_tickets) {
+            return false;
+        }
+
         return $this->tickets_enabled && $this->isPro();
     }
 
@@ -913,6 +917,17 @@ class Event extends Model
 
         return $this->tickets->every(function ($ticket) {
             return $ticket->sales_end_at && $ticket->sales_end_at->isPast();
+        });
+    }
+
+    public function allTicketSalesNotStarted()
+    {
+        if ($this->tickets->isEmpty()) {
+            return false;
+        }
+
+        return $this->tickets->every(function ($ticket) {
+            return $ticket->sales_start_at && $ticket->sales_start_at->isFuture();
         });
     }
 
@@ -1496,6 +1511,7 @@ class Event extends Model
                     'price' => $ticket->price,
                     'quantity' => $ticket->quantity,
                     'description' => $ticket->description,
+                    'sales_start_at' => $ticket->sales_start_at ? $ticket->sales_start_at->toIso8601String() : null,
                     'sales_end_at' => $ticket->sales_end_at ? $ticket->sales_end_at->toIso8601String() : null,
                 ];
             })->values();

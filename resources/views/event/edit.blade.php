@@ -2698,29 +2698,59 @@
                                                 class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
                                         </div>
 
-                                        <div class="mt-4">
-                                            <x-input-label :value="__('messages.ticket_sales_end_at')" />
-                                            <div class="flex items-center gap-2 mt-1">
-                                                <input type="text"
-                                                    class="datepicker-ticket-sales-end flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
-                                                    :data-ticket-index="index"
-                                                    :value="ticket.sales_end_at_date"
-                                                    autocomplete="off" />
-                                                <div class="relative w-28">
+                                        <template v-if="showSalesDates">
+                                            <div class="mt-4">
+                                                <x-input-label :value="__('messages.ticket_sales_start_at')" />
+                                                <div class="flex items-center gap-2 mt-1">
                                                     <input type="text"
-                                                        class="ticket-sales-end-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
-                                                        :value="formatPartTime(ticket.sales_end_at_time)"
-                                                        @focus="initTicketSalesEndTimePickerOnFocus($event, index)"
-                                                        @change="onTicketSalesEndTimeChange(index, $event)"
-                                                        autocomplete="off" placeholder="{{ __('messages.time') }}" />
-                                                    <div class="time-dropdown" :ref="'ticket_sales_end_time_dropdown_' + index"></div>
+                                                        class="datepicker-ticket-sales-start flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
+                                                        :data-ticket-index="index"
+                                                        :value="ticket.sales_start_at_date"
+                                                        autocomplete="off" />
+                                                    <div class="relative w-28">
+                                                        <input type="text"
+                                                            class="ticket-sales-start-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
+                                                            :value="formatPartTime(ticket.sales_start_at_time)"
+                                                            @focus="initTicketSalesStartTimePickerOnFocus($event, index)"
+                                                            @change="onTicketSalesStartTimeChange(index, $event)"
+                                                            autocomplete="off" placeholder="{{ __('messages.time') }}" />
+                                                        <div class="time-dropdown" :ref="'ticket_sales_start_time_dropdown_' + index"></div>
+                                                    </div>
                                                 </div>
+                                                <input type="hidden" v-bind:name="`tickets[${index}][sales_start_at]`" :value="ticket.sales_start_at_date && ticket.sales_start_at_time ? ticket.sales_start_at_date + ' ' + ticket.sales_start_at_time + ':00' : (ticket.sales_start_at_date ? ticket.sales_start_at_date + ' 00:00:00' : '')" />
+                                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                    {{ __('messages.ticket_sales_start_at_help') }}
+                                                </p>
                                             </div>
-                                            <input type="hidden" v-bind:name="`tickets[${index}][sales_end_at]`" :value="ticket.sales_end_at_date && ticket.sales_end_at_time ? ticket.sales_end_at_date + ' ' + ticket.sales_end_at_time + ':00' : (ticket.sales_end_at_date ? ticket.sales_end_at_date + ' 23:59:00' : '')" />
-                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                {{ __('messages.ticket_sales_end_at_help') }}
-                                            </p>
-                                        </div>
+
+                                            <div class="mt-4">
+                                                <x-input-label :value="__('messages.ticket_sales_end_at')" />
+                                                <div class="flex items-center gap-2 mt-1">
+                                                    <input type="text"
+                                                        class="datepicker-ticket-sales-end flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
+                                                        :data-ticket-index="index"
+                                                        :value="ticket.sales_end_at_date"
+                                                        autocomplete="off" />
+                                                    <div class="relative w-28">
+                                                        <input type="text"
+                                                            class="ticket-sales-end-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
+                                                            :value="formatPartTime(ticket.sales_end_at_time)"
+                                                            @focus="initTicketSalesEndTimePickerOnFocus($event, index)"
+                                                            @change="onTicketSalesEndTimeChange(index, $event)"
+                                                            autocomplete="off" placeholder="{{ __('messages.time') }}" />
+                                                        <div class="time-dropdown" :ref="'ticket_sales_end_time_dropdown_' + index"></div>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" v-bind:name="`tickets[${index}][sales_end_at]`" :value="ticket.sales_end_at_date && ticket.sales_end_at_time ? ticket.sales_end_at_date + ' ' + ticket.sales_end_at_time + ':00' : (ticket.sales_end_at_date ? ticket.sales_end_at_date + ' 23:59:00' : '')" />
+                                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                    {{ __('messages.ticket_sales_end_at_help') }}
+                                                </p>
+                                            </div>
+                                        </template>
+                                        <template v-else>
+                                            <input type="hidden" :name="`tickets[${index}][sales_start_at]`" value="" />
+                                            <input type="hidden" :name="`tickets[${index}][sales_end_at]`" value="" />
+                                        </template>
                                     </div>
 
                                     <!-- Total Tickets Mode Selection -->
@@ -2777,36 +2807,6 @@
                                     </p>
                                 </div>
 
-                                <div v-if="hasLimitedPaidTickets">
-                                    <div class="mb-6">
-                                        <div class="flex items-center gap-3">
-                                            <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                                <input id="expire_unpaid_tickets_checkbox" name="expire_unpaid_tickets_checkbox" type="checkbox"
-                                                    v-model="showExpireUnpaid"
-                                                    class="sr-only peer"
-                                                    @change="toggleExpireUnpaid">
-                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                                <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                            </label>
-                                            <label for="expire_unpaid_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                                {{ __('messages.expire_unpaid_tickets') }}
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-6" v-if="showExpireUnpaid">
-                                        <x-input-label for="expire_unpaid_tickets" :value="__('messages.after_number_of_hours')" />
-                                        <x-text-input id="expire_unpaid_tickets" name="expire_unpaid_tickets" type="number" class="mt-1 block w-full"
-                                            :value="old('expire_unpaid_tickets', $event->expire_unpaid_tickets)"
-                                            v-model="event.expire_unpaid_tickets"
-                                            autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('expire_unpaid_tickets')" />
-                                    </div>
-                                    <div v-else>
-                                        <input type="hidden" name="expire_unpaid_tickets" value="0"/>
-                                    </div>
-                                </div>
-
                                 <div class="mb-6">
                                     <div class="flex items-center gap-3">
                                         <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
@@ -2827,6 +2827,23 @@
                                 <div class="mb-6">
                                     <div class="flex items-center gap-3">
                                         <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input id="show_sales_dates_checkbox" type="checkbox"
+                                                v-model="showSalesDates"
+                                                class="sr-only peer"
+                                                @change="onToggleSalesDates">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="show_sales_dates_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.configure_sales_dates') }}
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.configure_sales_dates_help') }}</p>
+                                </div>
+
+                                <div class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
                                             <input id="show_unavailable_tickets_checkbox" type="checkbox"
                                                 v-model="event.show_unavailable_tickets"
                                                 class="sr-only peer">
@@ -2839,6 +2856,37 @@
                                     </div>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.show_unavailable_tickets_help') }}</p>
                                     <input type="hidden" name="show_unavailable_tickets" :value="event.show_unavailable_tickets ? 1 : 0">
+                                </div>
+
+                                <div v-if="hasLimitedPaidTickets">
+                                    <div class="mb-6">
+                                        <div class="flex items-center gap-3">
+                                            <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                                <input id="expire_unpaid_tickets_checkbox" name="expire_unpaid_tickets_checkbox" type="checkbox"
+                                                    v-model="showExpireUnpaid"
+                                                    class="sr-only peer"
+                                                    @change="toggleExpireUnpaid">
+                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                                <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                            </label>
+                                            <label for="expire_unpaid_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                                {{ __('messages.expire_unpaid_tickets') }}
+                                            </label>
+                                        </div>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.expire_unpaid_tickets_help') }}</p>
+                                    </div>
+
+                                    <div class="mb-6" v-if="showExpireUnpaid">
+                                        <x-input-label for="expire_unpaid_tickets" :value="__('messages.after_number_of_hours')" />
+                                        <x-text-input id="expire_unpaid_tickets" name="expire_unpaid_tickets" type="number" class="mt-1 block w-full"
+                                            :value="old('expire_unpaid_tickets', $event->expire_unpaid_tickets)"
+                                            v-model="event.expire_unpaid_tickets"
+                                            autocomplete="off" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('expire_unpaid_tickets')" />
+                                    </div>
+                                    <div v-else>
+                                        <input type="hidden" name="expire_unpaid_tickets" value="0"/>
+                                    </div>
                                 </div>
                                 </div>
 
@@ -3053,6 +3101,7 @@
                                             {{ __('messages.ask_for_phone_number') }}
                                         </label>
                                     </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.ask_for_phone_number_help') }}</p>
                                     <div class="flex items-center gap-4 mt-2 ms-14" v-if="event.ask_phone">
                                         <div class="flex items-center">
                                             <input type="checkbox" v-model="event.require_phone" id="require_phone_checkbox" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
@@ -4061,8 +4110,11 @@
         tickets: @json($event->tickets ?? [new Ticket()]).map(ticket => ({
           ...ticket,
           custom_fields: ticket.custom_fields || {},
+          sales_start_at_date: ticket.sales_start_at ? ticket.sales_start_at.substring(0, 10) : '',
+          sales_start_at_time: ticket.sales_start_at ? ticket.sales_start_at.substring(11, 16) : '',
           sales_end_at_date: ticket.sales_end_at ? ticket.sales_end_at.substring(0, 10) : '',
           sales_end_at_time: ticket.sales_end_at ? ticket.sales_end_at.substring(11, 16) : '',
+
           /*
           price: new Intl.NumberFormat('{{ app()->getLocale() }}', {
             style: 'currency',
@@ -4077,6 +4129,7 @@
         })),
         eventCustomFields: @json($event->custom_fields ?? []),
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
+        showSalesDates: @json(($event->tickets ?? collect())->contains(fn($t) => $t->sales_start_at || $t->sales_end_at)),
         isInvoiceNinjaPaymentLink: @json($user->invoiceninja_api_key && $user->invoiceninja_mode === 'payment_link'),
         activeTicketTab: @json($event->rsvp_enabled ? 'options' : 'tickets'),
         activeSettingsTab: 'custom_fields',
@@ -4933,23 +4986,34 @@
             price: null,
             description: '',
             custom_fields: {},
+            sales_start_at_date: '',
+            sales_start_at_time: '',
             sales_end_at_date: '',
             sales_end_at_time: '',
         });
-        this.$nextTick(() => {
+        if (this.showSalesDates) {
           this.$nextTick(() => {
-            this.initTicketSalesEndDatePicker(newIndex);
+            this.$nextTick(() => {
+              this.initTicketSalesStartDatePicker(newIndex);
+              this.initTicketSalesEndDatePicker(newIndex);
+            });
           });
-        });
+        }
       },
       removeTicket(index) {
         // Destroy flatpickr instances before removing
+        document.querySelectorAll('.datepicker-ticket-sales-start').forEach(input => {
+          if (input._flatpickr) input._flatpickr.destroy();
+        });
         document.querySelectorAll('.datepicker-ticket-sales-end').forEach(input => {
           if (input._flatpickr) input._flatpickr.destroy();
         });
         this.tickets.splice(index, 1);
         if (this.tickets.length > 0) {
-          this.$nextTick(() => { this.initAllTicketSalesEndDatePickers(); });
+          this.$nextTick(() => {
+            this.initAllTicketSalesStartDatePickers();
+            this.initAllTicketSalesEndDatePickers();
+          });
         }
       },
       addPromoCode() {
@@ -5068,6 +5132,58 @@
           event.target.value = formatMinutesToTime(minutes);
         } else {
           this.promoCodes[pcIndex].expires_at_time = '';
+        }
+      },
+      initTicketSalesStartDatePicker(ticketIndex) {
+        this.$nextTick(() => {
+          var inputs = document.querySelectorAll('.datepicker-ticket-sales-start');
+          var input = null;
+          inputs.forEach(function(el) {
+            if (el.getAttribute('data-ticket-index') == ticketIndex) input = el;
+          });
+          if (!input || input._flatpickr) return;
+          var defaultDate = this.tickets[ticketIndex].sales_start_at_date || null;
+          if (defaultDate) input.removeAttribute('value');
+          var fpLocale = window.flatpickrLocales ? window.flatpickrLocales[window.appLocale] : null;
+          var localeConfig = fpLocale ? { locale: fpLocale } : {};
+          var self = this;
+          var f = flatpickr(input, Object.assign({
+            allowInput: true,
+            enableTime: false,
+            altInput: true,
+            altFormat: "M j, Y",
+            dateFormat: "Y-m-d",
+            defaultDate: defaultDate,
+            onChange: function(selectedDates, dateStr) {
+              self.tickets[ticketIndex].sales_start_at_date = dateStr;
+            },
+          }, localeConfig));
+          if (f._input) f._input.onkeydown = () => false;
+        });
+      },
+      initAllTicketSalesStartDatePickers() {
+        for (var i = 0; i < this.tickets.length; i++) {
+          this.initTicketSalesStartDatePicker(i);
+        }
+      },
+      initTicketSalesStartTimePickerOnFocus(event, ticketIndex) {
+        var inputEl = event.target;
+        var dropdownRef = 'ticket_sales_start_time_dropdown_' + ticketIndex;
+        var dropdownEl = this.$refs[dropdownRef];
+        if (Array.isArray(dropdownEl)) dropdownEl = dropdownEl[0];
+        if (dropdownEl && !inputEl._timepickerInit) {
+          initPartTimePicker(inputEl, dropdownEl);
+        }
+      },
+      onTicketSalesStartTimeChange(ticketIndex, event) {
+        var minutes = parseTimeToMinutes(event.target.value);
+        if (minutes !== null) {
+          var h = Math.floor(minutes / 60);
+          var m = minutes % 60;
+          this.tickets[ticketIndex].sales_start_at_time = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+          event.target.value = formatMinutesToTime(minutes);
+        } else {
+          this.tickets[ticketIndex].sales_start_at_time = '';
         }
       },
       initTicketSalesEndDatePicker(ticketIndex) {
@@ -5376,6 +5492,21 @@
       getTicketCustomFieldCount(ticketIndex) {
         const ticket = this.tickets[ticketIndex];
         return Object.keys(ticket.custom_fields || {}).length;
+      },
+      onToggleSalesDates() {
+        if (this.showSalesDates) {
+          this.$nextTick(() => {
+            this.initAllTicketSalesStartDatePickers();
+            this.initAllTicketSalesEndDatePickers();
+          });
+        } else {
+          this.tickets.forEach(ticket => {
+            ticket.sales_start_at_date = '';
+            ticket.sales_start_at_time = '';
+            ticket.sales_end_at_date = '';
+            ticket.sales_end_at_time = '';
+          });
+        }
       },
       toggleExpireUnpaid() {
         if (! this.event.expire_unpaid_tickets) {
@@ -5747,6 +5878,7 @@
         if (self.promoCodes.length > 0) {
           self.initAllPromoDatePickers();
         }
+        self.initAllTicketSalesStartDatePickers();
         self.initAllTicketSalesEndDatePickers();
       });
       

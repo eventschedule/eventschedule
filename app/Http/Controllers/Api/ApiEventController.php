@@ -233,6 +233,7 @@ class ApiEventController extends Controller
                 'tickets.*.quantity' => 'nullable|integer|min:0',
                 'tickets.*.price' => 'nullable|numeric|min:0',
                 'tickets.*.description' => 'nullable|string|max:1000',
+                'tickets.*.sales_start_at' => 'nullable|date',
                 'tickets.*.sales_end_at' => 'nullable|date',
                 'event_parts' => 'nullable|array',
                 'event_parts.*.name' => 'required_with:event_parts|string|max:255',
@@ -345,6 +346,7 @@ class ApiEventController extends Controller
                 'tickets.*.quantity' => 'nullable|integer|min:0',
                 'tickets.*.price' => 'nullable|numeric|min:0',
                 'tickets.*.description' => 'nullable|string|max:1000',
+                'tickets.*.sales_start_at' => 'nullable|date',
                 'tickets.*.sales_end_at' => 'nullable|date',
                 'event_parts' => 'nullable|array',
                 'event_parts.*.name' => 'required_with:event_parts|string|max:255',
@@ -436,6 +438,7 @@ class ApiEventController extends Controller
                     'quantity' => $ticket->quantity,
                     'price' => $ticket->price,
                     'description' => $ticket->description,
+                    'sales_start_at' => $ticket->sales_start_at ? $ticket->sales_start_at->format('Y-m-d H:i:s') : null,
                     'sales_end_at' => $ticket->sales_end_at ? $ticket->sales_end_at->format('Y-m-d H:i:s') : null,
                 ];
             })->toArray();

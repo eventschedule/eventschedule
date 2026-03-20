@@ -23,13 +23,14 @@
             data() {
                 return {
                     createAccount: @json((bool) old('create_account', false)),
-                    tickets: @json($event->tickets->filter(fn($t) => !$t->isSalesEnded() || $event->show_unavailable_tickets)->values()->map(function ($ticket) use ($date) {
+                    tickets: @json($event->tickets->filter(fn($t) => (!$t->isSalesEnded() && !$t->isSalesNotStarted()) || $event->show_unavailable_tickets)->values()->map(function ($ticket) use ($date) {
                         $data = $ticket->toData($date ?? request()->date);
                         $data['selectedQty'] = min((int) (old('tickets')[$data['id']] ?? 0), $data['quantity']);
                         $data['custom_fields'] = $ticket->custom_fields ?? [];
                         $data['custom_values'] = (object) (old('ticket_custom_values')[$data['id']] ?? []);
                         $data['multiselect_values'] = (object) [];
                         $data['sales_ended'] = $ticket->isSalesEnded();
+                        $data['sales_not_started'] = $ticket->isSalesNotStarted();
                         return $data;
                     })),
                     eventCustomFields: @json($event->custom_fields ?? []),
@@ -211,7 +212,7 @@
                 },
                 isAllSoldOut() {
                     if (this.allSoldOut) return true;
-                    const activeTickets = this.tickets.filter(t => !t.sales_ended);
+                    const activeTickets = this.tickets.filter(t => !t.sales_ended && !t.sales_not_started);
                     if (activeTickets.length === 0) return this.tickets.length > 0;
                     return activeTickets.every(t => this.getAvailableQuantity(t) === 0);
                 },
@@ -935,7 +936,7 @@
         </div>
 
         <template v-for="(ticket, index) in tickets" :key="ticket.id">
-        <div v-if="!isPaymentLinkMode && (!isAllSoldOut || ticket.sales_ended)" class="mb-6 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4" :class="{'opacity-50': ticket.sales_ended}" style="border-inline-start-color: {{ $accentColor }}">
+        <div v-if="!isPaymentLinkMode && (!isAllSoldOut || ticket.sales_ended || ticket.sales_not_started)" class="mb-6 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4" :class="{'opacity-50': ticket.sales_ended || ticket.sales_not_started}" style="border-inline-start-color: {{ $accentColor }}">
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ ticket.type }}</h3>
@@ -944,6 +945,7 @@
                 </div>
                 <div>
                     <p v-if="ticket.sales_ended" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sales_ended') }}</p>
+                    <p v-else-if="ticket.sales_not_started" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sales_not_started') }}</p>
                     <p v-else-if="getAvailableQuantity(ticket) === 0" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>
                     <p v-else>
                     <select
@@ -1029,7 +1031,7 @@
         </template>
 
         <!-- Add-ons -->
-        <div v-if="addons.length > 0 && !isPaymentLinkMode && !isAllSoldOut" class="mb-6">
+        <div v-if="addons.length > 0 && totalSelectedTickets > 0 && !isPaymentLinkMode && !isAllSoldOut" class="mb-6">
             <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.add_ons') }}</h3>
             <div v-for="(addon, aIndex) in addons" :key="addon.id" class="mb-3 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4 border-gray-300 dark:border-gray-500">
                 <div class="flex items-center justify-between">

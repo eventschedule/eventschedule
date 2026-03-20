@@ -414,6 +414,10 @@ class ApiSaleController extends Controller
                 return response()->json(['error' => 'Ticket sales have ended for: '.$ticketIdentifier], 422);
             }
 
+            if ($ticket->isSalesNotStarted()) {
+                return response()->json(['error' => 'Ticket sales have not started for: '.$ticketIdentifier], 422);
+            }
+
             $ticketIds[$ticket->id] = $quantity;
         }
 

@@ -488,6 +488,10 @@ class TicketController extends Controller
                                 throw new \Exception(__('messages.tickets_not_available'));
                             }
 
+                            if ($ticketModel->isSalesNotStarted()) {
+                                throw new \Exception(__('messages.tickets_not_available'));
+                            }
+
                             if ($ticketModel->quantity > 0) {
                                 // Handle combined mode logic
                                 if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
