@@ -2,7 +2,33 @@
 
 use App\Jobs\ProcessScheduledNewsletters;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
+
+Schedule::call(function () {
+    Artisan::call('queue:work', [
+        '--stop-when-empty' => true,
+        '--max-time' => 120,
+        '--tries' => 3,
+    ]);
+})->everyMinute()->name('process-queue')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
+    $failedCount = DB::table('failed_jobs')->count();
+    if ($failedCount > 0) {
+        Log::warning("Found {$failedCount} failed jobs, retrying up to 50");
+        $failedIds = DB::table('failed_jobs')->orderBy('failed_at')->limit(50)->pluck('uuid');
+        foreach ($failedIds as $uuid) {
+            Artisan::call('queue:retry', ['id' => [$uuid]]);
+        }
+        Artisan::call('queue:work', [
+            '--stop-when-empty' => true,
+            '--max-time' => 60,
+            '--tries' => 3,
+        ]);
+    }
+})->everyFiveMinutes()->name('retry-failed-jobs')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('app:release-tickets');
