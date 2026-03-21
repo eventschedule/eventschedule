@@ -113,7 +113,7 @@
                 <button @click="openDropdown = openDropdown === 'system' ? null : 'system'"
                     class="whitespace-nowrap border-b-2 {{ $systemActive ? $tabActive : $tabInactive }} px-1 pb-4 text-base font-medium inline-flex items-center">
                     @lang('messages.system')
-                    @if (config('app.is_nexus') && isset($supportUnreadCount) && $supportUnreadCount > 0)
+                    @if (config('app.hosted') && isset($supportUnreadCount) && $supportUnreadCount > 0)
                     <span class="ms-1.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">{{ $supportUnreadCount }}</span>
                     @endif
                     <svg class="ms-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,7 +140,7 @@
                         <a href="{{ route('admin.logs') }}" class="{{ $active === 'logs' ? $dropdownItemActive : $dropdownItem }}">
                             Logs
                         </a>
-                        @if (config('app.is_nexus'))
+                        @if (config('app.hosted'))
                         <a href="{{ route('admin.support') }}" class="{{ $active === 'support' ? $dropdownItemActive : $dropdownItem }}">
                             Support
                         </a>

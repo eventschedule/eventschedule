@@ -196,7 +196,7 @@
     </div>
 
     @auth
-        @if (config('app.is_nexus'))
+        @if (config('app.hosted'))
             @include('partials.support-chat-widget')
         @endif
     @endauth

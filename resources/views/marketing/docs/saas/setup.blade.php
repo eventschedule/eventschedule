@@ -78,6 +78,7 @@
                         <a href="#verification" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Verification Steps</a>
                         <a href="#demo" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Demo Mode</a>
                         <a href="#troubleshooting" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Troubleshooting</a>
+                        <a href="#support-chat" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Support Chat</a>
                         <a href="#related" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Related Documentation</a>
                         <a href="#security" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Security Considerations</a>
                     </nav>
@@ -632,6 +633,35 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                                 </div>
                                 <pre><code>tail -f storage/logs/laravel.log</code></pre>
                             </div>
+                        </section>
+
+                        <!-- Support Chat -->
+                        <section id="support-chat" class="doc-section">
+                            <h2 class="doc-heading">
+                                <svg class="inline-block w-7 h-7 me-2 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                </svg>
+                                Support Chat
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Event Schedule includes a built-in real-time chat system that allows users to communicate directly with the site admin for support. This feature is automatically enabled in hosted/SaaS mode.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">For Users</h3>
+                            <ul class="doc-list">
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Chat widget:</span> A floating chat bubble appears in the bottom-right corner of the screen for logged-in users</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Availability indicator:</span> A green dot on the chat bubble indicates when the admin is available</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Sidebar button:</span> Users can also access support chat from the sidebar navigation</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Message limit:</span> Each message can be up to 2,000 characters</li>
+                            </ul>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-6">For Admins</h3>
+                            <ul class="doc-list">
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Admin panel:</span> Manage conversations from System > Support in the admin panel</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Availability toggle:</span> Toggle your online/offline status to let users know when you are available</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Conversations list:</span> View all conversations with unread message badges</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Replying:</span> Click on a conversation to view the message history and reply</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Closing conversations:</span> Close resolved conversations to keep the list organized</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Email notifications:</span> When a user sends a message while the admin is offline, an email notification is sent</li>
+                            </ul>
                         </section>
 
                         <!-- Related Documentation -->

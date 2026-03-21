@@ -154,6 +154,7 @@ class HelpUtils
         'checkin' => '/docs/tickets#check-in',
         'waitlist' => '/docs/tickets#waitlist',
         'referrals' => '/docs/referral-program',
+        'admin/support' => '/docs/saas#support-chat',
         'new/*' => '/docs/creating-schedules',
     ];
 

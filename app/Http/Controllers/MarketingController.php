@@ -4851,6 +4851,7 @@ class MarketingController extends Controller
             ['page' => 'SaaS Setup', 'section' => 'Troubleshooting', 'description' => 'Fix common SaaS setup issues.', 'url' => $r['saas_setup'].'#troubleshooting', 'category' => 'SaaS', 'keywords' => 'troubleshoot fix problem'],
             ['page' => 'SaaS Setup', 'section' => 'Related Documentation', 'description' => 'Links to related SaaS documentation.', 'url' => $r['saas_setup'].'#related', 'category' => 'SaaS', 'keywords' => ''],
             ['page' => 'SaaS Setup', 'section' => 'Security', 'description' => 'Security considerations for SaaS deployments.', 'url' => $r['saas_setup'].'#security', 'category' => 'SaaS', 'keywords' => 'security ssl https'],
+            ['page' => 'SaaS Setup', 'section' => 'Support Chat', 'description' => 'Built-in real-time chat for user support.', 'url' => $r['saas_setup'].'#support-chat', 'category' => 'SaaS', 'keywords' => 'support chat help message admin conversation'],
 
             // Custom Domains (SaaS)
             ['page' => 'Custom Domains', 'section' => 'Overview', 'description' => 'Allow users to use custom domains.', 'url' => $r['saas_custom_domains'].'#overview', 'category' => 'SaaS', 'keywords' => 'custom domain branded url'],

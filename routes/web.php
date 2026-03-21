@@ -389,8 +389,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/webhooks/{webhookHash}/test', [WebhookSettingsController::class, 'test'])->name('webhooks.test');
     Route::get('/webhooks/{webhookHash}/deliveries', [WebhookSettingsController::class, 'deliveries'])->name('webhooks.deliveries');
 
-    // Support chat routes (nexus only)
-    if (config('app.is_nexus')) {
+    // Support chat routes (hosted only)
+    if (config('app.hosted')) {
         Route::middleware('throttle:30,1')->group(function () {
             Route::get('/support-chat/status', [SupportChatController::class, 'status'])->name('support-chat.status');
             Route::get('/support-chat/messages', [SupportChatController::class, 'getMessages'])->name('support-chat.messages');
@@ -474,8 +474,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/admin/newsletter-segments/{hash}/users/{userHash}', [AdminNewsletterController::class, 'deleteSegmentUser'])->name('admin.newsletters.segment.user.delete');
         Route::get('/admin/users/search', [AdminNewsletterController::class, 'searchUsers'])->name('admin.users.search');
 
-        // Admin support chat routes (nexus only)
-        if (config('app.is_nexus')) {
+        // Admin support chat routes (hosted only)
+        if (config('app.hosted')) {
             Route::get('/admin/support', [SupportChatController::class, 'adminIndex'])->name('admin.support');
             Route::get('/admin/support/conversations', [SupportChatController::class, 'adminConversations'])->name('admin.support.conversations');
             Route::get('/admin/support/{id}/messages', [SupportChatController::class, 'adminMessages'])->name('admin.support.messages');
