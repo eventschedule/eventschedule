@@ -29,6 +29,7 @@ use App\Http\Controllers\PromoCodeController;
 use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StripeController;
+use App\Http\Controllers\SupportChatController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SubscriptionWebhookController;
 use App\Http\Controllers\TicketController;
@@ -163,7 +164,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/event', [EventController::class, 'createDefault'])->name('event.create_default');
     Route::get('/dashboard', [HomeController::class, 'home'])->name('home');
     Route::get('/dashboard/api/calendar-events', [HomeController::class, 'calendarEvents'])->name('home.calendar_events');
-    Route::post('/dashboard/feedback', [HomeController::class, 'submitFeedback'])->name('home.feedback');
     Route::post('/dashboard/config', [HomeController::class, 'saveDashboardConfig'])->name('home.save_config');
     Route::get('/new/{type}', [RoleController::class, 'create'])->name('new');
     Route::post('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:25,1440');
@@ -389,6 +389,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/webhooks/{webhookHash}/test', [WebhookSettingsController::class, 'test'])->name('webhooks.test');
     Route::get('/webhooks/{webhookHash}/deliveries', [WebhookSettingsController::class, 'deliveries'])->name('webhooks.deliveries');
 
+    // Support chat routes (nexus only)
+    if (config('app.is_nexus')) {
+        Route::middleware('throttle:30,1')->group(function () {
+            Route::get('/support-chat/status', [SupportChatController::class, 'status'])->name('support-chat.status');
+            Route::get('/support-chat/messages', [SupportChatController::class, 'getMessages'])->name('support-chat.messages');
+            Route::post('/support-chat/messages', [SupportChatController::class, 'sendMessage'])->name('support-chat.send');
+            Route::post('/support-chat/mark-read', [SupportChatController::class, 'markRead'])->name('support-chat.mark-read');
+        });
+    }
+
     // Admin password confirmation (outside admin middleware - the admin middleware redirects here)
     Route::get('/admin/confirm-password', [AdminController::class, 'showConfirmPassword'])
         ->name('admin.password.confirm.show');
@@ -463,6 +473,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/admin/newsletter-segments/{hash}/users', [AdminNewsletterController::class, 'storeSegmentUser'])->name('admin.newsletters.segment.user.store');
         Route::delete('/admin/newsletter-segments/{hash}/users/{userHash}', [AdminNewsletterController::class, 'deleteSegmentUser'])->name('admin.newsletters.segment.user.delete');
         Route::get('/admin/users/search', [AdminNewsletterController::class, 'searchUsers'])->name('admin.users.search');
+
+        // Admin support chat routes (nexus only)
+        if (config('app.is_nexus')) {
+            Route::get('/admin/support', [SupportChatController::class, 'adminIndex'])->name('admin.support');
+            Route::get('/admin/support/conversations', [SupportChatController::class, 'adminConversations'])->name('admin.support.conversations');
+            Route::get('/admin/support/{id}/messages', [SupportChatController::class, 'adminMessages'])->name('admin.support.messages');
+            Route::post('/admin/support/{id}/reply', [SupportChatController::class, 'adminReply'])->name('admin.support.reply');
+            Route::post('/admin/support/{id}/mark-read', [SupportChatController::class, 'adminMarkRead'])->name('admin.support.mark-read');
+            Route::post('/admin/support/toggle-availability', [SupportChatController::class, 'adminToggleAvailability'])->name('admin.support.toggle-availability');
+            Route::post('/admin/support/{id}/close', [SupportChatController::class, 'adminCloseConversation'])->name('admin.support.close');
+        }
 
         // Admin blog routes
         if (config('app.hosted')) {

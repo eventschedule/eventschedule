@@ -219,6 +219,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(CarpoolRequest::class);
     }
 
+    public function supportConversation()
+    {
+        return $this->hasOne(SupportConversation::class);
+    }
+
     public function hasAgreedToCarpool()
     {
         return $this->carpool_agreed_at !== null;

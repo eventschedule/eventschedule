@@ -8,7 +8,7 @@
         $manageKeys = array_merge($manageKeys, ['plans', 'domains', 'referrals', 'blog']);
     }
     $manageActive = in_array($active, $manageKeys);
-    $systemActive = in_array($active, ['audit-log', 'queue', 'logs']);
+    $systemActive = in_array($active, ['audit-log', 'queue', 'logs', 'support']);
 
     $tabActive = 'border-[var(--brand-blue)] text-[var(--brand-blue)]';
     $tabInactive = 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300';
@@ -113,6 +113,9 @@
                 <button @click="openDropdown = openDropdown === 'system' ? null : 'system'"
                     class="whitespace-nowrap border-b-2 {{ $systemActive ? $tabActive : $tabInactive }} px-1 pb-4 text-base font-medium inline-flex items-center">
                     @lang('messages.system')
+                    @if (config('app.is_nexus') && isset($supportUnreadCount) && $supportUnreadCount > 0)
+                    <span class="ms-1.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">{{ $supportUnreadCount }}</span>
+                    @endif
                     <svg class="ms-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
@@ -137,6 +140,11 @@
                         <a href="{{ route('admin.logs') }}" class="{{ $active === 'logs' ? $dropdownItemActive : $dropdownItem }}">
                             Logs
                         </a>
+                        @if (config('app.is_nexus'))
+                        <a href="{{ route('admin.support') }}" class="{{ $active === 'support' ? $dropdownItemActive : $dropdownItem }}">
+                            Support
+                        </a>
+                        @endif
                     </div>
                 </div>
             </div>

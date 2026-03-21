@@ -104,6 +104,12 @@ class AppServiceProvider extends ServiceProvider
             ]);
         });
 
+        View::composer('admin.partials._navigation', function ($view) {
+            if (config('app.is_nexus') && auth()->check() && auth()->user()->isAdmin()) {
+                $view->with('supportUnreadCount', \App\Models\SupportMessage::where('is_from_admin', false)->whereNull('read_at')->count());
+            }
+        });
+
         View::composer('marketing.partials.header', function ($view) {
             $view->with('githubStars', \App\Utils\GitHubUtils::getStars());
         });

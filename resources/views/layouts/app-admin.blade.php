@@ -195,6 +195,12 @@
         </div>
     </div>
 
+    @auth
+        @if (config('app.is_nexus'))
+            @include('partials.support-chat-widget')
+        @endif
+    @endauth
+
     <script {!! nonce_attr() !!}>
         document.getElementById('logout-link').addEventListener('click', function(e) {
             e.preventDefault();

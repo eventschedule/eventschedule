@@ -1,0 +1,286 @@
+<div id="support-chat-widget">
+    {{-- Launcher button --}}
+    <button v-if="!hidden" @click="togglePanel"
+        class="fixed bottom-6 end-6 z-50 w-14 h-14 rounded-full bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+        :class="{ 'scale-0': !entered, 'scale-100': entered }"
+        style="transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;">
+        {{-- Chat icon --}}
+        <svg v-if="!panelOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+        </svg>
+        {{-- Close icon --}}
+        <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+        {{-- Available dot --}}
+        <span v-if="available && !panelOpen" class="absolute bottom-0 start-0 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full"></span>
+        {{-- Unread badge --}}
+        <span v-if="unreadCount > 0 && !panelOpen" class="absolute -top-1 -end-1 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">@{{ unreadCount }}</span>
+    </button>
+
+    {{-- Chat panel --}}
+    <div v-if="panelOpen"
+        class="fixed z-[60] flex flex-col bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-2xl overflow-hidden transition-all duration-200"
+        :class="isMobile ? 'inset-2 top-8' : ''"
+        :style="isMobile ? '' : 'bottom: 90px; width: 380px; height: 520px; ' + (isRtl ? 'left: 24px;' : 'right: 24px;')">
+        {{-- Header --}}
+        <div class="bg-[var(--brand-button-bg)] text-white px-5 py-4 shrink-0">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="font-semibold text-base">Support</div>
+                    <div class="flex items-center gap-1.5 mt-1 text-sm opacity-90">
+                        <span :class="available ? 'bg-green-400' : 'bg-gray-400'" class="w-2 h-2 rounded-full inline-block"></span>
+                        <span v-if="available">We're online</span>
+                        <span v-else>Leave a message</span>
+                    </div>
+                    <div class="text-xs opacity-75 mt-0.5">
+                        <span v-if="available">We typically reply in a few minutes</span>
+                        <span v-else>We'll reply by email</span>
+                    </div>
+                </div>
+                <button @click="panelOpen = false" class="p-1 rounded hover:bg-white/20 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        {{-- Messages --}}
+        <div ref="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3">
+            {{-- Welcome message --}}
+            <div v-if="messages.length === 0" class="flex justify-start">
+                <div class="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm bg-gray-100 dark:bg-[#2d2d30] text-gray-900 dark:text-gray-100">
+                    Hi! How can we help you today?
+                </div>
+            </div>
+            <template v-for="(msg, idx) in messages" :key="msg.id">
+                <div v-if="showTimestamp(idx)" class="text-center text-xs text-gray-400 dark:text-gray-500 py-1">@{{ formatGroupTime(msg.created_at) }}</div>
+                <div :class="msg.is_from_admin ? 'flex justify-start' : 'flex justify-end'">
+                    <div :class="[
+                        'max-w-[80%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap break-words',
+                        msg.is_from_admin
+                            ? 'bg-gray-100 dark:bg-[#2d2d30] text-gray-900 dark:text-gray-100'
+                            : 'bg-[var(--brand-button-bg)] text-white'
+                    ]">@{{ msg.body }}</div>
+                </div>
+            </template>
+        </div>
+
+        {{-- Input --}}
+        <div class="p-3 border-t border-gray-200 dark:border-gray-700 shrink-0">
+            <div class="flex items-end gap-2">
+                <textarea v-model="inputText" @keydown.enter.exact.prevent="sendMessage" rows="1" placeholder="Type a message..." class="flex-1 resize-none rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#252526] text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-transparent" style="max-height: 100px;"></textarea>
+                <button v-if="inputText.trim()" @click="sendMessage" class="p-2 rounded-xl bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white transition-all duration-200 shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 0l-7 7m7-7l7 7" transform="rotate(45 12 12)"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="mt-2 text-center">
+                <button @click="hideWidget" class="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Hide chat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
+<script {!! nonce_attr() !!}>
+    document.addEventListener('DOMContentLoaded', function() {
+        Vue.createApp({
+            data() {
+                return {
+                    panelOpen: false,
+                    hidden: false,
+                    available: false,
+                    unreadCount: 0,
+                    messages: [],
+                    inputText: '',
+                    entered: false,
+                    isMobile: window.innerWidth < 640,
+                    isRtl: document.documentElement.dir === 'rtl' || document.body.dir === 'rtl',
+                    openPollInterval: null,
+                    closedPollInterval: null,
+                    hiddenPollInterval: null,
+                };
+            },
+            watch: {
+                panelOpen(open) {
+                    this.setupPolling();
+                    if (open) {
+                        this.fetchMessages();
+                        this.markRead();
+                    }
+                },
+                hidden() {
+                    this.setupPolling();
+                },
+            },
+            mounted() {
+                try {
+                    this.hidden = localStorage.getItem('supportChatHidden') === 'true';
+                } catch (e) {}
+                this.fetchStatus();
+                this.setupPolling();
+                setTimeout(() => { this.entered = true; }, 1000);
+                window.addEventListener('resize', () => {
+                    this.isMobile = window.innerWidth < 640;
+                });
+                window.addEventListener('show-support-chat', () => {
+                    this.hidden = false;
+                    try { localStorage.removeItem('supportChatHidden'); } catch (e) {}
+                    this.panelOpen = true;
+                    this.entered = true;
+                });
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        this.clearAllPolling();
+                    } else {
+                        this.fetchStatus();
+                        if (this.panelOpen) this.fetchMessages();
+                        this.setupPolling();
+                    }
+                });
+            },
+            beforeUnmount() {
+                this.clearAllPolling();
+            },
+            methods: {
+                clearAllPolling() {
+                    if (this.openPollInterval) clearInterval(this.openPollInterval);
+                    if (this.closedPollInterval) clearInterval(this.closedPollInterval);
+                    if (this.hiddenPollInterval) clearInterval(this.hiddenPollInterval);
+                    this.openPollInterval = null;
+                    this.closedPollInterval = null;
+                    this.hiddenPollInterval = null;
+                },
+                setupPolling() {
+                    this.clearAllPolling();
+                    if (this.panelOpen) {
+                        this.openPollInterval = setInterval(() => {
+                            this.fetchMessages();
+                            this.markRead();
+                        }, 5000);
+                    } else if (!this.hidden) {
+                        this.closedPollInterval = setInterval(() => {
+                            this.fetchStatus();
+                        }, 30000);
+                    } else {
+                        this.hiddenPollInterval = setInterval(() => {
+                            this.fetchStatus();
+                        }, 60000);
+                    }
+                },
+                fetchStatus() {
+                    fetch('/support-chat/status')
+                        .then(r => r.json())
+                        .then(data => {
+                            this.available = data.available;
+                            this.unreadCount = data.unread_count;
+                            this.updateSidebarBadge();
+                        })
+                        .catch(() => {});
+                },
+                fetchMessages() {
+                    fetch('/support-chat/messages')
+                        .then(r => r.json())
+                        .then(data => {
+                            var hadCount = this.messages.length;
+                            this.messages = data.messages;
+                            this.available = data.available;
+                            if (data.messages.length !== hadCount) {
+                                this.$nextTick(() => this.scrollToBottom());
+                            }
+                            this.unreadCount = 0;
+                            this.updateSidebarBadge();
+                        })
+                        .catch(() => {});
+                },
+                sendMessage() {
+                    var text = this.inputText.trim();
+                    if (!text) return;
+                    this.inputText = '';
+                    fetch('/support-chat/messages', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({ body: text })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.message) {
+                            this.messages.push(data.message);
+                            this.$nextTick(() => this.scrollToBottom());
+                        }
+                    })
+                    .catch(() => {});
+                },
+                markRead() {
+                    if (this.unreadCount > 0) {
+                        fetch('/support-chat/mark-read', {
+                            method: 'POST',
+                            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                        }).then(() => {
+                            this.unreadCount = 0;
+                            this.updateSidebarBadge();
+                        }).catch(() => {});
+                    }
+                },
+                togglePanel() {
+                    this.panelOpen = !this.panelOpen;
+                },
+                hideWidget() {
+                    this.panelOpen = false;
+                    this.hidden = true;
+                    try { localStorage.setItem('supportChatHidden', 'true'); } catch (e) {}
+                },
+                scrollToBottom() {
+                    var c = this.$refs.chatMessages;
+                    if (c) c.scrollTop = c.scrollHeight;
+                },
+                showTimestamp(idx) {
+                    if (idx === 0) return true;
+                    var curr = new Date(this.messages[idx].created_at);
+                    var prev = new Date(this.messages[idx - 1].created_at);
+                    return (curr - prev) > 300000;
+                },
+                formatGroupTime(iso) {
+                    var d = new Date(iso);
+                    var now = new Date();
+                    var opts = { hour: 'numeric', minute: '2-digit' };
+                    if (d.toDateString() === now.toDateString()) {
+                        return 'Today ' + d.toLocaleTimeString(undefined, opts);
+                    }
+                    var yesterday = new Date(now);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    if (d.toDateString() === yesterday.toDateString()) {
+                        return 'Yesterday ' + d.toLocaleTimeString(undefined, opts);
+                    }
+                    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString(undefined, opts);
+                },
+                updateSidebarBadge() {
+                    var self = this;
+                    document.querySelectorAll('.js-support-chat-sidebar-badge').forEach(function(badge) {
+                        if (self.unreadCount > 0) {
+                            badge.textContent = self.unreadCount;
+                            badge.style.display = '';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    });
+                    document.querySelectorAll('.js-support-chat-sidebar-btn').forEach(function(btn) {
+                        if (self.unreadCount > 0) {
+                            btn.classList.remove('opacity-0');
+                            btn.classList.add('opacity-100');
+                        } else {
+                            btn.classList.add('opacity-0');
+                            btn.classList.remove('opacity-100');
+                        }
+                    });
+                },
+            },
+        }).mount('#support-chat-widget');
+    });
+</script>

@@ -254,14 +254,31 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ \App\Utils\HelpUtils::getDocUrl() }}" target="_blank"
-                        class="js-help-link dark-nav-hover group flex gap-x-4 items-center rounded-lg p-2 text-lg font-semibold leading-6 text-gray-400 hover:text-white">
-                        <svg class="h-8 w-8 shrink-0" viewBox="0 0 24 24"
-                            fill="#666" aria-hidden="true">
-                            <path d="M15.07,11.25L14.17,12.17C13.45,12.89 13,13.5 13,15H11V14.5C11,13.39 11.45,12.39 12.17,11.67L13.41,10.41C13.78,10.05 14,9.55 14,9C14,7.89 13.1,7 12,7A2,2 0 0,0 10,9H8A4,4 0 0,1 12,5A4,4 0 0,1 16,9C16,9.88 15.64,10.67 15.07,11.25M13,19H11V17H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12C22,6.47 17.5,2 12,2Z" />
-                        </svg>
-                        {{ __('messages.help') }}
-                    </a>
+                    <div class="dark-nav-hover group flex items-center rounded-lg p-2 text-lg font-semibold leading-6 text-gray-400 hover:text-white">
+                        <a href="{{ \App\Utils\HelpUtils::getDocUrl() }}" target="_blank"
+                            class="js-help-link flex gap-x-4 items-center flex-1">
+                            <svg class="h-8 w-8 shrink-0" viewBox="0 0 24 24"
+                                fill="#666" aria-hidden="true">
+                                <path d="M15.07,11.25L14.17,12.17C13.45,12.89 13,13.5 13,15H11V14.5C11,13.39 11.45,12.39 12.17,11.67L13.41,10.41C13.78,10.05 14,9.55 14,9C14,7.89 13.1,7 12,7A2,2 0 0,0 10,9H8A4,4 0 0,1 12,5A4,4 0 0,1 16,9C16,9.88 15.64,10.67 15.07,11.25M13,19H11V17H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12C22,6.47 17.5,2 12,2Z" />
+                            </svg>
+                            {{ __('messages.help') }}
+                        </a>
+                        @if (config('app.is_nexus'))
+                        <button class="js-support-chat-sidebar-btn relative flex opacity-0 group-hover:opacity-100 p-2 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition-colors shrink-0" title="Support chat">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                            </svg>
+                            <span class="js-support-chat-sidebar-badge absolute -top-1 -end-1 inline-flex items-center justify-center min-w-[1rem] h-4 px-1 text-[10px] font-bold text-white bg-red-500 rounded-full" style="display: none;"></span>
+                        </button>
+                        <script {!! nonce_attr() !!}>
+                            (function(btn) {
+                                btn.addEventListener('click', function() {
+                                    window.dispatchEvent(new CustomEvent('show-support-chat'));
+                                });
+                            })(document.currentScript.previousElementSibling);
+                        </script>
+                        @endif
+                    </div>
                 </li>
             </ul>
         </li>

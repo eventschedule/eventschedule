@@ -135,37 +135,8 @@
         @endif
 
         @if (config('app.hosted'))
-        {{-- Dashboard Header Actions with Feedback --}}
-        <div class="flex flex-col sm:flex-row sm:items-start gap-4 mb-4">
-            {{-- Feedback textarea --}}
-            <div class="flex-1">
-                <form id="feedback-form" class="h-full">
-                    @csrf
-                    <div class="relative h-full">
-                        <textarea
-                            id="feedback-textarea"
-                            name="feedback"
-                            placeholder="{{ __('messages.feedback_placeholder') }}"
-                            class="w-full h-full px-4 py-2 pr-12 border border-gray-300 dark:border-white/[0.06] rounded-lg focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] resize-none bg-white dark:bg-[#252526] text-gray-900 dark:text-gray-100"
-                            rows="2"
-                            dir="auto"
-                        ></textarea>
-                        <button
-                            type="button"
-                            id="feedback-submit-btn"
-                            class="absolute bottom-2 right-2 p-2 mb-2 bg-[var(--brand-button-bg)] text-white rounded-lg hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 transition-all opacity-0 pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
-                            style="transition: opacity 0.2s ease-in-out;"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            {{-- Buttons --}}
-            <div class="flex items-start gap-3 flex-shrink-0">
+        {{-- Dashboard Header Actions --}}
+        <div class="flex justify-end items-center gap-3 mb-4">
                 {{-- Customize Button --}}
                 <button type="button" x-data x-on:click="$dispatch('open-modal', 'customize-dashboard')"
                     class="inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-[#2d2d30] border border-gray-300 dark:border-white/[0.06] rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 shadow-sm dark:shadow-none transition-all duration-200 hover:bg-gray-50 dark:hover:bg-[#252526] hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
@@ -215,7 +186,6 @@
                     </div>
                 </div>
                 @endif
-            </div>
         </div>
         @else
         {{-- Dashboard Header Actions (non-hosted) --}}
@@ -488,103 +458,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const feedbackForm = document.getElementById('feedback-form');
-            const feedbackTextarea = document.getElementById('feedback-textarea');
-            const submitButton = document.getElementById('feedback-submit-btn');
-            
-            if (feedbackForm && feedbackTextarea && submitButton) {
-                // Show/hide submit button based on textarea content
-                function toggleSubmitButton() {
-                    const hasText = feedbackTextarea.value.trim().length > 0;
-                    if (hasText) {
-                        submitButton.classList.remove('opacity-0', 'pointer-events-none');
-                        submitButton.classList.add('opacity-100');
-                    } else {
-                        submitButton.classList.add('opacity-0', 'pointer-events-none');
-                        submitButton.classList.remove('opacity-100');
-                    }
-                }
-                
-                // Listen for input changes
-                feedbackTextarea.addEventListener('input', toggleSubmitButton);
-                feedbackTextarea.addEventListener('keyup', toggleSubmitButton);
-                
-                // Handle form submission
-                async function submitFeedback() {
-                    const feedback = feedbackTextarea.value.trim();
-                    if (!feedback) {
-                        return;
-                    }
-                    
-                    submitButton.disabled = true;
-                    
-                    try {
-                        const formData = new FormData();
-                        formData.append('feedback', feedback);
-                        formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}');
-                        
-                        const response = await fetch('{{ route("home.feedback") }}', {
-                            method: 'POST',
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json'
-                            },
-                            body: formData
-                        });
-                        if (!response.ok) throw new Error('Request failed');
-                        const data = await response.json();
-                        
-                        if (data.success) {
-                            Toastify({
-                                text: data.message || @json(__("messages.feedback_submitted")),
-                                duration: 3000,
-                                position: 'center',
-                                stopOnFocus: true,
-                                style: {
-                                    background: '#4BB543',
-                                }
-                            }).showToast();
-                            
-                            feedbackTextarea.value = '';
-                            toggleSubmitButton();
-                        } else {
-                            Toastify({
-                                text: data.message || @json(__("messages.feedback_failed")),
-                                duration: 5000,
-                                position: 'center',
-                                stopOnFocus: true,
-                                style: {
-                                    background: '#FF0000',
-                                }
-                            }).showToast();
-                        }
-                    } catch (error) {
-                        Toastify({
-                            text: @json(__("messages.feedback_failed")),
-                            duration: 5000,
-                            position: 'center',
-                            stopOnFocus: true,
-                            style: {
-                                background: '#FF0000',
-                            }
-                        }).showToast();
-                    } finally {
-                        submitButton.disabled = false;
-                    }
-                }
-                
-                // Handle button click
-                submitButton.addEventListener('click', submitFeedback);
-                
-                // Handle Enter key (Ctrl+Enter or Cmd+Enter to submit)
-                feedbackTextarea.addEventListener('keydown', function(e) {
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                        e.preventDefault();
-                        submitFeedback();
-                    }
-                });
-            }
-
             // Sparkline chart
             const sparklineCanvas = document.getElementById('sparkline-chart');
             if (sparklineCanvas && typeof Chart !== 'undefined') {

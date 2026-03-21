@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\SupportEmail;
 use App\Models\BlogPost;
 use App\Models\BoostCampaign;
 use App\Models\Event;
@@ -18,7 +17,6 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 
 class HomeController extends Controller
 {
@@ -309,42 +307,6 @@ class HomeController extends Controller
 
         return response($sitemapView)
             ->header('Content-Type', 'application/xml');
-    }
-
-    public function submitFeedback(Request $request)
-    {
-        $request->validate([
-            'feedback' => 'required|string|max:5000',
-        ]);
-
-        // Block feedback submission in demo mode
-        if (is_demo_mode()) {
-            return response()->json([
-                'success' => false,
-                'message' => __('messages.demo_mode_restriction'),
-            ], 403);
-        }
-
-        $user = $request->user();
-        $feedback = $request->input('feedback');
-
-        try {
-            Mail::to('contact@eventschedule.com')->send(new SupportEmail(
-                $user->name ?? $user->email,
-                $user->email,
-                $feedback
-            ));
-
-            return response()->json([
-                'success' => true,
-                'message' => __('messages.feedback_submitted'),
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => __('messages.feedback_failed'),
-            ], 500);
-        }
     }
 
     public function saveDashboardConfig(Request $request): JsonResponse
