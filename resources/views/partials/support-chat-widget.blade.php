@@ -1,10 +1,48 @@
-<style>[v-cloak] { display: none !important; }</style>
+<style>
+[v-cloak] { display: none !important; }
+.chat-panel {
+    background: linear-gradient(135deg, #ffffff 0%, #fefefe 30%, #f9fafb 100%);
+    box-shadow: 0 4px 16px -2px rgba(0,0,0,0.08), 0 10px 25px rgba(0,0,0,0.06);
+}
+.dark .chat-panel {
+    background: linear-gradient(135deg, #2e2e31 0%, #2a2a2d 30%, #252526 100%);
+    box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(255,255,255,0.03), 0 10px 25px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.2);
+}
+.chat-panel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    z-index: 10;
+    background: transparent;
+}
+.dark .chat-panel::after {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+}
+.chat-bubble-admin {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.dark .chat-bubble-admin {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.chat-bubble-user {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.chat-input-area {
+    border-top: 1px solid rgba(0,0,0,0.06);
+}
+.dark .chat-input-area {
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+</style>
 <div id="support-chat-widget" v-cloak>
     {{-- Launcher button --}}
     <button v-if="showButton" @click="togglePanel"
-        class="fixed bottom-6 end-6 z-50 w-14 h-14 rounded-full bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+        class="fixed bottom-6 end-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] text-white transition-all duration-200 flex items-center justify-center"
         :class="{ 'scale-0': !entered, 'scale-100': entered }"
-        style="transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;">
+        style="box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.2), 0 2px 8px rgba(0,0,0,0.15), 0 4px 16px -4px rgba(0,0,0,0.2); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;">
         {{-- Chat icon --}}
         <svg v-if="!panelOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
@@ -21,11 +59,11 @@
 
     {{-- Chat panel --}}
     <div v-if="panelOpen"
-        class="fixed z-[60] flex flex-col bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-2xl overflow-hidden transition-all duration-200"
+        class="fixed z-[60] flex flex-col chat-panel rounded-2xl overflow-hidden transition-all duration-200"
         :class="isMobile ? 'inset-2 top-8' : ''"
         :style="isMobile ? '' : 'bottom: 90px; width: 380px; height: 520px; ' + (isRtl ? 'left: 24px;' : 'right: 24px;')">
         {{-- Header --}}
-        <div class="bg-[var(--brand-button-bg)] text-white px-5 py-4 shrink-0">
+        <div class="text-white px-5 py-4 shrink-0" style="background: linear-gradient(135deg, var(--brand-button-bg-light), var(--brand-button-bg)); box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.15);">
             <div class="flex items-center justify-between">
                 <div>
                     <div class="font-semibold text-base">Support</div>
@@ -51,7 +89,7 @@
         <div ref="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3">
             {{-- Welcome message --}}
             <div v-if="messages.length === 0" class="flex justify-start">
-                <div class="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm bg-gray-100 dark:bg-[#2d2d30] text-gray-900 dark:text-gray-100">
+                <div class="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm bg-gray-100 dark:bg-[#2d2d30] text-gray-900 dark:text-gray-100 chat-bubble-admin">
                     Hi! How can we help you today?
                 </div>
             </div>
@@ -61,18 +99,18 @@
                     <div :class="[
                         'max-w-[80%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap break-words',
                         msg.is_from_admin
-                            ? 'bg-gray-100 dark:bg-[#2d2d30] text-gray-900 dark:text-gray-100'
-                            : 'bg-[var(--brand-button-bg)] text-white'
+                            ? 'bg-gray-100 dark:bg-[#2d2d30] text-gray-900 dark:text-gray-100 chat-bubble-admin'
+                            : 'bg-[var(--brand-button-bg)] text-white chat-bubble-user'
                     ]">@{{ msg.body }}</div>
                 </div>
             </template>
         </div>
 
         {{-- Input --}}
-        <div class="p-3 border-t border-gray-200 dark:border-gray-700 shrink-0">
+        <div class="p-3 shrink-0 chat-input-area">
             <div class="flex items-end gap-2">
-                <textarea v-model="inputText" @keydown.enter.exact.prevent="sendMessage" rows="1" placeholder="Type a message..." class="flex-1 resize-none rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#252526] text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-transparent" style="max-height: 100px;"></textarea>
-                <button v-if="inputText.trim()" @click="sendMessage" class="p-2 rounded-xl bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white transition-all duration-200 shrink-0">
+                <textarea v-model="inputText" @keydown.enter.exact.prevent="sendMessage" rows="1" placeholder="Type a message..." class="flex-1 resize-none rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#252526] text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-transparent" style="max-height: 100px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);"></textarea>
+                <button v-if="inputText.trim()" @click="sendMessage" class="p-2 rounded-xl bg-gradient-to-br from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] text-white transition-all duration-200 shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 0l-7 7m7-7l7 7" transform="rotate(45 12 12)"/>
                     </svg>
