@@ -5785,6 +5785,8 @@
         this.event.rsvp_enabled = (newValue === 'rsvp');
         if (newValue === 'rsvp') {
             this.activeTicketTab = 'options';
+        } else {
+            this.activeTicketTab = 'tickets';
         }
         this.savePreferences();
       },

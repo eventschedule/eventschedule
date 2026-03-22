@@ -1760,9 +1760,9 @@
                                 <button type="button" class="links-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="social_links">
                                     {{ __('messages.social_links') }}
                                 </button>
-                                <button type="button" class="links-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="payment_links">
+                                {{-- <button type="button" class="links-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="payment_links">
                                     {{ __('messages.payment_links') }}
-                                </button>
+                                </button> --}}
                             </nav>
                         </div>
 
@@ -1856,8 +1856,8 @@
                             </button>
                         </div>
 
-                        {{-- Payment Links --}}
-                        <div id="links-tab-payment_links" class="links-tab-content hidden">
+                        {{-- Payment Links (hidden) --}}
+                        {{-- <div id="links-tab-payment_links" class="links-tab-content hidden">
                             <ul role="list" class="link-list divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
                                 {!! (!$role->payment_links || $role->payment_links == '[]') ? 'style="display:none"' : '' !!}>
                                 @if ($role->payment_links && $role->payment_links != '[]')
@@ -1899,7 +1899,7 @@
                                 data-link-type="payment_links">
                                 + {{ __('messages.add_link') }}
                             </button>
-                        </div>
+                        </div> --}}
 
                         <input type="hidden" name="youtube_links" id="youtube_links_data"
                             value="{{ $role->youtube_links ?? '[]' }}">

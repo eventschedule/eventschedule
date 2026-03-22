@@ -2,9 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\SendQueuedEmail;
-use App\Mail\FeedbackRequest;
-use App\Models\Event;
+use App\Jobs\SendFeedbackEmail;
 use App\Models\Role;
 use App\Models\Sale;
 use Illuminate\Console\Command;
@@ -53,10 +51,6 @@ class SendFeedbackRequests extends Command
                         $q->where('events.feedback_enabled', true);
                     }
                 })
-                ->where(function ($q) {
-                    $q->where('events.tickets_enabled', true)
-                        ->orWhere('events.rsvp_enabled', true);
-                })
                 ->get();
 
             foreach ($events as $event) {
@@ -92,21 +86,22 @@ class SendFeedbackRequests extends Command
                     }
 
                     try {
-                        $mailable = new FeedbackRequest($sale, $event, $role);
+                        $sale->feedback_sent_at = now();
+                        $sale->save();
 
-                        SendQueuedEmail::dispatch(
-                            $mailable,
-                            $sale->email,
+                        SendFeedbackEmail::dispatch(
+                            $sale->id,
+                            $event->id,
                             $role->id,
                             $role->language_code ?? app()->getLocale()
                         );
 
-                        $sale->feedback_sent_at = now();
-                        $sale->save();
                         $count++;
                     } catch (\Exception $e) {
+                        $sale->feedback_sent_at = null;
+                        $sale->save();
                         report($e);
-                        Log::error('Failed to send feedback request: '.$e->getMessage(), [
+                        Log::error('Failed to dispatch feedback request: '.$e->getMessage(), [
                             'sale_id' => $sale->id,
                             'event_id' => $event->id,
                         ]);
