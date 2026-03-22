@@ -63,7 +63,7 @@
         :class="isMobile ? 'inset-2 top-8' : ''"
         :style="isMobile ? '' : 'bottom: 90px; width: 380px; height: 520px; ' + (isRtl ? 'left: 24px;' : 'right: 24px;')">
         {{-- Header --}}
-        <div class="text-white px-5 py-4 shrink-0" style="background: linear-gradient(135deg, var(--brand-button-bg-light), var(--brand-button-bg)); box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.15);">
+        <div class="text-white px-5 py-4 shrink-0 relative z-10" style="background: linear-gradient(135deg, var(--brand-button-bg-light), var(--brand-button-bg)); box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.15), 0 4px 6px -1px rgba(0,0,0,0.2), 0 8px 16px -4px rgba(0,0,0,0.15);">
             <div class="flex items-center justify-between">
                 <div>
                     <div class="font-semibold text-base">Support</div>
