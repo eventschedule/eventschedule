@@ -1552,6 +1552,11 @@ class RoleController extends Controller
         $role->language_code = auth()->user()->language_code;
         $role->use_24_hour_time = auth()->user()->use_24_hour_time;
 
+        if (config('app.is_testing')) {
+            $role->plan_type = 'enterprise';
+            $role->plan_expires = '2099-01-01';
+        }
+
         if (auth()->user()->phone && auth()->user()->hasVerifiedPhone()) {
             $role->phone = auth()->user()->phone;
         }
@@ -1662,6 +1667,11 @@ class RoleController extends Controller
             $importConfig['urls'] = $importUrls;
             $importConfig['cities'] = array_map('strtolower', array_filter(array_map('trim', $request->input('import_cities', []))));
             $role->import_config = $importConfig;
+        }
+
+        if (config('app.is_testing')) {
+            $role->plan_type = 'enterprise';
+            $role->plan_expires = '2099-01-01';
         }
 
         $role->save();

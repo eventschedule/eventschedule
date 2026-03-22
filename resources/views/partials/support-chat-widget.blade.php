@@ -72,9 +72,8 @@
                         <span v-if="available">We're online</span>
                         <span v-else>Leave a message</span>
                     </div>
-                    <div class="text-xs opacity-75 mt-0.5">
-                        <span v-if="available">We typically reply in a few minutes</span>
-                        <span v-else>We'll reply by email</span>
+                    <div v-if="!available" class="text-xs opacity-75 mt-0.5">
+                        We'll reply by email
                     </div>
                 </div>
                 <button @click="panelOpen = false" class="p-1 rounded hover:bg-white/20 transition-colors">
@@ -166,7 +165,7 @@
                 });
                 window.addEventListener('show-support-chat', () => {
                     this.showButton = true;
-                    this.panelOpen = true;
+                    this.panelOpen = !this.panelOpen;
                 });
                 document.addEventListener('visibilitychange', () => {
                     if (document.hidden) {
