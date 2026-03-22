@@ -1,6 +1,6 @@
 <div id="support-chat-widget">
     {{-- Launcher button --}}
-    <button v-if="!hidden" @click="togglePanel"
+    <button v-if="showButton" @click="togglePanel"
         class="fixed bottom-6 end-6 z-50 w-14 h-14 rounded-full bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
         :class="{ 'scale-0': !entered, 'scale-100': entered }"
         style="transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;">
@@ -77,9 +77,6 @@
                     </svg>
                 </button>
             </div>
-            <div class="mt-2 text-center">
-                <button @click="hideWidget" class="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Hide chat</button>
-            </div>
         </div>
     </div>
 </div>
@@ -91,7 +88,8 @@
             data() {
                 return {
                     panelOpen: false,
-                    hidden: false,
+                    showButton: false,
+                    isDashboard: window.location.pathname === '/dashboard',
                     available: false,
                     unreadCount: 0,
                     messages: [],
@@ -101,7 +99,6 @@
                     isRtl: document.documentElement.dir === 'rtl' || document.body.dir === 'rtl',
                     openPollInterval: null,
                     closedPollInterval: null,
-                    hiddenPollInterval: null,
                 };
             },
             watch: {
@@ -110,27 +107,25 @@
                     if (open) {
                         this.fetchMessages();
                         this.markRead();
+                    } else if (!this.isDashboard) {
+                        this.showButton = false;
                     }
-                },
-                hidden() {
-                    this.setupPolling();
                 },
             },
             mounted() {
-                try {
-                    this.hidden = localStorage.getItem('supportChatHidden') === 'true';
-                } catch (e) {}
                 this.fetchStatus();
                 this.setupPolling();
-                setTimeout(() => { this.entered = true; }, 1000);
+                if (this.isDashboard) {
+                    setTimeout(() => { this.entered = true; this.showButton = true; }, 1000);
+                } else {
+                    this.entered = true;
+                }
                 window.addEventListener('resize', () => {
                     this.isMobile = window.innerWidth < 640;
                 });
                 window.addEventListener('show-support-chat', () => {
-                    this.hidden = false;
-                    try { localStorage.removeItem('supportChatHidden'); } catch (e) {}
+                    this.showButton = true;
                     this.panelOpen = true;
-                    this.entered = true;
                 });
                 document.addEventListener('visibilitychange', () => {
                     if (document.hidden) {
@@ -149,10 +144,8 @@
                 clearAllPolling() {
                     if (this.openPollInterval) clearInterval(this.openPollInterval);
                     if (this.closedPollInterval) clearInterval(this.closedPollInterval);
-                    if (this.hiddenPollInterval) clearInterval(this.hiddenPollInterval);
                     this.openPollInterval = null;
                     this.closedPollInterval = null;
-                    this.hiddenPollInterval = null;
                 },
                 setupPolling() {
                     this.clearAllPolling();
@@ -161,14 +154,10 @@
                             this.fetchMessages();
                             this.markRead();
                         }, 5000);
-                    } else if (!this.hidden) {
+                    } else {
                         this.closedPollInterval = setInterval(() => {
                             this.fetchStatus();
                         }, 30000);
-                    } else {
-                        this.hiddenPollInterval = setInterval(() => {
-                            this.fetchStatus();
-                        }, 60000);
                     }
                 },
                 fetchStatus() {
@@ -231,11 +220,6 @@
                 togglePanel() {
                     this.panelOpen = !this.panelOpen;
                 },
-                hideWidget() {
-                    this.panelOpen = false;
-                    this.hidden = true;
-                    try { localStorage.setItem('supportChatHidden', 'true'); } catch (e) {}
-                },
                 scrollToBottom() {
                     var c = this.$refs.chatMessages;
                     if (c) c.scrollTop = c.scrollHeight;
@@ -268,15 +252,6 @@
                             badge.style.display = '';
                         } else {
                             badge.style.display = 'none';
-                        }
-                    });
-                    document.querySelectorAll('.js-support-chat-sidebar-btn').forEach(function(btn) {
-                        if (self.unreadCount > 0) {
-                            btn.classList.remove('opacity-0');
-                            btn.classList.add('opacity-100');
-                        } else {
-                            btn.classList.add('opacity-0');
-                            btn.classList.remove('opacity-100');
                         }
                     });
                 },

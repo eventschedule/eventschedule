@@ -264,7 +264,7 @@
                             {{ __('messages.help') }}
                         </a>
                         @if (config('app.hosted'))
-                        <button class="js-support-chat-sidebar-btn relative flex opacity-0 group-hover:opacity-100 p-2 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition-colors shrink-0" title="Support chat">
+                        <button class="js-support-chat-sidebar-btn relative flex p-2 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition-colors shrink-0" title="Support chat">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                             </svg>
