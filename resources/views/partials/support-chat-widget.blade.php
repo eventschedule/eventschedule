@@ -1,4 +1,5 @@
-<div id="support-chat-widget">
+<style>[v-cloak] { display: none !important; }</style>
+<div id="support-chat-widget" v-cloak>
     {{-- Launcher button --}}
     <button v-if="showButton" @click="togglePanel"
         class="fixed bottom-6 end-6 z-50 w-14 h-14 rounded-full bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
@@ -81,7 +82,7 @@
     </div>
 </div>
 
-<script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
+<script {!! nonce_attr() !!}>window.Vue || document.write('<script src="{{ asset('js/vue.global.prod.js') }}"{!! nonce_attr() !!}><\/script>')</script>
 <script {!! nonce_attr() !!}>
     document.addEventListener('DOMContentLoaded', function() {
         Vue.createApp({
@@ -94,6 +95,7 @@
                     unreadCount: 0,
                     messages: [],
                     inputText: '',
+                    sending: false,
                     entered: false,
                     isMobile: window.innerWidth < 640,
                     isRtl: document.documentElement.dir === 'rtl' || document.body.dir === 'rtl',
@@ -113,6 +115,7 @@
                 },
             },
             mounted() {
+                if (document.getElementById('support-admin-app')) return;
                 this.fetchStatus();
                 this.setupPolling();
                 if (this.isDashboard) {
@@ -187,7 +190,8 @@
                 },
                 sendMessage() {
                     var text = this.inputText.trim();
-                    if (!text) return;
+                    if (!text || this.sending) return;
+                    this.sending = true;
                     this.inputText = '';
                     fetch('/support-chat/messages', {
                         method: 'POST',
@@ -197,14 +201,18 @@
                         },
                         body: JSON.stringify({ body: text })
                     })
-                    .then(r => r.json())
+                    .then(r => { if (!r.ok) throw r; return r.json(); })
                     .then(data => {
+                        this.sending = false;
                         if (data.message) {
                             this.messages.push(data.message);
                             this.$nextTick(() => this.scrollToBottom());
                         }
                     })
-                    .catch(() => {});
+                    .catch(() => {
+                        this.sending = false;
+                        this.inputText = text;
+                    });
                 },
                 markRead() {
                     if (this.unreadCount > 0) {

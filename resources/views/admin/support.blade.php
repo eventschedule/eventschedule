@@ -108,7 +108,7 @@
         </div>
     </div>
 
-    <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
+    <script {!! nonce_attr() !!}>window.Vue || document.write('<script src="{{ asset('js/vue.global.prod.js') }}"{!! nonce_attr() !!}><\/script>')</script>
     <script {!! nonce_attr() !!}>
         document.addEventListener('DOMContentLoaded', function() {
             Vue.createApp({
@@ -121,6 +121,7 @@
                         conversationUser: {},
                         conversationStatus: '',
                         adminReplyText: '',
+                        adminSending: false,
                         pollInterval: null,
                         msgPollInterval: null,
                         mobileShowConversation: false,
@@ -170,6 +171,10 @@
                             .then(data => {
                                 this.conversations = data.conversations;
                                 this.available = data.available;
+                                if (this.selectedConversation) {
+                                    var updated = data.conversations.find(c => c.id === this.selectedConversation.id);
+                                    if (updated) this.selectedConversation = updated;
+                                }
                             })
                             .catch(() => {});
                     },
@@ -198,21 +203,26 @@
                     },
                     sendAdminReply() {
                         var text = this.adminReplyText.trim();
-                        if (!text || !this.selectedConversation) return;
+                        if (!text || !this.selectedConversation || this.adminSending) return;
+                        this.adminSending = true;
                         this.adminReplyText = '';
                         fetch('/admin/support/' + this.selectedConversation.id + '/reply', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
                             body: JSON.stringify({ body: text })
                         })
-                        .then(r => r.json())
+                        .then(r => { if (!r.ok) throw r; return r.json(); })
                         .then(data => {
+                            this.adminSending = false;
                             if (data.message) {
                                 this.conversationMessages.push(data.message);
                                 this.$nextTick(() => this.scrollToBottom());
                             }
                         })
-                        .catch(() => {});
+                        .catch(() => {
+                            this.adminSending = false;
+                            this.adminReplyText = text;
+                        });
                     },
                     markRead(convId) {
                         fetch('/admin/support/' + convId + '/mark-read', {

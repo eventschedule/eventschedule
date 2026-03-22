@@ -76,14 +76,10 @@ class SupportChatController extends Controller
 
         Cache::put("support_user_online_{$user->id}", true, now()->addMinutes(2));
 
-        $conversation = $user->supportConversation;
-        if (! $conversation) {
-            $conversation = SupportConversation::create([
-                'user_id' => $user->id,
-                'status' => 'open',
-                'last_message_at' => now(),
-            ]);
-        }
+        $conversation = SupportConversation::firstOrCreate(
+            ['user_id' => $user->id],
+            ['status' => 'open', 'last_message_at' => now()]
+        );
 
         if ($conversation->status === 'closed') {
             $conversation->update(['status' => 'open']);
@@ -142,7 +138,7 @@ class SupportChatController extends Controller
 
     public function adminConversations()
     {
-        $conversations = SupportConversation::with('user')
+        $conversations = SupportConversation::with(['user', 'latestMessage'])
             ->withCount(['messages as unread_count' => function ($q) {
                 $q->where('is_from_admin', false)->whereNull('read_at');
             }])
@@ -155,7 +151,7 @@ class SupportChatController extends Controller
                 'status' => $conv->status,
                 'last_message_at' => $conv->last_message_at?->toIso8601String(),
                 'last_message_preview' => \Illuminate\Support\Str::limit(
-                    $conv->messages()->reorder()->latest()->first()?->body ?? '', 80
+                    $conv->latestMessage?->body ?? '', 80
                 ),
                 'unread_count' => $conv->unread_count,
             ]);
@@ -168,7 +164,7 @@ class SupportChatController extends Controller
 
     public function adminMessages($id)
     {
-        $conversationId = UrlUtils::decodeId($id);
+        $conversationId = UrlUtils::decodeIdOrFail($id);
         $conversation = SupportConversation::with('user.roles')->findOrFail($conversationId);
 
         $messages = $conversation->messages()
@@ -203,7 +199,7 @@ class SupportChatController extends Controller
             'body' => 'required|string|max:2000',
         ]);
 
-        $conversationId = UrlUtils::decodeId($id);
+        $conversationId = UrlUtils::decodeIdOrFail($id);
         $conversation = SupportConversation::findOrFail($conversationId);
         $body = strip_tags($request->input('body'));
 
@@ -245,7 +241,7 @@ class SupportChatController extends Controller
 
     public function adminMarkRead($id)
     {
-        $conversationId = UrlUtils::decodeId($id);
+        $conversationId = UrlUtils::decodeIdOrFail($id);
         $conversation = SupportConversation::findOrFail($conversationId);
         $conversation->unreadForAdmin()->update(['read_at' => now()]);
 
@@ -262,7 +258,7 @@ class SupportChatController extends Controller
 
     public function adminCloseConversation($id)
     {
-        $conversationId = UrlUtils::decodeId($id);
+        $conversationId = UrlUtils::decodeIdOrFail($id);
         $conversation = SupportConversation::findOrFail($conversationId);
         $conversation->update(['status' => 'closed']);
 

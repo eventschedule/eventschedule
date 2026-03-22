@@ -29,6 +29,11 @@ class SupportConversation extends Model
         return $this->hasMany(SupportMessage::class)->orderBy('created_at', 'asc');
     }
 
+    public function latestMessage()
+    {
+        return $this->hasOne(SupportMessage::class)->latestOfMany();
+    }
+
     public function unreadForAdmin()
     {
         return $this->messages()->where('is_from_admin', false)->whereNull('read_at');
