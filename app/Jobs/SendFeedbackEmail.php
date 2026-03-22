@@ -47,6 +47,10 @@ class SendFeedbackEmail implements ShouldQueue
             return;
         }
 
+        if ($sale->is_deleted || $sale->status !== 'paid') {
+            return;
+        }
+
         $originalLocale = app()->getLocale();
 
         try {

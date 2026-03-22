@@ -55,6 +55,7 @@ class SendFeedbackRequests extends Command
 
             foreach ($events as $event) {
                 $sales = Sale::where('event_id', $event->id)
+                    ->where('subdomain', $role->subdomain)
                     ->where('status', 'paid')
                     ->where('is_deleted', false)
                     ->whereNull('feedback_sent_at')
