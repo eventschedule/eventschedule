@@ -48,6 +48,9 @@ class SendFeedbackEmail implements ShouldQueue
         }
 
         if ($sale->is_deleted || $sale->status !== 'paid') {
+            $sale->feedback_sent_at = null;
+            $sale->save();
+
             return;
         }
 
