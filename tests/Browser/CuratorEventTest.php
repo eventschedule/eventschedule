@@ -113,6 +113,8 @@ class CuratorEventTest extends DuskTestCase
     {
         // Create an event and add it to both curators
         $browser->visit('/talent/add-event?date='.date('Y-m-d'))
+            ->waitFor('#event_name', 10)
+            ->pause(500)
             ->click('a[data-section="section-venue"]')
             ->waitFor('#in_person', 5);
         $browser->script("var cb = document.getElementById('in_person'); if (!cb.checked) cb.click();");
