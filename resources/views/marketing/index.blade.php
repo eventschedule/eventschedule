@@ -2,10 +2,6 @@
     <x-slot name="title">Event Schedule - Plan, Promote & Share Event Calendars</x-slot>
     <x-slot name="description">Create professional event calendars, sell tickets with no platform fees, and check in attendees with QR codes. Free for venues, performers, and communities.</x-slot>
     <x-slot name="breadcrumbTitle">Home</x-slot>
-    <x-slot name="preload">
-        <link rel="preload" as="image" type="image/webp" href="{{ url(webp_path('/images/screenshots/marketing_1_800w.jpg')) }}">
-    </x-slot>
-
     <style {!! nonce_attr() !!}>
         /* Homepage-specific animations (not shared across pages) */
         @keyframes gradient-shift {
@@ -16,25 +12,11 @@
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
         }
-        @keyframes scroll-step {
-            0%, 12% { transform: translateX(0); }
-            14%, 26% { transform: translateX(-100%); }
-            28%, 40% { transform: translateX(-200%); }
-            42%, 54% { transform: translateX(-300%); }
-            56%, 68% { transform: translateX(-400%); }
-            70%, 82% { transform: translateX(-500%); }
-            84%, 96% { transform: translateX(-600%); }
-            100% { transform: translateX(-700%); }
-        }
         .animate-gradient {
             background-size: 200% 200%;
             animation: gradient-shift 8s ease infinite;
         }
         .animate-marquee { animation: marquee 30s linear infinite; }
-        .animate-scroll-step { animation: scroll-step 21s ease-in-out infinite; }
-        .screenshot-carousel:hover .animate-scroll-step {
-            animation-play-state: paused;
-        }
         /* Noise overlay */
         .noise::before {
             content: "";
@@ -99,8 +81,8 @@
     </script>
     </x-slot>
 
-    <!-- Hero Section - Side by side with carousel -->
-    <section class="relative min-h-screen flex items-center overflow-hidden bg-white dark:bg-[#0a0a0f] noise">
+    <!-- Hero Section - Stacked layout with large video -->
+    <section class="relative flex items-center overflow-hidden bg-white dark:bg-[#0a0a0f] noise">
         <!-- Animated gradient orbs -->
         <div class="absolute inset-0 overflow-hidden">
             <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-blue-600/30 to-blue-500/30 rounded-full blur-[100px] animate-pulse-slow"></div>
@@ -112,72 +94,46 @@
         <div class="absolute inset-0 grid-pattern bg-[size:60px_60px]"></div>
 
         <div class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
-            <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16 items-center">
-                <!-- Left side - Text content -->
-                <div class="text-center lg:text-left lg:col-span-3">
-                    <!-- Badge -->
-                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8 animate-reveal">
-                        <span class="relative flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            <!-- Centered text content -->
+            <div class="text-center">
+                <!-- Badge -->
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8 animate-reveal">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    <span class="text-sm text-gray-600 dark:text-gray-300">Free forever. No credit card.</span>
+                </div>
+
+                <!-- Main headline -->
+                <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 max-w-4xl mx-auto animate-reveal delay-100">
+                    <span class="block text-gray-900 dark:text-white">Plan, Promote &</span>
+                    <span class="block text-gradient">Share Event Calendars</span>
+                </h1>
+
+                <!-- Subheadline -->
+                <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-xl mx-auto mb-12 animate-reveal delay-200">
+                    Share events, sell tickets, and grow your audience. Built for venues, performers, and communities.
+                </p>
+
+                <!-- CTA Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center animate-reveal delay-300">
+                    <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl overflow-hidden transition-all hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25">
+                        <span class="relative z-10 flex items-center gap-2">
+                            Start for free
+                            <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
                         </span>
-                        <span class="text-sm text-gray-600 dark:text-gray-300">Free forever. No credit card.</span>
-                    </div>
-
-                    <!-- Main headline -->
-                    <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 animate-reveal delay-100">
-                        <span class="block text-gray-900 dark:text-white">Plan, Promote &</span>
-                        <span class="block text-gradient">Share Event Calendars</span>
-                    </h1>
-
-                    <!-- Subheadline -->
-                    <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-xl mb-12 animate-reveal delay-200">
-                        Share events, sell tickets, and grow your audience. Built for venues, performers, and communities.
-                    </p>
-
-                    <!-- CTA Buttons -->
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-reveal delay-300">
-                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl overflow-hidden transition-all hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25">
-                            <span class="relative z-10 flex items-center gap-2">
-                                Start for free
-                                <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                            <div class="absolute inset-0 animate-shimmer"></div>
-                        </a>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-3 sm:mt-0 sm:self-center">Set up in under 2 minutes</p>
-                    </div>
+                        <div class="absolute inset-0 animate-shimmer"></div>
+                    </a>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-3 sm:mt-0 sm:self-center">Set up in under 2 minutes</p>
                 </div>
+            </div>
 
-                <!-- Right side - Screenshot carousel -->
-                <div class="relative screenshot-carousel overflow-hidden rounded-2xl shadow-2xl shadow-black/50 ring-1 ring-gray-200 dark:ring-white/10 lg:col-span-2">
-                    <div class="flex animate-scroll-step">
-                        @php
-                        $screenshots = [
-                            ['/images/screenshots/marketing_1.jpg', 'Event Schedule calendar view showing upcoming events in a clean grid layout'],
-                            ['/images/screenshots/marketing_2.jpg', 'Event details page with ticket options and event information'],
-                            ['/images/screenshots/marketing_3.jpg', 'Mobile-friendly event schedule on a smartphone display'],
-                            ['/images/screenshots/marketing_4.jpg', 'Event management dashboard for organizing your schedule'],
-                            ['/images/screenshots/marketing_5.jpg', 'Ticket sales and check-in management interface'],
-                            ['/images/screenshots/marketing_6.jpg', 'Event analytics showing page views and visitor statistics'],
-                            ['/images/screenshots/marketing_7.jpg', 'Schedule customization options with branding settings'],
-                            ['/images/screenshots/marketing_1.jpg', 'Event Schedule calendar view showing upcoming events in a clean grid layout'], // duplicate for seamless loop
-                        ];
-                        @endphp
-                        @foreach($screenshots as $index => $screenshot)
-                        @php
-                            $smallPath = str_replace('.jpg', '_800w.jpg', $screenshot[0]);
-                        @endphp
-                        <div class="flex-shrink-0 w-full overflow-hidden">
-                            <picture>
-                                <source srcset="{{ url(webp_path($smallPath)) }}" type="image/webp">
-                                <img src="{{ url($smallPath) }}" alt="{{ $screenshot[1] }}" width="800" height="1094" class="block w-full h-auto scale-[1.05]" @if($index === 0) fetchpriority="high" @else loading="lazy" decoding="async" @endif />
-                            </picture>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
+            <!-- YouTube overview video -->
+            <div class="relative overflow-hidden rounded-2xl shadow-2xl shadow-black/50 ring-1 ring-gray-200 dark:ring-white/10 mt-16 animate-reveal delay-300">
+                <iframe class="aspect-video w-full" src="https://www.youtube-nocookie.com/embed/IL8Fj0p6Lz8" title="Event Schedule Overview" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
             </div>
         </div>
     </section>

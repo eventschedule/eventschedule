@@ -18,6 +18,13 @@
     </p>
 </div>
 
+<div align="center">
+    <a href="https://www.youtube.com/watch?v=IL8Fj0p6Lz8">
+        <img src="https://img.youtube.com/vi/IL8Fj0p6Lz8/maxresdefault.jpg" alt="Watch the overview" width="600">
+    </a>
+    <p>Watch the overview</p>
+</div>
+
 ## Screenshots
 
 <div style="display: flex; gap: 10px;">
