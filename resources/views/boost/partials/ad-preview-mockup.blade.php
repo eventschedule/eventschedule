@@ -16,8 +16,8 @@
 
     {{-- Image --}}
     @if ($imageUrl)
-    <div class="aspect-square bg-gray-100 dark:bg-gray-700">
-        <img src="{{ $imageUrl }}" alt="Ad preview" class="w-full h-full object-cover">
+    <div class="bg-gray-100 dark:bg-gray-700 overflow-hidden">
+        <img src="{{ $imageUrl }}" alt="Ad preview" class="w-full h-auto">
     </div>
     @else
     <div class="aspect-square bg-gray-100 dark:bg-gray-700 flex items-center justify-center">

@@ -721,21 +721,40 @@ document.addEventListener('alpine:init', function() {
                     return;
                 }
 
-                // Fire all requests in parallel
-                self.elements.forEach(function(el) { self.elementStatus[el] = 'generating'; });
-                self.showPreview = true;
-
-                // Gather accent_color from form for image requests
-                var imageExtra = {};
+                // Determine if images should wait for accent_color generation
+                var needsSequencing = false;
                 @if ($name === 'ai-style-generator')
-                var accentInput = document.getElementById('accent_color');
-                if (accentInput) imageExtra.accent_color = accentInput.value;
+                needsSequencing = textElements.includes('accent_color') && selectedImages.length > 0;
                 @endif
 
-                // Fire image requests immediately
+                // Helper to fire all image requests with the best available accent color
+                var fireImages = function() {
+                    if (genId !== self.generationId) return;
+                    var imageExtra = {};
+                    @if ($name === 'ai-style-generator')
+                    if (self.previewResults.accent_color) {
+                        imageExtra.accent_color = self.previewResults.accent_color;
+                    } else {
+                        var accentInput = document.getElementById('accent_color');
+                        if (accentInput) imageExtra.accent_color = accentInput.value;
+                    }
+                    @endif
+                    selectedImages.forEach(function(imageKey) {
+                        self.fireImageRequest(imageKey, imageExtra);
+                    });
+                };
+
+                // Set initial statuses
+                textElements.forEach(function(el) { self.elementStatus[el] = 'generating'; });
                 selectedImages.forEach(function(imageKey) {
-                    self.fireImageRequest(imageKey, imageExtra);
+                    self.elementStatus[imageKey] = needsSequencing ? 'pending' : 'generating';
                 });
+                self.showPreview = true;
+
+                // Fire image requests immediately if no sequencing needed
+                if (!needsSequencing) {
+                    fireImages();
+                }
 
                 // Fire text request
                 if (textElements.length > 0) {
@@ -751,6 +770,7 @@ document.addEventListener('alpine:init', function() {
                         } else {
                             textElements.forEach(function(el) { self.elementStatus[el] = 'error'; if (data.error) self.elementErrors[el] = data.error; });
                         }
+                        if (needsSequencing) fireImages();
                     })
                     .catch(function(err) {
                         if (genId !== self.generationId) return;
@@ -758,6 +778,7 @@ document.addEventListener('alpine:init', function() {
                         if (err.message === 'rate_limit') {
                             alert(@json(__('messages.ai_rate_limit')));
                         }
+                        if (needsSequencing) fireImages();
                     })
                     .finally(function() {
                         if (genId !== self.generationId) return;

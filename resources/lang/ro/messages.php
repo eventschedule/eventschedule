@@ -1995,6 +1995,7 @@ return [
     'generate_ai_flyer' => 'Generează flyer cu IA',
     'regenerate_ai_flyer' => 'Regenerează',
     'ai_flyer_generation_failed' => 'Generarea flyerului cu IA a eșuat. Te rugăm să încerci din nou.',
+    'ai_daily_limit_reached' => 'Ai atins limita zilnică de :limit generări de imagini AI. Te rugăm să încerci din nou mâine.',
     'ai_content_moderation_blocked' => 'Imaginea nu a putut fi generată deoarece conținutul a fost semnalat de filtrul de siguranță al IA. Încearcă să ajustezi detaliile evenimentului sau instrucțiunile de stil.',
     'flyer_style_placeholder' => 'Opțional: descrie stilul preferat...',
     'ai_style_generator' => 'Generator de stil AI',

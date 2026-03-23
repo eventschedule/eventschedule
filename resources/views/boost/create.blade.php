@@ -48,7 +48,7 @@
         <div class="ap-card shadow-md rounded-lg p-6 mb-6">
             <div class="flex items-start gap-4">
                 @if ($event->getImageUrl())
-                <img src="{{ $event->getImageUrl() }}" alt="{{ $event->name }}" class="w-24 h-24 rounded-lg object-cover flex-shrink-0">
+                <img src="{{ $event->getImageUrl() }}" alt="{{ $event->name }}" class="w-24 rounded-lg object-contain flex-shrink-0">
                 @endif
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $event->translatedName() }}</h2>

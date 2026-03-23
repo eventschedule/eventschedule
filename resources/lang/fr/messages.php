@@ -1962,6 +1962,7 @@ return [
     'generate_ai_flyer' => 'Générer un flyer IA',
     'regenerate_ai_flyer' => 'Régénérer',
     'ai_flyer_generation_failed' => 'Échec de la génération du flyer IA. Veuillez réessayer.',
+    'ai_daily_limit_reached' => 'Vous avez atteint votre limite quotidienne de :limit générations d\'images IA. Veuillez réessayer demain.',
     'ai_content_moderation_blocked' => 'L\'image n\'a pas pu être générée car le contenu a été signalé par le filtre de sécurité de l\'IA. Essayez de modifier les détails de l\'événement ou les instructions de style.',
     'flyer_style_placeholder' => 'Facultatif : décrivez votre style préféré...',
     'ai_style_generator' => 'Générateur de style IA',

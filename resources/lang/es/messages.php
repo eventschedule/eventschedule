@@ -1962,6 +1962,7 @@ return [
     'generate_ai_flyer' => 'Generar flyer con IA',
     'regenerate_ai_flyer' => 'Regenerar',
     'ai_flyer_generation_failed' => 'No se pudo generar el flyer con IA. Por favor, inténtalo de nuevo.',
+    'ai_daily_limit_reached' => 'Has alcanzado tu límite diario de :limit generaciones de imágenes con IA. Por favor, inténtalo de nuevo mañana.',
     'ai_content_moderation_blocked' => 'No se pudo generar la imagen porque el contenido fue marcado por el filtro de seguridad de la IA. Intenta ajustar los detalles del evento o las instrucciones de estilo.',
     'flyer_style_placeholder' => 'Opcional: describe tu estilo preferido...',
     'ai_style_generator' => 'Generador de estilo con IA',

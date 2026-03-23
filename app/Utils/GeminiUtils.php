@@ -9,13 +9,13 @@ use Carbon\Carbon;
 
 class GeminiUtils
 {
-    private static function sendRequest($prompt, $imageData = null, $disableThinking = false, $purpose = 'content')
+    private static function sendRequest($prompt, $imageData = null, $purpose = 'content')
     {
         $textProvider = config('services.ai.text_provider', 'gemini');
 
         if ($textProvider === 'openai') {
             if (config('services.openai.api_key')) {
-                return OpenAIUtils::sendTextRequest($prompt, $imageData, $disableThinking, $purpose);
+                return OpenAIUtils::sendTextRequest($prompt, $imageData, $purpose);
             }
             if (! config('services.google.gemini_key')) {
                 return null;
@@ -23,7 +23,7 @@ class GeminiUtils
         } else {
             if (! config('services.google.gemini_key')) {
                 if (config('services.openai.api_key')) {
-                    return OpenAIUtils::sendTextRequest($prompt, $imageData, $disableThinking, $purpose);
+                    return OpenAIUtils::sendTextRequest($prompt, $imageData, $purpose);
                 }
 
                 return null;
@@ -46,10 +46,9 @@ class GeminiUtils
                     'parts' => [],
                 ],
             ],
-            'generationConfig' => array_merge(
-                ['response_mime_type' => 'application/json'],
-                $disableThinking ? ['thinking_config' => ['thinking_budget' => 0]] : []
-            ),
+            'generationConfig' => [
+                'response_mime_type' => 'application/json',
+            ],
         ];
 
         // Add image data if provided
@@ -191,9 +190,9 @@ class GeminiUtils
     /**
      * Send a simple text prompt to Gemini and return the response
      */
-    public static function sendPrompt($prompt, $disableThinking = false, $purpose = 'content')
+    public static function sendPrompt($prompt, $purpose = 'content')
     {
-        return self::sendRequest($prompt, null, $disableThinking, $purpose);
+        return self::sendRequest($prompt, null, $purpose);
     }
 
     public static function parseEvent($role, $details, $file = null)
@@ -1380,14 +1379,12 @@ class GeminiUtils
             $prompt .= "Duration: {$event->duration} hours\n";
         }
 
-        if ($event->venue) {
-            $prompt .= "Venue: {$event->venue->name}\n";
-            if ($event->venue->address1) {
-                $prompt .= "Address: {$event->venue->address1}";
-                if ($event->venue->city) {
-                    $prompt .= ", {$event->venue->city}";
-                }
-                $prompt .= "\n";
+        $hasVenue = (bool) $event->venue;
+        if ($hasVenue) {
+            $prompt .= "Venue name: {$event->venue->name}\n";
+            $venueAddress = $event->venue->bestAddress();
+            if ($venueAddress) {
+                $prompt .= "Venue address: {$venueAddress}\n";
             }
         }
 
@@ -1418,8 +1415,11 @@ class GeminiUtils
             $prompt .= "Do not show a price on the flyer.\n";
         }
 
-        $prompt .= $config['layout'];
+        $prompt .= $hasVenue ? $config['layout_with_venue'] : $config['layout_without_venue'];
         $prompt .= str_replace(':category_hint', $categoryName ? " ({$categoryName})" : '', $config['design']);
+        if ($hasVenue) {
+            $prompt .= $config['venue_directive'];
+        }
 
         if ($profileStyleDescription) {
             $prompt .= str_replace(':style_description', $profileStyleDescription, $config['style_reference']);

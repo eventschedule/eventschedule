@@ -1994,6 +1994,7 @@ return [
     'generate_ai_flyer' => 'Generate AI Flyer',
     'regenerate_ai_flyer' => 'Regenerate',
     'ai_flyer_generation_failed' => 'Failed to generate the AI flyer. Please try again.',
+    'ai_daily_limit_reached' => 'You have reached your daily limit of :limit AI image generations. Please try again tomorrow.',
     'ai_content_moderation_blocked' => 'The image could not be generated because the content was flagged by the AI safety filter. Try adjusting your event details or style instructions.',
     'flyer_style_placeholder' => 'Optional: describe your preferred style...',
     'ai_style_generator' => 'AI Style Generator',

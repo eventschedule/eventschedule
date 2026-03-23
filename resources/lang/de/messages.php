@@ -1966,6 +1966,7 @@ return [
     'generate_ai_flyer' => 'KI-Flyer erstellen',
     'regenerate_ai_flyer' => 'Neu generieren',
     'ai_flyer_generation_failed' => 'Der KI-Flyer konnte nicht erstellt werden. Bitte versuchen Sie es erneut.',
+    'ai_daily_limit_reached' => 'Sie haben Ihr tägliches Limit von :limit KI-Bildgenerierungen erreicht. Bitte versuchen Sie es morgen erneut.',
     'ai_content_moderation_blocked' => 'Das Bild konnte nicht erstellt werden, da der Inhalt vom KI-Sicherheitsfilter markiert wurde. Versuchen Sie, die Veranstaltungsdetails oder Stilanweisungen anzupassen.',
     'flyer_style_placeholder' => 'Optional: Beschreiben Sie Ihren bevorzugten Stil...',
     'ai_style_generator' => 'KI-Stilgenerator',

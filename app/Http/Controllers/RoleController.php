@@ -2601,6 +2601,11 @@ class RoleController extends Controller
         }
 
         $imageElements = array_intersect($request->input('elements', []), ['profile_image', 'header_image', 'background_image']);
+
+        if (! empty($imageElements) && ! $role->canGenerateAiImage()) {
+            return response()->json(['error' => __('messages.ai_daily_limit_reached', ['limit' => $role->aiImageDailyLimit()])], 422);
+        }
+
         if (! empty($imageElements) && ! config('services.openai.api_key') && ! config('services.google.gemini_key')) {
             return response()->json(['error' => __('messages.openai_key_required')], 422);
         }
@@ -2632,6 +2637,11 @@ class RoleController extends Controller
             }
 
             UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_STYLE, $role->id);
+
+            // Track image generations separately for daily limit enforcement
+            if (! empty($imageElements) && (isset($results['profile_image']) || isset($results['header_image']) || isset($results['background_image']))) {
+                UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_STYLE_IMAGE, $role->id);
+            }
 
             if ($request->input('save_instructions')) {
                 $role->update(['ai_style_instructions' => $request->input('style_instructions', '')]);
@@ -2854,6 +2864,10 @@ class RoleController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
+        if (! $role->canGenerateAiImage()) {
+            return response()->json(['error' => __('messages.ai_daily_limit_reached', ['limit' => $role->aiImageDailyLimit()])], 422);
+        }
+
         if (is_demo_mode()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
@@ -2902,6 +2916,8 @@ class RoleController extends Controller
                 $response[$imageType.'_url'] = $filename;
             }
             $response[$imageType.'_filename'] = $filename;
+
+            UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_STYLE_IMAGE, $role->id);
 
             return response()->json($response);
         } catch (\App\Exceptions\ContentModerationException $e) {

@@ -1978,6 +1978,7 @@ return [
     'generate_ai_flyer' => 'Loo AI-flaier',
     'regenerate_ai_flyer' => 'Loo uuesti',
     'ai_flyer_generation_failed' => 'AI-flaieri loomine ebaõnnestus. Palun proovi uuesti.',
+    'ai_daily_limit_reached' => 'Oled saavutanud oma päevase limiidi :limit AI-pildiloomist. Palun proovi homme uuesti.',
     'ai_content_moderation_blocked' => 'Pilti ei saanud luua, kuna sisu märgiti AI ohutusfilteri poolt. Proovi kohandada sündmuse andmeid või stiili juhiseid.',
     'flyer_style_placeholder' => 'Valikuline: kirjelda oma eelistatud stiili...',
     'ai_style_generator' => 'AI stiiligeneraator',

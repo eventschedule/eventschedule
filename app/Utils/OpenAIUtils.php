@@ -10,7 +10,7 @@ class OpenAIUtils
      *
      * @return array|null Parsed response data or null on failure
      */
-    public static function sendTextRequest($prompt, $imageData = null, $disableThinking = false, $purpose = 'content')
+    public static function sendTextRequest($prompt, $imageData = null, $purpose = 'content')
     {
         $apiKey = config('services.openai.api_key');
         if (! $apiKey) {

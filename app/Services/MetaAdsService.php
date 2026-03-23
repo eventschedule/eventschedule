@@ -213,8 +213,8 @@ class MetaAdsService
 
             file_put_contents($tempPath, $imageContents);
 
-            // Resize to 1080x1080 for feed
-            $this->resizeImage($tempPath, 1080, 1080);
+            // Resize to 1080px wide, preserving aspect ratio within Meta's allowed range
+            $this->resizeImage($tempPath, 1080);
 
             // Upload to Meta
             $response = Http::withToken($this->accessToken)
@@ -246,9 +246,11 @@ class MetaAdsService
     }
 
     /**
-     * Resize an image to fit Meta ad specs (center crop)
+     * Resize an image to fit Meta ad specs, preserving aspect ratio.
+     * Meta feed ads allow ratios from 1.91:1 (landscape) to 4:5 (portrait).
+     * Only crops if the source ratio exceeds these bounds.
      */
-    protected function resizeImage(string $path, int $width, int $height): void
+    protected function resizeImage(string $path, int $width, int $height = 0): void
     {
         $info = getimagesize($path);
         if (! $info) {
@@ -270,13 +272,35 @@ class MetaAdsService
             return;
         }
 
-        // Center crop to square
-        $cropSize = min($sourceWidth, $sourceHeight);
-        $cropX = ($sourceWidth - $cropSize) / 2;
-        $cropY = ($sourceHeight - $cropSize) / 2;
+        $sourceRatio = $sourceWidth / $sourceHeight;
+
+        // Meta allowed range: 1.91:1 (landscape) to 4:5 (portrait)
+        $maxRatio = 1.91;
+        $minRatio = 4 / 5;
+
+        $cropX = 0;
+        $cropY = 0;
+        $cropWidth = $sourceWidth;
+        $cropHeight = $sourceHeight;
+
+        if ($sourceRatio > $maxRatio) {
+            // Too wide - crop sides
+            $cropWidth = (int) ($sourceHeight * $maxRatio);
+            $cropX = ($sourceWidth - $cropWidth) / 2;
+            $sourceRatio = $maxRatio;
+        } elseif ($sourceRatio < $minRatio) {
+            // Too tall - crop top and bottom
+            $cropHeight = (int) ($sourceWidth / $minRatio);
+            $cropY = ($sourceHeight - $cropHeight) / 2;
+            $sourceRatio = $minRatio;
+        }
+
+        if ($height <= 0) {
+            $height = (int) round($width / $sourceRatio);
+        }
 
         $dest = imagecreatetruecolor($width, $height);
-        imagecopyresampled($dest, $source, 0, 0, (int) $cropX, (int) $cropY, $width, $height, $cropSize, $cropSize);
+        imagecopyresampled($dest, $source, 0, 0, (int) $cropX, (int) $cropY, $width, $height, (int) $cropWidth, (int) $cropHeight);
         imagejpeg($dest, $path, 90);
 
         imagedestroy($source);

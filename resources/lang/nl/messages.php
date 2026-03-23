@@ -1960,6 +1960,7 @@ return [
     'generate_ai_flyer' => 'Genereer AI-flyer',
     'regenerate_ai_flyer' => 'Opnieuw genereren',
     'ai_flyer_generation_failed' => 'Het genereren van de AI-flyer is mislukt. Probeer het opnieuw.',
+    'ai_daily_limit_reached' => 'Je hebt je dagelijkse limiet van :limit AI-beeldgeneraties bereikt. Probeer het morgen opnieuw.',
     'ai_content_moderation_blocked' => 'De afbeelding kon niet worden gegenereerd omdat de inhoud is gemarkeerd door het AI-veiligheidsfilter. Pas de evenementgegevens of stijlinstructies aan.',
     'flyer_style_placeholder' => 'Optioneel: beschrijf je gewenste stijl...',
     'ai_style_generator' => 'AI-stijlgenerator',

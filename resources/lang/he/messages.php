@@ -1955,6 +1955,7 @@ return [
     'generate_ai_flyer' => 'צור פלייר עם AI',
     'regenerate_ai_flyer' => 'צור מחדש',
     'ai_flyer_generation_failed' => 'יצירת הפלייר עם AI נכשלה. אנא נסה שוב.',
+    'ai_daily_limit_reached' => 'הגעת למגבלת היומית של :limit יצירות תמונות AI. אנא נסה שוב מחר.',
     'ai_content_moderation_blocked' => 'לא ניתן היה ליצור את התמונה כי התוכן סומן על ידי מסנן הבטיחות של ה-AI. נסה לשנות את פרטי האירוע או הוראות העיצוב.',
     'flyer_style_placeholder' => 'אופציונלי: תאר את הסגנון המועדף עליך...',
     'ai_style_generator' => 'מחולל סגנון AI',

@@ -1298,6 +1298,52 @@ class Role extends Model implements MustVerifyEmail
         return $this->newslettersSentThisMonth() < $limit;
     }
 
+    public function isOnTrial(): bool
+    {
+        if ($this->onGenericTrial()) {
+            return true;
+        }
+
+        $subscription = $this->subscription('default');
+
+        return $subscription && $subscription->onTrial() && ! $subscription->canceled();
+    }
+
+    public function aiImageDailyLimit(): ?int
+    {
+        if (! config('app.hosted')) {
+            return null;
+        }
+
+        if ($this->isOnTrial()) {
+            return config('usage.ai_image_daily_limit_trial');
+        }
+
+        return config('usage.ai_image_daily_limit_paid');
+    }
+
+    public function aiImageGenerationsToday(): int
+    {
+        return (int) \App\Models\UsageDaily::where('role_id', $this->id)
+            ->where('date', now()->toDateString())
+            ->whereIn('operation', [
+                \App\Services\UsageTrackingService::GEMINI_GENERATE_FLYER,
+                \App\Services\UsageTrackingService::GEMINI_GENERATE_STYLE_IMAGE,
+            ])
+            ->sum('count');
+    }
+
+    public function canGenerateAiImage(): bool
+    {
+        $limit = $this->aiImageDailyLimit();
+
+        if (is_null($limit)) {
+            return true;
+        }
+
+        return $this->aiImageGenerationsToday() < $limit;
+    }
+
     public function photoLimit(): ?int
     {
         if (! config('app.hosted')) {

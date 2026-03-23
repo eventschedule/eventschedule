@@ -1374,6 +1374,10 @@ class EventController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
+        if (! $role->canGenerateAiImage()) {
+            return response()->json(['error' => __('messages.ai_daily_limit_reached', ['limit' => $role->aiImageDailyLimit()])], 422);
+        }
+
         if (is_demo_mode()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
