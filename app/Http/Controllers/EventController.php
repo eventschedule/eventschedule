@@ -1394,6 +1394,9 @@ class EventController extends Controller
             'duration' => 'nullable|numeric',
             'short_description' => 'nullable|string',
             'category_id' => 'nullable|integer',
+            'venue_name' => 'nullable|string',
+            'venue_address1' => 'nullable|string',
+            'venue_city' => 'nullable|string',
         ]);
 
         $eventId = UrlUtils::decodeId($request->input('event_id'));
@@ -1417,6 +1420,16 @@ class EventController extends Controller
             $event->category_id = $request->input('category_id');
             $event->setRelation('roles', collect([]));
             $event->setRelation('tickets', collect([]));
+        }
+
+        if ($request->input('venue_name') || $request->input('venue_address1')) {
+            $venueRole = new Role;
+            $venueRole->type = 'venue';
+            $venueRole->name = $request->input('venue_name', '');
+            $venueRole->address1 = $request->input('venue_address1', '');
+            $venueRole->city = $request->input('venue_city', '');
+            $roles = $event->relationLoaded('roles') ? $event->roles->filter(fn ($r) => ! $r->isVenue()) : collect([]);
+            $event->setRelation('roles', $roles->push($venueRole));
         }
 
         try {
@@ -1495,6 +1508,9 @@ class EventController extends Controller
             'elements' => 'required|array|min:1',
             'elements.*' => 'in:category_id,short_description,description,flyer_image',
             'name' => 'required|string',
+            'venue_name' => 'nullable|string',
+            'venue_address1' => 'nullable|string',
+            'venue_city' => 'nullable|string',
         ]);
 
         $elements = $request->input('elements');
@@ -1522,6 +1538,15 @@ class EventController extends Controller
             $event->category_id = $request->input('category_id');
             $event->setRelation('roles', collect([]));
             $event->setRelation('tickets', collect([]));
+
+            if ($request->input('venue_name') || $request->input('venue_address1')) {
+                $venueRole = new Role;
+                $venueRole->type = 'venue';
+                $venueRole->name = $request->input('venue_name', '');
+                $venueRole->address1 = $request->input('venue_address1', '');
+                $venueRole->city = $request->input('venue_city', '');
+                $event->setRelation('roles', collect([$venueRole]));
+            }
 
             $styleDescription = GeminiUtils::buildStyleContext($role);
             $flyerPrompt = GeminiUtils::buildFlyerPrompt($event, $request->input('style_instructions'), $styleDescription, $role);

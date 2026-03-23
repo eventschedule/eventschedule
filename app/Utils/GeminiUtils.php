@@ -1382,7 +1382,7 @@ class GeminiUtils
         $hasVenue = (bool) $event->venue;
         if ($hasVenue) {
             $prompt .= "Venue name: {$event->venue->name}\n";
-            $venueAddress = $event->venue->bestAddress();
+            $venueAddress = $event->venue->shortAddress();
             if ($venueAddress) {
                 $prompt .= "Venue address: {$venueAddress}\n";
             }

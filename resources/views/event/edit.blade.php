@@ -6509,7 +6509,10 @@ window.getEventDetailsExtraData = function() {
         event_id: @json($event->exists ? \App\Utils\UrlUtils::encodeId($event->id) : ''),
         starts_at: startsAt ? startsAt.value : '',
         duration: duration ? duration.value : '',
-        category_id: categoryId ? categoryId.value : ''
+        category_id: categoryId ? categoryId.value : '',
+        venue_name: document.querySelector('input[name="venue_name"]')?.value || '',
+        venue_address1: document.querySelector('input[name="venue_address1"]')?.value || '',
+        venue_city: document.querySelector('input[name="venue_city"]')?.value || ''
     };
 };
 
