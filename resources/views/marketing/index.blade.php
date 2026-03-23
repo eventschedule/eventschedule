@@ -93,9 +93,9 @@
         <!-- Grid pattern overlay -->
         <div class="absolute inset-0 grid-pattern bg-[size:60px_60px]"></div>
 
-        <div class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
-            <!-- Centered text content -->
-            <div class="text-center">
+        <div class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-40 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            <!-- Text content -->
+            <div class="text-center lg:text-left lg:col-span-5">
                 <!-- Badge -->
                 <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8 animate-reveal">
                     <span class="relative flex h-2 w-2">
@@ -106,18 +106,18 @@
                 </div>
 
                 <!-- Main headline -->
-                <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 max-w-4xl mx-auto animate-reveal delay-100">
+                <h1 class="text-5xl sm:text-6xl lg:text-5xl xl:text-6xl font-bold tracking-tight mb-6 animate-reveal delay-100">
                     <span class="block text-gray-900 dark:text-white">Plan, Promote &</span>
                     <span class="block text-gradient">Share Event Calendars</span>
                 </h1>
 
                 <!-- Subheadline -->
-                <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-xl mx-auto mb-12 animate-reveal delay-200">
+                <p class="text-xl md:text-2xl lg:text-lg xl:text-xl text-gray-500 dark:text-gray-400 max-w-xl mx-auto lg:mx-0 mb-12 animate-reveal delay-200">
                     Share events, sell tickets, and grow your audience. Built for venues, performers, and communities.
                 </p>
 
                 <!-- CTA Buttons -->
-                <div class="flex flex-col sm:flex-row gap-4 justify-center animate-reveal delay-300">
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-reveal delay-300">
                     <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl overflow-hidden transition-all hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25">
                         <span class="relative z-10 flex items-center gap-2">
                             Start for free
@@ -132,7 +132,7 @@
             </div>
 
             <!-- YouTube overview video -->
-            <div class="relative overflow-hidden rounded-2xl shadow-2xl shadow-black/50 ring-1 ring-gray-200 dark:ring-white/10 mt-16 animate-reveal delay-300">
+            <div class="lg:col-span-7 relative overflow-hidden rounded-2xl shadow-2xl shadow-black/50 ring-1 ring-gray-200 dark:ring-white/10 mt-12 lg:mt-0 animate-reveal delay-300">
                 <iframe class="aspect-video w-full" src="https://www.youtube-nocookie.com/embed/IL8Fj0p6Lz8" title="Event Schedule Overview" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
             </div>
         </div>
