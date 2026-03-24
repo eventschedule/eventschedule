@@ -9,7 +9,7 @@ use Carbon\Carbon;
 
 class GeminiUtils
 {
-    private static function sendRequest($prompt, $imageData = null, $purpose = 'content')
+    private static function sendRequest($prompt, $imageData = null, $purpose = 'content', $options = [])
     {
         $textProvider = config('services.ai.text_provider', 'gemini');
 
@@ -50,6 +50,10 @@ class GeminiUtils
                 'response_mime_type' => 'application/json',
             ],
         ];
+
+        if (! empty($options['disable_thinking'])) {
+            $data['thinkingConfig'] = ['thinkingBudget' => 0];
+        }
 
         // Add image data if provided
         if ($imageData) {
@@ -190,9 +194,9 @@ class GeminiUtils
     /**
      * Send a simple text prompt to Gemini and return the response
      */
-    public static function sendPrompt($prompt, $purpose = 'content')
+    public static function sendPrompt($prompt, $purpose = 'content', $options = [])
     {
-        return self::sendRequest($prompt, null, $purpose);
+        return self::sendRequest($prompt, null, $purpose, $options);
     }
 
     public static function parseEvent($role, $details, $file = null)
