@@ -29,9 +29,9 @@ use App\Http\Controllers\PromoCodeController;
 use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StripeController;
-use App\Http\Controllers\SupportChatController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SubscriptionWebhookController;
+use App\Http\Controllers\SupportChatController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\WaitlistController;
 use App\Http\Controllers\WebhookSettingsController;
@@ -311,6 +311,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{subdomain}/events-graphic/download', [GraphicController::class, 'downloadGraphic'])->name('event.download_graphic');
     Route::get('/{subdomain}/events-graphic/settings', [GraphicController::class, 'getSettings'])->name('event.graphic_settings');
     Route::post('/{subdomain}/events-graphic/settings', [GraphicController::class, 'saveSettings'])->name('event.save_graphic_settings');
+    Route::post('/{subdomain}/events-graphic/ai-text', [GraphicController::class, 'processGraphicAIText'])->name('event.graphic_ai_text');
     Route::post('/{subdomain}/events-graphic/test-email', [GraphicController::class, 'sendTestEmail'])->name('event.graphic_test_email');
     Route::post('/{subdomain}/events-graphic/header-image', [GraphicController::class, 'uploadHeaderImage'])->name('event.graphic_upload_header_image');
     Route::delete('/{subdomain}/events-graphic/header-image', [GraphicController::class, 'deleteHeaderImage'])->name('event.graphic_delete_header_image');

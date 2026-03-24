@@ -2835,4 +2835,5 @@ return [
     'add_on' => 'Complemento',
     'add_add_on' => 'Adicionar complemento',
     'add_ons_help' => 'Itens opcionais que os clientes podem adicionar à sua compra (por exemplo, estacionamento, produtos, pacotes de refeição).',
+    'ai_processing' => 'A IA está processando o texto...',
 ];

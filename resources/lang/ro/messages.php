@@ -2875,4 +2875,5 @@ return [
     'add_on' => 'Supliment',
     'add_add_on' => 'Adaugă supliment',
     'add_ons_help' => 'Articole opționale pe care clienții le pot adăuga la achiziția lor (de ex. parcare, produse, pachete de masă).',
+    'ai_processing' => 'AI procesează textul...',
 ];

@@ -2836,4 +2836,5 @@ return [
     'add_on' => 'Supplément',
     'add_add_on' => 'Ajouter un supplément',
     'add_ons_help' => 'Articles optionnels que les clients peuvent ajouter à leur achat (par exemple, parking, produits dérivés, formules repas).',
+    'ai_processing' => 'L\'IA traite le texte...',
 ];

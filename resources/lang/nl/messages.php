@@ -2834,4 +2834,5 @@ return [
     'add_on' => 'Extra',
     'add_add_on' => 'Extra toevoegen',
     'add_ons_help' => 'Optionele items die klanten aan hun aankoop kunnen toevoegen (bijv. parkeren, merchandise, maaltijdpakketten).',
+    'ai_processing' => 'AI verwerkt de tekst...',
 ];

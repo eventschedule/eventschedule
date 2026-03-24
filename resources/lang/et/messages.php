@@ -2852,4 +2852,5 @@ return [
     'add_on' => 'Lisa',
     'add_add_on' => 'Lisa lisavalik',
     'add_ons_help' => 'Valikulised esemed, mida kliendid saavad oma ostule lisada (nt parkimine, meened, toidupaketid).',
+    'ai_processing' => 'Tehisintellekt töötleb teksti...',
 ];

@@ -2836,4 +2836,5 @@ return [
     'add_on' => 'Extra',
     'add_add_on' => 'Aggiungi extra',
     'add_ons_help' => 'Articoli opzionali che i clienti possono aggiungere al loro acquisto (ad es. parcheggio, merchandising, pacchetti pasto).',
+    'ai_processing' => 'L\'IA sta elaborando il testo...',
 ];

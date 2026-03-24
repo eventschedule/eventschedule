@@ -2878,4 +2878,5 @@ return [
     'add_on' => 'Add-on',
     'add_add_on' => 'Add add-on',
     'add_ons_help' => 'Optional items customers can add to their purchase (e.g. parking, merchandise, meal packages).',
+    'ai_processing' => 'AI is processing the text...',
 ];

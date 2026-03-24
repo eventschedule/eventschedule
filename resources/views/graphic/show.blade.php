@@ -360,6 +360,38 @@
                         graphicData = graphicData || {};
                         graphicData.text = data.text;
                         graphicData.download_url = data.download_url;
+
+                        // Process AI separately if enabled
+                        if (data.ai_prompt_enabled) {
+                            const aiIndicator = document.getElementById('aiProcessingIndicator');
+                            if (aiIndicator) aiIndicator.classList.remove('hidden');
+
+                            fetch('{{ route("event.graphic_ai_text", ["subdomain" => $role->subdomain]) }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                },
+                                body: JSON.stringify({
+                                    text: data.text,
+                                    ai_prompt: formSettings.ai_prompt,
+                                    exclude_recurring: formSettings.exclude_recurring,
+                                    text_show_all: formSettings.text_show_all,
+                                    event_count: formSettings.event_count,
+                                }),
+                            })
+                            .then(r => r.json())
+                            .then(aiData => {
+                                if (aiIndicator) aiIndicator.classList.add('hidden');
+                                if (aiData.text) {
+                                    textContent.value = aiData.text;
+                                    graphicData.text = aiData.text;
+                                }
+                            })
+                            .catch(() => {
+                                if (aiIndicator) aiIndicator.classList.add('hidden');
+                            });
+                        }
                     })
                     .catch(error => {
                         console.warn('Error loading text:', error);
@@ -2085,6 +2117,13 @@
                                 class="hidden w-full h-full p-3 border border-gray-200 dark:border-gray-700 rounded-md resize-none font-mono text-sm leading-relaxed whitespace-pre-wrap overflow-y-auto bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none min-h-[50vh] lg:min-h-[200px]"
                                 dir="{{ $role->isRtl() ? 'rtl' : 'ltr' }}"
                             ></textarea>
+                            <div id="aiProcessingIndicator" class="hidden flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-2 px-1">
+                                <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>{{ __('messages.ai_processing') }}</span>
+                            </div>
                         </div>
                     </div>
 

@@ -2840,4 +2840,5 @@ return [
     'add_on' => 'Zusatzoption',
     'add_add_on' => 'Zusatzoption hinzufügen',
     'add_ons_help' => 'Optionale Artikel, die Kunden zu ihrem Kauf hinzufügen können (z. B. Parkplatz, Merchandise, Verpflegungspakete).',
+    'ai_processing' => 'KI verarbeitet den Text...',
 ];

@@ -326,23 +326,65 @@ class GraphicController extends Controller
             // Generate event text content
             $eventText = EventTextGenerator::generate($role, $textEvents, $directRegistration, $textTemplate, $urlSettings);
 
-            // Process text through AI if ai_prompt is set (Enterprise feature)
-            // Use request parameter if provided, otherwise fall back to saved settings
+            // Check if AI processing is available (handled separately to avoid timeouts)
             $aiPrompt = $request->has('ai_prompt')
                 ? trim($request->get('ai_prompt', ''))
                 : trim($graphicSettings['ai_prompt'] ?? '');
-            if ($role->isEnterprise() && ! empty($aiPrompt) && (config('services.google.gemini_key') || config('services.openai.api_key'))) {
-                $aiProcessedText = $this->processTextWithAI($eventText, $aiPrompt, $textEvents);
-                if ($aiProcessedText) {
-                    $eventText = $aiProcessedText;
-                }
-            }
+            $aiEnabled = $role->isEnterprise() && ! empty($aiPrompt) && (config('services.google.gemini_key') || config('services.openai.api_key'));
 
             $response['text'] = $eventText;
+            $response['ai_prompt_enabled'] = $aiEnabled;
             $response['download_url'] = route('event.download_graphic', ['subdomain' => $role->subdomain, 'layout' => $layout]);
         }
 
         return response()->json($response);
+    }
+
+    public function processGraphicAIText(Request $request, $subdomain)
+    {
+        set_time_limit(120);
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! auth()->user()->isMember($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (! $role->isEnterprise()) {
+            return response()->json(['error' => 'Enterprise feature'], 403);
+        }
+
+        $text = $request->input('text', '');
+        $aiPrompt = trim($request->input('ai_prompt', ''));
+
+        if (empty($aiPrompt) || empty($text)) {
+            return response()->json(['error' => 'Missing text or AI prompt']);
+        }
+
+        // Re-query events for metadata (same filters as generateGraphicData)
+        $eventCountSetting = $request->input('event_count');
+        $eventLimit = $eventCountSetting ? (int) $eventCountSetting : 20;
+        $excludeRecurring = $request->boolean('exclude_recurring', false);
+        $textShowAll = $request->boolean('text_show_all', false);
+
+        $baseQuery = Event::with(['roles', 'tickets', 'venue'])
+            ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
+            ->where('starts_at', '>=', now())
+            ->where('is_private', false)
+            ->whereNull('event_password')
+            ->when($excludeRecurring, fn ($q) => $q->whereNull('days_of_week'));
+
+        $events = $textShowAll
+            ? $baseQuery->orderBy('starts_at')->get()
+            : $baseQuery->orderBy('starts_at')->limit($eventLimit)->get();
+
+        $result = $this->processTextWithAI($text, $aiPrompt, $events);
+
+        if ($result) {
+            return response()->json(['text' => $result]);
+        }
+
+        return response()->json(['error' => 'AI processing failed'], 500);
     }
 
     public function downloadGraphic(Request $request, $subdomain)
