@@ -3089,7 +3089,7 @@
                                 <div v-show="activeTicketTab === 'add_ons'">
                                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.add_ons_help') }}</p>
 
-                                    <div v-for="(addon, aIndex) in addons" :key="aIndex" class="mb-4 p-4 bg-gray-50 dark:bg-[#252526] rounded-lg">
+                                    <div v-for="(addon, aIndex) in addons" :key="addon._key" class="mb-4 p-4 bg-gray-50 dark:bg-[#252526] rounded-lg">
                                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.name') }} *</label>
@@ -3126,7 +3126,7 @@
                                                 </button>
                                             </div>
                                             <div v-if="!addon.image_url">
-                                                <button type="button" @click="$refs['addon_image_' + aIndex].click()"
+                                                <button type="button" @click="(Array.isArray($refs['addon_image_' + aIndex]) ? $refs['addon_image_' + aIndex][0] : $refs['addon_image_' + aIndex]).click()"
                                                     class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
                                                     <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -3134,9 +3134,10 @@
                                                     {{ __('messages.choose_file') }}
                                                 </button>
                                             </div>
-                                            <input type="file" :ref="'addon_image_' + aIndex" :name="`addons[${aIndex}][image]`"
+                                            <input type="file" :ref="'addon_image_' + aIndex"
                                                 accept="image/png, image/jpeg, image/gif, image/webp" class="hidden"
                                                 @change="onAddonFileChange(aIndex, $event)" />
+                                            <input type="hidden" v-if="addon.image_url && addon.image_url.startsWith('data:')" :name="`addon_image_data[${aIndex}]`" :value="addon.image_url">
                                             <input type="hidden" :name="`addons[${aIndex}][remove_image]`" :value="addon.remove_image ? 1 : 0" />
                                         </div>
                                         <div class="mt-2 flex justify-between items-center">
@@ -3155,6 +3156,7 @@
                                 </div>
 
                                 </div><!-- /disabled state wrapper -->
+
 
                             </div>
 
@@ -4162,8 +4164,9 @@
           }
           return pcs;
         })(),
-        addons: @json($event->addons ?? []).map(addon => ({
+        addons: @json($event->addons ?? []).map((addon, i) => ({
           id: addon.id || null,
+          _key: addon.id ? ('existing_' + addon.id) : ('init_' + i),
           type: addon.type || '',
           quantity: addon.quantity ?? null,
           price: addon.price ?? null,
@@ -4972,7 +4975,6 @@
         }
 
         this.isSaving = true;
-
         this.isDirty = false;
       },
       addTicket() {
@@ -5046,6 +5048,7 @@
       addAddon() {
         this.addons.push({
           id: null,
+          _key: 'new_' + Date.now() + '_' + this.addons.length,
           type: '',
           quantity: null,
           price: null,
@@ -5059,14 +5062,44 @@
         this.addons.splice(index, 1);
       },
       removeAddonImage(aIndex) {
+        if (!confirm(@json(__('messages.are_you_sure')))) return;
         this.addons[aIndex].remove_image = true;
         this.addons[aIndex].image_url = null;
+        var ref = this.$refs['addon_image_' + aIndex];
+        var fileInput = Array.isArray(ref) ? ref[0] : ref;
+        if (fileInput) fileInput.value = '';
       },
       onAddonFileChange(aIndex, event) {
         var file = event.target.files[0];
         if (file) {
-          this.addons[aIndex].image_url = URL.createObjectURL(file);
           this.addons[aIndex].remove_image = false;
+
+          var reader = new FileReader();
+          var self = this;
+          reader.onload = (e) => {
+            var img = new Image();
+            img.onload = () => {
+              var maxDim = 1200;
+              var w = img.width;
+              var h = img.height;
+              if (w > maxDim || h > maxDim) {
+                if (w > h) {
+                  h = Math.round(h * maxDim / w);
+                  w = maxDim;
+                } else {
+                  w = Math.round(w * maxDim / h);
+                  h = maxDim;
+                }
+              }
+              var canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+              self.addons[aIndex].image_url = canvas.toDataURL('image/jpeg', 0.85);
+            };
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
         }
       },
       copyPromoLink(promoCode) {

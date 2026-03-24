@@ -27,8 +27,8 @@ class EventUpdateRequest extends FormRequest
             'tickets.*.sales_start_at' => ['nullable', 'date'],
             'tickets.*.sales_end_at' => ['nullable', 'date'],
 
-            'addons.*.image' => ['nullable', 'image', 'max:2500'],
             'addons.*.url' => ['nullable', 'url', 'max:2000'],
+            'addon_image_data.*' => ['nullable', 'string', 'max:3500000'],
 
             'sponsor_mode' => ['nullable', 'string', 'in:default,none,custom'],
             'event_sponsor_logos.*' => ['image', 'max:2500'],

@@ -872,6 +872,7 @@ class EventRepo
         // Save add-ons
         if ($event->tickets_enabled) {
             $addonData = $request->input('addons', []);
+            $addonImageData = $request->input('addon_image_data', []);
             $addonIds = [];
 
             foreach ($addonData as $index => $data) {
@@ -917,33 +918,45 @@ class EventRepo
                     $addon->update(['image_url' => null]);
                 }
 
-                // Handle addon image upload
-                if ($request->hasFile("addons.{$index}.image")) {
-                    $file = $request->file("addons.{$index}.image");
+                // Handle addon image from base64 data URL
+                if (isset($addonImageData[$index]) && str_starts_with($addonImageData[$index], 'data:image/')) {
+                    $dataUrl = $addonImageData[$index];
+                    $commaPos = strpos($dataUrl, ',');
 
-                    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-                    $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-                    $extension = strtolower($file->getClientOriginalExtension());
-                    if (! in_array($extension, $allowedExtensions) || ! in_array($file->getMimeType(), $allowedMimeTypes)) {
-                        throw ValidationException::withMessages([
-                            "addons.{$index}.image" => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp',
-                        ]);
-                    }
+                    if ($commaPos !== false) {
+                        $header = substr($dataUrl, 0, $commaPos);
+                        $base64Data = substr($dataUrl, $commaPos + 1);
 
-                    // Delete old image if exists
-                    $rawImageUrl = $addon->getAttributes()['image_url'] ?? null;
-                    if ($rawImageUrl) {
-                        $path = $rawImageUrl;
-                        if (config('filesystems.default') == 'local') {
-                            $path = 'public/'.$path;
+                        if (preg_match('/^data:image\/(jpe?g|png|gif|webp);base64$/', $header, $matches)) {
+                            $extension = ($matches[1] === 'jpeg' || $matches[1] === 'jpg') ? 'jpg' : $matches[1];
+                            $content = base64_decode($base64Data, true);
+
+                            if ($content !== false) {
+                                $imageInfo = @getimagesizefromstring($content);
+                                if ($imageInfo !== false) {
+                                    $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                                    if (in_array($imageInfo['mime'], $allowedMimeTypes)) {
+                                        // Delete old image if exists
+                                        $rawImageUrl = $addon->getAttributes()['image_url'] ?? null;
+                                        if ($rawImageUrl) {
+                                            $path = $rawImageUrl;
+                                            if (config('filesystems.default') == 'local') {
+                                                $path = 'public/'.$path;
+                                            }
+                                            Storage::delete($path);
+                                        }
+
+                                        $filename = strtolower('addon_'.Str::random(32).'.'.$extension);
+                                        Storage::put(
+                                            config('filesystems.default') == 'local' ? 'public/'.$filename : $filename,
+                                            $content
+                                        );
+                                        $addon->update(['image_url' => $filename]);
+                                    }
+                                }
+                            }
                         }
-                        Storage::delete($path);
                     }
-
-                    $filename = strtolower('addon_'.Str::random(32).'.'.$extension);
-                    $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
-
-                    $addon->update(['image_url' => $filename]);
                 }
             }
 
