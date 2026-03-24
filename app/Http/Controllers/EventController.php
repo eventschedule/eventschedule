@@ -301,8 +301,22 @@ class EventController extends Controller
                 $event->sell_after_start = $defaultTickets['sell_after_start'] ?? false;
                 $event->show_unavailable_tickets = $defaultTickets['show_unavailable_tickets'] ?? false;
                 $event->custom_fields = $defaultTickets['custom_fields'] ?? null;
-                $event->tickets = collect($defaultTickets['tickets'] ?? [new Ticket]);
-                $event->addons = $defaultTickets['addons'] ?? [];
+                $tickets = array_map(function ($ticketData) {
+                    $ticket = new Ticket;
+                    foreach ($ticketData as $key => $value) {
+                        $ticket->$key = $value;
+                    }
+                    return $ticket;
+                }, $defaultTickets['tickets'] ?? []);
+                $event->tickets = collect($tickets ?: [new Ticket]);
+                $event->addons = array_map(function ($addonData) {
+                    $addon = new Ticket;
+                    foreach ($addonData as $key => $value) {
+                        $addon->$key = $value;
+                    }
+                    $addon->is_addon = true;
+                    return $addon;
+                }, $defaultTickets['addons'] ?? []);
                 $defaultPromoCodes = $defaultTickets['promo_codes'] ?? [];
             } else {
                 $event->ticket_currency_code = MoneyUtils::getCurrencyForCountry($role->country_code);
