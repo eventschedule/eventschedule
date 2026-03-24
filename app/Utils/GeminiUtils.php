@@ -30,8 +30,12 @@ class GeminiUtils
             }
         }
 
-        $modelKey = $purpose === 'translation' ? 'gemini_translation_model' : 'gemini_content_model';
-        $model = config("services.google.{$modelKey}", 'gemini-2.5-flash');
+        if (! empty($options['model'])) {
+            $model = $options['model'];
+        } else {
+            $modelKey = $purpose === 'translation' ? 'gemini_translation_model' : 'gemini_content_model';
+            $model = config("services.google.{$modelKey}", 'gemini-2.5-flash');
+        }
 
         if (config('app.is_testing')) {
             \Log::info('AI request', ['provider' => 'gemini', 'model' => $model, 'type' => 'text', 'purpose' => $purpose]);
@@ -50,10 +54,6 @@ class GeminiUtils
                 'response_mime_type' => 'application/json',
             ],
         ];
-
-        if (! empty($options['disable_thinking'])) {
-            $data['thinkingConfig'] = ['thinkingBudget' => 0];
-        }
 
         // Add image data if provided
         if ($imageData) {

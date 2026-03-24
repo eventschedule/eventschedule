@@ -156,10 +156,10 @@ class GraphicEmailService
             $prompt .= "Original text:\n{$eventText}\n\n";
             $prompt .= "Respond with only the transformed text, preserving the structure and URLs. Return JSON with a single 'text' field containing the result.";
 
-            $response = GeminiUtils::sendPrompt($prompt, 'content', ['disable_thinking' => true]);
+            $response = GeminiUtils::sendPrompt($prompt, 'content', ['model' => config('services.google.gemini_translation_model', 'gemini-2.5-flash')]);
 
-            if ($response && isset($response['text'])) {
-                return $response['text'];
+            if ($response && isset($response[0]['text'])) {
+                return $response[0]['text'];
             }
 
             return null;
