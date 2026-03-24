@@ -127,28 +127,28 @@
 
             function getFormSettings() {
                 // Check desktop first, fall back to mobile
-                const aiPrompt = document.getElementById('ai_prompt')?.value ||
-                                 document.getElementById('ai_prompt_mobile')?.value || '';
-                const textTemplate = document.getElementById('text_template')?.value ||
-                                     document.getElementById('text_template_mobile')?.value || '';
-                const excludeRecurring = document.getElementById('exclude_recurring')?.checked ||
-                                         document.getElementById('exclude_recurring_mobile')?.checked || false;
+                const aiPrompt = document.getElementById('ai_prompt')?.value ??
+                                 document.getElementById('ai_prompt_mobile')?.value ?? '';
+                const textTemplate = document.getElementById('text_template')?.value ??
+                                     document.getElementById('text_template_mobile')?.value ?? '';
+                const excludeRecurring = document.getElementById('exclude_recurring')?.checked ??
+                                         document.getElementById('exclude_recurring_mobile')?.checked ?? false;
                 const layout = document.querySelector('input[name="layout"]:checked')?.value ||
                                document.querySelector('input[name="layout_mobile"]:checked')?.value || 'grid';
-                const datePosition = document.getElementById('date_position')?.value ||
-                                     document.getElementById('date_position_mobile')?.value || '';
-                const eventCount = document.getElementById('event_count')?.value ||
-                                   document.getElementById('event_count_mobile')?.value || '';
-                const maxPerRow = document.getElementById('max_per_row')?.value ||
-                                  document.getElementById('max_per_row_mobile')?.value || '';
-                const overlayText = document.getElementById('overlay_text')?.value ||
-                                    document.getElementById('overlay_text_mobile')?.value || '';
-                const urlIncludeHttps = document.getElementById('url_include_https')?.checked ||
-                                        document.getElementById('url_include_https_mobile')?.checked || false;
-                const urlIncludeId = document.getElementById('url_include_id')?.checked ||
-                                     document.getElementById('url_include_id_mobile')?.checked || false;
-                const textShowAll = document.getElementById('text_show_all')?.checked ||
-                                    document.getElementById('text_show_all_mobile')?.checked || false;
+                const datePosition = document.getElementById('date_position')?.value ??
+                                     document.getElementById('date_position_mobile')?.value ?? '';
+                const eventCount = document.getElementById('event_count')?.value ??
+                                   document.getElementById('event_count_mobile')?.value ?? '';
+                const maxPerRow = document.getElementById('max_per_row')?.value ??
+                                  document.getElementById('max_per_row_mobile')?.value ?? '';
+                const overlayText = document.getElementById('overlay_text')?.value ??
+                                    document.getElementById('overlay_text_mobile')?.value ?? '';
+                const urlIncludeHttps = document.getElementById('url_include_https')?.checked ??
+                                        document.getElementById('url_include_https_mobile')?.checked ?? false;
+                const urlIncludeId = document.getElementById('url_include_id')?.checked ??
+                                     document.getElementById('url_include_id_mobile')?.checked ?? false;
+                const textShowAll = document.getElementById('text_show_all')?.checked ??
+                                    document.getElementById('text_show_all_mobile')?.checked ?? false;
 
                 return {
                     direct_registration: directRegistration,
@@ -315,7 +315,7 @@
                 const formSettings = getFormSettings();
                 const layoutParam = '?layout=' + encodeURIComponent(formSettings.layout);
                 const directParam = formSettings.direct_registration ? '&direct=1' : '';
-                const aiPromptParam = formSettings.ai_prompt ? '&ai_prompt=' + encodeURIComponent(formSettings.ai_prompt) : '';
+                const aiPromptParam = '&ai_prompt=' + encodeURIComponent(formSettings.ai_prompt || '');
                 const textTemplateParam = formSettings.text_template ? '&text_template=' + encodeURIComponent(formSettings.text_template) : '';
                 const excludeRecurringParam = formSettings.exclude_recurring ? '&exclude_recurring=1' : '';
                 const datePositionParam = formSettings.date_position ? '&date_position=' + encodeURIComponent(formSettings.date_position) : '';
