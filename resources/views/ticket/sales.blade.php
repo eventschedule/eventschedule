@@ -26,20 +26,20 @@
     <div id="sales-panel">
         <div class="flow-root">
             <div class="flex flex-col sm:flex-row sm:justify-between gap-4">
-                <div class="flex-1">
+                <div class="flex items-center gap-3 flex-1">
                     <div class="relative w-fit">
                         <x-text-input type="text" name="filter" id="filter" placeholder="{{ __('messages.filter') }}"
-                            value="{{ request()->filter }}" autocomplete="off"/>
+                            value="{{ request()->filter }}" autocomplete="off" class="w-52"/>
                         <button type="button" id="clear-filter" class="absolute end-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400" style="display: none;">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
                     </div>
+                    <x-toggle name="include_past_sales" id="include-past-sales" :label="__('messages.include_past_events')" />
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <x-toggle name="include_past_sales" id="include-past-sales" :label="__('messages.include_past_events')" />
                     <x-secondary-link href="#" id="export-sales">
                         <svg class="-ms-0.5 me-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />

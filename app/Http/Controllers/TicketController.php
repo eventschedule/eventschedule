@@ -166,7 +166,7 @@ class TicketController extends Controller
     {
         $user = auth()->user();
 
-        $query = Sale::with('event', 'saleTickets.ticket', 'promoCode', 'feedback')
+        $query = Sale::with('event.creatorRole', 'saleTickets.ticket', 'promoCode', 'feedback')
             ->where('is_deleted', false)
             ->whereHas('event', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
@@ -316,7 +316,7 @@ class TicketController extends Controller
             fwrite($handle, "\xEF\xBB\xBF");
 
             // Header row
-            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Add-ons', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Transaction Reference', 'Payment Method', 'Status', 'Date', 'Group ID'];
+            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Add-ons', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Transaction Reference', 'Payment Method', 'Status', 'Date', 'Group ID', 'Check-in Status', 'Check-in Time'];
             $headers = array_merge($headers, $customFieldNames);
             fputcsv($handle, $headers);
 
@@ -346,9 +346,26 @@ class TicketController extends Controller
                     $sale->transaction_reference,
                     $sale->payment_method,
                     $sale->status,
-                    $sale->created_at->format('Y-m-d H:i'),
+                    $sale->created_at->timezone($sale->event->creatorRole?->timezone ?? config('app.timezone'))->format('Y-m-d H:i'),
                     $sale->group_id ? UrlUtils::encodeId($sale->group_id) : '',
                 ];
+
+                // Check-in: find the first non-null timestamp across all SaleTicket seats
+                $checkinTimestamp = null;
+                foreach ($sale->saleTickets as $saleTicket) {
+                    $seats = $saleTicket->seats ? json_decode($saleTicket->seats, true) : [];
+                    if (is_array($seats)) {
+                        foreach ($seats as $timestamp) {
+                            if ($timestamp !== null && ($checkinTimestamp === null || $timestamp < $checkinTimestamp)) {
+                                $checkinTimestamp = $timestamp;
+                            }
+                        }
+                    }
+                }
+                $row[] = $checkinTimestamp !== null ? 'Yes' : 'No';
+                $row[] = $checkinTimestamp !== null
+                    ? \Carbon\Carbon::createFromTimestamp($checkinTimestamp)->timezone($sale->event->creatorRole?->timezone ?? config('app.timezone'))->format('Y-m-d H:i')
+                    : '';
 
                 // Build custom field values
                 $customValues = array_fill(0, count($customFieldNames), '');
