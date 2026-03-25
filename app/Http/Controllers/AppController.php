@@ -29,7 +29,9 @@ class AppController extends Controller
                 return redirect()->to(route('profile.edit').'#section-app')->with('error', __('messages.no_new_version_available'));
             }
         } catch (\Exception $e) {
-            return redirect()->to(route('profile.edit').'#section-app')->with('error', $e->getMessage());
+            report($e);
+
+            return redirect()->to(route('profile.edit').'#section-app')->with('error', __('messages.error'));
         }
 
         return redirect()->to(route('profile.edit').'#section-app')->with('message', __('messages.app_updated'));

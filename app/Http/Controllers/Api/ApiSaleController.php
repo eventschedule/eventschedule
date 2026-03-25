@@ -406,16 +406,16 @@ class ApiSaleController extends Controller
                 $ticket = $event->tickets()->where('type', $ticketIdentifier)->where('is_deleted', false)->first();
 
                 if (! $ticket) {
-                    return response()->json(['error' => 'Ticket not found: '.$ticketIdentifier.' (tried as ID and type)'], 422);
+                    return response()->json(['error' => 'Ticket not found'], 422);
                 }
             }
 
             if ($ticket->isSalesEnded()) {
-                return response()->json(['error' => 'Ticket sales have ended for: '.$ticketIdentifier], 422);
+                return response()->json(['error' => 'Ticket sales have ended'], 422);
             }
 
             if ($ticket->isSalesNotStarted()) {
-                return response()->json(['error' => 'Ticket sales have not started for: '.$ticketIdentifier], 422);
+                return response()->json(['error' => 'Ticket sales have not started'], 422);
             }
 
             $ticketIds[$ticket->id] = $quantity;
@@ -466,7 +466,7 @@ class ApiSaleController extends Controller
                     $ticket = $lockedTickets->find($ticketId);
 
                     if (! $ticket) {
-                        throw new \RuntimeException('Ticket no longer available');
+                        throw new \App\Exceptions\BusinessException('Ticket no longer available');
                     }
 
                     if ($ticket->quantity > 0) {
@@ -482,7 +482,7 @@ class ApiSaleController extends Controller
 
                             $totalRequested = array_sum($ticketIds);
                             if ($totalRequested > $remainingTickets) {
-                                throw new \RuntimeException('Tickets not available. Remaining: '.$remainingTickets);
+                                throw new \App\Exceptions\BusinessException('Tickets not available. Remaining: '.$remainingTickets);
                             }
                         } else {
                             $sold = ($ticket->sold ? json_decode($ticket->sold, true) : null) ?? [];
@@ -490,7 +490,7 @@ class ApiSaleController extends Controller
                             $remainingTickets = $ticket->quantity - $soldCount;
 
                             if ($quantity > $remainingTickets) {
-                                throw new \RuntimeException('Tickets not available for ticket '.UrlUtils::encodeId($ticketId).'. Remaining: '.$remainingTickets);
+                                throw new \App\Exceptions\BusinessException('Tickets not available for ticket '.UrlUtils::encodeId($ticketId).'. Remaining: '.$remainingTickets);
                             }
                         }
                     }
@@ -527,7 +527,7 @@ class ApiSaleController extends Controller
                         $addonModel = $event->addons()->lockForUpdate()->find(UrlUtils::decodeId($addonId));
 
                         if (! $addonModel) {
-                            throw new \RuntimeException('Add-on not found: '.$addonId);
+                            throw new \App\Exceptions\BusinessException('Add-on not found: '.$addonId);
                         }
 
                         if ($addonModel->quantity > 0) {
@@ -536,7 +536,7 @@ class ApiSaleController extends Controller
                             $remaining = $addonModel->quantity - $soldCount;
 
                             if ($addonQty > $remaining) {
-                                throw new \RuntimeException('Add-on not available: '.$addonId.'. Remaining: '.$remaining);
+                                throw new \App\Exceptions\BusinessException('Add-on not available: '.$addonId.'. Remaining: '.$remaining);
                             }
                         }
 
@@ -566,8 +566,12 @@ class ApiSaleController extends Controller
 
                 return $sale;
             });
-        } catch (\RuntimeException $e) {
+        } catch (\App\Exceptions\BusinessException $e) {
             return response()->json(['error' => $e->getMessage()], 422);
+        } catch (\Exception $e) {
+            report($e);
+
+            return response()->json(['error' => 'An unexpected error occurred'], 500);
         }
 
         // Reload sale with relationships for API response

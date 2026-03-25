@@ -190,7 +190,7 @@ class GraphicController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => __('messages.email_failed').': '.$e->getMessage(),
+                'message' => __('messages.email_failed'),
             ], 500);
         }
     }

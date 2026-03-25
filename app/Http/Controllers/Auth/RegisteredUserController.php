@@ -226,7 +226,9 @@ class RegisteredUserController extends Controller
                 Artisan::call('migrate', ['--force' => true]);
                 Artisan::call('storage:link');
             } catch (\Exception $e) {
-                return back()->withErrors(['database_host' => 'Database setup failed: '.$e->getMessage()])->withInput();
+                report($e);
+
+                return back()->withErrors(['database_host' => __('messages.error')])->withInput();
             }
         }
 

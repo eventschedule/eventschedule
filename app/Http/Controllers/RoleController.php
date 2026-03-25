@@ -3894,7 +3894,7 @@ class RoleController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => __('messages.error_searching_videos').': '.$e->getMessage(),
+                'message' => __('messages.error_searching_videos'),
             ]);
         }
     }
@@ -3925,7 +3925,7 @@ class RoleController extends Controller
             if (empty($videos)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No videos found for "'.$query.'". Please try a different search term.',
+                    'message' => __('messages.no_videos_found'),
                 ]);
             }
 
@@ -3937,7 +3937,7 @@ class RoleController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => __('messages.error_searching_videos').': '.$e->getMessage(),
+                'message' => __('messages.error_searching_videos'),
             ]);
         }
     }
@@ -4218,7 +4218,6 @@ class RoleController extends Controller
 
             return response()->json([
                 'error' => __('messages.failed_to_send_test_email'),
-                'details' => $e->getMessage(),
             ], 500);
         }
     }

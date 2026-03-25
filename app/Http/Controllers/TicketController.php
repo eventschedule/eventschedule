@@ -498,15 +498,15 @@ class TicketController extends Controller
                             $ticketModel = $event->tickets()->lockForUpdate()->find(UrlUtils::decodeId($ticketId));
 
                             if (! $ticketModel) {
-                                throw new \Exception(__('messages.ticket_not_found'));
+                                throw new \App\Exceptions\BusinessException(__('messages.ticket_not_found'));
                             }
 
                             if ($ticketModel->isSalesEnded()) {
-                                throw new \Exception(__('messages.tickets_not_available'));
+                                throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
                             }
 
                             if ($ticketModel->isSalesNotStarted()) {
-                                throw new \Exception(__('messages.tickets_not_available'));
+                                throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
                             }
 
                             if ($ticketModel->quantity > 0) {
@@ -526,7 +526,7 @@ class TicketController extends Controller
                                     // Check if the total requested quantity exceeds remaining tickets
                                     $totalRequested = array_sum($request->tickets);
                                     if ($totalRequested > $remainingTickets) {
-                                        throw new \Exception(__('messages.tickets_not_available'));
+                                        throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
                                     }
                                 } else {
                                     $sold = json_decode($ticketModel->sold, true);
@@ -534,7 +534,7 @@ class TicketController extends Controller
                                     $remainingTickets = $ticketModel->quantity - $soldCount;
 
                                     if ($quantity > $remainingTickets) {
-                                        throw new \Exception(__('messages.tickets_not_available'));
+                                        throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
                                     }
                                 }
                             }
@@ -549,7 +549,7 @@ class TicketController extends Controller
                             $addonModel = $event->addons()->lockForUpdate()->find(UrlUtils::decodeId($addonId));
 
                             if (! $addonModel) {
-                                throw new \Exception(__('messages.ticket_not_found'));
+                                throw new \App\Exceptions\BusinessException(__('messages.ticket_not_found'));
                             }
 
                             if ($addonModel->quantity > 0) {
@@ -558,7 +558,7 @@ class TicketController extends Controller
                                 $remaining = $addonModel->quantity - $soldCount;
 
                                 if ($addonQty > $remaining) {
-                                    throw new \Exception(__('messages.tickets_not_available'));
+                                    throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
                                 }
                             }
                         }
@@ -631,7 +631,7 @@ class TicketController extends Controller
                         // Validate no duplicate emails among guests
                         $guestEmails = collect($guests)->pluck('email')->filter()->map(fn ($e) => strtolower(trim($e)));
                         if ($guestEmails->count() !== $guestEmails->unique()->count()) {
-                            throw new \Exception(__('messages.duplicate_guest_emails'));
+                            throw new \App\Exceptions\BusinessException(__('messages.duplicate_guest_emails'));
                         }
 
                         // Build flat list of ticket assignments for guests
@@ -650,7 +650,7 @@ class TicketController extends Controller
 
                         // Validate guest count matches ticket count
                         if (count($ticketAssignments) !== count($guests)) {
-                            throw new \Exception(__('messages.error'));
+                            throw new \App\Exceptions\BusinessException(__('messages.error'));
                         }
 
                         // Primary sale gets the first ticket (qty=1)
@@ -855,8 +855,12 @@ class TicketController extends Controller
             report($e);
 
             return back()->withInput()->with('error', __('messages.error'));
-        } catch (\Exception $e) {
+        } catch (\App\Exceptions\BusinessException $e) {
             return back()->withInput()->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+            report($e);
+
+            return back()->withInput()->with('error', __('messages.error'));
         }
 
         $total = $sale->payment_amount;
@@ -1030,7 +1034,7 @@ class TicketController extends Controller
                 $rsvpQuantity = $event->individual_tickets ? max(1, count($guests)) : 1;
                 $rsvpSoldCount = $event->rsvpSoldCount($request->event_date);
                 if ($event->rsvp_limit && ($rsvpSoldCount + $rsvpQuantity) > $event->rsvp_limit) {
-                    throw new \Exception(__('messages.rsvp_full'));
+                    throw new \App\Exceptions\BusinessException(__('messages.rsvp_full'));
                 }
 
                 // Check for duplicate registration
@@ -1043,14 +1047,14 @@ class TicketController extends Controller
                     ->exists();
 
                 if ($duplicate) {
-                    throw new \Exception(__('messages.rsvp_already_registered'));
+                    throw new \App\Exceptions\BusinessException(__('messages.rsvp_already_registered'));
                 }
 
                 // Check for duplicate guest registrations
                 if ($event->individual_tickets && count($guests) > 1) {
                     $guestEmails = collect($guests)->pluck('email')->filter()->map(fn ($e) => strtolower(trim($e)));
                     if ($guestEmails->count() !== $guestEmails->unique()->count()) {
-                        throw new \Exception(__('messages.duplicate_guest_emails'));
+                        throw new \App\Exceptions\BusinessException(__('messages.duplicate_guest_emails'));
                     }
                     $duplicateGuests = Sale::where('event_id', $event->id)
                         ->where('event_date', $request->event_date)
@@ -1061,7 +1065,7 @@ class TicketController extends Controller
                         ->exists();
 
                     if ($duplicateGuests) {
-                        throw new \Exception(__('messages.rsvp_already_registered'));
+                        throw new \App\Exceptions\BusinessException(__('messages.rsvp_already_registered'));
                     }
                 }
 
@@ -1157,8 +1161,12 @@ class TicketController extends Controller
             report($e);
 
             return back()->withInput()->with('error', __('messages.error'));
-        } catch (\Exception $e) {
+        } catch (\App\Exceptions\BusinessException $e) {
             return back()->withInput()->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+            report($e);
+
+            return back()->withInput()->with('error', __('messages.error'));
         }
 
         // Send confirmation email and admin notification

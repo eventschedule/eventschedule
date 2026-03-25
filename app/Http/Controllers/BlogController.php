@@ -289,7 +289,9 @@ class BlogController extends Controller
 
             return response()->json($generatedContent);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to generate content: '.$e->getMessage()], 500);
+            report($e);
+
+            return response()->json(['error' => __('messages.failed_to_generate_content')], 500);
         }
     }
 }
