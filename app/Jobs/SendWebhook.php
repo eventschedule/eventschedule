@@ -70,15 +70,15 @@ class SendWebhook implements ShouldQueue
 
             // Pin to the resolved IP to prevent DNS rebinding attacks
             if ($resolvedIp) {
-                $parsed = parse_url($this->webhook->url);
-                $pinnedUrl = $parsed['scheme'].'://'.$resolvedIp
-                    .(isset($parsed['port']) ? ':'.$parsed['port'] : '')
-                    .($parsed['path'] ?? '/')
-                    .(isset($parsed['query']) ? '?'.$parsed['query'] : '');
+                $port = parse_url($this->webhook->url, PHP_URL_PORT)
+                    ?? (parse_url($this->webhook->url, PHP_URL_SCHEME) === 'https' ? 443 : 80);
                 $response = $httpClient
-                    ->withHeaders(['Host' => $parsed['host']])
-                    ->withOptions(['verify' => false])
-                    ->post($pinnedUrl);
+                    ->withOptions([
+                        'curl' => [
+                            CURLOPT_RESOLVE => ["{$host}:{$port}:{$resolvedIp}"],
+                        ],
+                    ])
+                    ->post($this->webhook->url);
             } else {
                 $response = $httpClient->post($this->webhook->url);
             }
