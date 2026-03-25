@@ -156,68 +156,79 @@
                                 Build your newsletter by combining these content blocks:
                             </p>
 
-                            <div class="overflow-x-auto mb-6">
-                                <table class="doc-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Block</th>
-                                            <th>Description</th>
-                                            <th>Options</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Heading</span></td>
-                                            <td>Large text for section titles and headlines</td>
-                                            <td>Level (H1/H2/H3), alignment (left/center/right)</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Text</span></td>
-                                            <td>Rich text content with Markdown editor</td>
-                                            <td>Markdown formatting via EasyMDE editor</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Events</span></td>
-                                            <td>Automatically displays your upcoming events with flyer images, dates, and links</td>
-                                            <td>All or selected events; cards or list layout</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Button</span></td>
-                                            <td>Call-to-action button with customizable text and link</td>
-                                            <td>Custom text, URL, alignment</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Image</span></td>
-                                            <td>Upload or link to an image with optional alt text</td>
-                                            <td>URL, alt text, width, alignment</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Divider</span></td>
-                                            <td>Horizontal line to separate sections</td>
-                                            <td>Style (solid/dashed/dotted)</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Spacer</span></td>
-                                            <td>Vertical spacing between blocks</td>
-                                            <td>Height (5 to 200px)</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Social Links</span></td>
-                                            <td>Icons linking to your social media profiles</td>
-                                            <td>Website, Facebook, Instagram, Twitter/X, YouTube, TikTok, LinkedIn</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Profile Image</span></td>
-                                            <td>Your schedule's profile image, displayed as a centered logo</td>
-                                            <td>Auto-populated from schedule settings</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="font-semibold text-gray-900 dark:text-white">Header Banner</span></td>
-                                            <td>Full-width banner image at the top of your newsletter</td>
-                                            <td>Auto-populated from schedule settings</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Content Blocks</h3>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Heading</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Large text for section titles and headlines.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Text, Level (H1/H2/H3), Alignment (left/center/right)</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Text</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Rich text content with full formatting support.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Content (Markdown editor with formatting)</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Events</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Automatically displays your upcoming events with flyer images, dates, and links.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Event selection (all or specific), Layout (cards or list)</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Button</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Call-to-action button with customizable text and link.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Text, URL, Alignment (left/center/right)</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Image</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Upload or link to an image with optional alt text.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> URL, Alt text, Width, Alignment (left/center/right)</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Video</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Embed a YouTube video thumbnail with a play button that links to the video.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> YouTube URL (thumbnail auto-extracted)</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Offer</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Promotional offer card with pricing, coupon code, and call-to-action button.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Title, Description, Original price, Sale price, Coupon code, Button text, Button URL, Alignment</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Quote</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Styled blockquote with attribution for testimonials or highlights.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Quote text, Author, Author title</p>
+                                </div>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Layout & Utility Blocks</h3>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Divider</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Horizontal line to visually separate sections.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Style (solid/dashed/dotted)</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Spacer</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Adjustable vertical spacing between blocks.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Height (5 to 200px)</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Social Links</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Icons linking to your social media profiles.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Platform links (Website, Facebook, Instagram, Twitter/X, YouTube, TikTok, LinkedIn)</p>
+                                </div>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Auto-populated Blocks</h3>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Profile Image</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Your schedule's profile image, displayed as a centered logo. Auto-populated from schedule settings.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Header Banner</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Full-width banner image at the top of your newsletter. Auto-populated from schedule settings.</p>
+                                </div>
                             </div>
 
                             <div class="doc-callout doc-callout-tip">

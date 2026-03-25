@@ -2853,4 +2853,10 @@ return [
     'add_add_on' => 'Lisa lisavalik',
     'add_ons_help' => 'Valikulised esemed, mida kliendid saavad oma ostule lisada (nt parkimine, meened, toidupaketid).',
     'ai_processing' => 'Tehisintellekt töötleb teksti...',
+    'block_video' => 'Video',
+    'block_quote' => 'Tsitaat',
+    'youtube_url' => 'YouTube URL',
+    'quote_text' => 'Tsitaadi tekst',
+    'quote_author' => 'Autor',
+    'quote_author_title' => 'Tiitel',
 ];

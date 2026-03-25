@@ -2837,4 +2837,10 @@ return [
     'add_add_on' => 'Agregar complemento',
     'add_ons_help' => 'Artículos opcionales que los clientes pueden agregar a su compra (por ejemplo, estacionamiento, mercancía, paquetes de comida).',
     'ai_processing' => 'La IA está procesando el texto...',
+    'block_video' => 'Video',
+    'block_quote' => 'Cita',
+    'youtube_url' => 'URL de YouTube',
+    'quote_text' => 'Texto de la cita',
+    'quote_author' => 'Autor',
+    'quote_author_title' => 'Título',
 ];

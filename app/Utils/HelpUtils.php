@@ -5,6 +5,12 @@ namespace App\Utils;
 class HelpUtils
 {
     private static array $mappings = [
+        // Newsletter routes (flat, must be checked before {subdomain}/* patterns
+        // because {subdomain} resolves to * on flat routes and */edit would match newsletters/{hash}/edit)
+        'newsletters*' => '/docs/newsletters',
+        'newsletter-segments*' => '/docs/newsletters#recipients',
+        'newsletter-import*' => '/docs/newsletters',
+
         // Pages with section-level anchor mapping
         '{subdomain}/edit' => [
             'doc' => '/docs/creating-schedules',
@@ -146,9 +152,6 @@ class HelpUtils
                 'tab-checkins' => '/docs/analytics#check-ins',
             ],
         ],
-        'newsletters*' => '/docs/newsletters',
-        'newsletter-segments*' => '/docs/newsletters#recipients',
-        'newsletter-import*' => '/docs/newsletters',
         'boost*' => '/docs/boost',
         'scan' => '/docs/tickets#check-in',
         'checkin' => '/docs/tickets#check-in',
@@ -175,18 +178,19 @@ class HelpUtils
     public static function getAnchorMap(): array
     {
         foreach (self::$mappings as $pattern => $value) {
-            if (! is_array($value) || empty($value['anchors'])) {
-                continue;
-            }
-
             $requestPattern = self::resolvePattern($pattern);
             if (request()->is($requestPattern)) {
-                $map = [];
-                foreach ($value['anchors'] as $sectionId => $docPath) {
-                    $map[$sectionId] = marketing_url($docPath);
+                if (is_array($value) && ! empty($value['anchors'])) {
+                    $map = [];
+                    foreach ($value['anchors'] as $sectionId => $docPath) {
+                        $map[$sectionId] = marketing_url($docPath);
+                    }
+
+                    return $map;
                 }
 
-                return $map;
+                // First matching pattern has no anchors - return empty
+                return [];
             }
         }
 

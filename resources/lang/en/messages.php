@@ -2879,4 +2879,10 @@ return [
     'add_add_on' => 'Add add-on',
     'add_ons_help' => 'Optional items customers can add to their purchase (e.g. parking, merchandise, meal packages).',
     'ai_processing' => 'AI is processing the text...',
+    'block_video' => 'Video',
+    'block_quote' => 'Quote',
+    'youtube_url' => 'YouTube URL',
+    'quote_text' => 'Quote text',
+    'quote_author' => 'Author',
+    'quote_author_title' => 'Title',
 ];

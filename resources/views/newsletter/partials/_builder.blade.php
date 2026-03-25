@@ -116,8 +116,8 @@ $builderProps = [
     'roleName' => $isAdmin ? config('app.name') : ($role->name ?? ''),
     'abTestHtml' => $abTestHtml,
     'availableBlockTypes' => $isAdmin
-        ? ['heading', 'text', 'button', 'image', 'divider', 'spacer', 'social_links', 'offer']
-        : ['heading', 'text', 'events', 'button', 'image', 'divider', 'spacer', 'social_links', 'profile_image', 'header_banner'],
+        ? ['heading', 'text', 'button', 'image', 'video', 'divider', 'spacer', 'social_links', 'quote', 'offer']
+        : ['heading', 'text', 'events', 'button', 'image', 'video', 'divider', 'spacer', 'social_links', 'quote', 'profile_image', 'header_banner'],
     'translations' => [
         'add_block' => __('messages.add_block'),
         'blocks' => __('messages.blocks'),
@@ -210,6 +210,12 @@ $builderProps = [
         'done' => __('messages.done'),
         'no_content' => __('messages.no_content'),
         'footer_text' => __('messages.footer_text'),
+        'block_video' => __('messages.block_video'),
+        'block_quote' => __('messages.block_quote'),
+        'youtube_url' => __('messages.youtube_url'),
+        'quote_text' => __('messages.quote_text'),
+        'quote_author' => __('messages.quote_author'),
+        'quote_author_title' => __('messages.quote_author_title'),
     ],
 ];
 @endphp

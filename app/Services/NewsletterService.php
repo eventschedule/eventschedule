@@ -242,6 +242,14 @@ class NewsletterService
                     ? $this->getUpcomingEvents($role, $useAll ? null : $eventIds)
                     : collect();
             }
+
+            if ($type === 'video') {
+                $videoUrl = $block['data']['url'] ?? '';
+                if (preg_match('/(?:youtube\.com\/watch\?.*v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/', $videoUrl, $m)) {
+                    $block['data']['videoId'] = $m[1];
+                    $block['data']['thumbnailUrl'] = 'https://img.youtube.com/vi/'.$m[1].'/hqdefault.jpg';
+                }
+            }
         }
 
         return $blocks;

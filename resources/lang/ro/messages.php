@@ -2876,4 +2876,10 @@ return [
     'add_add_on' => 'Adaugă supliment',
     'add_ons_help' => 'Articole opționale pe care clienții le pot adăuga la achiziția lor (de ex. parcare, produse, pachete de masă).',
     'ai_processing' => 'AI procesează textul...',
+    'block_video' => 'Video',
+    'block_quote' => 'Citat',
+    'youtube_url' => 'URL YouTube',
+    'quote_text' => 'Textul citatului',
+    'quote_author' => 'Autor',
+    'quote_author_title' => 'Titlu',
 ];

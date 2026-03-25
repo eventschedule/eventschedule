@@ -2835,4 +2835,10 @@ return [
     'add_add_on' => 'Extra toevoegen',
     'add_ons_help' => 'Optionele items die klanten aan hun aankoop kunnen toevoegen (bijv. parkeren, merchandise, maaltijdpakketten).',
     'ai_processing' => 'AI verwerkt de tekst...',
+    'block_video' => 'Video',
+    'block_quote' => 'Citaat',
+    'youtube_url' => 'YouTube-URL',
+    'quote_text' => 'Citaattekst',
+    'quote_author' => 'Auteur',
+    'quote_author_title' => 'Titel',
 ];

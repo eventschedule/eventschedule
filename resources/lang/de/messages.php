@@ -2841,4 +2841,10 @@ return [
     'add_add_on' => 'Zusatzoption hinzufügen',
     'add_ons_help' => 'Optionale Artikel, die Kunden zu ihrem Kauf hinzufügen können (z. B. Parkplatz, Merchandise, Verpflegungspakete).',
     'ai_processing' => 'KI verarbeitet den Text...',
+    'block_video' => 'Video',
+    'block_quote' => 'Zitat',
+    'youtube_url' => 'YouTube-URL',
+    'quote_text' => 'Zitattext',
+    'quote_author' => 'Autor',
+    'quote_author_title' => 'Titel',
 ];

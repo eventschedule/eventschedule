@@ -2837,4 +2837,10 @@ return [
     'add_add_on' => 'Ajouter un supplément',
     'add_ons_help' => 'Articles optionnels que les clients peuvent ajouter à leur achat (par exemple, parking, produits dérivés, formules repas).',
     'ai_processing' => 'L\'IA traite le texte...',
+    'block_video' => 'Vidéo',
+    'block_quote' => 'Citation',
+    'youtube_url' => 'URL YouTube',
+    'quote_text' => 'Texte de la citation',
+    'quote_author' => 'Auteur',
+    'quote_author_title' => 'Titre',
 ];

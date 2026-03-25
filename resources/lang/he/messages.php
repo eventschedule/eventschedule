@@ -2830,4 +2830,10 @@ return [
     'add_add_on' => 'הוסף תוספת',
     'add_ons_help' => 'פריטים אופציונליים שלקוחות יכולים להוסיף לרכישה שלהם (למשל, חניה, מוצרים, חבילות ארוחות).',
     'ai_processing' => 'הבינה המלאכותית מעבדת את הטקסט...',
+    'block_video' => 'סרטון',
+    'block_quote' => 'ציטוט',
+    'youtube_url' => 'כתובת YouTube',
+    'quote_text' => 'טקסט הציטוט',
+    'quote_author' => 'מחבר',
+    'quote_author_title' => 'תפקיד',
 ];

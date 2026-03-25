@@ -58,7 +58,7 @@ trait SanitizesNewsletterContent
 
         // Sanitize blocks
         $allowed = array_merge(
-            ['profile_image', 'header_banner', 'heading', 'text', 'events', 'button', 'divider', 'spacer', 'image', 'social_links'],
+            ['profile_image', 'header_banner', 'heading', 'text', 'events', 'button', 'divider', 'spacer', 'image', 'social_links', 'video', 'quote'],
             $extraAllowedTypes
         );
         $dangerousSchemes = ['javascript:', 'data:', 'vbscript:'];
@@ -111,8 +111,7 @@ trait SanitizesNewsletterContent
             // Validate social link platforms
             if (($block['type'] ?? '') === 'social_links' && isset($block['data']['links'])) {
                 $allowedPlatforms = ['website', 'facebook', 'instagram', 'twitter', 'youtube', 'tiktok', 'linkedin'];
-                $block['data']['links'] = array_values(array_filter($block['data']['links'], fn($l) =>
-                    !empty($l['platform']) && in_array($l['platform'], $allowedPlatforms)
+                $block['data']['links'] = array_values(array_filter($block['data']['links'], fn ($l) => ! empty($l['platform']) && in_array($l['platform'], $allowedPlatforms)
                 ));
             }
 
@@ -128,6 +127,16 @@ trait SanitizesNewsletterContent
                 if (! preg_match('/^\d+(px|%)?$/', $w)) {
                     $block['data']['width'] = '100%';
                 }
+            }
+
+            // Validate YouTube URL for video blocks
+            if (($block['type'] ?? '') === 'video') {
+                $videoUrl = trim($block['data']['url'] ?? '');
+                $videoId = null;
+                if (preg_match('/(?:youtube\.com\/watch\?.*v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/', $videoUrl, $m)) {
+                    $videoId = $m[1];
+                }
+                $block['data']['url'] = $videoId ? 'https://www.youtube.com/watch?v='.$videoId : '';
             }
         }
         unset($block);

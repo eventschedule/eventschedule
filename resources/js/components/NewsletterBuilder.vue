@@ -111,6 +111,14 @@
                                             <template v-if="block.data.title">{{ block.data.title }}<template v-if="block.data.salePrice"> - {{ block.data.salePrice }}</template></template>
                                             <span v-else class="italic text-gray-400 dark:text-gray-500">{{ t.no_content }}</span>
                                         </span>
+                                        <span v-else-if="block.type === 'video'">
+                                            <template v-if="block.data.url">{{ block.data.url.substring(0, 50) }}</template>
+                                            <span v-else class="italic text-gray-400 dark:text-gray-500">YouTube URL...</span>
+                                        </span>
+                                        <span v-else-if="block.type === 'quote'">
+                                            <template v-if="block.data.text">{{ block.data.text.substring(0, 80) }}</template>
+                                            <span v-else class="italic text-gray-400 dark:text-gray-500">{{ t.no_content }}</span>
+                                        </span>
                                         <span v-else-if="block.type === 'profile_image'" class="text-gray-400">{{ t.profile_image }}</span>
                                         <span v-else-if="block.type === 'header_banner'" class="text-gray-400">{{ t.header_image }}</span>
                                     </div>
@@ -365,6 +373,39 @@
                                                 <input type="url" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
                                                     :value="block.data.buttonUrl"
                                                     @input="updateBlockData(block.id, 'buttonUrl', $event.target.value)" />
+                                            </div>
+                                        </div>
+
+                                        <!-- Video block settings -->
+                                        <div v-if="block.type === 'video'" class="space-y-3">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.youtube_url }}</label>
+                                                <input type="url" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
+                                                    :value="block.data.url"
+                                                    @input="updateBlockData(block.id, 'url', $event.target.value)"
+                                                    placeholder="https://www.youtube.com/watch?v=..." />
+                                            </div>
+                                        </div>
+
+                                        <!-- Quote block settings -->
+                                        <div v-if="block.type === 'quote'" class="space-y-3">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.quote_text }}</label>
+                                                <textarea class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm" rows="3"
+                                                    :value="block.data.text"
+                                                    @input="updateBlockData(block.id, 'text', $event.target.value)"></textarea>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.quote_author }}</label>
+                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
+                                                    :value="block.data.author"
+                                                    @input="updateBlockData(block.id, 'author', $event.target.value)" />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.quote_author_title }}</label>
+                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
+                                                    :value="block.data.title"
+                                                    @input="updateBlockData(block.id, 'title', $event.target.value)" />
                                             </div>
                                         </div>
 
@@ -720,6 +761,8 @@ const allBlockTypes = [
     { type: 'profile_image', label: t.block_profile_image, icon: '\ud83d\udc64', defaultData: {} },
     { type: 'header_banner', label: t.block_header_banner, icon: '\ud83c\udff3', defaultData: {} },
     { type: 'offer', label: t.block_offer, icon: '\ud83c\udff7', defaultData: { title: '', description: '', originalPrice: '', salePrice: '', couponCode: '', buttonText: '', buttonUrl: '', align: 'center' } },
+    { type: 'video', label: t.block_video, icon: '▶', defaultData: { url: '' } },
+    { type: 'quote', label: t.block_quote, icon: '"', defaultData: { text: '', author: '', title: '' } },
 ];
 
 const blockTypes = props.availableBlockTypes
