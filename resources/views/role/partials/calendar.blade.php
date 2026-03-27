@@ -2181,13 +2181,34 @@ const calendarApp = createApp({
             this.filteredEvents.forEach(event => {
                 if (event.days_of_week && event.days_of_week.length > 0) {
                     // Recurring event - generate all occurrences
+                    // For multi-day recurring events, look back to catch still-running occurrences
+                    const lookBackDays = (event.is_multi_day && event.duration) ? Math.ceil(event.duration / 24) - 1 : 0;
                     const currentDate = new Date(today);
+                    if (lookBackDays > 0) {
+                        currentDate.setDate(currentDate.getDate() - lookBackDays);
+                    }
 
                     while (currentDate <= endDate) {
                         if (this.matchesFrequency(event, currentDate)) {
                             const dateStr = currentDate.getFullYear() + '-' +
                                           String(currentDate.getMonth() + 1).padStart(2, '0') + '-' +
                                           String(currentDate.getDate()).padStart(2, '0');
+
+                            // For past occurrences, only include if multi-day and still running
+                            const isPastOccurrence = currentDate < today;
+                            if (isPastOccurrence) {
+                                if (event.is_multi_day && event.duration) {
+                                    const occEnd = new Date(currentDate);
+                                    occEnd.setHours(occEnd.getHours() + event.duration);
+                                    if (occEnd < today) {
+                                        currentDate.setDate(currentDate.getDate() + 1);
+                                        continue;
+                                    }
+                                } else {
+                                    currentDate.setDate(currentDate.getDate() + 1);
+                                    continue;
+                                }
+                            }
 
                             // Check if this date should be included based on recurring end settings
                             if (shouldIncludeDate(event, dateStr)) {
@@ -3009,8 +3030,20 @@ const calendarApp = createApp({
             return eventDate < today;
         },
         isEventPast(event) {
-            if (event && event.is_multi_day && event.local_end_date) {
-                return this.isPastEvent(event.local_end_date);
+            if (event && event.is_multi_day) {
+                // For recurring events, compute end date from the occurrence date
+                if (event.days_of_week && event.days_of_week.length > 0 && event.occurrenceDate && event.duration) {
+                    const [y, m, d] = event.occurrenceDate.split('-').map(Number);
+                    const occStart = new Date(y, m - 1, d);
+                    const occEnd = new Date(occStart.getTime() + event.duration * 60 * 60 * 1000);
+                    const endDateStr = occEnd.getFullYear() + '-' +
+                        String(occEnd.getMonth() + 1).padStart(2, '0') + '-' +
+                        String(occEnd.getDate()).padStart(2, '0');
+                    return this.isPastEvent(endDateStr);
+                }
+                if (event.local_end_date) {
+                    return this.isPastEvent(event.local_end_date);
+                }
             }
             return this.isPastEvent(event?.occurrenceDate || event?.local_date);
         },

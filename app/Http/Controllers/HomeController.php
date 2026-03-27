@@ -126,7 +126,7 @@ class HomeController extends Controller
                     ->from('event_role')
                     ->whereIn('role_id', $roleIds)
                     ->where('is_accepted', true);
-            })->where('starts_at', '>', now())->count();
+            })->upcomingOrOngoing()->whereNull('days_of_week')->count();
         }
         if (in_array('views', $visiblePanels)) {
             $viewsPeriod = $panelSettings['views']['period'] ?? 30;
@@ -412,7 +412,8 @@ class HomeController extends Controller
                 ->whereIn('role_id', $roleIds)
                 ->where('is_accepted', true);
         })
-            ->where('starts_at', '>', now())
+            ->upcomingOrOngoing()
+            ->whereNull('days_of_week')
             ->orderBy('starts_at')
             ->limit($count)
             ->with(['roles', 'tickets'])
