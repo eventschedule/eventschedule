@@ -61,6 +61,7 @@ return [
     'details' => 'Details',
     'date_and_time' => 'Datum en Tijd',
     'date_and_time_required' => 'Datum en starttijd zijn verplicht.',
+    'end_date_required' => 'Einddatum is verplicht voor meerdaagse evenementen.',
     'duration_in_hours' => 'Duur in Uren',
     'private' => 'Privé',
     'unlisted' => 'Niet-gelijst',

@@ -61,6 +61,7 @@ return [
     'details' => 'Detalhes',
     'date_and_time' => 'Data e Hora',
     'date_and_time_required' => 'Data e hora de início são obrigatórias.',
+    'end_date_required' => 'A data de término é obrigatória para eventos de vários dias.',
     'duration_in_hours' => 'Duração em Horas',
     'private' => 'Privado',
     'unlisted' => 'Não listado',

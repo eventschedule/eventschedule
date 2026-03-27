@@ -63,6 +63,7 @@ return [
     'details' => 'Detalii',
     'date_and_time' => 'Data și Ora',
     'date_and_time_required' => 'Data și ora de început sunt obligatorii.',
+    'end_date_required' => 'Data de încheiere este obligatorie pentru evenimentele pe mai multe zile.',
     'duration_in_hours' => 'Durata în Ore',
     'private' => 'Privat',
     'unlisted' => 'Nelistat',

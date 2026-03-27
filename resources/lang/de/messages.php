@@ -58,6 +58,7 @@ return [
     'details' => 'Details',
     'date_and_time' => 'Datum und Uhrzeit',
     'date_and_time_required' => 'Datum und Startzeit sind erforderlich.',
+    'end_date_required' => 'Das Enddatum ist für mehrtägige Veranstaltungen erforderlich.',
     'duration_in_hours' => 'Dauer in Stunden',
     'private' => 'Privat',
     'unlisted' => 'Nicht gelistet',

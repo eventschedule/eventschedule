@@ -610,7 +610,6 @@
         @php
           $startDt = $event->getStartDateTime($date, true);
           $endDt = $event->duration >= 24 ? (clone $startDt)->addHours($event->duration) : null;
-          $isSameMonth = $endDt && $startDt->format('m') === $endDt->format('m');
         @endphp
         <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
           <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
@@ -619,32 +618,35 @@
                   style="color: {{ $accentColor }};">
               {{ $startDt->format('M') }}
             </span>
-            @if ($endDt && $isSameMonth)
-            <span class="text-lg font-bold text-gray-900 dark:text-white leading-none">
-              {{ $startDt->format('j') }}-{{ $endDt->format('j') }}
-            </span>
-            @else
             <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">
               {{ $startDt->format('j') }}
             </span>
-            @endif
           </div>
           <div class="flex flex-col">
-            <span class="text-lg font-semibold text-gray-900 dark:text-white">
-              @if ($event->isMultiDay())
-                <time datetime="{{ $event->getStartDateTime($date, true)->format('Y-m-d\TH:i:sP') }}">
-                  {{ $event->getStartDateTime($date, true)->format($event->getDateTimeFormat(true)) }} - {{ $event->getStartDateTime($date, true)->addHours($event->duration)->format($event->getDateTimeFormat()) }}
+            @if ($event->isMultiDay())
+              <span class="text-lg font-semibold text-gray-900 dark:text-white">
+                <time datetime="{{ $startDt->format('Y-m-d\TH:i:sP') }}">
+                  {{ $event->getDateRangeDisplay($date) }}
                 </time>
-              @else
-                <time datetime="{{ $event->getStartDateTime($date, true)->format('Y-m-d\TH:i:sP') }}">
-                  {{ $event->getStartDateTime($date, true)->format('l, F j') }}
+              </span>
+              @php
+                $use24 = get_use_24_hour_time($role);
+                $timeFormat = $use24 ? 'H:i' : 'g:i A';
+                $multiStartTime = $startDt->format($timeFormat);
+                $multiEndTime = $endDt->format($timeFormat);
+              @endphp
+              <span class="text-sm text-gray-500 dark:text-gray-400">
+                {{ $multiStartTime }} - {{ $multiEndTime }}
+              </span>
+            @else
+              <span class="text-lg font-semibold text-gray-900 dark:text-white">
+                <time datetime="{{ $startDt->format('Y-m-d\TH:i:sP') }}">
+                  {{ $startDt->format('l, F j') }}
                 </time>
-              @endif
-            </span>
-            @if (!$event->isMultiDay())
-            <span class="text-sm text-gray-500 dark:text-gray-400">
-              <time datetime="{{ $event->getStartDateTime($date, true)->format('Y-m-d\TH:i:sP') }}">{{ $event->getStartEndTime($date, get_use_24_hour_time($role)) }}</time>
-            </span>
+              </span>
+              <span class="text-sm text-gray-500 dark:text-gray-400">
+                <time datetime="{{ $startDt->format('Y-m-d\TH:i:sP') }}">{{ $event->getStartEndTime($date, get_use_24_hour_time($role)) }}</time>
+              </span>
             @endif
           </div>
         </div>

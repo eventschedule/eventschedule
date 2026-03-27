@@ -429,11 +429,14 @@
             if (multiDayToggle) {
                 multiDayToggle.addEventListener('change', function() {
                     var row = document.getElementById('multi_day_end_date_row');
+                    var endTimeMultiEl = document.getElementById('end_time_multi');
                     if (this.checked) {
                         row.style.display = '';
+                        if (endTimeMultiEl) endTimeMultiEl.value = endTimeEl.value;
                         if (window.vueApp) window.vueApp.isMultiDay = true;
                     } else {
                         row.style.display = 'none';
+                        if (endTimeMultiEl) endTimeEl.value = endTimeMultiEl.value;
                         if (window.vueApp) window.vueApp.isMultiDay = false;
                         multiDayEndPicker.clear();
                     }
@@ -701,6 +704,25 @@
             if (startMinutes === null) return 600;
             return (startMinutes + 60) % 1440;
         });
+
+        var endTimeMultiEl = document.getElementById('end_time_multi');
+        if (endTimeMultiEl) {
+            initTimePicker(endTimeMultiEl, document.getElementById('end_time_multi_dropdown'), function() {
+                var startMinutes = parseTimeToMinutes(startTimeEl.value);
+                if (startMinutes === null) return 600;
+                return (startMinutes + 60) % 1440;
+            });
+
+            endTimeMultiEl.addEventListener('blur', function() {
+                normalizeTimeInput(endTimeMultiEl);
+                endTimeEl.value = endTimeMultiEl.value;
+                updateHiddenFields();
+            });
+            endTimeMultiEl.addEventListener('input', function() {
+                endTimeEl.value = endTimeMultiEl.value;
+                updateHiddenFields();
+            });
+        }
     });
 
     function onChangeCountry() {
@@ -1355,7 +1377,8 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="event_date" :value="__('messages.date_and_time') . '*'" />
+                            <x-input-label for="event_date" :value="__('messages.date_and_time') . ' *'" v-show="!isMultiDay" />
+                            <x-input-label for="event_date" :value="__('messages.start_date') . ' *'" v-show="isMultiDay" />
                             <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 mt-1">
                                 <input type="text" id="event_date"
                                     class="datepicker-date flex-1 min-w-[140px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
@@ -1368,8 +1391,8 @@
                                             autocomplete="off" aria-label="{{ __('messages.start_time') }}" />
                                         <div class="time-dropdown" id="start_time_dropdown"></div>
                                     </div>
-                                    <span class="text-gray-500 dark:text-gray-400 text-sm shrink-0">{{ __('messages.to') }}</span>
-                                    <div class="relative w-28 sm:w-32">
+                                    <span v-show="!isMultiDay" class="text-gray-500 dark:text-gray-400 text-sm shrink-0">{{ __('messages.to') }}</span>
+                                    <div v-show="!isMultiDay" class="relative w-28 sm:w-32">
                                         <input type="text" id="end_time"
                                             class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
                                             value="{{ $eventEndTime }}" placeholder="{{ __('messages.end_time') }}"
@@ -1378,20 +1401,28 @@
                                     </div>
                                 </div>
                             </div>
+                            <div v-if="!isRecurring" class="mt-6 flex justify-end">
+                                <x-toggle name="is_multi_day" id="is_multi_day" :label="__('messages.multi_day_event')" :checked="$isMultiDay" />
+                            </div>
                             <input type="hidden" name="starts_at" id="starts_at" value="{{ $oldStartsAt }}" />
                             <input type="hidden" name="duration" id="duration" value="{{ $oldDuration }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('starts_at')" />
                             <x-input-error class="mt-2" :messages="$errors->get('duration')" />
 
-                            <div v-if="!isRecurring" class="mt-4">
-                                <x-toggle name="is_multi_day" id="is_multi_day" :label="__('messages.multi_day_event')" :checked="$isMultiDay" />
-                            </div>
-
                             <div v-if="!isRecurring" id="multi_day_end_date_row" class="mt-3" style="{{ $isMultiDay ? '' : 'display:none' }}">
-                                <x-input-label for="event_end_date" :value="__('messages.end_date')" />
-                                <input type="text" id="event_end_date"
-                                    class="mt-1 w-full sm:w-auto min-w-[180px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
-                                    value="{{ $eventEndDate }}" autocomplete="off" aria-label="{{ __('messages.end_date') }}" />
+                                <x-input-label for="event_end_date" :value="__('messages.end_date') . ' *'" />
+                                <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 mt-1">
+                                    <input type="text" id="event_end_date"
+                                        class="flex-1 min-w-[140px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
+                                        value="{{ $eventEndDate }}" autocomplete="off" aria-label="{{ __('messages.end_date') }}" />
+                                    <div class="relative w-28 sm:w-32">
+                                        <input type="text" id="end_time_multi"
+                                            class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
+                                            value="{{ $eventEndTime }}" placeholder="{{ __('messages.end_time') }}"
+                                            autocomplete="off" aria-label="{{ __('messages.end_time') }}" />
+                                        <div class="time-dropdown" id="end_time_multi_dropdown"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -5043,6 +5074,15 @@
           event.preventDefault();
           alert(@json(__('messages.date_and_time_required')));
           return;
+        }
+
+        if (this.isMultiDay) {
+          var endDateVal = document.getElementById('event_end_date').value;
+          if (!endDateVal) {
+            event.preventDefault();
+            alert(@json(__('messages.end_date_required')));
+            return;
+          }
         }
 
         if (! this.isFormValid) {

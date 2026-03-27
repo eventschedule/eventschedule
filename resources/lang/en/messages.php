@@ -63,6 +63,7 @@ return [
     'details' => 'Details',
     'date_and_time' => 'Date & Time',
     'date_and_time_required' => 'Date and start time are required.',
+    'end_date_required' => 'End date is required for multi-day events.',
     'duration_in_hours' => 'Duration in Hours',
     'private' => 'Private',
     'unlisted' => 'Unlisted',

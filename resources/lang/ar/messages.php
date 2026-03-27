@@ -58,6 +58,7 @@ return [
     'details' => 'التفاصيل',
     'date_and_time' => 'التاريخ والوقت',
     'date_and_time_required' => 'التاريخ ووقت البدء مطلوبان.',
+    'end_date_required' => 'تاريخ الانتهاء مطلوب للأحداث متعددة الأيام.',
     'duration_in_hours' => 'المدة بالساعات',
     'private' => 'خاص',
     'unlisted' => 'غير مدرج',

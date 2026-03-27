@@ -63,6 +63,7 @@ return [
     'details' => 'Üksikasjad',
     'date_and_time' => 'Kuupäev ja kellaaeg',
     'date_and_time_required' => 'Kuupäev ja algusaeg on kohustuslikud.',
+    'end_date_required' => 'Lõppkuupäev on mitmepäevaste ürituste puhul kohustuslik.',
     'duration_in_hours' => 'Kestus tundides',
     'private' => 'Privaatne',
     'unlisted' => 'Registreerimata',
