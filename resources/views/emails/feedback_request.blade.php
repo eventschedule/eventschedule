@@ -17,7 +17,7 @@
 
         <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
             <h2 style="margin-top: 0; color: #4E81FA;">{{ $event->name }}</h2>
-            <p style="margin: 10px 0;"><strong>{{ __('messages.date') }}:</strong> {{ $event->getStartDateTime($sale->event_date, true)->translatedFormat('F j, Y') }}</p>
+            <p style="margin: 10px 0;"><strong>{{ __('messages.date') }}:</strong> {{ $event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $event->getStartDateTime($sale->event_date, true)->translatedFormat('F j, Y') }}</p>
             <p style="margin: 10px 0;"><strong>{{ __('messages.time') }}:</strong> {{ $event->getStartEndTime($sale->event_date) }}</p>
         </div>
 

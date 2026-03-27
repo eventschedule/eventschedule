@@ -190,8 +190,12 @@
             @php
                 $offerExpired = false;
                 if (in_array($offer->direction, ['to_event', 'round_trip'])) {
-                    $st = $event->getStartDateTime($date);
-                    $offerExpired = $st && $st->isPast();
+                    if ($event->is_multi_day) {
+                        $offerExpired = $eventEnded;
+                    } else {
+                        $st = $event->getStartDateTime($date);
+                        $offerExpired = $st && $st->isPast();
+                    }
                 } else {
                     $offerExpired = $eventEnded;
                 }

@@ -19,7 +19,7 @@
             </p>
             @if ($sale->event_date)
             <p style="margin: 0 0 15px 0; font-size: 14px; color: #666;">
-                {{ $event->getStartDateTime($sale->event_date, true)->format('F j, Y') }}
+                {{ $event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $event->getStartDateTime($sale->event_date, true)->format('F j, Y') }}
                 @if ($event->getStartEndTime($sale->event_date)) {{ $event->getStartEndTime($sale->event_date) }}@endif
             </p>
             @endif

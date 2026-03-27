@@ -188,7 +188,7 @@
                 </div>
                 <div>
                   <p class="text-[10px] text-white/50 print-text-gray uppercase tracking-wide font-medium">{{ __('messages.date') }}</p>
-                  <p class="text-[13px] text-white print-text-dark font-semibold">{{ $event->getStartDateTime($sale->event_date, true)->format('F j, Y') }}</p>
+                  <p class="text-[13px] text-white print-text-dark font-semibold">{{ $event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $event->getStartDateTime($sale->event_date, true)->format('F j, Y') }}</p>
                 </div>
               </div>
 

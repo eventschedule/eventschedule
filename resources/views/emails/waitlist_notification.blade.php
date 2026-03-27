@@ -21,7 +21,7 @@
             </p>
             @if ($entry->event_date)
             <p style="margin: 0; font-size: 14px; color: #666;">
-                {{ $event->getStartDateTime($entry->event_date, true)->format('F j, Y') }}
+                {{ $event->is_multi_day ? $event->getDateRangeDisplay($entry->event_date) : $event->getStartDateTime($entry->event_date, true)->format('F j, Y') }}
                 @if ($event->getStartEndTime($entry->event_date)) {{ $event->getStartEndTime($entry->event_date) }}@endif
             </p>
             @endif

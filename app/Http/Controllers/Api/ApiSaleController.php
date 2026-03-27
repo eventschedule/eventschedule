@@ -373,6 +373,10 @@ class ApiSaleController extends Controller
                 if ($event->getEndDateTime(null, true)->isPast()) {
                     return response()->json(['error' => 'Cannot sell tickets for events in the past'], 422);
                 }
+            } elseif ($event->is_multi_day) {
+                if ($event->getEndDateTime(null, true)->isPast()) {
+                    return response()->json(['error' => 'Cannot sell tickets for events in the past'], 422);
+                }
             } elseif (Carbon::parse($event->starts_at)->isPast()) {
                 return response()->json(['error' => 'Cannot sell tickets for events in the past'], 422);
             }

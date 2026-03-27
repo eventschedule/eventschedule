@@ -32,7 +32,7 @@
                     </a>
                 </h1>
                 <p class="text-sm mt-1" style="opacity: 0.85;">
-                    {{ $event->getStartDateTime($eventDate, true)->format('l, F j, Y') }}
+                    {{ $event->is_multi_day ? $event->getDateRangeDisplay($eventDate) : $event->getStartDateTime($eventDate, true)->format('l, F j, Y') }}
                     @if ($event->getStartEndTime($eventDate))
                         &middot; {{ $event->getStartEndTime($eventDate) }}
                     @endif

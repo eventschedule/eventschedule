@@ -619,14 +619,16 @@ class MetaAdsService
         $start = $now->copy();
 
         if ($event->starts_at) {
-            $eventDate = \Carbon\Carbon::parse($event->starts_at);
-            $daysUntilEvent = $now->diffInDays($eventDate, false);
+            $eventEndDate = $event->is_multi_day
+                ? $event->getEndDateTime(null, true)
+                : \Carbon\Carbon::parse($event->starts_at);
+            $daysUntilEnd = $now->diffInDays($eventEndDate, false);
 
-            if ($daysUntilEvent <= 0) {
-                // Event already happened
+            if ($daysUntilEnd <= 0) {
+                // Event fully ended
                 $end = $now->copy()->addDays(3);
             } else {
-                $end = $eventDate->copy();
+                $end = $eventEndDate->copy();
             }
 
             $days = (int) max(3, min(14, $start->diffInDays($end)));
@@ -673,7 +675,7 @@ class MetaAdsService
 
         if ($event->starts_at) {
             $hoursUntil = now()->diffInHours(\Carbon\Carbon::parse($event->starts_at), false);
-            if ($hoursUntil > 0 && $hoursUntil < 24) {
+            if ($hoursUntil > 0 && $hoursUntil < 24 && ! $event->is_multi_day) {
                 $warnings[] = __('messages.boost_warning_too_soon');
             } elseif ($hoursUntil > 90 * 24) {
                 $warnings[] = __('messages.boost_warning_too_far');

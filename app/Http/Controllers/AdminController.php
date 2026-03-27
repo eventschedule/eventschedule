@@ -179,7 +179,7 @@ class AdminController extends Controller
         // Upcoming online events (events with event_url but no venue)
         $upcomingOnlineEvents = Event::whereNotNull('event_url')
             ->where('event_url', '!=', '')
-            ->where('starts_at', '>', now())
+            ->upcomingOrOngoing()
             ->whereDoesntHave('roles', function ($query) {
                 $query->where('roles.type', 'venue');
             })
@@ -190,7 +190,7 @@ class AdminController extends Controller
             ->count();
 
         // Events by country (from venue's country_code)
-        $eventsByCountry = Event::where('starts_at', '>', now())
+        $eventsByCountry = Event::upcomingOrOngoing()
             ->whereDoesntHave('roles', function ($query) {
                 $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
                     ->orWhere('subdomain', 'like', 'demo-%');

@@ -50,7 +50,7 @@ class GenerateDocScreenshots extends Command
         $venueRole = Role::where('subdomain', 'demo-moestavern')->first();
 
         $demoEvent = $role ? \App\Models\Event::whereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
-            ->where('starts_at', '>', now())
+            ->upcomingOrOngoing()
             ->orderBy('starts_at')
             ->first() : null;
 

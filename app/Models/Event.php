@@ -937,6 +937,10 @@ class Event extends Model
                 if ($this->getEndDateTime(null, true)->isPast()) {
                     return false;
                 }
+            } elseif ($this->is_multi_day) {
+                if ($this->getEndDateTime(null, true)->isPast()) {
+                    return false;
+                }
             } elseif (Carbon::parse($this->starts_at)->isPast()) {
                 return false;
             }
@@ -1404,9 +1408,18 @@ class Event extends Model
         return ! $this->getStartDateTime(null, true)->isSameDay($this->getStartDateTime(null, true)->addHours($this->duration));
     }
 
+    public function getIsMultiDayAttribute(): bool
+    {
+        return $this->duration >= 24;
+    }
+
     public function getStartEndTime($date = null, $use24 = false)
     {
         $date = $this->getStartDateTime($date, true);
+
+        if ($this->is_multi_day) {
+            return $date->format($use24 ? 'H:i' : 'g:i A');
+        }
 
         if ($this->duration > 0) {
             $endDate = $date->copy()->addHours($this->duration);
@@ -1414,6 +1427,20 @@ class Event extends Model
             return $date->format($use24 ? 'H:i' : 'g:i A').' - '.$endDate->format($use24 ? 'H:i' : 'g:i A');
         } else {
             return $date->format($use24 ? 'H:i' : 'g:i A');
+        }
+    }
+
+    public function getDateRangeDisplay($date = null)
+    {
+        $start = $this->getStartDateTime($date, true);
+        $end = $start->copy()->addHours($this->duration);
+
+        if ($start->year !== $end->year) {
+            return $start->translatedFormat('F j, Y').' - '.$end->translatedFormat('F j, Y');
+        } elseif ($start->month !== $end->month) {
+            return $start->translatedFormat('F j').' - '.$end->translatedFormat('F j, Y');
+        } else {
+            return $start->translatedFormat('F j').' - '.$end->translatedFormat('j, Y');
         }
     }
 
