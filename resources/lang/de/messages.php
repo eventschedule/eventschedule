@@ -1813,6 +1813,7 @@ return [
     'total_charged' => 'Gesamtbetrag',
     'start_date' => 'Startdatum',
     'end_date' => 'Enddatum',
+    'multi_day_event' => 'Mehrtägige Veranstaltung',
     'last_updated' => 'Zuletzt aktualisiert',
     'daily_performance' => 'Tägliche Leistung',
     'pause' => 'Pausieren',

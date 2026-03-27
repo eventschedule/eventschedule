@@ -109,10 +109,17 @@ class WaitlistController extends Controller
             ->whereIn('status', ['waiting', 'notified']);
 
         if (! $includePast) {
-            $query->where('event_date', '>=', now()->subDay()->startOfDay())
-                ->whereHas('event', function ($eq) {
-                    $eq->where('starts_at', '>=', now()->subDay()->startOfDay());
+            $query->where(function ($q) {
+                $q->where(function ($q2) {
+                    $q2->where('event_date', '>=', now()->subDay()->startOfDay())
+                        ->whereHas('event', function ($eq) {
+                            $eq->where('starts_at', '>=', now()->subDay()->startOfDay());
+                        });
+                })->orWhereHas('event', function ($eq) {
+                    $eq->where('duration', '>=', 24)
+                        ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [now()]);
                 });
+            });
         }
 
         if ($filter) {

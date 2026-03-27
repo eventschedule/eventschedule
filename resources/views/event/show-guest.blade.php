@@ -607,16 +607,27 @@
         @endif
 
         {{-- Calendar date badge + time --}}
+        @php
+          $startDt = $event->getStartDateTime($date, true);
+          $endDt = $event->duration >= 24 ? (clone $startDt)->addHours($event->duration) : null;
+          $isSameMonth = $endDt && $startDt->format('m') === $endDt->format('m');
+        @endphp
         <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
           <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
             <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1"
                   style="color: {{ $accentColor }};">
-              {{ $event->getStartDateTime($date, true)->format('M') }}
+              {{ $startDt->format('M') }}
             </span>
+            @if ($endDt && $isSameMonth)
+            <span class="text-lg font-bold text-gray-900 dark:text-white leading-none">
+              {{ $startDt->format('j') }}-{{ $endDt->format('j') }}
+            </span>
+            @else
             <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">
-              {{ $event->getStartDateTime($date, true)->format('j') }}
+              {{ $startDt->format('j') }}
             </span>
+            @endif
           </div>
           <div class="flex flex-col">
             <span class="text-lg font-semibold text-gray-900 dark:text-white">

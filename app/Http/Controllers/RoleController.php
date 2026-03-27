@@ -572,10 +572,7 @@ class RoleController extends Controller
             // For event detail view (non-graphic), only check if calendar has events
             // The calendar partial loads data via Ajax, so we just need existence
             if ($role->isCurator()) {
-                $query = Event::where(function ($query) use ($startOfMonthUtc) {
-                    $query->where('starts_at', '>=', $startOfMonthUtc)
-                        ->orWhereNotNull('days_of_week');
-                })
+                $query = Event::inMonth($startOfMonthUtc)
                     ->whereIn('id', function ($query) use ($role) {
                         $query->select('event_id')
                             ->from('event_role')
@@ -592,10 +589,7 @@ class RoleController extends Controller
                 }
                 $hasCalendarEvents = $query->exists();
             } else {
-                $query = Event::where(function ($query) use ($startOfMonthUtc) {
-                    $query->where('starts_at', '>=', $startOfMonthUtc)
-                        ->orWhereNotNull('days_of_week');
-                })
+                $query = Event::inMonth($startOfMonthUtc)
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true));
                 if (! $isMemberOrAdmin) {
                     $query->where(function ($q) use ($unlockedEventIds) {
@@ -610,10 +604,7 @@ class RoleController extends Controller
             $events = $hasCalendarEvents ? collect([true]) : collect();
         } elseif ($role->isCurator()) {
             $events = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->where(function ($query) use ($startOfMonthUtc) {
-                    $query->where('starts_at', '>=', $startOfMonthUtc)
-                        ->orWhereNotNull('days_of_week');
-                })
+                ->inMonth($startOfMonthUtc)
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
@@ -624,10 +615,7 @@ class RoleController extends Controller
                 ->get();
         } else {
             $events = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->where(function ($query) use ($startOfMonthUtc) {
-                    $query->where('starts_at', '>=', $startOfMonthUtc)
-                        ->orWhereNotNull('days_of_week');
-                })
+                ->inMonth($startOfMonthUtc)
                 ->where(function ($query) use ($role) {
                     $query->whereHas('roles', function ($query) use ($role) {
                         $query->where('role_id', $role->id)
@@ -644,7 +632,7 @@ class RoleController extends Controller
         if (request()->graphic && ! $role->hide_past_events) {
             if ($role->isCurator()) {
                 $pastEvents = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                    ->where('starts_at', '<', Carbon::now('UTC'))
+                    ->fullyPast(Carbon::now('UTC'))
                     ->whereNull('days_of_week')
                     ->whereIn('id', function ($query) use ($role) {
                         $query->select('event_id')
@@ -657,7 +645,7 @@ class RoleController extends Controller
                     ->get();
             } else {
                 $pastEvents = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                    ->where('starts_at', '<', Carbon::now('UTC'))
+                    ->fullyPast(Carbon::now('UTC'))
                     ->whereNull('days_of_week')
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
                     ->orderByDesc('starts_at')
@@ -857,7 +845,7 @@ class RoleController extends Controller
 
         if ($role->isCurator()) {
             $pastEvents = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->where('starts_at', '<', $beforeDate)
+                ->fullyPast($beforeDate)
                 ->whereNull('days_of_week')
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
@@ -878,7 +866,7 @@ class RoleController extends Controller
                 ->get();
         } else {
             $pastEvents = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->where('starts_at', '<', $beforeDate)
+                ->fullyPast($beforeDate)
                 ->whereNull('days_of_week')
                 ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
                 ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
@@ -1003,10 +991,7 @@ class RoleController extends Controller
 
         if ($role->isCurator()) {
             $events = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->where(function ($query) use ($startOfMonthUtc) {
-                    $query->where('starts_at', '>=', $startOfMonthUtc)
-                        ->orWhereNotNull('days_of_week');
-                })
+                ->inMonth($startOfMonthUtc)
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
@@ -1025,10 +1010,7 @@ class RoleController extends Controller
                 ->get();
         } else {
             $events = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->where(function ($query) use ($startOfMonthUtc) {
-                    $query->where('starts_at', '>=', $startOfMonthUtc)
-                        ->orWhereNotNull('days_of_week');
-                })
+                ->inMonth($startOfMonthUtc)
                 ->where(function ($query) use ($role) {
                     $query->whereHas('roles', function ($query) use ($role) {
                         $query->where('role_id', $role->id)
@@ -1053,7 +1035,7 @@ class RoleController extends Controller
         if (! $role->hide_past_events) {
             if ($role->isCurator()) {
                 $pastEvents = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                    ->where('starts_at', '<', Carbon::now('UTC'))
+                    ->fullyPast(Carbon::now('UTC'))
                     ->whereNull('days_of_week')
                     ->whereIn('id', function ($query) use ($role) {
                         $query->select('event_id')
@@ -1074,7 +1056,7 @@ class RoleController extends Controller
                     ->get();
             } else {
                 $pastEvents = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                    ->where('starts_at', '<', Carbon::now('UTC'))
+                    ->fullyPast(Carbon::now('UTC'))
                     ->whereNull('days_of_week')
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
                     ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
@@ -1119,10 +1101,7 @@ class RoleController extends Controller
 
         if ($role->isCurator()) {
             $events = Event::with('roles', 'parts', 'tickets')
-                ->where(function ($query) use ($startOfMonthUtc) {
-                    $query->where('starts_at', '>=', $startOfMonthUtc)
-                        ->orWhereNotNull('days_of_week');
-                })
+                ->inMonth($startOfMonthUtc)
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
@@ -1139,10 +1118,7 @@ class RoleController extends Controller
                             ->where('is_accepted', true);
                     });
                 })
-                ->where(function ($query) use ($startOfMonthUtc) {
-                    $query->where('starts_at', '>=', $startOfMonthUtc)
-                        ->orWhereNotNull('days_of_week');
-                })
+                ->inMonth($startOfMonthUtc)
                 ->orderBy('starts_at')
                 ->get();
         }
@@ -1227,10 +1203,7 @@ class RoleController extends Controller
             if ($tab == 'schedule') {
                 if ($role->isCurator()) {
                     $events = Event::with('roles')
-                        ->where(function ($query) use ($startOfMonthUtc) {
-                            $query->where('starts_at', '>=', $startOfMonthUtc)
-                                ->orWhereNotNull('days_of_week');
-                        })
+                        ->inMonth($startOfMonthUtc)
                         ->whereIn('id', function ($query) use ($role) {
                             $query->select('event_id')
                                 ->from('event_role')
@@ -1247,10 +1220,7 @@ class RoleController extends Controller
                                     ->where('is_accepted', true);
                             });
                         })
-                        ->where(function ($query) use ($startOfMonthUtc) {
-                            $query->where('starts_at', '>=', $startOfMonthUtc)
-                                ->orWhereNotNull('days_of_week');
-                        })
+                        ->inMonth($startOfMonthUtc)
                         ->orderBy('starts_at')
                         ->get();
 
@@ -3832,7 +3802,7 @@ class RoleController extends Controller
 
         // Get upcoming events for this curator
         $upcomingEvents = Event::with('roles')
-            ->where('starts_at', '>=', now()->subDay())
+            ->upcomingOrOngoing()
             ->whereIn('id', function ($query) use ($role) {
                 $query->select('event_id')
                     ->from('event_role')

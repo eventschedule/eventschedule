@@ -1809,6 +1809,7 @@ return [
     'total_charged' => 'Total facture',
     'start_date' => 'Date de debut',
     'end_date' => 'Date de fin',
+    'multi_day_event' => 'Événement sur plusieurs jours',
     'last_updated' => 'Derniere mise a jour',
     'daily_performance' => 'Performance quotidienne',
     'pause' => 'Pause',

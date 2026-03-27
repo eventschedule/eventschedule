@@ -1809,6 +1809,7 @@ return [
     'total_charged' => 'Total Cobrado',
     'start_date' => 'Fecha de Inicio',
     'end_date' => 'Fecha de Fin',
+    'multi_day_event' => 'Evento de varios días',
     'last_updated' => 'Ultima Actualizacion',
     'daily_performance' => 'Rendimiento Diario',
     'pause' => 'Pausar',

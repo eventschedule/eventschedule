@@ -14,7 +14,9 @@
             @php
                 // Filter out events without flyers/images
                 $displayEvents = collect($events)->filter(function($event) {
-                    return $event->getImageUrl() && $event->starts_at > now();
+                    if (!$event->getImageUrl()) return false;
+                    if ($event->starts_at > now()) return true;
+                    return $event->duration >= 24 && $event->getEndDateTime()->isAfter(now());
                 });
                 $displayEvents = $displayEvents->take(9);
             @endphp

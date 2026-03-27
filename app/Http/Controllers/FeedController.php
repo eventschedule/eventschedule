@@ -20,7 +20,11 @@ class FeedController extends Controller
 
         $events = Event::where(function ($query) use ($now) {
             $query->where('starts_at', '>=', $now)
-                ->orWhereNotNull('days_of_week');
+                ->orWhereNotNull('days_of_week')
+                ->orWhere(function ($q) use ($now) {
+                    $q->where('duration', '>=', 24)
+                        ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [$now]);
+                });
         })
             ->whereIn('id', function ($query) use ($role) {
                 $query->select('event_id')
@@ -84,7 +88,11 @@ class FeedController extends Controller
 
         $events = Event::where(function ($query) use ($now) {
             $query->where('starts_at', '>=', $now)
-                ->orWhereNotNull('days_of_week');
+                ->orWhereNotNull('days_of_week')
+                ->orWhere(function ($q) use ($now) {
+                    $q->where('duration', '>=', 24)
+                        ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [$now]);
+                });
         })
             ->whereIn('id', function ($query) use ($role) {
                 $query->select('event_id')

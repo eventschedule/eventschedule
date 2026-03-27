@@ -1802,6 +1802,7 @@ return [
     'total_charged' => 'סה"כ חויב',
     'start_date' => 'תאריך התחלה',
     'end_date' => 'תאריך סיום',
+    'multi_day_event' => 'אירוע רב-יומי',
     'last_updated' => 'עודכן לאחרונה',
     'daily_performance' => 'ביצועים יומיים',
     'pause' => 'השהה',

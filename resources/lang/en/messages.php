@@ -1840,6 +1840,7 @@ return [
     'total_charged' => 'Total Charged',
     'start_date' => 'Start Date',
     'end_date' => 'End Date',
+    'multi_day_event' => 'Multi-day event',
     'last_updated' => 'Last Updated',
     'daily_performance' => 'Daily Performance',
     'pause' => 'Pause',

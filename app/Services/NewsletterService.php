@@ -369,7 +369,7 @@ class NewsletterService
         }
 
         return $role->events()
-            ->where('starts_at', '>=', now())
+            ->upcomingOrOngoing()
             ->where('is_private', false)
             ->whereNull('event_password')
             ->orderBy('starts_at', 'asc')

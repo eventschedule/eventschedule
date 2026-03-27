@@ -50,6 +50,11 @@ class EventRepo
                         $query->whereNotNull('days_of_week')
                             ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
                             ->where('starts_at', '<=', $endOfDay);
+                    })
+                    ->orWhere(function ($query) use ($startOfDay, $endOfDay) {
+                        $query->where('duration', '>=', 24)
+                            ->where('starts_at', '<', $endOfDay)
+                            ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [$startOfDay]);
                     });
             })
             ->orderBy('starts_at')
@@ -70,6 +75,11 @@ class EventRepo
                     ->orWhere(function ($query) use ($eventDate) {
                         $query->whereNotNull('days_of_week')
                             ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1]);
+                    })
+                    ->orWhere(function ($query) use ($startOfDay, $endOfDay) {
+                        $query->where('duration', '>=', 24)
+                            ->where('starts_at', '<', $endOfDay)
+                            ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [$startOfDay]);
                     });
             })
             ->where(function ($query) use ($subdomain) {
@@ -89,7 +99,14 @@ class EventRepo
         [$startOfDay, $endOfDay] = $this->getUtcDateRange($eventDate);
 
         return Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'addons', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
-            ->whereBetween('starts_at', [$startOfDay, $endOfDay])
+            ->where(function ($query) use ($startOfDay, $endOfDay) {
+                $query->whereBetween('starts_at', [$startOfDay, $endOfDay])
+                    ->orWhere(function ($query) use ($startOfDay, $endOfDay) {
+                        $query->where('duration', '>=', 24)
+                            ->where('starts_at', '<', $endOfDay)
+                            ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [$startOfDay]);
+                    });
+            })
             ->where(function ($query) use ($subdomain) {
                 $query->whereHas('roles', function ($q) use ($subdomain) {
                     $q->where('subdomain', $subdomain)->where('is_accepted', true);
@@ -1157,7 +1174,13 @@ class EventRepo
                 $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'addons', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id)->where('is_accepted', true))
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id)->where('is_accepted', true))
-                    ->where('starts_at', '>=', now()->subDay())
+                    ->where(function ($q) {
+                        $q->where('starts_at', '>=', now()->subDay())
+                            ->orWhere(function ($q2) {
+                                $q2->where('duration', '>=', 24)
+                                    ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [now()]);
+                            });
+                    })
                     ->orderBy('starts_at')
                     ->first();
 
@@ -1187,7 +1210,13 @@ class EventRepo
         } else {
             $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'addons', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
                 ->where('slug', $slug)
-                ->where('starts_at', '>=', now()->subDay())
+                ->where(function ($q) {
+                    $q->where('starts_at', '>=', now()->subDay())
+                        ->orWhere(function ($q2) {
+                            $q2->where('duration', '>=', 24)
+                                ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [now()]);
+                        });
+                })
                 ->where(function ($query) use ($subdomain) {
                     $query->whereHas('roles', function ($q) use ($subdomain) {
                         $q->where('subdomain', $subdomain)->where('is_accepted', true);

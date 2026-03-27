@@ -251,7 +251,12 @@ class SupportChatController extends Controller
     public function adminToggleAvailability()
     {
         $current = (bool) Cache::get('support_available', false);
-        Cache::forever('support_available', ! $current);
+
+        if ($current) {
+            Cache::forget('support_available');
+        } else {
+            Cache::put('support_available', true, now()->addHours(4));
+        }
 
         return response()->json(['available' => ! $current]);
     }

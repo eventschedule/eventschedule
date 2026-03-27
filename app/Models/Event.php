@@ -674,6 +674,43 @@ class Event extends Model
         return $value;
     }
 
+    public function scopeInMonth($query, $startOfMonthUtc)
+    {
+        return $query->where(function ($q) use ($startOfMonthUtc) {
+            $q->where('starts_at', '>=', $startOfMonthUtc)
+                ->orWhereNotNull('days_of_week')
+                ->orWhere(function ($q2) use ($startOfMonthUtc) {
+                    $q2->where('duration', '>=', 24)
+                        ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [$startOfMonthUtc]);
+                });
+        });
+    }
+
+    public function scopeUpcomingOrOngoing($query, $date = null)
+    {
+        $date = $date ?? now();
+
+        return $query->where(function ($q) use ($date) {
+            $q->where('starts_at', '>=', $date)
+                ->orWhere(function ($q2) use ($date) {
+                    $q2->where('duration', '>=', 24)
+                        ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [$date]);
+                });
+        });
+    }
+
+    public function scopeFullyPast($query, $date = null)
+    {
+        $date = $date ?? now();
+
+        return $query->where('starts_at', '<', $date)
+            ->where(function ($q) use ($date) {
+                $q->whereNull('duration')
+                    ->orWhere('duration', '<', 24)
+                    ->orWhereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) < ?', [$date]);
+            });
+    }
+
     public function matchesDate($date)
     {
         if (! $this->starts_at) {
@@ -729,7 +766,14 @@ class Event extends Model
 
             return true;
         } else {
-            return Carbon::parse($this->localStartsAt())->isSameDay($date);
+            $startDate = Carbon::parse($this->localStartsAt())->startOfDay();
+            if ($this->duration && $this->duration >= 24) {
+                $endDate = Carbon::parse($this->localStartsAt())->addHours($this->duration)->startOfDay();
+
+                return Carbon::parse($date)->startOfDay()->between($startDate, $endDate);
+            }
+
+            return $startDate->isSameDay($date);
         }
     }
 
@@ -963,7 +1007,7 @@ class Event extends Model
                 return false;
             }
         } else {
-            if (Carbon::parse($this->starts_at)->endOfDay()->isPast()) {
+            if ($this->getEndDateTime(null, true)->endOfDay()->isPast()) {
                 return false;
             }
         }

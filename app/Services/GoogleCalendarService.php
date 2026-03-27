@@ -646,6 +646,11 @@ class GoogleCalendarService
             $start = \Carbon\Carbon::parse($googleEvent['start']->getDateTime());
             $end = \Carbon\Carbon::parse($googleEvent['end']->getDateTime());
             $event->duration = $start->diffInHours($end);
+        } elseif ($googleEvent['end']->getDate() && $googleEvent['start']->getDate()) {
+            $start = \Carbon\Carbon::parse($googleEvent['start']->getDate());
+            $end = \Carbon\Carbon::parse($googleEvent['end']->getDate());
+            $days = $start->diffInDays($end);
+            $event->duration = $days > 1 ? $days * 24 : 0;
         } else {
             $event->duration = 2; // Default 2 hours
         }
@@ -702,6 +707,11 @@ class GoogleCalendarService
             $start = \Carbon\Carbon::parse($googleEvent['start']->getDateTime());
             $end = \Carbon\Carbon::parse($googleEvent['end']->getDateTime());
             $event->duration = $start->diffInHours($end);
+        } elseif ($googleEvent['end']->getDate() && $googleEvent['start']->getDate()) {
+            $start = \Carbon\Carbon::parse($googleEvent['start']->getDate());
+            $end = \Carbon\Carbon::parse($googleEvent['end']->getDate());
+            $days = $start->diffInDays($end);
+            $event->duration = $days > 1 ? $days * 24 : 0;
         }
 
         if ($googleEvent['location']) {

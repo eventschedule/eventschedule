@@ -123,7 +123,7 @@ class NewsletterController extends Controller
             $segment->recipient_count = $segment->recipientCount();
         }
         $events = $role->events()
-            ->where('starts_at', '>=', now())
+            ->upcomingOrOngoing()
             ->orderBy('starts_at')
             ->get();
 
@@ -194,7 +194,7 @@ class NewsletterController extends Controller
             $segment->recipient_count = $segment->recipientCount();
         }
         $events = $role->events()
-            ->where('starts_at', '>=', now())
+            ->upcomingOrOngoing()
             ->orderBy('starts_at')
             ->get();
 
@@ -536,7 +536,7 @@ class NewsletterController extends Controller
         $role = $this->getRole($request);
 
         $events = $role->events()
-            ->where('starts_at', '>=', now())
+            ->upcomingOrOngoing()
             ->orderBy('starts_at')
             ->get(['events.id', 'events.name', 'events.starts_at'])
             ->map(fn ($e) => [

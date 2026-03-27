@@ -14,6 +14,8 @@
   $eventDate = '';
   $eventStartTime = '';
   $eventEndTime = '';
+  $isMultiDay = $event->exists && $event->duration >= 24;
+  $eventEndDate = '';
   if ($oldStartsAt) {
       $localDt = \Carbon\Carbon::parse($oldStartsAt);
       $eventDate = $localDt->format('Y-m-d');
@@ -21,6 +23,9 @@
       if ($oldDuration) {
           $endDt = $localDt->copy()->addMinutes(round($oldDuration * 60));
           $eventEndTime = $use24hr ? $endDt->format('H:i') : $endDt->format('g:i A');
+          if ($isMultiDay) {
+              $eventEndDate = $endDt->format('Y-m-d');
+          }
       }
   }
 @endphp
@@ -384,6 +389,58 @@
             }
         }
 
+        // Initialize multi-day end date picker
+        var multiDayEndDateEl = document.getElementById('event_end_date');
+        if (multiDayEndDateEl) {
+            var startDateVal = document.getElementById('event_date')._flatpickr
+                ? document.getElementById('event_date')._flatpickr.selectedDates[0]
+                : null;
+            var minEndDate = startDateVal ? new Date(startDateVal.getTime() + 86400000) : null;
+            var multiDayEndPicker = flatpickr(multiDayEndDateEl, Object.assign({
+                allowInput: true,
+                enableTime: false,
+                altInput: true,
+                altFormat: "M j, Y",
+                dateFormat: "Y-m-d",
+                minDate: minEndDate,
+                onChange: function() {
+                    updateHiddenFields();
+                },
+            }, localeConfig));
+            if (multiDayEndPicker._input) multiDayEndPicker._input.onkeydown = () => false;
+
+            // Update minDate when start date changes
+            var startDateFp = document.getElementById('event_date')._flatpickr;
+            if (startDateFp) {
+                var origOnChange = startDateFp.config.onChange;
+                startDateFp.config.onChange.push(function(selectedDates) {
+                    if (selectedDates[0]) {
+                        var newMin = new Date(selectedDates[0].getTime() + 86400000);
+                        multiDayEndPicker.set('minDate', newMin);
+                        if (multiDayEndPicker.selectedDates[0] && multiDayEndPicker.selectedDates[0] <= selectedDates[0]) {
+                            multiDayEndPicker.clear();
+                        }
+                    }
+                });
+            }
+
+            // Toggle behavior
+            var multiDayToggle = document.getElementById('is_multi_day');
+            if (multiDayToggle) {
+                multiDayToggle.addEventListener('change', function() {
+                    var row = document.getElementById('multi_day_end_date_row');
+                    if (this.checked) {
+                        row.style.display = '';
+                        if (window.vueApp) window.vueApp.isMultiDay = true;
+                    } else {
+                        row.style.display = 'none';
+                        if (window.vueApp) window.vueApp.isMultiDay = false;
+                        multiDayEndPicker.clear();
+                    }
+                    updateHiddenFields();
+                });
+            }
+        }
 
         // --- Time combobox logic for main event ---
 
@@ -403,6 +460,7 @@
             var endEl = document.getElementById('end_time');
             var hiddenStartsAt = document.getElementById('starts_at');
             var hiddenDuration = document.getElementById('duration');
+            var multiDayToggle = document.getElementById('is_multi_day');
 
             var dateVal = dateEl._flatpickr ? dateEl._flatpickr.selectedDates[0] : null;
             var dateStr = dateVal ? dateEl._flatpickr.formatDate(dateVal, 'Y-m-d') : dateEl.value;
@@ -414,17 +472,39 @@
                 var mm = (startMinutes % 60 < 10 ? '0' : '') + (startMinutes % 60);
                 hiddenStartsAt.value = dateStr + ' ' + hh + ':' + mm + ':00';
                 if (window.vueApp) { window.vueApp.startsAt = hiddenStartsAt.value; }
+            } else if (dateStr && multiDayToggle && multiDayToggle.checked) {
+                hiddenStartsAt.value = dateStr + ' 00:00:00';
+                if (window.vueApp) { window.vueApp.startsAt = hiddenStartsAt.value; }
             } else {
                 hiddenStartsAt.value = '';
                 if (window.vueApp) { window.vueApp.startsAt = ''; }
             }
 
-            if (endMinutes !== null && startMinutes !== null) {
-                var diff = endMinutes - startMinutes;
-                if (diff < 0) diff += 1440; // crosses midnight
-                hiddenDuration.value = (diff / 60).toFixed(2).replace(/\.?0+$/, '');
+            // Multi-day duration calculation
+            if (multiDayToggle && multiDayToggle.checked) {
+                var endDateEl = document.getElementById('event_end_date');
+                var endDateVal = endDateEl && endDateEl._flatpickr ? endDateEl._flatpickr.selectedDates[0] : null;
+                if (endDateVal && dateVal) {
+                    var daysDiffMs = endDateVal.getTime() - dateVal.getTime();
+                    var daysDiff = Math.round(daysDiffMs / 86400000);
+                    if (startMinutes !== null && endMinutes !== null) {
+                        var totalMinutes = (daysDiff * 1440) + endMinutes - startMinutes;
+                        hiddenDuration.value = (totalMinutes / 60).toFixed(2).replace(/\.?0+$/, '');
+                    } else {
+                        hiddenDuration.value = (daysDiff * 24).toString();
+                    }
+                } else {
+                    hiddenDuration.value = '';
+                }
             } else {
-                hiddenDuration.value = '';
+                // Single-day duration calculation
+                if (endMinutes !== null && startMinutes !== null) {
+                    var diff = endMinutes - startMinutes;
+                    if (diff < 0) diff += 1440; // crosses midnight
+                    hiddenDuration.value = (diff / 60).toFixed(2).replace(/\.?0+$/, '');
+                } else {
+                    hiddenDuration.value = '';
+                }
             }
         }
 
@@ -643,6 +723,12 @@
             window.vueApp.isRecurring = true;
             if (!window.vueApp.event.recurring_frequency) {
                 window.vueApp.event.recurring_frequency = 'weekly';
+            }
+            // Hide and uncheck multi-day when switching to recurring
+            var multiDayToggle = document.getElementById('is_multi_day');
+            if (multiDayToggle && multiDayToggle.checked) {
+                multiDayToggle.checked = false;
+                multiDayToggle.dispatchEvent(new Event('change'));
             }
         }
         updateRecurringFieldVisibility();
@@ -1296,8 +1382,19 @@
                             <input type="hidden" name="duration" id="duration" value="{{ $oldDuration }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('starts_at')" />
                             <x-input-error class="mt-2" :messages="$errors->get('duration')" />
+
+                            <div v-if="!isRecurring" class="mt-4">
+                                <x-toggle name="is_multi_day" id="is_multi_day" :label="__('messages.multi_day_event')" :checked="$isMultiDay" />
+                            </div>
+
+                            <div v-if="!isRecurring" id="multi_day_end_date_row" class="mt-3" style="{{ $isMultiDay ? '' : 'display:none' }}">
+                                <x-input-label for="event_end_date" :value="__('messages.end_date')" />
+                                <input type="text" id="event_end_date"
+                                    class="mt-1 w-full sm:w-auto min-w-[180px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
+                                    value="{{ $eventEndDate }}" autocomplete="off" aria-label="{{ __('messages.end_date') }}" />
+                            </div>
                         </div>
-                        
+
                         <div class="mb-6">
                         <x-input-label :value="__('messages.flyer_image')" />
                         <input id="flyer_image" name="flyer_image" type="file" class="hidden"
@@ -4180,6 +4277,7 @@
         isDirty: false,
         soldLabel: @json(__('messages.sold_reserved')),
         isRecurring: @json($event->days_of_week ? true : false),
+        isMultiDay: @json($isMultiDay),
         recurringIncludeDates: @json($event->recurring_include_dates ?? []),
         recurringExcludeDates: @json($event->recurring_exclude_dates ?? []),
         sendEmailToVenue: false,

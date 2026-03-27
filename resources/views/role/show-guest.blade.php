@@ -500,7 +500,9 @@ html[data-es-view="list"] #calendar-panel-wrapper {
           $upcomingEventsWithVideos = collect();
           if (!$event) {
             $upcomingEvents = $events->filter(function($event) {
-              return $event->starts_at && Carbon\Carbon::parse($event->starts_at)->isAfter(now());
+              if (!$event->starts_at) return false;
+              if (Carbon\Carbon::parse($event->starts_at)->isAfter(now())) return true;
+              return $event->duration >= 24 && $event->getEndDateTime()->isAfter(now());
             });
             
             foreach ($upcomingEvents as $upcomingEvent) {

@@ -1810,6 +1810,7 @@ return [
     'total_charged' => 'إجمالي الرسوم',
     'start_date' => 'تاريخ البدء',
     'end_date' => 'تاريخ الانتهاء',
+    'multi_day_event' => 'حدث متعدد الأيام',
     'last_updated' => 'آخر تحديث',
     'daily_performance' => 'الأداء اليومي',
     'pause' => 'إيقاف مؤقت',

@@ -68,6 +68,10 @@ trait CalendarDataTrait
             'coupon_code' => $event->coupon_code,
             'description_excerpt' => Str::words(html_entity_decode(strip_tags($curatorTranslation && $curatorTranslation->description_html_translated ? $curatorTranslation->description_html_translated : $event->translatedDescription())), 25, '...'),
             'duration' => $event->duration,
+            'is_multi_day' => $event->duration >= 24,
+            'local_end_date' => $event->duration >= 24
+                ? $event->getEndDateTime(null, true)->format('Y-m-d')
+                : null,
             'parts' => $event->parts->map(fn ($part) => [
                 'id' => UrlUtils::encodeId($part->id),
                 'name' => $part->translatedName(),

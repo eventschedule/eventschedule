@@ -32,8 +32,10 @@ class TicketTest extends DuskTestCase
 
             // Purchase ticket
             $browser->visit('/talent/venue')
-                ->press('Buy Tickets')
-                ->waitFor('#ticket-0', 5)
+                ->waitForText('Buy Tickets', 10)
+                ->pause(500);
+            $browser->script("window.dispatchEvent(new CustomEvent('show-event-form'))");
+            $browser->waitFor('#ticket-0', 10)
                 ->select('#ticket-0', '1')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('CHECKOUT')

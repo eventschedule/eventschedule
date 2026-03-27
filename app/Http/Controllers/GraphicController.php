@@ -233,13 +233,13 @@ class GraphicController extends Controller
         $eventCountSetting = $request->get('event_count', $graphicSettings['event_count'] ?? null);
         $eventLimit = $eventCountSetting ? (int) $eventCountSetting : 20; // Default max is 20
 
-        // Base query builder for future events belonging to this schedule
+        // Base query builder for future/ongoing events belonging to this schedule
         $baseQuery = function () use ($role, $request) {
             return Event::with(['roles', 'tickets', 'venue'])
                 ->whereHas('roles', function ($query) use ($role) {
                     $query->where('role_id', $role->id)->where('is_accepted', true);
                 })
-                ->where('starts_at', '>=', now())
+                ->upcomingOrOngoing()
                 ->where('is_private', false)
                 ->whereNull('event_password')
                 ->when($request->boolean('exclude_recurring', false), function ($query) {
@@ -369,7 +369,7 @@ class GraphicController extends Controller
 
         $baseQuery = Event::with(['roles', 'tickets', 'venue'])
             ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
-            ->where('starts_at', '>=', now())
+            ->upcomingOrOngoing()
             ->where('is_private', false)
             ->whereNull('event_password')
             ->when($excludeRecurring, fn ($q) => $q->whereNull('days_of_week'));
@@ -431,7 +431,7 @@ class GraphicController extends Controller
             ->whereHas('roles', function ($query) use ($role) {
                 $query->where('role_id', $role->id)->where('is_accepted', true);
             })
-            ->where('starts_at', '>=', now())
+            ->upcomingOrOngoing()
             ->whereNotNull('flyer_image_url')
             ->where('flyer_image_url', '!=', '')
             ->where('is_private', false)
@@ -451,7 +451,7 @@ class GraphicController extends Controller
             $hasFutureEvents = Event::whereHas('roles', function ($query) use ($role) {
                 $query->where('role_id', $role->id)->where('is_accepted', true);
             })
-                ->where('starts_at', '>=', now())
+                ->upcomingOrOngoing()
                 ->where('is_private', false)
                 ->whereNull('event_password')
                 ->exists();

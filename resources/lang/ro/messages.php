@@ -1841,6 +1841,7 @@ return [
     'total_charged' => 'Total Taxat',
     'start_date' => 'Data de Început',
     'end_date' => 'Data de Sfârșit',
+    'multi_day_event' => 'Eveniment de mai multe zile',
     'last_updated' => 'Ultima Actualizare',
     'daily_performance' => 'Performanță Zilnică',
     'pause' => 'Pauză',

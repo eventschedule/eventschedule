@@ -1825,6 +1825,7 @@ return [
     'total_charged' => 'Kokku arvestatud',
     'start_date' => 'Alguskuupäev',
     'end_date' => 'Lõppkuupäev',
+    'multi_day_event' => 'Mitmepäevane sündmus',
     'last_updated' => 'Viimati värskendatud',
     'daily_performance' => 'Igapäevane tulemuslikkus',
     'pause' => 'Peata',

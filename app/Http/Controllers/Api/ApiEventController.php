@@ -202,7 +202,7 @@ class ApiEventController extends Controller
             $request->validate([
                 'name' => 'required|string|max:255',
                 'starts_at' => 'required|date_format:Y-m-d H:i:s',
-                'duration' => 'nullable|numeric|min:0|max:24',
+                'duration' => 'nullable|numeric|min:0|max:8760',
                 'description' => 'nullable|string|max:10000',
                 'short_description' => 'nullable|string|max:500',
                 'event_url' => 'nullable|url|max:255',
@@ -315,7 +315,7 @@ class ApiEventController extends Controller
             $request->validate([
                 'name' => 'sometimes|required|string|max:255',
                 'starts_at' => 'sometimes|required|date_format:Y-m-d H:i:s',
-                'duration' => 'nullable|numeric|min:0|max:24',
+                'duration' => 'nullable|numeric|min:0|max:8760',
                 'description' => 'nullable|string|max:10000',
                 'short_description' => 'nullable|string|max:500',
                 'event_url' => 'nullable|url|max:255',

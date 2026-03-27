@@ -1807,6 +1807,7 @@ return [
     'total_charged' => 'Totaal in Rekening Gebracht',
     'start_date' => 'Startdatum',
     'end_date' => 'Einddatum',
+    'multi_day_event' => 'Meerdaags evenement',
     'last_updated' => 'Laatst Bijgewerkt',
     'daily_performance' => 'Dagelijkse Prestaties',
     'pause' => 'Pauzeren',

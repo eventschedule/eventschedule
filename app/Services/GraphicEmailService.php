@@ -41,7 +41,7 @@ class GraphicEmailService
                     ->whereHas('roles', function ($query) use ($role) {
                         $query->where('role_id', $role->id)->where('is_accepted', true);
                     })
-                    ->where('starts_at', '>=', now())
+                    ->upcomingOrOngoing()
                     ->where('is_private', false)
                     ->whereNull('event_password')
                     ->when($excludeRecurring, function ($query) {

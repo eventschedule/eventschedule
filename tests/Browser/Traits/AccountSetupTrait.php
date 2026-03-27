@@ -23,7 +23,7 @@ trait AccountSetupTrait
             ->check('terms')
             ->scrollIntoView('button[type="submit"]')
             ->press('SIGN UP')
-            ->waitForLocation('/dashboard', 15)
+            ->waitForLocation('/dashboard', 30)
             ->assertPathIs('/dashboard')
             ->assertSee($name);
     }

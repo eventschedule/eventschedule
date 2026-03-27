@@ -4516,7 +4516,11 @@ class MarketingController extends Controller
                 })
                 ->where(function ($q) {
                     $q->where('starts_at', '>=', Carbon::today())
-                        ->orWhereNotNull('days_of_week');
+                        ->orWhereNotNull('days_of_week')
+                        ->orWhere(function ($q2) {
+                            $q2->where('duration', '>=', 24)
+                                ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [Carbon::today()]);
+                        });
                 })
                 ->where('is_private', false)
                 ->whereHas('roles', $publicScheduleFilter)

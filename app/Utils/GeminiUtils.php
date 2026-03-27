@@ -827,7 +827,7 @@ class GeminiUtils
             // Check if the event is already imported
             $eventUrl = null;
             $event = Event::where('registration_url', $item['registration_url'])
-                ->where('starts_at', '>=', now())
+                ->upcomingOrOngoing()
                 ->whereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
                 ->first();
             if ($event) {
@@ -841,7 +841,7 @@ class GeminiUtils
                 $timezone = $role->user->timezone;
                 $eventDate = Carbon::parse($item['event_date_time'], $timezone)->setTimezone('UTC');
                 $query = Event::where('starts_at', $eventDate)
-                    ->where('starts_at', '>=', now())
+                    ->upcomingOrOngoing()
                     ->whereHas('roles', fn ($q) => $q->where('roles.id', $role->id));
 
                 // Check for same venue address

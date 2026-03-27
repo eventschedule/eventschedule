@@ -1809,6 +1809,7 @@ return [
     'total_charged' => 'Totale Addebitato',
     'start_date' => 'Data di Inizio',
     'end_date' => 'Data di Fine',
+    'multi_day_event' => 'Evento di più giorni',
     'last_updated' => 'Ultimo Aggiornamento',
     'daily_performance' => 'Prestazioni Giornaliere',
     'pause' => 'Pausa',

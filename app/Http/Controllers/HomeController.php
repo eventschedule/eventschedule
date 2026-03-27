@@ -90,10 +90,7 @@ class HomeController extends Controller
                         $query->where('user_id', $user->id);
                     });
                 })
-                ->where(function ($query) use ($startOfMonthUtc) {
-                    $query->where('starts_at', '>=', $startOfMonthUtc)
-                        ->orWhereNotNull('days_of_week');
-                })
+                ->inMonth($startOfMonthUtc)
                 ->orderBy('starts_at')
                 ->get();
         } else {
@@ -245,10 +242,7 @@ class HomeController extends Controller
                     $query->where('user_id', $user->id);
                 });
             })
-            ->where(function ($query) use ($startOfMonthUtc) {
-                $query->where('starts_at', '>=', $startOfMonthUtc)
-                    ->orWhereNotNull('days_of_week');
-            })
+            ->inMonth($startOfMonthUtc)
             ->orderBy('starts_at')
             ->get();
 
