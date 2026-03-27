@@ -152,10 +152,22 @@ class WhatsAppWebhookController extends Controller
 
             if ($event->starts_at) {
                 $date = Carbon::parse($event->starts_at)->setTimezone($timezone);
+                if ($event->is_multi_day) {
+                    $end = $date->copy()->addHours($event->duration);
+                    if ($date->year !== $end->year) {
+                        $dateStr = $date->format('M j, Y').' - '.$end->format('M j, Y');
+                    } elseif ($date->month !== $end->month) {
+                        $dateStr = $date->format('M j').' - '.$end->format('M j, Y');
+                    } else {
+                        $dateStr = $date->format('M j').' - '.$end->format('j, Y');
+                    }
+                } else {
+                    $dateStr = $date->format('M j, Y g:ia');
+                }
                 $message = __('messages.whatsapp_event_created', [
                     'name' => $event->name,
                     'url' => $eventUrl,
-                ])."\n".$date->format('M j, Y g:ia');
+                ])."\n".$dateStr;
             }
 
             WhatsAppService::sendMessage($phone, $message);

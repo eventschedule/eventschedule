@@ -17,7 +17,27 @@
 @elseif ($blockType === 'events' && !empty($block['data']['resolvedEvents']))
 @foreach ($block['data']['resolvedEvents'] as $event)
 * {{ $event->name }}
-  {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->setTimezone($role->timezone ?? 'UTC')->format(($role?->use_24_hour_time ?? false) ? 'M j, Y - H:i' : 'M j, Y - g:i A') : '' }}
+  @php
+      $tz = $role->timezone ?? 'UTC';
+      $s = $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->setTimezone($tz) : null;
+      $timeFormat = ($role?->use_24_hour_time ?? false) ? 'H:i' : 'g:i A';
+      if ($s && $event->is_multi_day) {
+          $e = $s->copy()->addHours($event->duration);
+          if ($s->year !== $e->year) {
+              $dateStr = $s->format('M j, Y') . ' - ' . $e->format('M j, Y');
+          } elseif ($s->month !== $e->month) {
+              $dateStr = $s->format('M j') . ' - ' . $e->format('M j, Y');
+          } else {
+              $dateStr = $s->format('M j') . ' - ' . $e->format('j, Y');
+          }
+          $dateStr .= ' - ' . $s->format($timeFormat);
+      } elseif ($s) {
+          $dateStr = $s->format('M j, Y - ' . $timeFormat);
+      } else {
+          $dateStr = '';
+      }
+  @endphp
+{{ $dateStr }}
   {{ $event->getGuestUrl() }}
 
 @endforeach

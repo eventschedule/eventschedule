@@ -83,7 +83,7 @@ class BoostController extends Controller
                 ->map(fn ($event) => [
                     'id' => UrlUtils::encodeId($event->id),
                     'name' => $event->translatedName(),
-                    'starts_at' => \Carbon\Carbon::parse($event->starts_at)->format('D, M j, Y'),
+                    'starts_at' => $event->getShortDateRangeDisplay('D, M j, Y'),
                     'image_url' => $event->getImageUrl(),
                     'role_id' => UrlUtils::encodeId($event->roles->firstWhere(fn ($r) => $proRoleIds->contains($r->id))?->id),
                 ]);

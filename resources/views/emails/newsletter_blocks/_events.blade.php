@@ -2,6 +2,28 @@
     $blockEvents = $block['data']['resolvedEvents'] ?? collect();
     $layout = $block['data']['layout'] ?? $style['eventLayout'] ?? 'cards';
     $template = $template ?? 'modern';
+    $formatEventDate = function($event, $includeTime = false) use ($role) {
+        if (!$event->starts_at) return '';
+        $tz = $role->timezone ?? 'UTC';
+        $s = \Carbon\Carbon::parse($event->starts_at)->setTimezone($tz);
+        if ($event->is_multi_day) {
+            $e = $s->copy()->addHours($event->duration);
+            if ($s->year !== $e->year) {
+                $dateStr = $s->format('M j, Y') . ' - ' . $e->format('M j, Y');
+            } elseif ($s->month !== $e->month) {
+                $dateStr = $s->format('M j') . ' - ' . $e->format('M j, Y');
+            } else {
+                $dateStr = $s->format('M j') . ' - ' . $e->format('j, Y');
+            }
+        } else {
+            $dateStr = $s->format('M j, Y');
+        }
+        if ($includeTime) {
+            $timeFormat = ($role?->use_24_hour_time ?? false) ? 'H:i' : 'g:i A';
+            $dateStr .= ' - ' . $s->format($timeFormat);
+        }
+        return $dateStr;
+    };
 @endphp
 @if ($blockEvents->isNotEmpty())
 <tr>
@@ -15,8 +37,8 @@
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td style="width: {{ $template === 'compact' ? '100px' : '120px' }}; font-size: {{ $template === 'compact' ? '12px' : '13px' }}; color: {{ $template === 'bold' ? '#e0e0e0' : $style['accentColor'] }}; font-weight: bold; font-family: '{{ $style['fontFamily'] }}', sans-serif; vertical-align: top; {{ $endPadding ?? 'padding-right' }}: 15px;">
-                                        {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->setTimezone($role->timezone ?? 'UTC')->format('M j, Y') : '' }}
-                                        @if ($event->starts_at)
+                                        {{ $formatEventDate($event) }}
+                                        @if ($event->starts_at && !$event->is_multi_day)
                                         <br><span style="font-weight: normal; font-size: {{ $template === 'compact' ? '11px' : '12px' }}; color: {{ $template === 'bold' ? '#888' : '#999' }};">{{ \Carbon\Carbon::parse($event->starts_at)->setTimezone($role->timezone ?? 'UTC')->format(($role?->use_24_hour_time ?? false) ? 'H:i' : 'g:i A') }}</span>
                                         @endif
                                     </td>
@@ -52,7 +74,7 @@
                         <td style="padding: 12px 0; vertical-align: top; font-family: '{{ $style['fontFamily'] }}', sans-serif;">
                             <h3 style="margin: 0 0 4px 0; font-size: 15px; color: {{ $style['textColor'] }}; font-weight: 600;">{{ $event->name }}</h3>
                             <p style="margin: 0 0 4px 0; font-size: 13px; color: {{ $style['accentColor'] }};">
-                                {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->setTimezone($role->timezone ?? 'UTC')->format(($role?->use_24_hour_time ?? false) ? 'M j, Y - H:i' : 'M j, Y - g:i A') : '' }}
+                                {{ $formatEventDate($event, true) }}
                             </p>
                             @php
                                 $venue = $event->venue ?? ($event->roles ? $event->roles->where('type', 'venue')->first() : null);
@@ -73,7 +95,7 @@
                         <td style="padding: 8px 12px; vertical-align: top; font-family: '{{ $style['fontFamily'] }}', sans-serif;">
                             <h3 style="margin: 0 0 2px 0; font-size: 14px; color: {{ $style['textColor'] }};">{{ $event->name }}</h3>
                             <p style="margin: 0 0 2px 0; font-size: 11px; color: {{ $style['accentColor'] }}; font-weight: bold;">
-                                {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->setTimezone($role->timezone ?? 'UTC')->format(($role?->use_24_hour_time ?? false) ? 'M j, Y - H:i' : 'M j, Y - g:i A') : '' }}
+                                {{ $formatEventDate($event, true) }}
                             </p>
                             @php
                                 $venue = $event->venue ?? ($event->roles ? $event->roles->where('type', 'venue')->first() : null);
@@ -117,7 +139,7 @@
                         <td style="padding: 14px 16px; vertical-align: top; font-family: '{{ $style['fontFamily'] }}', sans-serif;">
                             <h3 style="margin: 0 0 6px 0; font-size: 16px; color: {{ $titleColor }}; {{ $template === 'classic' ? 'font-family: Georgia, serif;' : '' }}">{{ $event->name }}</h3>
                             <p style="margin: 0 0 4px 0; font-size: 13px; color: {{ $template === 'bold' ? '#e0e0e0' : $style['accentColor'] }}; font-weight: bold;">
-                                {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->setTimezone($role->timezone ?? 'UTC')->format(($role?->use_24_hour_time ?? false) ? 'M j, Y - H:i' : 'M j, Y - g:i A') : '' }}
+                                {{ $formatEventDate($event, true) }}
                             </p>
                             @php
                                 $venue = $event->venue ?? ($event->roles ? $event->roles->where('type', 'venue')->first() : null);

@@ -1375,8 +1375,20 @@ class GeminiUtils
         $prompt = str_replace(':event_name', $event->name, $config['intro']);
 
         if ($event->starts_at) {
-            $prompt .= 'Date: '.Carbon::parse($event->starts_at)->format('l, F j, Y')."\n";
-            $prompt .= 'Time: '.Carbon::parse($event->starts_at)->format('g:i A')."\n";
+            $startDt = $event->getStartDateTime(null, true);
+            if ($event->is_multi_day) {
+                $endDt = $startDt->copy()->addHours($event->duration);
+                if ($startDt->year !== $endDt->year) {
+                    $prompt .= 'Date: '.$startDt->format('F j, Y').' - '.$endDt->format('F j, Y')."\n";
+                } elseif ($startDt->month !== $endDt->month) {
+                    $prompt .= 'Date: '.$startDt->format('F j').' - '.$endDt->format('F j, Y')."\n";
+                } else {
+                    $prompt .= 'Date: '.$startDt->format('F j').' - '.$endDt->format('j, Y')."\n";
+                }
+            } else {
+                $prompt .= 'Date: '.$startDt->format('l, F j, Y')."\n";
+            }
+            $prompt .= 'Time: '.$startDt->format('g:i A')."\n";
         }
 
         if ($event->duration) {

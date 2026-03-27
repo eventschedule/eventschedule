@@ -1796,6 +1796,9 @@ abstract class AbstractEventDesign
 
                 if (! $startDate->isSameDay($endDate)) {
                     // Multi-day event
+                    if ($startDate->year !== $endDate->year) {
+                        return $startDate->translatedFormat('M j, Y').' - '.$endDate->translatedFormat('M j, Y');
+                    }
                     return $startDate->translatedFormat('M j').' - '.$endDate->translatedFormat('M j, Y');
                 }
             }

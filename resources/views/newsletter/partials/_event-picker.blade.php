@@ -21,7 +21,7 @@
                 <div>
                     <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $event->name }}</span>
                     <span class="text-sm text-gray-500 dark:text-gray-400 {{ is_rtl() ? 'me-2' : 'ms-2' }}">
-                        {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format('M j, Y') : '' }}
+                        {{ $event->starts_at ? $event->getShortDateRangeDisplay() : '' }}
                     </span>
                 </div>
             </label>

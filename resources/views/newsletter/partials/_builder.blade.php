@@ -51,7 +51,7 @@ $eventsData = ($events ?? collect())->map(function ($event) {
     return [
         'id' => $event->id,
         'name' => $event->name,
-        'date' => $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format('M j, Y') : '',
+        'date' => $event->starts_at ? $event->getShortDateRangeDisplay() : '',
     ];
 })->values()->toArray();
 

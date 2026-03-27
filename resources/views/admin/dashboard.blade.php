@@ -239,7 +239,7 @@
                                 <div class="text-end text-sm text-gray-500 dark:text-gray-400">
                                     <p>{{ $event->created_at->diffForHumans() }}</p>
                                     @if ($event->starts_at)
-                                        <p class="text-xs">{{ \Carbon\Carbon::parse($event->starts_at)->format('M d, Y') }}</p>
+                                        <p class="text-xs">{{ $event->getShortDateRangeDisplay() }}</p>
                                     @endif
                                 </div>
                             </div>

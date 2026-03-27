@@ -643,6 +643,31 @@ class Event extends Model
 
         $startAt = $this->getStartDateTime($date, true);
 
+        // Multi-day events in pretty mode: show date range instead of single datetime
+        if ($pretty && $this->is_multi_day) {
+            $endAt = $startAt->copy()->addHours($this->duration);
+
+            if ($role && $role->language_code) {
+                $startAt->setLocale($role->language_code);
+                $endAt->setLocale($role->language_code);
+                if ($startAt->year !== $endAt->year) {
+                    return $startAt->translatedFormat('F j, Y').' - '.$endAt->translatedFormat('F j, Y');
+                } elseif ($startAt->month !== $endAt->month) {
+                    return $startAt->translatedFormat('F j').' - '.$endAt->translatedFormat('F j, Y');
+                } else {
+                    return $startAt->translatedFormat('F j').' - '.$endAt->translatedFormat('j, Y');
+                }
+            }
+
+            if ($startAt->year !== $endAt->year) {
+                return $startAt->format('M j, Y').' - '.$endAt->format('M j, Y');
+            } elseif ($startAt->month !== $endAt->month) {
+                return $startAt->format('M j').' - '.$endAt->format('M j, Y');
+            } else {
+                return $startAt->format('M j').' - '.$endAt->format('j, Y');
+            }
+        }
+
         $format = $pretty ? ($enable24 ? 'D, M jS • H:i' : 'D, M jS • g:i A') : 'Y-m-d H:i:s';
 
         // Set locale for date translation if pretty is true and role has language_code
@@ -1291,7 +1316,11 @@ class Event extends Model
             $str .= ' '.__('messages.at').' '.$this->getEventUrlDomain();
         }
 
-        $str .= ' | '.$this->localStartsAt(true, $date);
+        if ($this->is_multi_day) {
+            $str .= ' | '.$this->getDateRangeDisplay($date);
+        } else {
+            $str .= ' | '.$this->localStartsAt(true, $date);
+        }
 
         return \Illuminate\Support\Str::limit($str, 155);
     }
@@ -1442,6 +1471,29 @@ class Event extends Model
         } else {
             return $start->translatedFormat('F j').' - '.$end->translatedFormat('j, Y');
         }
+    }
+
+    public function getShortDateRangeDisplay($fallbackFormat = 'M j, Y')
+    {
+        if (! $this->starts_at) {
+            return '';
+        }
+
+        $s = $this->getStartDateTime(null, true);
+
+        if ($this->is_multi_day) {
+            $e = $s->copy()->addHours($this->duration);
+
+            if ($s->year !== $e->year) {
+                return $s->format('M j, Y').' - '.$e->format('M j, Y');
+            } elseif ($s->month !== $e->month) {
+                return $s->format('M j').' - '.$e->format('M j, Y');
+            } else {
+                return $s->format('M j').' - '.$e->format('j, Y');
+            }
+        }
+
+        return $s->format($fallbackFormat);
     }
 
     public function getFlyerImageUrlAttribute($value)

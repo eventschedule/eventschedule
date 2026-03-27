@@ -36,7 +36,7 @@ class CheckInController extends Controller
             return [
                 'id' => UrlUtils::encodeId($event->id),
                 'name' => $event->name,
-                'starts_at' => $event->starts_at ? Carbon::parse($event->starts_at)->format('D, M j, Y') : null,
+                'starts_at' => $event->starts_at ? $event->getShortDateRangeDisplay('D, M j, Y') : null,
                 'image_url' => $event->getImageUrl(),
             ];
         });

@@ -538,12 +538,12 @@ class NewsletterController extends Controller
         $events = $role->events()
             ->upcomingOrOngoing()
             ->orderBy('starts_at')
-            ->get(['events.id', 'events.name', 'events.starts_at'])
+            ->get(['events.id', 'events.name', 'events.starts_at', 'events.duration'])
             ->map(fn ($e) => [
                 'id' => $e->id,
                 'hash' => UrlUtils::encodeId($e->id),
                 'name' => $e->name,
-                'date' => $e->starts_at ? \Carbon\Carbon::parse($e->starts_at)->format('M j, Y') : '',
+                'date' => $e->starts_at ? $e->getShortDateRangeDisplay() : '',
             ]);
 
         return response()->json($events);
@@ -574,7 +574,7 @@ class NewsletterController extends Controller
             ->map(fn ($event) => [
                 'id' => UrlUtils::encodeId($event->id),
                 'name' => $event->translatedName(),
-                'starts_at' => $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format('D, M j, Y') : null,
+                'starts_at' => $event->starts_at ? $event->getShortDateRangeDisplay('D, M j, Y') : null,
                 'image_url' => $event->getImageUrl(),
             ]);
 

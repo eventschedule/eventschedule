@@ -16,7 +16,24 @@
             <div class="min-w-0 flex-1">
                 <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ $event->name }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->setTimezone($eventRole?->timezone ?? auth()->user()->timezone ?? 'UTC')->format('M j, g:i A') : '' }}
+                    @php
+                        $tz = $eventRole?->timezone ?? auth()->user()->timezone ?? 'UTC';
+                        $startDt = $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->setTimezone($tz) : null;
+                    @endphp
+                    @if($startDt)
+                        @if($event->is_multi_day)
+                            @php $endDt = $startDt->copy()->addHours($event->duration); @endphp
+                            @if($startDt->year !== $endDt->year)
+                                {{ $startDt->format('M j, Y') }} - {{ $endDt->format('M j, Y') }}
+                            @elseif($startDt->month !== $endDt->month)
+                                {{ $startDt->format('M j') }} - {{ $endDt->format('M j') }}
+                            @else
+                                {{ $startDt->format('M j') }} - {{ $endDt->format('j') }}
+                            @endif
+                        @else
+                            {{ $startDt->format('M j, g:i A') }}
+                        @endif
+                    @endif
                     @if($eventRole)
                     <span class="mx-1">&middot;</span> {{ $eventRole->name }}
                     @endif

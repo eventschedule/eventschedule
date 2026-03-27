@@ -25,7 +25,11 @@
             </a>
             <h1 class="text-xl font-semibold text-gray-900 dark:text-white mb-1">{{ __('messages.carpool') }}</h1>
             <p class="text-lg text-gray-700 dark:text-[#d1d5db]">{{ $event->name }}</p>
-            @if ($date)
+            @if ($event->is_multi_day)
+            <p class="text-sm text-gray-500 dark:text-[#9ca3af] mt-1">
+                {{ $event->getDateRangeDisplay($date) }}
+            </p>
+            @elseif ($date)
                 @php $startDt = $event->getStartDateTime($date, true); @endphp
                 @if ($startDt)
                 <p class="text-sm text-gray-500 dark:text-[#9ca3af] mt-1">
