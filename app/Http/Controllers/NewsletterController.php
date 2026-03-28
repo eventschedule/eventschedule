@@ -608,14 +608,16 @@ class NewsletterController extends Controller
         // Add manual users if provided
         if ($validated['type'] === 'manual' && ! empty($validated['emails'])) {
             $emails = array_filter(array_map('trim', explode("\n", $validated['emails'])));
+            $seen = [];
             foreach ($emails as $line) {
                 $parts = array_map('trim', explode(',', $line));
-                $email = $parts[0] ?? '';
+                $email = strtolower($parts[0] ?? '');
                 $name = $parts[1] ?? null;
-                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                if (filter_var($email, FILTER_VALIDATE_EMAIL) && ! in_array($email, $seen)) {
+                    $seen[] = $email;
                     NewsletterSegmentUser::create([
                         'newsletter_segment_id' => $segment->id,
-                        'email' => strtolower($email),
+                        'email' => $email,
                         'name' => $name,
                         'created_at' => now(),
                     ]);
