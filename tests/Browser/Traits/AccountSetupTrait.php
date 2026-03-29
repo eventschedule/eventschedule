@@ -172,6 +172,13 @@ trait AccountSetupTrait
             v.tickets[0].quantity = 50;
         ");
 
+        // Ensure tickets_enabled is set (radio click may not reliably trigger Vue watcher)
+        $browser->script("
+            var v = window.vueApp;
+            v.ticketMode = 'tickets';
+            v.event.tickets_enabled = true;
+        ");
+
         // Submit the event form
         $browser->script("
             window._skipUnsavedWarning = true;
