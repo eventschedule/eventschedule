@@ -619,7 +619,7 @@
         {{-- Calendar date badge + time --}}
         @php
           $startDt = $event->getStartDateTime($date, true);
-          $endDt = $event->duration >= 24 ? (clone $startDt)->addHours($event->duration) : null;
+          $endDt = $event->isMultiDay() ? (clone $startDt)->addHours($event->duration) : null;
         @endphp
         <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
           @if ($event->isMultiDay() && $endDt && $startDt->format('m') === $endDt->format('m'))
