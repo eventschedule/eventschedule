@@ -454,9 +454,6 @@
                                 <p class="flex-auto font-medium text-gray-900 dark:text-gray-100 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }} truncate">
                                     <span class="flex items-start gap-1.5">
                                         <span v-if="getEventGroupColor(event)" class="inline-block w-2 h-2 rounded-full flex-shrink-0 mt-1.5" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
-                                        <svg v-if="event.is_multi_day" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3 flex-shrink-0 mt-1 text-gray-400">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                                        </svg>
                                         <span :class="getEventsForDate(day.date).filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'"
                                           class="hover:underline truncate" dir="auto" v-text="getEventDisplayName(event)">
                                         </span>
@@ -541,9 +538,6 @@
                                     <p class="flex-auto font-medium text-gray-900 dark:text-gray-100 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }} truncate">
                                         <span class="flex items-start gap-1.5">
                                             <span v-if="getEventGroupColor(event)" class="inline-block w-2 h-2 rounded-full flex-shrink-0 mt-1.5" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
-                                            <svg v-if="event.is_multi_day" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3 flex-shrink-0 mt-1 text-gray-400">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                                            </svg>
                                             <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'"
                                               class="hover:underline truncate" dir="auto" v-text="getEventDisplayName(event)">
                                             </span>
@@ -705,13 +699,9 @@
 
                                         {{-- Date Badge --}}
                                         <div v-if="event.occurrenceDate" class="flex items-center gap-4">
-                                            <div v-if="event.is_multi_day && event.local_end_date" class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
+                                            <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
                                                 <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1" style="color: {{ $accentColor }}" v-text="getMonthAbbr(event._originalOccurrenceDate || event.occurrenceDate)"></span>
-                                                <span class="text-lg font-bold text-gray-900 dark:text-white leading-none" v-text="getMultiDayBadge(event)"></span>
-                                            </div>
-                                            <div v-else class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
-                                                <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1" style="color: {{ $accentColor }}" v-text="getMonthAbbr(event.occurrenceDate)"></span>
-                                                <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none" v-text="getDayNum(event.occurrenceDate)"></span>
+                                                <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none" v-text="getDayNum(event._originalOccurrenceDate || event.occurrenceDate)"></span>
                                             </div>
                                             <div class="flex flex-col">
                                                 <span v-if="event.is_multi_day && event.local_end_date" class="text-lg font-semibold text-gray-900 dark:text-white" v-text="getEventTime(event)"></span>
@@ -1066,13 +1056,9 @@
 
                                     {{-- Date Badge --}}
                                     <div v-if="event.occurrenceDate" class="flex items-center gap-4">
-                                        <div v-if="event.is_multi_day && event.local_end_date" class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
+                                        <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
                                             <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1" style="color: {{ $accentColor }}" v-text="getMonthAbbr(event._originalOccurrenceDate || event.occurrenceDate)"></span>
-                                            <span class="text-lg font-bold text-gray-900 dark:text-white leading-none" v-text="getMultiDayBadge(event)"></span>
-                                        </div>
-                                        <div v-else class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
-                                            <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1" style="color: {{ $accentColor }}" v-text="getMonthAbbr(event.occurrenceDate)"></span>
-                                            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none" v-text="getDayNum(event.occurrenceDate)"></span>
+                                            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none" v-text="getDayNum(event._originalOccurrenceDate || event.occurrenceDate)"></span>
                                         </div>
                                         <div class="flex flex-col">
                                             <span v-if="event.is_multi_day && event.local_end_date" class="text-lg font-semibold text-gray-900 dark:text-white" v-text="getEventTime(event)"></span>
@@ -2220,22 +2206,17 @@ const calendarApp = createApp({
                             if (shouldIncludeDate(event, dateStr)) {
                                 if (event.is_multi_day && event.duration) {
                                     const totalDays = Math.ceil(event.duration / 24);
-                                    for (let d = 0; d < totalDays; d++) {
-                                        const dayDate = new Date(currentDate);
-                                        dayDate.setDate(dayDate.getDate() + d);
-                                        if (dayDate < today || dayDate > endDate) continue;
-                                        const dayStr = dayDate.getFullYear() + '-' +
-                                            String(dayDate.getMonth() + 1).padStart(2, '0') + '-' +
-                                            String(dayDate.getDate()).padStart(2, '0');
-                                        mobileEvents.push({
-                                            ...event,
-                                            occurrenceDate: dayStr,
-                                            uniqueKey: `${event.id}-${dayStr}`,
-                                            _originalOccurrenceDate: dateStr,
-                                            _multiDayNum: d + 1,
-                                            _multiDayTotal: totalDays,
-                                        });
-                                    }
+                                    const displayDate = (currentDate < today) ? today.getFullYear() + '-' +
+                                        String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                                        String(today.getDate()).padStart(2, '0') : dateStr;
+                                    mobileEvents.push({
+                                        ...event,
+                                        occurrenceDate: displayDate,
+                                        uniqueKey: `${event.id}-${dateStr}`,
+                                        _originalOccurrenceDate: dateStr,
+                                        _multiDayNum: 1,
+                                        _multiDayTotal: totalDays,
+                                    });
                                 } else {
                                     mobileEvents.push({
                                         ...event,
@@ -2257,29 +2238,23 @@ const calendarApp = createApp({
                         startDate.setHours(0, 0, 0, 0);
 
                         if (event.is_multi_day && event.local_end_date) {
-                            // Multi-day: push one entry per day from start to end
                             const [ey, em, ed] = event.local_end_date.split('-').map(Number);
                             const endCheck = new Date(ey, em - 1, ed);
                             endCheck.setHours(0, 0, 0, 0);
                             if (endCheck >= today) {
                                 const totalDays = Math.round((endCheck - startDate) / (1000 * 60 * 60 * 24)) + 1;
-                                const cursor = new Date(Math.max(startDate.getTime(), today.getTime()));
-                                cursor.setHours(0, 0, 0, 0);
-                                while (cursor <= endCheck) {
-                                    const dateStr = cursor.getFullYear() + '-' +
-                                        String(cursor.getMonth() + 1).padStart(2, '0') + '-' +
-                                        String(cursor.getDate()).padStart(2, '0');
-                                    const dayNum = Math.round((cursor - startDate) / (1000 * 60 * 60 * 24)) + 1;
-                                    mobileEvents.push({
-                                        ...event,
-                                        occurrenceDate: dateStr,
-                                        uniqueKey: `${event.id}-${dateStr}`,
-                                        _originalOccurrenceDate: eventDate,
-                                        _multiDayNum: dayNum,
-                                        _multiDayTotal: totalDays,
-                                    });
-                                    cursor.setDate(cursor.getDate() + 1);
-                                }
+                                const displayDate = (startDate < today) ?
+                                    today.getFullYear() + '-' +
+                                    String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                                    String(today.getDate()).padStart(2, '0') : eventDate;
+                                mobileEvents.push({
+                                    ...event,
+                                    occurrenceDate: displayDate,
+                                    uniqueKey: event.id,
+                                    _originalOccurrenceDate: eventDate,
+                                    _multiDayNum: 1,
+                                    _multiDayTotal: totalDays,
+                                });
                             }
                         } else if (startDate >= today) {
                             mobileEvents.push({
@@ -2363,22 +2338,14 @@ const calendarApp = createApp({
                     const endCheck = new Date(ey, em - 1, ed);
                     endCheck.setHours(0, 0, 0, 0);
                     const totalDays = Math.round((endCheck - evStartDate) / (1000 * 60 * 60 * 24)) + 1;
-                    const cursor = new Date(evStartDate);
-                    while (cursor <= endCheck && cursor < today) {
-                        const dateStr = cursor.getFullYear() + '-' +
-                            String(cursor.getMonth() + 1).padStart(2, '0') + '-' +
-                            String(cursor.getDate()).padStart(2, '0');
-                        const dayNum = Math.round((cursor - evStartDate) / (1000 * 60 * 60 * 24)) + 1;
-                        events.push({
-                            ...event,
-                            occurrenceDate: dateStr,
-                            uniqueKey: `${event.id}-past-${dateStr}`,
-                            _originalOccurrenceDate: event.occurrenceDate,
-                            _multiDayNum: dayNum,
-                            _multiDayTotal: totalDays,
-                        });
-                        cursor.setDate(cursor.getDate() + 1);
-                    }
+                    events.push({
+                        ...event,
+                        occurrenceDate: event.occurrenceDate,
+                        uniqueKey: `${event.id}-past-${event.occurrenceDate}`,
+                        _originalOccurrenceDate: event.occurrenceDate,
+                        _multiDayNum: 1,
+                        _multiDayTotal: totalDays,
+                    });
                 } else {
                     events.push(event);
                 }
@@ -2405,22 +2372,14 @@ const calendarApp = createApp({
                             if (this.shouldIncludePastDate(event, dateStr)) {
                                 if (event.is_multi_day && event.duration) {
                                     const totalDays = Math.ceil(event.duration / 24);
-                                    for (let d = 0; d < totalDays; d++) {
-                                        const dayDate = new Date(currentDate);
-                                        dayDate.setDate(dayDate.getDate() + d);
-                                        if (dayDate >= today) break;
-                                        const dayStr = dayDate.getFullYear() + '-' +
-                                            String(dayDate.getMonth() + 1).padStart(2, '0') + '-' +
-                                            String(dayDate.getDate()).padStart(2, '0');
-                                        events.push({
-                                            ...event,
-                                            occurrenceDate: dayStr,
-                                            uniqueKey: `${event.id}-past-${dayStr}`,
-                                            _originalOccurrenceDate: dateStr,
-                                            _multiDayNum: d + 1,
-                                            _multiDayTotal: totalDays,
-                                        });
-                                    }
+                                    events.push({
+                                        ...event,
+                                        occurrenceDate: dateStr,
+                                        uniqueKey: `${event.id}-past-${dateStr}`,
+                                        _originalOccurrenceDate: dateStr,
+                                        _multiDayNum: 1,
+                                        _multiDayTotal: totalDays,
+                                    });
                                 } else {
                                     events.push({
                                         ...event,
