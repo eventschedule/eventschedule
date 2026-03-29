@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Schedule for Workshop Instructors | Class Scheduling</x-slot>
+    <x-slot name="title">Free Event Schedule for Workshop Instructors | Share Classes</x-slot>
     <x-slot name="description">Teach what you love. Fill every seat. From pottery to photography, cooking to coding. One link for all your workshops. Reach students directly. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Workshop Instructors</x-slot>
 
@@ -89,6 +89,7 @@
             "One link for all workshops"
         ],
         "url": "{{ url()->current() }}",
+        "keywords": "workshop schedule, class booking calendar, workshop registration, course scheduling software, free workshop scheduling",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"
@@ -705,8 +706,18 @@
                     </x-slot:icon>
                 </x-feature-link-card>
             </div>
+            <div class="mt-6 text-center">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                    See all features
+                    <svg aria-hidden="true" class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
         </div>
     </section>
+
+    @include('marketing.partials.pricing-nudge')
 
     <!-- Related Pages -->
     <section class="bg-white dark:bg-[#0a0a0f] py-20">
@@ -750,6 +761,14 @@
                     </svg>
                 </a>
             </div>
+            <div class="mt-6 text-center">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                    See all use cases
+                    <svg aria-hidden="true" class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
         </div>
     </section>
 
@@ -765,70 +784,62 @@
                 </p>
             </div>
 
-            <div class="space-y-4" x-data="{ open: null }">
-                <div class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+            <div class="space-y-4">
+                <details name="faq" class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Is Event Schedule free for workshop instructors?
                         </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                    </button>
-                    <div x-show="open === 1" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                    </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
                             Yes. Event Schedule is free forever for sharing your workshop schedule, building a following, and syncing with Google Calendar. Paid registration and newsletters are available on the Pro plan, with zero platform fees.
                         </p>
-                    </div>
-                </div>
+                </details>
 
-                <div class="bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900 dark:to-emerald-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                <details name="faq" class="bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900 dark:to-emerald-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Can I manage different types of workshops in one schedule?
                         </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                    </button>
-                    <div x-show="open === 2" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                    </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
                             Yes. Use sub-schedules to organize by workshop type - cooking classes, pottery, photography, or craft sessions. Each workshop can have its own description, images, pricing, capacity limits, and registration options.
                         </p>
-                    </div>
-                </div>
+                </details>
 
-                <div class="bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                <details name="faq" class="bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             How do students discover my workshops?
                         </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                    </button>
-                    <div x-show="open === 3" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                    </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
                             Students can follow your schedule and receive email notifications when you add new workshops. Share your schedule link on social media, embed it on your studio or school website, or send newsletters to followers with upcoming sessions.
                         </p>
-                    </div>
-                </div>
+                </details>
 
-                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                <details name="faq" class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Can I sell spots and manage registrations?
                         </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                    </button>
-                    <div x-show="open === 4" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                    </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
                             Yes. Connect your Stripe account and sell workshop spots directly from your schedule. Set per-workshop pricing, limit capacity, and check in attendees with QR codes. Event Schedule charges zero platform fees.
                         </p>
-                    </div>
-                </div>
+                </details>
             </div>
         </div>
     </section>

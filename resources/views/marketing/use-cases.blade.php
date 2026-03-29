@@ -11,7 +11,7 @@
         "name": "Event Schedule Use Cases",
         "description": "Discover how Event Schedule works for musicians, venues, comedians, restaurants, art galleries, and more.",
         "url": "{{ url()->current() }}",
-        "numberOfItems": 10,
+        "numberOfItems": 34,
         "itemListElement": [
             {
                 "@type": "ListItem",
@@ -30,58 +30,226 @@
             {
                 "@type": "ListItem",
                 "position": 3,
+                "name": "For DJs",
+                "description": "Promote your sets, manage bookings, and grow your following.",
+                "url": "{{ config('app.url') }}/for-djs"
+            },
+            {
+                "@type": "ListItem",
+                "position": 4,
                 "name": "For Comedians",
                 "description": "List your shows, sell tickets, and build your comedy brand.",
                 "url": "{{ config('app.url') }}/for-comedians"
             },
             {
                 "@type": "ListItem",
-                "position": 4,
+                "position": 5,
+                "name": "For Circus & Acrobatics",
+                "description": "Showcase circus performances, manage tour dates, and sell tickets directly.",
+                "url": "{{ config('app.url') }}/for-circus-acrobatics"
+            },
+            {
+                "@type": "ListItem",
+                "position": 6,
+                "name": "For Magicians",
+                "description": "Share your magic show schedule, sell tickets, and reach your audience directly.",
+                "url": "{{ config('app.url') }}/for-magicians"
+            },
+            {
+                "@type": "ListItem",
+                "position": 7,
+                "name": "For Spoken Word",
+                "description": "Share your poetry readings and spoken word performances with your audience.",
+                "url": "{{ config('app.url') }}/for-spoken-word"
+            },
+            {
+                "@type": "ListItem",
+                "position": 8,
+                "name": "For Dance Groups",
+                "description": "Schedule performances, workshops, and recitals for your dance company.",
+                "url": "{{ config('app.url') }}/for-dance-groups"
+            },
+            {
+                "@type": "ListItem",
+                "position": 9,
+                "name": "For Theater Performers",
+                "description": "Share your theater schedule, manage auditions, and sell tickets to your shows.",
+                "url": "{{ config('app.url') }}/for-theater-performers"
+            },
+            {
+                "@type": "ListItem",
+                "position": 10,
+                "name": "For Visual Artists",
+                "description": "Share exhibition openings, studio events, and art shows with your audience.",
+                "url": "{{ config('app.url') }}/for-visual-artists"
+            },
+            {
+                "@type": "ListItem",
+                "position": 11,
                 "name": "For Venues",
                 "description": "Bars, clubs, theaters, and event spaces that want to fill their calendar with great events.",
                 "url": "{{ config('app.url') }}/for-venues"
             },
             {
                 "@type": "ListItem",
-                "position": 5,
-                "name": "For Restaurants",
-                "description": "Promote dinner events, wine tastings, and live entertainment to your diners.",
-                "url": "{{ config('app.url') }}/for-restaurants"
-            },
-            {
-                "@type": "ListItem",
-                "position": 6,
+                "position": 12,
                 "name": "For Bars & Pubs",
                 "description": "Keep your entertainment calendar fresh and bring in crowds.",
                 "url": "{{ config('app.url') }}/for-bars"
             },
             {
                 "@type": "ListItem",
-                "position": 7,
+                "position": 13,
+                "name": "For Nightclubs",
+                "description": "Promote DJ sets, themed nights, and special events to your audience.",
+                "url": "{{ config('app.url') }}/for-nightclubs"
+            },
+            {
+                "@type": "ListItem",
+                "position": 14,
+                "name": "For Music Venues",
+                "description": "Fill your stage with great acts. Accept booking requests and sell tickets.",
+                "url": "{{ config('app.url') }}/for-music-venues"
+            },
+            {
+                "@type": "ListItem",
+                "position": 15,
+                "name": "For Theaters",
+                "description": "Manage your season calendar, sell tickets, and promote your productions.",
+                "url": "{{ config('app.url') }}/for-theaters"
+            },
+            {
+                "@type": "ListItem",
+                "position": 16,
+                "name": "For Comedy Clubs",
+                "description": "Book comedians, manage your lineup, and sell tickets to shows.",
+                "url": "{{ config('app.url') }}/for-comedy-clubs"
+            },
+            {
+                "@type": "ListItem",
+                "position": 17,
+                "name": "For Restaurants",
+                "description": "Promote dinner events, wine tastings, and live entertainment to your diners.",
+                "url": "{{ config('app.url') }}/for-restaurants"
+            },
+            {
+                "@type": "ListItem",
+                "position": 18,
+                "name": "For Breweries & Wineries",
+                "description": "Schedule tastings, live music, and taproom events for your guests.",
+                "url": "{{ config('app.url') }}/for-breweries-and-wineries"
+            },
+            {
+                "@type": "ListItem",
+                "position": 19,
+                "name": "For Art Galleries",
+                "description": "Promote exhibitions, openings, and art events to collectors and enthusiasts.",
+                "url": "{{ config('app.url') }}/for-art-galleries"
+            },
+            {
+                "@type": "ListItem",
+                "position": 20,
+                "name": "For Community Centers",
+                "description": "Organize programs, classes, and community events in one shared calendar.",
+                "url": "{{ config('app.url') }}/for-community-centers"
+            },
+            {
+                "@type": "ListItem",
+                "position": 21,
+                "name": "For Hotels & Resorts",
+                "description": "Share guest activities, entertainment, and experiences in one calendar.",
+                "url": "{{ config('app.url') }}/for-hotels-and-resorts"
+            },
+            {
+                "@type": "ListItem",
+                "position": 22,
+                "name": "For Libraries",
+                "description": "Schedule programs, author events, and reading groups for your community.",
+                "url": "{{ config('app.url') }}/for-libraries"
+            },
+            {
+                "@type": "ListItem",
+                "position": 23,
                 "name": "For Curators",
                 "description": "Event curators and promoters who organize and promote events across multiple venues.",
                 "url": "{{ config('app.url') }}/for-curators"
             },
             {
                 "@type": "ListItem",
-                "position": 8,
+                "position": 24,
+                "name": "For Food Trucks & Vendors",
+                "description": "Share your location schedule and let customers follow your route.",
+                "url": "{{ config('app.url') }}/for-food-trucks-and-vendors"
+            },
+            {
+                "@type": "ListItem",
+                "position": 25,
+                "name": "For Farmers Markets",
+                "description": "Organize vendor schedules, seasonal markets, and special events.",
+                "url": "{{ config('app.url') }}/for-farmers-markets"
+            },
+            {
+                "@type": "ListItem",
+                "position": 26,
+                "name": "For Fitness & Yoga",
+                "description": "Schedule classes, workshops, and retreats for your fitness community.",
+                "url": "{{ config('app.url') }}/for-fitness-and-yoga"
+            },
+            {
+                "@type": "ListItem",
+                "position": 27,
+                "name": "For Workshop Instructors",
+                "description": "Schedule and promote workshops, courses, and hands-on classes.",
+                "url": "{{ config('app.url') }}/for-workshop-instructors"
+            },
+            {
+                "@type": "ListItem",
+                "position": 28,
                 "name": "For Webinars",
                 "description": "Host webinars with built-in registration, ticketing, and streaming link integration.",
                 "url": "{{ config('app.url') }}/for-webinars"
             },
             {
                 "@type": "ListItem",
-                "position": 9,
+                "position": 29,
+                "name": "For Online Classes",
+                "description": "Schedule and sell online classes with built-in registration and video platform integration.",
+                "url": "{{ config('app.url') }}/for-online-classes"
+            },
+            {
+                "@type": "ListItem",
+                "position": 30,
                 "name": "For Virtual Conferences",
                 "description": "Schedule and manage virtual conferences with multi-track programs and ticketing.",
                 "url": "{{ config('app.url') }}/for-virtual-conferences"
             },
             {
                 "@type": "ListItem",
-                "position": 10,
-                "name": "For Online Classes",
-                "description": "Schedule and sell online classes with built-in registration and video platform integration.",
-                "url": "{{ config('app.url') }}/for-online-classes"
+                "position": 31,
+                "name": "For Live Q&A Sessions",
+                "description": "Schedule live Q&A sessions with registration, ticketing, and streaming links.",
+                "url": "{{ config('app.url') }}/for-live-qa-sessions"
+            },
+            {
+                "@type": "ListItem",
+                "position": 32,
+                "name": "For Watch Parties",
+                "description": "Schedule watch parties with registration, ticketing, and streaming platform integration.",
+                "url": "{{ config('app.url') }}/for-watch-parties"
+            },
+            {
+                "@type": "ListItem",
+                "position": 33,
+                "name": "For Live Concerts",
+                "description": "Promote live concert events with ticketing, lineups, and fan notifications.",
+                "url": "{{ config('app.url') }}/for-live-concerts"
+            },
+            {
+                "@type": "ListItem",
+                "position": 34,
+                "name": "For AI Agents",
+                "description": "Full REST API with OpenAPI spec for AI agents and developers to automate scheduling.",
+                "url": "{{ config('app.url') }}/for-ai-agents"
             }
         ]
     }
