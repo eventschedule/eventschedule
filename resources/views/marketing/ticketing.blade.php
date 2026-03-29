@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Ticketing with No Platform Fees | QR Check-in - Event Schedule</x-slot>
+    <x-slot name="title">Event Ticketing with No Fees - Event Schedule</x-slot>
     <x-slot name="description">Sell tickets directly through your event schedule with QR codes, multiple ticket types, and secure payment processing.</x-slot>
     <x-slot name="breadcrumbTitle">Ticketing</x-slot>
 
@@ -815,6 +815,18 @@
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Related features</h2>
             <div class="space-y-3">
+                <x-feature-link-card
+                    name="Stripe Payments"
+                    description="Accept credit cards, Apple Pay, and Google Pay with zero platform fees"
+                    :url="marketing_url('/stripe')"
+                    icon-color="blue"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-feature-link-card>
                 <x-feature-link-card
                     name="Custom Fields"
                     description="Collect additional info from ticket buyers with custom form fields"

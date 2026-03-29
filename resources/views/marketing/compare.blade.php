@@ -635,6 +635,25 @@
         </div>
     </section>
 
+    <!-- Cross-link to Replace -->
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <a href="{{ route('marketing.replace') }}" class="group flex items-center justify-between p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">
+                        Looking to consolidate your tools?
+                    </h2>
+                    <p class="text-gray-500 dark:text-gray-400">
+                        See which general-purpose tools Event Schedule can replace.
+                    </p>
+                </div>
+                <svg aria-hidden="true" class="w-6 h-6 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex-shrink-0 ml-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+            </a>
+        </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="relative bg-gradient-to-br from-blue-600 to-sky-700 py-24 overflow-hidden">
         <div class="absolute inset-0 grid-overlay"></div>

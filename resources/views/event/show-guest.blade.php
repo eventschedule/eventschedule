@@ -612,6 +612,18 @@
           $endDt = $event->duration >= 24 ? (clone $startDt)->addHours($event->duration) : null;
         @endphp
         <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
+          @if ($event->isMultiDay() && $endDt && $startDt->format('m') === $endDt->format('m'))
+          <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
+                      bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
+            <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1"
+                  style="color: {{ $accentColor }};">
+              {{ $startDt->format('M') }}
+            </span>
+            <span class="text-lg font-bold text-gray-900 dark:text-white leading-none">
+              {{ $startDt->format('j') }}-{{ $endDt->format('j') }}
+            </span>
+          </div>
+          @else
           <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
             <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1"
@@ -622,6 +634,7 @@
               {{ $startDt->format('j') }}
             </span>
           </div>
+          @endif
           <div class="flex flex-col">
             @if ($event->isMultiDay())
               <span class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -636,7 +649,11 @@
                 $multiEndTime = $endDt->format($timeFormat);
               @endphp
               <span class="text-sm text-gray-500 dark:text-gray-400">
-                {{ $multiStartTime }} - {{ $multiEndTime }}
+                @if ($startDt->format('m') === $endDt->format('m'))
+                  {{ $startDt->format('M j') }}, {{ $multiStartTime }} - {{ $endDt->format('j') }}, {{ $multiEndTime }}
+                @else
+                  {{ $startDt->format('M j') }}, {{ $multiStartTime }} - {{ $endDt->format('M j') }}, {{ $multiEndTime }}
+                @endif
               </span>
             @else
               <span class="text-lg font-semibold text-gray-900 dark:text-white">

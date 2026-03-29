@@ -79,6 +79,54 @@
         ]
     }
     </script>
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Is Event Schedule free?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, Event Schedule is free to use with unlimited events and schedules. Pro and Enterprise plans add features like ticketing, event boosting, custom branding, and AI tools."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I sell tickets with Event Schedule?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, you can sell tickets with zero platform fees using Stripe or Invoice Ninja. Tickets include QR codes for check-in, and you can create multiple ticket types with promo codes."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Does Event Schedule sync with Google Calendar?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, Event Schedule offers two-way Google Calendar sync with real-time webhook updates. You can also sync with any CalDAV-compatible calendar server."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I selfhost Event Schedule?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, Event Schedule is 100% open source. You can selfhost it on your own server for full control over your data, or use the hosted platform at eventschedule.com."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Who is Event Schedule for?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Event Schedule is built for musicians, DJs, comedians, venues, bars, theaters, event curators, and anyone who needs to share an event schedule with their audience."
+                }
+            }
+        ]
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section - Stacked layout with large video -->

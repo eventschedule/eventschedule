@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Availability Management for Schedules | Booking Windows - Event Schedule</x-slot>
+    <x-slot name="title">Availability Management - Event Schedule</x-slot>
     <x-slot name="description">Set availability windows for your schedule. Define when you're open for bookings and let guests see your available times. Enterprise feature. No credit card required.</x-slot>
     <x-slot name="breadcrumbTitle">Availability</x-slot>
 

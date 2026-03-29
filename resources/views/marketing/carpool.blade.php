@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Carpool Matching | Coordinate Rides to Events - Event Schedule</x-slot>
+    <x-slot name="title">Event Carpool Matching - Event Schedule</x-slot>
     <x-slot name="description">Let attendees coordinate rides to your events. Drivers offer seats, riders request spots, with approvals, reminders, and reviews. Pro feature.</x-slot>
     <x-slot name="breadcrumbTitle">Carpool</x-slot>
 

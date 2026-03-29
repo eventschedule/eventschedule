@@ -148,14 +148,24 @@ class AppController extends Controller
                 \Log::warning('Queue processing failed: '.$e->getMessage());
             }
 
-            (new \App\Jobs\ProcessScheduledNewsletters)();
+            try {
+                (new \App\Jobs\ProcessScheduledNewsletters)();
+            } catch (\Exception $e) {
+                \Log::error('Scheduled command ProcessScheduledNewsletters failed: '.$e->getMessage());
+                report($e);
+            }
 
             // === EVERY 5 MINUTES ===
             if (! Cache::has('td_5min')) {
                 Cache::put('td_5min', true, now()->addMinutes(5));
 
                 if (config('app.hosted')) {
-                    \Artisan::call('app:sync-domain-statuses');
+                    try {
+                        \Artisan::call('app:sync-domain-statuses');
+                    } catch (\Exception $e) {
+                        \Log::error('Scheduled command app:sync-domain-statuses failed: '.$e->getMessage());
+                        report($e);
+                    }
                 }
             }
 
@@ -163,27 +173,77 @@ class AppController extends Controller
             if (! Cache::has('td_15min')) {
                 Cache::put('td_15min', true, now()->addMinutes(15));
 
-                \Artisan::call('caldav:sync');
+                try {
+                    \Artisan::call('caldav:sync');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command caldav:sync failed: '.$e->getMessage());
+                    report($e);
+                }
 
                 if (\App\Services\MetaAdsService::isBoostConfigured()) {
-                    \Artisan::call('boost:sync');
+                    try {
+                        \Artisan::call('boost:sync');
+                    } catch (\Exception $e) {
+                        \Log::error('Scheduled command boost:sync failed: '.$e->getMessage());
+                        report($e);
+                    }
                 }
-                \Artisan::call('boost:expire-pending');
+                try {
+                    \Artisan::call('boost:expire-pending');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command boost:expire-pending failed: '.$e->getMessage());
+                    report($e);
+                }
             }
 
             // === HOURLY ===
             if (! Cache::has('td_hourly')) {
                 Cache::put('td_hourly', true, now()->addHour());
 
-                \Artisan::call('app:release-tickets');
-                \Artisan::call('app:expire-waitlist');
-                \Artisan::call('app:translate');
-                \Artisan::call('app:send-graphic-emails');
-                \Artisan::call('app:send-feedback-requests');
-                \Artisan::call('app:send-carpool-reminders');
+                try {
+                    \Artisan::call('app:release-tickets');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:release-tickets failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:expire-waitlist');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:expire-waitlist failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:translate');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:translate failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:send-graphic-emails');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:send-graphic-emails failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:send-feedback-requests');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:send-feedback-requests failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:send-carpool-reminders');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:send-carpool-reminders failed: '.$e->getMessage());
+                    report($e);
+                }
 
                 if (config('app.hosted')) {
-                    \Artisan::call('app:setup-demo');
+                    try {
+                        \Artisan::call('app:setup-demo');
+                    } catch (\Exception $e) {
+                        \Log::error('Scheduled command app:setup-demo failed: '.$e->getMessage());
+                        report($e);
+                    }
                 }
             }
 
@@ -191,28 +251,88 @@ class AppController extends Controller
             if (! Cache::has('td_daily')) {
                 Cache::put('td_daily', true, now()->endOfDay());
 
-                \Artisan::call('google:refresh-webhooks');
-                \Artisan::call('audit:prune');
-                \Artisan::call('app:cleanup-webhook-deliveries');
-                \Artisan::call('app:cleanup-backups');
+                try {
+                    \Artisan::call('google:refresh-webhooks');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command google:refresh-webhooks failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('audit:prune');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command audit:prune failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:cleanup-webhook-deliveries');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:cleanup-webhook-deliveries failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:cleanup-backups');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:cleanup-backups failed: '.$e->getMessage());
+                    report($e);
+                }
 
                 if (config('app.hosted')) {
-                    \Artisan::call('app:generate-sub-audience-blog');
-                    \Artisan::call('app:generate-daily-blog-post');
-                    \Artisan::call('app:send-subscription-reminders');
-                    \Artisan::call('app:process-referral-credits');
+                    try {
+                        \Artisan::call('app:generate-sub-audience-blog');
+                    } catch (\Exception $e) {
+                        \Log::error('Scheduled command app:generate-sub-audience-blog failed: '.$e->getMessage());
+                        report($e);
+                    }
+                    try {
+                        \Artisan::call('app:generate-daily-blog-post');
+                    } catch (\Exception $e) {
+                        \Log::error('Scheduled command app:generate-daily-blog-post failed: '.$e->getMessage());
+                        report($e);
+                    }
+                    try {
+                        \Artisan::call('app:send-subscription-reminders');
+                    } catch (\Exception $e) {
+                        \Log::error('Scheduled command app:send-subscription-reminders failed: '.$e->getMessage());
+                        report($e);
+                    }
+                    try {
+                        \Artisan::call('app:process-referral-credits');
+                    } catch (\Exception $e) {
+                        \Log::error('Scheduled command app:process-referral-credits failed: '.$e->getMessage());
+                        report($e);
+                    }
                 }
 
                 if (! config('app.hosted')) {
-                    \Artisan::call('app:import-curator-events');
+                    try {
+                        \Artisan::call('app:import-curator-events');
+                    } catch (\Exception $e) {
+                        \Log::error('Scheduled command app:import-curator-events failed: '.$e->getMessage());
+                        report($e);
+                    }
                 }
             }
 
             // === DAILY AT 12:00 PM UTC ===
             if (now()->hour >= 12 && ! Cache::has('notified_pending_today')) {
-                \Artisan::call('app:notify-request-changes');
-                \Artisan::call('app:notify-fan-content-changes');
-                \Artisan::call('app:notify-poll-option-changes');
+                try {
+                    \Artisan::call('app:notify-request-changes');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:notify-request-changes failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:notify-fan-content-changes');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:notify-fan-content-changes failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:notify-poll-option-changes');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:notify-poll-option-changes failed: '.$e->getMessage());
+                    report($e);
+                }
                 Cache::put('notified_pending_today', true, now()->endOfDay());
             }
 

@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Custom Labels for Event Schedules | Rename Default Terms - Event Schedule</x-slot>
+    <x-slot name="title">Custom Labels for Schedules - Event Schedule</x-slot>
     <x-slot name="description">Override default labels in your event schedule. Rename "Events" to "Shows", "Venue" to "Location", and more. Multi-language support with auto-translation. Pro feature. No credit card required.</x-slot>
     <x-slot name="breadcrumbTitle">Custom Labels</x-slot>
 

@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Google Calendar Sync | Two-Way Event Synchronization - Event Schedule</x-slot>
+    <x-slot name="title">Google Calendar Sync - Event Schedule</x-slot>
     <x-slot name="description">Two-way sync with Google Calendar and CalDAV. Real-time webhook updates. Let attendees add events to Apple, Google, or Outlook calendars instantly.</x-slot>
     <x-slot name="breadcrumbTitle">Calendar Sync</x-slot>
 
