@@ -95,6 +95,9 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::post('/carpool/{event_hash}/offer/{offer_hash}/decline/{request_hash}', [CarpoolController::class, 'declineRequest'])->name('carpool.decline')->middleware('throttle:10,1');
         Route::post('/carpool/{event_hash}/offer/{offer_hash}/review', [CarpoolController::class, 'storeReview'])->name('carpool.store_review')->middleware('throttle:5,60');
         Route::post('/carpool/{event_hash}/offer/{offer_hash}/report/{user_hash}', [CarpoolController::class, 'report'])->name('carpool.report')->middleware('throttle:5,60');
+        // Static map image (must be before catch-all /{slug}/{id} routes)
+        Route::get('/map-image/{id}', [AppController::class, 'mapImage']);
+
         // Photo gallery
         Route::get('/{slug}/{id}/{date}/photos', [EventController::class, 'photoGallery'])->where(['date' => '\d{4}-\d{2}-\d{2}', 'id' => '[A-Za-z0-9+=]+']);
         Route::get('/{slug}/{id}/photos', [EventController::class, 'photoGallery'])->where(['id' => '[A-Za-z0-9+=]+']);
