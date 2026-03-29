@@ -6,7 +6,7 @@
 </div>
 @endif
 
-@if (config('services.google.maps') && $role->formatted_address)
+@if (config('services.google.maps') && $role->formatted_address && !request()->attributes->get('custom_domain_host'))
 <div class="pt-5">
     <div class="rounded-lg overflow-hidden" style="height: 400px;">
         <iframe

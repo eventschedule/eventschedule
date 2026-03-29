@@ -47,6 +47,10 @@ class ResolveCustomDomain
         $request->server->set('HTTP_HOST', $newHost);
         $request->server->set('SERVER_NAME', $newHost);
 
+        // Clear session domain so the cookie is scoped to the custom domain origin
+        // (otherwise it would be scoped to .eventschedule.com which the browser rejects)
+        config(['session.domain' => null]);
+
         $response = $next($request);
 
         $subdomainUrl = "https://{$role->subdomain}.{$baseDomain}";

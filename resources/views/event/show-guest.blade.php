@@ -468,7 +468,7 @@
               @endif
             </div>
           </div>
-          @if ($event->venue->formatted_address && config('services.google.maps'))
+          @if ($event->venue->formatted_address && config('services.google.maps') && !request()->attributes->get('custom_domain_host'))
           <div class="overflow-hidden sm:rounded-b-2xl" style="height: 200px;">
             <iframe
                 width="100%" height="200" style="border:0"
