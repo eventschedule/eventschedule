@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">{{ $short_name ?? $name }} Replacement for Events | Event Schedule</x-slot>
+    <x-slot name="title">Replace {{ $short_name ?? $name }} for Events | Event Schedule</x-slot>
     <x-slot name="description">{{ $description }}</x-slot>
     <x-slot name="keywords">{{ $keywords }}</x-slot>
     <x-slot name="breadcrumbTitle">{{ $short_name ?? $name }} Replacement</x-slot>
@@ -137,13 +137,18 @@
             </div>
 
             <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight animate-reveal delay-100" style="opacity: 0;">
-                Replace <span class="text-gradient">{{ $name }}</span><br>
-                for Events
+                Replace <span class="text-gradient">{{ $name }}</span> for Events
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto animate-reveal delay-200" style="opacity: 0;">
                 {{ $tagline }}
             </p>
+
+            @if (!empty($audience_hint))
+                <p class="text-base text-gray-400 dark:text-gray-500 mt-4 animate-reveal delay-300" style="opacity: 0;">
+                    {{ $audience_hint }}
+                </p>
+            @endif
         </div>
     </section>
 
@@ -183,7 +188,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    What Event Schedule gives you instead
+                    What Event Schedule gives you over {{ $name }}
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
                     Purpose-built features that replace the workarounds.
@@ -203,6 +208,19 @@
             </div>
         </div>
     </section>
+
+    <!-- Mid-page CTA -->
+    <div class="bg-white dark:bg-[#0a0a0f] pb-12">
+        <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
+                Try Event Schedule Free
+                <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+            </a>
+            <p class="mt-3 text-sm text-gray-400 dark:text-gray-500">Free plan available. No credit card required.</p>
+        </div>
+    </div>
 
     <!-- Transition -->
     <div class="section-fade-to-gray h-24"></div>
@@ -250,6 +268,17 @@
                             </li>
                         @endforeach
                     </ul>
+
+                    @if (!empty($pricing_note))
+                        <div class="mt-6 pt-6 border-t border-blue-200 dark:border-blue-500/20">
+                            <div class="flex items-start gap-3">
+                                <svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span class="text-gray-600 dark:text-gray-400 text-sm">{{ $pricing_note }}</span>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -263,7 +292,7 @@
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    How to switch in 3 steps
+                    How to switch from {{ $name }} in 3 steps
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
                     Get started in minutes. No migration or data import needed.
@@ -300,7 +329,7 @@
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Frequently asked questions
+                    {{ $name }} to Event Schedule FAQ
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400">
                     Common questions about switching from {{ $name }}.
@@ -374,6 +403,9 @@
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Replace</div>
                             <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{{ $link['name'] }}</div>
+                            @if (!empty($link['description']))
+                                <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $link['description'] }}</div>
+                            @endif
                         </div>
                         <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

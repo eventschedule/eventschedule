@@ -17,6 +17,18 @@
         </iframe>
     </div>
 </div>
+@elseif (config('services.google.backend') && $role->formatted_address && $role->geo_lat)
+<div class="pt-5">
+    <div class="rounded-lg overflow-hidden" style="height: 400px;">
+        <a href="https://www.google.com/maps/search/?api=1&query={{ $role->geo_lat }},{{ $role->geo_lon }}" target="_blank" rel="noopener noreferrer">
+            <img src="{{ route('map.image', ['id' => \App\Utils\UrlUtils::encodeId($role->id), 'size' => '600x400']) }}"
+                 alt="{{ $role->bestAddress() }}"
+                 width="600" height="400"
+                 loading="lazy"
+                 style="width: 100%; height: 400px; object-fit: cover;">
+        </a>
+    </div>
+</div>
 @endif
 
 <div class="pt-5 container mx-auto">

@@ -477,6 +477,16 @@
                 src="https://www.google.com/maps/embed/v1/place?key={{ config('services.google.maps') }}&q={{ $event->venue->google_place_id ? 'place_id:' . $event->venue->google_place_id : urlencode($event->venue->bestAddress()) }}">
             </iframe>
           </div>
+          @elseif ($event->venue->formatted_address && config('services.google.backend') && $event->venue->geo_lat)
+          <div class="overflow-hidden sm:rounded-b-2xl" style="height: 200px;">
+            <a href="https://www.google.com/maps/search/?api=1&query={{ $event->venue->geo_lat }},{{ $event->venue->geo_lon }}" target="_blank" rel="noopener noreferrer">
+              <img src="{{ route('map.image', ['id' => \App\Utils\UrlUtils::encodeId($event->venue->id)]) }}"
+                   alt="{{ $event->venue->bestAddress() }}"
+                   width="600" height="200"
+                   loading="lazy"
+                   style="width: 100%; height: 200px; object-fit: cover;">
+            </a>
+          </div>
           @endif
         </div>
         @endif

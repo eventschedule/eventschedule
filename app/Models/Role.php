@@ -187,6 +187,12 @@ class Role extends Model implements MustVerifyEmail
                 $model->geo_lon = null;
                 $model->formatted_address = null;
                 $model->google_place_id = null;
+
+                // Clear cached map images when address is removed
+                $cachePattern = storage_path('app/map_cache/'.$model->id.'_*');
+                foreach (glob($cachePattern) as $file) {
+                    @unlink($file);
+                }
             }
 
             if (config('services.google.backend') && $address && $address != $model->geo_address) {
@@ -210,6 +216,11 @@ class Role extends Model implements MustVerifyEmail
                             $model->geo_lat = $latitude;
                             $model->geo_lon = $longitude;
                         }
+                    }
+                    // Clear cached map images when coordinates change
+                    $cachePattern = storage_path('app/map_cache/'.$model->id.'_*');
+                    foreach (glob($cachePattern) as $file) {
+                        @unlink($file);
                     }
                 } catch (\Exception $e) {
                     \Log::warning('Geocoding failed: '.$e->getMessage());

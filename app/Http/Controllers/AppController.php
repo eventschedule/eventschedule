@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
+use App\Utils\UrlUtils;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class AppController extends Controller
 {
@@ -353,6 +356,69 @@ class AppController extends Controller
             : $disallowRules."\nSitemap: ".config('app.url')."/sitemap.xml\n";
 
         return response($content, 200)->header('Content-Type', 'text/plain');
+    }
+
+    public function mapImage($id)
+    {
+        $apiKey = config('services.google.backend');
+        if (! $apiKey) {
+            abort(404);
+        }
+
+        $roleId = UrlUtils::decodeIdOrFail($id);
+        $role = Role::find($roleId);
+
+        if (! $role || ! $role->geo_lat || ! $role->geo_lon) {
+            abort(404);
+        }
+
+        $allowedSizes = ['600x200', '600x400'];
+        $size = request('size', '600x200');
+        if (! in_array($size, $allowedSizes)) {
+            $size = '600x200';
+        }
+
+        $cacheDir = storage_path('app/map_cache');
+        $cachePath = $cacheDir.'/'.$roleId.'_'.$size.'.png';
+        $cacheTtl = 30 * 24 * 60 * 60; // 30 days
+
+        if (file_exists($cachePath) && (time() - filemtime($cachePath)) < $cacheTtl) {
+            return response()->file($cachePath, [
+                'Content-Type' => 'image/png',
+                'Cache-Control' => 'public, max-age=86400',
+            ]);
+        }
+
+        $url = 'https://maps.googleapis.com/maps/api/staticmap?'.http_build_query([
+            'center' => $role->geo_lat.','.$role->geo_lon,
+            'zoom' => 15,
+            'size' => $size,
+            'scale' => 2,
+            'markers' => 'color:red|'.$role->geo_lat.','.$role->geo_lon,
+            'key' => $apiKey,
+        ]);
+
+        try {
+            $response = Http::timeout(10)->get($url);
+
+            if (! $response->successful()) {
+                abort(404);
+            }
+
+            if (! is_dir($cacheDir)) {
+                mkdir($cacheDir, 0755, true);
+            }
+
+            file_put_contents($cachePath, $response->body());
+
+            return response($response->body(), 200, [
+                'Content-Type' => 'image/png',
+                'Cache-Control' => 'public, max-age=86400',
+            ]);
+        } catch (\Exception $e) {
+            report($e);
+            abort(404);
+        }
     }
 
     public function tempEventImage($filename = null)

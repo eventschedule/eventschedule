@@ -500,6 +500,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::get('/tmp/event-image/{filename?}', [AppController::class, 'tempEventImage'])->name('event.tmp_image');
+Route::get('/map-image/{id}', [AppController::class, 'mapImage'])->name('map.image');
 
 // Marketing pages - only shown on the nexus (eventschedule.com)
 if (config('app.is_nexus')) {
