@@ -360,8 +360,11 @@ class AppController extends Controller
 
     public function mapImage($id)
     {
+        \Log::info('mapImage called', ['id' => $id, 'host' => request()->getHost(), 'url' => request()->fullUrl()]);
+
         $apiKey = config('services.google.backend');
         if (! $apiKey) {
+            \Log::info('mapImage: no API key');
             abort(404);
         }
 
@@ -369,6 +372,7 @@ class AppController extends Controller
         $role = Role::find($roleId);
 
         if (! $role || ! $role->geo_lat || ! $role->geo_lon) {
+            \Log::info('mapImage: role issue', ['roleId' => $roleId, 'found' => (bool) $role, 'geo_lat' => $role?->geo_lat]);
             abort(404);
         }
 
