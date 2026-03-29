@@ -243,6 +243,7 @@ class TicketController extends Controller
     {
         $user = auth()->user();
 
+        // --- Submitted feedback (existing) ---
         $sortBy = request()->get('sort_by', 'created_at');
         $sortDir = strtolower(request()->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
         $allowedSortColumns = ['rating', 'created_at', 'event_date', 'event_name', 'attendee_name'];
@@ -293,7 +294,116 @@ class TicketController extends Controller
 
         $responseRate = $totalEligibleSales > 0 ? round(($feedbackCount / $totalEligibleSales) * 100) : 0;
 
-        return compact('feedbacks', 'feedbackCount', 'averageRating', 'responseRate', 'sortBy', 'sortDir');
+        // --- Pending sales (eligible but not yet sent) ---
+        $pendingSales = Sale::where('status', 'paid')
+            ->where('is_deleted', false)
+            ->whereNull('feedback_sent_at')
+            ->whereDoesntHave('feedback')
+            ->where(fn ($q) => $q->whereNull('group_id')->orWhereColumn('group_id', 'id'))
+            ->excludeTestEmails()
+            ->whereHas('event', fn ($q) => $q->where('user_id', $user->id))
+            ->with(['event.roles', 'event.creatorRole'])
+            ->limit(100)
+            ->get();
+
+        $pendingGroups = collect();
+        $nextSendAt = null;
+
+        foreach ($pendingSales as $sale) {
+            $event = $sale->event;
+            if (! $event || ! $event->isFeedbackEnabled()) {
+                continue;
+            }
+
+            $endDateTime = $event->getEndDateTime($sale->event_date);
+            if ($endDateTime->isFuture() || $endDateTime->copy()->addDays(30)->isPast()) {
+                continue;
+            }
+
+            $role = $event->roles->first(fn ($r) => $r->isTalent()) ?? $event->roles->first();
+            $delayHours = $role ? ($role->feedback_delay_hours ?? 24) : 24;
+            $estimatedSendAt = $endDateTime->copy()->addHours($delayHours);
+
+            // Ceil to next hour boundary (cron runs hourly)
+            if ($estimatedSendAt->minute > 0 || $estimatedSendAt->second > 0) {
+                $estimatedSendAt->startOfHour()->addHour();
+            }
+
+            $groupKey = $event->id.'-'.($sale->event_date ?? 'default');
+
+            if (! $pendingGroups->has($groupKey)) {
+                $pendingGroups[$groupKey] = (object) [
+                    'event_name' => $event->name,
+                    'event_date' => $sale->event_date,
+                    'estimated_send_at' => $estimatedSendAt,
+                    'count' => 0,
+                    'sales' => collect(),
+                ];
+            }
+
+            $pendingGroups[$groupKey]->count++;
+            $pendingGroups[$groupKey]->sales->push($sale);
+
+            if (! $nextSendAt || $estimatedSendAt->lt($nextSendAt)) {
+                $nextSendAt = $estimatedSendAt;
+            }
+        }
+
+        $pendingGroups = $pendingGroups->sortBy('estimated_send_at')->values();
+        $pendingCount = $pendingGroups->sum('count');
+
+        // --- Sent awaiting response ---
+        $awaitingQuery = Sale::where('status', 'paid')
+            ->where('is_deleted', false)
+            ->whereNotNull('feedback_sent_at')
+            ->whereDoesntHave('feedback')
+            ->whereHas('event', fn ($q) => $q->where('user_id', $user->id));
+
+        $awaitingCount = $awaitingQuery->count();
+
+        $awaitingSales = (clone $awaitingQuery)
+            ->with('event')
+            ->orderByDesc('feedback_sent_at')
+            ->limit(50)
+            ->get();
+
+        // --- Excluded count (for debugging) ---
+        // Only count exclusions for events that have feedback enabled
+        $feedbackEnabledEventIds = $pendingGroups->flatMap(fn ($g) => $g->sales->pluck('event_id'))
+            ->merge($awaitingSales->pluck('event_id'))
+            ->unique();
+
+        $excludedCount = 0;
+        if ($feedbackEnabledEventIds->isNotEmpty()) {
+            $excludedCount = Sale::where('status', 'paid')
+                ->where('is_deleted', false)
+                ->whereNull('feedback_sent_at')
+                ->whereDoesntHave('feedback')
+                ->whereIn('event_id', $feedbackEnabledEventIds)
+                ->where(function ($q) {
+                    $q->whereNull('email')
+                        ->orWhere('email', '')
+                        ->orWhere('email', 'like', '%@example.com')
+                        ->orWhere('email', 'like', '%@example.org')
+                        ->orWhere('email', 'like', '%@example.net')
+                        ->orWhere('email', 'like', '%@test.com')
+                        ->orWhere('email', 'like', '%@test.org')
+                        ->orWhere('email', 'like', '%@test.net')
+                        ->orWhere('email', 'like', '%@localhost')
+                        ->orWhere(function ($q2) {
+                            $q2->whereNotNull('group_id')
+                                ->whereColumn('group_id', '!=', 'id');
+                        });
+                })
+                ->count();
+        }
+
+        return compact(
+            'feedbacks', 'feedbackCount', 'averageRating', 'responseRate', 'sortBy', 'sortDir',
+            'pendingGroups', 'pendingCount', 'nextSendAt',
+            'awaitingSales', 'awaitingCount',
+            'excludedCount'
+        );
     }
 
     public function exportSales()

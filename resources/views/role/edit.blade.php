@@ -2968,6 +2968,7 @@
                                 </option>
                                 @endforeach
                             </select>
+                            <p id="feedback-delay-hint" class="mt-2 text-sm text-gray-500 dark:text-gray-400"></p>
                         </div>
 
                         </div>
@@ -3602,6 +3603,23 @@ if (feedbackToggle && feedbackDelayWrapper) {
     feedbackToggle.addEventListener('change', function() {
         feedbackDelayWrapper.style.display = this.checked ? '' : 'none';
     });
+}
+
+// Feedback delay hint
+var feedbackDelaySelect = document.getElementById('feedback_delay_hours');
+var feedbackDelayHint = document.getElementById('feedback-delay-hint');
+if (feedbackDelaySelect && feedbackDelayHint) {
+    function updateFeedbackHint() {
+        var hours = parseInt(feedbackDelaySelect.value);
+        var exampleEnd = new Date();
+        exampleEnd.setHours(20, 0, 0, 0);
+        var sendAt = new Date(exampleEnd.getTime() + hours * 3600000);
+        var timeStr = sendAt.toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'});
+        var dayNote = sendAt.getDate() !== exampleEnd.getDate() ? (' (+' + Math.ceil(hours / 24) + 'd)') : '';
+        feedbackDelayHint.textContent = @json(__('messages.feedback_delay_hint', ['time' => '__TIME__'])).replace('__TIME__', timeStr + dayNote);
+    }
+    updateFeedbackHint();
+    feedbackDelaySelect.addEventListener('change', updateFeedbackHint);
 }
 
 // Toggle "Required" label visibility for import fields

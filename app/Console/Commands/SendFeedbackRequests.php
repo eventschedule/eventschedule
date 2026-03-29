@@ -66,14 +66,10 @@ class SendFeedbackRequests extends Command
                             $q->whereNull('group_id')
                                 ->orWhereColumn('group_id', 'id');
                         })
+                        ->excludeTestEmails()
                         ->get();
 
                     foreach ($sales as $sale) {
-                        // Skip empty or test emails
-                        if (empty($sale->email) || $this->isTestEmail($sale->email)) {
-                            continue;
-                        }
-
                         // Check if enough time has passed since event ended
                         $endDateTime = $event->getEndDateTime($sale->event_date);
 
@@ -117,28 +113,5 @@ class SendFeedbackRequests extends Command
             }
         }
 
-    }
-
-    protected function isTestEmail(string $email): bool
-    {
-        $email = strtolower($email);
-
-        $testDomains = [
-            '@example.com',
-            '@example.org',
-            '@example.net',
-            '@test.com',
-            '@test.org',
-            '@test.net',
-            '@localhost',
-        ];
-
-        foreach ($testDomains as $domain) {
-            if (str_contains($email, $domain)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

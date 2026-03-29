@@ -241,4 +241,18 @@ class Sale extends Model
 
         return $data;
     }
+
+    public function scopeExcludeTestEmails($query)
+    {
+        $testDomains = [
+            '@example.com', '@example.org', '@example.net',
+            '@test.com', '@test.org', '@test.net', '@localhost',
+        ];
+
+        foreach ($testDomains as $domain) {
+            $query->where('email', 'not like', '%'.$domain);
+        }
+
+        return $query->whereNotNull('email')->where('email', '!=', '');
+    }
 }
