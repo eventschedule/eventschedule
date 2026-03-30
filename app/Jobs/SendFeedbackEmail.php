@@ -78,9 +78,6 @@ class SendFeedbackEmail implements ShouldBeUnique, ShouldQueue
             }
 
             UsageTrackingService::track(UsageTrackingService::EMAIL_TICKET, $role->id);
-
-            $sale->feedback_sent_at = now();
-            $sale->save();
         } finally {
             app()->setLocale($originalLocale);
         }
