@@ -105,23 +105,27 @@ class FeedbackController extends Controller
             ]);
         }
 
-        // Dispatch webhook
-        WebhookService::dispatch('feedback.submitted', $sale, [
-            'event' => 'feedback.submitted',
-            'timestamp' => now()->toIso8601String(),
-            'data' => [
-                'event_id' => UrlUtils::encodeId($event->id),
-                'event_name' => $event->name,
-                'event_date' => $sale->event_date,
-                'attendee_name' => $sale->name,
-                'attendee_email' => $sale->email,
-                'rating' => $feedback->rating,
-                'comment' => $feedback->comment,
-            ],
-        ]);
+        try {
+            // Dispatch webhook
+            WebhookService::dispatch('feedback.submitted', $sale, [
+                'event' => 'feedback.submitted',
+                'timestamp' => now()->toIso8601String(),
+                'data' => [
+                    'event_id' => UrlUtils::encodeId($event->id),
+                    'event_name' => $event->name,
+                    'event_date' => $sale->event_date,
+                    'attendee_name' => $sale->name,
+                    'attendee_email' => $sale->email,
+                    'rating' => $feedback->rating,
+                    'comment' => $feedback->comment,
+                ],
+            ]);
 
-        // Notify opted-in editors
-        $this->notifyEditors($feedback, $sale, $event, $role);
+            // Notify opted-in editors
+            $this->notifyEditors($feedback, $sale, $event, $role);
+        } catch (\Exception $e) {
+            report($e);
+        }
 
         return redirect()->route('feedback.show', [
             'event_id' => UrlUtils::encodeId($event->id),

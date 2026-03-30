@@ -195,45 +195,29 @@ trait AccountSetupTrait
     protected function enableApi(Browser $browser): string
     {
         $browser->visit('/settings#section-api')
-            ->waitFor('#enable_api', 5)
-            ->scrollIntoView('#enable_api');
+            ->waitFor('#enable_api', 5);
 
-        // Check if already enabled, if not enable it
-        $isChecked = $browser->script("return document.getElementById('enable_api').checked;");
-        if (! $isChecked[0]) {
-            // Click the label to toggle the switch (sr-only inputs can't be clicked directly)
-            $browser->click('label[for="enable_api"]');
-            // Wait a moment for any UI updates
-            $browser->pause(500);
-        }
-
-        // Find and click the submit button in the API settings form using JavaScript
-        // This is more reliable when the button might not be immediately interactable via Dusk
+        // Set checkbox to checked via JS (clicking sr-only label is unreliable in headless Chrome)
         $browser->script("
-            const checkbox = document.getElementById('enable_api');
-            const form = checkbox.closest('form');
-            const submitButton = form.querySelector('button[type=\"submit\"]');
-            if (submitButton) {
-                submitButton.scrollIntoView({ block: 'center', behavior: 'instant' });
+            var cb = document.getElementById('enable_api');
+            if (!cb.checked) {
+                cb.checked = true;
+                cb.dispatchEvent(new Event('change', { bubbles: true }));
             }
         ");
 
-        // Wait a moment for scroll to complete, then click
-        $browser->pause(300);
-
-        // Click the button using JavaScript to avoid interactability issues
+        // Submit the form
         $browser->script("
-            const checkbox = document.getElementById('enable_api');
-            const form = checkbox.closest('form');
-            const submitButton = form.querySelector('button[type=\"submit\"]');
-            if (submitButton) {
-                submitButton.click();
-            }
+            window._skipUnsavedWarning = true;
+            document.getElementById('enable_api').closest('form').requestSubmit();
         ");
 
-        $browser->waitForText('API settings updated successfully', 5);
+        $browser->waitForText('API settings updated successfully', 10);
 
-        // Get the API key from the page - it should be visible after enabling
+        // Ensure the API section is visible after redirect (toast may appear before section JS runs)
+        $browser->waitUntil("document.getElementById('section-api') && document.getElementById('section-api').style.display === 'block'", 5);
+
+        // Get the API key from the page
         $browser->waitFor('#api_key', 5);
         $apiKey = $browser->value('#api_key');
 

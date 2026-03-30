@@ -1935,6 +1935,14 @@ class RoleController extends Controller
             $request->files->remove('new_sponsor_logos');
         }
 
+        // Guard feedback settings behind Pro plan
+        if (! $role->isPro()) {
+            $request->merge([
+                'feedback_enabled' => $role->feedback_enabled,
+                'feedback_delay_hours' => $role->feedback_delay_hours,
+            ]);
+        }
+
         // Guard carpool_enabled behind Pro plan
         if (! $role->isPro()) {
             $request->merge(['carpool_enabled' => $role->carpool_enabled]);

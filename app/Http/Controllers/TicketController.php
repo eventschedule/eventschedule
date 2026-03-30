@@ -309,7 +309,6 @@ class TicketController extends Controller
             ->excludeTestEmails()
             ->whereHas('event', fn ($q) => $q->where('user_id', $user->id))
             ->with(['event.creatorRole'])
-            ->limit(100)
             ->get();
 
         $pendingGroups = collect();
@@ -380,7 +379,9 @@ class TicketController extends Controller
             }
 
             $pendingGroups[$groupKey]->count++;
-            $pendingGroups[$groupKey]->sales->push($sale);
+            if ($pendingGroups[$groupKey]->sales->count() < 100) {
+                $pendingGroups[$groupKey]->sales->push($sale);
+            }
 
             if (! $nextSendAt || $estimatedSendAt->lt($nextSendAt)) {
                 $nextSendAt = $estimatedSendAt;
