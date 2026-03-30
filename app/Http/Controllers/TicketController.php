@@ -274,7 +274,7 @@ class TicketController extends Controller
         $feedbacks = $feedbackQuery->paginate(50, ['*'], 'feedback_page')->withQueryString();
 
         $stats = EventFeedback::whereHas('event', fn ($q) => $q->where('user_id', $user->id))
-            ->whereHas('sale', fn ($q) => $q->where('is_deleted', false))
+            ->whereHas('sale', fn ($q) => $q->where('is_deleted', false)->where('status', 'paid'))
             ->selectRaw('COUNT(*) as feedback_count, AVG(rating) as avg_rating')
             ->first();
 
