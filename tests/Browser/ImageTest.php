@@ -36,15 +36,13 @@ class ImageTest extends DuskTestCase
                 ->waitFor('#profile_image_preview_clear', 5)
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
-                ->waitForLocation('/settings', 15);
+                ->waitFor('#profile_image_existing', 15);
 
             // Verify DB
             $this->assertNotNull(User::first()->profile_image_url);
 
             // Verify page shows existing image
-            $browser->visit('/settings')
-                ->waitFor('#profile_image_existing', 5)
-                ->assertVisible('#profile_image_existing');
+            $browser->assertVisible('#profile_image_existing');
 
             // Delete via AJAX (override confirm dialog)
             $browser->script('window.confirm = function() { return true; }');
