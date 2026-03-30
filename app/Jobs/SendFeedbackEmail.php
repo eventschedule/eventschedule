@@ -7,19 +7,22 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Services\UsageTrackingService;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
-class SendFeedbackEmail implements ShouldQueue
+class SendFeedbackEmail implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
 
     public int $tries = 3;
 
     public int $backoff = 60;
+
+    public int $uniqueFor = 300;
 
     protected int $saleId;
 
@@ -35,6 +38,11 @@ class SendFeedbackEmail implements ShouldQueue
         $this->eventId = $eventId;
         $this->roleId = $roleId;
         $this->locale = $locale;
+    }
+
+    public function uniqueId(): string
+    {
+        return 'feedback-'.$this->saleId;
     }
 
     public function handle(): void

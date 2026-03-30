@@ -6,6 +6,7 @@ use App\Jobs\SendQueuedEmail;
 use App\Mail\FeedbackNotification;
 use App\Models\Event;
 use App\Models\EventFeedback;
+use App\Models\Role;
 use App\Models\Sale;
 use App\Services\WebhookService;
 use App\Utils\UrlUtils;
@@ -19,14 +20,17 @@ class FeedbackController extends Controller
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
         $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->where('status', 'paid')->where('is_deleted', false)->firstOrFail();
 
-        $event->loadMissing('roles');
-        $role = $event->role() ?? $event->roles->first();
+        $role = Role::where('subdomain', $sale->subdomain)->where('is_deleted', false)->first();
+        if (! $role) {
+            $event->loadMissing('roles');
+            $role = $event->role() ?? $event->roles->first();
+        }
 
         if (! $role || ! $role->isPro()) {
             abort(404);
         }
 
-        if (! $event->isFeedbackEnabled()) {
+        if (! $event->isFeedbackEnabled($role)) {
             abort(404);
         }
 
@@ -49,14 +53,17 @@ class FeedbackController extends Controller
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
         $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->where('status', 'paid')->where('is_deleted', false)->firstOrFail();
 
-        $event->loadMissing('roles');
-        $role = $event->role() ?? $event->roles->first();
+        $role = Role::where('subdomain', $sale->subdomain)->where('is_deleted', false)->first();
+        if (! $role) {
+            $event->loadMissing('roles');
+            $role = $event->role() ?? $event->roles->first();
+        }
 
         if (! $role || ! $role->isPro()) {
             abort(404);
         }
 
-        if (! $event->isFeedbackEnabled()) {
+        if (! $event->isFeedbackEnabled($role)) {
             abort(404);
         }
 

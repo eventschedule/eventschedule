@@ -569,8 +569,15 @@ class TicketController extends Controller
                 continue;
             }
 
-            if (config('app.hosted') && ! $saleRole->hasEmailSettings()) {
-                continue;
+            if (config('app.hosted')) {
+                if (! $saleRole->hasEmailSettings()) {
+                    continue;
+                }
+            } else {
+                $mailer = config('mail.default');
+                if (in_array($mailer, ['log', 'array'])) {
+                    continue;
+                }
             }
 
             if (! is_null($event->feedback_enabled)) {

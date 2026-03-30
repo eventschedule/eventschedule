@@ -468,13 +468,15 @@ class Event extends Model
         return $this->hasMany(CarpoolOffer::class);
     }
 
-    public function isFeedbackEnabled()
+    public function isFeedbackEnabled(?Role $role = null)
     {
         if (! is_null($this->feedback_enabled)) {
             return (bool) $this->feedback_enabled;
         }
 
-        $role = $this->roles->first(fn ($role) => $role->isTalent()) ?? $this->roles->first();
+        if (! $role) {
+            $role = $this->roles->first(fn ($role) => $role->isTalent()) ?? $this->roles->first();
+        }
 
         return $role ? (bool) $role->feedback_enabled : false;
     }
