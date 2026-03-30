@@ -18,21 +18,60 @@ class SendFeedbackRequests extends Command
     {
         $count = 0;
 
-        $roles = Role::where('is_deleted', false)
-            ->where(function ($q) {
-                $q->where('feedback_enabled', true)
-                    ->orWhereHas('events', function ($eq) {
-                        $eq->where('feedback_enabled', true);
-                    });
-            })->get()->filter(fn ($role) => $role->isPro());
+        // Pre-load eligible roles keyed by subdomain
+        $rolesBySubdomain = Role::where('is_deleted', false)
+            ->get()
+            ->filter(fn ($role) => $role->isPro())
+            ->keyBy('subdomain');
 
-        foreach ($roles as $role) {
+        // Get subdomains that are eligible to send
+        $eligibleSubdomains = $rolesBySubdomain->filter(function ($role) {
+            if (is_demo_role($role)) {
+                return false;
+            }
+            if (config('app.hosted')) {
+                return $role->hasEmailSettings();
+            }
+
+            return ! in_array(config('mail.default'), ['log', 'array']);
+        })->keys();
+
+        if ($eligibleSubdomains->isEmpty()) {
+            return;
+        }
+
+        // Query eligible sales for roles that can send
+        $sales = Sale::where('status', 'paid')
+            ->where('is_deleted', false)
+            ->whereNull('feedback_sent_at')
+            ->whereDoesntHave('feedback')
+            ->whereIn('subdomain', $eligibleSubdomains)
+            ->where(function ($q) {
+                $q->whereNull('group_id')
+                    ->orWhereColumn('group_id', 'id');
+            })
+            ->excludeTestEmails()
+            ->with(['event'])
+            ->get();
+
+        foreach ($sales as $sale) {
             try {
+                $event = $sale->event;
+                if (! $event) {
+                    continue;
+                }
+
+                // Resolve role from sale's subdomain
+                $role = $rolesBySubdomain->get($sale->subdomain);
+                if (! $role) {
+                    continue;
+                }
+
                 if (is_demo_role($role)) {
                     continue;
                 }
 
-                // Check if email sending is possible for this role
+                // Check email sending capability
                 if (config('app.hosted')) {
                     if (! $role->hasEmailSettings()) {
                         continue;
@@ -44,72 +83,55 @@ class SendFeedbackRequests extends Command
                     }
                 }
 
-                $events = $role->events()
-                    ->where(function ($q) use ($role) {
-                        if ($role->feedback_enabled) {
-                            $q->where('events.feedback_enabled', true)
-                                ->orWhereNull('events.feedback_enabled');
-                        } else {
-                            $q->where('events.feedback_enabled', true);
-                        }
-                    })
-                    ->get();
-
-                foreach ($events as $event) {
-                    $sales = Sale::where('event_id', $event->id)
-                        ->where('subdomain', $role->subdomain)
-                        ->where('status', 'paid')
-                        ->where('is_deleted', false)
-                        ->whereNull('feedback_sent_at')
-                        ->whereDoesntHave('feedback')
-                        ->where(function ($q) {
-                            $q->whereNull('group_id')
-                                ->orWhereColumn('group_id', 'id');
-                        })
-                        ->excludeTestEmails()
-                        ->get();
-
-                    foreach ($sales as $sale) {
-                        // Check if enough time has passed since event ended
-                        $endDateTime = $event->getEndDateTime($sale->event_date);
-
-                        // Don't send feedback requests for events that ended more than 30 days ago
-                        if ($endDateTime->copy()->addDays(30)->isPast()) {
-                            continue;
-                        }
-
-                        $delayHours = $role->feedback_delay_hours ?? 24;
-
-                        if ($endDateTime->copy()->addHours($delayHours)->isFuture()) {
-                            continue;
-                        }
-
-                        try {
-                            $sale->feedback_sent_at = now();
-                            $sale->save();
-
-                            SendFeedbackEmail::dispatch(
-                                $sale->id,
-                                $event->id,
-                                $role->id,
-                                $role->language_code ?? app()->getLocale()
-                            );
-
-                            $count++;
-                        } catch (\Exception $e) {
-                            $sale->feedback_sent_at = null;
-                            $sale->save();
-                            report($e);
-                            Log::error('Failed to dispatch feedback request: '.$e->getMessage(), [
-                                'sale_id' => $sale->id,
-                                'event_id' => $event->id,
-                            ]);
-                        }
+                // Check feedback enabled using event's own setting or role fallback
+                if (! is_null($event->feedback_enabled)) {
+                    if (! $event->feedback_enabled) {
+                        continue;
+                    }
+                } else {
+                    if (! $role->feedback_enabled) {
+                        continue;
                     }
                 }
+
+                // Check timing
+                $endDateTime = $event->getEndDateTime($sale->event_date);
+
+                // Don't send for events that ended more than 30 days ago
+                if ($endDateTime->copy()->addDays(30)->isPast()) {
+                    continue;
+                }
+
+                // Don't send if event hasn't ended yet
+                if ($endDateTime->isFuture()) {
+                    continue;
+                }
+
+                $delayHours = $role->feedback_delay_hours ?? 24;
+
+                if ($endDateTime->copy()->addHours($delayHours)->isFuture()) {
+                    continue;
+                }
+
+                $sale->feedback_sent_at = now();
+                $sale->save();
+
+                SendFeedbackEmail::dispatch(
+                    $sale->id,
+                    $event->id,
+                    $role->id,
+                    $role->language_code ?? app()->getLocale()
+                );
+
+                $count++;
             } catch (\Exception $e) {
-                Log::error('Failed to process feedback for role '.$role->subdomain.': '.$e->getMessage());
+                $sale->feedback_sent_at = null;
+                $sale->save();
                 report($e);
+                Log::error('Failed to process feedback request: '.$e->getMessage(), [
+                    'sale_id' => $sale->id,
+                    'event_id' => $sale->event_id,
+                ]);
             }
         }
 

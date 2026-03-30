@@ -295,6 +295,12 @@ class TicketController extends Controller
         $responseRate = $totalEligibleSales > 0 ? round(($feedbackCount / $totalEligibleSales) * 100) : 0;
 
         // --- Pending sales (eligible but not yet sent) ---
+        // Pre-load roles by subdomain for eligibility checks (mirrors SendFeedbackRequests command)
+        $rolesBySubdomain = Role::where('is_deleted', false)
+            ->get()
+            ->filter(fn ($r) => $r->isPro())
+            ->keyBy('subdomain');
+
         $pendingSales = Sale::where('status', 'paid')
             ->where('is_deleted', false)
             ->whereNull('feedback_sent_at')
@@ -311,8 +317,41 @@ class TicketController extends Controller
 
         foreach ($pendingSales as $sale) {
             $event = $sale->event;
-            if (! $event || ! $event->isFeedbackEnabled()) {
+            if (! $event) {
                 continue;
+            }
+
+            // Resolve role from sale's subdomain (same as command)
+            $saleRole = $rolesBySubdomain->get($sale->subdomain);
+            if (! $saleRole) {
+                continue;
+            }
+
+            if (is_demo_role($saleRole)) {
+                continue;
+            }
+
+            // Check email sending capability (same as command)
+            if (config('app.hosted')) {
+                if (! $saleRole->hasEmailSettings()) {
+                    continue;
+                }
+            } else {
+                $mailer = config('mail.default');
+                if (in_array($mailer, ['log', 'array'])) {
+                    continue;
+                }
+            }
+
+            // Check feedback enabled using event's own setting or role fallback
+            if (! is_null($event->feedback_enabled)) {
+                if (! $event->feedback_enabled) {
+                    continue;
+                }
+            } else {
+                if (! $saleRole->feedback_enabled) {
+                    continue;
+                }
             }
 
             $endDateTime = $event->getEndDateTime($sale->event_date);
@@ -320,8 +359,7 @@ class TicketController extends Controller
                 continue;
             }
 
-            $role = $event->roles->first(fn ($r) => $r->isTalent()) ?? $event->roles->first();
-            $delayHours = $role ? ($role->feedback_delay_hours ?? 24) : 24;
+            $delayHours = $saleRole->feedback_delay_hours ?? 24;
             $estimatedSendAt = $endDateTime->copy()->addHours($delayHours);
 
             // Ceil to next hour boundary (cron runs hourly)
@@ -351,6 +389,7 @@ class TicketController extends Controller
 
         $pendingGroups = $pendingGroups->sortBy('estimated_send_at')->values();
         $pendingCount = $pendingGroups->sum('count');
+        $readyToSendCount = $pendingGroups->filter(fn ($g) => $g->estimated_send_at->isPast())->sum('count');
 
         // --- Sent awaiting response ---
         $awaitingQuery = Sale::where('status', 'paid')
@@ -400,10 +439,115 @@ class TicketController extends Controller
 
         return compact(
             'feedbacks', 'feedbackCount', 'averageRating', 'responseRate', 'sortBy', 'sortDir',
-            'pendingGroups', 'pendingCount', 'nextSendAt',
+            'pendingGroups', 'pendingCount', 'readyToSendCount', 'nextSendAt',
             'awaitingSales', 'awaitingCount',
             'excludedCount'
         );
+    }
+
+    public function sendFeedbackNow()
+    {
+        $user = auth()->user();
+        $count = 0;
+
+        $rolesBySubdomain = Role::where('is_deleted', false)
+            ->get()
+            ->filter(fn ($r) => $r->isPro())
+            ->keyBy('subdomain');
+
+        $pendingSales = Sale::where('status', 'paid')
+            ->where('is_deleted', false)
+            ->whereNull('feedback_sent_at')
+            ->whereDoesntHave('feedback')
+            ->where(fn ($q) => $q->whereNull('group_id')->orWhereColumn('group_id', 'id'))
+            ->excludeTestEmails()
+            ->whereHas('event', fn ($q) => $q->where('user_id', $user->id))
+            ->with(['event.roles'])
+            ->get();
+
+        foreach ($pendingSales as $sale) {
+            try {
+                $event = $sale->event;
+                if (! $event) {
+                    continue;
+                }
+
+                $saleRole = $rolesBySubdomain->get($sale->subdomain);
+                if (! $saleRole) {
+                    continue;
+                }
+
+                if (is_demo_role($saleRole)) {
+                    continue;
+                }
+
+                if (config('app.hosted')) {
+                    if (! $saleRole->hasEmailSettings()) {
+                        continue;
+                    }
+                } else {
+                    $mailer = config('mail.default');
+                    if (in_array($mailer, ['log', 'array'])) {
+                        continue;
+                    }
+                }
+
+                // Check feedback enabled
+                if (! is_null($event->feedback_enabled)) {
+                    if (! $event->feedback_enabled) {
+                        continue;
+                    }
+                } else {
+                    if (! $saleRole->feedback_enabled) {
+                        continue;
+                    }
+                }
+
+                $endDateTime = $event->getEndDateTime($sale->event_date);
+                if ($endDateTime->isFuture() || $endDateTime->copy()->addDays(30)->isPast()) {
+                    continue;
+                }
+
+                $delayHours = $saleRole->feedback_delay_hours ?? 24;
+                if ($endDateTime->copy()->addHours($delayHours)->isFuture()) {
+                    continue;
+                }
+
+                $sale->feedback_sent_at = now();
+                $sale->save();
+
+                \App\Jobs\SendFeedbackEmail::dispatch(
+                    $sale->id,
+                    $event->id,
+                    $saleRole->id,
+                    $saleRole->language_code ?? app()->getLocale()
+                );
+
+                $count++;
+            } catch (\Exception $e) {
+                $sale->feedback_sent_at = null;
+                $sale->save();
+                report($e);
+            }
+        }
+
+        return redirect()->back()->with('message', __('messages.feedback_sent_count', ['count' => $count]));
+    }
+
+    public function cancelFeedback()
+    {
+        $user = auth()->user();
+
+        $count = Sale::where('status', 'paid')
+            ->where('is_deleted', false)
+            ->whereNull('feedback_sent_at')
+            ->whereDoesntHave('feedback')
+            ->where(fn ($q) => $q->whereNull('group_id')->orWhereColumn('group_id', 'id'))
+            ->excludeTestEmails()
+            ->whereHas('event', fn ($q) => $q->where('user_id', $user->id))
+            ->update(['feedback_sent_at' => now()]);
+
+        return redirect()->back()->with('message', __('messages.feedback_cancelled_count', ['count' => $count]));
     }
 
     public function exportSales()

@@ -96,7 +96,12 @@ class GenerateDailyBlogPost extends Command
         try {
             $supportEmail = config('app.support_email');
             if ($supportEmail) {
-                Mail::to($supportEmail)->send(new BlogPostReview($blogPost));
+                \Log::info('Blog post email mailer config', [
+                    'mailer' => config('mail.default'),
+                    'host' => config('mail.mailers.smtp.host'),
+                    'from' => config('mail.from.address'),
+                ]);
+                Mail::mailer('smtp')->to($supportEmail)->send(new BlogPostReview($blogPost));
                 $this->line("Sent review email to {$supportEmail}");
             }
         } catch (\Throwable $e) {

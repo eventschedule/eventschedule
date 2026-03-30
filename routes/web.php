@@ -182,6 +182,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales', [TicketController::class, 'sales'])->name('sales');
     Route::get('/sales/export', [TicketController::class, 'exportSales'])->name('sales.export');
     Route::get('/sales/export-feedback', [FeedbackController::class, 'export'])->name('sales.export_feedback')->middleware('throttle:10,1');
+    Route::post('/sales/send-feedback-now', [TicketController::class, 'sendFeedbackNow'])->name('sales.send_feedback_now');
+    Route::post('/sales/cancel-feedback', [TicketController::class, 'cancelFeedback'])->name('sales.cancel_feedback');
     Route::post('/sales/action/{sale_id}', [TicketController::class, 'handleAction'])->name('sales.action');
     Route::post('/sales/resend-email/{sale_id}', [TicketController::class, 'resendEmail'])->name('sales.resend_email');
     Route::get('/waitlist', [WaitlistController::class, 'index'])->name('waitlist.index');

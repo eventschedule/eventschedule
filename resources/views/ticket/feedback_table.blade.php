@@ -84,15 +84,49 @@
 {{-- Pending Emails Section --}}
 @if ($pendingCount > 0)
 <div class="mb-6">
-    <button type="button" onclick="this.parentElement.querySelector('.js-collapsible').classList.toggle('hidden'); this.querySelector('.js-arrow').classList.toggle('rotate-90')" class="flex items-center gap-2 mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
-        <svg class="js-arrow w-4 h-4 rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        {{ __('messages.feedback_pending_emails') }}
-    </button>
+    <div class="flex items-center justify-between mb-3">
+        <button type="button" onclick="this.closest('div').nextElementSibling.classList.toggle('hidden'); this.querySelector('.js-arrow').classList.toggle('rotate-90')" class="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
+            <svg class="js-arrow w-4 h-4 rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+            <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {{ __('messages.feedback_pending_emails') }}
+        </button>
+        @if ($readyToSendCount > 0)
+        <div class="relative inline-block text-start">
+            <button type="button" data-popup-toggle="feedback-actions-menu" class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                {{ __('messages.actions') }}
+                <svg class="-me-1 ms-2 h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                </svg>
+            </button>
+            <div id="feedback-actions-menu" class="ap-dropdown pop-up-menu hidden absolute {{ is_rtl() ? 'start-0' : 'end-0' }} z-10 mt-2 w-56 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} rounded-lg ring-1 ring-black/5 dark:ring-white/[0.06] focus:outline-none" role="menu">
+                <div class="py-2" role="none" data-popup-toggle="feedback-actions-menu">
+                    <form method="POST" action="{{ route('sales.send_feedback_now') }}">
+                        @csrf
+                        <button type="submit" onclick="return confirm('{{ __('messages.feedback_send_now_confirm', ['count' => $readyToSendCount]) }}')" class="group flex items-center w-full px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-colors" role="menuitem">
+                            <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                            </svg>
+                            {{ __('messages.feedback_send_now', ['count' => $readyToSendCount]) }}
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ route('sales.cancel_feedback') }}">
+                        @csrf
+                        <button type="submit" onclick="return confirm('{{ __('messages.feedback_cancel_confirm', ['count' => $pendingCount]) }}')" class="group flex items-center w-full px-5 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-colors" role="menuitem">
+                            <svg class="me-3 h-5 w-5 text-red-400 dark:text-red-500 group-hover:text-red-500 dark:group-hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            {{ __('messages.feedback_cancel_all', ['count' => $pendingCount]) }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        @endif
+    </div>
     <div class="js-collapsible">
         {{-- Desktop Table --}}
         <div class="hidden md:block overflow-hidden shadow ring-1 ring-black/5 rounded-lg">
