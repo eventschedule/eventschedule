@@ -94,7 +94,6 @@
             </svg>
             {{ __('messages.feedback_pending_emails') }}
         </button>
-        @if ($pendingCount > 0)
         <div class="relative inline-block text-start">
             <button type="button" data-popup-toggle="feedback-actions-menu" class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                 {{ __('messages.actions') }}
@@ -127,7 +126,6 @@
                 </div>
             </div>
         </div>
-        @endif
     </div>
     <div class="js-collapsible">
         {{-- Desktop Table --}}

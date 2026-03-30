@@ -284,7 +284,7 @@ class TicketController extends Controller
         $totalEligibleSales = Sale::where('status', 'paid')
             ->where('is_deleted', false)
             ->where(function ($q) {
-                $q->whereNotNull('feedback_sent_at')
+                $q->where(fn ($q2) => $q2->whereNotNull('feedback_sent_at')->where('feedback_sent_at', '>', '2000-01-02'))
                     ->orWhereHas('feedback');
             })
             ->whereHas('event', function ($q) use ($user) {
@@ -308,7 +308,7 @@ class TicketController extends Controller
             ->where(fn ($q) => $q->whereNull('group_id')->orWhereColumn('group_id', 'id'))
             ->excludeTestEmails()
             ->whereHas('event', fn ($q) => $q->where('user_id', $user->id))
-            ->with(['event.roles', 'event.creatorRole'])
+            ->with(['event.creatorRole'])
             ->limit(100)
             ->get();
 
