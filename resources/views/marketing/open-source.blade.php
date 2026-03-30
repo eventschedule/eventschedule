@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Open Source Event Calendar - Event Schedule</x-slot>
-    <x-slot name="description">Event Schedule is 100% open source under the Attribution Assurance License (AAL). Selfhost on your own server or integrate with our REST API. Full control, no vendor lock-in.</x-slot>
+    <x-slot name="description">100% open source under the Attribution Assurance License. Selfhost on your own server or integrate via REST API. Full control, no vendor lock-in.</x-slot>
     <x-slot name="breadcrumbTitle">Open Source</x-slot>
 
     <x-slot name="structuredData">

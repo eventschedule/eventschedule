@@ -391,10 +391,11 @@ class TicketController extends Controller
         $pendingCount = $pendingGroups->sum('count');
         $readyToSendCount = $pendingGroups->filter(fn ($g) => $g->estimated_send_at->isPast())->sum('count');
 
-        // --- Sent awaiting response ---
+        // --- Sent awaiting response (exclude cancelled with sentinel date) ---
         $awaitingQuery = Sale::where('status', 'paid')
             ->where('is_deleted', false)
             ->whereNotNull('feedback_sent_at')
+            ->where('feedback_sent_at', '>', '2000-01-02')
             ->whereDoesntHave('feedback')
             ->whereHas('event', fn ($q) => $q->where('user_id', $user->id));
 
@@ -531,7 +532,7 @@ class TicketController extends Controller
             }
         }
 
-        return redirect()->back()->with('message', __('messages.feedback_sent_count', ['count' => $count]));
+        return redirect()->route('sales', ['tab' => 'feedback'])->with('message', __('messages.feedback_sent_count', ['count' => $count]));
     }
 
     public function cancelFeedback()
@@ -553,6 +554,9 @@ class TicketController extends Controller
             ->whereHas('event', fn ($q) => $q->where('user_id', $user->id))
             ->with(['event'])
             ->get();
+
+        // Use a sentinel date to distinguish cancelled from actually sent
+        $cancelledAt = \Carbon\Carbon::create(2000, 1, 1);
 
         foreach ($pendingSales as $sale) {
             $event = $sale->event;
@@ -577,12 +581,18 @@ class TicketController extends Controller
                 continue;
             }
 
-            $sale->feedback_sent_at = now();
+            // Only cancel feedback for events that have already ended
+            $endDateTime = $event->getEndDateTime($sale->event_date);
+            if ($endDateTime->isFuture() || $endDateTime->copy()->addDays(30)->isPast()) {
+                continue;
+            }
+
+            $sale->feedback_sent_at = $cancelledAt;
             $sale->save();
             $count++;
         }
 
-        return redirect()->back()->with('message', __('messages.feedback_cancelled_count', ['count' => $count]));
+        return redirect()->route('sales', ['tab' => 'feedback'])->with('message', __('messages.feedback_cancelled_count', ['count' => $count]));
     }
 
     public function exportSales()

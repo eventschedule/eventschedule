@@ -94,7 +94,7 @@
             </svg>
             {{ __('messages.feedback_pending_emails') }}
         </button>
-        @if ($readyToSendCount > 0)
+        @if ($pendingCount > 0)
         <div class="relative inline-block text-start">
             <button type="button" data-popup-toggle="feedback-actions-menu" class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                 {{ __('messages.actions') }}
@@ -104,6 +104,7 @@
             </button>
             <div id="feedback-actions-menu" class="ap-dropdown pop-up-menu hidden absolute {{ is_rtl() ? 'start-0' : 'end-0' }} z-10 mt-2 w-56 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} rounded-lg ring-1 ring-black/5 dark:ring-white/[0.06] focus:outline-none" role="menu">
                 <div class="py-2" role="none" data-popup-toggle="feedback-actions-menu">
+                    @if ($readyToSendCount > 0)
                     <form method="POST" action="{{ route('sales.send_feedback_now') }}">
                         @csrf
                         <button type="submit" onclick="return confirm('{{ __('messages.feedback_send_now_confirm', ['count' => $readyToSendCount]) }}')" class="group flex items-center w-full px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-colors" role="menuitem">
@@ -113,6 +114,7 @@
                             {{ __('messages.feedback_send_now', ['count' => $readyToSendCount]) }}
                         </button>
                     </form>
+                    @endif
                     <form method="POST" action="{{ route('sales.cancel_feedback') }}">
                         @csrf
                         <button type="submit" onclick="return confirm('{{ __('messages.feedback_cancel_confirm', ['count' => $pendingCount]) }}')" class="group flex items-center w-full px-5 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-colors" role="menuitem">

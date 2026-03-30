@@ -146,6 +146,14 @@
         "description": "The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.",
         "publisher": {
             "@id": "{{ config('app.url') }}/#organization"
+        },
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "{{ config('app.url') }}/search?search={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
         }
     }
     </script>
