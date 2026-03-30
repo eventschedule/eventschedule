@@ -52,6 +52,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->append(SecurityHeaders::class);
 
+        $middleware->authenticateSessions();
+
         $middleware->web(append: [
             CaptureUtmParameters::class,
             SetUserLanguage::class,

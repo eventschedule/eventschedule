@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
@@ -53,6 +54,8 @@ class PasswordController extends Controller
         $user->update([
             'password' => Hash::make($validated['password']),
         ]);
+
+        $request->session()->put('password_hash_'.Auth::getDefaultDriver(), $user->getAuthPassword());
 
         AuditService::log(AuditService::AUTH_PASSWORD_CHANGE, $user->id);
 
