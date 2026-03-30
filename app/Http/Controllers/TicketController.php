@@ -462,7 +462,7 @@ class TicketController extends Controller
             ->where(fn ($q) => $q->whereNull('group_id')->orWhereColumn('group_id', 'id'))
             ->excludeTestEmails()
             ->whereHas('event', fn ($q) => $q->where('user_id', $user->id))
-            ->with(['event.roles'])
+            ->with(['event'])
             ->get();
 
         foreach ($pendingSales as $sale) {
@@ -537,15 +537,50 @@ class TicketController extends Controller
     public function cancelFeedback()
     {
         $user = auth()->user();
+        $count = 0;
 
-        $count = Sale::where('status', 'paid')
+        $rolesBySubdomain = Role::where('is_deleted', false)
+            ->get()
+            ->filter(fn ($r) => $r->isPro())
+            ->keyBy('subdomain');
+
+        $pendingSales = Sale::where('status', 'paid')
             ->where('is_deleted', false)
             ->whereNull('feedback_sent_at')
             ->whereDoesntHave('feedback')
             ->where(fn ($q) => $q->whereNull('group_id')->orWhereColumn('group_id', 'id'))
             ->excludeTestEmails()
             ->whereHas('event', fn ($q) => $q->where('user_id', $user->id))
-            ->update(['feedback_sent_at' => now()]);
+            ->with(['event'])
+            ->get();
+
+        foreach ($pendingSales as $sale) {
+            $event = $sale->event;
+            if (! $event) {
+                continue;
+            }
+
+            $saleRole = $rolesBySubdomain->get($sale->subdomain);
+            if (! $saleRole || is_demo_role($saleRole)) {
+                continue;
+            }
+
+            if (config('app.hosted') && ! $saleRole->hasEmailSettings()) {
+                continue;
+            }
+
+            if (! is_null($event->feedback_enabled)) {
+                if (! $event->feedback_enabled) {
+                    continue;
+                }
+            } elseif (! $saleRole->feedback_enabled) {
+                continue;
+            }
+
+            $sale->feedback_sent_at = now();
+            $sale->save();
+            $count++;
+        }
 
         return redirect()->back()->with('message', __('messages.feedback_cancelled_count', ['count' => $count]));
     }

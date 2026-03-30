@@ -61,26 +61,10 @@ class SendFeedbackRequests extends Command
                     continue;
                 }
 
-                // Resolve role from sale's subdomain
+                // Resolve role from sale's subdomain (already filtered to eligible roles)
                 $role = $rolesBySubdomain->get($sale->subdomain);
                 if (! $role) {
                     continue;
-                }
-
-                if (is_demo_role($role)) {
-                    continue;
-                }
-
-                // Check email sending capability
-                if (config('app.hosted')) {
-                    if (! $role->hasEmailSettings()) {
-                        continue;
-                    }
-                } else {
-                    $mailer = config('mail.default');
-                    if (in_array($mailer, ['log', 'array'])) {
-                        continue;
-                    }
                 }
 
                 // Check feedback enabled using event's own setting or role fallback
