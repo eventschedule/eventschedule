@@ -25,7 +25,7 @@
     <div class="p-6" x-data="aiGenerateModal_{{ Str::camel($name) }}">
 
         {{-- ===== SELECTION PHASE ===== --}}
-        <div x-show="!showPreview" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+        <div x-show="!showPreview">
             <div class="text-center mb-4">
                 <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 mb-3">
                     <svg class="w-6 h-6 text-[var(--brand-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -293,7 +293,7 @@
                                     </div>
                                     <div x-show="elementStatus[key] === 'complete'" x-cloak>
                                         <p class="text-sm text-gray-700 dark:text-gray-300" x-text="previewResults[previewConfig[key].data_key]"></p>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" :style="'font-family: \'' + (previewResults[previewConfig[key].data_key] || '') + '\', sans-serif'" x-effect="if (elementStatus[key] === 'complete' && previewResults[previewConfig[key].data_key]) loadPreviewFont(previewResults[previewConfig[key].data_key])">The quick brown fox jumps over the lazy dog</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" :style="'font-family: \'' + (previewResults[previewConfig[key].data_key] || '').replace(/_/g, ' ') + '\', sans-serif'" x-effect="if (elementStatus[key] === 'complete' && previewResults[previewConfig[key].data_key]) loadPreviewFont(previewResults[previewConfig[key].data_key])">The quick brown fox jumps over the lazy dog</p>
                                     </div>
                                     <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500" x-text="elementErrors[key] || '{{ __('messages.generation_failed') }}'">
                                     </div>
@@ -481,7 +481,7 @@ document.addEventListener('alpine:init', function() {
                 var link = document.createElement('link');
                 link.id = id;
                 link.rel = 'stylesheet';
-                link.href = 'https://fonts.googleapis.com/css?family=' + encodeURIComponent(fontFamily) + '&display=swap';
+                link.href = 'https://fonts.googleapis.com/css?family=' + encodeURIComponent(fontFamily.replace(/_/g, ' ')) + '&display=swap';
                 document.head.appendChild(link);
             },
             retryPreviewElement: function(key) {
