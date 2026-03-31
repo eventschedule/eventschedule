@@ -678,6 +678,8 @@ class RoleController extends Controller
         $myPendingComments = collect();
         $myPendingPhotos = collect();
         $publicFeedbacks = collect();
+        $feedbackCount = 0;
+        $avgRating = 0;
         $photoLimitReached = false;
         $userSale = null;
 
@@ -756,6 +758,8 @@ class RoleController extends Controller
                 if ($date) {
                     $query->where('event_date', $date);
                 }
+                $feedbackCount = $query->count();
+                $avgRating = round((float) $query->avg('rating'), 1);
                 $publicFeedbacks = $query->latest()->limit(20)->get();
             }
         }
@@ -801,6 +805,8 @@ class RoleController extends Controller
                 'photoLimitReached',
                 'userSale',
                 'publicFeedbacks',
+                'feedbackCount',
+                'avgRating',
             ));
 
         return $response;

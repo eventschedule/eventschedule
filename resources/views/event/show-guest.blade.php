@@ -1851,10 +1851,6 @@
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('messages.feedback_reviews') }}</h3>
 
           {{-- Average rating summary --}}
-          @php
-            $avgRating = round($publicFeedbacks->avg('rating'), 1);
-            $feedbackCount = $publicFeedbacks->count();
-          @endphp
           <div class="flex items-center gap-3 mb-6">
             <div class="flex items-center gap-1">
               @for ($i = 1; $i <= 5; $i++)
