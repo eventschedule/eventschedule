@@ -1618,6 +1618,7 @@ return [
     'file_too_large' => 'Bestand is te groot. Maximale grootte is 10MB.',
     'test_email_sent_to' => 'Test e-mail wordt verzonden naar :email',
     'test_email_failed' => 'Test-e-mail verzenden mislukt. Controleer de logs voor details.',
+    'test_email_note' => 'Dit is een testmail. Links zijn uitgeschakeld.',
     'please_wait' => 'Even geduld voordat u het opnieuw probeert',
 
     // Scan agenda

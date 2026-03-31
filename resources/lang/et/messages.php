@@ -1626,6 +1626,7 @@ return [
     'file_too_large' => 'Fail on liiga suur. Maksimaalne suurus on 10 MB.',
     'test_email_sent_to' => 'Testmeil saadetakse aadressile :email',
     'test_email_failed' => 'Testmeili saatmine ebaõnnestus. Vaadake üksikasju logidest.',
+    'test_email_note' => 'See on testmeil. Lingid on keelatud.',
     'footer_text' => 'Jaluse tekst',
     'please_wait' => 'Oodake enne uuesti proovimist',
 

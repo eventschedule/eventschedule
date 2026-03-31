@@ -1615,6 +1615,7 @@ return [
     'file_too_large' => 'Datei ist zu groß. Maximale Größe beträgt 10 MB.',
     'test_email_sent_to' => 'Test-E-Mail wird an :email gesendet',
     'test_email_failed' => 'Test-E-Mail konnte nicht gesendet werden. Bitte überprüfen Sie die Logs für Details.',
+    'test_email_note' => 'Dies ist eine Test-E-Mail. Links sind deaktiviert.',
     'please_wait' => 'Bitte warten Sie, bevor Sie es erneut versuchen',
 
     // Scan agenda

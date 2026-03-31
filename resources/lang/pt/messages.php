@@ -1619,6 +1619,7 @@ return [
     'file_too_large' => 'O arquivo é muito grande. O tamanho máximo é 10MB.',
     'test_email_sent_to' => 'O e-mail de teste será enviado para :email',
     'test_email_failed' => 'Falha ao enviar e-mail de teste. Verifique os logs para mais detalhes.',
+    'test_email_note' => 'Este é um e-mail de teste. Os links estão desabilitados.',
     'please_wait' => 'Por favor aguarde antes de tentar novamente',
 
     // Scan agenda

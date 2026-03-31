@@ -1641,6 +1641,7 @@ return [
     'file_too_large' => 'Fișierul este prea mare. Dimensiunea maximă este 10MB.',
     'test_email_sent_to' => 'Emailul test va fi trimis la :email',
     'test_email_failed' => 'Trimiterea emailului test a eșuat. Vă rugăm verificați logurile pentru detalii.',
+    'test_email_note' => 'Acesta este un e-mail de test. Linkurile sunt dezactivate.',
     'footer_text' => 'Text Subsol',
     'please_wait' => 'Vă rugăm așteptați înainte de a încerca din nou',
 

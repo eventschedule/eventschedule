@@ -751,7 +751,7 @@ class RoleController extends Controller
 
             if ($role->isPro() && $role->feedback_enabled && $role->feedback_public && $event->isFeedbackEnabled($role)) {
                 $query = $event->feedbacks()
-                    ->whereHas('sale', fn ($q) => $q->where('is_deleted', false))
+                    ->whereHas('sale', fn ($q) => $q->where('is_deleted', false)->where('status', 'paid'))
                     ->with('sale');
                 if ($date) {
                     $query->where('event_date', $date);

@@ -1615,6 +1615,7 @@ return [
     'file_too_large' => 'Le fichier est trop volumineux. La taille maximale est de 10\u{202F}Mo.',
     'test_email_sent_to' => 'Un e-mail de test sera envoyé à :email',
     'test_email_failed' => 'Échec de l\'envoi de l\'e-mail de test. Veuillez consulter les journaux pour plus de détails.',
+    'test_email_note' => 'Ceci est un e-mail de test. Les liens sont désactivés.',
     'please_wait' => 'Veuillez patienter avant de réessayer',
 
     // Scan agenda

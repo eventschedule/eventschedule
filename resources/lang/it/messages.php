@@ -1620,6 +1620,7 @@ return [
     'file_too_large' => 'Il file e troppo grande. La dimensione massima e 10MB.',
     'test_email_sent_to' => 'L\'email di test verrà inviata a :email',
     'test_email_failed' => 'Invio email di test non riuscito. Controlla i log per i dettagli.',
+    'test_email_note' => 'Questa è un\'e-mail di prova. I link sono disabilitati.',
     'please_wait' => 'Attendere prima di riprovare',
 
     // Scan agenda
