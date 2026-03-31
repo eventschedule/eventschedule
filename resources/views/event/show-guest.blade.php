@@ -1845,6 +1845,54 @@
         </div>
         @endif
 
+        {{-- Public feedback / reviews --}}
+        @if ($publicFeedbacks->count() > 0)
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('messages.feedback_reviews') }}</h3>
+
+          {{-- Average rating summary --}}
+          @php
+            $avgRating = round($publicFeedbacks->avg('rating'), 1);
+            $feedbackCount = $publicFeedbacks->count();
+          @endphp
+          <div class="flex items-center gap-3 mb-6">
+            <div class="flex items-center gap-1">
+              @for ($i = 1; $i <= 5; $i++)
+              <svg class="w-5 h-5 {{ $i <= round($avgRating) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}" viewBox="0 0 24 24" fill="{{ $i <= round($avgRating) ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+              </svg>
+              @endfor
+            </div>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $avgRating }}</span>
+            <span class="text-sm text-gray-500 dark:text-gray-400">({{ trans_choice('messages.feedback_review_count', $feedbackCount, ['count' => $feedbackCount]) }})</span>
+          </div>
+
+          {{-- Individual reviews --}}
+          <div class="space-y-4">
+            @foreach ($publicFeedbacks as $fb)
+            <div class="{{ !$loop->last ? 'border-b border-gray-100 dark:border-gray-800 pb-4' : '' }}">
+              <div class="flex items-center gap-2 mb-1">
+                <div class="flex gap-0.5">
+                  @for ($i = 1; $i <= 5; $i++)
+                  <svg class="w-4 h-4 {{ $i <= $fb->rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}" viewBox="0 0 24 24" fill="{{ $i <= $fb->rating ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                  </svg>
+                  @endfor
+                </div>
+                @if ($fb->sale?->name)
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ explode(' ', trim($fb->sale->name))[0] }}</span>
+                @endif
+                <span class="text-xs text-gray-400 dark:text-gray-500">{{ $fb->created_at->diffForHumans() }}</span>
+              </div>
+              @if ($fb->comment)
+              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1" dir="auto">{{ $fb->comment }}</p>
+              @endif
+            </div>
+            @endforeach
+          </div>
+        </div>
+        @endif
+
         @php
           $eventSponsors = $event->getEffectiveSponsorLogos($role);
         @endphp

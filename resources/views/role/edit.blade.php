@@ -2971,6 +2971,14 @@
                             <p id="feedback-delay-hint" class="mt-2 text-sm text-gray-500 dark:text-gray-400"></p>
                         </div>
 
+                        <div class="mb-6" id="feedback-public-wrapper" style="{{ $role->feedback_enabled && ! $emailDisabled ? '' : 'display: none;' }}">
+                            <x-toggle name="feedback_public"
+                                label="{{ __('messages.feedback_public') }}"
+                                checked="{{ old('feedback_public', $role->feedback_public) }}"
+                                help="{{ __('messages.feedback_public_help') }}"
+                                :disabled="$emailDisabled" />
+                        </div>
+
                         <div class="mb-6" id="feedback-test-wrapper" style="{{ $role->feedback_enabled && ! $emailDisabled ? '' : 'display: none;' }}">
                             <button type="button" id="send-test-feedback-btn" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm transition-all duration-200">
                                 <svg class="w-4 h-4 me-2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3610,11 +3618,13 @@ window.addEventListener('scroll', _scrollGuard);
 var feedbackToggle = document.querySelector('input[name="feedback_enabled"][type="checkbox"]');
 var feedbackDelayWrapper = document.getElementById('feedback-delay-wrapper');
 var feedbackTestWrapper = document.getElementById('feedback-test-wrapper');
+var feedbackPublicWrapper = document.getElementById('feedback-public-wrapper');
 var feedbackEmailDisabled = {{ $emailDisabled ? 'true' : 'false' }};
 if (feedbackToggle && feedbackDelayWrapper) {
     feedbackToggle.addEventListener('change', function() {
         feedbackDelayWrapper.style.display = this.checked ? '' : 'none';
         if (feedbackTestWrapper) feedbackTestWrapper.style.display = (this.checked && !feedbackEmailDisabled) ? '' : 'none';
+        if (feedbackPublicWrapper) feedbackPublicWrapper.style.display = (this.checked && !feedbackEmailDisabled) ? '' : 'none';
     });
 }
 

@@ -87,6 +87,7 @@ class RoleUpdateRequest extends FormRequest
             'hide_past_events' => ['nullable', 'boolean'],
             'first_day_of_week' => ['nullable', 'integer', 'min:0', 'max:6'],
             'feedback_enabled' => ['nullable', 'boolean'],
+            'feedback_public' => ['nullable', 'boolean'],
             'fan_comments_enabled' => ['nullable', 'boolean'],
             'fan_photos_enabled' => ['nullable', 'boolean'],
             'fan_videos_enabled' => ['nullable', 'boolean'],

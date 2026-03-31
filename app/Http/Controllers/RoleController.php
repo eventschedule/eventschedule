@@ -677,6 +677,7 @@ class RoleController extends Controller
         $myPendingVideos = collect();
         $myPendingComments = collect();
         $myPendingPhotos = collect();
+        $publicFeedbacks = collect();
         $photoLimitReached = false;
         $userSale = null;
 
@@ -747,6 +748,14 @@ class RoleController extends Controller
                     ->when($date, fn ($q, $d) => $q->where('event_date', $d))
                     ->first();
             }
+
+            if ($role->isPro() && $role->feedback_enabled && $role->feedback_public && $event->isFeedbackEnabled($role)) {
+                $query = $event->feedbacks()->with('sale');
+                if ($date) {
+                    $query->where('event_date', $date);
+                }
+                $publicFeedbacks = $query->latest()->limit(20)->get();
+            }
         }
 
         $fonts = [];
@@ -789,6 +798,7 @@ class RoleController extends Controller
                 'myPendingPhotos',
                 'photoLimitReached',
                 'userSale',
+                'publicFeedbacks',
             ));
 
         return $response;
@@ -1945,6 +1955,7 @@ class RoleController extends Controller
             $request->merge([
                 'feedback_enabled' => $role->feedback_enabled,
                 'feedback_delay_hours' => $role->feedback_delay_hours,
+                'feedback_public' => $role->feedback_public,
             ]);
         }
 
