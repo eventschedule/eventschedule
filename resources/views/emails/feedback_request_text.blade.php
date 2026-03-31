@@ -9,7 +9,11 @@
 {{ __('messages.date') }}: {{ $event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $event->getStartDateTime($sale->event_date, true)->translatedFormat('F j, Y') }}
 {{ __('messages.time') }}: {{ $event->getStartEndTime($sale->event_date) }}
 
+@if(empty($sale->id))
+{{ __('messages.feedback_submit') }} ({{ __('messages.test_email_note') }})
+@else
 {{ __('messages.feedback_submit') }}: {{ $feedbackUrl }}
+@endif
 
 @if($event->isFanContentEnabled() && $event->getGuestUrl())
 @php

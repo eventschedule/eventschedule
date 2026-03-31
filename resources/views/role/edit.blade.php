@@ -2971,6 +2971,16 @@
                             <p id="feedback-delay-hint" class="mt-2 text-sm text-gray-500 dark:text-gray-400"></p>
                         </div>
 
+                        <div class="mb-6" id="feedback-test-wrapper" style="{{ $role->feedback_enabled && ! $emailDisabled ? '' : 'display: none;' }}">
+                            <button type="button" id="send-test-feedback-btn" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm transition-all duration-200">
+                                <svg class="w-4 h-4 me-2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                {{ __('messages.feedback_send_test') }}
+                            </button>
+                            <div id="test-feedback-result" class="mt-2 hidden"></div>
+                        </div>
+
                         </div>
                         <!-- End Tab Content: Feedback -->
 
@@ -3596,12 +3606,15 @@ var isNewSchedule = {{ $role->exists ? 'false' : 'true' }};
 var _scrollGuard = function() { window.scrollTo(0, 0); };
 window.addEventListener('scroll', _scrollGuard);
 
-// Toggle feedback delay dropdown visibility
+// Toggle feedback delay dropdown and test button visibility
 var feedbackToggle = document.querySelector('input[name="feedback_enabled"][type="checkbox"]');
 var feedbackDelayWrapper = document.getElementById('feedback-delay-wrapper');
+var feedbackTestWrapper = document.getElementById('feedback-test-wrapper');
+var feedbackEmailDisabled = {{ $emailDisabled ? 'true' : 'false' }};
 if (feedbackToggle && feedbackDelayWrapper) {
     feedbackToggle.addEventListener('change', function() {
         feedbackDelayWrapper.style.display = this.checked ? '' : 'none';
+        if (feedbackTestWrapper) feedbackTestWrapper.style.display = (this.checked && !feedbackEmailDisabled) ? '' : 'none';
     });
 }
 
@@ -4317,6 +4330,60 @@ document.addEventListener('DOMContentLoaded', function() {
                 testEmailResult.textContent = @json(__('messages.failed_to_send_test_email'), JSON_UNESCAPED_UNICODE);
                 testEmailResult.classList.remove('hidden');
                 console.error('Error:', error);
+            });
+        });
+    }
+});
+
+// Test feedback email functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const sendTestFeedbackBtn = document.getElementById('send-test-feedback-btn');
+    const testFeedbackResult = document.getElementById('test-feedback-result');
+
+    @if ($role->exists && $role->subdomain)
+    const testFeedbackUrl = '{{ route("role.test_feedback_email", ["subdomain" => $role->subdomain]) }}';
+    @else
+    const testFeedbackUrl = null;
+    @endif
+
+    if (sendTestFeedbackBtn && testFeedbackResult && testFeedbackUrl) {
+        sendTestFeedbackBtn.addEventListener('click', function() {
+            if (!confirm(@json(__('messages.feedback_test_confirm', ['email' => auth()->user()->email])))) {
+                return;
+            }
+
+            sendTestFeedbackBtn.disabled = true;
+            sendTestFeedbackBtn.style.opacity = '0.5';
+            testFeedbackResult.classList.add('hidden');
+
+            fetch(testFeedbackUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json().then(data => ({ok: response.ok, data})))
+            .then(({ok, data}) => {
+                sendTestFeedbackBtn.disabled = false;
+                sendTestFeedbackBtn.style.opacity = '';
+
+                if (ok && data.success) {
+                    testFeedbackResult.className = 'mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-800 dark:text-green-200';
+                    testFeedbackResult.textContent = data.message;
+                } else {
+                    testFeedbackResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
+                    testFeedbackResult.textContent = data.error || @json(__('messages.test_email_failed'));
+                }
+                testFeedbackResult.classList.remove('hidden');
+            })
+            .catch(error => {
+                sendTestFeedbackBtn.disabled = false;
+                sendTestFeedbackBtn.style.opacity = '';
+                testFeedbackResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
+                testFeedbackResult.textContent = @json(__('messages.test_email_failed'));
+                testFeedbackResult.classList.remove('hidden');
             });
         });
     }

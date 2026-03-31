@@ -1640,6 +1640,7 @@ return [
     'file_too_large' => 'File is too large. Maximum size is 10MB.',
     'test_email_sent_to' => 'Test email will be sent to :email',
     'test_email_failed' => 'Failed to send test email. Please check the logs for details.',
+    'test_email_note' => 'This is a test email. Links are disabled.',
     'footer_text' => 'Footer Text',
     'please_wait' => 'Please wait before trying again',
 
@@ -2543,6 +2544,9 @@ return [
     'feedback_cancel_all' => 'Cancel all (:count)',
     'feedback_cancel_confirm' => 'Cancel :count pending feedback emails? This cannot be undone.',
     'feedback_cancelled_count' => ':count pending feedback emails cancelled.',
+    'feedback_send_test' => 'Send test feedback email',
+    'feedback_test_confirm' => 'Send a test feedback email to :email?',
+    'feedback_test_no_events' => 'You need at least one event to send a test feedback email.',
     'feedback_share_content' => 'Were you at the event? Share your content!',
     'feedback_share_content_description' => 'You can also share your :types on the event page.',
     'feedback_share_content_link' => 'Share on the event page',

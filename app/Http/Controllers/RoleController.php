@@ -8,6 +8,7 @@ use App\Http\Requests\RoleEmailVerificationRequest;
 use App\Http\Requests\RoleUpdateRequest;
 use App\Http\Requests\RoleVideoSaveRequest;
 use App\Http\Requests\RoleVideosSaveRequest;
+use App\Mail\FeedbackRequest;
 use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsReferrersDaily;
@@ -15,6 +16,7 @@ use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\RoleUser;
+use App\Models\Sale;
 use App\Models\User;
 use App\Notifications\AddedMemberNotification;
 use App\Notifications\DeletedRoleNotification;
@@ -40,7 +42,10 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -4197,6 +4202,72 @@ class RoleController extends Controller
             return response()->json([
                 'error' => __('messages.failed_to_send_test_email'),
             ], 500);
+        }
+    }
+
+    public function testFeedbackEmail(Request $request, $subdomain): JsonResponse
+    {
+        $user = auth()->user();
+
+        if (! $user->isEditor($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (empty($user->email)) {
+            return response()->json(['error' => __('messages.email_required')], 400);
+        }
+
+        $rateLimitKey = 'test-feedback-'.$role->id;
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
+            return response()->json(['error' => __('messages.please_wait').'...'], 429);
+        }
+
+        $event = Event::where('creator_role_id', $role->id)->orderByDesc('id')->first();
+        if (! $event) {
+            return response()->json(['error' => __('messages.feedback_test_no_events')], 400);
+        }
+
+        $fakeSale = new Sale([
+            'name' => $user->name ?? 'Test Attendee',
+            'email' => $user->email,
+            'secret' => Str::random(32),
+            'event_id' => $event->id,
+            'event_date' => $event->starts_at ? Carbon::parse($event->starts_at)->format('Y-m-d') : now()->format('Y-m-d'),
+            'subdomain' => $role->subdomain,
+            'status' => 'paid',
+        ]);
+
+        try {
+            $mailable = new FeedbackRequest($fakeSale, $event, $role);
+
+            if (config('app.hosted') && $role->hasEmailSettings()) {
+                $emailSettings = $role->getEmailSettings();
+                $mailerName = 'role_'.$role->id;
+                Config::set("mail.mailers.{$mailerName}", [
+                    'transport' => 'smtp',
+                    'host' => $emailSettings['host'] ?? config('mail.mailers.smtp.host'),
+                    'port' => $emailSettings['port'] ?? config('mail.mailers.smtp.port'),
+                    'encryption' => $emailSettings['encryption'] ?? config('mail.mailers.smtp.encryption'),
+                    'username' => $emailSettings['username'] ?? null,
+                    'password' => $emailSettings['password'] ?? null,
+                    'timeout' => null,
+                    'local_domain' => config('mail.mailers.smtp.local_domain'),
+                ]);
+                Mail::mailer($mailerName)->to($user->email)->send($mailable);
+            } else {
+                Mail::to($user->email)->send($mailable);
+            }
+
+            RateLimiter::hit($rateLimitKey, 60);
+
+            return response()->json(['success' => true, 'message' => __('messages.test_email_sent_to', ['email' => $user->email])]);
+        } catch (\Exception $e) {
+            report($e);
+            RateLimiter::hit($rateLimitKey, 60);
+
+            return response()->json(['error' => __('messages.test_email_failed')], 500);
         }
     }
 

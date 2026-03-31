@@ -297,6 +297,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{subdomain}/unfollow', [RoleController::class, 'unfollow'])->name('role.unfollow');
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
     Route::post('/{subdomain}/test-email', [RoleController::class, 'testEmail'])->name('role.test_email');
+    Route::post('/{subdomain}/test-feedback-email', [RoleController::class, 'testFeedbackEmail'])->name('role.test_feedback_email');
     Route::delete('/{subdomain}/delete', [RoleController::class, 'delete'])->name('role.delete');
     Route::delete('/{subdomain}/delete-image', [RoleController::class, 'deleteImage'])->name('role.delete_image');
     Route::get('/{subdomain}/add-event', [EventController::class, 'create'])->name('event.create');

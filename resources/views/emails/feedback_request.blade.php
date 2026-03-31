@@ -22,10 +22,17 @@
         </div>
 
         <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ $feedbackUrl }}"
-               style="display: inline-block; background-color: #4E81FA; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
-                {{ __('messages.feedback_submit') }}
-            </a>
+            @if(empty($sale->id))
+                <span style="display: inline-block; background-color: #ccc; color: white; padding: 15px 30px; border-radius: 5px; font-weight: bold; font-size: 16px;">
+                    {{ __('messages.feedback_submit') }}
+                </span>
+                <p style="font-size: 12px; color: #999; margin-top: 8px;">{{ __('messages.test_email_note') }}</p>
+            @else
+                <a href="{{ $feedbackUrl }}"
+                   style="display: inline-block; background-color: #4E81FA; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
+                    {{ __('messages.feedback_submit') }}
+                </a>
+            @endif
         </div>
 
         @if($event->isFanContentEnabled() && $event->getGuestUrl())
