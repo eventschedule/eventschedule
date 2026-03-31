@@ -1880,7 +1880,7 @@
                   @endfor
                 </div>
                 @if ($fb->sale?->name)
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ explode(' ', trim($fb->sale->name))[0] }}</span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ explode(' ', trim($fb->sale?->name ?? ''))[0] }}</span>
                 @endif
                 <span class="text-xs text-gray-400 dark:text-gray-500">{{ $fb->created_at->diffForHumans() }}</span>
               </div>
