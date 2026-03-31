@@ -35,6 +35,9 @@
                                 if (event.exception.values[i].value && event.exception.values[i].value.indexOf('Unexpected token') !== -1) {
                                     return null;
                                 }
+                                if (event.exception.values[i].value && event.exception.values[i].value.indexOf('ResizeObserver loop') !== -1) {
+                                    return null;
+                                }
                             }
                         }
                         return event;
