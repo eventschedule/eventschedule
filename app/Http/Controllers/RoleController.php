@@ -4228,6 +4228,10 @@ class RoleController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        if (! $role->isPro() || ! $role->feedback_enabled) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
         if (empty($user->email)) {
             return response()->json(['error' => __('messages.email_required')], 400);
         }
