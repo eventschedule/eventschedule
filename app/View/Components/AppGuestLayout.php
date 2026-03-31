@@ -18,6 +18,7 @@ class AppGuestLayout extends Component
         public bool $passwordGate = false,
         public ?Role $otherRole = null,
         public bool $galleryMode = false,
+        public bool $noIndex = false,
     ) {}
 
     /**

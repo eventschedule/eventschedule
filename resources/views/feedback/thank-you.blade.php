@@ -1,10 +1,11 @@
-<x-app-layout :title="__('messages.feedback_thank_you') . ' | ' . $event->name">
+<x-app-guest-layout :role="$role" :event="$event" :fonts="$fonts" :noIndex="true">
 
-    <x-slot name="meta">
-        <meta name="robots" content="noindex, nofollow">
-    </x-slot>
+    @php
+        $accentColor = $role->accent_color ?? '#4E81FA';
+        $contrastColor = accent_contrast_color($accentColor);
+    @endphp
 
-    <div class="min-h-screen bg-gray-50 dark:bg-[#1e1e1e] py-8 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8" style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
         <div class="max-w-lg mx-auto">
 
             {{-- Schedule branding --}}
@@ -50,7 +51,30 @@
                 </div>
                 @endif
             </div>
+
+            {{-- Fan content CTA --}}
+            @if ($event->isFanContentEnabled() && $event->getGuestUrl())
+            @php
+                $types = [];
+                if ($event->isFanPhotosEnabled()) $types[] = mb_strtolower(__('messages.fan_photos_enabled'));
+                if ($event->isFanVideosEnabled()) $types[] = mb_strtolower(__('messages.fan_videos_enabled'));
+                if ($event->isFanCommentsEnabled()) $types[] = mb_strtolower(__('messages.fan_comments_enabled'));
+            @endphp
+            <div class="bg-white dark:bg-[#2d2d30] rounded-lg shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6 mt-6">
+                <p class="text-sm font-semibold text-gray-900 dark:text-white mb-1">{{ __('messages.feedback_share_content') }}</p>
+                <p class="text-sm text-gray-500 dark:text-[#9ca3af] mb-4">{{ __('messages.feedback_share_content_description', ['types' => implode(', ', $types)]) }}</p>
+                <a href="{{ $event->getGuestUrl() }}#event-media-section"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 hover:opacity-90"
+                    style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                    </svg>
+                    {{ __('messages.feedback_share_content_link') }}
+                </a>
+            </div>
+            @endif
+
         </div>
     </div>
 
-</x-app-layout>
+</x-app-guest-layout>

@@ -1,10 +1,10 @@
-<x-app-layout :title="__('messages.event_feedback') . ' | ' . $event->name">
+<x-app-guest-layout :role="$role" :event="$event" :fonts="$fonts" :noIndex="true">
 
-    <x-slot name="meta">
-        <meta name="robots" content="noindex, nofollow">
-    </x-slot>
+    @php
+        $accentColor = $role->accent_color ?? '#4E81FA';
+    @endphp
 
-    <div class="min-h-screen bg-gray-50 dark:bg-[#1e1e1e] py-8 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8" style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
         <div class="max-w-lg mx-auto">
 
             {{-- Schedule branding --}}
@@ -79,7 +79,7 @@
                     {{-- Submit --}}
                     <button type="submit" id="submit-btn"
                         class="w-full px-4 py-3 text-base font-medium text-white rounded-lg transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-[#2d2d30] opacity-50 cursor-not-allowed"
-                        style="background-color: {{ $role->accent_color ?? 'var(--brand-blue)' }}; --tw-ring-color: {{ $role->accent_color ?? 'var(--brand-blue)' }};"
+                        style="background-color: {{ $accentColor }}; --tw-ring-color: {{ $accentColor }};"
                         disabled>
                         {{ __('messages.feedback_submit') }}
                     </button>
@@ -162,4 +162,4 @@
         })();
     </script>
 
-</x-app-layout>
+</x-app-guest-layout>

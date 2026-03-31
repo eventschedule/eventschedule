@@ -39,13 +39,15 @@ class FeedbackController extends Controller
             abort(404);
         }
 
+        $fonts = array_unique(array_filter([$role->font_family]));
+
         $existingFeedback = EventFeedback::where('sale_id', $sale->id)->first();
 
         if ($existingFeedback) {
-            return view('feedback.thank-you', compact('event', 'sale', 'role', 'existingFeedback'));
+            return view('feedback.thank-you', compact('event', 'sale', 'role', 'existingFeedback', 'fonts'));
         }
 
-        return view('feedback.show', compact('event', 'sale', 'role'));
+        return view('feedback.show', compact('event', 'sale', 'role', 'fonts'));
     }
 
     public function store(Request $request, $eventId, $secret)
