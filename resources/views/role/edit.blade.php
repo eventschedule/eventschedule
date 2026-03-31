@@ -2937,6 +2937,17 @@
 
                         @php $emailDisabled = config('app.hosted') && ! $role->hasEmailSettings(); @endphp
 
+                        @if (! $role->isPro())
+                            <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span>{{ __('messages.feedback_pro_only') }}</span>
+                                </p>
+                            </div>
+                        @endif
+
                         @if ($emailDisabled)
                             <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
                                 <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
@@ -2951,17 +2962,19 @@
                             </div>
                         @endif
 
+                        @php $feedbackDisabled = $emailDisabled || ! $role->isPro(); @endphp
+
                         <div class="mb-6">
                             <x-toggle name="feedback_enabled"
                                 label="{{ __('messages.feedback_enabled') }}"
                                 checked="{{ old('feedback_enabled', $role->feedback_enabled) }}"
                                 help="{{ __('messages.feedback_enabled_help') }}"
-                                :disabled="$emailDisabled" />
+                                :disabled="$feedbackDisabled" />
                         </div>
 
-                        <div class="mb-6" id="feedback-delay-wrapper" style="{{ $role->feedback_enabled && ! $emailDisabled ? '' : 'display: none;' }}">
+                        <div class="mb-6" id="feedback-delay-wrapper" style="{{ $role->feedback_enabled && ! $feedbackDisabled ? '' : 'display: none;' }}">
                             <x-input-label for="feedback_delay_hours" value="{{ __('messages.feedback_delay') }}" />
-                            <select id="feedback_delay_hours" name="feedback_delay_hours" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" {{ $emailDisabled ? 'disabled' : '' }}>
+                            <select id="feedback_delay_hours" name="feedback_delay_hours" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" {{ $feedbackDisabled ? 'disabled' : '' }}>
                                 @foreach ([1, 2, 6, 12, 24, 48] as $hours)
                                 <option value="{{ $hours }}" {{ old('feedback_delay_hours', $role->feedback_delay_hours ?? 24) == $hours ? 'selected' : '' }}>
                                     {{ $hours }} {{ __('messages.feedback_hours') }}
@@ -2971,15 +2984,15 @@
                             <p id="feedback-delay-hint" class="mt-2 text-sm text-gray-500 dark:text-gray-400"></p>
                         </div>
 
-                        <div class="mb-6" id="feedback-public-wrapper" style="{{ $role->feedback_enabled && ! $emailDisabled ? '' : 'display: none;' }}">
+                        <div class="mb-6" id="feedback-public-wrapper" style="{{ $role->feedback_enabled && ! $feedbackDisabled ? '' : 'display: none;' }}">
                             <x-toggle name="feedback_public"
                                 label="{{ __('messages.feedback_public') }}"
                                 checked="{{ old('feedback_public', $role->feedback_public) }}"
                                 help="{{ __('messages.feedback_public_help') }}"
-                                :disabled="$emailDisabled" />
+                                :disabled="$feedbackDisabled" />
                         </div>
 
-                        <div class="mb-6" id="feedback-test-wrapper" style="{{ $role->feedback_enabled && ! $emailDisabled ? '' : 'display: none;' }}">
+                        <div class="mb-6" id="feedback-test-wrapper" style="{{ $role->feedback_enabled && ! $feedbackDisabled ? '' : 'display: none;' }}">
                             <button type="button" id="send-test-feedback-btn" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm transition-all duration-200">
                                 <svg class="w-4 h-4 me-2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -3619,12 +3632,12 @@ var feedbackToggle = document.querySelector('input[name="feedback_enabled"][type
 var feedbackDelayWrapper = document.getElementById('feedback-delay-wrapper');
 var feedbackTestWrapper = document.getElementById('feedback-test-wrapper');
 var feedbackPublicWrapper = document.getElementById('feedback-public-wrapper');
-var feedbackEmailDisabled = {{ $emailDisabled ? 'true' : 'false' }};
+var feedbackDisabled = {{ $feedbackDisabled ? 'true' : 'false' }};
 if (feedbackToggle && feedbackDelayWrapper) {
     feedbackToggle.addEventListener('change', function() {
-        feedbackDelayWrapper.style.display = this.checked ? '' : 'none';
-        if (feedbackTestWrapper) feedbackTestWrapper.style.display = (this.checked && !feedbackEmailDisabled) ? '' : 'none';
-        if (feedbackPublicWrapper) feedbackPublicWrapper.style.display = (this.checked && !feedbackEmailDisabled) ? '' : 'none';
+        feedbackDelayWrapper.style.display = (this.checked && !feedbackDisabled) ? '' : 'none';
+        if (feedbackTestWrapper) feedbackTestWrapper.style.display = (this.checked && !feedbackDisabled) ? '' : 'none';
+        if (feedbackPublicWrapper) feedbackPublicWrapper.style.display = (this.checked && !feedbackDisabled) ? '' : 'none';
     });
 }
 
