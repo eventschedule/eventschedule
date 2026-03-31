@@ -25,7 +25,7 @@ jobs:
 
       - name: Build assets
         run: | 
-          npm install
+          npm ci --ignore-scripts
           npm run build
 
       - name: Create Release Build
