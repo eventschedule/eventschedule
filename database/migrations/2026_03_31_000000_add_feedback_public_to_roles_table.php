@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('roles', function (Blueprint $table) {
-            $table->boolean('feedback_public')->default(false)->after('feedback_delay_hours');
+            $table->boolean('feedback_public')->default(false);
         });
     }
 
