@@ -475,7 +475,7 @@ class NewsletterController extends Controller
 
         $sortBy = $request->get('sort_by', 'opened_at');
         $sortDir = strtolower($request->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
-        $allowedSortColumns = ['email', 'status', 'opened_at', 'clicked_at'];
+        $allowedSortColumns = ['name', 'status', 'opened_at', 'clicked_at'];
         if (! in_array($sortBy, $allowedSortColumns)) {
             $sortBy = 'opened_at';
         }

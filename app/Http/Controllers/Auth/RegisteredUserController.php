@@ -115,7 +115,7 @@ class RegisteredUserController extends Controller
         // Send notification to email (using a temporary user object for notification)
         $tempUser = new User;
         $tempUser->email = $email;
-        Notification::route('mail', $email)->notify(new SignupVerificationCode($code));
+        Notification::route('mail', $email)->notifyNow(new SignupVerificationCode($code));
 
         $response = [
             'success' => true,

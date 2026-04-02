@@ -142,6 +142,9 @@
                             // Hide the guest option
                             var guestOption = document.getElementById('guest-option');
                             if (guestOption) guestOption.style.display = 'none';
+                            // Hide the "Already registered?" link
+                            var alreadyRegistered = document.getElementById('already-registered');
+                            if (alreadyRegistered) alreadyRegistered.style.display = 'none';
                             // Focus on the name field and pre-fill if available
                             var nameInput = document.getElementById('name');
                             if (nameInput) {
@@ -537,7 +540,7 @@
         @endif
 
         @if (config('app.hosted'))
-        <div class="mt-6">
+        <div class="mt-6" id="already-registered">
             <a class="hover:underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800"
                 href="{{ route('login') }}">
                 {{ __('messages.already_registered') }}

@@ -63,10 +63,10 @@
         <div class="ap-card sm:rounded-xl p-6 mb-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.add_subscriber') }}</h3>
             <form method="POST" action="{{ route('newsletter.segment.user.store', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
-                class="flex flex-col sm:flex-row gap-3">
+                class="flex flex-col sm:flex-row gap-3" autocomplete="off">
                 @csrf
-                <x-text-input name="name" type="text" class="flex-1" :placeholder="__('messages.name')" />
-                <x-text-input name="email" type="email" class="flex-1" :placeholder="__('messages.email')" required />
+                <x-text-input name="name" type="text" class="flex-1" :placeholder="__('messages.name')" data-1p-ignore data-lpignore="true" />
+                <x-text-input name="email" type="email" class="flex-1" :placeholder="__('messages.email')" required data-1p-ignore data-lpignore="true" />
                 <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-[var(--brand-button-bg-hover)] whitespace-nowrap">
                     {{ __('messages.add_subscriber') }}
                 </button>
@@ -101,7 +101,6 @@
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.actions') }}</th>
                             @else
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.name') }}</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.email') }}</th>
                             @endif
                         </tr>
                     </thead>
@@ -150,7 +149,6 @@
                         {{-- Read-only row for non-manual segments --}}
                         <tr>
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $subscriber->name }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $subscriber->email }}</td>
                         </tr>
                         @endif
                         @endforeach
