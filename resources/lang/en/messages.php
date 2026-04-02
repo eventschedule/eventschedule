@@ -77,7 +77,7 @@ return [
     'data' => 'Data',
     'there_was_a_problem' => 'There was a problem',
     'delete_account' => 'Delete Account',
-    'once_your_account_is_deleted' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.',
+    'once_your_account_is_deleted' => 'Before deleting your account, please download any data or information that you wish to retain.',
     'are_you_sure_you_want_to_delete_your_account' => 'Are you sure you want to delete your account?',
     'update_password' => 'Update Password',
     'ensure_your_account_is_using_a_long_random_password_to_stay_secure' => 'Ensure your account is using a long, random password to stay secure.',

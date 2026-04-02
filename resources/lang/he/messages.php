@@ -76,7 +76,7 @@ return [
     'data' => 'נתונים',
     'there_was_a_problem' => 'אירעה שגיאה',
     'delete_account' => 'מחק חשבון',
-    'once_your_account_is_deleted' => 'לאחר מחיקת החשבון שלך, כל המשאבים והנתונים שלו יימחקו לצמיתות. באפשרותך לשמור את המידע לפני המחיקה.',
+    'once_your_account_is_deleted' => 'באפשרותך לשמור את המידע לפני המחיקה.',
     'are_you_sure_you_want_to_delete_your_account' => 'האם אתה בטוח שברצונך למחוק את החשבון שלך?',
     'update_password' => 'עדכן סיסמה',
     'ensure_your_account_is_using_a_long_random_password_to_stay_secure' => 'וודא שהחשבון שלך משתמש בסיסמה ארוכה ואקראית כדי להישאר מאובטח.',

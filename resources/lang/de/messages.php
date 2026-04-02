@@ -72,7 +72,7 @@ return [
     'data' => 'Daten',
     'there_was_a_problem' => 'Es gab ein Problem',
     'delete_account' => 'Konto löschen',
-    'once_your_account_is_deleted' => 'Sobald Ihr Konto gelöscht ist, werden alle Ressourcen und Daten dauerhaft gelöscht. Bitte sichern Sie alle Informationen, die Sie behalten möchten, bevor Sie Ihr Konto löschen.',
+    'once_your_account_is_deleted' => 'Bitte sichern Sie alle Informationen, die Sie behalten möchten, bevor Sie Ihr Konto löschen.',
     'are_you_sure_you_want_to_delete_your_account' => 'Sind Sie sicher, dass Sie Ihr Konto löschen möchten?',
     'update_password' => 'Passwort aktualisieren',
     'ensure_your_account_is_using_a_long_random_password_to_stay_secure' => 'Stellen Sie sicher, dass Ihr Konto ein langes, zufälliges Passwort verwendet, um sicher zu bleiben.',

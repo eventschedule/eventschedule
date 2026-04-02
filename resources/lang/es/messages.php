@@ -72,7 +72,7 @@ return [
     'data' => 'Datos',
     'there_was_a_problem' => 'Hubo un problema',
     'delete_account' => 'Eliminar Cuenta',
-    'once_your_account_is_deleted' => 'Una vez que tu cuenta sea eliminada, todos sus recursos y datos se borrarán permanentemente. Antes de eliminar tu cuenta, descarga cualquier información que desees conservar.',
+    'once_your_account_is_deleted' => 'Antes de eliminar tu cuenta, descarga cualquier información que desees conservar.',
     'are_you_sure_you_want_to_delete_your_account' => '¿Estás seguro de que deseas eliminar tu cuenta?',
     'update_password' => 'Actualizar Contraseña',
     'ensure_your_account_is_using_a_long_random_password_to_stay_secure' => 'Asegúrate de que tu cuenta utilice una contraseña larga y aleatoria para mantener la seguridad.',

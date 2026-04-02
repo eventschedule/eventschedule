@@ -77,7 +77,7 @@ return [
     'data' => 'Andmed',
     'there_was_a_problem' => 'Tekkis probleem',
     'delete_account' => 'Kustuta konto',
-    'once_your_account_is_deleted' => 'Kui teie konto on kustutatud, kustutatakse jäädavalt kõik selle ressursid ja andmed. Enne konto kustutamist laadige alla kõik andmed või teave, mida soovite säilitada.',
+    'once_your_account_is_deleted' => 'Enne konto kustutamist laadige alla kõik andmed või teave, mida soovite säilitada.',
     'are_you_sure_you_want_to_delete_your_account' => 'Kas olete kindel, et soovite oma konto kustutada?',
     'update_password' => 'Värskenda parooli',
     'ensure_your_account_is_using_a_long_random_password_to_stay_secure' => 'Veenduge, et teie konto kasutaks turvalisuse tagamiseks pikka juhuslikku parooli.',

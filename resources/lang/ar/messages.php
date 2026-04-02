@@ -72,7 +72,7 @@ return [
     'data' => 'البيانات',
     'there_was_a_problem' => 'حدثت مشكلة',
     'delete_account' => 'حذف الحساب',
-    'once_your_account_is_deleted' => 'بمجرد حذف حسابك، سيتم حذف جميع الموارد والبيانات بشكل دائم. قبل حذف الحساب، يرجى تنزيل أي بيانات أو معلومات ترغب في الاحتفاظ بها.',
+    'once_your_account_is_deleted' => 'قبل حذف الحساب، يرجى تنزيل أي بيانات أو معلومات ترغب في الاحتفاظ بها.',
     'are_you_sure_you_want_to_delete_your_account' => 'هل أنت متأكد أنك تريد حذف حسابك؟',
     'update_password' => 'تحديث كلمة المرور',
     'ensure_your_account_is_using_a_long_random_password_to_stay_secure' => 'تأكد من استخدام كلمة مرور طويلة وعشوائية لحماية حسابك.',

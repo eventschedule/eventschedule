@@ -75,7 +75,7 @@ return [
     'data' => 'Gegevens',
     'there_was_a_problem' => 'Er is een probleem opgetreden',
     'delete_account' => 'Account Verwijderen',
-    'once_your_account_is_deleted' => 'Zodra je account is verwijderd, worden alle gegevens permanent verwijderd. Download alles wat je wilt bewaren voordat je je account verwijdert.',
+    'once_your_account_is_deleted' => 'Download alles wat je wilt bewaren voordat je je account verwijdert.',
     'are_you_sure_you_want_to_delete_your_account' => 'Weet je zeker dat je je account wilt verwijderen?',
     'update_password' => 'Wachtwoord Bijwerken',
     'ensure_your_account_is_using_a_long_random_password_to_stay_secure' => 'Zorg ervoor dat je account een lang en willekeurig wachtwoord gebruikt om veilig te blijven.',

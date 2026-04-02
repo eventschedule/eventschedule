@@ -77,7 +77,7 @@ return [
     'data' => 'Date',
     'there_was_a_problem' => 'A apărut o problemă',
     'delete_account' => 'Șterge Contul',
-    'once_your_account_is_deleted' => 'Odată ce contul este șters, toate resursele și datele sale vor fi șterse permanent. Înainte de a șterge contul, vă rugăm să descărcați orice date sau informații pe care doriți să le păstrați.',
+    'once_your_account_is_deleted' => 'Înainte de a șterge contul, vă rugăm să descărcați orice date sau informații pe care doriți să le păstrați.',
     'are_you_sure_you_want_to_delete_your_account' => 'Sigur doriți să vă ștergeți contul?',
     'update_password' => 'Actualizează Parola',
     'ensure_your_account_is_using_a_long_random_password_to_stay_secure' => 'Asigurați-vă că folosiți o parolă lungă și aleatorie pentru securitate.',

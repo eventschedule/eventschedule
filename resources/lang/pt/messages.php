@@ -75,7 +75,7 @@ return [
     'data' => 'Dados',
     'there_was_a_problem' => 'Houve um problema',
     'delete_account' => 'Excluir Conta',
-    'once_your_account_is_deleted' => 'Uma vez que sua conta for excluída, todos os dados e recursos serão permanentemente apagados. Antes de excluir sua conta, faça o download de quaisquer dados que deseje guardar.',
+    'once_your_account_is_deleted' => 'Antes de excluir sua conta, faça o download de quaisquer dados que deseje guardar.',
     'are_you_sure_you_want_to_delete_your_account' => 'Tem certeza de que deseja excluir sua conta?',
     'update_password' => 'Atualizar Senha',
     'ensure_your_account_is_using_a_long_random_password_to_stay_secure' => 'Certifique-se de que sua conta está usando uma senha longa e aleatória para manter a segurança.',
