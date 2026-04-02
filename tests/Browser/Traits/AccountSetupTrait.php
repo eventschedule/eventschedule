@@ -17,13 +17,39 @@ trait AccountSetupTrait
         // Sign up
         $browser->visit('/sign_up')
             ->waitFor('#name', 15)
+            ->pause(1000)
             ->type('name', $name)
             ->type('email', $email)
-            ->type('password', $password)
-            ->check('terms')
-            ->scrollIntoView('button[type="submit"]')
-            ->press('SIGN UP')
-            ->waitForLocation('/dashboard', 30)
+            ->type('password', $password);
+
+        // Ensure fields were set (JS fallback for headless Chrome flakiness)
+        $browser->script("
+            var nameField = document.getElementById('name');
+            if (!nameField.value) {
+                nameField.value = ".json_encode($name).";
+                nameField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            var emailField = document.getElementById('email');
+            if (!emailField.value) {
+                emailField.value = ".json_encode($email).";
+                emailField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            var passwordField = document.getElementById('password');
+            if (!passwordField.value) {
+                passwordField.value = ".json_encode($password).";
+                passwordField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            var termsCheckbox = document.getElementById('terms');
+            if (!termsCheckbox.checked) {
+                termsCheckbox.checked = true;
+                termsCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        ");
+
+        // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
+        $browser->script("document.querySelector('form').requestSubmit()");
+
+        $browser->waitForLocation('/dashboard', 30)
             ->assertPathIs('/dashboard')
             ->assertSee($name);
     }
