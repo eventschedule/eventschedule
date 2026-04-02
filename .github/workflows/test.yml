@@ -141,11 +141,25 @@ jobs:
           APP_ENV: local
           APP_URL: http://127.0.0.1:8000
   
-      - name: Upload Dusk Screenshots and Logs
+      - name: Upload Dusk Screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: dusk-screenshots
-          path: |
-            tests/Browser/screenshots
-            storage/logs
+          path: tests/Browser/screenshots
+
+      - name: Upload Query Log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: query-log
+          path: storage/logs/queries.log
+          if-no-files-found: ignore
+
+      - name: Upload Error Log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: error-log
+          path: storage/logs/laravel.log
+          if-no-files-found: ignore
