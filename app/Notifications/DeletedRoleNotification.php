@@ -42,7 +42,7 @@ class DeletedRoleNotification extends Notification
         $user = $this->user;
 
         return (new MailMessage)
-            ->replyTo($user->email, $user->name)
+            ->replyTo(config('app.support_email'))
             ->subject(str_replace(
                 ':type',
                 __('messages.'.$role->type),

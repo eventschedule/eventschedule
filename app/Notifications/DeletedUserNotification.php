@@ -38,7 +38,7 @@ class DeletedUserNotification extends Notification
         $user = $this->user;
 
         return (new MailMessage)
-            ->replyTo($user->email, $user->name)
+            ->replyTo(config('app.support_email'))
             ->subject(__('messages.user_has_been_deleted'))
             ->line(str_replace(
                 ':user',
