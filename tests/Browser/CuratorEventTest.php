@@ -93,10 +93,15 @@ class CuratorEventTest extends DuskTestCase
             $browser->visit($eventUrl)
                 ->waitForText('Edit Event', 5)
                 ->clickLink('Edit Event')
-                ->waitForText('Edit Event', 5)
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/curator1/schedule', 5)
+                ->waitFor('#edit-form', 10);
+
+            // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
+            $browser->script("
+                window._skipUnsavedWarning = true;
+                document.getElementById('edit-form').requestSubmit();
+            ");
+
+            $browser->waitForLocation('/curator1/schedule', 5)
                 ->pause(1000)
                 ->assertSee('Talent');
 
@@ -114,14 +119,18 @@ class CuratorEventTest extends DuskTestCase
         // Create an event and add it to both curators
         $browser->visit('/talent/add-event?date='.date('Y-m-d'))
             ->waitFor('#event_name', 10)
-            ->pause(500)
-            ->click('a[data-section="section-venue"]')
-            ->waitFor('#in_person', 5);
+            ->pause(500);
+
+        // Navigate to venue section via JS (more reliable than clicking the nav link)
+        $browser->script("document.querySelector('a[data-section=\"section-venue\"]').click()");
+        $browser->waitFor('#in_person', 5);
         $browser->script("var cb = document.getElementById('in_person'); if (!cb.checked) cb.click();");
         $browser->waitFor('#selected_venue', 5)
-            ->select('#selected_venue')
-            ->click('a[data-section="section-schedules"]')
-            ->pause(1000)
+            ->select('#selected_venue');
+
+        // Navigate to schedules section via JS
+        $browser->script("document.querySelector('a[data-section=\"section-schedules\"]').click()");
+        $browser->pause(1000)
                 // Use curator names to find and check the checkboxes
             ->script("
                     var labels = document.querySelectorAll('label[for^=\"curator_\"]');
@@ -136,9 +145,13 @@ class CuratorEventTest extends DuskTestCase
                     });
                 ");
 
-        $browser->scrollIntoView('button[type="submit"]')
-            ->press('SAVE')
-            ->waitForLocation('/talent/schedule', 5)
+        // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
+        $browser->script("
+            window._skipUnsavedWarning = true;
+            document.getElementById('edit-form').requestSubmit();
+        ");
+
+        $browser->waitForLocation('/talent/schedule', 5)
             ->pause(1000)
             ->assertSee('Talent');
     }
