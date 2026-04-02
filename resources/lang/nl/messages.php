@@ -159,6 +159,7 @@ return [
     'updated_availability' => 'Beschikbaarheid succesvol bijgewerkt',
     'unavailable' => 'Niet Beschikbaar',
     'unsaved_changes' => 'Je hebt niet-opgeslagen wijzigingen',
+    'unsaved_changes_warning' => 'Je wijzigingen zijn niet opgeslagen en gaan verloren. Weet je het zeker?',
     'show_email_address' => 'Toon E-mailadres',
     'address_not_found' => 'Adres niet gevonden',
     'create_schedule' => 'Schema Aanmaken',

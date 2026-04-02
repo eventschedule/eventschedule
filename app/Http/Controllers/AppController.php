@@ -123,6 +123,15 @@ class AppController extends Controller
         try {
             // === EVERY CALL (every minute) ===
 
+            // Process scheduled newsletters BEFORE queue:work so newly dispatched
+            // SendNewsletterBatch jobs get processed by the queue:work below
+            try {
+                (new \App\Jobs\ProcessScheduledNewsletters)();
+            } catch (\Exception $e) {
+                \Log::error('Scheduled command ProcessScheduledNewsletters failed: '.$e->getMessage());
+                report($e);
+            }
+
             // Process queued jobs (emails, etc.)
             try {
                 \Artisan::call('queue:work', [
@@ -149,13 +158,6 @@ class AppController extends Controller
                 }
             } catch (\Exception $e) {
                 \Log::warning('Queue processing failed: '.$e->getMessage());
-            }
-
-            try {
-                (new \App\Jobs\ProcessScheduledNewsletters)();
-            } catch (\Exception $e) {
-                \Log::error('Scheduled command ProcessScheduledNewsletters failed: '.$e->getMessage());
-                report($e);
             }
 
             // === EVERY 5 MINUTES ===

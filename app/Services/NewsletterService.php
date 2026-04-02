@@ -22,6 +22,12 @@ class NewsletterService
     {
         $role = $newsletter->role;
         if (! $newsletter->isAdmin() && (! $role || ! $role->canSendNewsletter())) {
+            Log::warning('Newsletter send blocked: role cannot send', [
+                'newsletter_id' => $newsletter->id,
+                'role_id' => $newsletter->role_id,
+                'has_role' => ! is_null($role),
+            ]);
+
             return false;
         }
 
@@ -31,6 +37,10 @@ class NewsletterService
             ->update(['status' => 'sending', 'send_token' => $sendToken]);
 
         if ($updated === 0) {
+            Log::warning('Newsletter send skipped: status already changed', [
+                'newsletter_id' => $newsletter->id,
+            ]);
+
             return false;
         }
 
@@ -75,8 +85,7 @@ class NewsletterService
 
         $chunks = array_chunk($recipientIds, 50);
         foreach ($chunks as $index => $chunk) {
-            SendNewsletterBatch::dispatch($newsletter->id, $chunk)
-                ->delay(now()->addSeconds($index * 15));
+            SendNewsletterBatch::dispatch($newsletter->id, $chunk);
         }
 
         return true;
@@ -484,8 +493,7 @@ class NewsletterService
 
         $chunks = array_chunk($recipientIds, 50);
         foreach ($chunks as $index => $chunk) {
-            SendNewsletterBatch::dispatch($remainderNewsletter->id, $chunk)
-                ->delay(now()->addSeconds($index * 15));
+            SendNewsletterBatch::dispatch($remainderNewsletter->id, $chunk);
         }
     }
 

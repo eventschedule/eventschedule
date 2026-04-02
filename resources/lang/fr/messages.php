@@ -255,6 +255,7 @@ return [
     'updated_availability' => 'Disponibilité mise à jour avec succès',
     'unavailable' => 'Indisponible',
     'unsaved_changes' => 'Vous avez des modifications non enregistrées',
+    'unsaved_changes_warning' => 'Vos modifications n\'ont pas été enregistrées et seront perdues. Êtes-vous sûr ?',
     'show_email_address' => 'Afficher l\'adresse e-mail',
     'address_not_found' => 'Adresse introuvable',
     'curators' => 'Organisateurs',

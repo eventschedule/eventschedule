@@ -275,6 +275,7 @@ return [
     'updated_availability' => 'Successfully updated availability',
     'unavailable' => 'Unavailable',
     'unsaved_changes' => 'You have unsaved changes',
+    'unsaved_changes_warning' => 'Your changes have not been saved and will be lost. Are you sure?',
     'show_email_address' => 'Show email address',
     'address_not_found' => 'Address not found',
     'curators' => 'Curators',

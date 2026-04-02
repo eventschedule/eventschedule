@@ -275,6 +275,7 @@ return [
     'updated_availability' => 'Доступность успешно обновлена.',
     'unavailable' => 'Недоступно',
     'unsaved_changes' => 'У вас есть несохраненные изменения',
+    'unsaved_changes_warning' => 'Ваши изменения не были сохранены и будут потеряны. Вы уверены?',
     'show_email_address' => 'Показать адрес электронной почты',
     'address_not_found' => 'Адрес не найден',
     'curators' => 'Кураторы',

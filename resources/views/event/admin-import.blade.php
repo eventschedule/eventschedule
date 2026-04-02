@@ -7,7 +7,7 @@
                 <button type="button" class="js-back-btn inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                     {{ __('messages.back') }}
                 </button>
-                <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}" class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}" class="js-more-options inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                     {{ __('messages.more_import_options') }}
                 </a>
             </div>
@@ -36,7 +36,7 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}" class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}" class="js-more-options inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                     {{ __('messages.more_import_options') }}
                 </a>
                 <button type="button" class="js-back-btn inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
@@ -49,9 +49,22 @@
     @include('event.import')
 
     <script {!! nonce_attr() !!}>
+        function hasUnsavedImportChanges() {
+            var app = window.__importApp;
+            if (!app || !app.preview || !app.preview.parsed) return false;
+            return app.preview.parsed.some(function(_, idx) { return !app.savedEvents[idx]; });
+        }
+
         document.addEventListener('click', function(e) {
             if (e.target.closest('.js-back-btn')) {
+                if (hasUnsavedImportChanges() && !confirm(@json(__('messages.unsaved_changes_warning')))) return;
                 history.back();
+            }
+            var moreOptions = e.target.closest('.js-more-options');
+            if (moreOptions) {
+                if (hasUnsavedImportChanges() && !confirm(@json(__('messages.unsaved_changes_warning')))) {
+                    e.preventDefault();
+                }
             }
         });
     </script>

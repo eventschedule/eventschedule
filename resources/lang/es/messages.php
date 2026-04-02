@@ -247,6 +247,7 @@ return [
     'updated_availability' => 'Disponibilidad actualizada con éxito',
     'unavailable' => 'No disponible',
     'unsaved_changes' => 'Tienes cambios no guardados',
+    'unsaved_changes_warning' => 'Tus cambios no se han guardado y se perderán. ¿Estás seguro?',
     'show_email_address' => 'Mostrar dirección de correo electrónico',
     'address_not_found' => 'Dirección no encontrada',
     'curators' => 'Curadores',

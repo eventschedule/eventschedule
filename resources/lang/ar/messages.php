@@ -242,6 +242,7 @@ return [
     'updated_availability' => 'تم تحديث التوفر بنجاح',
     'unavailable' => 'غير متوفر',
     'unsaved_changes' => 'لديك تغييرات غير محفوظة',
+    'unsaved_changes_warning' => 'لم يتم حفظ تغييراتك وستفقد. هل أنت متأكد؟',
     'show_email_address' => 'عرض عنوان البريد الإلكتروني',
     'address_not_found' => 'لم يتم العثور على العنوان',
     'curators' => 'المنظمون',

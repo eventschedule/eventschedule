@@ -160,6 +160,7 @@ return [
     'updated_availability' => 'Disponibilidade atualizada com sucesso',
     'unavailable' => 'Indisponível',
     'unsaved_changes' => 'Você tem alterações não salvas',
+    'unsaved_changes_warning' => 'Suas alterações não foram salvas e serão perdidas. Tem certeza?',
     'show_email_address' => 'Mostrar endereço de e-mail',
     'address_not_found' => 'Endereço não encontrado',
     'create_schedule' => 'Criar Agenda',

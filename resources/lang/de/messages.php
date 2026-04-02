@@ -243,6 +243,7 @@ return [
     'updated_availability' => 'Verfügbarkeit erfolgreich aktualisiert',
     'unavailable' => 'Nicht verfügbar',
     'unsaved_changes' => 'Sie haben ungespeicherte Änderungen',
+    'unsaved_changes_warning' => 'Ihre Änderungen wurden nicht gespeichert und gehen verloren. Sind Sie sicher?',
     'show_email_address' => 'E-Mail-Adresse anzeigen',
     'address_not_found' => 'Adresse nicht gefunden',
     'curators' => 'Kuratoren',

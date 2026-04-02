@@ -275,6 +275,7 @@ return [
     'updated_availability' => 'Saadavuse värskendamine õnnestus',
     'unavailable' => 'Pole saadaval',
     'unsaved_changes' => 'Teil on salvestamata muudatusi',
+    'unsaved_changes_warning' => 'Teie muudatused pole salvestatud ja lähevad kaotsi. Kas olete kindel?',
     'show_email_address' => 'Näita meiliaadressi',
     'address_not_found' => 'Aadressi ei leitud',
     'curators' => 'Kuraatorid',

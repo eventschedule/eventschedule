@@ -162,6 +162,7 @@ return [
     'updated_availability' => 'Disponibilità aggiornata con successo',
     'unavailable' => 'Non Disponibile',
     'unsaved_changes' => 'Hai modifiche non salvate',
+    'unsaved_changes_warning' => 'Le tue modifiche non sono state salvate e andranno perse. Sei sicuro?',
     'show_email_address' => 'Mostra Indirizzo Email',
     'address_not_found' => 'Indirizzo non trovato',
     'create_schedule' => 'Crea Programma',

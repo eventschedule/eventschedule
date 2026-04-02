@@ -426,6 +426,7 @@ return [
     'searching' => 'מחפש',
     'unavailable' => 'לא זמין',
     'unsaved_changes' => 'יש לך שינויים שלא נשמרו',
+    'unsaved_changes_warning' => 'השינויים שלך לא נשמרו ויאבדו. האם אתה בטוח?',
     'curators' => 'אוֹצֵרים',
     'curator' => 'אוֹצֵר',
     'register_curator' => 'להרשמת אוֹצֵר',

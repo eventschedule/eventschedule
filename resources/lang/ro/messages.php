@@ -275,6 +275,7 @@ return [
     'updated_availability' => 'Disponibilitate actualizată cu succes',
     'unavailable' => 'Indisponibil',
     'unsaved_changes' => 'Aveți modificări nesalvate',
+    'unsaved_changes_warning' => 'Modificările dvs. nu au fost salvate și vor fi pierdute. Sunteți sigur?',
     'show_email_address' => 'Arată adresa de email',
     'address_not_found' => 'Adresa nu a fost găsită',
     'curators' => 'Curatori',

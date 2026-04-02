@@ -76,13 +76,27 @@ class SendNewsletterBatch implements ShouldQueue
         $this->updateNewsletterCounts($newsletter);
     }
 
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('SendNewsletterBatch permanently failed', [
+            'newsletter_id' => $this->newsletterId,
+            'recipient_ids' => $this->recipientIds,
+            'error' => $exception->getMessage(),
+        ]);
+
+        $newsletter = Newsletter::find($this->newsletterId);
+        if ($newsletter) {
+            $this->updateNewsletterCounts($newsletter);
+        }
+    }
+
     protected function updateNewsletterCounts(Newsletter $newsletter): void
     {
         $newsletter->update([
             'sent_count' => $newsletter->recipients()->where('status', 'sent')->count(),
         ]);
 
-        // Check if all recipients have been processed
+        // Check if all recipients have been processed (sent, failed, or skipped)
         $pendingCount = $newsletter->recipients()->where('status', 'pending')->count();
         if ($pendingCount === 0) {
             Newsletter::where('id', $newsletter->id)
