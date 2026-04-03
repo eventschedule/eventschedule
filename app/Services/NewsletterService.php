@@ -64,7 +64,10 @@ class NewsletterService
             if ($limit !== null) {
                 $used = $role->newslettersSentThisMonth();
                 if ($used + $recipients->count() > $limit) {
-                    $newsletter->update(['status' => 'draft', 'send_token' => null]);
+                    $newsletter->update([
+                        'status' => $newsletter->scheduled_at ? 'scheduled' : 'draft',
+                        'send_token' => null,
+                    ]);
 
                     return ['limit_exceeded', $recipients->count()];
                 }
