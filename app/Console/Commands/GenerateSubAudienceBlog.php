@@ -206,11 +206,6 @@ class GenerateSubAudienceBlog extends Command
         }
 
         try {
-            \Log::info('Blog post email mailer config', [
-                'mailer' => config('mail.default'),
-                'host' => config('mail.mailers.smtp.host'),
-                'from' => config('mail.from.address'),
-            ]);
             Mail::mailer('smtp')->to($adminEmail)->send(new BlogPostReview($post));
             $this->line('  Sent review email to '.$adminEmail);
         } catch (\Throwable $e) {
