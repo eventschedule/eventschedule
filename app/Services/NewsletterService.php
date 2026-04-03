@@ -71,21 +71,24 @@ class NewsletterService
             }
         }
 
-        $recipientData = [];
-        foreach ($recipients as $recipient) {
-            $recipientData[] = [
-                'newsletter_id' => $newsletter->id,
-                'user_id' => $recipient->user_id,
-                'email' => $recipient->email,
-                'name' => $recipient->name,
-                'token' => Str::random(64),
-                'status' => 'pending',
-            ];
-        }
-
         DB::beginTransaction();
         try {
-            foreach (array_chunk($recipientData, 500) as $chunk) {
+            $chunk = [];
+            foreach ($recipients as $recipient) {
+                $chunk[] = [
+                    'newsletter_id' => $newsletter->id,
+                    'user_id' => $recipient->user_id,
+                    'email' => $recipient->email,
+                    'name' => $recipient->name,
+                    'token' => Str::random(64),
+                    'status' => 'pending',
+                ];
+                if (count($chunk) >= 500) {
+                    NewsletterRecipient::insert($chunk);
+                    $chunk = [];
+                }
+            }
+            if (! empty($chunk)) {
                 NewsletterRecipient::insert($chunk);
             }
             DB::commit();
@@ -100,21 +103,19 @@ class NewsletterService
             return false;
         }
 
-        $recipientIds = NewsletterRecipient::where('newsletter_id', $newsletter->id)
+        $batchIndex = 0;
+        NewsletterRecipient::where('newsletter_id', $newsletter->id)
             ->where('status', 'pending')
-            ->pluck('id')
-            ->toArray();
-
-        $chunks = array_chunk($recipientIds, 50);
-        foreach ($chunks as $index => $chunk) {
-            SendNewsletterBatch::dispatch($newsletter->id, $chunk)
-                ->delay(now()->addSeconds($index * 15));
-        }
+            ->chunkById(50, function ($recipientChunk) use ($newsletter, &$batchIndex) {
+                SendNewsletterBatch::dispatch($newsletter->id, $recipientChunk->pluck('id')->toArray())
+                    ->delay(now()->addSeconds($batchIndex * 15));
+                $batchIndex++;
+            });
 
         return true;
     }
 
-    public function sendToRecipient(Newsletter $newsletter, NewsletterRecipient $recipient, bool $isTest = false): bool
+    public function sendToRecipient(Newsletter $newsletter, NewsletterRecipient $recipient, bool $isTest = false, ?array $processedBlocks = null): bool
     {
         if (! $isTest && $this->isTestEmail($recipient->email)) {
             $recipient->update(['status' => 'skipped']);
@@ -123,11 +124,14 @@ class NewsletterService
         }
 
         try {
-            $html = $this->renderHtml($newsletter, $recipient);
+            if ($processedBlocks === null) {
+                $processedBlocks = $this->processBlocks($newsletter);
+            }
+            $html = $this->renderHtml($newsletter, $recipient, $processedBlocks);
             $html = $this->rewriteLinks($html, $recipient);
             $html = $this->insertTrackingPixel($html, $recipient);
 
-            $mailable = new NewsletterEmail($newsletter, $recipient, $html);
+            $mailable = new NewsletterEmail($newsletter, $recipient, $html, $processedBlocks);
 
             $role = $newsletter->role;
             if (config('app.hosted') && $role && $role->hasEmailSettings()) {
@@ -312,10 +316,10 @@ class NewsletterService
         return empty($allEventIds) ? null : array_unique($allEventIds);
     }
 
-    public function renderHtml(Newsletter $newsletter, ?NewsletterRecipient $recipient = null): string
+    public function renderHtml(Newsletter $newsletter, ?NewsletterRecipient $recipient = null, ?array $processedBlocks = null): string
     {
         $style = array_merge(Newsletter::defaultStyleSettings(), $newsletter->style_settings ?? []);
-        $blocks = $this->processBlocks($newsletter);
+        $blocks = $processedBlocks ?? $this->processBlocks($newsletter);
         $unsubscribeUrl = $recipient
             ? url('/nl/u/'.$recipient->token)
             : '#';
@@ -507,21 +511,24 @@ class NewsletterService
             return;
         }
 
-        $recipientData = [];
-        foreach ($remaining as $recipient) {
-            $recipientData[] = [
-                'newsletter_id' => $remainderNewsletter->id,
-                'user_id' => $recipient->user_id,
-                'email' => $recipient->email,
-                'name' => $recipient->name,
-                'token' => Str::random(64),
-                'status' => 'pending',
-            ];
-        }
-
         DB::beginTransaction();
         try {
-            foreach (array_chunk($recipientData, 500) as $chunk) {
+            $chunk = [];
+            foreach ($remaining as $recipient) {
+                $chunk[] = [
+                    'newsletter_id' => $remainderNewsletter->id,
+                    'user_id' => $recipient->user_id,
+                    'email' => $recipient->email,
+                    'name' => $recipient->name,
+                    'token' => Str::random(64),
+                    'status' => 'pending',
+                ];
+                if (count($chunk) >= 500) {
+                    NewsletterRecipient::insert($chunk);
+                    $chunk = [];
+                }
+            }
+            if (! empty($chunk)) {
                 NewsletterRecipient::insert($chunk);
             }
             DB::commit();
@@ -533,16 +540,14 @@ class NewsletterService
             throw $e;
         }
 
-        $recipientIds = NewsletterRecipient::where('newsletter_id', $remainderNewsletter->id)
+        $batchIndex = 0;
+        NewsletterRecipient::where('newsletter_id', $remainderNewsletter->id)
             ->where('status', 'pending')
-            ->pluck('id')
-            ->toArray();
-
-        $chunks = array_chunk($recipientIds, 50);
-        foreach ($chunks as $index => $chunk) {
-            SendNewsletterBatch::dispatch($remainderNewsletter->id, $chunk)
-                ->delay(now()->addSeconds($index * 15));
-        }
+            ->chunkById(50, function ($recipientChunk) use ($remainderNewsletter, &$batchIndex) {
+                SendNewsletterBatch::dispatch($remainderNewsletter->id, $recipientChunk->pluck('id')->toArray())
+                    ->delay(now()->addSeconds($batchIndex * 15));
+                $batchIndex++;
+            });
     }
 
     protected function configureRoleMailer(Role $role): void

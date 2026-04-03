@@ -1295,7 +1295,7 @@ class Role extends Model implements MustVerifyEmail
                 ->where('status', 'sending')
                 ->where('updated_at', '>=', now()->startOfMonth())
                 ->select('id')
-        )->count();
+        )->whereIn('status', ['pending', 'sent'])->count();
 
         return $sentEmails + $sendingEmails;
     }

@@ -54,9 +54,11 @@ class SendNewsletterBatch implements ShouldQueue
                 ->where('status', 'pending')
                 ->get();
 
+            $processedBlocks = $service->processBlocks($newsletter);
+
             foreach ($recipients as $recipient) {
                 try {
-                    $service->sendToRecipient($newsletter, $recipient);
+                    $service->sendToRecipient($newsletter, $recipient, false, $processedBlocks);
                     if ($newsletter->role_id) {
                         UsageTrackingService::track(UsageTrackingService::EMAIL_NEWSLETTER, $newsletter->role_id);
                     }
