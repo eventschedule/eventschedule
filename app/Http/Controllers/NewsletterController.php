@@ -282,10 +282,7 @@ class NewsletterController extends Controller
 
         // On sync queue, large sends would timeout the HTTP request - advise scheduling instead
         if (config('queue.default') === 'sync') {
-            $segmentIds = $newsletter->segment_ids ?? [];
-            $estimatedCount = $newsletter->isAdmin()
-                ? $service->resolveAdminRecipients($segmentIds)->count()
-                : $service->resolveRecipients($role, $segmentIds)->count();
+            $estimatedCount = $service->resolveRecipients($role, $newsletter->segment_ids ?? [])->count();
 
             if ($estimatedCount > 50) {
                 return back()->with('error', __('messages.newsletter_sync_queue_limit'));
