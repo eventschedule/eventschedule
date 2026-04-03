@@ -1589,6 +1589,11 @@ return [
     'subject' => 'Asunto',
     'template' => 'Plantilla',
 
+    // Newsletter verification
+    'newsletter_requires_verification' => 'Para enviar boletines, configura las credenciales SMTP en tu agenda o verifica tu numero de telefono en la configuracion de tu perfil.',
+    'newsletter_verification_required_title' => 'Verificacion requerida para enviar boletines',
+    'newsletter_verification_required_body' => 'Para enviar boletines, <a href=":smtp_link" class="underline font-medium">configura las credenciales SMTP</a> en tu agenda, o <a href=":phone_link" class="underline font-medium">verifica tu numero de telefono</a> en la configuracion de tu perfil.',
+
     // Newsletter limits
     'newsletter_limit_reached' => 'Has alcanzado tu limite mensual de correos de boletines (:used/:limit). Actualiza tu plan o agrega configuracion SMTP personalizada para envios ilimitados.',
     'newsletters_per_month' => 'correos de boletines / mes',

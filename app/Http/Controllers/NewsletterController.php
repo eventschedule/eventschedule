@@ -67,6 +67,19 @@ class NewsletterController extends Controller
         return ['role_id' => UrlUtils::encodeId($role->id)];
     }
 
+    protected function requiresNewsletterVerification($role): bool
+    {
+        if (! config('app.hosted') || config('app.is_testing')) {
+            return false;
+        }
+
+        if (auth()->user()->isAdmin()) {
+            return false;
+        }
+
+        return ! $role->hasEmailSettings() && ! auth()->user()->hasVerifiedPhone();
+    }
+
     public function index(Request $request)
     {
         $this->authorizeAccess();
@@ -265,6 +278,10 @@ class NewsletterController extends Controller
         $this->authorizeAccess();
         $role = $this->getRole($request);
 
+        if ($this->requiresNewsletterVerification($role)) {
+            return back()->with('error', __('messages.newsletter_requires_verification'));
+        }
+
         $newsletter = Newsletter::where('role_id', $role->id)
             ->where('id', UrlUtils::decodeId($hash))
             ->firstOrFail();
@@ -319,6 +336,10 @@ class NewsletterController extends Controller
     {
         $this->authorizeAccess();
         $role = $this->getRole($request);
+
+        if ($this->requiresNewsletterVerification($role)) {
+            return back()->with('error', __('messages.newsletter_requires_verification'));
+        }
 
         $newsletter = Newsletter::where('role_id', $role->id)
             ->where('id', UrlUtils::decodeId($hash))
@@ -442,6 +463,10 @@ class NewsletterController extends Controller
     {
         $this->authorizeAccess();
         $role = $this->getRole($request);
+
+        if ($this->requiresNewsletterVerification($role)) {
+            return back()->with('error', __('messages.newsletter_requires_verification'));
+        }
 
         if (empty($role->email)) {
             return back()->with('error', __('messages.email_required'));
@@ -886,6 +911,10 @@ class NewsletterController extends Controller
     {
         $this->authorizeAccess();
         $role = $this->getRole($request);
+
+        if ($this->requiresNewsletterVerification($role)) {
+            return back()->with('error', __('messages.newsletter_requires_verification'));
+        }
 
         if (! $role->canSendNewsletter()) {
             $limit = $role->newsletterLimit();

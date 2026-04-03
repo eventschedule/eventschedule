@@ -1617,6 +1617,11 @@ return [
     'subject' => 'Subiect',
     'template' => 'Șablon',
 
+    // Newsletter verification
+    'newsletter_requires_verification' => 'Pentru a trimite newslettere, configurați credențialele SMTP pe programul dvs. sau verificați numărul de telefon în setările profilului.',
+    'newsletter_verification_required_title' => 'Verificare necesară pentru trimiterea newsletterelor',
+    'newsletter_verification_required_body' => 'Pentru a trimite newslettere, <a href=":smtp_link" class="underline font-medium">configurați credențialele SMTP</a> pe programul dvs., sau <a href=":phone_link" class="underline font-medium">verificați numărul de telefon</a> în setările profilului.',
+
     // Newsletter limits
     'newsletter_limit_reached' => 'Ați atins limita lunară de e-mailuri newsletter (:used/:limit). Faceți upgrade la plan sau adăugați setări SMTP personalizate pentru trimiteri nelimitate.',
     'newsletters_per_month' => 'e-mailuri newsletter / lună',

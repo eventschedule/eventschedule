@@ -1602,6 +1602,11 @@ return [
     'subject' => 'Teema',
     'template' => 'Mall',
 
+    // Newsletter verification
+    'newsletter_requires_verification' => 'Uudiskirjade saatmiseks seadistage palun SMTP-mandaadid oma ajakavas või kinnitage oma telefoninumber profiiliseadetes.',
+    'newsletter_verification_required_title' => 'Uudiskirjade saatmiseks on vajalik kinnitus',
+    'newsletter_verification_required_body' => 'Uudiskirjade saatmiseks <a href=":smtp_link" class="underline font-medium">seadistage SMTP-mandaadid</a> oma ajakavas või <a href=":phone_link" class="underline font-medium">kinnitage oma telefoninumber</a> profiiliseadetes.',
+
     // Newsletter limits
     'newsletter_limit_reached' => 'Olete jõudnud oma igakuise uudiskirja e-kirjade limiidini (:used/:limit). Täiendage oma plaani või lisage kohandatud SMTP-sätted piiramatuks saatmiseks.',
     'newsletters_per_month' => 'uudiskirja e-kirjad / kuus',

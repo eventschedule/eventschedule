@@ -292,7 +292,7 @@ class AdminController extends Controller
             ->limit(10)
             ->get(['name', 'created_at', 'utm_source']);
 
-        // Stripe paid count
+        // Stripe paid count (verified, non-demo roles only)
         $validSubscriptionScope = function ($sq) {
             $sq->where(function ($q) {
                 $q->active();
@@ -302,9 +302,14 @@ class AdminController extends Controller
                 $q->onGracePeriod();
             });
         };
-        $stripePaidCount = Role::whereHas('subscriptions', $validSubscriptionScope)
+        $stripePaidCount = Role::whereNotNull('user_id')
+            ->where(function ($q) {
+                $q->whereNotNull('email_verified_at')
+                    ->orWhereNotNull('phone_verified_at');
+            })
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
             ->where('subdomain', 'not like', 'demo-%')
+            ->whereHas('subscriptions', $validSubscriptionScope)
             ->count();
 
         // Domains overview
@@ -1406,35 +1411,31 @@ class AdminController extends Controller
         }
         $freeCount = $totalRoleCount - $proCount - $enterpriseCount;
 
-        // Active Stripe subscriptions (excluding demo roles)
-        $stripePaidCount = Role::whereHas('subscriptions', $validSubscriptionScope)
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
+        // Active Stripe subscriptions (verified, non-demo roles only)
+        $stripePaidCount = Role::where($verifiedNonDemoScope)
+            ->whereHas('subscriptions', $validSubscriptionScope)
             ->count();
 
         // Manually assigned paid plans (have plan_expires, not free, no active Stripe subscription)
-        $manualPlanCount = Role::where('plan_type', '!=', 'free')
+        $manualPlanCount = Role::where($verifiedNonDemoScope)
+            ->where('plan_type', '!=', 'free')
             ->whereNotNull('plan_expires')
             ->where('plan_expires', '>=', now()->format('Y-m-d'))
             ->whereDoesntHave('subscriptions', $validSubscriptionScope)
             ->whereNull('trial_ends_at')
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
             ->count();
 
-        // Schedules currently on trial (excluding demo roles)
-        $trialCount = Role::whereNotNull('trial_ends_at')
+        // Schedules currently on trial (verified, non-demo roles only)
+        $trialCount = Role::where($verifiedNonDemoScope)
+            ->whereNotNull('trial_ends_at')
             ->where('trial_ends_at', '>', now())
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
             ->count();
 
-        // Expiring in 30 days (excluding demo roles)
-        $expiringSoon = Role::where('plan_type', '!=', 'free')
+        // Expiring in 30 days (verified, non-demo roles only)
+        $expiringSoon = Role::where($verifiedNonDemoScope)
+            ->where('plan_type', '!=', 'free')
             ->whereNotNull('plan_expires')
             ->whereBetween('plan_expires', [now()->format('Y-m-d'), now()->addDays(30)->format('Y-m-d')])
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
             ->count();
 
         // Build query for role list (excluding demo roles)

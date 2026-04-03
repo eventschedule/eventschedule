@@ -1592,6 +1592,11 @@ return [
     'subject' => 'Objet',
     'template' => 'Modèle',
 
+    // Newsletter verification
+    'newsletter_requires_verification' => 'Pour envoyer des newsletters, veuillez configurer les identifiants SMTP de votre agenda ou vérifier votre numéro de téléphone dans les paramètres de votre profil.',
+    'newsletter_verification_required_title' => 'Vérification requise pour envoyer des newsletters',
+    'newsletter_verification_required_body' => 'Pour envoyer des newsletters, veuillez soit <a href=":smtp_link" class="underline font-medium">configurer les identifiants SMTP</a> de votre agenda, soit <a href=":phone_link" class="underline font-medium">vérifier votre numéro de téléphone</a> dans les paramètres de votre profil.',
+
     // Newsletter limits
     'newsletter_limit_reached' => 'Vous avez atteint votre quota mensuel d\'e-mails de newsletter (:used/:limit). Passez à un plan supérieur ou configurez un SMTP personnalisé pour un envoi illimité.',
     'newsletters_per_month' => 'e-mails de newsletter / mois',

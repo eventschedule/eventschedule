@@ -1596,6 +1596,11 @@ return [
     'subject' => 'Onderwerp',
     'template' => 'Sjabloon',
 
+    // Newsletter verification
+    'newsletter_requires_verification' => 'Om nieuwsbrieven te verzenden, stel SMTP-gegevens in op uw schema of verifieer uw telefoonnummer in uw profielinstellingen.',
+    'newsletter_verification_required_title' => 'Verificatie vereist om nieuwsbrieven te verzenden',
+    'newsletter_verification_required_body' => 'Om nieuwsbrieven te verzenden, <a href=":smtp_link" class="underline font-medium">stel SMTP-gegevens in</a> op uw schema, of <a href=":phone_link" class="underline font-medium">verifieer uw telefoonnummer</a> in uw profielinstellingen.',
+
     // Newsletter limits
     'newsletter_limit_reached' => 'U heeft uw maandelijkse limiet voor nieuwsbrief-e-mails bereikt (:used/:limit). Upgrade uw plan of voeg aangepaste SMTP-instellingen toe voor onbeperkt verzenden.',
     'newsletters_per_month' => 'nieuwsbrief-e-mails / maand',

@@ -32,6 +32,20 @@ class NewsletterService
             return false;
         }
 
+        if (! $newsletter->isAdmin() && $role && config('app.hosted') && ! config('app.is_testing')) {
+            if (! $role->hasEmailSettings()) {
+                $newsletterUser = $newsletter->user;
+                if (! $newsletterUser || (! $newsletterUser->isAdmin() && ! $newsletterUser->hasVerifiedPhone())) {
+                    Log::warning('Newsletter send blocked: requires SMTP or phone verification', [
+                        'newsletter_id' => $newsletter->id,
+                        'role_id' => $newsletter->role_id,
+                    ]);
+
+                    return false;
+                }
+            }
+        }
+
         $sendToken = Str::random(64);
         $updated = Newsletter::where('id', $newsletter->id)
             ->whereIn('status', ['draft', 'scheduled'])

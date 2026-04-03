@@ -1591,6 +1591,11 @@ return [
     'subject' => 'נושא',
     'template' => 'תבנית',
 
+    // Newsletter verification
+    'newsletter_requires_verification' => 'כדי לשלוח ניוזלטרים, הגדר פרטי SMTP בלוח הזמנים שלך או אמת את מספר הטלפון שלך בהגדרות הפרופיל.',
+    'newsletter_verification_required_title' => 'נדרש אימות לשליחת ניוזלטרים',
+    'newsletter_verification_required_body' => 'כדי לשלוח ניוזלטרים, <a href=":smtp_link" class="underline font-medium">הגדר פרטי SMTP</a> בלוח הזמנים שלך, או <a href=":phone_link" class="underline font-medium">אמת את מספר הטלפון שלך</a> בהגדרות הפרופיל.',
+
     // Newsletter limits
     'newsletter_limit_reached' => 'הגעת למגבלת המיילים החודשית של ניוזלטרים (:used/:limit). שדרג את התוכנית שלך או הוסף הגדרות SMTP מותאמות אישית לשליחה ללא הגבלה.',
     'newsletters_per_month' => 'מיילים של ניוזלטר / חודש',

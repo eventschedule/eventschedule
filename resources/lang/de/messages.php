@@ -1593,6 +1593,11 @@ return [
     'subject' => 'Betreff',
     'template' => 'Vorlage',
 
+    // Newsletter verification
+    'newsletter_requires_verification' => 'Um Newsletter zu versenden, richten Sie bitte SMTP-Zugangsdaten in Ihrem Zeitplan ein oder verifizieren Sie Ihre Telefonnummer in Ihren Profileinstellungen.',
+    'newsletter_verification_required_title' => 'Verifizierung zum Versenden von Newslettern erforderlich',
+    'newsletter_verification_required_body' => 'Um Newsletter zu versenden, <a href=":smtp_link" class="underline font-medium">richten Sie bitte SMTP-Zugangsdaten ein</a> in Ihrem Zeitplan, oder <a href=":phone_link" class="underline font-medium">verifizieren Sie Ihre Telefonnummer</a> in Ihren Profileinstellungen.',
+
     // Newsletter limits
     'newsletter_limit_reached' => 'Sie haben Ihr monatliches Newsletter-E-Mail-Limit erreicht (:used/:limit). Upgraden Sie Ihren Plan oder fügen Sie benutzerdefinierte SMTP-Einstellungen für unbegrenzte Sendungen hinzu.',
     'newsletters_per_month' => 'Newsletter-E-Mails / Monat',

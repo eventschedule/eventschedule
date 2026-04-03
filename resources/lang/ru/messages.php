@@ -1604,6 +1604,11 @@ return [
     'subject' => 'Предмет',
     'template' => 'Шаблон',
 
+    // Newsletter verification
+    'newsletter_requires_verification' => 'Для отправки рассылок настройте учётные данные SMTP в вашем расписании или подтвердите номер телефона в настройках профиля.',
+    'newsletter_verification_required_title' => 'Для отправки рассылок требуется верификация',
+    'newsletter_verification_required_body' => 'Для отправки рассылок <a href=":smtp_link" class="underline font-medium">настройте учётные данные SMTP</a> в вашем расписании или <a href=":phone_link" class="underline font-medium">подтвердите номер телефона</a> в настройках профиля.',
+
     // Newsletter limits
     'newsletter_limit_reached' => 'Вы достигли месячного лимита писем рассылки (:used/:limit). Обновите свой план или добавьте собственные настройки SMTP для неограниченной отправки.',
     'newsletters_per_month' => 'писем рассылки / месяц',

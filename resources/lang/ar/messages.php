@@ -1590,6 +1590,11 @@ return [
     'subject' => 'الموضوع',
     'template' => 'قالب',
 
+    // Newsletter verification
+    'newsletter_requires_verification' => 'لإرسال النشرات البريدية، يرجى إعداد بيانات اعتماد SMTP في جدولك أو التحقق من رقم هاتفك في إعدادات ملفك الشخصي.',
+    'newsletter_verification_required_title' => 'التحقق مطلوب لإرسال النشرات البريدية',
+    'newsletter_verification_required_body' => 'لإرسال النشرات البريدية، يرجى إما <a href=":smtp_link" class="underline font-medium">إعداد بيانات اعتماد SMTP</a> في جدولك، أو <a href=":phone_link" class="underline font-medium">التحقق من رقم هاتفك</a> في إعدادات ملفك الشخصي.',
+
     // Newsletter limits
     'newsletter_limit_reached' => 'لقد وصلت إلى حد رسائل النشرة البريدية الشهري (:used/:limit). قم بترقية خطتك أو أضف إعدادات SMTP مخصصة لإرسال غير محدود.',
     'newsletters_per_month' => 'رسائل نشرة بريدية / شهر',

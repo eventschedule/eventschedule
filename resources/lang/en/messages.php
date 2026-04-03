@@ -1616,6 +1616,11 @@ return [
     'subject' => 'Subject',
     'template' => 'Template',
 
+    // Newsletter verification
+    'newsletter_requires_verification' => 'To send newsletters, please set up SMTP credentials on your schedule or verify your phone number in your profile settings.',
+    'newsletter_verification_required_title' => 'Verification required to send newsletters',
+    'newsletter_verification_required_body' => 'To send newsletters, please either <a href=":smtp_link" class="underline font-medium">set up SMTP credentials</a> on your schedule, or <a href=":phone_link" class="underline font-medium">verify your phone number</a> in your profile settings.',
+
     // Newsletter limits
     'newsletter_limit_reached' => 'You have reached your monthly newsletter email limit (:used/:limit). Upgrade your plan or add custom SMTP settings for unlimited sends.',
     'newsletters_per_month' => 'newsletter emails / month',

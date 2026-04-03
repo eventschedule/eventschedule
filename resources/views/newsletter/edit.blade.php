@@ -20,6 +20,8 @@
         </div>
         @endif
 
+        @include('newsletter.partials._verification-warning')
+
         @if ($role->newsletterLimit() !== null)
         @php
             $newsletterLimit = $role->newsletterLimit();

@@ -1598,6 +1598,11 @@ return [
     'subject' => 'Oggetto',
     'template' => 'Modello',
 
+    // Newsletter verification
+    'newsletter_requires_verification' => 'Per inviare newsletter, configura le credenziali SMTP nel tuo calendario o verifica il tuo numero di telefono nelle impostazioni del profilo.',
+    'newsletter_verification_required_title' => 'Verifica richiesta per inviare newsletter',
+    'newsletter_verification_required_body' => 'Per inviare newsletter, <a href=":smtp_link" class="underline font-medium">configura le credenziali SMTP</a> nel tuo calendario, oppure <a href=":phone_link" class="underline font-medium">verifica il tuo numero di telefono</a> nelle impostazioni del profilo.',
+
     // Newsletter limits
     'newsletter_limit_reached' => 'Hai raggiunto il limite mensile di e-mail newsletter (:used/:limit). Aggiorna il tuo piano o aggiungi impostazioni SMTP personalizzate per invii illimitati.',
     'newsletters_per_month' => 'e-mail newsletter / mese',
