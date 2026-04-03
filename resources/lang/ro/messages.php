@@ -1417,6 +1417,8 @@ return [
     'newsletter_cloned' => 'Buletin informativ clonat',
     'newsletter_sending' => 'Buletinul informativ se trimite',
     'newsletter_send_failed' => 'Trimiterea buletinului informativ a eșuat, vă rugăm să încercați din nou',
+    'newsletter_no_recipients' => 'Nu s-au găsit destinatari. Verificați setările segmentelor și asigurați-vă că aveți abonați.',
+    'newsletter_sync_queue_limit' => 'Acest buletin informativ are prea mulți destinatari pentru trimitere imediată. Vă rugăm să îl programați pentru un moment specific sau să configurați un driver de coadă în fundal.',
     'newsletter_sent' => 'Buletinul informativ a fost trimis',
     'newsletter_scheduled' => 'Buletin informativ programat',
     'newsletter_cancelled' => 'Programare anulată',
