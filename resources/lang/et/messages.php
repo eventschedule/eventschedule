@@ -1402,6 +1402,8 @@ return [
     'newsletter_cloned' => 'Kloonitud uudiskiri',
     'newsletter_sending' => 'Uudiskirja saadetakse',
     'newsletter_send_failed' => 'Uudiskirja saatmine ebaõnnestus, palun proovige uuesti',
+    'newsletter_no_recipients' => 'Adressaate ei leitud. Kontrolli oma segmendi seadeid ja veendu, et sul on tellijaid.',
+    'newsletter_sync_queue_limit' => 'Sellel uudiskirjal on koheseks saatmiseks liiga palju adressaate. Palun ajasta see kindlale ajale või seadista taustal töötav järjekorradraiver.',
     'newsletter_sent' => 'Uudiskiri on saadetud',
     'newsletter_scheduled' => 'Infoleht on ajastatud',
     'newsletter_cancelled' => 'Ajakava tühistatud',

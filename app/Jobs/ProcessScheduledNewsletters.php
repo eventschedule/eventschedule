@@ -31,6 +31,11 @@ class ProcessScheduledNewsletters
                         'newsletter_id' => $newsletter->id,
                         'role_id' => $newsletter->role_id,
                     ]);
+                } elseif (is_array($result) && $result[0] === 'no_recipients') {
+                    Log::warning('Scheduled newsletter has no recipients', [
+                        'newsletter_id' => $newsletter->id,
+                        'role_id' => $newsletter->role_id,
+                    ]);
                 } elseif (is_array($result) && $result[0] === 'limit_exceeded') {
                     Log::warning('Scheduled newsletter exceeded email limit', [
                         'newsletter_id' => $newsletter->id,

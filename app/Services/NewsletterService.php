@@ -53,9 +53,12 @@ class NewsletterService
             : $this->resolveRecipients($newsletter->role, $segmentIds);
 
         if ($recipients->isEmpty()) {
-            $newsletter->update(['status' => 'sent', 'sent_at' => now(), 'sent_count' => 0]);
+            $newsletter->update([
+                'status' => $newsletter->scheduled_at ? 'scheduled' : 'draft',
+                'send_token' => null,
+            ]);
 
-            return true;
+            return ['no_recipients', 0];
         }
 
         // Check if sending to these recipients would exceed the email limit

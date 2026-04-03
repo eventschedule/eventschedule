@@ -280,10 +280,26 @@ class NewsletterController extends Controller
             return back()->with('error', __('messages.newsletter_limit_reached', ['used' => $used, 'limit' => $limit]));
         }
 
+        // On sync queue, large sends would timeout the HTTP request - advise scheduling instead
+        if (config('queue.default') === 'sync') {
+            $segmentIds = $newsletter->segment_ids ?? [];
+            $estimatedCount = $newsletter->isAdmin()
+                ? $service->resolveAdminRecipients($segmentIds)->count()
+                : $service->resolveRecipients($role, $segmentIds)->count();
+
+            if ($estimatedCount > 50) {
+                return back()->with('error', __('messages.newsletter_sync_queue_limit'));
+            }
+        }
+
         $result = $service->send($newsletter);
 
         if ($result === false) {
             return back()->with('error', __('messages.newsletter_send_failed'));
+        }
+
+        if (is_array($result) && $result[0] === 'no_recipients') {
+            return back()->with('error', __('messages.newsletter_no_recipients'));
         }
 
         if (is_array($result) && $result[0] === 'limit_exceeded') {
@@ -945,29 +961,66 @@ class NewsletterController extends Controller
         $sampleB = $sample->slice($halfSize)->values();
 
         // Send each variant to its sample
-        foreach ([['newsletter' => $variants->where('ab_variant', 'A')->first(), 'recipients' => $sampleA],
-            ['newsletter' => $variants->where('ab_variant', 'B')->first(), 'recipients' => $sampleB]] as $variant) {
+        $variantData = [
+            ['newsletter' => $variants->where('ab_variant', 'A')->first(), 'recipients' => $sampleA],
+            ['newsletter' => $variants->where('ab_variant', 'B')->first(), 'recipients' => $sampleB],
+        ];
+
+        DB::beginTransaction();
+        try {
+            foreach ($variantData as $variant) {
+                $vn = $variant['newsletter'];
+
+                // Atomic status update to prevent double-send on double-click
+                $updated = Newsletter::where('id', $vn->id)
+                    ->whereIn('status', ['draft', 'scheduled'])
+                    ->update(['status' => 'sending', 'send_token' => Str::random(64)]);
+
+                if ($updated === 0) {
+                    continue;
+                }
+
+                $vn->refresh();
+
+                foreach ($variant['recipients'] as $recipient) {
+                    NewsletterRecipient::create([
+                        'newsletter_id' => $vn->id,
+                        'user_id' => $recipient->user_id,
+                        'email' => $recipient->email,
+                        'name' => $recipient->name,
+                        'token' => Str::random(64),
+                        'status' => 'pending',
+                    ]);
+                }
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // Reset variant statuses
+            foreach ($variantData as $variant) {
+                $variant['newsletter']?->update(['status' => 'draft', 'send_token' => null]);
+            }
+            $abTest->update(['status' => 'pending']);
+            report($e);
+
+            return back()->with('error', __('messages.newsletter_send_failed'));
+        }
+
+        // Dispatch batch jobs outside the transaction
+        foreach ($variantData as $variant) {
             $vn = $variant['newsletter'];
-            $vn->update(['status' => 'sending', 'send_token' => Str::random(64)]);
-
-            $recipientIds = [];
-            foreach ($variant['recipients'] as $recipient) {
-                $nr = NewsletterRecipient::create([
-                    'newsletter_id' => $vn->id,
-                    'user_id' => $recipient->user_id,
-                    'email' => $recipient->email,
-                    'name' => $recipient->name,
-                    'token' => Str::random(64),
-                    'status' => 'pending',
-                ]);
-                $recipientIds[] = $nr->id;
+            if ($vn->status !== 'sending') {
+                continue;
             }
 
-            $chunks = array_chunk($recipientIds, 50);
-            foreach ($chunks as $index => $chunk) {
-                \App\Jobs\SendNewsletterBatch::dispatch($vn->id, $chunk)
-                    ->delay(now()->addSeconds($index * 15));
-            }
+            $batchIndex = 0;
+            NewsletterRecipient::where('newsletter_id', $vn->id)
+                ->where('status', 'pending')
+                ->chunkById(50, function ($recipientChunk) use ($vn, &$batchIndex) {
+                    \App\Jobs\SendNewsletterBatch::dispatch($vn->id, $recipientChunk->pluck('id')->toArray())
+                        ->delay(now()->addSeconds($batchIndex * 15));
+                    $batchIndex++;
+                });
         }
 
         // Schedule winner evaluation

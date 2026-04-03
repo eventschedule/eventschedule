@@ -1398,6 +1398,8 @@ return [
     'newsletter_cloned' => 'Newsletter clonata',
     'newsletter_sending' => 'La newsletter e in fase di invio',
     'newsletter_send_failed' => 'Invio della newsletter non riuscito, riprova',
+    'newsletter_no_recipients' => 'Nessun destinatario trovato. Controlla le impostazioni dei segmenti e assicurati di avere iscritti.',
+    'newsletter_sync_queue_limit' => 'Questa newsletter ha troppi destinatari per l\'invio immediato. Programmala per un orario specifico o configura un driver di coda in background.',
     'newsletter_sent' => 'La newsletter e stata inviata',
     'newsletter_scheduled' => 'Newsletter programmata',
     'newsletter_cancelled' => 'Programmazione annullata',

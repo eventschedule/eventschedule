@@ -1393,6 +1393,8 @@ return [
     'newsletter_cloned' => 'Newsletter geklont',
     'newsletter_sending' => 'Newsletter wird gesendet',
     'newsletter_send_failed' => 'Newsletter konnte nicht gesendet werden, bitte versuchen Sie es erneut',
+    'newsletter_no_recipients' => 'Keine Empfänger gefunden. Überprüfen Sie Ihre Segmenteinstellungen und stellen Sie sicher, dass Sie Abonnenten haben.',
+    'newsletter_sync_queue_limit' => 'Dieser Newsletter hat zu viele Empfänger für den sofortigen Versand. Bitte planen Sie ihn für einen bestimmten Zeitpunkt oder konfigurieren Sie einen Hintergrund-Warteschlangentreiber.',
     'newsletter_sent' => 'Newsletter wurde gesendet',
     'newsletter_scheduled' => 'Newsletter geplant',
     'newsletter_cancelled' => 'Planung abgebrochen',

@@ -166,10 +166,23 @@ class AdminNewsletterController extends Controller
             return back()->with('error', __('messages.newsletter_already_sent'));
         }
 
+        // On sync queue, large sends would timeout the HTTP request - advise scheduling instead
+        if (config('queue.default') === 'sync') {
+            $estimatedCount = $service->resolveAdminRecipients($newsletter->segment_ids ?? [])->count();
+
+            if ($estimatedCount > 50) {
+                return back()->with('error', __('messages.newsletter_sync_queue_limit'));
+            }
+        }
+
         $result = $service->send($newsletter);
 
         if ($result === false) {
             return back()->with('error', __('messages.newsletter_send_failed'));
+        }
+
+        if (is_array($result) && $result[0] === 'no_recipients') {
+            return back()->with('error', __('messages.newsletter_no_recipients'));
         }
 
         return redirect()->route('admin.newsletters.index')

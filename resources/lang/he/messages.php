@@ -1391,6 +1391,8 @@ return [
     'newsletter_cloned' => 'הניוזלטר שוכפל',
     'newsletter_sending' => 'הניוזלטר נשלח',
     'newsletter_send_failed' => 'שליחת הניוזלטר נכשלה, אנא נסו שוב',
+    'newsletter_no_recipients' => 'לא נמצאו נמענים. בדוק את הגדרות הפלחים שלך וודא שיש לך מנויים.',
+    'newsletter_sync_queue_limit' => 'לניוזלטר זה יש יותר מדי נמענים לשליחה מיידית. אנא תזמן אותו לשעה ספציפית, או הגדר מנהל תור ברקע.',
     'newsletter_sent' => 'הניוזלטר נשלח בהצלחה',
     'newsletter_scheduled' => 'הניוזלטר תוזמן',
     'newsletter_cancelled' => 'התזמון בוטל',

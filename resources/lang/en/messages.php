@@ -1416,6 +1416,8 @@ return [
     'newsletter_cloned' => 'Newsletter cloned',
     'newsletter_sending' => 'Newsletter is being sent',
     'newsletter_send_failed' => 'Failed to send newsletter, please try again',
+    'newsletter_no_recipients' => 'No recipients found. Check your segment settings and make sure you have subscribers.',
+    'newsletter_sync_queue_limit' => 'This newsletter has too many recipients for immediate sending. Please schedule it for a specific time instead, or configure a background queue driver.',
     'newsletter_sent' => 'Newsletter has been sent',
     'newsletter_scheduled' => 'Newsletter scheduled',
     'newsletter_cancelled' => 'Schedule cancelled',

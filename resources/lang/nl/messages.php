@@ -1396,6 +1396,8 @@ return [
     'newsletter_cloned' => 'Nieuwsbrief gekloond',
     'newsletter_sending' => 'Nieuwsbrief wordt verzonden',
     'newsletter_send_failed' => 'Verzenden van nieuwsbrief mislukt, probeer het opnieuw',
+    'newsletter_no_recipients' => 'Geen ontvangers gevonden. Controleer je segmentinstellingen en zorg dat je abonnees hebt.',
+    'newsletter_sync_queue_limit' => 'Deze nieuwsbrief heeft te veel ontvangers voor directe verzending. Plan deze in voor een specifiek tijdstip of configureer een achtergrond-wachtrijdriver.',
     'newsletter_sent' => 'Nieuwsbrief is verzonden',
     'newsletter_scheduled' => 'Nieuwsbrief ingepland',
     'newsletter_cancelled' => 'Planning geannuleerd',

@@ -1392,6 +1392,8 @@ return [
     'newsletter_cloned' => 'Newsletter clonée',
     'newsletter_sending' => 'La newsletter est en cours d\'envoi',
     'newsletter_send_failed' => 'Échec de l\'envoi de la newsletter, veuillez réessayer',
+    'newsletter_no_recipients' => 'Aucun destinataire trouvé. Vérifiez les paramètres de vos segments et assurez-vous d\'avoir des abonnés.',
+    'newsletter_sync_queue_limit' => 'Cette newsletter a trop de destinataires pour un envoi immédiat. Veuillez la programmer pour un horaire précis ou configurer un pilote de file d\'attente en arrière-plan.',
     'newsletter_sent' => 'La newsletter a été envoyée',
     'newsletter_scheduled' => 'Newsletter programmée',
     'newsletter_cancelled' => 'Programmation annulée',
@@ -2843,7 +2845,7 @@ return [
     'carpool_status_approved' => 'Approuvée',
     'carpool_status_declined' => 'Refusée',
     'carpool_status_cancelled' => 'Annulée',
-    
+
     // Carpool emails
     'carpool_email_ride_requested_subject' => 'Nouvelle demande de trajet pour :event',
     'carpool_email_ride_requested_heading' => 'Nouvelle demande de trajet',

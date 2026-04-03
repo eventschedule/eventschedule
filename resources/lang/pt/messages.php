@@ -1397,6 +1397,8 @@ return [
     'newsletter_cloned' => 'Newsletter clonada',
     'newsletter_sending' => 'A newsletter esta sendo enviada',
     'newsletter_send_failed' => 'Falha ao enviar a newsletter, por favor tente novamente',
+    'newsletter_no_recipients' => 'Nenhum destinatário encontrado. Verifique as configurações dos seus segmentos e certifique-se de ter assinantes.',
+    'newsletter_sync_queue_limit' => 'Esta newsletter tem muitos destinatários para envio imediato. Agende-a para um horário específico ou configure um driver de fila em segundo plano.',
     'newsletter_sent' => 'A newsletter foi enviada',
     'newsletter_scheduled' => 'Newsletter agendada',
     'newsletter_cancelled' => 'Agendamento cancelado',

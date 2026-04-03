@@ -1389,6 +1389,8 @@ return [
     'newsletter_cloned' => 'Boletin clonado',
     'newsletter_sending' => 'El boletin se esta enviando',
     'newsletter_send_failed' => 'Error al enviar el boletín, por favor inténtelo de nuevo',
+    'newsletter_no_recipients' => 'No se encontraron destinatarios. Revisa la configuración de tus segmentos y asegúrate de tener suscriptores.',
+    'newsletter_sync_queue_limit' => 'Este boletín tiene demasiados destinatarios para el envío inmediato. Prográmalo para un horario específico o configura un controlador de cola en segundo plano.',
     'newsletter_sent' => 'El boletin ha sido enviado',
     'newsletter_scheduled' => 'Boletin programado',
     'newsletter_cancelled' => 'Programacion cancelada',
