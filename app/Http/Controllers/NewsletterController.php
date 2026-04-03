@@ -282,6 +282,10 @@ class NewsletterController extends Controller
 
         $result = $service->send($newsletter);
 
+        if ($result === false) {
+            return back()->with('error', __('messages.newsletter_send_failed'));
+        }
+
         if (is_array($result) && $result[0] === 'limit_exceeded') {
             $recipientCount = $result[1];
             $limit = $role->newsletterLimit();

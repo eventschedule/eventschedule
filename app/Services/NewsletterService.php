@@ -527,9 +527,10 @@ class NewsletterService
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
+            $remainderNewsletter->update(['status' => 'draft', 'send_token' => null]);
             report($e);
 
-            return;
+            throw $e;
         }
 
         $recipientIds = NewsletterRecipient::where('newsletter_id', $remainderNewsletter->id)

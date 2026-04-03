@@ -90,6 +90,13 @@ class SendNewsletterBatch implements ShouldQueue
             'error' => $exception->getMessage(),
         ]);
 
+        NewsletterRecipient::whereIn('id', $this->recipientIds)
+            ->where('status', 'pending')
+            ->update([
+                'status' => 'failed',
+                'error_message' => substr($exception->getMessage(), 0, 500),
+            ]);
+
         $newsletter = Newsletter::find($this->newsletterId);
         if ($newsletter) {
             $this->updateNewsletterCounts($newsletter);
