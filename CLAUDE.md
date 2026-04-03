@@ -184,7 +184,7 @@ Key configuration in `.env`:
 
 ## Localization
 
-11 languages supported in `resources/lang/`: EN, ES, DE, FR, IT, PT, HE, NL, AR, ET, RU
+Supported languages are defined in `config('app.supported_languages')`. Each has a corresponding directory in `resources/lang/`.
 
 ```bash
 # Check for missing translation keys across all languages
