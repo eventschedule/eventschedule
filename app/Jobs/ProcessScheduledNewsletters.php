@@ -87,7 +87,8 @@ class ProcessScheduledNewsletters
                 ]);
                 $chunks = array_chunk($pendingIds, 50);
                 foreach ($chunks as $index => $chunk) {
-                    SendNewsletterBatch::dispatch($stuck->id, $chunk);
+                    SendNewsletterBatch::dispatch($stuck->id, $chunk)
+                        ->delay(now()->addSeconds($index * 15));
                 }
                 $stuck->touch(); // Reset updated_at so recovery doesn't re-trigger for 1 hour
             }

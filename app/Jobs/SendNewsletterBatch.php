@@ -65,6 +65,12 @@ class SendNewsletterBatch implements ShouldQueue
                         'newsletter_id' => $this->newsletterId,
                         'recipient_id' => $recipient->id,
                     ]);
+                    if ($recipient->status === 'pending') {
+                        $recipient->update([
+                            'status' => 'failed',
+                            'error_message' => substr($e->getMessage(), 0, 500),
+                        ]);
+                    }
                 }
                 usleep(200000); // 200ms throttle between sends
             }

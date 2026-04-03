@@ -70,22 +70,31 @@ class NewsletterService
             }
         }
 
-        $recipientIds = [];
+        $recipientData = [];
         foreach ($recipients as $recipient) {
-            $nr = NewsletterRecipient::create([
+            $recipientData[] = [
                 'newsletter_id' => $newsletter->id,
                 'user_id' => $recipient->user_id,
                 'email' => $recipient->email,
                 'name' => $recipient->name,
                 'token' => Str::random(64),
                 'status' => 'pending',
-            ]);
-            $recipientIds[] = $nr->id;
+            ];
         }
+
+        foreach (array_chunk($recipientData, 500) as $chunk) {
+            NewsletterRecipient::insert($chunk);
+        }
+
+        $recipientIds = NewsletterRecipient::where('newsletter_id', $newsletter->id)
+            ->where('status', 'pending')
+            ->pluck('id')
+            ->toArray();
 
         $chunks = array_chunk($recipientIds, 50);
         foreach ($chunks as $index => $chunk) {
-            SendNewsletterBatch::dispatch($newsletter->id, $chunk);
+            SendNewsletterBatch::dispatch($newsletter->id, $chunk)
+                ->delay(now()->addSeconds($index * 15));
         }
 
         return true;
@@ -179,10 +188,10 @@ class NewsletterService
             ->map(fn ($email) => strtolower($email))
             ->toArray();
 
-        $excludeEmails = array_merge($unsubscribedEmails, $unsubscribedUserEmails);
+        $excludeEmails = array_flip(array_merge($unsubscribedEmails, $unsubscribedUserEmails));
 
         $allRecipients = $allRecipients->filter(function ($recipient) use ($excludeEmails) {
-            return ! in_array($recipient->email, $excludeEmails)
+            return ! isset($excludeEmails[$recipient->email])
                 && ! $this->isTestEmail($recipient->email);
         });
 
@@ -214,12 +223,14 @@ class NewsletterService
             }
 
             // Safety net: filter unsubscribed users regardless of segment implementation
-            $unsubscribedEmails = \App\Models\User::whereNotNull('admin_newsletter_unsubscribed_at')
-                ->orWhere('is_subscribed', false)
-                ->pluck('email')
-                ->map(fn ($e) => strtolower($e))
-                ->all();
-            $allRecipients = $allRecipients->reject(fn ($r) => in_array($r->email, $unsubscribedEmails));
+            $unsubscribedEmails = array_flip(
+                \App\Models\User::whereNotNull('admin_newsletter_unsubscribed_at')
+                    ->orWhere('is_subscribed', false)
+                    ->pluck('email')
+                    ->map(fn ($e) => strtolower($e))
+                    ->all()
+            );
+            $allRecipients = $allRecipients->reject(fn ($r) => isset($unsubscribedEmails[$r->email]));
         }
 
         // Deduplicate by lowercase email
@@ -442,16 +453,18 @@ class NewsletterService
         }
 
         // Get all emails already sent in the A/B test
-        $sentEmails = NewsletterRecipient::whereIn('newsletter_id', $abTest->newsletters->pluck('id'))
-            ->pluck('email')
-            ->map(fn ($e) => strtolower($e))
-            ->toArray();
+        $sentEmails = array_flip(
+            NewsletterRecipient::whereIn('newsletter_id', $abTest->newsletters->pluck('id'))
+                ->pluck('email')
+                ->map(fn ($e) => strtolower($e))
+                ->toArray()
+        );
 
         // Resolve full recipient list and remove already-sent
         $allRecipients = $winnerNewsletter->isAdmin()
             ? $this->resolveAdminRecipients($winnerNewsletter->segment_ids ?? [])
             : $this->resolveRecipients($winnerNewsletter->role, $winnerNewsletter->segment_ids ?? []);
-        $remaining = $allRecipients->filter(fn ($r) => ! in_array($r->email, $sentEmails));
+        $remaining = $allRecipients->filter(fn ($r) => ! isset($sentEmails[$r->email]));
 
         if (! $remainderNewsletter) {
             if ($remaining->isEmpty()) {
@@ -467,33 +480,44 @@ class NewsletterService
         }
 
         // Exclude recipients already created on the remainder newsletter
-        $existingRemainderEmails = NewsletterRecipient::where('newsletter_id', $remainderNewsletter->id)
-            ->pluck('email')
-            ->map(fn ($e) => strtolower($e))
-            ->toArray();
+        $existingRemainderEmails = array_flip(
+            NewsletterRecipient::where('newsletter_id', $remainderNewsletter->id)
+                ->pluck('email')
+                ->map(fn ($e) => strtolower($e))
+                ->toArray()
+        );
 
-        $remaining = $remaining->filter(fn ($r) => ! in_array($r->email, $existingRemainderEmails));
+        $remaining = $remaining->filter(fn ($r) => ! isset($existingRemainderEmails[$r->email]));
 
         if ($remaining->isEmpty()) {
             return;
         }
 
-        $recipientIds = [];
+        $recipientData = [];
         foreach ($remaining as $recipient) {
-            $nr = NewsletterRecipient::create([
+            $recipientData[] = [
                 'newsletter_id' => $remainderNewsletter->id,
                 'user_id' => $recipient->user_id,
                 'email' => $recipient->email,
                 'name' => $recipient->name,
                 'token' => Str::random(64),
                 'status' => 'pending',
-            ]);
-            $recipientIds[] = $nr->id;
+            ];
         }
+
+        foreach (array_chunk($recipientData, 500) as $chunk) {
+            NewsletterRecipient::insert($chunk);
+        }
+
+        $recipientIds = NewsletterRecipient::where('newsletter_id', $remainderNewsletter->id)
+            ->where('status', 'pending')
+            ->pluck('id')
+            ->toArray();
 
         $chunks = array_chunk($recipientIds, 50);
         foreach ($chunks as $index => $chunk) {
-            SendNewsletterBatch::dispatch($remainderNewsletter->id, $chunk);
+            SendNewsletterBatch::dispatch($remainderNewsletter->id, $chunk)
+                ->delay(now()->addSeconds($index * 15));
         }
     }
 

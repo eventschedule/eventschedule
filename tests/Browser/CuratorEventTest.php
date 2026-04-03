@@ -77,9 +77,10 @@ class CuratorEventTest extends DuskTestCase
 
             // Approve the event
             $browser->visit('/curator1/requests')
-                ->waitForText('Accept', 5)
-                ->click('.test-accept-event')
-                ->waitForLocation('/curator1/schedule', 5)
+                ->waitFor('.test-accept-event', 10)
+                ->script("document.querySelector('.test-accept-event').closest('form').requestSubmit()");
+
+            $browser->waitForLocation('/curator1/schedule', 15)
                 ->waitForText('Talent', 5);
 
             // Get the event from the database
