@@ -1416,6 +1416,7 @@ return [
     'newsletter_deleted' => 'Buletin informativ șters',
     'newsletter_cloned' => 'Buletin informativ clonat',
     'newsletter_sending' => 'Buletinul informativ se trimite',
+    'newsletter_send_failed' => 'Trimiterea buletinului informativ a eșuat, vă rugăm să încercați din nou',
     'newsletter_sent' => 'Buletinul informativ a fost trimis',
     'newsletter_scheduled' => 'Buletin informativ programat',
     'newsletter_cancelled' => 'Programare anulată',

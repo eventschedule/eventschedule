@@ -1391,6 +1391,7 @@ return [
     'newsletter_deleted' => 'Newsletter supprimée',
     'newsletter_cloned' => 'Newsletter clonée',
     'newsletter_sending' => 'La newsletter est en cours d\'envoi',
+    'newsletter_send_failed' => 'Échec de l\'envoi de la newsletter, veuillez réessayer',
     'newsletter_sent' => 'La newsletter a été envoyée',
     'newsletter_scheduled' => 'Newsletter programmée',
     'newsletter_cancelled' => 'Programmation annulée',

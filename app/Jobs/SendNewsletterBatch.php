@@ -98,16 +98,16 @@ class SendNewsletterBatch implements ShouldQueue
 
     protected function updateNewsletterCounts(Newsletter $newsletter): void
     {
-        $newsletter->update([
-            'sent_count' => $newsletter->recipients()->where('status', 'sent')->count(),
-        ]);
-
-        // Check if all recipients have been processed (sent, failed, or skipped)
         $pendingCount = $newsletter->recipients()->where('status', 'pending')->count();
+        $sentCount = $newsletter->recipients()->where('status', 'sent')->count();
+
         if ($pendingCount === 0) {
+            // Final update: set sent_count + status in one query to avoid race
             Newsletter::where('id', $newsletter->id)
                 ->where('status', 'sending')
-                ->update(['status' => 'sent', 'sent_at' => now()]);
+                ->update(['status' => 'sent', 'sent_at' => now(), 'sent_count' => $sentCount]);
+        } else {
+            $newsletter->update(['sent_count' => $sentCount]);
         }
     }
 }

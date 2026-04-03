@@ -1401,6 +1401,7 @@ return [
     'newsletter_deleted' => 'Uudiskiri kustutatud',
     'newsletter_cloned' => 'Kloonitud uudiskiri',
     'newsletter_sending' => 'Uudiskirja saadetakse',
+    'newsletter_send_failed' => 'Uudiskirja saatmine ebaõnnestus, palun proovige uuesti',
     'newsletter_sent' => 'Uudiskiri on saadetud',
     'newsletter_scheduled' => 'Infoleht on ajastatud',
     'newsletter_cancelled' => 'Ajakava tühistatud',

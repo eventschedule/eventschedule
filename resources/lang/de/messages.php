@@ -1392,6 +1392,7 @@ return [
     'newsletter_deleted' => 'Newsletter geloscht',
     'newsletter_cloned' => 'Newsletter geklont',
     'newsletter_sending' => 'Newsletter wird gesendet',
+    'newsletter_send_failed' => 'Newsletter konnte nicht gesendet werden, bitte versuchen Sie es erneut',
     'newsletter_sent' => 'Newsletter wurde gesendet',
     'newsletter_scheduled' => 'Newsletter geplant',
     'newsletter_cancelled' => 'Planung abgebrochen',

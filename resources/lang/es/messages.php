@@ -1388,6 +1388,7 @@ return [
     'newsletter_deleted' => 'Boletin eliminado',
     'newsletter_cloned' => 'Boletin clonado',
     'newsletter_sending' => 'El boletin se esta enviando',
+    'newsletter_send_failed' => 'Error al enviar el boletín, por favor inténtelo de nuevo',
     'newsletter_sent' => 'El boletin ha sido enviado',
     'newsletter_scheduled' => 'Boletin programado',
     'newsletter_cancelled' => 'Programacion cancelada',

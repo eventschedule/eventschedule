@@ -12,6 +12,7 @@ use App\Models\Role;
 use App\Utils\MarkdownUtils;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -82,8 +83,21 @@ class NewsletterService
             ];
         }
 
-        foreach (array_chunk($recipientData, 500) as $chunk) {
-            NewsletterRecipient::insert($chunk);
+        DB::beginTransaction();
+        try {
+            foreach (array_chunk($recipientData, 500) as $chunk) {
+                NewsletterRecipient::insert($chunk);
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $newsletter->update([
+                'status' => $newsletter->scheduled_at ? 'scheduled' : 'draft',
+                'send_token' => null,
+            ]);
+            report($e);
+
+            return false;
         }
 
         $recipientIds = NewsletterRecipient::where('newsletter_id', $newsletter->id)
@@ -505,8 +519,17 @@ class NewsletterService
             ];
         }
 
-        foreach (array_chunk($recipientData, 500) as $chunk) {
-            NewsletterRecipient::insert($chunk);
+        DB::beginTransaction();
+        try {
+            foreach (array_chunk($recipientData, 500) as $chunk) {
+                NewsletterRecipient::insert($chunk);
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            report($e);
+
+            return;
         }
 
         $recipientIds = NewsletterRecipient::where('newsletter_id', $remainderNewsletter->id)

@@ -1415,6 +1415,7 @@ return [
     'newsletter_deleted' => 'Newsletter deleted',
     'newsletter_cloned' => 'Newsletter cloned',
     'newsletter_sending' => 'Newsletter is being sent',
+    'newsletter_send_failed' => 'Failed to send newsletter, please try again',
     'newsletter_sent' => 'Newsletter has been sent',
     'newsletter_scheduled' => 'Newsletter scheduled',
     'newsletter_cancelled' => 'Schedule cancelled',

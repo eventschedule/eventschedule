@@ -1390,6 +1390,7 @@ return [
     'newsletter_deleted' => 'הניוזלטר נמחק',
     'newsletter_cloned' => 'הניוזלטר שוכפל',
     'newsletter_sending' => 'הניוזלטר נשלח',
+    'newsletter_send_failed' => 'שליחת הניוזלטר נכשלה, אנא נסו שוב',
     'newsletter_sent' => 'הניוזלטר נשלח בהצלחה',
     'newsletter_scheduled' => 'הניוזלטר תוזמן',
     'newsletter_cancelled' => 'התזמון בוטל',

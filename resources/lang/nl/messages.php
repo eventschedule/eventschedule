@@ -1395,6 +1395,7 @@ return [
     'newsletter_deleted' => 'Nieuwsbrief verwijderd',
     'newsletter_cloned' => 'Nieuwsbrief gekloond',
     'newsletter_sending' => 'Nieuwsbrief wordt verzonden',
+    'newsletter_send_failed' => 'Verzenden van nieuwsbrief mislukt, probeer het opnieuw',
     'newsletter_sent' => 'Nieuwsbrief is verzonden',
     'newsletter_scheduled' => 'Nieuwsbrief ingepland',
     'newsletter_cancelled' => 'Planning geannuleerd',

@@ -85,7 +85,7 @@ class AdminNewsletterController extends Controller
             'blocks' => $blocks,
             'template' => $validated['template'],
             'style_settings' => $this->sanitizeStyleSettings($validated['style_settings'] ?? null),
-            'segment_ids' => !empty($validated['segment_ids']) ? array_map('intval', $validated['segment_ids']) : null,
+            'segment_ids' => ! empty($validated['segment_ids']) ? array_map('intval', $validated['segment_ids']) : null,
             'status' => 'draft',
         ]);
 
@@ -134,7 +134,7 @@ class AdminNewsletterController extends Controller
             'blocks' => $blocks,
             'template' => $validated['template'],
             'style_settings' => $this->sanitizeStyleSettings($validated['style_settings'] ?? null),
-            'segment_ids' => !empty($validated['segment_ids']) ? array_map('intval', $validated['segment_ids']) : null,
+            'segment_ids' => ! empty($validated['segment_ids']) ? array_map('intval', $validated['segment_ids']) : null,
         ]);
 
         return back()->with('status', __('messages.newsletter_saved'));
@@ -166,7 +166,11 @@ class AdminNewsletterController extends Controller
             return back()->with('error', __('messages.newsletter_already_sent'));
         }
 
-        $service->send($newsletter);
+        $result = $service->send($newsletter);
+
+        if ($result === false) {
+            return back()->with('error', __('messages.newsletter_send_failed'));
+        }
 
         return redirect()->route('admin.newsletters.index')
             ->with('status', __('messages.newsletter_sending'));

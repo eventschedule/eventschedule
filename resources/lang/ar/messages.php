@@ -1389,6 +1389,7 @@ return [
     'newsletter_deleted' => 'تم حذف النشرة البريدية',
     'newsletter_cloned' => 'تم استنساخ النشرة البريدية',
     'newsletter_sending' => 'جاري إرسال النشرة البريدية',
+    'newsletter_send_failed' => 'فشل إرسال النشرة البريدية، يرجى المحاولة مرة أخرى',
     'newsletter_sent' => 'تم إرسال النشرة البريدية',
     'newsletter_scheduled' => 'تمت جدولة النشرة البريدية',
     'newsletter_cancelled' => 'تم إلغاء الجدولة',
