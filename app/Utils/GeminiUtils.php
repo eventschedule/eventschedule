@@ -82,7 +82,7 @@ class GeminiUtils
             CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
             CURLOPT_POSTFIELDS => json_encode($data),
             CURLOPT_CONNECTTIMEOUT => 10,
-            CURLOPT_TIMEOUT => 55,
+            CURLOPT_TIMEOUT => $options['timeout'] ?? 55,
         ]);
 
         $response = curl_exec($ch);
