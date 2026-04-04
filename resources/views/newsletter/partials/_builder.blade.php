@@ -1,5 +1,6 @@
 @php
 $isAdmin = $isAdmin ?? false;
+$isTemplateMode = $isTemplateMode ?? false;
 
 $templateDefaults = [
     'modern' => \App\Models\Newsletter::templateDefaults('modern'),
@@ -71,6 +72,9 @@ if ($isAdmin) {
         $routesData['test_send'] = route('admin.newsletters.test_send', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
         $routesData['schedule'] = route('admin.newsletters.schedule', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
         $routesData['send'] = route('admin.newsletters.send', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
+        if (!$isTemplateMode) {
+            $routesData['save_as_template'] = route('admin.newsletters.save_as_template', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
+        }
     }
 
     $previewUrl = isset($newsletter) && $newsletter->exists
@@ -84,6 +88,9 @@ if ($isAdmin) {
         $routesData['test_send'] = route('newsletter.test_send', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
         $routesData['schedule'] = route('newsletter.schedule', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
         $routesData['send'] = route('newsletter.send', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
+        if (!$isTemplateMode) {
+            $routesData['save_as_template'] = route('newsletter.save_as_template', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
+        }
     }
 
     $previewUrl = isset($newsletter) && $newsletter->exists
@@ -115,6 +122,7 @@ $builderProps = [
     'roleEmail' => $isAdmin ? (auth()->user()->email ?? '') : ($role->email ?? ''),
     'roleName' => $isAdmin ? config('app.name') : ($role->name ?? ''),
     'abTestHtml' => $abTestHtml,
+    'isTemplateMode' => $isTemplateMode,
     'availableBlockTypes' => $isAdmin
         ? ['heading', 'text', 'button', 'image', 'video', 'divider', 'spacer', 'social_links', 'quote', 'offer']
         : ['heading', 'text', 'events', 'button', 'image', 'video', 'divider', 'spacer', 'social_links', 'quote', 'profile_image', 'header_banner'],
@@ -216,6 +224,9 @@ $builderProps = [
         'quote_text' => __('messages.quote_text'),
         'quote_author' => __('messages.quote_author'),
         'quote_author_title' => __('messages.quote_author_title'),
+        'save_as_template' => __('messages.save_as_template'),
+        'template_name' => __('messages.template_name'),
+        'template_name_placeholder' => __('messages.template_name_placeholder'),
     ],
 ];
 @endphp

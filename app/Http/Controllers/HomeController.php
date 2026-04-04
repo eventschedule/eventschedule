@@ -191,6 +191,8 @@ class HomeController extends Controller
             $trafficSources = $analyticsService->getTopReferrerDomains($user, $trafficCount, $trafficStart, $now);
         }
 
+        $canCreateSchedule = ! config('app.hosted') || $user->roles()->where('is_deleted', false)->count() < 50;
+
         return view('home', compact(
             'events',
             'month',
@@ -212,6 +214,7 @@ class HomeController extends Controller
             'latestNewsletters',
             'boostCampaigns',
             'trafficSources',
+            'canCreateSchedule',
         ));
     }
 

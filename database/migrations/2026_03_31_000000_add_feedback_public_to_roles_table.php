@@ -8,9 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('roles', function (Blueprint $table) {
-            $table->boolean('feedback_public')->default(false);
-        });
+        if (! Schema::hasColumn('roles', 'feedback_public')) {
+            Schema::table('roles', function (Blueprint $table) {
+                $table->boolean('feedback_public')->default(false);
+            });
+        }
     }
 
     public function down(): void

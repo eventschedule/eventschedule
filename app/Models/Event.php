@@ -701,14 +701,14 @@ class Event extends Model
         return $value;
     }
 
-    public function scopeInMonth($query, $startOfMonthUtc)
+    public function scopeInMonth($query, $gridStartUtc)
     {
-        return $query->where(function ($q) use ($startOfMonthUtc) {
-            $q->where('starts_at', '>=', $startOfMonthUtc)
+        return $query->where(function ($q) use ($gridStartUtc) {
+            $q->where('starts_at', '>=', $gridStartUtc)
                 ->orWhereNotNull('days_of_week')
-                ->orWhere(function ($q2) use ($startOfMonthUtc) {
+                ->orWhere(function ($q2) use ($gridStartUtc) {
                     $q2->where('duration', '>=', 24)
-                        ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [$startOfMonthUtc]);
+                        ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [$gridStartUtc]);
                 });
         });
     }

@@ -218,6 +218,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/newsletter-segments/{hash}/users/{userHash}', [NewsletterController::class, 'deleteSegmentUser'])->name('newsletter.segment.user.delete');
     Route::get('/newsletter-import', [NewsletterController::class, 'importForm'])->name('newsletter.import');
     Route::post('/newsletter-import', [NewsletterController::class, 'importStore'])->name('newsletter.import.store');
+    Route::get('/newsletter-templates', [NewsletterController::class, 'templates'])->name('newsletter.templates');
+    Route::get('/newsletter-templates/create', [NewsletterController::class, 'createTemplate'])->name('newsletter.template.create');
+    Route::post('/newsletter-templates', [NewsletterController::class, 'storeTemplate'])->name('newsletter.template.store');
+    Route::get('/newsletter-templates/{hash}/edit', [NewsletterController::class, 'editTemplate'])->name('newsletter.template.edit');
+    Route::put('/newsletter-templates/{hash}', [NewsletterController::class, 'updateTemplate'])->name('newsletter.template.update');
+    Route::delete('/newsletter-templates/{hash}', [NewsletterController::class, 'deleteTemplate'])->name('newsletter.template.delete');
+    Route::post('/newsletter-templates/{hash}/preview', [NewsletterController::class, 'previewTemplate'])->name('newsletter.template.preview');
+    Route::post('/newsletters/{hash}/save-as-template', [NewsletterController::class, 'saveAsTemplate'])->name('newsletter.save_as_template');
 
     // Boost routes
     Route::get('/boost', [BoostController::class, 'index'])->name('boost.index');
@@ -480,6 +488,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/admin/newsletter-segments/{hash}/users', [AdminNewsletterController::class, 'storeSegmentUser'])->name('admin.newsletters.segment.user.store');
         Route::delete('/admin/newsletter-segments/{hash}/users/{userHash}', [AdminNewsletterController::class, 'deleteSegmentUser'])->name('admin.newsletters.segment.user.delete');
         Route::get('/admin/users/search', [AdminNewsletterController::class, 'searchUsers'])->name('admin.users.search');
+        Route::get('/admin/newsletter-templates', [AdminNewsletterController::class, 'templates'])->name('admin.newsletters.templates');
+        Route::get('/admin/newsletter-templates/create', [AdminNewsletterController::class, 'createTemplate'])->name('admin.newsletters.template.create');
+        Route::post('/admin/newsletter-templates', [AdminNewsletterController::class, 'storeTemplate'])->name('admin.newsletters.template.store');
+        Route::get('/admin/newsletter-templates/{hash}/edit', [AdminNewsletterController::class, 'editTemplate'])->name('admin.newsletters.template.edit');
+        Route::put('/admin/newsletter-templates/{hash}', [AdminNewsletterController::class, 'updateTemplate'])->name('admin.newsletters.template.update');
+        Route::delete('/admin/newsletter-templates/{hash}', [AdminNewsletterController::class, 'deleteTemplate'])->name('admin.newsletters.template.delete');
+        Route::post('/admin/newsletter-templates/{hash}/preview', [AdminNewsletterController::class, 'previewTemplate'])->name('admin.newsletters.template.preview');
+        Route::post('/admin/newsletters/{hash}/save-as-template', [AdminNewsletterController::class, 'saveAsTemplate'])->name('admin.newsletters.save_as_template');
 
         // Admin support chat routes (hosted only)
         if (config('app.hosted')) {

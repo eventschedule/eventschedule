@@ -106,7 +106,6 @@
                 'ticket_price' => $event->ticket_price,
                 'ticket_currency_code' => $event->ticket_currency_code,
                 'coupon_code' => $event->coupon_code,
-                'description_excerpt' => Str::words(html_entity_decode(strip_tags($curatorTranslation && $curatorTranslation->description_html_translated ? $curatorTranslation->description_html_translated : $event->translatedDescription())), 25, '...'),
                 'duration' => $event->duration,
                 'is_multi_day' => $event->duration >= 24,
                 'local_end_date' => $event->duration >= 24
@@ -917,9 +916,6 @@
                                             </div>
                                         </div>
 
-                                        {{-- Description excerpt --}}
-                                        <p v-if="event.description_excerpt && !event.is_password_protected" class="hidden md:block text-base text-gray-500 dark:text-gray-400 line-clamp-2" dir="auto" v-text="event.description_excerpt"></p>
-
                                         {{-- Action buttons row --}}
                                         <div class="flex flex-wrap items-center gap-2">
                                                 <button v-if="event.fan_photos_enabled" @click.stop="togglePhotoForm(event, $event)"
@@ -1273,9 +1269,6 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                    {{-- Description excerpt --}}
-                                    <p v-if="event.description_excerpt && !event.is_password_protected" class="hidden md:block text-base text-gray-500 dark:text-gray-400 line-clamp-2" dir="auto" v-text="event.description_excerpt"></p>
 
                                     {{-- Action buttons row --}}
                                     <div class="flex flex-wrap items-center gap-2">

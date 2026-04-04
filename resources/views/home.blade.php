@@ -145,7 +145,7 @@
                 </button>
 
                 {{-- New Schedule Dropdown --}}
-                @if(!is_demo_mode())
+                @if(!is_demo_mode() && $canCreateSchedule)
                 <div class="relative inline-block text-left">
                     <button type="button" data-popup-target="dashboard-new-schedule-menu" class="popup-toggle inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-[#2d2d30] border border-gray-300 dark:border-white/[0.06] rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 shadow-sm dark:shadow-none transition-all duration-200 hover:bg-gray-50 dark:hover:bg-[#252526] hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800" aria-expanded="true" aria-haspopup="true">
                         {{ __('messages.new_schedule') }}

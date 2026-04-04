@@ -66,7 +66,6 @@ trait CalendarDataTrait
             'ticket_price' => $event->ticket_price,
             'ticket_currency_code' => $event->ticket_currency_code,
             'coupon_code' => $event->coupon_code,
-            'description_excerpt' => Str::words(html_entity_decode(strip_tags($curatorTranslation && $curatorTranslation->description_html_translated ? $curatorTranslation->description_html_translated : $event->translatedDescription())), 25, '...'),
             'duration' => $event->duration,
             'is_multi_day' => $event->duration >= 24,
             'local_end_date' => $event->duration >= 24
@@ -127,7 +126,6 @@ trait CalendarDataTrait
 
         if ($event->isPasswordProtected()) {
             $data['short_description'] = null;
-            $data['description_excerpt'] = null;
             $data['venue_name'] = null;
             $data['venue_guest_url'] = null;
             $data['venue_profile_image'] = null;

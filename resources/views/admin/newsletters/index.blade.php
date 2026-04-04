@@ -5,6 +5,9 @@
         <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.admin_newsletters') }}</h2>
                 <div class="flex gap-3">
+                    <x-secondary-link href="{{ route('admin.newsletters.templates') }}">
+                        {{ __('messages.templates') }}
+                    </x-secondary-link>
                     <x-secondary-link href="{{ route('admin.newsletters.segments') }}">
                         {{ __('messages.segments') }}
                     </x-secondary-link>

@@ -1034,6 +1034,13 @@ class BackupService
             $counter++;
         }
 
+        if (config('app.hosted')) {
+            $user = \App\Models\User::find($userId);
+            if ($user && $user->roles()->where('is_deleted', false)->count() >= 50) {
+                throw new \Exception(__('messages.schedule_limit'));
+            }
+        }
+
         $role = new Role;
         foreach (self::ROLE_EXPORT_FIELDS as $field) {
             if (array_key_exists($field, $data)) {

@@ -564,11 +564,11 @@ class RoleController extends Controller
         // Get timezone from user or role
         $timezone = $user?->timezone ?? $role->timezone ?? 'UTC';
 
-        // Calculate month boundaries in user's/role's timezone, then convert to UTC for database query
+        // Calculate calendar grid start (including overflow days from previous month)
+        $firstDayOfWeek = $role->first_day_of_week ?? 0;
         $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-
-        // Convert to UTC for database query
-        $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
+        $startOfGrid = $startOfMonth->copy()->startOfWeek($firstDayOfWeek);
+        $startOfGridUtc = $startOfGrid->copy()->setTimezone('UTC');
 
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
         $unlockedEventIds = ! $isMemberOrAdmin ? $this->getUnlockedEventIds() : [];
@@ -577,7 +577,7 @@ class RoleController extends Controller
             // For event detail view (non-graphic), only check if calendar has events
             // The calendar partial loads data via Ajax, so we just need existence
             if ($role->isCurator()) {
-                $query = Event::inMonth($startOfMonthUtc)
+                $query = Event::inMonth($startOfGridUtc)
                     ->whereIn('id', function ($query) use ($role) {
                         $query->select('event_id')
                             ->from('event_role')
@@ -594,7 +594,7 @@ class RoleController extends Controller
                 }
                 $hasCalendarEvents = $query->exists();
             } else {
-                $query = Event::inMonth($startOfMonthUtc)
+                $query = Event::inMonth($startOfGridUtc)
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true));
                 if (! $isMemberOrAdmin) {
                     $query->where(function ($q) use ($unlockedEventIds) {
@@ -609,7 +609,7 @@ class RoleController extends Controller
             $events = $hasCalendarEvents ? collect([true]) : collect();
         } elseif ($role->isCurator()) {
             $events = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfMonthUtc)
+                ->inMonth($startOfGridUtc)
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
@@ -620,7 +620,7 @@ class RoleController extends Controller
                 ->get();
         } else {
             $events = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfMonthUtc)
+                ->inMonth($startOfGridUtc)
                 ->where(function ($query) use ($role) {
                     $query->whereHas('roles', function ($query) use ($role) {
                         $query->where('role_id', $role->id)
@@ -945,7 +945,6 @@ class RoleController extends Controller
             'recurring_end_value' => $event->recurring_end_value,
             'start_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
             'is_online' => ! empty($event->event_url),
-            'description_excerpt' => Str::words(html_entity_decode(strip_tags($event->translatedDescription())), 25, '...'),
             'duration' => $event->duration,
             'parts' => $event->parts->map(fn ($part) => [
                 'name' => $part->name,
@@ -977,7 +976,6 @@ class RoleController extends Controller
         ];
 
         if ($event->isPasswordProtected()) {
-            $data['description_excerpt'] = null;
             $data['venue_name'] = null;
             $data['venue_profile_image'] = null;
             $data['venue_header_image'] = null;
@@ -1005,16 +1003,16 @@ class RoleController extends Controller
         $user = auth()->user();
         $timezone = ($user ? $user->timezone : null) ?? $role->timezone ?? 'UTC';
 
-        $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-
-        $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
+        $firstDayOfWeek = $role->first_day_of_week ?? 0;
+        $startOfGrid = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth()->startOfWeek($firstDayOfWeek);
+        $startOfGridUtc = $startOfGrid->copy()->setTimezone('UTC');
 
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
         $unlockedEventIds = ! $isMemberOrAdmin ? $this->getUnlockedEventIds() : [];
 
         if ($role->isCurator()) {
             $events = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfMonthUtc)
+                ->inMonth($startOfGridUtc)
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
@@ -1033,7 +1031,7 @@ class RoleController extends Controller
                 ->get();
         } else {
             $events = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfMonthUtc)
+                ->inMonth($startOfGridUtc)
                 ->where(function ($query) use ($role) {
                     $query->whereHas('roles', function ($query) use ($role) {
                         $query->where('role_id', $role->id)
@@ -1101,7 +1099,7 @@ class RoleController extends Controller
             }
         }
 
-        return $this->buildCalendarResponse($events, $pastEvents, $hasMorePastEvents, $role, $subdomain, (int) $month, (int) $year, $timezone, $role->first_day_of_week ?? 0);
+        return $this->buildCalendarResponse($events, $pastEvents, $hasMorePastEvents, $role, $subdomain, (int) $month, (int) $year, $timezone, $firstDayOfWeek);
     }
 
     public function adminCalendarEvents(Request $request, $subdomain): JsonResponse
@@ -1118,13 +1116,13 @@ class RoleController extends Controller
         $user = $request->user();
         $timezone = $user->timezone ?? $role->timezone ?? 'UTC';
 
-        $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-
-        $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
+        $firstDayOfWeek = $role->first_day_of_week ?? 0;
+        $startOfGrid = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth()->startOfWeek($firstDayOfWeek);
+        $startOfGridUtc = $startOfGrid->copy()->setTimezone('UTC');
 
         if ($role->isCurator()) {
             $events = Event::with('roles', 'parts', 'tickets')
-                ->inMonth($startOfMonthUtc)
+                ->inMonth($startOfGridUtc)
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
@@ -1141,12 +1139,12 @@ class RoleController extends Controller
                             ->where('is_accepted', true);
                     });
                 })
-                ->inMonth($startOfMonthUtc)
+                ->inMonth($startOfGridUtc)
                 ->orderBy('starts_at')
                 ->get();
         }
 
-        return $this->buildCalendarResponse($events, collect(), false, $role, $subdomain, (int) $month, (int) $year, $timezone, $role->first_day_of_week ?? 0);
+        return $this->buildCalendarResponse($events, collect(), false, $role, $subdomain, (int) $month, (int) $year, $timezone, $firstDayOfWeek);
     }
 
     public function viewAdmin(Request $request, $subdomain, $tab = 'schedule')
@@ -1217,16 +1215,15 @@ class RoleController extends Controller
             $user = $request->user();
             $timezone = $user->timezone ?? $role->timezone ?? 'UTC';
 
-            // Calculate month boundaries in user's/role's timezone, then convert to UTC for database query
-            $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-
-            // Convert to UTC for database query
-            $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
+            // Calculate calendar grid start (including overflow days from previous month)
+            $firstDayOfWeek = $role->first_day_of_week ?? 0;
+            $startOfGrid = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth()->startOfWeek($firstDayOfWeek);
+            $startOfGridUtc = $startOfGrid->copy()->setTimezone('UTC');
 
             if ($tab == 'schedule') {
                 if ($role->isCurator()) {
                     $events = Event::with('roles')
-                        ->inMonth($startOfMonthUtc)
+                        ->inMonth($startOfGridUtc)
                         ->whereIn('id', function ($query) use ($role) {
                             $query->select('event_id')
                                 ->from('event_role')
@@ -1243,7 +1240,7 @@ class RoleController extends Controller
                                     ->where('is_accepted', true);
                             });
                         })
-                        ->inMonth($startOfMonthUtc)
+                        ->inMonth($startOfGridUtc)
                         ->orderBy('starts_at')
                         ->get();
 
@@ -1531,6 +1528,10 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        if (config('app.hosted') && auth()->user()->roles()->where('is_deleted', false)->count() >= 50) {
+            return redirect()->route('home')->with('error', __('messages.schedule_limit'));
+        }
+
         $role = new Role;
         $role->type = $type;
         $role->font_family = 'Roboto';
@@ -1626,6 +1627,10 @@ class RoleController extends Controller
         }
 
         $user = $request->user();
+
+        if (config('app.hosted') && $user->roles()->where('is_deleted', false)->count() >= 50) {
+            return redirect()->back()->with('error', __('messages.schedule_limit'));
+        }
 
         $role = new Role;
         $role->fill($request->all());

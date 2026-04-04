@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Jobs\EvaluateAbTestWinner;
 use App\Models\Newsletter;
+use Carbon\Carbon;
 use App\Models\NewsletterAbTest;
 use App\Models\NewsletterRecipient;
 use App\Models\NewsletterSegment;
 use App\Models\NewsletterSegmentUser;
+use App\Models\NewsletterTemplate;
 use App\Models\User;
 use App\Services\NewsletterService;
 use App\Utils\UrlUtils;
@@ -151,7 +153,27 @@ class NewsletterController extends Controller
         $defaultStyleSettings = $lastNewsletter ? $lastNewsletter->style_settings : Newsletter::defaultStyleSettingsForRole($role);
         $defaultSegmentIds = $lastNewsletter ? ($lastNewsletter->segment_ids ?? []) : [];
 
-        return view('newsletter.create', compact('role', 'segments', 'events', 'defaultBlocks', 'defaultTemplate', 'defaultStyleSettings', 'defaultSegmentIds'));
+        // Load saved templates for the template picker
+        $savedTemplates = NewsletterTemplate::where('role_id', $role->id)
+            ->where('is_system', false)
+            ->orderBy('name')
+            ->get();
+        // If a template_id is provided, use that template's design
+        if ($request->has('template_id')) {
+            $decoded = UrlUtils::decodeId($request->template_id);
+            if ($decoded) {
+                $fromTemplate = NewsletterTemplate::where('role_id', $role->id)
+                    ->where('id', $decoded)
+                    ->first();
+                if ($fromTemplate) {
+                    $defaultBlocks = ! empty($fromTemplate->blocks) ? $fromTemplate->blocks : $defaultBlocks;
+                    $defaultTemplate = $fromTemplate->template ?? 'modern';
+                    $defaultStyleSettings = $fromTemplate->style_settings ?? $defaultStyleSettings;
+                }
+            }
+        }
+
+        return view('newsletter.create', compact('role', 'segments', 'events', 'defaultBlocks', 'defaultTemplate', 'defaultStyleSettings', 'defaultSegmentIds', 'savedTemplates'));
     }
 
     public function store(Request $request)
@@ -356,13 +378,20 @@ class NewsletterController extends Controller
             return back()->with('error', __('messages.newsletter_limit_reached', ['used' => $used, 'limit' => $limit]));
         }
 
-        $validated = $request->validate([
-            'scheduled_at' => 'required|date|after:now',
+        $request->validate([
+            'scheduled_at' => 'required|date',
         ]);
+
+        $timezone = auth()->user()->timezone ?? $role->timezone ?? 'UTC';
+        $scheduledAtUtc = Carbon::parse($request->scheduled_at, $timezone)->setTimezone('UTC');
+
+        if ($scheduledAtUtc->lte(now())) {
+            return back()->withErrors(['scheduled_at' => __('validation.after', ['attribute' => 'scheduled at', 'date' => 'now'])]);
+        }
 
         $newsletter->update([
             'status' => 'scheduled',
-            'scheduled_at' => $validated['scheduled_at'],
+            'scheduled_at' => $scheduledAtUtc,
         ]);
 
         return back()->with('status', __('messages.newsletter_scheduled'));
@@ -1153,5 +1182,195 @@ class NewsletterController extends Controller
 
         return redirect()->route('newsletter.segments', $this->roleIdParam($role))
             ->with('status', __('messages.emails_imported', ['count' => $imported]));
+    }
+
+    // ── Newsletter Templates ────────────────────────────────────────
+
+    public function templates(Request $request)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $userTemplates = NewsletterTemplate::where('role_id', $role->id)
+            ->where('is_system', false)
+            ->orderBy('name')
+            ->get();
+
+        return view('newsletter.templates', compact('role', 'userTemplates'));
+    }
+
+    public function createTemplate(Request $request)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $defaultBlocks = Newsletter::defaultBlocks($role);
+        $events = $role->events()
+            ->upcomingOrOngoing()
+            ->orderBy('starts_at')
+            ->get();
+
+        $segments = collect();
+
+        return view('newsletter.template-edit', [
+            'role' => $role,
+            'newsletterTemplate' => null,
+            'defaultBlocks' => $defaultBlocks,
+            'events' => $events,
+            'segments' => $segments,
+        ]);
+    }
+
+    public function storeTemplate(Request $request)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'blocks' => 'nullable|string',
+            'template' => 'required|in:modern,classic,minimal,bold,compact',
+            'style_settings' => 'nullable|array',
+        ]);
+
+        $blocks = $this->parseBlocks($request);
+
+        NewsletterTemplate::create([
+            'role_id' => $role->id,
+            'user_id' => auth()->id(),
+            'name' => $validated['name'],
+            'blocks' => $blocks,
+            'template' => $validated['template'],
+            'style_settings' => $this->sanitizeStyleSettings($validated['style_settings'] ?? null),
+        ]);
+
+        return redirect()->route('newsletter.templates', $this->roleIdParam($role))
+            ->with('status', __('messages.template_saved'));
+    }
+
+    public function editTemplate(Request $request, string $hash)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $newsletterTemplate = NewsletterTemplate::where('role_id', $role->id)
+            ->where('id', UrlUtils::decodeId($hash))
+            ->firstOrFail();
+
+        if ($newsletterTemplate->is_system) {
+            abort(403);
+        }
+
+        $events = $role->events()
+            ->upcomingOrOngoing()
+            ->orderBy('starts_at')
+            ->get();
+
+        $segments = collect();
+
+        return view('newsletter.template-edit', [
+            'role' => $role,
+            'newsletterTemplate' => $newsletterTemplate,
+            'events' => $events,
+            'segments' => $segments,
+        ]);
+    }
+
+    public function updateTemplate(Request $request, string $hash)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $newsletterTemplate = NewsletterTemplate::where('role_id', $role->id)
+            ->where('id', UrlUtils::decodeId($hash))
+            ->firstOrFail();
+
+        if ($newsletterTemplate->is_system) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'blocks' => 'nullable|string',
+            'template' => 'required|in:modern,classic,minimal,bold,compact',
+            'style_settings' => 'nullable|array',
+        ]);
+
+        $blocks = $this->parseBlocks($request);
+
+        $newsletterTemplate->update([
+            'name' => $validated['name'],
+            'blocks' => $blocks,
+            'template' => $validated['template'],
+            'style_settings' => $this->sanitizeStyleSettings($validated['style_settings'] ?? null),
+        ]);
+
+        return back()->with('status', __('messages.template_updated'));
+    }
+
+    public function deleteTemplate(Request $request, string $hash)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $newsletterTemplate = NewsletterTemplate::where('role_id', $role->id)
+            ->where('id', UrlUtils::decodeId($hash))
+            ->firstOrFail();
+
+        if ($newsletterTemplate->is_system) {
+            abort(403);
+        }
+
+        $newsletterTemplate->delete();
+
+        return back()->with('status', __('messages.template_deleted'));
+    }
+
+    public function saveAsTemplate(Request $request, string $hash)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $newsletter = Newsletter::where('role_id', $role->id)
+            ->where('id', UrlUtils::decodeId($hash))
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'template_name' => 'required|string|max:255',
+        ]);
+
+        NewsletterTemplate::create([
+            'role_id' => $role->id,
+            'user_id' => auth()->id(),
+            'name' => $validated['template_name'],
+            'blocks' => $newsletter->blocks,
+            'template' => $newsletter->template,
+            'style_settings' => $newsletter->style_settings,
+        ]);
+
+        return back()->with('status', __('messages.template_saved'));
+    }
+
+    public function previewTemplate(Request $request, string $hash, NewsletterService $service)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $newsletterTemplate = NewsletterTemplate::where('role_id', $role->id)
+            ->where('id', UrlUtils::decodeId($hash))
+            ->firstOrFail();
+
+        $newsletter = new Newsletter([
+            'role_id' => $role->id,
+            'subject' => '',
+            'blocks' => $newsletterTemplate->blocks,
+            'template' => $newsletterTemplate->template,
+            'style_settings' => $newsletterTemplate->style_settings,
+        ]);
+        $newsletter->setRelation('role', $role);
+
+        $html = $service->renderPreview($newsletter);
+
+        return response()->json(['html' => $html]);
     }
 }

@@ -24,7 +24,7 @@
         <div class="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg">
             <div class="flex justify-between items-center">
                 <p class="text-yellow-700 dark:text-yellow-300">
-                    {{ __('messages.scheduled_for') }}: {{ $newsletter->scheduled_at->format('M j, Y g:i A') }}
+                    {{ __('messages.scheduled_for') }}: {{ $newsletter->scheduled_at->timezone(auth()->user()->timezone ?? 'UTC')->format('M j, Y g:i A') }}
                 </p>
                 <form method="POST" action="{{ route('admin.newsletters.cancel', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]) }}" class="inline">
                     @csrf

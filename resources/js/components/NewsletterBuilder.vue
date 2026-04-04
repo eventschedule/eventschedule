@@ -15,7 +15,7 @@
                     :class="activeSection === 'style' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)] font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'">
                     {{ t.style }}
                 </button>
-                <button type="button" @click="showSection('settings')"
+                <button v-if="!isTemplateMode" type="button" @click="showSection('settings')"
                     class="px-4 py-3 text-sm font-medium border-b-2 transition-colors"
                     :class="activeSection === 'settings' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)] font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'">
                     {{ t.settings }}
@@ -30,7 +30,7 @@
                     <div v-show="activeSection === 'content'" class="ap-card sm:rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
 
                         <!-- Subject -->
-                        <div>
+                        <div v-if="!isTemplateMode">
                             <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 px-5 py-4">{{ t.subject }} *</h3>
                             <div class="px-5 pb-5">
                                 <input id="subject" name="subject" type="text"
@@ -543,7 +543,7 @@
                     </div>
 
                     <!-- SETTINGS SECTION -->
-                    <div v-show="activeSection === 'settings'" class="ap-card sm:rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
+                    <div v-if="!isTemplateMode" v-show="activeSection === 'settings'" class="ap-card sm:rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
 
                         <!-- Recipients -->
                         <div>
@@ -610,13 +610,16 @@
 
             <!-- Action Buttons -->
             <div class="mt-4 flex flex-wrap gap-3 justify-between">
-                <div>
-                    <button v-if="newsletter && newsletter.exists" type="button" @click="showTestSend = true" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                <div class="flex flex-wrap gap-3">
+                    <button v-if="!isTemplateMode && newsletter && newsletter.exists" type="button" @click="showTestSend = true" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
                         {{ t.send_a_test }}
+                    </button>
+                    <button v-if="!isTemplateMode && newsletter && newsletter.exists && routes.save_as_template" type="button" @click="showSaveAsTemplate = true" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                        {{ t.save_as_template }}
                     </button>
                 </div>
                 <div class="flex flex-wrap gap-3">
-                    <button v-if="newsletter && newsletter.exists" type="button" @click="showSchedule = true" class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-yellow-600">
+                    <button v-if="!isTemplateMode && newsletter && newsletter.exists" type="button" @click="showSchedule = true" class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-yellow-600">
                         {{ t.schedule_newsletter }}
                     </button>
 
@@ -624,7 +627,7 @@
                         {{ t.save }}
                     </button>
 
-                    <button v-if="newsletter && newsletter.exists && newsletter.canSend" type="button" @click="confirmSend()" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-700">
+                    <button v-if="!isTemplateMode && newsletter && newsletter.exists && newsletter.canSend" type="button" @click="confirmSend()" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-700">
                         {{ t.send_now }}
                     </button>
                 </div>
@@ -688,6 +691,26 @@
             </div>
         </div>
 
+        <!-- Save as Template Modal -->
+        <div v-if="!isTemplateMode && newsletter && newsletter.exists && routes.save_as_template" v-show="showSaveAsTemplate" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="showSaveAsTemplate = false">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ t.save_as_template }}</h3>
+                <form method="POST" :action="routes.save_as_template">
+                    <input type="hidden" name="_token" :value="csrfToken" />
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.template_name }}</label>
+                        <input type="text" name="template_name" required
+                            class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
+                            :placeholder="t.template_name_placeholder" />
+                    </div>
+                    <div class="mt-4 flex justify-end gap-3">
+                        <button type="button" @click="showSaveAsTemplate = false" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200">{{ t.cancel }}</button>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-600">{{ t.save }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </div>
 </template>
 
@@ -715,6 +738,7 @@ const props = defineProps({
     roleSocialLinks: { type: Array, default: () => [] },
     roleName: { type: String, default: '' },
     availableBlockTypes: { type: Array, default: null },
+    isTemplateMode: { type: Boolean, default: false },
 });
 
 const t = props.translations;
@@ -728,6 +752,7 @@ const selectedSegmentIds = ref([...props.initialSegmentIds]);
 const showBlockPalette = ref(false);
 const showTestSend = ref(false);
 const showSchedule = ref(false);
+const showSaveAsTemplate = ref(false);
 const previewLoading = ref(false);
 
 const activeSection = ref('content');
