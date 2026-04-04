@@ -196,7 +196,7 @@ class EventTextGenerator
                 });
 
                 if ($allFree) {
-                    return __('messages.free');
+                    return '';
                 }
 
                 // Return lowest price
@@ -207,7 +207,7 @@ class EventTextGenerator
         // Check for external event price (when tickets are disabled)
         if (! $event->tickets_enabled && $event->ticket_price !== null) {
             if ($event->ticket_price == 0) {
-                return __('messages.free');
+                return '';
             }
 
             return floatval($event->ticket_price);
