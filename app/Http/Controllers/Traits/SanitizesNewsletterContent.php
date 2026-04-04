@@ -167,7 +167,7 @@ trait SanitizesNewsletterContent
             return response()->json(['error' => __('messages.invalid_file_type')], 400);
         }
 
-        if ($file->getSize() > 5 * 1024 * 1024) {
+        if ($file->getSize() > 10 * 1024 * 1024) {
             return response()->json(['error' => __('messages.file_too_large')], 400);
         }
 
