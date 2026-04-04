@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Newsletter;
-use Carbon\Carbon;
 use App\Models\NewsletterRecipient;
 use App\Models\NewsletterSegment;
 use App\Models\NewsletterSegmentUser;
@@ -11,6 +10,7 @@ use App\Models\NewsletterTemplate;
 use App\Models\User;
 use App\Services\NewsletterService;
 use App\Utils\UrlUtils;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -159,6 +159,10 @@ class AdminNewsletterController extends Controller
             'style_settings' => $this->sanitizeStyleSettings($validated['style_settings'] ?? null),
             'segment_ids' => ! empty($validated['segment_ids']) ? array_map('intval', $validated['segment_ids']) : null,
         ]);
+
+        if ($request->header('X-Save-Before-Action')) {
+            return response()->json(['saved' => true]);
+        }
 
         return back()->with('status', __('messages.newsletter_saved'));
     }

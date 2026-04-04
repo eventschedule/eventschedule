@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Jobs\EvaluateAbTestWinner;
 use App\Models\Newsletter;
-use Carbon\Carbon;
 use App\Models\NewsletterAbTest;
 use App\Models\NewsletterRecipient;
 use App\Models\NewsletterSegment;
@@ -13,6 +12,7 @@ use App\Models\NewsletterTemplate;
 use App\Models\User;
 use App\Services\NewsletterService;
 use App\Utils\UrlUtils;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
@@ -272,6 +272,10 @@ class NewsletterController extends Controller
         // Derive event_ids from blocks
         $newsletter->event_ids = $service->deriveEventIds($newsletter);
         $newsletter->save();
+
+        if ($request->header('X-Save-Before-Action')) {
+            return response()->json(['saved' => true]);
+        }
 
         return back()->with('status', __('messages.newsletter_saved'));
     }
@@ -730,6 +734,15 @@ class NewsletterController extends Controller
             ->where('id', UrlUtils::decodeId($hash))
             ->firstOrFail();
 
+        $inUse = Newsletter::where('role_id', $role->id)
+            ->whereIn('status', ['draft', 'scheduled'])
+            ->whereJsonContains('segment_ids', $segment->id)
+            ->exists();
+
+        if ($inUse) {
+            return back()->with('error', __('messages.segment_in_use'));
+        }
+
         $segment->delete();
 
         return back()->with('status', __('messages.segment_deleted'));
@@ -1037,15 +1050,23 @@ class NewsletterController extends Controller
 
                 $vn->refresh();
 
+                $chunk = [];
                 foreach ($variant['recipients'] as $recipient) {
-                    NewsletterRecipient::create([
+                    $chunk[] = [
                         'newsletter_id' => $vn->id,
                         'user_id' => $recipient->user_id,
                         'email' => $recipient->email,
                         'name' => $recipient->name,
                         'token' => Str::random(64),
                         'status' => 'pending',
-                    ]);
+                    ];
+                    if (count($chunk) >= 500) {
+                        NewsletterRecipient::insert($chunk);
+                        $chunk = [];
+                    }
+                }
+                if (! empty($chunk)) {
+                    NewsletterRecipient::insert($chunk);
                 }
             }
             DB::commit();

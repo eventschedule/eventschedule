@@ -663,8 +663,7 @@
         <div v-if="newsletter && newsletter.exists" v-show="showTestSend" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="showTestSend = false">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ t.test_send }}</h3>
-                <form method="POST" :action="routes.test_send">
-                    <input type="hidden" name="_token" :value="csrfToken" />
+                <form @submit.prevent="submitTestSend">
                     <p class="text-sm text-gray-600 dark:text-gray-400">{{ t.test_email_sent_to.replace(':email', roleEmail) }}</p>
                     <div class="mt-4 flex justify-end gap-3">
                         <button type="button" @click="showTestSend = false" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200">{{ t.cancel }}</button>
@@ -678,10 +677,9 @@
         <div v-if="newsletter && newsletter.exists" v-show="showSchedule" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="showSchedule = false">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ t.schedule_newsletter }}</h3>
-                <form method="POST" :action="routes.schedule">
-                    <input type="hidden" name="_token" :value="csrfToken" />
+                <form @submit.prevent="submitSchedule">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.send_at }}</label>
-                    <input id="scheduled_at" name="scheduled_at" type="datetime-local"
+                    <input id="scheduled_at" name="scheduled_at" type="text"
                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm" required />
                     <div class="mt-4 flex justify-end gap-3">
                         <button type="button" @click="showSchedule = false" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-200">{{ t.cancel }}</button>
@@ -1075,33 +1073,76 @@ function openPreviewInNewTab() {
         });
 }
 
-function confirmSend() {
-    if (confirm(t.newsletter_send_confirm)) {
-        const form = document.querySelector('#newsletter-builder')?.closest('form');
-        if (!form) return;
+async function saveFirst() {
+    const form = document.querySelector('#newsletter-builder')?.closest('form');
+    if (!form) return false;
 
-        // Save content via fetch, then POST to send
-        const formData = new FormData(form);
-
-        fetch(form.action, {
+    const formData = new FormData(form);
+    try {
+        const response = await fetch(form.action, {
             method: 'POST',
             body: formData,
-        }).then(response => {
-            if (!response.ok) throw new Error('Save failed');
-            const sendForm = document.createElement('form');
-            sendForm.method = 'POST';
-            sendForm.action = props.routes.send;
-            const token = document.createElement('input');
-            token.type = 'hidden';
-            token.name = '_token';
-            token.value = props.csrfToken;
-            sendForm.appendChild(token);
-            document.body.appendChild(sendForm);
-            sendForm.submit();
-        }).catch(() => {
-            alert(t.general_error || 'Something went wrong');
+            headers: {
+                'Accept': 'application/json',
+                'X-Save-Before-Action': '1',
+            },
         });
+        if (!response.ok) return false;
+        const data = await response.json();
+        return data.saved === true;
+    } catch {
+        return false;
     }
+}
+
+function submitFormTo(action, extraFields = {}) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = action;
+    const token = document.createElement('input');
+    token.type = 'hidden';
+    token.name = '_token';
+    token.value = props.csrfToken;
+    form.appendChild(token);
+    for (const [name, value] of Object.entries(extraFields)) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+    }
+    document.body.appendChild(form);
+    form.submit();
+}
+
+async function confirmSend() {
+    if (!confirm(t.newsletter_send_confirm)) return;
+    const saved = await saveFirst();
+    if (!saved) {
+        alert(t.general_error || 'Something went wrong');
+        return;
+    }
+    submitFormTo(props.routes.send);
+}
+
+async function submitTestSend() {
+    const saved = await saveFirst();
+    if (!saved) {
+        alert(t.general_error || 'Something went wrong');
+        return;
+    }
+    submitFormTo(props.routes.test_send);
+}
+
+async function submitSchedule() {
+    const input = document.getElementById('scheduled_at');
+    if (!input || !input.value) return;
+    const saved = await saveFirst();
+    if (!saved) {
+        alert(t.general_error || 'Something went wrong');
+        return;
+    }
+    submitFormTo(props.routes.schedule, { scheduled_at: input.value });
 }
 
 function initSortable() {
@@ -1154,6 +1195,30 @@ function onHashChange() {
         activeSection.value = hash;
     }
 }
+
+// Initialize Flatpickr on schedule modal when it opens
+let scheduleFlatpickr = null;
+watch(showSchedule, (val) => {
+    if (val) {
+        nextTick(() => {
+            const el = document.getElementById('scheduled_at');
+            if (el && !scheduleFlatpickr && typeof window.flatpickr !== 'undefined') {
+                const fpLocale = window.flatpickrLocales
+                    ? window.flatpickrLocales[window.appLocale]
+                    : null;
+                const localeConfig = fpLocale ? { locale: fpLocale } : {};
+                scheduleFlatpickr = window.flatpickr(el, Object.assign({
+                    enableTime: true,
+                    dateFormat: 'Y-m-d H:i',
+                    altInput: true,
+                    altFormat: 'M j, Y h:i K',
+                    allowInput: true,
+                    minDate: 'today',
+                }, localeConfig));
+            }
+        });
+    }
+});
 
 // Watch for changes and trigger debounced preview
 watch(

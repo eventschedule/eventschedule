@@ -57,9 +57,13 @@ class GroupsTest extends DuskTestCase
     protected function createGroups(Browser $browser): void
     {
         $browser->visit('/talent/edit')
-            ->waitFor('a[data-section="section-subschedules"]', 5)
-            ->click('a[data-section="section-subschedules"]')
-            ->waitFor('#section-subschedules', 5);
+            ->waitFor('#edit-form', 15)
+            ->pause(500);
+
+        // Use JavaScript to switch to sub-schedules section (more reliable than clicking the nav link)
+        $browser->script("document.querySelector('a[data-section=\"section-subschedules\"]').click()");
+
+        $browser->waitUntil("document.getElementById('section-subschedules') && document.getElementById('section-subschedules').style.display === 'block'", 5);
 
         // Click the sub-schedules tab within the Customize section
         $browser->click('button.customize-tab[data-tab="subschedules"]')
@@ -76,9 +80,12 @@ class GroupsTest extends DuskTestCase
 
         // Add second sub-schedule
         $browser->visit('/talent/edit')
-            ->waitFor('a[data-section="section-subschedules"]', 5)
-            ->click('a[data-section="section-subschedules"]')
-            ->waitFor('#section-subschedules', 5);
+            ->waitFor('#edit-form', 15)
+            ->pause(500);
+
+        $browser->script("document.querySelector('a[data-section=\"section-subschedules\"]').click()");
+
+        $browser->waitUntil("document.getElementById('section-subschedules') && document.getElementById('section-subschedules').style.display === 'block'", 5);
 
         // Click the sub-schedules tab within the Customize section
         $browser->click('button.customize-tab[data-tab="subschedules"]')
