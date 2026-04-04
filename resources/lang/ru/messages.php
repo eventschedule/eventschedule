@@ -1543,6 +1543,8 @@ return [
     'button_url' => 'URL-адрес кнопки',
     'image_url' => 'URL-адрес изображения',
     'image_alt' => 'Альтернативный текст',
+    'upload_image' => 'Загрузить изображение',
+    'or_enter_url' => 'Или введите URL',
     'spacer_height' => 'Высота (пикселей)',
     'divider_style' => 'Стиль разделителя',
     'platform' => 'Платформа',

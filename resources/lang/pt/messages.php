@@ -1536,6 +1536,8 @@ return [
     'button_url' => 'URL do Botao',
     'image_url' => 'URL da Imagem',
     'image_alt' => 'Texto Alternativo',
+    'upload_image' => 'Carregar imagem',
+    'or_enter_url' => 'Ou insira um URL',
     'spacer_height' => 'Altura (px)',
     'divider_style' => 'Estilo do Divisor',
     'platform' => 'Plataforma',

@@ -718,4 +718,9 @@ class AdminNewsletterController extends Controller
 
         return response()->json(['html' => $html]);
     }
+
+    public function uploadImage(Request $request)
+    {
+        return $this->handleNewsletterImageUpload($request);
+    }
 }

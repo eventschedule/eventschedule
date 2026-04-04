@@ -67,6 +67,7 @@ if (isset($newsletter) && $newsletter->exists) {
 if ($isAdmin) {
     $routesData = [
         'manage_segments' => route('admin.newsletters.segments'),
+        'upload_image' => route('admin.newsletters.upload_image'),
     ];
     if (isset($newsletter) && $newsletter->exists) {
         $routesData['test_send'] = route('admin.newsletters.test_send', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
@@ -83,6 +84,7 @@ if ($isAdmin) {
 } else {
     $routesData = [
         'manage_segments' => route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]),
+        'upload_image' => route('newsletter.upload_image', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]),
     ];
     if (isset($newsletter) && $newsletter->exists) {
         $routesData['test_send'] = route('newsletter.test_send', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
@@ -123,6 +125,7 @@ $builderProps = [
     'roleName' => $isAdmin ? config('app.name') : ($role->name ?? ''),
     'abTestHtml' => $abTestHtml,
     'isTemplateMode' => $isTemplateMode,
+    'canUploadImages' => $isAdmin || (isset($role) && $role->isPro()),
     'availableBlockTypes' => $isAdmin
         ? ['heading', 'text', 'button', 'image', 'video', 'divider', 'spacer', 'social_links', 'quote', 'offer']
         : ['heading', 'text', 'events', 'button', 'image', 'video', 'divider', 'spacer', 'social_links', 'quote', 'profile_image', 'header_banner'],
@@ -227,6 +230,11 @@ $builderProps = [
         'save_as_template' => __('messages.save_as_template'),
         'template_name' => __('messages.template_name'),
         'template_name_placeholder' => __('messages.template_name_placeholder'),
+        'upload_image' => __('messages.upload_image'),
+        'or_enter_url' => __('messages.or_enter_url'),
+        'uploading' => __('messages.uploading'),
+        'choose_file' => __('messages.choose_file'),
+        'error_uploading_image' => __('messages.error_uploading_image'),
     ],
 ];
 @endphp

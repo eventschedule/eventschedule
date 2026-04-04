@@ -1555,6 +1555,8 @@ return [
     'button_url' => 'Button URL',
     'image_url' => 'Image URL',
     'image_alt' => 'Alt Text',
+    'upload_image' => 'Upload Image',
+    'or_enter_url' => 'Or enter URL',
     'spacer_height' => 'Height (px)',
     'divider_style' => 'Divider Style',
     'platform' => 'Platform',

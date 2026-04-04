@@ -1532,6 +1532,8 @@ return [
     'button_url' => 'Schaltflachen-URL',
     'image_url' => 'Bild-URL',
     'image_alt' => 'Alternativtext',
+    'upload_image' => 'Bild hochladen',
+    'or_enter_url' => 'Oder URL eingeben',
     'spacer_height' => 'Hoehe (px)',
     'divider_style' => 'Trennlinienstil',
     'platform' => 'Plattform',

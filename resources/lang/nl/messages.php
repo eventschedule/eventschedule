@@ -1535,6 +1535,8 @@ return [
     'button_url' => 'Knop URL',
     'image_url' => 'Afbeelding URL',
     'image_alt' => 'Alternatieve Tekst',
+    'upload_image' => 'Afbeelding uploaden',
+    'or_enter_url' => 'Of voer een URL in',
     'spacer_height' => 'Hoogte (px)',
     'divider_style' => 'Scheidingslijnstijl',
     'platform' => 'Platform',

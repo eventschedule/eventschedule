@@ -1528,6 +1528,8 @@ return [
     'button_url' => 'URL del Boton',
     'image_url' => 'URL de Imagen',
     'image_alt' => 'Texto Alternativo',
+    'upload_image' => 'Subir imagen',
+    'or_enter_url' => 'O ingrese una URL',
     'spacer_height' => 'Altura (px)',
     'divider_style' => 'Estilo del Divisor',
     'platform' => 'Plataforma',

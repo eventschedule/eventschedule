@@ -1556,6 +1556,8 @@ return [
     'button_url' => 'URL Buton',
     'image_url' => 'URL Imagine',
     'image_alt' => 'Text Alternativ',
+    'upload_image' => 'Încarcă imagine',
+    'or_enter_url' => 'Sau introduceți un URL',
     'spacer_height' => 'Înălțime (px)',
     'divider_style' => 'Stil Separator',
     'platform' => 'Platformă',

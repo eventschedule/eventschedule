@@ -143,4 +143,46 @@ trait SanitizesNewsletterContent
 
         return $blocks;
     }
+
+    protected function handleNewsletterImageUpload(Request $request): \Illuminate\Http\JsonResponse
+    {
+        if (! $request->hasFile('image')) {
+            return response()->json(['error' => __('messages.no_file_uploaded')], 400);
+        }
+
+        $file = $request->file('image');
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        if (! in_array($extension, $allowedExtensions)) {
+            return response()->json(['error' => __('messages.invalid_file_type')], 400);
+        }
+
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (! in_array($file->getMimeType(), $allowedMimeTypes)) {
+            return response()->json(['error' => __('messages.invalid_file_type')], 400);
+        }
+
+        if (@getimagesize($file->getPathname()) === false) {
+            return response()->json(['error' => __('messages.invalid_file_type')], 400);
+        }
+
+        if ($file->getSize() > 5 * 1024 * 1024) {
+            return response()->json(['error' => __('messages.file_too_large')], 400);
+        }
+
+        $filename = strtolower('newsletter_image_'.\Illuminate\Support\Str::random(32).'.'.$extension);
+        $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+
+        if (config('filesystems.default') == 'local') {
+            $url = url('/storage/'.$filename);
+        } else {
+            $url = \Illuminate\Support\Facades\Storage::url($filename);
+        }
+
+        return response()->json([
+            'success' => true,
+            'url' => $url,
+        ]);
+    }
 }

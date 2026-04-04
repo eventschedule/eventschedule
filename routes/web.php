@@ -226,6 +226,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/newsletter-templates/{hash}', [NewsletterController::class, 'deleteTemplate'])->name('newsletter.template.delete');
     Route::post('/newsletter-templates/{hash}/preview', [NewsletterController::class, 'previewTemplate'])->name('newsletter.template.preview');
     Route::post('/newsletters/{hash}/save-as-template', [NewsletterController::class, 'saveAsTemplate'])->name('newsletter.save_as_template');
+    Route::post('/newsletters/upload-image', [NewsletterController::class, 'uploadImage'])->name('newsletter.upload_image');
 
     // Boost routes
     Route::get('/boost', [BoostController::class, 'index'])->name('boost.index');
@@ -496,6 +497,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/admin/newsletter-templates/{hash}', [AdminNewsletterController::class, 'deleteTemplate'])->name('admin.newsletters.template.delete');
         Route::post('/admin/newsletter-templates/{hash}/preview', [AdminNewsletterController::class, 'previewTemplate'])->name('admin.newsletters.template.preview');
         Route::post('/admin/newsletters/{hash}/save-as-template', [AdminNewsletterController::class, 'saveAsTemplate'])->name('admin.newsletters.save_as_template');
+        Route::post('/admin/newsletters/upload-image', [AdminNewsletterController::class, 'uploadImage'])->name('admin.newsletters.upload_image');
 
         // Admin support chat routes (hosted only)
         if (config('app.hosted')) {

@@ -266,8 +266,27 @@
 
                                         <!-- Image block settings -->
                                         <div v-if="block.type === 'image'" class="space-y-3">
+                                            <div v-if="canUploadImages">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.upload_image }}</label>
+                                                <div class="mt-1 flex items-center gap-3">
+                                                    <input type="file" :id="'image-upload-' + block.id" class="hidden" accept="image/jpeg,image/png,image/gif,image/webp"
+                                                        @change="uploadBlockImage(block.id, $event.target.files[0]); $event.target.value = ''" />
+                                                    <button type="button" @click="$event.target.closest('div').querySelector('input[type=file]').click()"
+                                                        :disabled="imageUploading[block.id]"
+                                                        class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600 disabled:opacity-50">
+                                                        <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                        </svg>
+                                                        <span v-if="imageUploading[block.id]">{{ t.uploading }}...</span>
+                                                        <span v-else>{{ t.choose_file }}</span>
+                                                    </button>
+                                                </div>
+                                                <div v-if="block.data.url" class="mt-2">
+                                                    <img :src="block.data.url" :alt="block.data.alt" class="max-h-20 rounded border border-gray-200 dark:border-gray-600" />
+                                                </div>
+                                            </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.image_url }}</label>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ canUploadImages ? t.or_enter_url : t.image_url }}</label>
                                                 <input type="url" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
                                                     :value="block.data.url"
                                                     @input="updateBlockData(block.id, 'url', $event.target.value)" />
@@ -737,6 +756,7 @@ const props = defineProps({
     roleName: { type: String, default: '' },
     availableBlockTypes: { type: Array, default: null },
     isTemplateMode: { type: Boolean, default: false },
+    canUploadImages: { type: Boolean, default: false },
 });
 
 const t = props.translations;
@@ -754,6 +774,36 @@ const showSaveAsTemplate = ref(false);
 const previewLoading = ref(false);
 
 const activeSection = ref('content');
+const imageUploading = ref({});
+
+function uploadBlockImage(blockId, file) {
+    if (!file) return;
+    imageUploading.value[blockId] = true;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    fetch(props.routes.upload_image, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': props.csrfToken },
+        body: formData,
+    })
+    .then(r => {
+        if (!r.ok) return r.json().then(d => { throw new Error(d.error || t.error_uploading_image); });
+        return r.json();
+    })
+    .then(data => {
+        if (data.success && data.url) {
+            updateBlockData(blockId, 'url', data.url);
+        }
+    })
+    .catch(e => {
+        alert(e.message || t.error_uploading_image);
+    })
+    .finally(() => {
+        imageUploading.value[blockId] = false;
+    });
+}
 
 // Track whether the first heading is auto-synced from the subject field
 const subjectSyncActive = ref((() => {

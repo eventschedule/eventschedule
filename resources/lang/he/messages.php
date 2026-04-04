@@ -1530,6 +1530,8 @@ return [
     'button_url' => 'כתובת כפתור',
     'image_url' => 'כתובת תמונה',
     'image_alt' => 'טקסט חלופי',
+    'upload_image' => 'העלאת תמונה',
+    'or_enter_url' => 'או הזן כתובת URL',
     'spacer_height' => 'גובה (פיקסלים)',
     'divider_style' => 'סגנון קו מפריד',
     'platform' => 'פלטפורמה',

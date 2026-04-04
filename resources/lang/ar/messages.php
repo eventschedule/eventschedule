@@ -1529,6 +1529,8 @@ return [
     'button_url' => 'رابط الزر',
     'image_url' => 'رابط الصورة',
     'image_alt' => 'نص بديل',
+    'upload_image' => 'رفع صورة',
+    'or_enter_url' => 'أو أدخل رابط',
     'spacer_height' => 'الارتفاع (بكسل)',
     'divider_style' => 'نمط الفاصل',
     'platform' => 'المنصة',

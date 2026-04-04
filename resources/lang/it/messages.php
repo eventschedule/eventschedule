@@ -1537,6 +1537,8 @@ return [
     'button_url' => 'URL Pulsante',
     'image_url' => 'URL Immagine',
     'image_alt' => 'Testo Alternativo',
+    'upload_image' => 'Carica immagine',
+    'or_enter_url' => 'Oppure inserisci un URL',
     'spacer_height' => 'Altezza (px)',
     'divider_style' => 'Stile Divisore',
     'platform' => 'Piattaforma',

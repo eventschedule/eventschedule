@@ -1531,6 +1531,8 @@ return [
     'button_url' => 'URL du Bouton',
     'image_url' => 'URL de l\'Image',
     'image_alt' => 'Texte Alternatif',
+    'upload_image' => 'Télécharger une image',
+    'or_enter_url' => 'Ou entrez une URL',
     'spacer_height' => 'Hauteur (px)',
     'divider_style' => 'Style du Separateur',
     'platform' => 'Plateforme',

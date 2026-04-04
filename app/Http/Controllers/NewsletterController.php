@@ -1394,4 +1394,16 @@ class NewsletterController extends Controller
 
         return response()->json(['html' => $html]);
     }
+
+    public function uploadImage(Request $request)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        if (! $role->isPro()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        return $this->handleNewsletterImageUpload($request);
+    }
 }

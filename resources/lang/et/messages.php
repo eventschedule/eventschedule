@@ -1541,6 +1541,8 @@ return [
     'button_url' => 'Nupu URL',
     'image_url' => 'Pildi URL',
     'image_alt' => 'Alternatiivne tekst',
+    'upload_image' => 'Laadi pilt üles',
+    'or_enter_url' => 'Või sisesta URL',
     'spacer_height' => 'Kõrgus (px)',
     'divider_style' => 'Jagaja stiil',
     'platform' => 'Platvorm',
