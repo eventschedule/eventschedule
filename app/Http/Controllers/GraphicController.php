@@ -524,7 +524,7 @@ class GraphicController extends Controller
 
             $prompt = "Transform the following event list text according to this instruction: \"{$aiPrompt}\"\n\nEvent metadata (use this to inform your transformation):\n{$metadata}\n\nEvent List:\n{$text}\n\nReturn only the transformed text as a JSON string with a single key 'text'.";
 
-            $response = GeminiUtils::sendPrompt($prompt, 'content', ['model' => 'gemini-2.5-pro', 'timeout' => 120]);
+            $response = GeminiUtils::sendPrompt($prompt, 'content', ['model' => 'gemini-2.5-flash', 'timeout' => 55]);
 
             if ($response && isset($response[0]['text'])) {
                 return $response[0]['text'];
