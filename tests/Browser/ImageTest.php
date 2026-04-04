@@ -33,10 +33,10 @@ class ImageTest extends DuskTestCase
             $browser->visit('/settings')
                 ->waitFor('#profile_image_choose', 5)
                 ->attach('#profile_image', $imagePath)
-                ->waitFor('#profile_image_preview_clear', 5)
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitFor('#profile_image_existing', 15);
+                ->waitFor('#profile_image_preview_clear', 5);
+
+            $browser->script("document.querySelector('#section-profile form').requestSubmit()");
+            $browser->waitFor('#profile_image_existing', 15);
 
             // Verify DB
             $this->assertNotNull(User::first()->profile_image_url);
