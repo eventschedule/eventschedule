@@ -9,6 +9,7 @@ use App\Services\GraphicEmailService;
 use App\Utils\EventTextGenerator;
 use App\Utils\GeminiUtils;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -342,8 +343,6 @@ class GraphicController extends Controller
 
     public function processGraphicAIText(Request $request, $subdomain)
     {
-        set_time_limit(120);
-
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (! auth()->user()->isMember($subdomain)) {
@@ -378,13 +377,37 @@ class GraphicController extends Controller
             ? $baseQuery->orderBy('starts_at')->get()
             : $baseQuery->orderBy('starts_at')->limit($eventLimit)->get();
 
-        $result = $this->processTextWithAI($text, $aiPrompt, $events);
+        $requestId = Str::uuid()->toString();
+        Cache::put("ai_text_{$requestId}", ['status' => 'processing'], 300);
 
-        if ($result) {
-            return response()->json(['text' => $result]);
+        dispatch(function () use ($requestId, $text, $aiPrompt, $events) {
+            set_time_limit(120);
+
+            $result = $this->processTextWithAI($text, $aiPrompt, $events);
+
+            if ($result) {
+                Cache::put("ai_text_{$requestId}", ['status' => 'completed', 'text' => $result], 300);
+            } else {
+                Cache::put("ai_text_{$requestId}", ['status' => 'failed'], 300);
+            }
+        })->afterResponse();
+
+        return response()->json(['request_id' => $requestId]);
+    }
+
+    public function pollGraphicAIText($subdomain, $requestId)
+    {
+        if (! auth()->check() || ! auth()->user()->isMember($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
-        return response()->json(['error' => 'AI processing failed'], 500);
+        $data = Cache::get("ai_text_{$requestId}");
+
+        if (! $data) {
+            return response()->json(['status' => 'not_found'], 404);
+        }
+
+        return response()->json($data);
     }
 
     public function downloadGraphic(Request $request, $subdomain)
@@ -524,7 +547,7 @@ class GraphicController extends Controller
 
             $prompt = "Transform the following event list text according to this instruction: \"{$aiPrompt}\"\n\nEvent metadata (use this to inform your transformation):\n{$metadata}\n\nEvent List:\n{$text}\n\nReturn only the transformed text as a JSON string with a single key 'text'.";
 
-            $response = GeminiUtils::sendPrompt($prompt, 'content', ['model' => 'gemini-2.0-flash', 'timeout' => 55]);
+            $response = GeminiUtils::sendPrompt($prompt, 'content', ['model' => 'gemini-2.5-flash', 'timeout' => 120]);
 
             if ($response && isset($response[0]['text'])) {
                 return $response[0]['text'];

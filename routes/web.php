@@ -327,6 +327,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{subdomain}/events-graphic/settings', [GraphicController::class, 'getSettings'])->name('event.graphic_settings');
     Route::post('/{subdomain}/events-graphic/settings', [GraphicController::class, 'saveSettings'])->name('event.save_graphic_settings');
     Route::post('/{subdomain}/events-graphic/ai-text', [GraphicController::class, 'processGraphicAIText'])->name('event.graphic_ai_text');
+    Route::get('/{subdomain}/events-graphic/ai-text/{requestId}', [GraphicController::class, 'pollGraphicAIText'])->name('event.graphic_ai_poll');
     Route::post('/{subdomain}/events-graphic/test-email', [GraphicController::class, 'sendTestEmail'])->name('event.graphic_test_email');
     Route::post('/{subdomain}/events-graphic/header-image', [GraphicController::class, 'uploadHeaderImage'])->name('event.graphic_upload_header_image');
     Route::delete('/{subdomain}/events-graphic/header-image', [GraphicController::class, 'deleteHeaderImage'])->name('event.graphic_delete_header_image');

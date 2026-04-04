@@ -24,7 +24,6 @@
         
         <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 10px 0; color: #666;">{{ __('messages.signup_verification_code_expiry') }}</p>
-            <p style="margin: 10px 0; color: #666;">{{ __('messages.signup_verification_code_ignore') }}</p>
         </div>
 
         <div style="background-color: #f0f4ff; padding: 15px; border-radius: 8px; margin: 20px 0;">

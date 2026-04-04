@@ -381,11 +381,36 @@
                                 }),
                             })
                             .then(r => r.json())
-                            .then(aiData => {
-                                if (aiIndicator) aiIndicator.classList.add('hidden');
-                                if (aiData.text) {
-                                    textContent.value = aiData.text;
-                                    graphicData.text = aiData.text;
+                            .then(startData => {
+                                if (startData.request_id) {
+                                    const pollUrl = '{{ route("event.graphic_ai_text", ["subdomain" => $role->subdomain]) }}/' + startData.request_id;
+                                    const pollInterval = setInterval(() => {
+                                        fetch(pollUrl)
+                                            .then(r => r.json())
+                                            .then(pollData => {
+                                                if (pollData.status === 'completed') {
+                                                    clearInterval(pollInterval);
+                                                    if (aiIndicator) aiIndicator.classList.add('hidden');
+                                                    if (pollData.text) {
+                                                        textContent.value = pollData.text;
+                                                        graphicData.text = pollData.text;
+                                                    }
+                                                } else if (pollData.status === 'failed' || pollData.status === 'not_found') {
+                                                    clearInterval(pollInterval);
+                                                    if (aiIndicator) aiIndicator.classList.add('hidden');
+                                                }
+                                            })
+                                            .catch(() => {
+                                                clearInterval(pollInterval);
+                                                if (aiIndicator) aiIndicator.classList.add('hidden');
+                                            });
+                                    }, 3000);
+                                    setTimeout(() => {
+                                        clearInterval(pollInterval);
+                                        if (aiIndicator) aiIndicator.classList.add('hidden');
+                                    }, 120000);
+                                } else {
+                                    if (aiIndicator) aiIndicator.classList.add('hidden');
                                 }
                             })
                             .catch(() => {

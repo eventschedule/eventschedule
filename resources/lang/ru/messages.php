@@ -819,7 +819,6 @@ return [
     'signup_verification_code_intro' => 'Пожалуйста, используйте следующий код для завершения signup:',
     'your_verification_code' => 'Ваш код подтверждения',
     'signup_verification_code_expiry' => 'Срок действия этого кода истекает через 10 минут.',
-    'signup_verification_code_ignore' => 'Если вы не запрашивали этот код, вы можете смело игнорировать это письмо.',
     'signup_verification_code_security_notice' => 'В целях вашей безопасности никогда и никому не сообщайте этот код подтверждения. Наша команда никогда не попросит вас ввести этот код.',
     'send_code' => 'Отправить код',
     'verification_code' => 'Проверочный код',

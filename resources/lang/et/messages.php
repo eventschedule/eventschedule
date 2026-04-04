@@ -818,7 +818,6 @@ return [
     'signup_verification_code_intro' => 'Kasutage registreerumise lõpetamiseks järgmist koodi:',
     'your_verification_code' => 'Teie kinnituskood',
     'signup_verification_code_expiry' => 'See kood aegub 10 minuti pärast.',
-    'signup_verification_code_ignore' => 'Kui te seda koodi ei taotlenud, võite seda meili julgelt ignoreerida.',
     'signup_verification_code_security_notice' => 'Turvalisuse huvides ärge kunagi jagage seda kinnituskoodi kellegagi. Meie meeskond ei küsi teilt seda koodi kunagi.',
     'send_code' => 'Saada kood',
     'verification_code' => 'Kinnituskood',

@@ -826,7 +826,6 @@ return [
     'signup_verification_code_intro' => 'Vă rugăm utilizați următorul cod pentru a finaliza înregistrarea:',
     'your_verification_code' => 'Codul tău de verificare',
     'signup_verification_code_expiry' => 'Acest cod va expira în 10 minute.',
-    'signup_verification_code_ignore' => 'Dacă nu ați solicitat acest cod, puteți ignora acest email în siguranță.',
     'signup_verification_code_security_notice' => 'Pentru securitatea dumneavoastră, nu împărtășiți niciodată acest cod de verificare cu nimeni. Echipa noastră nu vă va cere niciodată acest cod.',
     'send_code' => 'Trimite Cod',
     'verification_code' => 'Cod de Verificare',

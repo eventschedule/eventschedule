@@ -73,10 +73,15 @@ class GroupsTest extends DuskTestCase
         $browser->script('addGroupField();');
 
         $browser->waitFor('input[name*="groups"][name*="name"]', 5)
-            ->type('input[name*="groups"][name*="name"]', 'Main Shows')
-            ->scrollIntoView('button[type="submit"]')
-            ->press('SAVE')
-            ->waitForLocation('/talent/schedule', 15);
+            ->type('input[name*="groups"][name*="name"]', 'Main Shows');
+
+        // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
+        $browser->script("
+            window._skipUnsavedWarning = true;
+            document.getElementById('edit-form').requestSubmit();
+        ");
+
+        $browser->waitForLocation('/talent/schedule', 45);
 
         // Add second sub-schedule
         $browser->visit('/talent/edit')
@@ -94,10 +99,15 @@ class GroupsTest extends DuskTestCase
         $browser->script('addGroupField();');
 
         $browser->waitFor('#group-items > div:last-child input[name*="groups"][name*="name"]', 5)
-            ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops')
-            ->scrollIntoView('button[type="submit"]')
-            ->press('SAVE')
-            ->waitForLocation('/talent/schedule', 15);
+            ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops');
+
+        // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
+        $browser->script("
+            window._skipUnsavedWarning = true;
+            document.getElementById('edit-form').requestSubmit();
+        ");
+
+        $browser->waitForLocation('/talent/schedule', 45);
 
         // Verify both sub-schedules were saved in database
         $role = Role::where('subdomain', 'talent')->first();
@@ -133,9 +143,13 @@ class GroupsTest extends DuskTestCase
             sel.dispatchEvent(new Event('change', { bubbles: true }));
         ");
 
-        $browser->scrollIntoView('button[type="submit"]')
-            ->press('SAVE')
-            ->waitForLocation('/talent/schedule', 15)
+        // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
+        $browser->script("
+            window._skipUnsavedWarning = true;
+            document.getElementById('edit-form').requestSubmit();
+        ");
+
+        $browser->waitForLocation('/talent/schedule', 45)
             ->pause(1000)
             ->assertSee('Main Show Event');
 
@@ -159,9 +173,13 @@ class GroupsTest extends DuskTestCase
             sel.dispatchEvent(new Event('change', { bubbles: true }));
         ");
 
-        $browser->scrollIntoView('button[type="submit"]')
-            ->press('SAVE')
-            ->waitForLocation('/talent/schedule', 15)
+        // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
+        $browser->script("
+            window._skipUnsavedWarning = true;
+            document.getElementById('edit-form').requestSubmit();
+        ");
+
+        $browser->waitForLocation('/talent/schedule', 45)
             ->pause(1000)
             ->assertSee('Workshop Event');
 
@@ -176,10 +194,15 @@ class GroupsTest extends DuskTestCase
 
         // Create third event without sub-schedule
         $browser->visit('/talent/add-event?date='.date('Y-m-d', strtotime('+7 days')))
-            ->type('name', 'General Event')
-            ->scrollIntoView('button[type="submit"]')
-            ->press('SAVE')
-            ->waitForLocation('/talent/schedule', 15)
+            ->type('name', 'General Event');
+
+        // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
+        $browser->script("
+            window._skipUnsavedWarning = true;
+            document.getElementById('edit-form').requestSubmit();
+        ");
+
+        $browser->waitForLocation('/talent/schedule', 45)
             ->pause(1000)
             ->assertSee('General Event');
     }
@@ -187,7 +210,7 @@ class GroupsTest extends DuskTestCase
     /**
      * Test filtering functionality in guest view
      */
-    protected function testGuestViewFiltering(Browser $browser): void
+    protected function test_guest_view_filtering(Browser $browser): void
     {
         // Visit guest view - should show all events initially
         $browser->visit('/talent')
@@ -224,7 +247,7 @@ class GroupsTest extends DuskTestCase
     /**
      * Test API functionality for creating events with sub-schedules
      */
-    protected function testApiGroupFunctionality(Browser $browser): void
+    protected function test_api_group_functionality(Browser $browser): void
     {
         // Enable API for the user
         $apiKey = $this->enableApi($browser);

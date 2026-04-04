@@ -8,8 +8,6 @@
 
 {{ __('messages.signup_verification_code_expiry') }}
 
-{{ __('messages.signup_verification_code_ignore') }}
-
 {{ __('messages.signup_verification_code_security_notice') }}
 
 {{ __('messages.thank_you_for_using') }}
