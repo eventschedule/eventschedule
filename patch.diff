@@ -1,0 +1,37 @@
+--- app/Http/Controllers/HomeController.php
++++ app/Http/Controllers/HomeController.php
+@@ -194,6 +194,15 @@
+         $canCreateSchedule = ! config('app.hosted') || $user->roles()->where('is_deleted', false)->count() < 50;
+
++        $allRoles = app('userRoles');
++        $schedules = $allRoles->where('type', 'talent')->whereIn('pivot.level', ['owner', 'admin', 'viewer']);
++        $venues = $allRoles->where('type', 'venue')->whereIn('pivot.level', ['owner', 'admin', 'viewer']);
++        $curators = $allRoles->where('type', 'curator')->whereIn('pivot.level', ['owner', 'admin', 'viewer']);
++
+         return view('home', compact(
+             'events',
+             'month',
+             'year',
+             'startOfMonth',
+             'roleIds',
+             'upcomingCount',
+             'views30d',
+             'viewsChange',
+             'sparklineData',
+             'followersCount',
+             'totalEventsCount',
+             'upcomingEvents',
+             'recentActivity',
+             'dashboardConfig',
+             'panelSettings',
+             'revenueStats',
+             'topEvents',
+             'latestNewsletters',
+             'boostCampaigns',
+             'trafficSources',
+             'canCreateSchedule',
++            'schedules',
++            'venues',
++            'curators'
+         ));
+     }
