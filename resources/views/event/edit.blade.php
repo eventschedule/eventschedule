@@ -1254,7 +1254,7 @@
                             </x-primary-button>
                             @if ($event->exists && $event->is_draft)
                             <button type="button" @click="publishEvent()" v-bind:disabled="isSaving"
-                                class="w-full justify-center mt-3 inline-flex items-center px-4 py-3 bg-green-600 border border-transparent rounded-lg font-semibold text-sm text-white tracking-wide hover:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                                class="w-full justify-center mt-3 inline-flex items-center px-4 py-3 bg-green-600 border border-transparent rounded-lg font-semibold text-sm text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                                 {{ __('messages.publish') }}
                             </button>
                             @endif
@@ -4160,7 +4160,7 @@
                 </x-primary-button>
                 @if ($event->exists && $event->is_draft)
                 <button type="button" @click="publishEvent()" v-bind:disabled="isSaving"
-                    class="flex-1 justify-center inline-flex items-center px-4 py-3 bg-green-600 border border-transparent rounded-lg font-semibold text-sm text-white tracking-wide hover:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                    class="flex-1 justify-center inline-flex items-center px-4 py-3 bg-green-600 border border-transparent rounded-lg font-semibold text-sm text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                     {{ __('messages.publish') }}
                 </button>
                 @endif
@@ -5109,7 +5109,7 @@
         this.event.is_draft = false;
         this.$nextTick(() => {
           window._skipUnsavedWarning = true;
-          this.$el.closest('form').requestSubmit();
+          document.getElementById('edit-form').requestSubmit();
         });
       },
       validateForm(event) {
