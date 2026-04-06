@@ -632,6 +632,10 @@ class EventRepo
             $event->sponsor_logos = null;
         }
 
+        // Capture draft transition before save() resets dirty tracking
+        $wasDraftBeforeSave = $event->isDirty('is_draft') && $event->getOriginal('is_draft');
+        $wasJustUnpublished = $event->isDirty('is_draft') && ! $event->getOriginal('is_draft') && $event->is_draft;
+
         $event->save();
 
         if ($venue) {
@@ -1107,7 +1111,7 @@ class EventRepo
 
         // Skip external sync and webhooks for draft events
         if (! $event->is_draft) {
-            $isNewOrJustPublished = $event->wasRecentlyCreated || $event->wasChanged('is_draft');
+            $isNewOrJustPublished = $event->wasRecentlyCreated || $wasDraftBeforeSave;
 
             // Sync to Google Calendar for the current role
             if ($currentRole && $currentRole->syncsToGoogle()) {
@@ -1132,6 +1136,14 @@ class EventRepo
                 $isNewOrJustPublished ? 'event.created' : 'event.updated',
                 $event
             );
+        } elseif ($wasJustUnpublished) {
+            // Remove from external calendars when un-publishing
+            if ($currentRole && $currentRole->syncsToGoogle()) {
+                $event->syncToGoogleCalendar('delete');
+            }
+            if ($currentRole && $currentRole->syncsToCalDAV()) {
+                $event->syncToCalDAV('delete');
+            }
         }
 
         return $event;

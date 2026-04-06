@@ -567,12 +567,14 @@ class ApiEventController extends Controller
         }
 
         // Capture webhook payload before deletion
-        $webhookPayload = [
-            'event' => 'event.deleted',
-            'timestamp' => now()->toIso8601String(),
-            'data' => $event->toApiData(),
-        ];
-        WebhookService::dispatch('event.deleted', $event, $webhookPayload);
+        if (! $event->is_draft) {
+            $webhookPayload = [
+                'event' => 'event.deleted',
+                'timestamp' => now()->toIso8601String(),
+                'data' => $event->toApiData(),
+            ];
+            WebhookService::dispatch('event.deleted', $event, $webhookPayload);
+        }
 
         $event->delete();
 

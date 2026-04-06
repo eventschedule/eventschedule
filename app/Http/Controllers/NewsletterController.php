@@ -139,6 +139,7 @@ class NewsletterController extends Controller
         }
         $events = $role->events()
             ->upcomingOrOngoing()
+            ->where('is_draft', false)
             ->orderBy('starts_at')
             ->get();
 

@@ -662,6 +662,7 @@ class RoleController extends Controller
                             ->where('role_id', $role->id)
                             ->where('is_accepted', true);
                     })
+                    ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false))
                     ->orderByDesc('starts_at')
                     ->limit(51)
                     ->get();
@@ -670,6 +671,7 @@ class RoleController extends Controller
                     ->fullyPast(Carbon::now('UTC'))
                     ->whereNull('days_of_week')
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
+                    ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false))
                     ->orderByDesc('starts_at')
                     ->limit(51)
                     ->get();

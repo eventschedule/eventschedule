@@ -371,6 +371,7 @@ class GraphicController extends Controller
             ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
             ->upcomingOrOngoing()
             ->where('is_private', false)
+            ->where('is_draft', false)
             ->whereNull('event_password')
             ->when($excludeRecurring, fn ($q) => $q->whereNull('days_of_week'));
 
