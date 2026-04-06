@@ -840,6 +840,7 @@ class RoleController extends Controller
 
         $eventId = UrlUtils::decodeId($request->event_id);
         $event = Event::whereHas('roles', fn ($q) => $q->where('subdomain', $subdomain))
+            ->where('is_draft', false)
             ->find($eventId);
 
         if (! $event) {

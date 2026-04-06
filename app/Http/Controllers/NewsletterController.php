@@ -231,6 +231,7 @@ class NewsletterController extends Controller
         }
         $events = $role->events()
             ->upcomingOrOngoing()
+            ->where('is_draft', false)
             ->orderBy('starts_at')
             ->get();
 
@@ -613,6 +614,7 @@ class NewsletterController extends Controller
 
         $events = $role->events()
             ->upcomingOrOngoing()
+            ->where('is_draft', false)
             ->orderBy('starts_at')
             ->get(['events.id', 'events.name', 'events.starts_at', 'events.duration'])
             ->map(fn ($e) => [
@@ -1230,6 +1232,7 @@ class NewsletterController extends Controller
         $defaultBlocks = Newsletter::defaultBlocks($role);
         $events = $role->events()
             ->upcomingOrOngoing()
+            ->where('is_draft', false)
             ->orderBy('starts_at')
             ->get();
 
@@ -1286,6 +1289,7 @@ class NewsletterController extends Controller
 
         $events = $role->events()
             ->upcomingOrOngoing()
+            ->where('is_draft', false)
             ->orderBy('starts_at')
             ->get();
 
