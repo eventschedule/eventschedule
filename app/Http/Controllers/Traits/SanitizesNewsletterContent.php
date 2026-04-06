@@ -58,7 +58,7 @@ trait SanitizesNewsletterContent
 
         // Sanitize blocks
         $allowed = array_merge(
-            ['profile_image', 'header_banner', 'heading', 'text', 'events', 'button', 'divider', 'spacer', 'image', 'social_links', 'video', 'quote'],
+            ['profile_image', 'header_banner', 'heading', 'text', 'events', 'button', 'divider', 'spacer', 'image', 'social_links', 'video', 'quote', 'sponsors', 'poll'],
             $extraAllowedTypes
         );
         $dangerousSchemes = ['javascript:', 'data:', 'vbscript:'];
@@ -83,6 +83,15 @@ trait SanitizesNewsletterContent
                 foreach ($dangerousSchemes as $scheme) {
                     if (str_starts_with($urlLower, $scheme)) {
                         $block['data']['buttonUrl'] = '#';
+                        break;
+                    }
+                }
+            }
+            if (isset($block['data']['link'])) {
+                $urlLower = strtolower(trim($block['data']['link']));
+                foreach ($dangerousSchemes as $scheme) {
+                    if (str_starts_with($urlLower, $scheme)) {
+                        $block['data']['link'] = '#';
                         break;
                     }
                 }
@@ -121,12 +130,46 @@ trait SanitizesNewsletterContent
                 $block['data']['align'] = in_array($block['data']['align'], $allowedAligns) ? $block['data']['align'] : 'center';
             }
 
-            // Validate image width to prevent CSS injection
+            // Validate image block
             if (($block['type'] ?? '') === 'image') {
                 $w = $block['data']['width'] ?? '100%';
                 if (! preg_match('/^\d+(px|%)?$/', $w)) {
                     $block['data']['width'] = '100%';
                 }
+                if (isset($block['data']['layout'])) {
+                    $allowedLayouts = ['column', 'row', 'grid'];
+                    $block['data']['layout'] = in_array($block['data']['layout'], $allowedLayouts)
+                        ? $block['data']['layout'] : 'column';
+                }
+                if (isset($block['data']['images']) && is_array($block['data']['images'])) {
+                    $block['data']['images'] = array_slice($block['data']['images'], 0, 4);
+                    foreach ($block['data']['images'] as &$img) {
+                        unset($img['_id']);
+                        foreach (['url', 'link'] as $urlField) {
+                            if (isset($img[$urlField])) {
+                                $urlLower = strtolower(trim($img[$urlField]));
+                                foreach ($dangerousSchemes as $scheme) {
+                                    if (str_starts_with($urlLower, $scheme)) {
+                                        $img[$urlField] = '#';
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        foreach (['caption', 'alt'] as $textField) {
+                            if (isset($img[$textField])) {
+                                $img[$textField] = mb_substr(strip_tags(trim($img[$textField])), 0, 200);
+                            }
+                        }
+                    }
+                    unset($img);
+                }
+            }
+
+            // Validate sponsors source
+            if (($block['type'] ?? '') === 'sponsors') {
+                $block['data']['source'] = in_array($block['data']['source'] ?? '', ['schedule', 'first_event'])
+                    ? $block['data']['source'] : 'schedule';
             }
 
             // Validate YouTube URL for video blocks

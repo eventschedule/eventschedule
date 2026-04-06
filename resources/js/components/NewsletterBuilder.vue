@@ -103,7 +103,11 @@
                                             <template v-if="block.data.text">{{ block.data.text }}</template>
                                             <span v-else class="italic text-gray-400 dark:text-gray-500">{{ t.no_content }}</span>
                                         </span>
-                                        <span v-else-if="block.type === 'image'">{{ block.data.url ? (block.data.alt || block.data.url.substring(0, 50)) : t.image_url + '...' }}</span>
+                                        <span v-else-if="block.type === 'image'">
+                                            <template v-if="block.data.images && block.data.images.length > 1">{{ block.data.images.filter(img => img.url).length }} {{ t.images }}</template>
+                                            <template v-else-if="block.data.images && block.data.images[0]">{{ block.data.images[0].caption || block.data.images[0].alt || (block.data.images[0].url ? block.data.images[0].url.substring(0, 50) : t.image_url + '...') }}</template>
+                                            <span v-else class="italic text-gray-400 dark:text-gray-500">{{ t.image_url }}...</span>
+                                        </span>
                                         <span v-else-if="block.type === 'social_links'">{{ (block.data.links || []).length + ' ' + t.links }}</span>
                                         <span v-else-if="block.type === 'divider'" class="text-gray-400">---</span>
                                         <span v-else-if="block.type === 'spacer'" class="text-gray-400">{{ (block.data.height || 20) + 'px' }}</span>
@@ -266,43 +270,27 @@
 
                                         <!-- Image block settings -->
                                         <div v-if="block.type === 'image'" class="space-y-3">
-                                            <div v-if="canUploadImages">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.upload_image }}</label>
-                                                <div class="mt-1 flex items-center gap-3">
-                                                    <input type="file" :id="'image-upload-' + block.id" class="hidden" accept="image/jpeg,image/png,image/gif,image/webp"
-                                                        @change="uploadBlockImage(block.id, $event.target.files[0]); $event.target.value = ''" />
-                                                    <button type="button" @click="$event.target.closest('div').querySelector('input[type=file]').click()"
-                                                        :disabled="imageUploading[block.id]"
-                                                        class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600 disabled:opacity-50">
-                                                        <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                                        </svg>
-                                                        <span v-if="imageUploading[block.id]">{{ t.uploading }}...</span>
-                                                        <span v-else>{{ t.choose_file }}</span>
-                                                    </button>
-                                                </div>
-                                                <div v-if="block.data.url" class="mt-2">
-                                                    <img :src="block.data.url" :alt="block.data.alt" class="max-h-20 rounded border border-gray-200 dark:border-gray-600" />
-                                                </div>
+                                            <!-- Layout selector (only when multiple images) -->
+                                            <div v-if="block.data.images && block.data.images.length > 1">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.layout }}</label>
+                                                <select class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm"
+                                                    :value="block.data.layout"
+                                                    @change="updateBlockData(block.id, 'layout', $event.target.value)">
+                                                    <option value="column">{{ t.layout_column }}</option>
+                                                    <option value="row">{{ t.layout_row }}</option>
+                                                    <option value="grid">{{ t.layout_grid }}</option>
+                                                </select>
                                             </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ canUploadImages ? t.or_enter_url : t.image_url }}</label>
-                                                <input type="url" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
-                                                    :value="block.data.url"
-                                                    @input="updateBlockData(block.id, 'url', $event.target.value)" />
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.image_alt }}</label>
-                                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
-                                                    :value="block.data.alt"
-                                                    @input="updateBlockData(block.id, 'alt', $event.target.value)" />
-                                            </div>
-                                            <div>
+
+                                            <!-- Width (for column layout or single image) -->
+                                            <div v-if="!block.data.images || block.data.images.length <= 1 || block.data.layout === 'column'">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.width }}</label>
                                                 <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm" placeholder="100%"
                                                     :value="block.data.width"
                                                     @input="updateBlockData(block.id, 'width', $event.target.value)" />
                                             </div>
+
+                                            <!-- Alignment -->
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.alignment }}</label>
                                                 <select class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm"
@@ -313,6 +301,84 @@
                                                     <option value="right">{{ t.right }}</option>
                                                 </select>
                                             </div>
+
+                                            <!-- Per-image fields -->
+                                            <div v-for="(img, imgIdx) in (block.data.images || [])" :key="img._id"
+                                                class="border border-gray-200 dark:border-gray-600 rounded-lg p-3 space-y-2">
+
+                                                <!-- Header with image number and remove button -->
+                                                <div class="flex items-center justify-between">
+                                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        {{ t.image }}{{ block.data.images.length > 1 ? ' ' + (imgIdx + 1) : '' }}
+                                                    </span>
+                                                    <button v-if="block.data.images.length > 1" type="button"
+                                                        @click="removeImageItem(block.id, img._id)"
+                                                        class="p-1 text-red-400 hover:text-red-600 dark:hover:text-red-300">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                    </button>
+                                                </div>
+
+                                                <!-- Upload button -->
+                                                <div v-if="canUploadImages">
+                                                    <input type="file" :id="'image-upload-' + img._id" class="hidden"
+                                                        accept="image/jpeg,image/png,image/gif,image/webp"
+                                                        @change="uploadImageItem(block.id, img._id, $event.target.files[0]); $event.target.value = ''" />
+                                                    <div class="flex items-center gap-3">
+                                                        <button type="button"
+                                                            @click="document.getElementById('image-upload-' + img._id).click()"
+                                                            :disabled="imageUploading[img._id]"
+                                                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600 disabled:opacity-50">
+                                                            <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                            </svg>
+                                                            <span v-if="imageUploading[img._id]">{{ t.uploading }}...</span>
+                                                            <span v-else>{{ t.choose_file }}</span>
+                                                        </button>
+                                                    </div>
+                                                    <div v-if="img.url" class="mt-2">
+                                                        <img :src="img.url" :alt="img.alt" class="max-h-16 rounded border border-gray-200 dark:border-gray-600" />
+                                                    </div>
+                                                </div>
+
+                                                <!-- URL -->
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ canUploadImages ? t.or_enter_url : t.image_url }}</label>
+                                                    <input type="url" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
+                                                        :value="img.url"
+                                                        @input="updateImageItem(block.id, img._id, 'url', $event.target.value)" />
+                                                </div>
+
+                                                <!-- Alt -->
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.image_alt }}</label>
+                                                    <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
+                                                        :value="img.alt"
+                                                        @input="updateImageItem(block.id, img._id, 'alt', $event.target.value)" />
+                                                </div>
+
+                                                <!-- Caption -->
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.image_caption }}</label>
+                                                    <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
+                                                        :value="img.caption"
+                                                        @input="updateImageItem(block.id, img._id, 'caption', $event.target.value)" />
+                                                </div>
+
+                                                <!-- Link -->
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.image_link }}</label>
+                                                    <input type="url" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
+                                                        :value="img.link"
+                                                        @input="updateImageItem(block.id, img._id, 'link', $event.target.value)" />
+                                                </div>
+                                            </div>
+
+                                            <!-- Add image button -->
+                                            <button v-if="(block.data.images || []).length < 4" type="button"
+                                                @click="addImageItem(block.id)"
+                                                class="text-sm text-[var(--brand-blue)] hover:text-blue-700">
+                                                + {{ t.add_image }}
+                                            </button>
                                         </div>
 
                                         <!-- Social links block settings -->
@@ -426,6 +492,37 @@
                                                     :value="block.data.title"
                                                     @input="updateBlockData(block.id, 'title', $event.target.value)" />
                                             </div>
+                                        </div>
+
+                                        <!-- Sponsors block settings -->
+                                        <div v-if="block.type === 'sponsors'" class="space-y-3">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.sponsor_source }}</label>
+                                                <div class="flex gap-4 mt-2">
+                                                    <label class="flex items-center gap-2 cursor-pointer">
+                                                        <input type="radio" value="schedule"
+                                                            :name="'sponsor_source_' + block.id"
+                                                            :checked="block.data.source === 'schedule'"
+                                                            @change="updateBlockData(block.id, 'source', 'schedule')"
+                                                            class="border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ t.sponsor_source_schedule }}</span>
+                                                    </label>
+                                                    <label class="flex items-center gap-2 cursor-pointer">
+                                                        <input type="radio" value="first_event"
+                                                            :name="'sponsor_source_' + block.id"
+                                                            :checked="block.data.source === 'first_event'"
+                                                            @change="updateBlockData(block.id, 'source', 'first_event')"
+                                                            class="border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ t.sponsor_source_first_event }}</span>
+                                                    </label>
+                                                </div>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ t.sponsor_source_help }}</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Poll block: auto-populated -->
+                                        <div v-if="block.type === 'poll'">
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ t.poll_auto_description }}</p>
                                         </div>
 
                                         <!-- Profile image / header banner: no settings -->
@@ -761,7 +858,25 @@ const props = defineProps({
 
 const t = props.translations;
 
-const blocks = ref(JSON.parse(JSON.stringify(props.initialBlocks)));
+function newImageItem(url, alt, caption, link) {
+    return { _id: generateId(), url: url || '', alt: alt || '', caption: caption || '', link: link || '' };
+}
+
+function normalizeImageBlock(block) {
+    if (block.type === 'image') {
+        if (!block.data.images) {
+            block.data.images = [newImageItem(block.data.url, block.data.alt)];
+            delete block.data.url;
+            delete block.data.alt;
+        } else {
+            block.data.images.forEach(img => { if (!img._id) img._id = generateId(); });
+        }
+        if (!block.data.layout) block.data.layout = 'column';
+    }
+    return block;
+}
+
+const blocks = ref(JSON.parse(JSON.stringify(props.initialBlocks)).map(b => normalizeImageBlock(b)));
 const selectedBlockId = ref(null);
 const template = ref(props.initialTemplate);
 const subject = ref(props.initialSubject);
@@ -775,35 +890,6 @@ const previewLoading = ref(false);
 
 const activeSection = ref('content');
 const imageUploading = ref({});
-
-function uploadBlockImage(blockId, file) {
-    if (!file) return;
-    imageUploading.value[blockId] = true;
-
-    const formData = new FormData();
-    formData.append('image', file);
-
-    fetch(props.routes.upload_image, {
-        method: 'POST',
-        headers: { 'X-CSRF-TOKEN': props.csrfToken },
-        body: formData,
-    })
-    .then(r => {
-        if (!r.ok) return r.json().then(d => { throw new Error(d.error || t.error_uploading_image); });
-        return r.json();
-    })
-    .then(data => {
-        if (data.success && data.url) {
-            updateBlockData(blockId, 'url', data.url);
-        }
-    })
-    .catch(e => {
-        alert(e.message || t.error_uploading_image);
-    })
-    .finally(() => {
-        imageUploading.value[blockId] = false;
-    });
-}
 
 // Track whether the first heading is auto-synced from the subject field
 const subjectSyncActive = ref((() => {
@@ -827,7 +913,7 @@ const allBlockTypes = [
     { type: 'text', label: t.block_text, icon: '\u00b6', defaultData: { content: '' } },
     { type: 'events', label: t.block_events, icon: '\ud83d\udcc5', defaultData: { layout: 'cards', useAllEvents: true, eventIds: [] } },
     { type: 'button', label: t.block_button, icon: '\u25a2', defaultData: { text: '', url: '', align: 'center' } },
-    { type: 'image', label: t.block_image, icon: '\ud83d\uddbc', defaultData: { url: '', alt: '', width: '100%', align: 'center' } },
+    { type: 'image', label: t.block_image, icon: '\ud83d\uddbc', defaultData: { images: [{ url: '', alt: '', caption: '', link: '' }], layout: 'column', width: '100%', align: 'center' } },
     { type: 'divider', label: t.block_divider, icon: '\u2014', defaultData: { style: 'solid' } },
     { type: 'spacer', label: t.block_spacer, icon: '\u2195', defaultData: { height: 20 } },
     { type: 'social_links', label: t.block_social_links, icon: '@', defaultData: { links: props.roleSocialLinks.length ? JSON.parse(JSON.stringify(props.roleSocialLinks)) : [{ platform: 'website', url: '' }] } },
@@ -836,6 +922,8 @@ const allBlockTypes = [
     { type: 'offer', label: t.block_offer, icon: '\ud83c\udff7', defaultData: { title: '', description: '', originalPrice: '', salePrice: '', couponCode: '', buttonText: '', buttonUrl: '', align: 'center' } },
     { type: 'video', label: t.block_video, icon: '▶', defaultData: { url: '' } },
     { type: 'quote', label: t.block_quote, icon: '"', defaultData: { text: '', author: '', title: '' } },
+    { type: 'sponsors', label: t.block_sponsors, icon: '★', defaultData: { source: 'schedule' } },
+    { type: 'poll', label: t.block_poll, icon: '📊', defaultData: {} },
 ];
 
 const blockTypes = props.availableBlockTypes
@@ -923,11 +1011,11 @@ function blockIcon(type) {
 }
 
 function addBlockFromPalette(bt) {
-    const newBlock = {
+    const newBlock = normalizeImageBlock({
         id: generateId(),
         type: bt.type,
         data: JSON.parse(JSON.stringify(bt.defaultData)),
-    };
+    });
     blocks.value.push(newBlock);
     showBlockPalette.value = false;
     selectBlock(newBlock.id);
@@ -1028,6 +1116,57 @@ function removeSocialLink(blockId, linkIdx) {
     if (block && block.data.links) {
         block.data.links.splice(linkIdx, 1);
     }
+}
+
+function updateImageItem(blockId, imgId, key, value) {
+    const block = blocks.value.find(b => b.id === blockId);
+    if (!block || !block.data.images) return;
+    const img = block.data.images.find(i => i._id === imgId);
+    if (img) img[key] = value;
+}
+
+function addImageItem(blockId) {
+    const block = blocks.value.find(b => b.id === blockId);
+    if (block && block.data.images && block.data.images.length < 4) {
+        block.data.images.push(newImageItem());
+    }
+}
+
+function removeImageItem(blockId, imgId) {
+    const block = blocks.value.find(b => b.id === blockId);
+    if (block && block.data.images && block.data.images.length > 1) {
+        const idx = block.data.images.findIndex(i => i._id === imgId);
+        if (idx > -1) block.data.images.splice(idx, 1);
+    }
+}
+
+function uploadImageItem(blockId, imgId, file) {
+    if (!file) return;
+    imageUploading.value[imgId] = true;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    fetch(props.routes.upload_image, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': props.csrfToken },
+        body: formData,
+    })
+    .then(r => {
+        if (!r.ok) return r.json().then(d => { throw new Error(d.error || t.error_uploading_image); });
+        return r.json();
+    })
+    .then(data => {
+        if (data.success && data.url) {
+            updateImageItem(blockId, imgId, 'url', data.url);
+        }
+    })
+    .catch(e => {
+        alert(e.message || t.error_uploading_image);
+    })
+    .finally(() => {
+        imageUploading.value[imgId] = false;
+    });
 }
 
 function cloneBlock(blockId) {

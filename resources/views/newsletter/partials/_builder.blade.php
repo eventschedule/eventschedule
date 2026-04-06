@@ -128,7 +128,7 @@ $builderProps = [
     'canUploadImages' => $isAdmin || (isset($role) && $role->isPro()),
     'availableBlockTypes' => $isAdmin
         ? ['heading', 'text', 'button', 'image', 'video', 'divider', 'spacer', 'social_links', 'quote', 'offer']
-        : ['heading', 'text', 'events', 'button', 'image', 'video', 'divider', 'spacer', 'social_links', 'quote', 'profile_image', 'header_banner'],
+        : ['heading', 'text', 'events', 'button', 'image', 'video', 'divider', 'spacer', 'social_links', 'quote', 'profile_image', 'header_banner', 'sponsors', 'poll'],
     'translations' => [
         'add_block' => __('messages.add_block'),
         'blocks' => __('messages.blocks'),
@@ -172,7 +172,14 @@ $builderProps = [
         'spacer_height' => __('messages.spacer_height'),
         'image_url' => __('messages.image_url'),
         'image_alt' => __('messages.image_alt'),
+        'image_caption' => __('messages.image_caption'),
+        'image_link' => __('messages.image_link'),
         'width' => __('messages.width'),
+        'layout' => __('messages.layout'),
+        'layout_column' => __('messages.layout_column'),
+        'layout_row' => __('messages.layout_row'),
+        'layout_grid' => __('messages.layout_grid'),
+        'add_image' => __('messages.add_image'),
         'platform' => __('messages.platform'),
         'add_link' => __('messages.add_link'),
         'auto_populated_from_schedule' => __('messages.auto_populated_from_schedule'),
@@ -181,6 +188,8 @@ $builderProps = [
         'remove_block' => __('messages.remove_block'),
         'profile_image' => __('messages.profile_image'),
         'header_image' => __('messages.header_image'),
+        'image' => __('messages.image'),
+        'images' => __('messages.images'),
         'links' => __('messages.links'),
         'background_color' => __('messages.background_color'),
         'accent_color' => __('messages.accent_color'),
@@ -235,6 +244,13 @@ $builderProps = [
         'uploading' => __('messages.uploading'),
         'choose_file' => __('messages.choose_file'),
         'error_uploading_image' => __('messages.error_uploading_image'),
+        'block_sponsors' => __('messages.block_sponsors'),
+        'block_poll' => __('messages.block_poll'),
+        'sponsor_source' => __('messages.sponsor_source'),
+        'sponsor_source_schedule' => __('messages.sponsor_source_schedule'),
+        'sponsor_source_first_event' => __('messages.sponsor_source_first_event'),
+        'sponsor_source_help' => __('messages.sponsor_source_help'),
+        'poll_auto_description' => __('messages.poll_auto_description'),
     ],
 ];
 @endphp

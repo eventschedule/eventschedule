@@ -308,6 +308,41 @@ class NewsletterService
                     $block['data']['thumbnailUrl'] = 'https://img.youtube.com/vi/'.$m[1].'/hqdefault.jpg';
                 }
             }
+
+            if ($type === 'sponsors') {
+                $source = $block['data']['source'] ?? 'schedule';
+                if ($source === 'first_event' && $role) {
+                    $events = $this->getUpcomingEvents($role);
+                    $firstEvent = $events->first();
+                    $block['data']['resolvedSponsors'] = $firstEvent
+                        ? $firstEvent->getEffectiveSponsorLogos($role)
+                        : [];
+                } elseif ($role) {
+                    $block['data']['resolvedSponsors'] = $role->getSponsorLogos();
+                } else {
+                    $block['data']['resolvedSponsors'] = [];
+                }
+                $block['data']['sponsorTitle'] = $role ? $role->translatedSponsorSectionTitle() : '';
+            }
+
+            if ($type === 'poll') {
+                $block['data']['resolvedPoll'] = null;
+                if ($role) {
+                    $events = $this->getUpcomingEvents($role);
+                    foreach ($events as $event) {
+                        $poll = $event->activePolls()->first();
+                        if ($poll) {
+                            $block['data']['resolvedPoll'] = [
+                                'question' => $poll->question,
+                                'options' => $poll->options,
+                                'eventName' => $event->name,
+                                'eventUrl' => $event->getGuestUrl(),
+                            ];
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         return $blocks;
