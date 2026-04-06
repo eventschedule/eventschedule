@@ -445,7 +445,7 @@
               @endif
 
               {{-- Calendar links dropdown (inside venue card) --}}
-              @if ($event->tickets_enabled && $event->isPro())
+              @if (!$event->is_draft && $event->tickets_enabled && $event->isPro())
               <div class="relative mt-4">
                 <button type="button"
                     class="calendar-card-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
@@ -508,7 +508,7 @@
         @endif
 
         {{-- Calendar links dropdown (fallback when no venue) --}}
-        @if (!($event->venue && $event->venue->name) && $event->tickets_enabled && $event->isPro())
+        @if (!$event->is_draft && !($event->venue && $event->venue->name) && $event->tickets_enabled && $event->isPro())
         <div class="relative {{ $role->isRtl() ? 'rtl' : '' }}">
           <button type="button"
               class="calendar-card-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
@@ -861,7 +861,7 @@
                 </button>
             </a>
           @endif
-        @elseif ($event->allTicketSalesEnded() && $event->tickets_enabled)
+        @elseif (!$event->is_draft && $event->allTicketSalesEnded() && $event->tickets_enabled)
               <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_sales_ended') }}</span>
               <button type="button"
                   class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
@@ -872,7 +872,7 @@
                   <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
               </svg>
               </button>
-        @elseif ($event->allTicketSalesNotStarted() && $event->tickets_enabled)
+        @elseif (!$event->is_draft && $event->allTicketSalesNotStarted() && $event->tickets_enabled)
               <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.sales_not_started') }}</span>
               <button type="button"
                   class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
@@ -883,7 +883,7 @@
                   <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
               </svg>
               </button>
-        @else
+        @elseif (!$event->is_draft)
               <button type="button"
                   class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
@@ -945,6 +945,7 @@
         </a>
         @endif
         {{-- Share button --}}
+        @if (!$event->is_draft)
         <button type="button"
                 data-share-title="{{ $event->translatedName() }}"
                 @click="
@@ -967,12 +968,13 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-600 dark:text-green-400" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
           </template>
         </button>
+        @endif
         </div>
 
         </div>
 
         {{-- Mobile calendar bottom sheet (outside hidden sm:block container so it's visible on mobile) --}}
-        @if (!($event->canSellTickets($date) || $event->canAcceptRsvp($date) || $event->registration_url))
+        @if (!$event->is_draft && !($event->canSellTickets($date) || $event->canAcceptRsvp($date) || $event->registration_url))
         <div id="calendar-mobile-sheet" class="hidden fixed inset-0 z-50 sm:hidden">
           <div class="fixed inset-0 bg-black/60" id="calendar-mobile-overlay"></div>
           <div class="gp-bottom-sheet fixed inset-x-0 bottom-0 rounded-t-2xl shadow-xl">
@@ -1995,6 +1997,7 @@
        class="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 shadow-lg" style="font-family: sans-serif; padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
     <div class="flex items-center gap-3 {{ $role->isRtl() ? 'rtl' : '' }}">
       {{-- Mobile share button --}}
+      @if (!$event->is_draft)
       <button type="button"
               data-share-title="{{ $event->translatedName() }}"
               @click="
@@ -2016,6 +2019,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-600 dark:text-green-400" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
         </template>
       </button>
+      @endif
       {{-- View Ticket (if already registered) --}}
       @if ($userSale)
         <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $userSale->secret]) }}"
@@ -2069,7 +2073,7 @@
         <span class="flex-1 text-center text-sm text-gray-500 dark:text-gray-400 py-3">{{ __('messages.ticket_sales_ended') }}</span>
       @elseif ($event->allTicketSalesNotStarted() && $event->tickets_enabled)
         <span class="flex-1 text-center text-sm text-gray-500 dark:text-gray-400 py-3">{{ __('messages.sales_not_started') }}</span>
-      @else
+      @elseif (!$event->is_draft)
         <button type="button"
             id="mobile-calendar-cta"
             class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"

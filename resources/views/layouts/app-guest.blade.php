@@ -51,7 +51,7 @@
             <meta name="twitter:image" content="{{ config('app.url') . '/images/social/home.png' }}">
             <meta name="twitter:card" content="summary_large_image">
             <meta name="twitter:site" content="@ScheduleEvent">
-        @elseif ($event && $event->exists)
+        @elseif ($event && $event->exists && !$event->is_draft)
             @if ($galleryMode)
                 @php
                     $galleryTitle = $event->translatedName() . ' - ' . __('messages.photo_gallery');
@@ -268,7 +268,7 @@
 
         </style>
 
-        @if ($event && $event->exists && $event->starts_at && !($passwordGate ?? false))
+        @if ($event && $event->exists && $event->starts_at && !$event->is_draft && !($passwordGate ?? false))
             @php
                 // Use translation if available, otherwise fall back to event methods
                 $eventName = (isset($translation) && $translation && $translation->name_translated) ? $translation->name_translated : $event->translatedName();
@@ -392,7 +392,7 @@
             </script>
         @endif
 
-        @if ($event && $event->exists && $event->starts_at && !($passwordGate ?? false))
+        @if ($event && $event->exists && $event->starts_at && !$event->is_draft && !($passwordGate ?? false))
             <script type="application/ld+json" {!! nonce_attr() !!}>
             {
                 "@context": "https://schema.org",

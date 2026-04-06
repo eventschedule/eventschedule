@@ -2881,6 +2881,9 @@ class EventController extends Controller
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
 
+        if ($event->is_draft && ! $isMemberOrAdmin) {
+            abort(404);
+        }
         if ($event->is_private && ! $isMemberOrAdmin) {
             abort(404);
         }
@@ -3124,7 +3127,7 @@ class EventController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 404);
         }
 
-        if ($event->is_private) {
+        if ($event->is_draft || $event->is_private) {
             $user = auth()->user();
             $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
             if (! $isMemberOrAdmin) {

@@ -739,7 +739,7 @@ class EventRepo
             }
         }
 
-        if (config('app.hosted')) {
+        if (config('app.hosted') && ! $event->is_draft) {
             $sendEmailToMembers = $request->input('send_email_to_members', []);
 
             foreach ($roles as $role) {

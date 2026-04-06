@@ -25,6 +25,62 @@
         "url": "{{ url()->current() }}"
     }
     </script>
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Do I get access to all platform features as an operator?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. As a SaaS operator, you run the full platform on your own server with access to every feature. Your customers get features based on the plan tier they subscribe to (Free, Pro, or Enterprise), which you control."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is there a limit on the number of clients I can have?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. There are no limits on the number of customers or schedules on your platform. Each customer gets their own subdomain (customer.yourdomain.com), and you can grow without restrictions."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Are there limits on event attendees or participants?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "There are no platform-imposed limits on event attendees. Event creators can optionally set their own capacity limits per ticket type, but the platform itself does not restrict attendance numbers."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I customize features across different pricing tiers?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. The platform includes built-in Free, Pro, and Enterprise tiers with automatic feature gating. You set your own prices via Stripe and can configure trial length. Features are gated per tier out of the box."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Will the platform be hosted on your servers?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. You host it on your own servers. You control the infrastructure, the data, and the entire installation. It runs on your hardware, under your domain, with your branding."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How is GDPR compliance handled?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Since you host the platform yourself, you are the data controller and manage compliance for your jurisdiction. The open-source codebase means you can audit every line of code and customize it to meet any regulatory requirements."
+                }
+            }
+        ]
+    }
+    </script>
     </x-slot>
 
     <!-- Hero Section -->
@@ -515,6 +571,112 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/5">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-700 dark:text-blue-300 text-sm font-medium mb-4">
+                    <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Common Questions
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Frequently asked questions
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+                    Common questions from SaaS operators considering the platform.
+                </p>
+            </div>
+
+            <div class="space-y-4">
+                <details name="faq" class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white pr-4">
+                            Do I get access to all platform features as an operator?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. As a SaaS operator, you run the full platform on your own server with access to every feature. Your customers get features based on the plan tier they subscribe to (Free, Pro, or Enterprise), which you control.
+                        </p>
+                </details>
+
+                <details name="faq" class="bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900 dark:to-cyan-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white pr-4">
+                            Is there a limit on the number of clients I can have?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            No. There are no limits on the number of customers or schedules on your platform. Each customer gets their own subdomain (customer.yourdomain.com), and you can grow without restrictions.
+                        </p>
+                </details>
+
+                <details name="faq" class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white pr-4">
+                            Are there limits on event attendees or participants?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            There are no platform-imposed limits on event attendees. Event creators can optionally set their own capacity limits per ticket type, but the platform itself does not restrict attendance numbers.
+                        </p>
+                </details>
+
+                <details name="faq" class="bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900 dark:to-emerald-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white pr-4">
+                            Can I customize features across different pricing tiers?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. The platform includes built-in Free, Pro, and Enterprise tiers with automatic feature gating. You set your own prices via Stripe and can configure trial length. Features are gated per tier out of the box.
+                        </p>
+                </details>
+
+                <details name="faq" class="bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white pr-4">
+                            Will the platform be hosted on your servers?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            No. You host it on your own servers. You control the infrastructure, the data, and the entire installation. It runs on your hardware, under your domain, with your branding.
+                        </p>
+                </details>
+
+                <details name="faq" class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white pr-4">
+                            How is GDPR compliance handled?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Since you host the platform yourself, you are the data controller and manage compliance for your jurisdiction. The open-source codebase means you can audit every line of code and customize it to meet any regulatory requirements.
+                        </p>
+                </details>
             </div>
         </div>
     </section>
