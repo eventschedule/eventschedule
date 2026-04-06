@@ -2,12 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Mail\BlogPostReview;
 use App\Models\BlogPost;
 use App\Utils\GeminiUtils;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Mail;
 
 class GenerateSubAudienceBlog extends Command
 {
@@ -171,9 +169,6 @@ class GenerateSubAudienceBlog extends Command
 
                 $this->info("  Created blog post: {$post->title} (ID: {$post->id})");
 
-                // Send review email
-                $this->sendReviewEmail($post);
-
                 $generated++;
             } catch (\Exception $e) {
                 $this->error("  Error generating post for {$item['name']}: ".$e->getMessage());
@@ -190,27 +185,5 @@ class GenerateSubAudienceBlog extends Command
         }
 
         return 0;
-    }
-
-    /**
-     * Send review email to admin
-     */
-    protected function sendReviewEmail(BlogPost $post)
-    {
-        $adminEmail = config('app.support_email');
-
-        if (! $adminEmail) {
-            $this->warn('  No admin email configured - skipping review email');
-
-            return;
-        }
-
-        try {
-            Mail::mailer('smtp')->to($adminEmail)->send(new BlogPostReview($post));
-            $this->line('  Sent review email to '.$adminEmail);
-        } catch (\Throwable $e) {
-            \Log::error('Failed to send blog post review email: '.$e->getMessage(), ['exception' => $e]);
-            $this->warn('  Failed to send review email: '.$e->getMessage());
-        }
     }
 }

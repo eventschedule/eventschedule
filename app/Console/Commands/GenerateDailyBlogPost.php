@@ -2,11 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Mail\BlogPostReview;
 use App\Models\BlogPost;
 use App\Utils\GeminiUtils;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Mail;
 
 class GenerateDailyBlogPost extends Command
 {
@@ -91,18 +89,6 @@ class GenerateDailyBlogPost extends Command
         ]);
 
         $this->info("Created blog post: {$blogPost->title} (ID: {$blogPost->id})");
-
-        // Send email notification to admin for review
-        try {
-            $supportEmail = config('app.support_email');
-            if ($supportEmail) {
-                Mail::mailer('smtp')->to($supportEmail)->send(new BlogPostReview($blogPost));
-                $this->line("Sent review email to {$supportEmail}");
-            }
-        } catch (\Throwable $e) {
-            \Log::error('Failed to send blog post review email: '.$e->getMessage(), ['exception' => $e]);
-            $this->warn('Failed to send review email: '.$e->getMessage());
-        }
 
         return 0;
     }

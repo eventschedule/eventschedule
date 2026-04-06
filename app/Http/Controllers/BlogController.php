@@ -243,19 +243,6 @@ class BlogController extends Controller
     }
 
     /**
-     * Remove a blog post via signed URL (from email notification).
-     */
-    public function destroySigned(BlogPost $blogPost)
-    {
-        $title = $blogPost->title;
-        $slug = $blogPost->slug;
-        $blogPost->delete();
-        Cache::forget('sub_audience_blog_'.$slug);
-
-        return view('blog.deleted-confirmation', compact('title'));
-    }
-
-    /**
      * Admin index - show all posts (published and unpublished)
      */
     public function adminIndex()
