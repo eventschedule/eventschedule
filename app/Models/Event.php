@@ -1602,6 +1602,7 @@ class Event extends Model
         $data->category_id = $this->category_id;
         $data->category_name = $this->category_id ? (config('app.event_categories')[$this->category_id] ?? null) : null;
         $data->is_private = (bool) $this->is_private;
+        $data->is_draft = (bool) $this->is_draft;
         $data->is_password_protected = $this->isPasswordProtected();
         $data->event_url = $this->event_url;
         $data->registration_url = $this->registration_url;

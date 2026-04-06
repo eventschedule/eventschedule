@@ -1117,6 +1117,14 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        if ($event->is_draft) {
+            $user = auth()->user();
+            $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+            if (! $isMemberOrAdmin) {
+                abort(404);
+            }
+        }
+
         if ($event->is_private) {
             $user = auth()->user();
             $isEventMember = $event->roles->contains(fn ($r) => $user && $user->isMember($r->subdomain));
@@ -1759,6 +1767,9 @@ class EventController extends Controller
         if (! $role->acceptEventRequests()) {
             abort(403, __('messages.not_authorized'));
         }
+
+        // Prevent guests from injecting draft status
+        $request->request->remove('is_draft');
 
         $event = $this->eventRepo->saveEvent($role, $request, null, false);
 
@@ -3220,6 +3231,14 @@ class EventController extends Controller
 
         if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
             return response()->json(['error' => __('messages.not_authorized')], 404);
+        }
+
+        if ($event->is_draft) {
+            $user = auth()->user();
+            $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+            if (! $isMemberOrAdmin) {
+                return response()->json(['error' => __('messages.not_authorized')], 404);
+            }
         }
 
         if ($event->is_private) {

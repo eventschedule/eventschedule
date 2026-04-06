@@ -278,6 +278,11 @@ class ApiEventController extends Controller
         // Convert days_of_week string to individual checkbox params for saveEvent()
         $this->convertDaysOfWeek($request);
 
+        // Default is_draft to role's draft_events_default if not provided
+        if (! $request->has('is_draft')) {
+            $request->merge(['is_draft' => $role->draft_events_default]);
+        }
+
         // Pre-processing: venue, members, group, category
         $errorResponse = $this->preprocessEventRequest($request, $role, $encodedRoleId);
         if ($errorResponse) {
