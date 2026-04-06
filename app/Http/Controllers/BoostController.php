@@ -110,6 +110,10 @@ class BoostController extends Controller
             abort(403);
         }
 
+        if ($event->is_draft) {
+            abort(403);
+        }
+
         // Get the role for this boost
         $role = null;
         if ($request->role_id) {
@@ -242,6 +246,10 @@ class BoostController extends Controller
         $event = Event::with(['roles', 'tickets'])->findOrFail($eventId);
 
         if (! auth()->user()->canEditEvent($event)) {
+            abort(403);
+        }
+
+        if ($event->is_draft) {
             abort(403);
         }
 
@@ -713,6 +721,10 @@ class BoostController extends Controller
             abort(403);
         }
 
+        if ($event->is_draft) {
+            abort(403);
+        }
+
         $metaService = $this->getMetaService();
         $defaults = $metaService->generateQuickBoostDefaults($event);
 
@@ -769,6 +781,10 @@ class BoostController extends Controller
         $event = Event::findOrFail($eventId);
 
         if (! auth()->user()->canEditEvent($event)) {
+            abort(403);
+        }
+
+        if ($event->is_draft) {
             abort(403);
         }
 
@@ -903,6 +919,10 @@ class BoostController extends Controller
         $event = Event::with(['roles', 'tickets'])->findOrFail($eventId);
 
         if (! auth()->user()->canEditEvent($event)) {
+            abort(403);
+        }
+
+        if ($event->is_draft) {
             abort(403);
         }
 
