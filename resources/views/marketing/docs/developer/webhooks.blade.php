@@ -71,7 +71,13 @@
                     <div class="prose-dark">
                         <!-- Overview -->
                         <section class="doc-section" id="overview">
-                            <h2 class="doc-heading">Overview</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                Overview
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Webhooks let you receive automatic POST notifications to your server when key events occur, such as ticket sales, event changes, or check-ins. Instead of polling the API, your application is notified in real time.
                             </p>
@@ -82,7 +88,13 @@
 
                         <!-- Setup -->
                         <section class="doc-section" id="setup">
-                            <h2 class="doc-heading">Setup</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75a4.5 4.5 0 01-4.884 4.484c-1.076-.091-2.264.071-2.95.904l-7.152 8.684a2.548 2.548 0 11-3.586-3.586l8.684-7.152c.833-.686.995-1.874.904-2.95a4.5 4.5 0 016.336-4.486l-3.276 3.276a3.004 3.004 0 002.25 2.25l3.276-3.276c.256.565.398 1.192.398 1.852z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.867 19.125h.008v.008h-.008v-.008z" />
+                                </svg>
+                                Setup
+                            </h2>
                             <ol class="doc-list doc-list-numbered">
                                 <li>Go to <strong>Settings</strong> in the admin panel and select the <strong>Webhooks</strong> section.</li>
                                 <li>Enter your endpoint URL (must be HTTPS in production).</li>
@@ -94,7 +106,12 @@
 
                         <!-- Event Types -->
                         <section class="doc-section" id="event-types">
-                            <h2 class="doc-heading">Event Types</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12M8.25 17.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                </svg>
+                                Event Types
+                            </h2>
                             <div class="overflow-x-auto">
                                 <table class="doc-table">
                                     <thead>
@@ -120,7 +137,12 @@
 
                         <!-- Payload Format -->
                         <section class="doc-section" id="payload">
-                            <h2 class="doc-heading">Payload Format</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                </svg>
+                                Payload Format
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">All webhook payloads are JSON with this structure:</p>
                             <div class="doc-code-block">
                                 <pre><code>{
@@ -147,7 +169,12 @@
 
                         <!-- Headers -->
                         <section class="doc-section" id="headers">
-                            <h2 class="doc-heading">Request Headers</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                                </svg>
+                                Request Headers
+                            </h2>
                             <div class="overflow-x-auto">
                                 <table class="doc-table">
                                     <thead>
@@ -169,7 +196,12 @@
 
                         <!-- Signature Verification -->
                         <section class="doc-section" id="verification">
-                            <h2 class="doc-heading">Signature Verification</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                                </svg>
+                                Signature Verification
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Every webhook includes an <code class="doc-inline-code">X-Webhook-Signature</code> header containing an HMAC-SHA256 hash of the raw request body, signed with your webhook secret. Always verify this signature before processing the payload.
                             </p>
@@ -216,7 +248,12 @@ def verify_webhook(body: bytes, signature: str, secret: str) -> bool:
 
                         <!-- Best Practices -->
                         <section class="doc-section" id="best-practices">
-                            <h2 class="doc-heading">Best Practices</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0118 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3l1.5 1.5 3-3.75" />
+                                </svg>
+                                Best Practices
+                            </h2>
                             <ul class="doc-list">
                                 <li><strong>Respond quickly.</strong> Return a 2xx status within 5 seconds. Do heavy processing asynchronously after acknowledging receipt.</li>
                                 <li><strong>Verify signatures.</strong> Always validate the <code class="doc-inline-code">X-Webhook-Signature</code> header before processing any webhook payload.</li>
@@ -228,7 +265,12 @@ def verify_webhook(body: bytes, signature: str, secret: str) -> bool:
 
                         <!-- Test Ping -->
                         <section class="doc-section" id="testing">
-                            <h2 class="doc-heading">Testing</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+                                </svg>
+                                Testing
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Use the <strong>Test</strong> button in your webhook settings to send a test payload. The test event uses the type <code class="doc-inline-code">webhook.test</code> with an empty data object:
                             </p>
@@ -243,7 +285,12 @@ def verify_webhook(body: bytes, signature: str, secret: str) -> bool:
 
                         <!-- See Also -->
                         <section class="doc-section" id="see-also">
-                            <h2 class="doc-heading">See Also</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                </svg>
+                                See Also
+                            </h2>
                             <ul class="doc-list">
                                 <li><x-link href="{{ route('marketing.docs.developer.api') }}">REST API Reference</x-link> - Full API documentation for managing schedules and events</li>
                                 <li><x-link href="{{ route('marketing.docs.account_settings') }}">Account Settings</x-link> - Configure webhooks in your account</li>

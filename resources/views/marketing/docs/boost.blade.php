@@ -86,7 +86,13 @@
                     <div class="prose-dark">
                         <!-- Overview -->
                         <section id="overview" class="doc-section">
-                            <h2 class="doc-heading">Overview</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                Overview
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Boost turns your event details into live Facebook and Instagram ads. It is designed for event organizers who want to reach a wider audience without needing ad manager experience.
                             </p>
@@ -114,7 +120,12 @@
 
                         <!-- Quick Mode -->
                         <section id="quick-mode" class="doc-section">
-                            <h2 class="doc-heading">Quick Mode</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                                </svg>
+                                Quick Mode
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Quick Mode is the fastest way to launch a campaign. Follow these steps:
                             </p>
@@ -134,7 +145,12 @@
 
                         <!-- Advanced Mode -->
                         <section id="advanced-mode" class="doc-section">
-                            <h2 class="doc-heading">Advanced Mode</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+                                </svg>
+                                Advanced Mode
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Advanced Mode gives you full control over your campaign. Toggle it on when creating a boost to access additional settings.
                             </p>
@@ -195,7 +211,12 @@
 
                         <!-- Smart Defaults -->
                         <section id="smart-defaults" class="doc-section">
-                            <h2 class="doc-heading">Smart Defaults</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                                </svg>
+                                Smart Defaults
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Boost automatically configures your campaign based on your event's details:
                             </p>
@@ -222,7 +243,12 @@
 
                         <!-- Managing Campaigns -->
                         <section id="managing-campaigns" class="doc-section">
-                            <h2 class="doc-heading">Managing Campaigns</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0l4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0l-5.571 3-5.571-3" />
+                                </svg>
+                                Managing Campaigns
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Active and past campaigns are listed in your admin panel under Boost. You can pause, resume, or cancel a campaign at any time.
                             </p>
@@ -273,7 +299,12 @@
 
                         <!-- Spending Limits -->
                         <section id="spending-limits" class="doc-section">
-                            <h2 class="doc-heading">Spending Limits</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                                </svg>
+                                Spending Limits
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 To build trust on both sides, boost spending limits start low and grow automatically as you complete successful campaigns.
                             </p>
@@ -339,7 +370,12 @@
 
                         <!-- Analytics -->
                         <section id="analytics" class="doc-section">
-                            <h2 class="doc-heading">Analytics</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                                </svg>
+                                Analytics
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Track your campaign's performance in real time from your dashboard. Metrics update automatically as your ad runs.
                             </p>
@@ -392,7 +428,12 @@
 
                         <!-- Billing & Refunds -->
                         <section id="billing" class="doc-section">
-                            <h2 class="doc-heading">Billing & Refunds</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                                </svg>
+                                Billing & Refunds
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Boost uses transparent pricing with no hidden costs. Your total is your ad budget plus a 20% service fee.
                             </p>
@@ -444,7 +485,12 @@
 
                         <!-- Tips -->
                         <section id="tips" class="doc-section">
-                            <h2 class="doc-heading">Tips</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                                </svg>
+                                Tips
+                            </h2>
                             <ul class="doc-list mb-6">
                                 <li><strong>Add images to your events</strong> - Events with images produce more engaging ads and higher click-through rates.</li>
                                 <li><strong>Write detailed descriptions</strong> - Boost uses your event description to generate ad copy. The more detail you provide, the better the ad.</li>
@@ -456,7 +502,12 @@
 
                         <!-- See Also -->
                         <section id="see-also" class="doc-section">
-                            <h2 class="doc-heading">See Also</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                </svg>
+                                See Also
+                            </h2>
                             <ul class="doc-list">
                                 <li><a href="{{ route('marketing.docs.analytics') }}" class="text-orange-500 hover:text-orange-400">Analytics</a> - Track how Boost campaigns drive schedule views</li>
                                 <li><a href="{{ route('marketing.docs.tickets') }}" class="text-orange-500 hover:text-orange-400">Selling Tickets</a> - Set up ticketing for boosted events</li>

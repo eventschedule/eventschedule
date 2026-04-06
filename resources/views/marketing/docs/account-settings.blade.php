@@ -180,7 +180,7 @@
                                 To sell tickets, you need to connect at least one payment method. Event Schedule supports three options, each available as a tab in your Settings page.
                             </p>
 
-                            <h3 id="stripe" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Stripe</h3>
+                            <h3 id="stripe" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mb-4">Stripe</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Stripe provides the most integrated payment experience with automatic ticket delivery and QR codes.
                             </p>
@@ -199,7 +199,7 @@
                                 </div>
                             </div>
 
-                            <h3 id="invoice-ninja" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Invoice Ninja</h3>
+                            <h3 id="invoice-ninja" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mb-4">Invoice Ninja</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Connect your <x-link href="https://invoiceninja.com" target="_blank">Invoice Ninja</x-link> account to process payments through Invoice Ninja's payment gateways. This is especially useful for selfhosted deployments.
                             </p>
@@ -222,7 +222,7 @@
                                 <p>First-time Invoice Ninja users may be eligible for a free 1-year Pro upgrade. Look for the special offer banner when connecting.</p>
                             </div>
 
-                            <h3 id="payment-url" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Payment URL</h3>
+                            <h3 id="payment-url" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mb-4">Payment URL</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Use any external payment page by providing its URL. This works with PayPal.me links, custom checkout pages, or any other payment system.
                             </p>
@@ -470,7 +470,12 @@
 
                         <!-- See Also -->
                         <section id="see-also" class="doc-section">
-                            <h2 class="doc-heading">See Also</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                </svg>
+                                See Also
+                            </h2>
                             <ul class="doc-list">
                                 <li><a href="{{ route('marketing.docs.getting_started') }}" class="text-cyan-400 hover:text-cyan-300">Getting Started</a> - Set up your first schedule</li>
                                 <li><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Selling Tickets</a> - Configure ticketing after connecting a payment method</li>

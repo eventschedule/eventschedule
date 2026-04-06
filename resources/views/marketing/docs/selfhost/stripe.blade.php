@@ -88,7 +88,13 @@
                     <div class="prose-dark">
                         <!-- Overview -->
                         <section id="overview" class="doc-section">
-                            <h2 class="doc-heading">Overview</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                Overview
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Event Schedule supports Stripe for payment processing, but the setup varies depending on how you're using the platform. This guide is organized by user type to help you find exactly what you need.</p>
 
                             <div class="bg-green-500/10 border border-green-500/20 rounded-xl p-4 mb-6">
@@ -107,7 +113,12 @@
 
                         <!-- Choose Your Setup -->
                         <section id="choose-setup" class="doc-section">
-                            <h2 class="doc-heading">Choose Your Setup</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12M8.25 17.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                </svg>
+                                Choose Your Setup
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Find your setup type and follow the corresponding guide:</p>
 
                             <div class="overflow-x-auto mb-6">
@@ -146,7 +157,12 @@
 
                         <!-- Selfhosted Users -->
                         <section id="selfhosted-users" class="doc-section">
-                            <h2 class="doc-heading">For Selfhosted Users</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 00-.12-1.03l-2.268-9.64a3.375 3.375 0 00-3.285-2.602H7.923a3.375 3.375 0 00-3.285 2.602l-2.268 9.64a4.5 4.5 0 00-.12 1.03v.228m19.5 0a3 3 0 01-3 3H5.25a3 3 0 01-3-3m19.5 0a3 3 0 00-3-3H5.25a3 3 0 00-3 3m16.5 0h.008v.008h-.008v-.008zm-3 0h.008v.008h-.008v-.008z" />
+                                </svg>
+                                For Selfhosted Users
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">If you're running your own Event Schedule instance for your organization, venue, or community, all ticket payments go to a single Stripe account that you control.</p>
 
                             <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mb-6">
@@ -224,7 +240,12 @@
 
                         <!-- SaaS Operators -->
                         <section id="saas-operators" class="doc-section">
-                            <h2 class="doc-heading">For SaaS Operators</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                                </svg>
+                                For SaaS Operators
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">If you're running your own white-label SaaS platform (like eventschedule.com but with your own branding), you need two Stripe integrations:</p>
 
                             <div class="grid md:grid-cols-2 gap-4 mb-6">
@@ -445,7 +466,12 @@
 
                         <!-- Invoice Ninja -->
                         <section id="invoice-ninja" class="doc-section">
-                            <h2 class="doc-heading">Invoice Ninja (Alternative Payment Method)</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                                </svg>
+                                Invoice Ninja (Alternative Payment Method)
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">In addition to Stripe, Event Schedule supports <a href="https://invoiceninja.com" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300">Invoice Ninja</a> as an alternative payment method for ticket sales. Invoice Ninja is an open-source invoicing and payments platform that supports multiple payment gateways.</p>
 
                             <div class="doc-callout doc-callout-info">
@@ -485,7 +511,12 @@
 
                         <!-- Testing -->
                         <section id="testing" class="doc-section">
-                            <h2 class="doc-heading">Testing</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+                                </svg>
+                                Testing
+                            </h2>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Test Mode Setup</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">For development and testing:</p>
@@ -568,7 +599,13 @@ stripe trigger customer.subscription.created</code></pre>
 
                         <!-- Troubleshooting -->
                         <section id="troubleshooting" class="doc-section">
-                            <h2 class="doc-heading">Troubleshooting</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75a4.5 4.5 0 01-4.884 4.484c-1.076-.091-2.264.071-2.95.904l-7.152 8.684a2.548 2.548 0 11-3.586-3.586l8.684-7.152c.833-.686.995-1.874.904-2.95a4.5 4.5 0 016.336-4.486l-3.276 3.276a3.004 3.004 0 002.25 2.25l3.276-3.276c.256.565.398 1.192.398 1.852z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.867 19.125h.008v.008h-.008v-.008z" />
+                                </svg>
+                                Troubleshooting
+                            </h2>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Common Issues</h3>
 
@@ -636,7 +673,12 @@ stripe trigger customer.subscription.created</code></pre>
 
                         <!-- Security -->
                         <section id="security" class="doc-section">
-                            <h2 class="doc-heading">Security</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                                </svg>
+                                Security
+                            </h2>
                             <ol class="doc-list doc-list-numbered">
                                 <li><span class="font-semibold text-gray-900 dark:text-white">API Key Security:</span> Never expose secret keys in client-side code or version control. Use environment variables.</li>
                                 <li><span class="font-semibold text-gray-900 dark:text-white">Webhook Verification:</span> Always verify webhook signatures—Event Schedule does this automatically.</li>

@@ -101,7 +101,13 @@
                     <div class="prose-dark">
                         <!-- Overview -->
                         <section id="overview" class="doc-section">
-                            <h2 class="doc-heading">Overview</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                Overview
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 The Analytics dashboard gives you a comprehensive view of how your schedule is performing. Access it by clicking <strong>Analytics</strong> in the main navigation.
                             </p>
@@ -124,7 +130,12 @@
 
                         <!-- Filters -->
                         <section id="filters" class="doc-section">
-                            <h2 class="doc-heading">Filters</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+                                </svg>
+                                Filters
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Use the filters at the top of the analytics dashboard to control which data is displayed:
                             </p>
@@ -147,12 +158,17 @@
 
                         <!-- Web Analytics -->
                         <section id="web-analytics" class="doc-section">
-                            <h2 class="doc-heading">Web Analytics</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                                </svg>
+                                Web Analytics
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">
                                 The Web Analytics tab (the default tab) shows page view trends, device and traffic breakdowns, and your top-performing content.
                             </p>
 
-                            <h3 id="web-stats" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Stats Cards</h3>
+                            <h3 id="web-stats" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mb-4">Stats Cards</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 The top of the tab shows summary cards with key metrics for the selected period:
                             </p>
@@ -191,7 +207,7 @@
                                 <p>Use the comparison percentage to quickly identify whether your schedule is gaining or losing traction relative to the previous period.</p>
                             </div>
 
-                            <h3 id="web-charts" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Charts</h3>
+                            <h3 id="web-charts" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Charts</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Below the stats cards, the Web Analytics tab displays several interactive charts:
                             </p>
@@ -234,12 +250,17 @@
 
                         <!-- Revenue -->
                         <section id="revenue" class="doc-section">
-                            <h2 class="doc-heading">Revenue <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-1">Pro</span></h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                                </svg>
+                                Revenue <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-1">Pro</span>
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">
                                 The Revenue tab tracks your ticket sales performance, including conversion metrics, promo code stats, and the effectiveness of your boost and newsletter campaigns.
                             </p>
 
-                            <h3 id="revenue-stats" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Stats Cards</h3>
+                            <h3 id="revenue-stats" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mb-4">Stats Cards</h3>
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
                                     <thead>
@@ -269,7 +290,7 @@
                                 </table>
                             </div>
 
-                            <h3 id="revenue-funnels" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Funnels and Charts</h3>
+                            <h3 id="revenue-funnels" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Funnels and Charts</h3>
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Promo Code Stats</h4>
@@ -292,12 +313,17 @@
 
                         <!-- Check-ins -->
                         <section id="checkins" class="doc-section">
-                            <h2 class="doc-heading">Check-ins <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-1">Pro</span></h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0118 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3l1.5 1.5 3-3.75" />
+                                </svg>
+                                Check-ins <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-1">Pro</span>
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">
                                 The Check-ins tab provides attendance analytics for events where you use the <a href="{{ route('marketing.docs.tickets') }}#check-in" class="text-cyan-400 hover:text-cyan-300">check-in feature</a>. Track how many ticket holders actually attend your events.
                             </p>
 
-                            <h3 id="checkins-stats" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Stats Cards</h3>
+                            <h3 id="checkins-stats" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mb-4">Stats Cards</h3>
                             <div class="overflow-x-auto mb-6">
                                 <table class="doc-table">
                                     <thead>
@@ -327,7 +353,7 @@
                                 </table>
                             </div>
 
-                            <h3 id="checkins-charts" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Charts</h3>
+                            <h3 id="checkins-charts" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Charts</h3>
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Arrival Time Distribution</h4>
@@ -346,7 +372,12 @@
 
                         <!-- No Data State -->
                         <section id="no-data" class="doc-section">
-                            <h2 class="doc-heading">No Data State</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                                </svg>
+                                No Data State
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 If no data appears on the dashboard, it means no views have been recorded for the selected date range or schedule. This can happen when:
                             </p>
@@ -362,7 +393,12 @@
 
                         <!-- See Also -->
                         <section id="see-also" class="doc-section">
-                            <h2 class="doc-heading">See Also</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                </svg>
+                                See Also
+                            </h2>
                             <ul class="doc-list">
                                 <li><a href="{{ route('marketing.docs.sharing') }}" class="text-cyan-400 hover:text-cyan-300">Sharing Your Schedule</a> - Increase traffic to your schedule</li>
                                 <li><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Selling Tickets</a> - Set up ticketing to track conversions and revenue</li>

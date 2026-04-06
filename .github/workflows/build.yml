@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -38,12 +38,12 @@ jobs:
           zip -r eventschedule.zip .
 
       - name: Create Release
-        uses: marvinpinto/action-automatic-releases@v1.2.1
+        uses: softprops/action-gh-release@v2
         with:
-          repo_token: "${{ secrets.commit_secret }}"
+          token: "${{ secrets.commit_secret }}"
           draft: false
           prerelease: false
-          title: "Latest Release"
-          automatic_release_tag: "v1.0.98"
+          name: "Latest Release"
+          tag_name: "v1.0.98"
           files: |
             eventschedule.zip

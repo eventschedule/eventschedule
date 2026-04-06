@@ -91,20 +91,19 @@
             </x-stat-panel>
         </div>
 
-        {{-- Boost & Newsletter Stats --}}
+        {{-- Boost & Revenue Stats --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <x-stat-panel label="{{ __('messages.stripe_paid') }}" color="green">
                 {{ number_format($stripePaidCount) }}
+            </x-stat-panel>
+            <x-stat-panel label="ARR" color="green">
+                ${{ number_format($arr, 2) }}
             </x-stat-panel>
             <x-stat-panel label="{{ __('messages.active_boost_campaigns') }}">
                 {{ number_format($activeBoostCampaigns) }}
             </x-stat-panel>
             <x-stat-panel label="{{ __('messages.boost_markup_revenue') }}" color="green">
                 ${{ number_format($boostMarkupRevenue, 2) }}
-                <x-slot:subtitle>@lang('messages.in_period')</x-slot:subtitle>
-            </x-stat-panel>
-            <x-stat-panel label="{{ __('messages.newsletter_subscribers') }}">
-                {{ number_format($newsletterSubscribers) }}
             </x-stat-panel>
         </div>
 

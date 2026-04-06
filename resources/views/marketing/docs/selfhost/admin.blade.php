@@ -115,7 +115,13 @@
                     <div class="prose-dark">
                         <!-- Overview -->
                         <section id="overview" class="doc-section">
-                            <h2 class="doc-heading">Overview</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                Overview
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">The admin panel provides platform-wide visibility and management tools for your Event Schedule installation. It is organized into four areas:</p>
                             <ul class="doc-list mb-6">
                                 <li><strong class="text-gray-900 dark:text-white">Dashboard</strong> - at-a-glance key metrics for your platform</li>
@@ -128,7 +134,12 @@
 
                         <!-- Accessing /admin -->
                         <section id="accessing" class="doc-section">
-                            <h2 class="doc-heading">Accessing /admin</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                </svg>
+                                Accessing /admin
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">The admin panel is available at <code class="doc-inline-code">/admin</code> and is restricted to users whose <code class="doc-inline-code">is_admin</code> column is set to <code class="doc-inline-code">true</code> in the database.</p>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">To grant admin access to a user, update the <code class="doc-inline-code">users</code> table directly:</p>
 
@@ -148,7 +159,12 @@
 
                         <!-- Dashboard -->
                         <section id="dashboard" class="doc-section">
-                            <h2 class="doc-heading">Dashboard</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                                </svg>
+                                Dashboard
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">The dashboard is the landing page of the admin panel. It shows key metrics at a glance including:</p>
                             <ul class="doc-list mb-6">
                                 <li>Total users, schedules, and events with period-over-period change</li>
@@ -160,7 +176,12 @@
 
                         <!-- Insights: Users -->
                         <section id="insights-users" class="doc-section">
-                            <h2 class="doc-heading">Users (Insights)</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0Zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0Z" />
+                                </svg>
+                                Users (Insights)
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">The Users page lists every registered user on the platform with search and filtering capabilities.</p>
                             <ul class="doc-list mb-6">
                                 <li>Search users by name or email</li>
@@ -173,7 +194,12 @@
 
                         <!-- Insights: Revenue -->
                         <section id="insights-revenue" class="doc-section">
-                            <h2 class="doc-heading">Revenue (Insights)</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                                </svg>
+                                Revenue (Insights)
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">The Revenue page provides a financial overview of ticket sales across the platform.</p>
                             <ul class="doc-list mb-6">
                                 <li>Total revenue, ticket sales count, and average order value</li>
@@ -185,7 +211,12 @@
 
                         <!-- Insights: Analytics -->
                         <section id="insights-analytics" class="doc-section">
-                            <h2 class="doc-heading">Analytics (Insights)</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                                </svg>
+                                Analytics (Insights)
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">The Analytics page shows platform-wide traffic and engagement data.</p>
                             <ul class="doc-list mb-6">
                                 <li>Page views and unique visitors across all schedules</li>
@@ -198,7 +229,12 @@
 
                         <!-- Insights: Usage -->
                         <section id="insights-usage" class="doc-section">
-                            <h2 class="doc-heading">Usage (Insights)</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                                </svg>
+                                Usage (Insights)
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">The Usage page tracks how actively the platform's features are being used.</p>
                             <ul class="doc-list mb-6">
                                 <li>Feature adoption rates (e.g. Google Calendar sync, ticket sales, event graphics)</li>
@@ -210,7 +246,12 @@
 
                         <!-- Manage: Boost -->
                         <section id="manage-boost" class="doc-section">
-                            <h2 class="doc-heading">Boost (Manage)</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                                </svg>
+                                Boost (Manage)
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">The Boost management page lets you view and manage all active and past boost campaigns across the platform.</p>
                             <ul class="doc-list mb-6">
                                 <li>View all boost campaigns with their status, budget, and performance metrics</li>
@@ -226,7 +267,12 @@
 
                         <!-- Manage: Plans (SaaS only) -->
                         <section id="manage-plans" class="doc-section">
-                            <h2 class="doc-heading">Plans (Manage) <span class="doc-badge-saas">SaaS only</span></h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                                </svg>
+                                Plans (Manage) <span class="doc-badge-saas">SaaS only</span>
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">The Plans page lets you manage subscription plans and pricing tiers for your SaaS platform.</p>
                             <ul class="doc-list mb-6">
                                 <li>View and edit plan tiers (Free, Pro, Enterprise)</li>
@@ -241,7 +287,12 @@
 
                         <!-- Manage: Domains (SaaS only) -->
                         <section id="manage-domains" class="doc-section">
-                            <h2 class="doc-heading">Domains (Manage) <span class="doc-badge-saas">SaaS only</span></h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                                </svg>
+                                Domains (Manage) <span class="doc-badge-saas">SaaS only</span>
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">The Domains page manages custom domain mappings for schedules on the SaaS platform.</p>
                             <ul class="doc-list mb-6">
                                 <li>View all custom domains connected to schedules</li>
@@ -256,7 +307,12 @@
 
                         <!-- Manage: Newsletters -->
                         <section id="manage-newsletters" class="doc-section">
-                            <h2 class="doc-heading">Newsletters (Manage)</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                                </svg>
+                                Newsletters (Manage)
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">The Newsletters page lets you create and send email newsletters to platform users.</p>
                             <ul class="doc-list mb-6">
                                 <li>Create newsletters with a rich text editor</li>
@@ -269,7 +325,12 @@
 
                         <!-- Manage: Blog (SaaS only) -->
                         <section id="manage-blog" class="doc-section">
-                            <h2 class="doc-heading">Blog (Manage) <span class="doc-badge-saas">SaaS only</span></h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                </svg>
+                                Blog (Manage) <span class="doc-badge-saas">SaaS only</span>
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">The Blog section lets you publish and manage blog posts on the marketing site.</p>
                             <ul class="doc-list mb-6">
                                 <li>Create and edit blog posts with a rich text editor</li>
@@ -284,7 +345,12 @@
 
                         <!-- System: Audit Log -->
                         <section id="system-audit-log" class="doc-section">
-                            <h2 class="doc-heading">Audit Log (System)</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                                </svg>
+                                Audit Log (System)
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">The Audit Log provides a chronological record of important actions taken across the platform.</p>
                             <ul class="doc-list mb-6">
                                 <li>Track user logins, schedule changes, and administrative actions</li>
@@ -296,7 +362,12 @@
 
                         <!-- System: Queue -->
                         <section id="system-queue" class="doc-section">
-                            <h2 class="doc-heading">Queue (System)</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" />
+                                </svg>
+                                Queue (System)
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">The Queue page shows the status of background jobs processed by the Laravel queue worker.</p>
                             <ul class="doc-list mb-6">
                                 <li>View pending, processing, and failed jobs</li>
@@ -313,7 +384,12 @@
 
                         <!-- System: Logs -->
                         <section id="system-logs" class="doc-section">
-                            <h2 class="doc-heading">Logs (System)</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+                                </svg>
+                                Logs (System)
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">The Logs page displays recent application log entries, useful for debugging issues on your selfhosted installation.</p>
                             <ul class="doc-list mb-6">
                                 <li>View log entries with severity levels (info, warning, error, critical)</li>

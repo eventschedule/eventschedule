@@ -233,7 +233,12 @@
                             <section id="authentication" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Authentication</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                                            </svg>
+                                            Authentication
+                                        </h2>
                                         <p class="text-gray-600 dark:text-gray-300 mb-6">Most API endpoints require authentication via an API key in the <code class="doc-inline-code">X-API-Key</code> header. You can get an API key by:</p>
                                         <ul class="doc-list mb-6">
                                             <li>Using the <a href="#register" class="text-cyan-400 hover:text-cyan-300">Register</a> or <a href="#login" class="text-cyan-400 hover:text-cyan-300">Login</a> endpoints (for AI agents)</li>
@@ -258,7 +263,12 @@
                             <section id="rate-limits" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Rate Limits</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Rate Limits
+                                        </h2>
                                         <p class="text-gray-600 dark:text-gray-300 mb-6">API requests are rate limited per IP address:</p>
                                         <div class="overflow-x-auto mb-6">
                                             <table class="doc-table">
@@ -286,7 +296,12 @@
                             <section id="response-format" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Response Format</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                            </svg>
+                                            Response Format
+                                        </h2>
                                         <p class="text-gray-600 dark:text-gray-300 mb-6">Successful responses wrap results in a <code class="doc-inline-code">data</code> property. List endpoints include a <code class="doc-inline-code">meta</code> object with pagination. Error responses use an <code class="doc-inline-code">error</code> property.</p>
                                     </div>
                                     <div class="api-endpoint-code">
@@ -317,7 +332,12 @@
                             <section id="pagination" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Pagination</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                                            </svg>
+                                            Pagination
+                                        </h2>
                                         <p class="text-gray-600 dark:text-gray-300 mb-6">List endpoints support pagination through query parameters:</p>
                                         <div class="overflow-x-auto mb-6">
                                             <table class="doc-table">
@@ -343,7 +363,12 @@
                             <section id="register" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Register</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+                                            </svg>
+                                            Register
+                                        </h2>
                                         @if(config('app.hosted'))
                                         <p class="text-gray-600 dark:text-gray-300 mb-4">Registration is a two-step process: first send a verification code, then register with it.</p>
                                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Step 1: Send Verification Code</h3>
@@ -408,7 +433,12 @@
                             <section id="login" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Login</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                                            </svg>
+                                            Login
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-green-600 text-white px-2 py-1 rounded text-sm font-medium">POST</span>
                                             <code class="doc-inline-code">/api/login</code>
@@ -456,7 +486,12 @@
                             <section id="list-schedules" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">List Schedules</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12M8.25 17.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                            </svg>
+                                            List Schedules
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">GET</span>
                                             <code class="doc-inline-code">/api/schedules</code>
@@ -503,7 +538,13 @@
                             <section id="show-schedule" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Show Schedule</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                            Show Schedule
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">GET</span>
                                             <code class="doc-inline-code">/api/schedules/{subdomain}</code>
@@ -539,7 +580,12 @@
                             <section id="create-schedule" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Create Schedule</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Create Schedule
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-green-600 text-white px-2 py-1 rounded text-sm font-medium">POST</span>
                                             <code class="doc-inline-code">/api/schedules</code>
@@ -577,7 +623,12 @@
                             <section id="update-schedule" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Update Schedule</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                            </svg>
+                                            Update Schedule
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-yellow-600 text-white px-2 py-1 rounded text-sm font-medium">PUT</span>
                                             <code class="doc-inline-code">/api/schedules/{subdomain}</code>
@@ -600,7 +651,12 @@
                             <section id="delete-schedule" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Delete Schedule</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                            </svg>
+                                            Delete Schedule
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-red-600 text-white px-2 py-1 rounded text-sm font-medium">DELETE</span>
                                             <code class="doc-inline-code">/api/schedules/{subdomain}</code>
@@ -629,7 +685,12 @@
                             <section id="list-groups" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">List Sub-Schedules</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12M8.25 17.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                            </svg>
+                                            List Sub-Schedules
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">GET</span>
                                             <code class="doc-inline-code">/api/schedules/{subdomain}/groups</code>
@@ -663,7 +724,12 @@
                             <section id="create-group" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Create Sub-Schedule</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Create Sub-Schedule
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-green-600 text-white px-2 py-1 rounded text-sm font-medium">POST</span>
                                             <code class="doc-inline-code">/api/schedules/{subdomain}/groups</code>
@@ -706,7 +772,12 @@
                             <section id="update-group" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Update Sub-Schedule</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                            </svg>
+                                            Update Sub-Schedule
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-yellow-600 text-white px-2 py-1 rounded text-sm font-medium">PUT</span>
                                             <code class="doc-inline-code">/api/schedules/{subdomain}/groups/{group_id}</code>
@@ -729,7 +800,12 @@
                             <section id="delete-group" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Delete Sub-Schedule</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                            </svg>
+                                            Delete Sub-Schedule
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-red-600 text-white px-2 py-1 rounded text-sm font-medium">DELETE</span>
                                             <code class="doc-inline-code">/api/schedules/{subdomain}/groups/{group_id}</code>
@@ -757,7 +833,12 @@
                             <section id="list-events" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">List Events</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12M8.25 17.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                            </svg>
+                                            List Events
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">GET</span>
                                             <code class="doc-inline-code">/api/events</code>
@@ -812,7 +893,13 @@
                             <section id="show-event" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Show Event</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                            Show Event
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">GET</span>
                                             <code class="doc-inline-code">/api/events/{id}</code>
@@ -851,7 +938,12 @@
                             <section id="create-event" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Create Event</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Create Event
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-green-600 text-white px-2 py-1 rounded text-sm font-medium">POST</span>
                                             <code class="doc-inline-code">/api/events/{subdomain}</code>
@@ -924,7 +1016,12 @@
                             <section id="update-event" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Update Event</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                            </svg>
+                                            Update Event
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-yellow-600 text-white px-2 py-1 rounded text-sm font-medium">PUT</span>
                                             <code class="doc-inline-code">/api/events/{id}</code>
@@ -947,7 +1044,12 @@
                             <section id="delete-event" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Delete Event</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                            </svg>
+                                            Delete Event
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-red-600 text-white px-2 py-1 rounded text-sm font-medium">DELETE</span>
                                             <code class="doc-inline-code">/api/events/{id}</code>
@@ -976,7 +1078,12 @@
                             <section id="upload-flyer" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Upload Flyer</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                            </svg>
+                                            Upload Flyer
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-green-600 text-white px-2 py-1 rounded text-sm font-medium">POST</span>
                                             <code class="doc-inline-code">/api/events/flyer/{event_id}</code>
@@ -1007,7 +1114,12 @@
                             <section id="list-categories" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">List Categories</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12M8.25 17.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                            </svg>
+                                            List Categories
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">GET</span>
                                             <code class="doc-inline-code">/api/categories</code>
@@ -1039,7 +1151,12 @@
                             <section id="list-sales" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">List Sales</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12M8.25 17.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                            </svg>
+                                            List Sales
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">GET</span>
                                             <code class="doc-inline-code">/api/sales</code>
@@ -1092,7 +1209,13 @@
                             <section id="show-sale" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Show Sale</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                            Show Sale
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">GET</span>
                                             <code class="doc-inline-code">/api/sales/{id}</code>
@@ -1131,7 +1254,12 @@
                             <section id="create-sale" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Create Sale</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Create Sale
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-green-600 text-white px-2 py-1 rounded text-sm font-medium">POST</span>
                                             <code class="doc-inline-code">/api/sales</code>
@@ -1171,7 +1299,12 @@
                             <section id="update-sale" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Update Sale Status</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                            </svg>
+                                            Update Sale Status
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-yellow-600 text-white px-2 py-1 rounded text-sm font-medium">PUT</span>
                                             <code class="doc-inline-code">/api/sales/{id}</code>
@@ -1204,7 +1337,12 @@
                             <section id="delete-sale" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Delete Sale</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                            </svg>
+                                            Delete Sale
+                                        </h2>
                                         <div class="flex items-center gap-2 mb-4">
                                             <span class="bg-red-600 text-white px-2 py-1 rounded text-sm font-medium">DELETE</span>
                                             <code class="doc-inline-code">/api/sales/{id}</code>
@@ -1233,7 +1371,12 @@
                             <section id="error-handling" class="doc-section api-endpoint-section">
                                 <div class="api-endpoint-row">
                                     <div class="api-endpoint-desc">
-                                        <h2 class="doc-heading">Error Handling</h2>
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                            </svg>
+                                            Error Handling
+                                        </h2>
                                         <p class="text-gray-600 dark:text-gray-300 mb-6">The API uses standard HTTP status codes and returns error messages in JSON format.</p>
                                         <div class="overflow-x-auto mb-6">
                                             <table class="doc-table">
@@ -1268,7 +1411,12 @@
 
                             <!-- See Also -->
                             <section id="see-also" class="doc-section">
-                                <h2 class="doc-heading">See Also</h2>
+                                <h2 class="doc-heading">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                    </svg>
+                                    See Also
+                                </h2>
                                 <ul class="doc-list">
                                     <li><a href="/api/openapi.json" class="text-cyan-400 hover:text-cyan-300">OpenAPI Specification</a> - Machine-readable API spec for AI agents and code generators</li>
                                     <li><a href="{{ route('marketing.docs.account_settings') }}#api" class="text-cyan-400 hover:text-cyan-300">Account Settings</a> - Enable API and manage your API key</li>

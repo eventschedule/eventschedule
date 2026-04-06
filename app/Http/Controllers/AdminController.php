@@ -263,6 +263,17 @@ class AdminController extends Controller
             ->whereNull('admin_newsletter_unsubscribed_at')
             ->count();
 
+        // ARR calculation
+        $monthlyPriceId = config('services.stripe_platform.price_monthly');
+        $yearlyPriceId = config('services.stripe_platform.price_yearly');
+        $enterpriseMonthlyPriceId = config('services.stripe_platform.enterprise_price_monthly');
+        $enterpriseYearlyPriceId = config('services.stripe_platform.enterprise_price_yearly');
+
+        $monthlyAmount = (float) config('services.stripe_platform.price_monthly_amount');
+        $yearlyAmount = (float) config('services.stripe_platform.price_yearly_amount');
+        $enterpriseMonthlyAmount = (float) config('services.stripe_platform.enterprise_price_monthly_amount');
+        $enterpriseYearlyAmount = (float) config('services.stripe_platform.enterprise_price_yearly_amount');
+
         // Signups by method (selected period)
         $emailUsersInPeriod = User::whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
@@ -312,6 +323,31 @@ class AdminController extends Controller
             ->whereHas('subscriptions', $validSubscriptionScope)
             ->count();
 
+        $activeSubscriptions = Subscription::where('type', 'default')
+            ->where(function ($q) {
+                $q->where(function ($q) {
+                    $q->active();
+                })->orWhere(function ($q) {
+                    $q->onTrial();
+                })->orWhere(function ($q) {
+                    $q->onGracePeriod();
+                });
+            })
+            ->pluck('stripe_price');
+
+        $arr = 0;
+        foreach ($activeSubscriptions as $priceId) {
+            if ($priceId === $monthlyPriceId) {
+                $arr += $monthlyAmount * 12;
+            } elseif ($priceId === $yearlyPriceId) {
+                $arr += $yearlyAmount;
+            } elseif ($enterpriseMonthlyPriceId && $priceId === $enterpriseMonthlyPriceId) {
+                $arr += $enterpriseMonthlyAmount * 12;
+            } elseif ($enterpriseYearlyPriceId && $priceId === $enterpriseYearlyPriceId) {
+                $arr += $enterpriseYearlyAmount;
+            }
+        }
+
         // Domains overview
         $totalCustomDomains = Role::whereNotNull('custom_domain')->count();
         $directCount = Role::where('custom_domain_mode', 'direct')->count();
@@ -352,6 +388,7 @@ class AdminController extends Controller
             'hybridUsersInPeriod',
             'recentSignups',
             'stripePaidCount',
+            'arr',
             'totalCustomDomains',
             'directCount',
             'activeCount',
