@@ -634,7 +634,7 @@ class EventRepo
 
         // Capture draft transition before save() resets dirty tracking
         $wasDraftBeforeSave = $event->isDirty('is_draft') && $event->getOriginal('is_draft');
-        $wasJustUnpublished = $event->isDirty('is_draft') && ! $event->getOriginal('is_draft') && $event->is_draft;
+        $wasJustUnpublished = $event->isDirty('is_draft') && $event->getOriginal('is_draft') === false && $event->is_draft;
 
         $event->save();
 

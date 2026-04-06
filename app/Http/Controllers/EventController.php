@@ -310,6 +310,7 @@ class EventController extends Controller
                     foreach ($ticketData as $key => $value) {
                         $ticket->$key = $value;
                     }
+
                     return $ticket;
                 }, $defaultTickets['tickets'] ?? []);
                 $event->tickets = collect($tickets ?: [new Ticket]);
@@ -319,6 +320,7 @@ class EventController extends Controller
                         $addon->$key = $value;
                     }
                     $addon->is_addon = true;
+
                     return $addon;
                 }, $defaultTickets['addons'] ?? []);
                 $defaultPromoCodes = $defaultTickets['promo_codes'] ?? [];
