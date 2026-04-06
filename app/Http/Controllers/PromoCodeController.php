@@ -18,7 +18,7 @@ class PromoCodeController extends Controller
         ]);
 
         $eventId = UrlUtils::decodeId($request->event_id);
-        $event = Event::with('tickets')->find($eventId);
+        $event = Event::with('tickets')->where('is_draft', false)->find($eventId);
 
         if (! $event) {
             return response()->json([
