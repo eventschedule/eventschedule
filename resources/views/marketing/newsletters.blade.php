@@ -131,9 +131,9 @@
                                 Visual Editor
                             </div>
                             <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Build with blocks</h3>
-                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Compose newsletters visually with 10 block types: headings, rich text with markdown, images, buttons, event listings, social links, dividers, spacers, profile images, and header banners. Drag to reorder, clone, or delete blocks.</p>
+                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Compose newsletters visually with a variety of block types: headings, rich text with markdown, images, buttons, event listings, sponsors, polls, social links, dividers, spacers, profile images, and header banners. Drag to reorder, clone, or delete blocks.</p>
                             <div class="flex flex-wrap gap-3">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">10 block types</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">15 block types</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Drag-and-drop</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Markdown support</span>
                             </div>

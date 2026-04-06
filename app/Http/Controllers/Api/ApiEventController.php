@@ -208,6 +208,7 @@ class ApiEventController extends Controller
                 'event_url' => 'nullable|url|max:255',
                 'event_password' => 'nullable|string|max:255',
                 'is_private' => 'nullable|boolean',
+                'is_draft' => 'nullable|boolean',
                 'rsvp_enabled' => 'nullable|boolean',
                 'rsvp_limit' => 'nullable|integer|min:1',
                 'registration_url' => 'nullable|url|max:255',
@@ -257,7 +258,7 @@ class ApiEventController extends Controller
         // Strip request to only allowed fields to prevent mass assignment
         $request->replace($request->only([
             'name', 'starts_at', 'duration', 'description', 'short_description',
-            'event_url', 'event_password', 'is_private', 'rsvp_enabled', 'rsvp_limit',
+            'event_url', 'event_password', 'is_private', 'is_draft', 'rsvp_enabled', 'rsvp_limit',
             'registration_url',
             'category_id', 'category', 'tickets_enabled', 'ticket_currency_code',
             'payment_method', 'payment_instructions',
@@ -321,6 +322,7 @@ class ApiEventController extends Controller
                 'event_url' => 'nullable|url|max:255',
                 'event_password' => 'nullable|string|max:255',
                 'is_private' => 'nullable|boolean',
+                'is_draft' => 'nullable|boolean',
                 'rsvp_enabled' => 'nullable|boolean',
                 'rsvp_limit' => 'nullable|integer|min:1',
                 'registration_url' => 'nullable|url|max:255',
@@ -370,7 +372,7 @@ class ApiEventController extends Controller
         // Strip request to only allowed fields to prevent mass assignment
         $request->replace($request->only([
             'name', 'starts_at', 'duration', 'description', 'short_description',
-            'event_url', 'event_password', 'is_private', 'rsvp_enabled', 'rsvp_limit',
+            'event_url', 'event_password', 'is_private', 'is_draft', 'rsvp_enabled', 'rsvp_limit',
             'registration_url',
             'category_id', 'category', 'tickets_enabled', 'ticket_currency_code',
             'payment_method', 'payment_instructions',

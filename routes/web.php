@@ -335,6 +335,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/{subdomain}/requests/accept-event/{hash}', [EventController::class, 'accept'])->name('event.accept');
     Route::post('/{subdomain}/requests/decline-event/{hash}', [EventController::class, 'decline'])->name('event.decline');
     Route::post('/{subdomain}/requests/accept-all', [EventController::class, 'acceptAll'])->name('event.accept_all');
+    Route::post('/{subdomain}/publish-event/{hash}', [EventController::class, 'publish'])->name('event.publish');
     Route::post('/{subdomain}/preview-link', [RoleController::class, 'previewLink'])->name('role.preview_link');
     Route::get('/{subdomain}/followers/qr-code', [RoleController::class, 'qrCode'])->name('role.qr_code');
     Route::get('/{subdomain}/team/add-member', [RoleController::class, 'createMember'])->name('role.create_member');

@@ -198,6 +198,15 @@
                                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Styled blockquote with attribution for testimonials or highlights.</p>
                                     <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Quote text, Author, Author title</p>
                                 </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sponsors</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Displays sponsor logos with names and tier badges. Choose to show sponsors from your schedule settings or from the first event.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Source (from schedule or from first event)</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Poll</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Displays the first active poll from your upcoming events with a "Vote Now" button linking to the event page. Auto-populated from your events.</p>
+                                </div>
                             </div>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Layout & Utility Blocks</h3>

@@ -2703,6 +2703,14 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('hide_past_events')" />
                             </div>
 
+                            <div class="mb-6">
+                                <x-toggle name="draft_events_default"
+                                    label="{{ __('messages.draft_events_default') }}"
+                                    checked="{{ old('draft_events_default', $role->draft_events_default) }}"
+                                    help="{{ __('messages.draft_events_default_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('draft_events_default')" />
+                            </div>
+
                         @if (isset($availableCurators) && $availableCurators->count() > 0 && !$role->isCurator())
                             <div class="mb-6">
                                 <x-input-label :value="__('messages.default_curator_schedules')" />

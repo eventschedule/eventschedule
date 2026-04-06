@@ -33,6 +33,7 @@ class FeedController extends Controller
                     ->where('is_accepted', true);
             })
             ->where('is_private', false)
+            ->where('is_draft', false)
             ->whereNull('event_password')
             ->with(['roles', 'venue'])
             ->orderBy('starts_at')
@@ -101,6 +102,7 @@ class FeedController extends Controller
                     ->where('is_accepted', true);
             })
             ->where('is_private', false)
+            ->where('is_draft', false)
             ->whereNull('event_password')
             ->with(['roles', 'venue'])
             ->orderBy('starts_at')

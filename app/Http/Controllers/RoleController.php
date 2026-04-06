@@ -453,12 +453,25 @@ class RoleController extends Controller
                 $event = $this->eventRepo->getEvent($subdomain, $slug, $date, $eventIdParam, $role);
             }
 
-            // Fallback: allow schedule members to view pending (not yet accepted) events
+            // Fallback: allow schedule members to view pending (not yet accepted) or draft events
             if (! $event && $eventIdParam && $user && $user->isMember($subdomain)) {
                 $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
                     ->where('id', $eventIdParam)
-                    ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->whereNull('is_accepted'))
+                    ->where(function ($q) use ($role) {
+                        $q->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->whereNull('is_accepted'))
+                            ->orWhere(function ($q) use ($role) {
+                                $q->where('is_draft', true)
+                                    ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id));
+                            });
+                    })
                     ->first();
+            }
+
+            if ($event) {
+                // Block direct URL access to draft events for non-members
+                if ($event->is_draft && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
+                    $event = null;
+                }
             }
 
             if ($event) {
@@ -585,6 +598,7 @@ class RoleController extends Controller
                             ->where('is_accepted', true);
                     });
                 if (! $isMemberOrAdmin) {
+                    $query->where('is_draft', false);
                     $query->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -597,6 +611,7 @@ class RoleController extends Controller
                 $query = Event::inMonth($startOfGridUtc)
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true));
                 if (! $isMemberOrAdmin) {
+                    $query->where('is_draft', false);
                     $query->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -616,6 +631,7 @@ class RoleController extends Controller
                         ->where('role_id', $role->id)
                         ->where('is_accepted', true);
                 })
+                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false))
                 ->orderBy('starts_at')
                 ->get();
         } else {
@@ -626,7 +642,8 @@ class RoleController extends Controller
                         $query->where('role_id', $role->id)
                             ->where('is_accepted', true);
                     });
-                });
+                })
+                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false));
 
             $events = $events->orderBy('starts_at')->get();
         }
@@ -663,10 +680,10 @@ class RoleController extends Controller
             }
         }
 
-        // Filter private events from calendar listings for non-members
+        // Filter draft and private events from calendar listings for non-members
         if (! $isMemberOrAdmin && $events->first() instanceof Event) {
-            $events = $events->filter(fn ($e) => ! $e->is_private || in_array($e->id, $unlockedEventIds));
-            $pastEvents = $pastEvents->filter(fn ($e) => ! $e->is_private || in_array($e->id, $unlockedEventIds));
+            $events = $events->filter(fn ($e) => ! $e->is_draft && (! $e->is_private || in_array($e->id, $unlockedEventIds)));
+            $pastEvents = $pastEvents->filter(fn ($e) => ! $e->is_draft && (! $e->is_private || in_array($e->id, $unlockedEventIds)));
         }
 
         // Track view for analytics (non-member visits only, skip embeds)
@@ -877,6 +894,7 @@ class RoleController extends Controller
                         ->where('is_accepted', true);
                 })
                 ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                    $q->where('is_draft', false);
                     $q->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -893,6 +911,7 @@ class RoleController extends Controller
                 ->whereNull('days_of_week')
                 ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
                 ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                    $q->where('is_draft', false);
                     $q->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -1020,6 +1039,7 @@ class RoleController extends Controller
                         ->where('is_accepted', true);
                 })
                 ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                    $q->where('is_draft', false);
                     $q->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -1039,6 +1059,7 @@ class RoleController extends Controller
                     });
                 })
                 ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                    $q->where('is_draft', false);
                     $q->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -1065,6 +1086,7 @@ class RoleController extends Controller
                             ->where('is_accepted', true);
                     })
                     ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                        $q->where('is_draft', false);
                         $q->where(function ($q) use ($unlockedEventIds) {
                             $q->where('is_private', false);
                             if ($unlockedEventIds) {
@@ -1081,6 +1103,7 @@ class RoleController extends Controller
                     ->whereNull('days_of_week')
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
                     ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                        $q->where('is_draft', false);
                         $q->where(function ($q) use ($unlockedEventIds) {
                             $q->where('is_private', false);
                             if ($unlockedEventIds) {
@@ -3666,12 +3689,12 @@ class RoleController extends Controller
                 ->get();
         }
 
-        // Filter private events for non-members
+        // Filter draft and private events for non-members
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
         if (! $isMemberOrAdmin) {
             $unlockedEventIds = $this->getUnlockedEventIds();
-            $events = $events->filter(fn ($e) => ! $e->is_private || in_array($e->id, $unlockedEventIds));
+            $events = $events->filter(fn ($e) => ! $e->is_draft && (! $e->is_private || in_array($e->id, $unlockedEventIds)));
         }
 
         // Format events for frontend

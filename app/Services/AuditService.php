@@ -63,6 +63,8 @@ class AuditService
 
     const EVENT_DECLINE = 'event.decline';
 
+    const EVENT_PUBLISH = 'event.publish';
+
     // Sales actions
     const SALE_CHECKOUT = 'sale.checkout';
 

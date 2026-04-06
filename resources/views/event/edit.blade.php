@@ -1252,12 +1252,24 @@
                                 <span v-if="isSaving">{{ __('messages.saving') }}</span>
                                 <span v-else>{{ __('messages.save') }}</span>
                             </x-primary-button>
+                            @if ($event->exists && $event->is_draft)
+                            <button type="button" @click="publishEvent()" v-bind:disabled="isSaving"
+                                class="w-full justify-center mt-3 inline-flex items-center px-4 py-3 bg-green-600 border border-transparent rounded-lg font-semibold text-sm text-white tracking-wide hover:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                                {{ __('messages.publish') }}
+                            </button>
+                            @endif
                             @if (! $event->exists)
-                            <p v-show="!event.is_private" class="text-sm text-gray-500 dark:text-gray-400 mt-3 flex items-center justify-center gap-1.5">
+                            <p v-show="!event.is_private && !event.is_draft" class="text-sm text-gray-500 dark:text-gray-400 mt-3 flex items-center justify-center gap-1.5">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5a17.92 17.92 0 0 1-8.716-4.247m0 0A8.959 8.959 0 0 1 3 12c0-1.178.227-2.304.638-3.335" />
                                 </svg>
                                 {{ __('messages.note_all_events_are_publicly_listed') }}
+                            </p>
+                            <p v-show="event.is_draft" class="text-sm text-gray-500 dark:text-gray-400 mt-3 flex items-center justify-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                </svg>
+                                {{ __('messages.note_event_will_be_draft') }}
                             </p>
                             @endif
                         </div>
@@ -3595,6 +3607,22 @@
 
                             <!-- Privacy Tab -->
                             <div v-show="activeSettingsTab === 'privacy'">
+                                <div class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input type="hidden" name="is_draft" :value="event.is_draft ? 1 : 0">
+                                            <input id="is_draft" name="is_draft" type="checkbox" v-model="event.is_draft" :value="1"
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="is_draft" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.draft_event') }}
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 ms-14">{{ __('messages.draft_event_help') }}</p>
+                                </div>
+
                             @if ($role->isEnterprise())
                                 <div class="mb-6">
                                     <div class="flex items-center gap-3">
@@ -4112,11 +4140,17 @@
         <div class="lg:hidden fixed bottom-0 inset-x-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 z-40 shadow-lg"
              style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
             @if (! $event->exists)
-            <p v-show="!event.is_private" class="text-sm text-gray-500 dark:text-gray-400 mb-3 flex items-center justify-center gap-1.5">
+            <p v-show="!event.is_private && !event.is_draft" class="text-sm text-gray-500 dark:text-gray-400 mb-3 flex items-center justify-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5a17.92 17.92 0 0 1-8.716-4.247m0 0A8.959 8.959 0 0 1 3 12c0-1.178.227-2.304.638-3.335" />
                 </svg>
                 {{ __('messages.note_all_events_are_publicly_listed') }}
+            </p>
+            <p v-show="event.is_draft" class="text-sm text-gray-500 dark:text-gray-400 mb-3 flex items-center justify-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                </svg>
+                {{ __('messages.note_event_will_be_draft') }}
             </p>
             @endif
             <div class="flex gap-3 justify-center max-w-lg mx-auto">
@@ -4124,6 +4158,12 @@
                     <span v-if="isSaving">{{ __('messages.saving') }}</span>
                     <span v-else>{{ __('messages.save') }}</span>
                 </x-primary-button>
+                @if ($event->exists && $event->is_draft)
+                <button type="button" @click="publishEvent()" v-bind:disabled="isSaving"
+                    class="flex-1 justify-center inline-flex items-center px-4 py-3 bg-green-600 border border-transparent rounded-lg font-semibold text-sm text-white tracking-wide hover:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                    {{ __('messages.publish') }}
+                </button>
+                @endif
                 <x-cancel-button class="flex-1 justify-center" />
             </div>
         </div>
@@ -5064,6 +5104,13 @@
           this.ticketMode = this.event.tickets_enabled ? 'tickets' : (this.event.rsvp_enabled ? 'rsvp' : 'external');
         }
         @endif
+      },
+      publishEvent() {
+        this.event.is_draft = false;
+        this.$nextTick(() => {
+          window._skipUnsavedWarning = true;
+          this.$el.closest('form').requestSubmit();
+        });
       },
       validateForm(event) {
         this.formSubmitAttempted = true;

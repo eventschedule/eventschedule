@@ -44,6 +44,7 @@ class EventRepo
         return Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'addons', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
             ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id)->where('is_accepted', true))
             ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id)->where('is_accepted', true))
+            ->where('is_draft', false)
             ->where(function ($query) use ($startOfDay, $endOfDay, $eventDate) {
                 $query->whereBetween('starts_at', [$startOfDay, $endOfDay])
                     ->orWhere(function ($query) use ($eventDate, $endOfDay) {
@@ -70,6 +71,7 @@ class EventRepo
 
         return Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'addons', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
             ->where('slug', $slug)
+            ->where('is_draft', false)
             ->where(function ($query) use ($startOfDay, $endOfDay, $eventDate) {
                 $query->whereBetween('starts_at', [$startOfDay, $endOfDay])
                     ->orWhere(function ($query) use ($eventDate) {
@@ -99,6 +101,7 @@ class EventRepo
         [$startOfDay, $endOfDay] = $this->getUtcDateRange($eventDate);
 
         return Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'addons', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
+            ->where('is_draft', false)
             ->where(function ($query) use ($startOfDay, $endOfDay) {
                 $query->whereBetween('starts_at', [$startOfDay, $endOfDay])
                     ->orWhere(function ($query) use ($startOfDay, $endOfDay) {
@@ -1102,29 +1105,34 @@ class EventRepo
 
         $event->load(['tickets', 'addons', 'roles']);
 
-        // Sync to Google Calendar for the current role
-        if ($currentRole && $currentRole->syncsToGoogle()) {
-            if ($event->wasRecentlyCreated) {
-                $event->syncToGoogleCalendar('create');
-            } else {
-                $event->syncToGoogleCalendar('update');
-            }
-        }
+        // Skip external sync and webhooks for draft events
+        if (! $event->is_draft) {
+            $isNewOrJustPublished = $event->wasRecentlyCreated || $event->wasChanged('is_draft');
 
-        // Sync to CalDAV for the current role
-        if ($currentRole && $currentRole->syncsToCalDAV()) {
-            if ($event->wasRecentlyCreated) {
-                $event->syncToCalDAV('create');
-            } else {
-                $event->syncToCalDAV('update');
+            // Sync to Google Calendar for the current role
+            if ($currentRole && $currentRole->syncsToGoogle()) {
+                if ($isNewOrJustPublished) {
+                    $event->syncToGoogleCalendar('create');
+                } else {
+                    $event->syncToGoogleCalendar('update');
+                }
             }
-        }
 
-        // Dispatch webhook
-        WebhookService::dispatch(
-            $event->wasRecentlyCreated ? 'event.created' : 'event.updated',
-            $event
-        );
+            // Sync to CalDAV for the current role
+            if ($currentRole && $currentRole->syncsToCalDAV()) {
+                if ($isNewOrJustPublished) {
+                    $event->syncToCalDAV('create');
+                } else {
+                    $event->syncToCalDAV('update');
+                }
+            }
+
+            // Dispatch webhook
+            WebhookService::dispatch(
+                $isNewOrJustPublished ? 'event.created' : 'event.updated',
+                $event
+            );
+        }
 
         return $event;
     }
@@ -1146,6 +1154,7 @@ class EventRepo
         if ($subdomainRole && $lookupEventId) {
             $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'addons', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
                 ->where('id', $lookupEventId)
+                ->where('is_draft', false)
                 ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id)->where('is_accepted', true))
                 ->first();
 
@@ -1174,6 +1183,7 @@ class EventRepo
                 $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'addons', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id)->where('is_accepted', true))
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id)->where('is_accepted', true))
+                    ->where('is_draft', false)
                     ->where(function ($q) {
                         $q->where('starts_at', '>=', now()->subDay())
                             ->orWhere(function ($q2) {
@@ -1188,6 +1198,7 @@ class EventRepo
                     $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'addons', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
                         ->whereHas('roles', fn ($q) => $q->where('role_id', $subdomainRole->id)->where('is_accepted', true))
                         ->whereHas('roles', fn ($q) => $q->where('role_id', $slugRole->id)->where('is_accepted', true))
+                        ->where('is_draft', false)
                         ->where('starts_at', '<', now())
                         ->orderBy('starts_at', 'desc')
                         ->first();
@@ -1210,6 +1221,7 @@ class EventRepo
         } else {
             $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'addons', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
                 ->where('slug', $slug)
+                ->where('is_draft', false)
                 ->where(function ($q) {
                     $q->where('starts_at', '>=', now()->subDay())
                         ->orWhere(function ($q2) {
@@ -1228,6 +1240,7 @@ class EventRepo
             if (! $event) {
                 $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'addons', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
                     ->where('slug', $slug)
+                    ->where('is_draft', false)
                     ->where('starts_at', '<', now())
                     ->where(function ($query) use ($subdomain) {
                         $query->whereHas('roles', function ($q) use ($subdomain) {

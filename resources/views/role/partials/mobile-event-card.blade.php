@@ -5,6 +5,7 @@
         <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto">
             <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-4 h-4 text-gray-400 me-2 align-[-0.2em]"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
             <span v-text="event.name"></span>
+            <span v-if="event.is_draft" class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 ms-1.5">{{ __('messages.draft') }}</span>
         </h3>
     </div>
     <p v-if="event.short_description && !event.is_password_protected" class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2" dir="auto" v-text="event.short_description"></p>

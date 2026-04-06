@@ -23,6 +23,7 @@ class Event extends Model
         'event_url',
         'event_password',
         'is_private',
+        'is_draft',
         'name',
         'name_en',
         'slug',
@@ -72,6 +73,7 @@ class Event extends Model
     protected $casts = [
         'duration' => 'float',
         'is_private' => 'boolean',
+        'is_draft' => 'boolean',
         'rsvp_enabled' => 'boolean',
         'custom_fields' => 'array',
         'custom_field_values' => 'array',

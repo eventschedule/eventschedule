@@ -4547,6 +4547,7 @@ class MarketingController extends Controller
                         });
                 })
                 ->where('is_private', false)
+                ->where('is_draft', false)
                 ->whereHas('roles', $publicScheduleFilter)
                 ->orderByRaw('starts_at IS NULL, starts_at ASC')
                 ->limit(12)
@@ -4703,7 +4704,7 @@ class MarketingController extends Controller
             // Newsletters
             ['page' => 'Newsletters', 'section' => 'Overview', 'description' => 'Send branded email newsletters to your audience.', 'url' => $r['newsletters'].'#overview', 'category' => 'User Guide', 'keywords' => 'email newsletter campaign'],
             ['page' => 'Newsletters', 'section' => 'Newsletter Builder', 'description' => 'Use the three-tab builder: Content, Style, Settings.', 'url' => $r['newsletters'].'#newsletter-builder', 'category' => 'User Guide', 'keywords' => 'builder editor compose'],
-            ['page' => 'Newsletters', 'section' => 'Block Types', 'description' => 'Available content blocks: heading, text, events, button, image, video, offer, quote, divider, spacer, social links.', 'url' => $r['newsletters'].'#block-types', 'category' => 'User Guide', 'keywords' => 'blocks content heading text button image video offer quote divider spacer social'],
+            ['page' => 'Newsletters', 'section' => 'Block Types', 'description' => 'Available content blocks: heading, text, events, button, image, video, offer, quote, sponsors, poll, divider, spacer, social links.', 'url' => $r['newsletters'].'#block-types', 'category' => 'User Guide', 'keywords' => 'blocks content heading text button image video offer quote sponsors poll divider spacer social'],
             ['page' => 'Newsletters', 'section' => 'Templates', 'description' => 'Pre-designed newsletter templates.', 'url' => $r['newsletters'].'#templates', 'category' => 'User Guide', 'keywords' => 'template design preset'],
             ['page' => 'Newsletters', 'section' => 'Style Customization', 'description' => 'Customize colors, fonts, and button styles.', 'url' => $r['newsletters'].'#style-customization', 'category' => 'User Guide', 'keywords' => 'color font button style design'],
             ['page' => 'Newsletters', 'section' => 'Recipients & Segments', 'description' => 'Choose audiences: followers, ticket buyers, or custom lists.', 'url' => $r['newsletters'].'#recipients', 'category' => 'User Guide', 'keywords' => 'recipients segments audience list'],

@@ -379,10 +379,10 @@ class GoogleCalendarService
             return $results;
         }
 
-        // Get all events for the specific role
+        // Get all non-draft events for the specific role
         $events = Event::whereHas('roles', function ($query) use ($role) {
             $query->where('roles.id', $role->id);
-        })->get();
+        })->where('is_draft', false)->get();
 
         foreach ($events as $event) {
             try {

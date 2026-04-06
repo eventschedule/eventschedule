@@ -85,6 +85,7 @@ class RoleUpdateRequest extends FormRequest
             'event_layout' => ['nullable', 'string', 'in:calendar,list'],
             'direct_registration' => ['nullable', 'boolean'],
             'hide_past_events' => ['nullable', 'boolean'],
+            'draft_events_default' => ['nullable', 'boolean'],
             'first_day_of_week' => ['nullable', 'integer', 'min:0', 'max:6'],
             'feedback_enabled' => ['nullable', 'boolean'],
             'feedback_public' => ['nullable', 'boolean'],

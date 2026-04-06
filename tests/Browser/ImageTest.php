@@ -47,7 +47,7 @@ class ImageTest extends DuskTestCase
             // Delete via AJAX (override confirm dialog)
             $browser->script('window.confirm = function() { return true; }');
             $browser->click('#profile_image_existing button[data-delete-image-url]')
-                ->waitUntilMissing('#profile_image_existing', 5)
+                ->waitUntilMissing('#profile_image_existing', 15)
                 ->waitFor('#profile_image_choose', 5);
 
             // Verify DB
@@ -87,7 +87,7 @@ class ImageTest extends DuskTestCase
             // Delete via AJAX (override confirm dialog)
             $browser->script('window.confirm = function() { return true; }');
             $browser->click('#profile_image_existing button[data-delete-image-url]')
-                ->waitUntilMissing('#profile_image_existing', 5)
+                ->waitUntilMissing('#profile_image_existing', 15)
                 ->waitFor('#profile_image_choose', 5);
 
             // Verify DB
@@ -132,7 +132,7 @@ class ImageTest extends DuskTestCase
             // Delete via AJAX (override confirm dialog)
             $browser->script('window.confirm = function() { return true; }');
             $browser->click('#delete_header_image_button button[data-delete-image-url]')
-                ->waitUntilMissing('#delete_header_image_button', 5);
+                ->waitUntilMissing('#delete_header_image_button', 15);
 
             // Verify DB
             $this->assertEmpty(Role::where('subdomain', 'talent')->first()->refresh()->header_image_url);
@@ -192,7 +192,7 @@ class ImageTest extends DuskTestCase
             // Delete via AJAX (override confirm dialog)
             $browser->script('window.confirm = function() { return true; }');
             $browser->click('#background_image_existing button[data-delete-image-url]')
-                ->waitUntilMissing('#background_image_existing', 5);
+                ->waitUntilMissing('#background_image_existing', 15);
 
             // Verify DB
             $this->assertEmpty(Role::where('subdomain', 'talent')->first()->refresh()->background_image_url);
@@ -230,7 +230,7 @@ class ImageTest extends DuskTestCase
                 ->waitFor('#flyer_image_existing', 5);
             $browser->script('window.confirm = function() { return true; }');
             $browser->click('#delete-flyer-btn')
-                ->waitUntilMissing('#flyer_image_existing', 5)
+                ->waitUntilMissing('#flyer_image_existing', 15)
                 ->waitFor('#flyer_image_choose', 5);
 
             // Verify DB

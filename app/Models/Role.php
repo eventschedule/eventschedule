@@ -105,6 +105,7 @@ class Role extends Model implements MustVerifyEmail
         'ai_style_instructions',
         'ai_content_instructions',
         'hide_past_events',
+        'draft_events_default',
     ];
 
     /**
@@ -137,6 +138,7 @@ class Role extends Model implements MustVerifyEmail
         'renewal_reminder_sent_at' => 'datetime',
         'custom_labels' => 'array',
         'hide_past_events' => 'boolean',
+        'draft_events_default' => 'boolean',
     ];
 
     /**

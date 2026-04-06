@@ -457,12 +457,13 @@ class NewsletterService
             return collect($eventIds)
                 ->map(fn ($id) => $events->firstWhere('id', $id))
                 ->filter()
-                ->filter(fn ($e) => ! $e->is_private && ! $e->isPasswordProtected())
+                ->filter(fn ($e) => ! $e->is_draft && ! $e->is_private && ! $e->isPasswordProtected())
                 ->values();
         }
 
         return $role->events()
             ->upcomingOrOngoing()
+            ->where('is_draft', false)
             ->where('is_private', false)
             ->whereNull('event_password')
             ->orderBy('starts_at', 'asc')

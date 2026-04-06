@@ -75,6 +75,7 @@ class BoostController extends Controller
             $eventsData = Event::with('roles')
                 ->whereHas('roles', fn ($q) => $q->whereIn('roles.id', $proRoleIds))
                 ->upcomingOrOngoing()
+                ->where('is_draft', false)
                 ->where('name', '!=', '')
                 ->whereNotNull('name')
                 ->orderBy('starts_at')

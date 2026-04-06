@@ -285,7 +285,7 @@ class CalDAVService
         // Use chunking to avoid memory issues with large event sets
         Event::whereHas('roles', function ($query) use ($role) {
             $query->where('roles.id', $role->id);
-        })->with(['roles' => function ($query) use ($role) {
+        })->where('is_draft', false)->with(['roles' => function ($query) use ($role) {
             $query->where('roles.id', $role->id);
         }])->chunk(100, function ($events) use ($role, &$results) {
             foreach ($events as $event) {

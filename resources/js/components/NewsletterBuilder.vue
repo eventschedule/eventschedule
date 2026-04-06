@@ -123,6 +123,8 @@
                                             <template v-if="block.data.text">{{ block.data.text.substring(0, 80) }}</template>
                                             <span v-else class="italic text-gray-400 dark:text-gray-500">{{ t.no_content }}</span>
                                         </span>
+                                        <span v-else-if="block.type === 'sponsors'" class="text-gray-400">{{ block.data.source === 'first_event' ? t.sponsor_source_first_event : t.sponsor_source_schedule }}</span>
+                                        <span v-else-if="block.type === 'poll'" class="text-gray-400">{{ t.block_poll }}</span>
                                         <span v-else-if="block.type === 'profile_image'" class="text-gray-400">{{ t.profile_image }}</span>
                                         <span v-else-if="block.type === 'header_banner'" class="text-gray-400">{{ t.header_image }}</span>
                                     </div>
@@ -1178,6 +1180,9 @@ function cloneBlock(blockId) {
         type: original.type,
         data: JSON.parse(JSON.stringify(original.data)),
     };
+    if (copy.type === 'image' && copy.data.images) {
+        copy.data.images.forEach(img => { img._id = generateId(); });
+    }
     blocks.value.splice(idx + 1, 0, copy);
     selectedBlockId.value = copy.id;
 }
@@ -1357,11 +1362,11 @@ function initSortable() {
                 const blockType = evt.item.getAttribute('data-block-type');
                 const bt = blockTypes.find(b => b.type === blockType);
                 if (bt) {
-                    const newBlock = {
+                    const newBlock = normalizeImageBlock({
                         id: generateId(),
                         type: bt.type,
                         data: JSON.parse(JSON.stringify(bt.defaultData)),
-                    };
+                    });
                     evt.item.remove();
                     blocks.value.splice(evt.newIndex, 0, newBlock);
                     showBlockPalette.value = false;

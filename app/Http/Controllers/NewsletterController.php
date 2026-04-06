@@ -642,6 +642,7 @@ class NewsletterController extends Controller
 
         $eventsData = $role->events()
             ->where('event_role.is_accepted', true)
+            ->where('is_draft', false)
             ->where('name', '!=', '')
             ->whereNotNull('name')
             ->orderBy('starts_at', 'desc')

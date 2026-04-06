@@ -43,6 +43,7 @@ class GraphicEmailService
                     })
                     ->upcomingOrOngoing()
                     ->where('is_private', false)
+                    ->where('is_draft', false)
                     ->whereNull('event_password')
                     ->when($excludeRecurring, function ($query) {
                         $query->whereNull('days_of_week');

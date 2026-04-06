@@ -234,6 +234,7 @@ class EventController extends Controller
 
         $event = new Event;
         $event->user_id = $user->id;
+        $event->is_draft = $role->draft_events_default;
         $selectedMembers = [];
 
         // Check if we're cloning an event
@@ -245,6 +246,7 @@ class EventController extends Controller
             }
             $event->user_id = $user->id;
             $event->creator_role_id = $role->id;
+            $event->is_draft = $role->draft_events_default;
 
             // Set cloned tickets
             $event->tickets = collect(array_map(function ($ticketData) {
@@ -873,6 +875,40 @@ class EventController extends Controller
             return redirect('/'.$subdomain.'/requests')
                 ->with('message', __('messages.request_declined'));
         }
+    }
+
+    public function publish(Request $request, $subdomain, $hash)
+    {
+        if (! auth()->user()->isEditor($subdomain)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $user = $request->user();
+        $event_id = UrlUtils::decodeId($hash);
+        $event = Event::with('roles')->findOrFail($event_id);
+
+        if ($user->cannot('update', $event)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $event->is_draft = false;
+        $event->save();
+
+        // Trigger calendar sync now that the event is published
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        if ($role->syncsToGoogle()) {
+            $event->syncToGoogleCalendar('create');
+        }
+        if ($role->syncsToCalDAV()) {
+            $event->syncToCalDAV('create');
+        }
+
+        // Dispatch webhook
+        WebhookService::dispatch('event.created', $event);
+
+        AuditService::log(AuditService::EVENT_PUBLISH, $user->id, 'Event', $event->id, null, null, $event->name);
+
+        return redirect()->back()->with('message', __('messages.event_published'));
     }
 
     public function acceptAll(Request $request, $subdomain)
@@ -2134,6 +2170,9 @@ class EventController extends Controller
 
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+        if ($event->is_draft && ! $isMemberOrAdmin) {
+            abort(404);
+        }
         if ($event->is_private && ! $isMemberOrAdmin) {
             abort(404);
         }
@@ -2242,6 +2281,9 @@ class EventController extends Controller
 
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+        if ($event->is_draft && ! $isMemberOrAdmin) {
+            abort(404);
+        }
         if ($event->is_private && ! $isMemberOrAdmin) {
             abort(404);
         }
@@ -2386,6 +2428,9 @@ class EventController extends Controller
 
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+        if ($event->is_draft && ! $isMemberOrAdmin) {
+            abort(404);
+        }
         if ($event->is_private && ! $isMemberOrAdmin) {
             abort(404);
         }

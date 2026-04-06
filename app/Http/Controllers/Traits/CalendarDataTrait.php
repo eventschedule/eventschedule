@@ -122,6 +122,7 @@ trait CalendarDataTrait
             'fan_photos_enabled' => $event->isFanPhotosEnabled(),
             'fan_videos_enabled' => $event->isFanVideosEnabled(),
             'is_password_protected' => $event->isPasswordProtected(),
+            'is_draft' => (bool) $event->is_draft,
         ];
 
         if ($event->isPasswordProtected()) {

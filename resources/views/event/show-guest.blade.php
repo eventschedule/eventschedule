@@ -60,7 +60,23 @@
     @endphp
 
   {{-- Status alerts (full width, fixed at top) --}}
-  @if ($eventIsAccepted === null)
+  @if ($event->is_draft)
+  <div class="fixed top-0 left-0 w-full bg-blue-50 dark:bg-blue-950 border-b border-blue-200 dark:border-blue-800 py-6 z-[60]">
+    <div class="container mx-auto px-5">
+      <div class="flex items-center justify-center gap-3 text-blue-800 dark:text-blue-200">
+        <span class="text-xl font-medium">{{ __('messages.event_is_draft') }}</span>
+        @if (auth()->user() && auth()->user()->isEditor($role->subdomain))
+        <form method="POST" action="{{ route('event.publish', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}">
+          @csrf
+          <button type="submit" class="px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors">
+            {{ __('messages.publish') }}
+          </button>
+        </form>
+        @endif
+      </div>
+    </div>
+  </div>
+  @elseif ($eventIsAccepted === null)
   <div class="fixed top-0 left-0 w-full bg-amber-50 dark:bg-amber-950 border-b border-amber-200 dark:border-amber-800 py-6 z-[60]">
     <div class="container mx-auto px-5">
       <div class="flex items-center justify-center text-amber-800 dark:text-amber-200">
@@ -78,7 +94,7 @@
   </div>
   @endif
   {{-- Spacer for fixed banner --}}
-  @if ($eventIsAccepted === null || ! $eventIsAccepted)
+  @if ($event->is_draft || $eventIsAccepted === null || ! $eventIsAccepted)
   <div class="h-[68px]"></div>
   @endif
 

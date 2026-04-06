@@ -15,7 +15,7 @@
     @endphp
 
     <x-slot name="meta">
-        @if ($noIndex || request()->embed || request('graphic') || (isset($event) && $event->exists && $event->is_private))
+        @if ($noIndex || request()->embed || request('graphic') || (isset($event) && $event->exists && ($event->is_private || $event->is_draft)))
             <meta name="robots" content="noindex, nofollow">
         @else
             <meta name="robots" content="index, follow">
