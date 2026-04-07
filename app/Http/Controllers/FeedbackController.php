@@ -30,6 +30,10 @@ class FeedbackController extends Controller
             abort(404);
         }
 
+        if ($event->is_draft) {
+            abort(404);
+        }
+
         if (! $event->isFeedbackEnabled($role)) {
             abort(404);
         }
@@ -62,6 +66,10 @@ class FeedbackController extends Controller
         }
 
         if (! $role || ! $role->isPro()) {
+            abort(404);
+        }
+
+        if ($event->is_draft) {
             abort(404);
         }
 

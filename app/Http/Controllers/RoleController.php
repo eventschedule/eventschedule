@@ -455,7 +455,7 @@ class RoleController extends Controller
 
             // Fallback: allow schedule members to view pending (not yet accepted) or draft events
             if (! $event && $eventIdParam && $user && $user->isMember($subdomain)) {
-                $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
+                $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'addons', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
                     ->where('id', $eventIdParam)
                     ->where(function ($q) use ($role) {
                         $q->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->whereNull('is_accepted'))
@@ -772,14 +772,14 @@ class RoleController extends Controller
 
             if ($role->isPro() && $role->feedback_enabled && $role->feedback_public && $event->isFeedbackEnabled($role)) {
                 $query = $event->feedbacks()
-                    ->whereHas('sale', fn ($q) => $q->where('is_deleted', false)->where('status', 'paid'))
-                    ->with('sale');
+                    ->whereHas('sale', fn ($q) => $q->where('is_deleted', false)->where('status', 'paid'));
                 if ($date) {
                     $query->where('event_date', $date);
                 }
-                $feedbackCount = $query->count();
-                $avgRating = round((float) $query->avg('rating'), 1);
-                $publicFeedbacks = $query->latest()->limit(20)->get();
+                $stats = (clone $query)->selectRaw('COUNT(*) as count, ROUND(AVG(rating), 1) as avg_rating')->first();
+                $feedbackCount = (int) $stats->count;
+                $avgRating = (float) ($stats->avg_rating ?? 0);
+                $publicFeedbacks = $query->with('sale')->latest()->limit(20)->get();
             }
         }
 

@@ -271,6 +271,15 @@
                                                     <span class="text-emerald-600/70 dark:text-emerald-400/70 text-xs">{{ substr($row[1], 4) }}</span>
                                                 @endif
                                             </span>
+                                        @elseif (str_starts_with($row[1], 'No'))
+                                            <span class="inline-flex items-center gap-1.5">
+                                                <svg aria-hidden="true" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                                @if (strlen($row[1]) > 2)
+                                                    <span class="text-gray-400 dark:text-gray-500 text-xs">{{ trim(substr($row[1], 2)) }}</span>
+                                                @endif
+                                            </span>
                                         @else
                                             <span class="text-gray-700 dark:text-gray-300">{{ $row[1] }}</span>
                                         @endif
@@ -367,33 +376,25 @@
                         Why choose Event Schedule?
                     </h2>
                     <p class="text-gray-600 dark:text-gray-400 mb-6">
-                        Event Schedule offers a unique combination of features that no other platform matches: zero platform fees, open source transparency, and powerful AI tools.
+                        {{ $why_choose['summary'] ?? 'Event Schedule offers a unique combination of features that no other platform matches: zero platform fees, open source transparency, and powerful AI tools.' }}
                     </p>
+                    @php
+                        $whyChoosePoints = $why_choose['points'] ?? [
+                            'Zero platform fees on all ticket sales, at any plan level',
+                            'Fully open source with selfhosting option for complete control',
+                            'AI-powered event parsing, flyer generation, and automatic graphics',
+                            'Two-way Google Calendar and CalDAV sync included free',
+                        ];
+                    @endphp
                     <ul class="space-y-3">
-                        <li class="flex items-start gap-3">
-                            <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span class="text-gray-600 dark:text-gray-400">Zero platform fees on all ticket sales, at any plan level</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span class="text-gray-600 dark:text-gray-400">Fully open source with selfhosting option for complete control</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span class="text-gray-600 dark:text-gray-400">AI-powered event parsing, flyer generation, and automatic graphics</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span class="text-gray-600 dark:text-gray-400">Two-way Google Calendar and CalDAV sync included free</span>
-                        </li>
+                        @foreach ($whyChoosePoints as $point)
+                            <li class="flex items-start gap-3">
+                                <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span class="text-gray-600 dark:text-gray-400">{{ $point }}</span>
+                            </li>
+                        @endforeach
                     </ul>
                 </div>
             </div>

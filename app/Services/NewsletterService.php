@@ -285,6 +285,7 @@ class NewsletterService
     {
         $blocks = $newsletter->blocks ?? [];
         $role = $newsletter->role;
+        $allUpcomingEvents = null;
 
         foreach ($blocks as &$block) {
             $type = $block['type'] ?? '';
@@ -296,9 +297,16 @@ class NewsletterService
             if ($type === 'events') {
                 $useAll = $block['data']['useAllEvents'] ?? true;
                 $eventIds = $block['data']['eventIds'] ?? [];
-                $block['data']['resolvedEvents'] = $role
-                    ? $this->getUpcomingEvents($role, $useAll ? null : $eventIds)
-                    : collect();
+                if ($role) {
+                    if ($useAll) {
+                        $allUpcomingEvents = $allUpcomingEvents ?? $this->getUpcomingEvents($role);
+                        $block['data']['resolvedEvents'] = $allUpcomingEvents;
+                    } else {
+                        $block['data']['resolvedEvents'] = $this->getUpcomingEvents($role, $eventIds);
+                    }
+                } else {
+                    $block['data']['resolvedEvents'] = collect();
+                }
             }
 
             if ($type === 'video') {
@@ -312,8 +320,8 @@ class NewsletterService
             if ($type === 'sponsors') {
                 $source = $block['data']['source'] ?? 'schedule';
                 if ($source === 'first_event' && $role) {
-                    $events = $this->getUpcomingEvents($role);
-                    $firstEvent = $events->first();
+                    $allUpcomingEvents = $allUpcomingEvents ?? $this->getUpcomingEvents($role);
+                    $firstEvent = $allUpcomingEvents->first();
                     $block['data']['resolvedSponsors'] = $firstEvent
                         ? $firstEvent->getEffectiveSponsorLogos($role)
                         : [];
@@ -328,8 +336,8 @@ class NewsletterService
             if ($type === 'poll') {
                 $block['data']['resolvedPoll'] = null;
                 if ($role) {
-                    $events = $this->getUpcomingEvents($role);
-                    foreach ($events as $event) {
+                    $allUpcomingEvents = $allUpcomingEvents ?? $this->getUpcomingEvents($role);
+                    foreach ($allUpcomingEvents as $event) {
                         $poll = $event->activePolls()->first();
                         if ($poll) {
                             $block['data']['resolvedPoll'] = [
