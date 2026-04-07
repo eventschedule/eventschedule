@@ -4481,7 +4481,9 @@ class MarketingController extends Controller
             ],
         ];
 
-        return $tools[$tool];
+        return array_merge($tools[$tool], [
+            'githubStars' => \App\Utils\GitHubUtils::getStars(),
+        ]);
     }
 
     /**
