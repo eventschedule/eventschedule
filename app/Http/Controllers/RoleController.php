@@ -3766,8 +3766,13 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $pattern = $request->input('slug_pattern', '');
 
+        // Save the pattern to the role so future events use it too
+        $role->slug_pattern = $pattern;
+        $role->save();
+
         $events = $role->events()->with('roles')->get();
         $count = 0;
+        $usedSlugs = [];
 
         foreach ($events as $event) {
             $venue = $event->venue;
@@ -3779,6 +3784,16 @@ class RoleController extends Controller
                 $role,
                 $venue
             );
+
+            // Ensure slug uniqueness within this role
+            if (isset($usedSlugs[$newSlug])) {
+                $suffix = 2;
+                while (isset($usedSlugs[$newSlug.'-'.$suffix])) {
+                    $suffix++;
+                }
+                $newSlug = $newSlug.'-'.$suffix;
+            }
+            $usedSlugs[$newSlug] = true;
 
             if ($newSlug !== $event->slug) {
                 $event->slug = $newSlug;
