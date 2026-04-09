@@ -44,7 +44,7 @@
         <div class="absolute inset-0 grid-pattern"></div>
 
         <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <x-docs-breadcrumb currentTitle="Twilio Integration" section="saas" sectionTitle="SaaS" sectionRoute="marketing.docs" />
+            <x-docs-breadcrumb currentTitle="Twilio Integration" section="saas" sectionTitle="SaaS" sectionRoute="marketing.docs.saas.setup" />
 
             <div class="flex items-center gap-4 mb-4">
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/20">
