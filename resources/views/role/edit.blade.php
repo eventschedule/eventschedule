@@ -6310,6 +6310,7 @@ document.addEventListener('DOMContentLoaded', function() {
     })();
     @endif
 
+    @if ($role->exists && $role->subdomain)
     // Slug pattern: show/hide "Update all slugs" button
     (function() {
         var input = document.getElementById('slug_pattern');
@@ -6365,6 +6366,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     })();
+    @endif
 
     // Sync events button
     var syncEventsBtn = document.getElementById('sync-events-button');
