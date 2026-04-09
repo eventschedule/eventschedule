@@ -2608,8 +2608,8 @@
                                 placeholder="{event_name}" />
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.slug_pattern_help') }}</p>
 
-                            <div class="mt-2 flex items-start justify-between">
-                                <x-link href="{{ marketing_url('/docs/creating-schedules#settings-general') }}" target="_blank" class="text-sm">
+                            <div class="mt-4 flex items-start justify-between">
+                                <x-link href="{{ marketing_url('/docs/creating-schedules#url-pattern-variables') }}" target="_blank" class="text-sm">
                                     {{ __('messages.show_available_variables') }}
                                 </x-link>
                                 <div class="flex items-center gap-2">
@@ -2729,7 +2729,7 @@
                                         <option value="{{ $id }}" {{ old('default_category_id', $role->default_category_id) == $id ? 'selected' : '' }}>{{ $label }}</option>
                                     @endforeach
                                 </select>
-                                <div class="mt-1 flex items-start justify-between">
+                                <div class="mt-4 flex items-start justify-between">
                                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.default_category_help') }}</p>
                                     @if ($role->exists && $role->subdomain)
                                     <div class="flex items-center gap-2">
@@ -3560,6 +3560,9 @@
                             <div class="mb-8">
                                 <x-input-label for="calendar_description_template" :value="__('messages.calendar_description_template')" />
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-2">{{ __('messages.calendar_description_template_help') }}</p>
+                                <x-link href="{{ marketing_url('/docs/creating-schedules#available-variables') }}" target="_blank" class="text-xs">
+                                    {{ __('messages.show_available_variables') }}
+                                </x-link>
                                 <textarea id="calendar_description_template" name="calendar_description_template" rows="4"
                                     class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm text-sm"
                                     placeholder="{description}">{{ old('calendar_description_template', $role->calendar_description_template) }}</textarea>

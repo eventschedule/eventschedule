@@ -542,7 +542,7 @@
                             </div>
 
                             <!-- URL Pattern Variables -->
-                            <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-4">URL Pattern Variables</h4>
+                            <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-4" id="url-pattern-variables">URL Pattern Variables</h4>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Use these variables in your Event URL Pattern. All values are automatically converted to URL-safe format (lowercase, spaces become dashes).
                             </p>
