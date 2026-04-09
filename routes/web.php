@@ -365,6 +365,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/{subdomain}/generate-event-details', [EventController::class, 'generateEventDetails'])->name('event.generate_event_details')->middleware('throttle:5,1');
     Route::post('/{subdomain}/get-event-details-prompt', [EventController::class, 'getEventDetailsPrompt'])->name('event.get_event_details_prompt')->middleware('throttle:30,1');
     Route::post('/{subdomain}/test-import', [RoleController::class, 'testImport'])->name('role.test_import');
+    Route::post('/{subdomain}/update-all-categories', [RoleController::class, 'updateAllCategories'])->name('role.update_all_categories');
+    Route::post('/{subdomain}/update-all-slugs', [RoleController::class, 'updateAllSlugs'])->name('role.update_all_slugs');
     Route::get('/{subdomain}/search-youtube', [RoleController::class, 'searchYouTube'])->name('role.search_youtube');
     Route::get('/{subdomain}/match-videos', [RoleController::class, 'getTalentRolesWithoutVideos'])->name('role.talent_roles_without_videos');
     Route::post('/{subdomain}/save-video', [RoleController::class, 'saveVideo'])->name('role.save_video');

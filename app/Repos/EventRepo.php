@@ -408,6 +408,10 @@ class EventRepo
 
         $event->fill($request->all());
 
+        if ($isNewEvent && ! $event->category_id && $currentRole && $currentRole->default_category_id) {
+            $event->category_id = $currentRole->default_category_id;
+        }
+
         if ($currentRole && ! $currentRole->isEnterprise()) {
             $event->is_private = false;
             $event->event_password = null;

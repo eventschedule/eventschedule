@@ -34,6 +34,7 @@ use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\ImageUtils;
 use App\Utils\OpenAIUtils;
+use App\Utils\SlugPatternUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Endroid\QrCode\QrCode;
@@ -3754,6 +3755,66 @@ class RoleController extends Controller
         $role->save();
 
         return redirect()->back()->with('message', __('messages.plan_changed'));
+    }
+
+    public function updateAllSlugs(Request $request, $subdomain)
+    {
+        if (! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $pattern = $request->input('slug_pattern', '');
+
+        $events = $role->events()->with('venue')->get();
+        $count = 0;
+
+        foreach ($events as $event) {
+            $venue = $event->venue->first();
+            $newSlug = SlugPatternUtils::generateSlug(
+                $pattern,
+                $event->short_name ?: $event->name,
+                $event->short_name_en ?: $event->name_en,
+                $event,
+                $role,
+                $venue
+            );
+
+            if ($newSlug !== $event->slug) {
+                $event->slug = $newSlug;
+                $event->save();
+                $count++;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.events_slugs_updated', ['count' => $count]),
+        ]);
+    }
+
+    public function updateAllCategories(Request $request, $subdomain)
+    {
+        if (! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $categoryId = (int) $request->input('category_id');
+        $validCategories = array_keys(config('app.event_categories', []));
+
+        if (! in_array($categoryId, $validCategories)) {
+            return response()->json(['success' => false, 'message' => __('messages.invalid_value')], 422);
+        }
+
+        $eventIds = $role->events()->pluck('events.id');
+        $count = Event::whereIn('id', $eventIds)->update(['category_id' => $categoryId]);
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.events_category_updated', ['count' => $count]),
+        ]);
     }
 
     public function testImport(Request $request, $subdomain)

@@ -2612,6 +2612,12 @@
                                 {{ __('messages.show_available_variables') }}
                             </x-link>
                             <x-input-error class="mt-2" :messages="$errors->get('slug_pattern')" />
+
+                            <button type="button" id="update-all-slugs-btn" style="display: none;"
+                                class="mt-3 inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white transition ease-in-out duration-150">
+                                {{ __('messages.update_all_events_slugs') }}
+                            </button>
+                            <span id="update-all-slugs-result" style="display: none;" class="ml-2 text-sm text-green-600 dark:text-green-400"></span>
                         </div>
 
                         </div>
@@ -2709,6 +2715,25 @@
                                     checked="{{ old('draft_events_default', $role->draft_events_default) }}"
                                     help="{{ __('messages.draft_events_default_help') }}" />
                                 <x-input-error class="mt-2" :messages="$errors->get('draft_events_default')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="default_category_id" :value="__('messages.default_category')" />
+                                <select name="default_category_id" id="default_category_id"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    <option value="">{{ __('messages.none') }}</option>
+                                    @foreach(get_translated_categories() as $id => $label)
+                                        <option value="{{ $id }}" {{ old('default_category_id', $role->default_category_id) == $id ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.default_category_help') }}</p>
+                                <x-input-error class="mt-2" :messages="$errors->get('default_category_id')" />
+
+                                <button type="button" id="update-all-categories-btn" style="display: none;"
+                                    class="mt-3 inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white transition ease-in-out duration-150">
+                                    {{ __('messages.update_all_events_category') }}
+                                </button>
+                                <span id="update-all-categories-result" style="display: none;" class="ml-2 text-sm text-green-600 dark:text-green-400"></span>
                             </div>
 
                         @if (isset($availableCurators) && $availableCurators->count() > 0 && !$role->isCurator())
@@ -6217,6 +6242,115 @@ document.addEventListener('DOMContentLoaded', function() {
     if (testImportBtn) {
         testImportBtn.addEventListener('click', function() { testImport(this); });
     }
+
+    // Default category: show/hide "Update all events" button
+    (function() {
+        var select = document.getElementById('default_category_id');
+        var btn = document.getElementById('update-all-categories-btn');
+        var resultSpan = document.getElementById('update-all-categories-result');
+        if (!select || !btn) return;
+
+        var originalValue = select.value;
+
+        select.addEventListener('change', function() {
+            if (this.value && this.value !== originalValue) {
+                btn.style.display = '';
+            } else {
+                btn.style.display = 'none';
+            }
+            resultSpan.style.display = 'none';
+        });
+
+        btn.addEventListener('click', function() {
+            var categoryId = select.value;
+            if (!categoryId) return;
+
+            btn.disabled = true;
+            var originalText = btn.textContent;
+            btn.textContent = '...';
+            resultSpan.style.display = 'none';
+
+            fetch('{{ route("role.update_all_categories", ["subdomain" => $role->subdomain]) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ category_id: categoryId })
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                resultSpan.textContent = data.message;
+                resultSpan.style.display = '';
+                if (data.success) {
+                    originalValue = categoryId;
+                    btn.style.display = 'none';
+                }
+            })
+            .catch(function(error) {
+                resultSpan.textContent = error.message;
+                resultSpan.style.display = '';
+            })
+            .finally(function() {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            });
+        });
+    })();
+
+    // Slug pattern: show/hide "Update all slugs" button
+    (function() {
+        var input = document.getElementById('slug_pattern');
+        var btn = document.getElementById('update-all-slugs-btn');
+        var resultSpan = document.getElementById('update-all-slugs-result');
+        if (!input || !btn) return;
+
+        var originalValue = input.value;
+
+        input.addEventListener('input', function() {
+            if (this.value !== originalValue) {
+                btn.style.display = '';
+            } else {
+                btn.style.display = 'none';
+            }
+            resultSpan.style.display = 'none';
+        });
+
+        btn.addEventListener('click', function() {
+            var pattern = input.value;
+
+            btn.disabled = true;
+            var originalText = btn.textContent;
+            btn.textContent = '...';
+            resultSpan.style.display = 'none';
+
+            fetch('{{ route("role.update_all_slugs", ["subdomain" => $role->subdomain]) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ slug_pattern: pattern })
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                resultSpan.textContent = data.message;
+                resultSpan.style.display = '';
+                if (data.success) {
+                    originalValue = pattern;
+                    btn.style.display = 'none';
+                }
+            })
+            .catch(function(error) {
+                resultSpan.textContent = error.message;
+                resultSpan.style.display = '';
+            })
+            .finally(function() {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            });
+        });
+    })();
 
     // Sync events button
     var syncEventsBtn = document.getElementById('sync-events-button');

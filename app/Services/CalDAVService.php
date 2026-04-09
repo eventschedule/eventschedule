@@ -705,6 +705,10 @@ class CalDAVService
                 $role
             );
 
+            if ($role->default_category_id) {
+                $event->category_id = $role->default_category_id;
+            }
+
             $event->save();
 
             // Attach to role with CalDAV UID and etag for conflict detection

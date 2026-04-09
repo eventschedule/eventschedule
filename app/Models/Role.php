@@ -106,6 +106,7 @@ class Role extends Model implements MustVerifyEmail
         'ai_content_instructions',
         'hide_past_events',
         'draft_events_default',
+        'default_category_id',
     ];
 
     /**

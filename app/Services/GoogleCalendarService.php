@@ -664,6 +664,10 @@ class GoogleCalendarService
             $role
         );
 
+        if ($role->default_category_id) {
+            $event->category_id = $role->default_category_id;
+        }
+
         $event->save();
 
         // Attach to the role with google_event_id
