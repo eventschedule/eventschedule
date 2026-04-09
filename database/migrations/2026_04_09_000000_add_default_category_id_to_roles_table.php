@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('roles', function (Blueprint $table) {
-            $table->unsignedInteger('default_category_id')->nullable()->after('draft_events_default');
+            $table->unsignedInteger('default_category_id')->nullable()->after('feedback_public');
         });
     }
 

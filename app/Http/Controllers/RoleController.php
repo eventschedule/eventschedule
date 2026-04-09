@@ -3766,15 +3766,15 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $pattern = $request->input('slug_pattern', '');
 
-        $events = $role->events()->with('venue')->get();
+        $events = $role->events()->with('roles')->get();
         $count = 0;
 
         foreach ($events as $event) {
-            $venue = $event->venue->first();
+            $venue = $event->venue;
             $newSlug = SlugPatternUtils::generateSlug(
                 $pattern,
-                $event->short_name ?: $event->name,
-                $event->short_name_en ?: $event->name_en,
+                $event->name,
+                $event->name_en,
                 $event,
                 $role,
                 $venue
