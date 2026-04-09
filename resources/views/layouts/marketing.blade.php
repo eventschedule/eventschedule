@@ -86,8 +86,11 @@
     <link rel="canonical" href="{{ $canonicalPath }}">
     <!-- Hreflang tags -->
     <link rel="alternate" hreflang="x-default" href="{{ $basePath }}">
+    <link rel="alternate" hreflang="en" href="{{ $basePath }}">
     @foreach (array_keys(config('app.supported_languages')) as $lang)
+        @if ($lang !== 'en')
     <link rel="alternate" hreflang="{{ $lang }}" href="{{ $basePath }}?lang={{ $lang }}">
+        @endif
     @endforeach
     <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">
     @if(isset($keywords))
