@@ -2729,11 +2729,13 @@
                                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.default_category_help') }}</p>
                                 <x-input-error class="mt-2" :messages="$errors->get('default_category_id')" />
 
+                                @if ($role->exists && $role->subdomain)
                                 <button type="button" id="update-all-categories-btn" style="display: none;"
                                     class="mt-3 inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white transition ease-in-out duration-150">
                                     {{ __('messages.update_all_events_category') }}
                                 </button>
                                 <span id="update-all-categories-result" style="display: none;" class="ml-2 text-sm text-green-600 dark:text-green-400"></span>
+                                @endif
                             </div>
 
                         @if (isset($availableCurators) && $availableCurators->count() > 0 && !$role->isCurator())
@@ -6244,6 +6246,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Default category: show/hide "Update all events" button
+    @if ($role->exists && $role->subdomain)
     (function() {
         var select = document.getElementById('default_category_id');
         var btn = document.getElementById('update-all-categories-btn');
@@ -6299,6 +6302,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     })();
+    @endif
 
     // Slug pattern: show/hide "Update all slugs" button
     (function() {
