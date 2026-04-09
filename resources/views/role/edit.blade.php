@@ -6281,6 +6281,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(function(response) { return response.json(); })
             .then(function(data) {
                 resultSpan.textContent = data.message;
+                resultSpan.className = data.success ? 'ml-2 text-sm text-green-600 dark:text-green-400' : 'ml-2 text-sm text-red-600 dark:text-red-400';
                 resultSpan.style.display = '';
                 if (data.success) {
                     originalValue = categoryId;
@@ -6289,6 +6290,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(function(error) {
                 resultSpan.textContent = error.message;
+                resultSpan.className = 'ml-2 text-sm text-red-600 dark:text-red-400';
                 resultSpan.style.display = '';
             })
             .finally(function() {
@@ -6335,6 +6337,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(function(response) { return response.json(); })
             .then(function(data) {
                 resultSpan.textContent = data.message;
+                resultSpan.className = data.success ? 'ml-2 text-sm text-green-600 dark:text-green-400' : 'ml-2 text-sm text-red-600 dark:text-red-400';
                 resultSpan.style.display = '';
                 if (data.success) {
                     originalValue = pattern;
@@ -6343,6 +6346,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(function(error) {
                 resultSpan.textContent = error.message;
+                resultSpan.className = 'ml-2 text-sm text-red-600 dark:text-red-400';
                 resultSpan.style.display = '';
             })
             .finally(function() {
