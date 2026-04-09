@@ -123,7 +123,7 @@ return [
     'default_category_help' => 'Nieuwe evenementen worden vooraf ingevuld met deze categorie.',
     'update_all_events_category' => 'Alle bestaande evenementen bijwerken',
     'events_category_updated' => ':count evenement(en) bijgewerkt.',
-    'update_all_events_slugs' => 'Alle bestaande evenement-slugs bijwerken',
+    'update_all_events_slugs' => 'Alle bestaande evenementen bijwerken',
     'events_slugs_updated' => ':count evenement-slug(s) bijgewerkt.',
     'draft_event' => 'Concept evenement',
     'draft_event_help' => 'Concept evenementen zijn alleen zichtbaar voor leden van de agenda. Publiceer wanneer het klaar is om openbaar te maken.',

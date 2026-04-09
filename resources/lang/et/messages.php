@@ -129,7 +129,7 @@ return [
     'default_category_help' => 'Uued sündmused täidetakse selle kategooriaga eelnevalt.',
     'update_all_events_category' => 'Uuenda kõik olemasolevad sündmused',
     'events_category_updated' => ':count sündmus(t) uuendatud.',
-    'update_all_events_slugs' => 'Uuenda kõik olemasolevad sündmuste aadressid',
+    'update_all_events_slugs' => 'Uuenda kõik olemasolevad sündmused',
     'events_slugs_updated' => ':count sündmuse aadressi uuendatud.',
     'draft_event' => 'Mustandi sündmus',
     'draft_event_help' => 'Mustandi sündmused on nähtavad ainult kalendri liikmetele. Avaldage, kui see on avalikustamiseks valmis.',

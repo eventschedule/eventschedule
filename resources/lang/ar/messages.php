@@ -469,7 +469,7 @@ return [
     'default_category_help' => 'سيتم ملء الأحداث الجديدة بهذه الفئة مسبقًا.',
     'update_all_events_category' => 'تحديث جميع الأحداث الحالية',
     'events_category_updated' => 'تم تحديث :count حدث/أحداث.',
-    'update_all_events_slugs' => 'تحديث جميع روابط الأحداث الحالية',
+    'update_all_events_slugs' => 'تحديث جميع الأحداث الحالية',
     'events_slugs_updated' => 'تم تحديث :count رابط/روابط أحداث.',
     'draft_event' => 'حدث مسودة',
     'draft_event_help' => 'أحداث المسودة مرئية فقط لأعضاء الجدول. انشر عندما تكون جاهزًا لجعله عامًا.',

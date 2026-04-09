@@ -129,7 +129,7 @@ return [
     'default_category_help' => 'Evenimentele noi vor fi precompletate cu această categorie.',
     'update_all_events_category' => 'Actualizați toate evenimentele existente',
     'events_category_updated' => ':count eveniment(e) actualizat(e).',
-    'update_all_events_slugs' => 'Actualizați toate slug-urile evenimentelor existente',
+    'update_all_events_slugs' => 'Actualizați toate evenimentele existente',
     'events_slugs_updated' => ':count slug(-uri) de eveniment(e) actualizat(e).',
     'draft_event' => 'Eveniment ciornă',
     'draft_event_help' => 'Evenimentele ciornă sunt vizibile doar pentru membrii calendarului. Publicați când este gata pentru a-l face public.',

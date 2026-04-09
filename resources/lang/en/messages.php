@@ -129,7 +129,7 @@ return [
     'default_category_help' => 'New events will be pre-filled with this category.',
     'update_all_events_category' => 'Update all existing events',
     'events_category_updated' => ':count event(s) updated.',
-    'update_all_events_slugs' => 'Update all existing event slugs',
+    'update_all_events_slugs' => 'Update all existing events',
     'events_slugs_updated' => ':count event slug(s) updated.',
     'draft_event' => 'Draft event',
     'draft_event_help' => 'Draft events are only visible to schedule members. Publish when ready to make it public.',

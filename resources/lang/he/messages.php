@@ -124,7 +124,7 @@ return [
     'default_category_help' => 'אירועים חדשים ימולאו מראש עם קטגוריה זו.',
     'update_all_events_category' => 'עדכן את כל האירועים הקיימים',
     'events_category_updated' => ':count אירוע(ים) עודכנו.',
-    'update_all_events_slugs' => 'עדכן את כל כתובות האירועים הקיימים',
+    'update_all_events_slugs' => 'עדכן את כל האירועים הקיימים',
     'events_slugs_updated' => ':count כתובת/כתובות אירועים עודכנו.',
     'draft_event' => 'אירוע טיוטה',
     'draft_event_help' => 'אירועי טיוטה גלויים רק לחברי לוח הזמנים. פרסם כשהכל מוכן להפיכתו לציבורי.',

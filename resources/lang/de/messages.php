@@ -476,7 +476,7 @@ return [
     'default_category_help' => 'Neue Veranstaltungen werden mit dieser Kategorie vorausgefüllt.',
     'update_all_events_category' => 'Alle bestehenden Veranstaltungen aktualisieren',
     'events_category_updated' => ':count Veranstaltung(en) aktualisiert.',
-    'update_all_events_slugs' => 'Alle bestehenden Veranstaltungs-Slugs aktualisieren',
+    'update_all_events_slugs' => 'Alle bestehenden Veranstaltungen aktualisieren',
     'events_slugs_updated' => ':count Veranstaltungs-Slug(s) aktualisiert.',
     'draft_event' => 'Entwurf',
     'draft_event_help' => 'Entwürfe sind nur für Mitglieder des Kalenders sichtbar. Veröffentlichen Sie, wenn alles bereit ist.',

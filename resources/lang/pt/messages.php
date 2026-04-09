@@ -124,7 +124,7 @@ return [
     'default_category_help' => 'Novos eventos serão preenchidos com esta categoria.',
     'update_all_events_category' => 'Atualizar todos os eventos existentes',
     'events_category_updated' => ':count evento(s) atualizado(s).',
-    'update_all_events_slugs' => 'Atualizar todos os slugs de eventos existentes',
+    'update_all_events_slugs' => 'Atualizar todos os eventos existentes',
     'events_slugs_updated' => ':count slug(s) de evento(s) atualizado(s).',
     'draft_event' => 'Evento rascunho',
     'draft_event_help' => 'Eventos rascunho são visíveis apenas para membros da agenda. Publique quando estiver pronto para torná-lo público.',

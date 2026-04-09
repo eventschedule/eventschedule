@@ -121,7 +121,7 @@ return [
     'default_category_help' => 'Los nuevos eventos se rellenarán previamente con esta categoría.',
     'update_all_events_category' => 'Actualizar todos los eventos existentes',
     'events_category_updated' => ':count evento(s) actualizado(s).',
-    'update_all_events_slugs' => 'Actualizar todos los slugs de eventos existentes',
+    'update_all_events_slugs' => 'Actualizar todos los eventos existentes',
     'events_slugs_updated' => ':count slug(s) de evento(s) actualizado(s).',
     'draft_event' => 'Evento borrador',
     'draft_event_help' => 'Los eventos en borrador solo son visibles para los miembros del calendario. Publica cuando esté listo para hacerlo público.',

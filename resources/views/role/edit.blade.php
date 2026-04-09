@@ -2608,16 +2608,19 @@
                                 placeholder="{event_name}" />
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.slug_pattern_help') }}</p>
 
-                            <x-link href="{{ marketing_url('/docs/creating-schedules#settings-general') }}" target="_blank" class="text-sm mt-2">
-                                {{ __('messages.show_available_variables') }}
-                            </x-link>
+                            <div class="mt-2 flex items-start justify-between">
+                                <x-link href="{{ marketing_url('/docs/creating-schedules#settings-general') }}" target="_blank" class="text-sm">
+                                    {{ __('messages.show_available_variables') }}
+                                </x-link>
+                                <div class="flex items-center gap-2">
+                                    <span id="update-all-slugs-result" style="display: none;" class="text-sm text-green-600 dark:text-green-400"></span>
+                                    <button type="button" id="update-all-slugs-btn" style="display: none;"
+                                        class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white transition ease-in-out duration-150">
+                                        {{ __('messages.update_all_events_slugs') }}
+                                    </button>
+                                </div>
+                            </div>
                             <x-input-error class="mt-2" :messages="$errors->get('slug_pattern')" />
-
-                            <button type="button" id="update-all-slugs-btn" style="display: none;"
-                                class="mt-3 inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white transition ease-in-out duration-150">
-                                {{ __('messages.update_all_events_slugs') }}
-                            </button>
-                            <span id="update-all-slugs-result" style="display: none;" class="ml-2 text-sm text-green-600 dark:text-green-400"></span>
                         </div>
 
                         </div>
@@ -2726,16 +2729,19 @@
                                         <option value="{{ $id }}" {{ old('default_category_id', $role->default_category_id) == $id ? 'selected' : '' }}>{{ $label }}</option>
                                     @endforeach
                                 </select>
-                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.default_category_help') }}</p>
+                                <div class="mt-1 flex items-start justify-between">
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.default_category_help') }}</p>
+                                    @if ($role->exists && $role->subdomain)
+                                    <div class="flex items-center gap-2">
+                                        <span id="update-all-categories-result" style="display: none;" class="text-sm text-green-600 dark:text-green-400"></span>
+                                        <button type="button" id="update-all-categories-btn" style="display: none;"
+                                            class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white transition ease-in-out duration-150">
+                                            {{ __('messages.update_all_events_category') }}
+                                        </button>
+                                    </div>
+                                    @endif
+                                </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('default_category_id')" />
-
-                                @if ($role->exists && $role->subdomain)
-                                <button type="button" id="update-all-categories-btn" style="display: none;"
-                                    class="mt-3 inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white transition ease-in-out duration-150">
-                                    {{ __('messages.update_all_events_category') }}
-                                </button>
-                                <span id="update-all-categories-result" style="display: none;" class="ml-2 text-sm text-green-600 dark:text-green-400"></span>
-                                @endif
                             </div>
 
                         @if (isset($availableCurators) && $availableCurators->count() > 0 && !$role->isCurator())

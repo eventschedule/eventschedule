@@ -128,7 +128,7 @@ return [
     'default_category_help' => 'Les nouveaux événements seront pré-remplis avec cette catégorie.',
     'update_all_events_category' => 'Mettre à jour tous les événements existants',
     'events_category_updated' => ':count événement(s) mis à jour.',
-    'update_all_events_slugs' => 'Mettre à jour tous les slugs des événements existants',
+    'update_all_events_slugs' => 'Mettre à jour tous les événements existants',
     'events_slugs_updated' => ':count slug(s) d\'événement(s) mis à jour.',
     'draft_event' => 'Événement brouillon',
     'draft_event_help' => 'Les événements brouillons ne sont visibles que par les membres du calendrier. Publiez quand vous êtes prêt à le rendre public.',

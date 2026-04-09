@@ -126,7 +126,7 @@ return [
     'default_category_help' => 'I nuovi eventi saranno precompilati con questa categoria.',
     'update_all_events_category' => 'Aggiorna tutti gli eventi esistenti',
     'events_category_updated' => ':count evento/i aggiornato/i.',
-    'update_all_events_slugs' => 'Aggiorna tutti gli slug degli eventi esistenti',
+    'update_all_events_slugs' => 'Aggiorna tutti gli eventi esistenti',
     'events_slugs_updated' => ':count slug evento/i aggiornato/i.',
     'draft_event' => 'Evento bozza',
     'draft_event_help' => 'Gli eventi bozza sono visibili solo ai membri del calendario. Pubblica quando è pronto per renderlo pubblico.',
