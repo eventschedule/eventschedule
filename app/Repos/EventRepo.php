@@ -1284,7 +1284,7 @@ class EventRepo
     private static function slugPatternFieldsChanged(string $pattern, Event $event): bool
     {
         // Date/time variables -> starts_at/ends_at
-        if (preg_match('/\{(day|month|year|day_name|day_short|date_dmy|date_mdy|date_full_dmy|date_full_mdy|month_name|month_short|time|end_time|duration)\}/', $pattern)
+        if (preg_match('/\{(day|day_pad|month|month_pad|year|day_name|day_short|date_dmy|date_mdy|date_full_dmy|date_full_mdy|month_name|month_short|time|end_time|duration)\}/', $pattern)
             && $event->isDirty(['starts_at', 'ends_at'])) {
             return true;
         }

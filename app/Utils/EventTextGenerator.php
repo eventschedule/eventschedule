@@ -63,8 +63,8 @@ class EventTextGenerator
         $locale = $role->language_code ?? 'en';
         \Carbon\Carbon::setLocale($locale);
 
-        $startDate = $event->getStartDateTime(null, true);
-        $endDate = $event->getEndDateTime(null, true);
+        $startDate = $event->getStartDateTime(null, true, $role->timezone ?? 'UTC');
+        $endDate = $event->getEndDateTime(null, true, $role->timezone ?? 'UTC');
 
         // Determine time format based on role's 24h setting
         $timeFormat = $role->use_24_hour_time ? 'H:i' : 'g:i A';
@@ -104,9 +104,11 @@ class EventTextGenerator
             '{date_full_dmy}' => $startDate->format('d/m/Y'),
             '{date_full_mdy}' => $startDate->format('m/d/Y'),
             '{month}' => $startDate->format('n'),
+            '{month_pad}' => $startDate->format('m'),
             '{month_name}' => $startDate->translatedFormat('F'),
             '{month_short}' => $startDate->translatedFormat('M'),
             '{day}' => $startDate->format('j'),
+            '{day_pad}' => $startDate->format('d'),
             '{year}' => $startDate->format('Y'),
             '{time}' => $startDate->format($timeFormat),
             '{end_time}' => $endDate ? $endDate->format($timeFormat) : '',

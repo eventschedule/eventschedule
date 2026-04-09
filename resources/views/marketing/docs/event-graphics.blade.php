@@ -263,6 +263,11 @@ https://example.com/event/summer-concert</code></pre>
                                             <td>3</td>
                                         </tr>
                                         <tr>
+                                            <td><code class="doc-inline-code">{month_pad}</code></td>
+                                            <td>Month number (zero-padded)</td>
+                                            <td>03</td>
+                                        </tr>
+                                        <tr>
                                             <td><code class="doc-inline-code">{month_name}</code></td>
                                             <td>Full month name (translated)</td>
                                             <td>March</td>
@@ -276,6 +281,11 @@ https://example.com/event/summer-concert</code></pre>
                                             <td><code class="doc-inline-code">{day}</code></td>
                                             <td>Day of month</td>
                                             <td>15</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">{day_pad}</code></td>
+                                            <td>Day of month (zero-padded)</td>
+                                            <td>05</td>
                                         </tr>
                                         <tr>
                                             <td><code class="doc-inline-code">{year}</code></td>

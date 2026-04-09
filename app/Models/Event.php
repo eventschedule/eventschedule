@@ -1380,11 +1380,13 @@ class Event extends Model
         return $url;
     }
 
-    public function getStartDateTime($date = null, $locale = false)
+    public function getStartDateTime($date = null, $locale = false, $timezoneOverride = null)
     {
         $timezone = 'UTC';
 
-        if ($user = auth()->user()) {
+        if ($timezoneOverride) {
+            $timezone = $timezoneOverride;
+        } elseif ($user = auth()->user()) {
             $timezone = $user->timezone;
         } elseif ($this->creatorRole) {
             $timezone = $this->creatorRole->timezone;
@@ -1907,9 +1909,9 @@ class Event extends Model
     /**
      * Get end date/time for the event
      */
-    public function getEndDateTime($date = null, $locale = false)
+    public function getEndDateTime($date = null, $locale = false, $timezoneOverride = null)
     {
-        $startAt = $this->getStartDateTime($date, $locale);
+        $startAt = $this->getStartDateTime($date, $locale, $timezoneOverride);
         $duration = $this->duration > 0 ? $this->duration : 2; // Default to 2 hours if no duration
 
         return $startAt->copy()->addHours($duration);
