@@ -333,6 +333,15 @@ class AdminController extends Controller
                     $q->onGracePeriod();
                 });
             })
+            ->whereHasMorph('owner', [Role::class], function ($q) {
+                $q->whereNotNull('user_id')
+                    ->where(function ($q) {
+                        $q->whereNotNull('email_verified_at')
+                            ->orWhereNotNull('phone_verified_at');
+                    })
+                    ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+                    ->where('subdomain', 'not like', 'demo-%');
+            })
             ->pluck('stripe_price');
 
         $arr = 0;
