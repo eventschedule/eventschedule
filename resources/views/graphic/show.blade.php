@@ -322,9 +322,9 @@
                 const eventCountParam = formSettings.event_count ? '&event_count=' + encodeURIComponent(formSettings.event_count) : '';
                 const maxPerRowParam = formSettings.max_per_row ? '&max_per_row=' + encodeURIComponent(formSettings.max_per_row) : '';
                 const overlayTextParam = formSettings.overlay_text ? '&overlay_text=' + encodeURIComponent(formSettings.overlay_text) : '';
-                const urlIncludeHttpsParam = formSettings.url_include_https ? '&url_include_https=1' : '';
-                const urlIncludeIdParam = formSettings.url_include_id ? '&url_include_id=1' : '';
-                const textShowAllParam = formSettings.text_show_all ? '&text_show_all=1' : '';
+                const urlIncludeHttpsParam = '&url_include_https=' + (formSettings.url_include_https ? '1' : '0');
+                const urlIncludeIdParam = '&url_include_id=' + (formSettings.url_include_id ? '1' : '0');
+                const textShowAllParam = '&text_show_all=' + (formSettings.text_show_all ? '1' : '0');
 
                 const baseUrl = '{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam + urlIncludeHttpsParam + urlIncludeIdParam + textShowAllParam;
 
