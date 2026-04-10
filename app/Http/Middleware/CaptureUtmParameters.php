@@ -33,20 +33,26 @@ class CaptureUtmParameters
 
             // Also store in a long-lived cookie as fallback for cross-session attribution
             $response = $next($request);
-            $response->cookie('utm_params', json_encode($utmParams), 60 * 24 * 30, '/', null, true, true, false, 'Lax');
+            if (method_exists($response, 'cookie')) {
+                $response->cookie('utm_params', json_encode($utmParams), 60 * 24 * 30, '/', null, true, true, false, 'Lax');
+            }
 
             $referer = $request->header('Referer');
             if ($referer && ! $this->isSameDomain($referer, $request)) {
                 $referrerUrl = mb_substr(trim($referer), 0, 2048);
                 $request->session()->put('utm_referrer_url', $referrerUrl);
-                $response->cookie('utm_referrer_url', $referrerUrl, 60 * 24 * 30, '/', null, true, true, false, 'Lax');
+                if (method_exists($response, 'cookie')) {
+                    $response->cookie('utm_referrer_url', $referrerUrl, 60 * 24 * 30, '/', null, true, true, false, 'Lax');
+                }
             }
 
             // Capture landing page on first visit (GET only)
             if ($request->isMethod('GET') && ! $request->session()->has('utm_landing_page')) {
                 $landingPage = mb_substr($request->path(), 0, 2048);
                 $request->session()->put('utm_landing_page', $landingPage);
-                $response->cookie('utm_landing_page', $landingPage, 60 * 24 * 30, '/', null, true, true, false, 'Lax');
+                if (method_exists($response, 'cookie')) {
+                    $response->cookie('utm_landing_page', $landingPage, 60 * 24 * 30, '/', null, true, true, false, 'Lax');
+                }
             }
 
             return $response;
@@ -60,7 +66,9 @@ class CaptureUtmParameters
             if ($referer && ! $this->isSameDomain($referer, $request)) {
                 $referrerUrl = mb_substr(trim($referer), 0, 2048);
                 $request->session()->put('utm_referrer_url', $referrerUrl);
-                $response->cookie('utm_referrer_url', $referrerUrl, 60 * 24 * 30, '/', null, true, true, false, 'Lax');
+                if (method_exists($response, 'cookie')) {
+                    $response->cookie('utm_referrer_url', $referrerUrl, 60 * 24 * 30, '/', null, true, true, false, 'Lax');
+                }
             }
         }
 
@@ -68,7 +76,9 @@ class CaptureUtmParameters
         if ($request->isMethod('GET') && ! $request->session()->has('utm_landing_page')) {
             $landingPage = mb_substr($request->path(), 0, 2048);
             $request->session()->put('utm_landing_page', $landingPage);
-            $response->cookie('utm_landing_page', $landingPage, 60 * 24 * 30, '/', null, true, true, false, 'Lax');
+            if (method_exists($response, 'cookie')) {
+                $response->cookie('utm_landing_page', $landingPage, 60 * 24 * 30, '/', null, true, true, false, 'Lax');
+            }
         }
 
         return $response;
