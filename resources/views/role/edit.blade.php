@@ -2582,7 +2582,7 @@
                                 <x-input-label for="new_subdomain" :value="config('app.hosted') ? __('messages.subdomain') : __('messages.path')" />
                                 <x-text-input id="new_subdomain" name="new_subdomain" type="text" class="mt-1 block w-full"
                                     :value="old('new_subdomain', $role->subdomain)" x-bind:required="mode !== 'direct'" minlength="4" maxlength="50"
-                                    pattern="[a-z0-9-]+" data-action="subdomain-sanitize" />
+                                    pattern="[a-z0-9\-]+" data-action="subdomain-sanitize" />
                                 <x-input-error class="mt-2" :messages="$errors->get('new_subdomain')" />
                             </div>
 

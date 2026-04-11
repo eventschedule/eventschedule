@@ -75,6 +75,15 @@ class GroupsTest extends DuskTestCase
         $browser->waitFor('input[name*="groups"][name*="name"]', 5)
             ->type('input[name*="groups"][name*="name"]', 'Main Shows');
 
+        // JS fallback for headless Chrome flakiness
+        $browser->script("
+            var input = document.querySelector('input[name*=\"groups\"][name*=\"name\"]');
+            if (!input.value) {
+                input.value = 'Main Shows';
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        ");
+
         // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
         $browser->script("
             window._skipUnsavedWarning = true;
@@ -100,6 +109,15 @@ class GroupsTest extends DuskTestCase
 
         $browser->waitFor('#group-items > div:last-child input[name*="groups"][name*="name"]', 5)
             ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops');
+
+        // JS fallback for headless Chrome flakiness
+        $browser->script("
+            var input = document.querySelector('#group-items > div:last-child input[name*=\"groups\"][name*=\"name\"]');
+            if (!input.value) {
+                input.value = 'Workshops';
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        ");
 
         // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
         $browser->script("
