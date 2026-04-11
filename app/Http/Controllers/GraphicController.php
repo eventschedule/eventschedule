@@ -8,6 +8,7 @@ use App\Services\EventGraphicGenerator;
 use App\Services\GraphicEmailService;
 use App\Utils\EventTextGenerator;
 use App\Utils\GeminiUtils;
+use App\Utils\OpenAIUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -44,7 +45,18 @@ class GraphicController extends Controller
             }
         }
 
-        return view('graphic.show', compact('role', 'layout', 'isPro', 'isEnterprise', 'graphicSettings', 'hasRecurringEvents', 'headerImagePreviewUrl'));
+        $aiGraphicModels = collect(config('services.ai.graphic_models', []))->filter(function ($model) {
+            if ($model['provider'] === 'gemini') {
+                return (bool) config('services.google.gemini_key');
+            }
+            if ($model['provider'] === 'openai') {
+                return (bool) config('services.openai.api_key');
+            }
+
+            return false;
+        })->all();
+
+        return view('graphic.show', compact('role', 'layout', 'isPro', 'isEnterprise', 'graphicSettings', 'hasRecurringEvents', 'headerImagePreviewUrl', 'aiGraphicModels'));
     }
 
     public function getSettings($subdomain)
@@ -74,6 +86,7 @@ class GraphicController extends Controller
             'enabled' => 'boolean',
             'frequency' => 'in:daily,weekly,monthly',
             'ai_prompt' => 'nullable|string|max:500',
+            'ai_model' => 'nullable|string|max:50',
             'text_template' => 'nullable|string|max:2000',
             'layout' => 'in:grid,list,row',
             'send_day' => 'integer|min:0|max:31',
@@ -356,6 +369,7 @@ class GraphicController extends Controller
 
         $text = $request->input('text', '');
         $aiPrompt = trim($request->input('ai_prompt', ''));
+        $aiModel = $request->input('ai_model', '');
 
         if (empty($aiPrompt) || empty($text)) {
             return response()->json(['error' => 'Missing text or AI prompt']);
@@ -382,10 +396,10 @@ class GraphicController extends Controller
         $requestId = Str::uuid()->toString();
         Cache::put("ai_text_{$requestId}", ['status' => 'processing'], 300);
 
-        dispatch(function () use ($requestId, $text, $aiPrompt, $events) {
+        dispatch(function () use ($requestId, $text, $aiPrompt, $events, $aiModel) {
             set_time_limit(120);
 
-            $result = $this->processTextWithAI($text, $aiPrompt, $events);
+            $result = $this->processTextWithAI($text, $aiPrompt, $events, $aiModel);
 
             if ($result) {
                 Cache::put("ai_text_{$requestId}", ['status' => 'completed', 'text' => $result], 300);
@@ -512,7 +526,7 @@ class GraphicController extends Controller
             ->header('Expires', '0');
     }
 
-    private function processTextWithAI($text, $aiPrompt, $events)
+    private function processTextWithAI($text, $aiPrompt, $events, $aiModel = '')
     {
         try {
             // Build structured metadata so the AI can reference event properties
@@ -551,7 +565,17 @@ class GraphicController extends Controller
 
             $prompt = "Transform the following event list text according to this instruction: \"{$aiPrompt}\"\n\nEvent metadata (use this to inform your transformation):\n{$metadata}\n\nEvent List:\n{$text}\n\nReturn only the transformed text as a JSON string with a single key 'text'.";
 
-            $response = GeminiUtils::sendPrompt($prompt, 'content', ['model' => 'gemini-2.5-flash', 'timeout' => 120]);
+            // Determine model and provider from config
+            $models = config('services.ai.graphic_models', []);
+            $modelConfig = $models[$aiModel] ?? null;
+            $model = $modelConfig ? $aiModel : 'gemini-2.5-flash';
+            $provider = $modelConfig ? $modelConfig['provider'] : 'gemini';
+
+            if ($provider === 'openai') {
+                $response = OpenAIUtils::sendTextRequest($prompt, null, 'content', ['model' => $model, 'timeout' => 120]);
+            } else {
+                $response = GeminiUtils::sendPrompt($prompt, 'content', ['model' => $model, 'timeout' => 120]);
+            }
 
             if ($response && isset($response[0]['text'])) {
                 return $response[0]['text'];

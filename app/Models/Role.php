@@ -1502,6 +1502,7 @@ class Role extends Model implements MustVerifyEmail
             'enabled' => false,
             'frequency' => 'weekly',
             'ai_prompt' => '',
+            'ai_model' => 'gemini-2.5-flash',
             'layout' => 'grid',
             'send_day' => 1,
             'send_hour' => 9,
