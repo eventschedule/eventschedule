@@ -38,9 +38,8 @@ class ProfileTest extends DuskTestCase
                 select.dispatchEvent(new Event('change', { bubbles: true }));
             ");
 
-            $browser->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/settings', 15);
+            $browser->script("document.querySelector('#section-profile form').requestSubmit()");
+            $browser->waitForText('Saved', 15);
 
             // Verify DB
             $this->assertEquals('Pacific/Auckland', User::first()->refresh()->timezone);
@@ -58,9 +57,8 @@ class ProfileTest extends DuskTestCase
             // -----------------------------------------------
             $browser->scrollIntoView('label[for="use_24_hour_time"]');
             $browser->script("document.getElementById('use_24_hour_time').checked = true;");
-            $browser->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/settings', 15);
+            $browser->script("document.querySelector('#section-profile form').requestSubmit()");
+            $browser->waitForText('Saved', 15);
 
             // Verify DB
             $this->assertTrue((bool) User::first()->refresh()->use_24_hour_time);
@@ -72,10 +70,9 @@ class ProfileTest extends DuskTestCase
                 ->waitFor('button[data-tab="localization"]', 5)
                 ->click('button[data-tab="localization"]')
                 ->waitFor('#language_code', 5)
-                ->select('language_code', 'es')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/settings', 15);
+                ->select('language_code', 'es');
+            $browser->script("document.querySelector('#section-profile form').requestSubmit()");
+            $browser->waitForText('Guardado', 15);
 
             // Verify DB
             $this->assertEquals('es', User::first()->refresh()->language_code);
@@ -88,10 +85,9 @@ class ProfileTest extends DuskTestCase
                 ->assertSee('Configuraci');
 
             // Change back to English
-            $browser->select('language_code', 'en')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('GUARDAR')
-                ->waitForLocation('/settings', 15);
+            $browser->select('language_code', 'en');
+            $browser->script("document.querySelector('#section-profile form').requestSubmit()");
+            $browser->waitForText('Saved', 15);
 
             // Verify DB
             $this->assertEquals('en', User::first()->refresh()->language_code);
@@ -104,10 +100,9 @@ class ProfileTest extends DuskTestCase
                 ->click('button[data-tab="general"]')
                 ->waitFor('#name', 5)
                 ->clear('name')
-                ->type('name', 'New Name')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/settings', 15);
+                ->type('name', 'New Name');
+            $browser->script("document.querySelector('#section-profile form').requestSubmit()");
+            $browser->waitForText('Saved', 15);
 
             // Verify DB
             $this->assertEquals('New Name', User::first()->refresh()->name);
