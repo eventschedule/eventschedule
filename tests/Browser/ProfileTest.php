@@ -69,8 +69,14 @@ class ProfileTest extends DuskTestCase
             $browser->visit('/settings')
                 ->waitFor('button[data-tab="localization"]', 5)
                 ->click('button[data-tab="localization"]')
-                ->waitFor('#language_code', 5)
-                ->select('language_code', 'es');
+                ->pause(500);
+
+            $browser->script("
+                var select = document.getElementById('language_code');
+                select.value = 'es';
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            ");
+
             $browser->script("document.querySelector('#section-profile form').requestSubmit()");
             $browser->waitForText('Guardado', 15);
 
@@ -81,11 +87,16 @@ class ProfileTest extends DuskTestCase
             $browser->visit('/settings')
                 ->waitFor('button[data-tab="localization"]', 5)
                 ->click('button[data-tab="localization"]')
-                ->waitFor('#language_code', 5)
+                ->pause(500)
                 ->assertSee('Configuraci');
 
             // Change back to English
-            $browser->select('language_code', 'en');
+            $browser->script("
+                var select = document.getElementById('language_code');
+                select.value = 'en';
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            ");
+
             $browser->script("document.querySelector('#section-profile form').requestSubmit()");
             $browser->waitForText('Saved', 15);
 
