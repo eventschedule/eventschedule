@@ -236,7 +236,7 @@
             </div>
         </div>
 
-        @if($role->accept_requests && $role->request_terms)
+        @if(isset($isGuest) && $isGuest && $role->accept_requests && $role->request_terms)
         <!-- Request Terms Panel -->
         <div class="ap-card p-4 sm:p-8 shadow-md rounded-lg mb-4 mt-4">
             <div class="max-w-3xl mx-auto">
@@ -482,7 +482,7 @@
                                         :value="eventSelectedVenues[idx]?.id || ''">
                                     <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                     <option v-for="venue in venues" :key="venue.id" :value="venue.id">
-                                        @{{ venue.name || venue.address1 }}@{{ venue._matched ? ' (Matched)' : '' }}
+                                        @{{ venue.name || venue.address1 }}
                                     </option>
                                 </select>
                             </div>
@@ -918,7 +918,7 @@
                 </div>
 
                 <!-- YouTube Videos Section for Talent - Now below the form and image -->
-                <div v-if="preview.parsed[idx].performers && preview.parsed[idx].performers.length > 0" class="mt-6">
+                <div v-if="!savedEvents[idx] && preview.parsed[idx].performers && preview.parsed[idx].performers.length > 0" class="mt-6">
                     <div v-for="(performer, performerIdx) in preview.parsed[idx].performers" :key="performerIdx" class="my-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <!-- Only show YouTube video selection for the first performer when there are multiple performers -->
                         <div v-if="performerIdx === 0 && ! performer.talent_id">
@@ -1692,6 +1692,15 @@
                         initializeFlatpickr();
                         // Initialize EasyMDE editors for description fields
                         this.initDescriptionEditors();
+                        // Re-apply venue selections to searchable-select dropdowns
+                        this.eventSelectedVenues.forEach((venue, idx) => {
+                            if (venue) {
+                                const select = document.getElementById('selected_venue_' + idx);
+                                if (select) {
+                                    select.value = venue.id;
+                                }
+                            }
+                        });
                     });
                 } catch (error) {
                     // Only show error if this is still the latest request

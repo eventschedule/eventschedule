@@ -115,14 +115,14 @@ class EventTextGenerator
             '{duration}' => $event->duration ?? '',
 
             // Event variables
-            '{event_name}' => $event->translatedName(),
-            '{short_description}' => $event->translatedShortDescription() ?? '',
-            '{description}' => $event->translatedDescription() ?? '',
+            '{event_name}' => $event->name,
+            '{short_description}' => $event->short_description ?? '',
+            '{description}' => $event->description_html ?? '',
             '{url}' => $eventUrl,
 
             // Venue variables
-            '{venue}' => $event->venue ? ($event->venue->translatedName() ?? '') : '',
-            '{city}' => $event->venue ? ($event->venue->translatedCity() ?? '') : '',
+            '{venue}' => $event->venue ? ($event->venue->name ?? '') : '',
+            '{city}' => $event->venue ? ($event->venue->city ?? '') : '',
             '{address}' => $event->venue ? ($event->venue->address1 ?? '') : '',
             '{state}' => $event->venue ? ($event->venue->state ?? '') : '',
             '{country}' => $event->venue ? ($event->venue->country ?? '') : '',

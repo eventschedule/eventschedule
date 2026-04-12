@@ -534,10 +534,10 @@ class GraphicController extends Controller
             $eventIndex = 1;
             foreach ($events as $event) {
                 $fields = [
-                    'name' => $event->translatedName(),
-                    'short_description' => $event->translatedShortDescription() ?? '',
-                    'venue' => $event->venue ? ($event->venue->translatedName() ?? '') : '',
-                    'city' => $event->venue ? ($event->venue->translatedCity() ?? '') : '',
+                    'name' => $event->name,
+                    'short_description' => $event->short_description ?? '',
+                    'venue' => $event->venue ? ($event->venue->name ?? '') : '',
+                    'city' => $event->venue ? ($event->venue->city ?? '') : '',
                     'address' => $event->venue ? ($event->venue->address1 ?? '') : '',
                     'state' => $event->venue ? ($event->venue->state ?? '') : '',
                     'country' => $event->venue ? ($event->venue->country ?? '') : '',
