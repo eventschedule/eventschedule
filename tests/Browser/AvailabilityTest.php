@@ -41,15 +41,15 @@ class AvailabilityTest extends DuskTestCase
             $isDisabled = $browser->script("return document.getElementById('saveButton').disabled;");
             $this->assertTrue($isDisabled[0], 'Save button should be disabled initially');
 
+            // Wait for jQuery click handler to be attached to day elements
+            $browser->waitUntil(
+                "typeof jQuery !== 'undefined' && jQuery._data(document.querySelector('.day-element'), 'events') !== undefined",
+                10
+            );
+
             // Click the 15th to mark it unavailable
             $browser->click('.day-element[data-date="'.$targetDate.'"]')
-                ->pause(500);
-
-            // Verify .day-x overlay appeared on the clicked date
-            $hasDayX = $browser->script(
-                "return document.querySelector('.day-element[data-date=\"".$targetDate."\"] .day-x') !== null;"
-            );
-            $this->assertTrue($hasDayX[0], 'Day-x overlay should appear after clicking');
+                ->waitFor('.day-element[data-date="'.$targetDate.'"] .day-x', 5);
 
             // Save button should now be enabled
             $isDisabled = $browser->script("return document.getElementById('saveButton').disabled;");
@@ -68,21 +68,11 @@ class AvailabilityTest extends DuskTestCase
             // Verify persistence after reload
             $browser->visit('/talent/availability')
                 ->waitFor('#saveButton', 10)
-                ->pause(500);
-
-            $hasDayX = $browser->script(
-                "return document.querySelector('.day-element[data-date=\"".$targetDate."\"] .day-x') !== null;"
-            );
-            $this->assertTrue($hasDayX[0], 'Day-x overlay should persist after reload');
+                ->waitFor('.day-element[data-date="'.$targetDate.'"] .day-x', 5);
 
             // Toggle back to available
             $browser->click('.day-element[data-date="'.$targetDate.'"]')
-                ->pause(500);
-
-            $hasDayX = $browser->script(
-                "return document.querySelector('.day-element[data-date=\"".$targetDate."\"] .day-x') !== null;"
-            );
-            $this->assertFalse($hasDayX[0], 'Day-x overlay should be removed after toggling back');
+                ->waitUntilMissing('.day-element[data-date="'.$targetDate.'"] .day-x', 5);
 
             // Save again
             $browser->click('#saveButton')
