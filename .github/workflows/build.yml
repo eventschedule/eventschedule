@@ -44,6 +44,6 @@ jobs:
           draft: false
           prerelease: false
           name: "Latest Release"
-          tag_name: "v1.0.99"
+          tag_name: "v1.0.100"
           files: |
             eventschedule.zip
