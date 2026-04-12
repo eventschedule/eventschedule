@@ -417,6 +417,14 @@ class EventRepo
             $event->event_password = null;
         }
 
+        // Convert starts_at from user's local time to UTC before slug generation
+        if ($event->starts_at) {
+            $timezone = $user->timezone;
+            $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, $timezone)
+                ->setTimezone('UTC')
+                ->format('Y-m-d H:i:s');
+        }
+
         // Handle slug update for existing events
         if (! $isNewEvent) {
             if ($request->filled('slug')) {
@@ -520,13 +528,6 @@ class EventRepo
         } else {
             $event->recurring_include_dates = null;
             $event->recurring_exclude_dates = null;
-        }
-
-        if ($event->starts_at) {
-            $timezone = $user->timezone;
-            $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, $timezone)
-                ->setTimezone('UTC')
-                ->format('Y-m-d H:i:s');
         }
 
         /*
