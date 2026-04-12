@@ -194,6 +194,11 @@ class HomeController extends Controller
 
         $canCreateSchedule = ! config('app.hosted') || $user->roles()->where('is_deleted', false)->count() < 50;
 
+        $allRoles = app('userRoles');
+        $schedules = $allRoles->where('type', 'talent')->whereIn('pivot.level', ['owner', 'admin', 'viewer']);
+        $venues = $allRoles->where('type', 'venue')->whereIn('pivot.level', ['owner', 'admin', 'viewer']);
+        $curators = $allRoles->where('type', 'curator')->whereIn('pivot.level', ['owner', 'admin', 'viewer']);
+
         return view('home', compact(
             'events',
             'month',
@@ -216,6 +221,9 @@ class HomeController extends Controller
             'boostCampaigns',
             'trafficSources',
             'canCreateSchedule',
+            'schedules',
+            'venues',
+            'curators',
         ));
     }
 
