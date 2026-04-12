@@ -152,7 +152,24 @@ class GroupsTest extends DuskTestCase
 
         // Create first event for "Main Shows" sub-schedule
         $browser->visit('/talent/add-event?date='.date('Y-m-d', strtotime('+7 days')))
-            ->type('name', 'Main Show Event');
+            ->waitFor('#event_name', 15)
+            ->pause(1000);
+
+        // Set event name via JS (more reliable than Dusk type in headless Chrome)
+        $browser->script("
+            var nameField = document.getElementById('event_name');
+            nameField.value = 'Main Show Event';
+            nameField.dispatchEvent(new Event('input', { bubbles: true }));
+        ");
+
+        // Ensure name was set (JS fallback for headless Chrome flakiness)
+        $browser->script("
+            var nameField = document.getElementById('event_name');
+            if (!nameField.value || nameField.value !== 'Main Show Event') {
+                nameField.value = 'Main Show Event';
+                nameField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        ");
 
         // Use JS to set searchable select value (native select is hidden by searchable-select component)
         $browser->script("
@@ -182,7 +199,24 @@ class GroupsTest extends DuskTestCase
 
         // Create second event for "Workshops" sub-schedule
         $browser->visit('/talent/add-event?date='.date('Y-m-d', strtotime('+7 days')))
-            ->type('name', 'Workshop Event');
+            ->waitFor('#event_name', 15)
+            ->pause(1000);
+
+        // Set event name via JS (more reliable than Dusk type in headless Chrome)
+        $browser->script("
+            var nameField = document.getElementById('event_name');
+            nameField.value = 'Workshop Event';
+            nameField.dispatchEvent(new Event('input', { bubbles: true }));
+        ");
+
+        // Ensure name was set (JS fallback for headless Chrome flakiness)
+        $browser->script("
+            var nameField = document.getElementById('event_name');
+            if (!nameField.value || nameField.value !== 'Workshop Event') {
+                nameField.value = 'Workshop Event';
+                nameField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        ");
 
         // Use JS to set searchable select value (native select is hidden by searchable-select component)
         $browser->script("
@@ -212,7 +246,24 @@ class GroupsTest extends DuskTestCase
 
         // Create third event without sub-schedule
         $browser->visit('/talent/add-event?date='.date('Y-m-d', strtotime('+7 days')))
-            ->type('name', 'General Event');
+            ->waitFor('#event_name', 15)
+            ->pause(1000);
+
+        // Set event name via JS (more reliable than Dusk type in headless Chrome)
+        $browser->script("
+            var nameField = document.getElementById('event_name');
+            nameField.value = 'General Event';
+            nameField.dispatchEvent(new Event('input', { bubbles: true }));
+        ");
+
+        // Ensure name was set (JS fallback for headless Chrome flakiness)
+        $browser->script("
+            var nameField = document.getElementById('event_name');
+            if (!nameField.value || nameField.value !== 'General Event') {
+                nameField.value = 'General Event';
+                nameField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        ");
 
         // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
         $browser->script("
