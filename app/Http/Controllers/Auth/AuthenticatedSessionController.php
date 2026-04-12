@@ -22,6 +22,8 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('sign_up');
         }
 
+        restore_pending_action();
+
         return view('auth.login');
     }
 

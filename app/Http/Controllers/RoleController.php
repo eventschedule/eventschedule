@@ -295,10 +295,12 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (! auth()->user()) {
-            session(['pending_follow' => $subdomain]);
             $lang = session()->has('translate') ? 'en' : $role->language_code;
 
-            return redirect(app_url(route('sign_up', ['lang' => $lang], false)));
+            return redirect_with_pending_action(
+                app_url(route('sign_up', ['lang' => $lang], false)),
+                ['pending_follow' => $subdomain]
+            );
         }
 
         $user = $request->user();
@@ -3319,15 +3321,22 @@ class RoleController extends Controller
             return redirect(app_url(route('event.booking_request', ['subdomain' => $role->subdomain], false)));
         }
 
-        session(['pending_request' => $subdomain]);
-        session(['pending_request_allow_guest' => ! $role->require_account]);
-        session(['pending_request_form' => 'import']);
-
         if (! auth()->user()) {
             $lang = session()->has('translate') ? 'en' : $role->language_code;
 
-            return redirect(app_url(route('sign_up', ['lang' => $lang], false)));
+            return redirect_with_pending_action(
+                app_url(route('sign_up', ['lang' => $lang], false)),
+                [
+                    'pending_request' => $subdomain,
+                    'pending_request_allow_guest' => ! $role->require_account,
+                    'pending_request_form' => 'import',
+                ]
+            );
         }
+
+        session(['pending_request' => $subdomain]);
+        session(['pending_request_allow_guest' => ! $role->require_account]);
+        session(['pending_request_form' => 'import']);
 
         $user = auth()->user();
 

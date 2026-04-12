@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('roles', function (Blueprint $table) {
-            $table->boolean('hide_videos')->default(false)->after('draft_events_default');
+            $table->boolean('hide_videos')->default(false)->after('default_category_id');
         });
     }
 

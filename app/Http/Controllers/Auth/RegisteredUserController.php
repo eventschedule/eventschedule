@@ -35,6 +35,8 @@ class RegisteredUserController extends Controller
             return redirect()->route('login');
         }
 
+        restore_pending_action();
+
         if (request()->has('lang') && is_valid_language_code(request('lang'))) {
             \App::setLocale(request('lang'));
         }

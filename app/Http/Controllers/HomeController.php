@@ -583,7 +583,14 @@ class HomeController extends Controller
             $parsedUrl = parse_url($returnUrl);
             $appHost = parse_url(config('app.url'), PHP_URL_HOST);
             if (isset($parsedUrl['host']) && $parsedUrl['host'] !== $appHost && ! str_ends_with($parsedUrl['host'], '.'.$appHost)) {
-                $returnUrl = null;
+                // Allow return URLs on valid custom domains
+                $isCustomDomain = Role::where('custom_domain_host', $parsedUrl['host'])
+                    ->where('custom_domain_mode', 'direct')
+                    ->where('custom_domain_status', 'active')
+                    ->exists();
+                if (! $isCustomDomain) {
+                    $returnUrl = null;
+                }
             }
             $lowerUrl = strtolower(trim($returnUrl ?? ''));
             if (str_starts_with($lowerUrl, 'javascript:') || str_starts_with($lowerUrl, 'data:')) {

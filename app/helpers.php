@@ -208,6 +208,51 @@ if (! function_exists('app_url')) {
     }
 }
 
+if (! function_exists('redirect_with_pending_action')) {
+    /**
+     * Store pending action data in session and redirect.
+     * On custom domains, also bridges the data via cache so it survives the
+     * cross-domain redirect to app.eventschedule.com for sign-up/login.
+     */
+    function redirect_with_pending_action(string $url, array $sessionData): \Illuminate\Http\RedirectResponse
+    {
+        foreach ($sessionData as $key => $value) {
+            session([$key => $value]);
+        }
+
+        if (request()->attributes->get('custom_domain_host')) {
+            $token = \Illuminate\Support\Str::random(40);
+            \Illuminate\Support\Facades\Cache::put('pending_action:'.$token, $sessionData, now()->addHour());
+            $url .= (str_contains($url, '?') ? '&' : '?').'pa='.$token;
+        }
+
+        return redirect($url);
+    }
+}
+
+if (! function_exists('restore_pending_action')) {
+    /**
+     * Restore pending action data from cache into the current session.
+     * Called on sign-up/login pages to recover data that was stored on a custom domain.
+     */
+    function restore_pending_action(): void
+    {
+        $token = request()->query('pa');
+        if (! $token || ! is_string($token)) {
+            return;
+        }
+
+        $data = \Illuminate\Support\Facades\Cache::pull('pending_action:'.$token);
+        if (! is_array($data)) {
+            return;
+        }
+
+        foreach ($data as $key => $value) {
+            session([$key => $value]);
+        }
+    }
+}
+
 if (! function_exists('is_demo_mode')) {
     /**
      * Check if the current session is in demo mode

@@ -1261,9 +1261,13 @@ class EventController extends Controller
         }
 
         if (! auth()->check() && $role->require_account) {
-            session(['pending_request' => $subdomain]);
-
-            return redirect(app_url(route('sign_up', [], false)));
+            return redirect_with_pending_action(
+                app_url(route('sign_up', [], false)),
+                [
+                    'pending_request' => $subdomain,
+                    'guest_language' => session('guest_language'),
+                ]
+            );
         }
 
         if ($request->lang) {
@@ -2208,17 +2212,18 @@ class EventController extends Controller
         }
 
         if (! auth()->check()) {
-            session()->put('pending_fan_content', [
-                'type' => 'video',
-                'subdomain' => $subdomain,
-                'event_hash' => $event_hash,
-                'youtube_url' => $youtubeUrl,
-                'event_part_id' => $request->input('event_part_id'),
-                'event_date' => $request->input('event_date'),
-                'return_url' => url()->previous(),
-            ]);
-
-            return redirect(app_url(route('sign_up', [], false)));
+            return redirect_with_pending_action(
+                app_url(route('sign_up', [], false)),
+                ['pending_fan_content' => [
+                    'type' => 'video',
+                    'subdomain' => $subdomain,
+                    'event_hash' => $event_hash,
+                    'youtube_url' => $youtubeUrl,
+                    'event_part_id' => $request->input('event_part_id'),
+                    'event_date' => $request->input('event_date'),
+                    'return_url' => url()->previous(),
+                ]]
+            );
         }
 
         $eventPartId = $request->input('event_part_id');
@@ -2314,17 +2319,18 @@ class EventController extends Controller
         $comment = strip_tags(trim($request->input('comment')));
 
         if (! auth()->check()) {
-            session()->put('pending_fan_content', [
-                'type' => 'comment',
-                'subdomain' => $subdomain,
-                'event_hash' => $event_hash,
-                'comment' => $comment,
-                'event_part_id' => $request->input('event_part_id'),
-                'event_date' => $request->input('event_date'),
-                'return_url' => url()->previous(),
-            ]);
-
-            return redirect(app_url(route('sign_up', [], false)));
+            return redirect_with_pending_action(
+                app_url(route('sign_up', [], false)),
+                ['pending_fan_content' => [
+                    'type' => 'comment',
+                    'subdomain' => $subdomain,
+                    'event_hash' => $event_hash,
+                    'comment' => $comment,
+                    'event_part_id' => $request->input('event_part_id'),
+                    'event_date' => $request->input('event_date'),
+                    'return_url' => url()->previous(),
+                ]]
+            );
         }
 
         $eventPartId = $request->input('event_part_id');
@@ -2478,19 +2484,20 @@ class EventController extends Controller
             $tempFilename = 'photo_'.Str::random(32).'.'.$extension;
             $file->storeAs('temp', $tempFilename);
 
-            session()->put('pending_fan_content', [
-                'type' => 'photo',
-                'subdomain' => $subdomain,
-                'event_hash' => $event_hash,
-                'temp_filename' => $tempFilename,
-                'extension' => $extension,
-                'event_part_id' => $request->input('event_part_id'),
-                'event_date' => $request->input('event_date'),
-                'return_url' => url()->previous(),
-                'return_to' => $request->input('return_to'),
-            ]);
-
-            return redirect(app_url(route('sign_up', [], false)));
+            return redirect_with_pending_action(
+                app_url(route('sign_up', [], false)),
+                ['pending_fan_content' => [
+                    'type' => 'photo',
+                    'subdomain' => $subdomain,
+                    'event_hash' => $event_hash,
+                    'temp_filename' => $tempFilename,
+                    'extension' => $extension,
+                    'event_part_id' => $request->input('event_part_id'),
+                    'event_date' => $request->input('event_date'),
+                    'return_url' => url()->previous(),
+                    'return_to' => $request->input('return_to'),
+                ]]
+            );
         }
 
         $eventPartId = $request->input('event_part_id');
