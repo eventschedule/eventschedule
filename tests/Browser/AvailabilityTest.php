@@ -47,9 +47,9 @@ class AvailabilityTest extends DuskTestCase
                 10
             );
 
-            // Click the 15th to mark it unavailable
-            $browser->click('.day-element[data-date="'.$targetDate.'"]')
-                ->waitFor('.day-element[data-date="'.$targetDate.'"] .day-x', 5);
+            // Click the 15th to mark it unavailable (use JS click to avoid sticky header overlay)
+            $browser->script("document.querySelector('.day-element[data-date=\"{$targetDate}\"]').click()");
+            $browser->waitFor('.day-element[data-date="'.$targetDate.'"] .day-x', 5);
 
             // Save button should now be enabled
             $isDisabled = $browser->script("return document.getElementById('saveButton').disabled;");
@@ -70,9 +70,9 @@ class AvailabilityTest extends DuskTestCase
                 ->waitFor('#saveButton', 10)
                 ->waitFor('.day-element[data-date="'.$targetDate.'"] .day-x', 5);
 
-            // Toggle back to available
-            $browser->click('.day-element[data-date="'.$targetDate.'"]')
-                ->waitUntilMissing('.day-element[data-date="'.$targetDate.'"] .day-x', 5);
+            // Toggle back to available (use JS click to avoid sticky header overlay)
+            $browser->script("document.querySelector('.day-element[data-date=\"{$targetDate}\"]').click()");
+            $browser->waitUntilMissing('.day-element[data-date="'.$targetDate.'"] .day-x', 5);
 
             // Save again
             $browser->click('#saveButton')
