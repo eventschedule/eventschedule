@@ -1261,12 +1261,14 @@ class EventController extends Controller
         }
 
         if (! auth()->check() && $role->require_account) {
+            $data = ['pending_request' => $subdomain];
+            if (session('guest_language')) {
+                $data['guest_language'] = session('guest_language');
+            }
+
             return redirect_with_pending_action(
                 app_url(route('sign_up', [], false)),
-                [
-                    'pending_request' => $subdomain,
-                    'guest_language' => session('guest_language'),
-                ]
+                $data
             );
         }
 
