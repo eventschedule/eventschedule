@@ -566,6 +566,8 @@ class HomeController extends Controller
             return null;
         }
 
+        $role = Role::where('subdomain', $pending['subdomain'] ?? '')->first();
+
         $eventPartId = $pending['event_part_id'] ?? null;
         if ($eventPartId) {
             $eventPartId = UrlUtils::decodeId($eventPartId);
@@ -624,6 +626,10 @@ class HomeController extends Controller
                 ]);
                 $returnUrl = $event->getGuestUrl($pending['subdomain']);
                 session()->flash('scroll_to', 'pending-video-'.$video->id);
+
+                if ($role && ! auth()->user()->isConnected($role->subdomain)) {
+                    auth()->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+                }
             }
 
             session()->flash('message', __('messages.video_submitted'));
@@ -644,9 +650,12 @@ class HomeController extends Controller
             $returnUrl = $event->getGuestUrl($pending['subdomain']);
             session()->flash('scroll_to', 'pending-comment-'.$comment->id);
 
+            if ($role && ! auth()->user()->isConnected($role->subdomain)) {
+                auth()->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+            }
+
             session()->flash('message', __('messages.comment_submitted'));
         } elseif ($pending['type'] === 'photo') {
-            $role = Role::where('subdomain', $pending['subdomain'] ?? '')->first();
             if ($role && ! $role->canUploadPhoto()) {
                 $tempFilename = $pending['temp_filename'] ?? '';
                 if ($tempFilename) {
@@ -686,6 +695,11 @@ class HomeController extends Controller
                 'photo_url' => $filename,
                 'is_approved' => false,
             ]);
+
+            if ($role && ! auth()->user()->isConnected($role->subdomain)) {
+                auth()->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+            }
+
             if (($pending['return_to'] ?? null) === 'gallery') {
                 $returnUrl = $event->getPhotoGalleryUrl($pending['subdomain']);
             } else {
