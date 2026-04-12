@@ -106,6 +106,7 @@ class Role extends Model implements MustVerifyEmail
         'ai_content_instructions',
         'hide_past_events',
         'draft_events_default',
+        'hide_videos',
         'default_category_id',
     ];
 
@@ -140,6 +141,7 @@ class Role extends Model implements MustVerifyEmail
         'custom_labels' => 'array',
         'hide_past_events' => 'boolean',
         'draft_events_default' => 'boolean',
+        'hide_videos' => 'boolean',
     ];
 
     /**

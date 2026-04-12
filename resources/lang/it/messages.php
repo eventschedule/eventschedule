@@ -120,6 +120,8 @@ return [
     'first_day_of_week' => 'Primo Giorno della Settimana',
     'hide_past_events' => 'Nascondi Eventi Passati',
     'hide_past_events_help' => 'Quando abilitato, gli eventi passati non verranno mostrati nel calendario pubblico.',
+    'hide_videos' => 'Nascondi Video',
+    'hide_videos_help' => 'Quando abilitato, il pannello video non verrà mostrato nel calendario pubblico.',
     'draft_events_default' => 'Nuovi eventi come bozza per impostazione predefinita',
     'draft_events_default_help' => 'Quando attivato, i nuovi eventi verranno salvati come bozze. Potrai pubblicarli quando saranno pronti.',
     'default_category' => 'Categoria predefinita',

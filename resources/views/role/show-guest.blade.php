@@ -494,7 +494,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
           </header>
         </div>
 
-        @if (! $role->isTalent())
+        @if (! $role->isTalent() && ! $role->hide_videos)
         @php
           // Filter events for upcoming events with videos (only on main role page, not event pages)
           $upcomingEventsWithVideos = collect();

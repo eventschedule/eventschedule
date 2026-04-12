@@ -122,6 +122,8 @@ return [
     'first_day_of_week' => 'Premier jour de la semaine',
     'hide_past_events' => 'Masquer les événements passés',
     'hide_past_events_help' => 'Lorsqu\'activé, les événements passés ne seront pas affichés sur le calendrier public.',
+    'hide_videos' => 'Masquer les vidéos',
+    'hide_videos_help' => 'Lorsqu\'activé, le panneau vidéos ne sera pas affiché sur le calendrier public.',
     'draft_events_default' => 'Nouveaux événements en brouillon par défaut',
     'draft_events_default_help' => 'Lorsque cette option est activée, les nouveaux événements seront enregistrés en tant que brouillons. Vous pourrez les publier quand ils seront prêts.',
     'default_category' => 'Catégorie par défaut',

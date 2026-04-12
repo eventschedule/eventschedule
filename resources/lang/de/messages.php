@@ -470,6 +470,8 @@ return [
     'first_day_of_week' => 'Erster Wochentag',
     'hide_past_events' => 'Vergangene Veranstaltungen ausblenden',
     'hide_past_events_help' => 'Wenn aktiviert, werden vergangene Veranstaltungen nicht im öffentlichen Kalender angezeigt.',
+    'hide_videos' => 'Videos ausblenden',
+    'hide_videos_help' => 'Wenn aktiviert, wird der Videobereich nicht im öffentlichen Kalender angezeigt.',
     'draft_events_default' => 'Neue Veranstaltungen standardmäßig als Entwurf',
     'draft_events_default_help' => 'Wenn aktiviert, werden neue Veranstaltungen als Entwürfe gespeichert. Sie können sie veröffentlichen, wenn sie bereit sind.',
     'default_category' => 'Standardkategorie',

@@ -2712,6 +2712,16 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('hide_past_events')" />
                             </div>
 
+                            @if (! $role->isTalent())
+                            <div class="mb-6">
+                                <x-toggle name="hide_videos"
+                                    label="{{ __('messages.hide_videos') }}"
+                                    checked="{{ old('hide_videos', $role->hide_videos) }}"
+                                    help="{{ __('messages.hide_videos_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('hide_videos')" />
+                            </div>
+                            @endif
+
                             <div class="mb-6">
                                 <x-toggle name="draft_events_default"
                                     label="{{ __('messages.draft_events_default') }}"

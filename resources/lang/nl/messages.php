@@ -117,6 +117,8 @@ return [
     'first_day_of_week' => 'Eerste Dag van de Week',
     'hide_past_events' => 'Verberg Afgelopen Evenementen',
     'hide_past_events_help' => 'Wanneer ingeschakeld, worden afgelopen evenementen niet weergegeven op de openbare agenda.',
+    'hide_videos' => 'Video\'s verbergen',
+    'hide_videos_help' => 'Wanneer ingeschakeld, wordt het videopaneel niet weergegeven op de openbare agenda.',
     'draft_events_default' => 'Nieuwe evenementen standaard als concept',
     'draft_events_default_help' => 'Wanneer ingeschakeld, worden nieuwe evenementen opgeslagen als concepten. U kunt ze publiceren wanneer ze klaar zijn.',
     'default_category' => 'Standaardcategorie',

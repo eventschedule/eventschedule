@@ -123,6 +123,8 @@ return [
     'first_day_of_week' => 'Nädala Esimene Päev',
     'hide_past_events' => 'Peida Möödunud Sündmused',
     'hide_past_events_help' => 'Kui see on lubatud, ei kuvata möödunud sündmusi avalikus kalendris.',
+    'hide_videos' => 'Peida Videod',
+    'hide_videos_help' => 'Kui see on lubatud, ei kuvata videopaneeli avalikus kalendris.',
     'draft_events_default' => 'Uued sündmused vaikimisi mustandina',
     'draft_events_default_help' => 'Kui see on lubatud, salvestatakse uued sündmused mustanditena. Saate need avaldada, kui need on valmis.',
     'default_category' => 'Vaikekategooria',

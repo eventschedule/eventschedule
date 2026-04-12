@@ -123,6 +123,8 @@ return [
     'first_day_of_week' => 'Prima Zi a Săptămânii',
     'hide_past_events' => 'Ascunde Evenimentele Trecute',
     'hide_past_events_help' => 'Când este activat, evenimentele trecute nu vor fi afișate în calendarul public.',
+    'hide_videos' => 'Ascunde Videoclipurile',
+    'hide_videos_help' => 'Când este activat, panoul de videoclipuri nu va fi afișat în calendarul public.',
     'draft_events_default' => 'Evenimentele noi implicit ca ciornă',
     'draft_events_default_help' => 'Când este activat, evenimentele noi vor fi salvate ca ciorne. Le puteți publica când sunt gata.',
     'default_category' => 'Categoria implicită',

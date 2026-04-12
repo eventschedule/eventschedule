@@ -118,6 +118,8 @@ return [
     'first_day_of_week' => 'Primeiro Dia da Semana',
     'hide_past_events' => 'Ocultar Eventos Passados',
     'hide_past_events_help' => 'Quando ativado, os eventos passados não serão exibidos no calendário público.',
+    'hide_videos' => 'Ocultar Vídeos',
+    'hide_videos_help' => 'Quando ativado, o painel de vídeos não será exibido no calendário público.',
     'draft_events_default' => 'Novos eventos como rascunho por padrão',
     'draft_events_default_help' => 'Quando ativado, novos eventos serão salvos como rascunhos. Você pode publicá-los quando estiverem prontos.',
     'default_category' => 'Categoria padrão',

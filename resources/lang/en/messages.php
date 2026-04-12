@@ -123,6 +123,8 @@ return [
     'first_day_of_week' => 'First Day of Week',
     'hide_past_events' => 'Hide Past Events',
     'hide_past_events_help' => 'When enabled, past events will not be shown on the public schedule.',
+    'hide_videos' => 'Hide Videos',
+    'hide_videos_help' => 'When enabled, the videos panel will not be shown on the public schedule.',
     'draft_events_default' => 'New events default to draft',
     'draft_events_default_help' => 'When enabled, new events will be saved as drafts. You can publish them when ready.',
     'default_category' => 'Default category',
