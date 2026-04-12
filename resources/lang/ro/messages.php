@@ -2987,4 +2987,6 @@ return [
     'starter_compact_digest' => 'Rezumat compact',
     'starter_compact_digest_desc' => 'Listă concisă de evenimente în format rezumat',
     'schedule_limit' => 'Ați atins numărul maxim de calendare.',
+    'ai_import_ready' => 'Importul este gata',
+    'ai_import_ready_body' => 'Evenimentele au fost analizate și sunt gata de verificare.',
 ];

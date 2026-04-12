@@ -2990,4 +2990,6 @@ return [
     'starter_compact_digest' => 'Compact Digest',
     'starter_compact_digest_desc' => 'Concise event listing in digest format',
     'schedule_limit' => 'You have reached the maximum number of schedules.',
+    'ai_import_ready' => 'AI Import Ready',
+    'ai_import_ready_body' => 'Your events have been parsed and are ready for review.',
 ];

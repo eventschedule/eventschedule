@@ -2941,4 +2941,6 @@ return [
     'starter_compact_digest' => 'סיכום מתומצת',
     'starter_compact_digest_desc' => 'רשימת אירועים תמציתית בפורמט סיכום',
     'schedule_limit' => 'הגעת למספר המקסימלי של לוחות זמנים.',
+    'ai_import_ready' => 'הייבוא מוכן',
+    'ai_import_ready_body' => 'האירועים נותחו ומוכנים לבדיקה.',
 ];

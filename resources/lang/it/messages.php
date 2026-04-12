@@ -2948,4 +2948,6 @@ return [
     'starter_compact_digest' => 'Riepilogo compatto',
     'starter_compact_digest_desc' => 'Elenco conciso di eventi in formato riepilogo',
     'schedule_limit' => 'Hai raggiunto il numero massimo di calendari.',
+    'ai_import_ready' => 'Importazione pronta',
+    'ai_import_ready_body' => 'I tuoi eventi sono stati analizzati e sono pronti per la revisione.',
 ];

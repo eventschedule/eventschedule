@@ -2946,4 +2946,6 @@ return [
     'starter_compact_digest' => 'Compact overzicht',
     'starter_compact_digest_desc' => 'Beknopte evenementenlijst in overzichtsformaat',
     'schedule_limit' => 'U heeft het maximale aantal agenda\'s bereikt.',
+    'ai_import_ready' => 'Import gereed',
+    'ai_import_ready_body' => 'Uw evenementen zijn geanalyseerd en klaar voor beoordeling.',
 ];

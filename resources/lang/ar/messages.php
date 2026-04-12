@@ -2948,4 +2948,6 @@ return [
     'starter_compact_digest' => 'ملخص مختصر',
     'starter_compact_digest_desc' => 'قائمة فعاليات موجزة بتنسيق ملخص',
     'schedule_limit' => 'لقد وصلت إلى الحد الأقصى لعدد الجداول.',
+    'ai_import_ready' => 'الاستيراد جاهز',
+    'ai_import_ready_body' => 'تم تحليل الفعاليات وهي جاهزة للمراجعة.',
 ];

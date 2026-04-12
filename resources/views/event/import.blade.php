@@ -1461,8 +1461,48 @@
 
             handleSubmit() {
                 if (this.canSubmit) {
+                    if (window.Notification && Notification.permission === 'default') {
+                        Notification.requestPermission();
+                    }
                     this.fetchPreview();
                 }
+            },
+
+            playNotificationChime() {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    if (ctx.state === 'suspended') ctx.resume();
+                    const playTone = (freq, startTime, duration) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.frequency.value = freq;
+                        osc.type = 'sine';
+                        gain.gain.setValueAtTime(0.3, startTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+                        osc.start(startTime);
+                        osc.stop(startTime + duration);
+                    };
+                    playTone(523.25, ctx.currentTime, 0.15);
+                    playTone(659.25, ctx.currentTime + 0.15, 0.2);
+                    setTimeout(() => ctx.close(), 1000);
+                } catch (e) {
+                    // Web Audio not supported
+                }
+            },
+
+            notifyParseComplete() {
+                if (document.hidden && window.Notification && Notification.permission === 'granted') {
+                    const n = new Notification(@json(__('messages.ai_import_ready')), {
+                        body: @json(__('messages.ai_import_ready_body')),
+                    });
+                    n.onclick = () => {
+                        window.focus();
+                        n.close();
+                    };
+                }
+                this.playNotificationChime();
             },
 
             async fetchPreview() {
@@ -1702,6 +1742,8 @@
                             }
                         });
                     });
+
+                    this.notifyParseComplete();
                 } catch (error) {
                     // Only show error if this is still the latest request
                     if (this.currentRequestId === requestId) {

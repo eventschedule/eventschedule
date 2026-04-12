@@ -2952,4 +2952,6 @@ return [
     'starter_compact_digest' => 'Kompakter Überblick',
     'starter_compact_digest_desc' => 'Übersichtliche Veranstaltungsliste im Digest-Format',
     'schedule_limit' => 'Sie haben die maximale Anzahl an Zeitplänen erreicht.',
+    'ai_import_ready' => 'Import bereit',
+    'ai_import_ready_body' => 'Ihre Veranstaltungen wurden analysiert und sind zur Überprüfung bereit.',
 ];

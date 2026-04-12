@@ -2953,4 +2953,6 @@ return [
     'starter_compact_digest' => 'Résumé compact',
     'starter_compact_digest_desc' => 'Liste concise d\'événements au format résumé',
     'schedule_limit' => 'Vous avez atteint le nombre maximum de calendriers.',
+    'ai_import_ready' => 'Importation terminée',
+    'ai_import_ready_body' => 'Vos événements ont été analysés et sont prêts à être vérifiés.',
 ];

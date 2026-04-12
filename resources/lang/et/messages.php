@@ -2964,4 +2964,6 @@ return [
     'starter_compact_digest' => 'Kompaktne kokkuvõte',
     'starter_compact_digest_desc' => 'Lühike sündmuste nimekiri kokkuvõtte formaadis',
     'schedule_limit' => 'Olete saavutanud ajakavade maksimaalse arvu.',
+    'ai_import_ready' => 'Import on valmis',
+    'ai_import_ready_body' => 'Teie sündmused on analüüsitud ja ülevaatamiseks valmis.',
 ];
