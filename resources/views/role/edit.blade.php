@@ -2692,16 +2692,11 @@
                         <!-- Tab Content: Advanced -->
                         <div id="settings-tab-advanced" class="settings-tab-content hidden">
                             <div class="mb-6">
-                                <x-input-label for="first_day_of_week" :value="__('messages.first_day_of_week')" />
-                                <select name="first_day_of_week" id="first_day_of_week"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                    @foreach ([0 => 'sunday', 1 => 'monday', 2 => 'tuesday', 3 => 'wednesday', 4 => 'thursday', 5 => 'friday', 6 => 'saturday'] as $value => $dayName)
-                                    <option value="{{ $value }}" {{ old('first_day_of_week', $role->first_day_of_week ?? 0) == $value ? 'selected' : '' }}>
-                                        {{ __('messages.' . $dayName) }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                                <x-input-error class="mt-2" :messages="$errors->get('first_day_of_week')" />
+                                <x-toggle name="draft_events_default"
+                                    label="{{ __('messages.draft_events_default') }}"
+                                    checked="{{ old('draft_events_default', $role->draft_events_default) }}"
+                                    help="{{ __('messages.draft_events_default_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('draft_events_default')" />
                             </div>
 
                             <div class="mb-6">
@@ -2723,11 +2718,16 @@
                             @endif
 
                             <div class="mb-6">
-                                <x-toggle name="draft_events_default"
-                                    label="{{ __('messages.draft_events_default') }}"
-                                    checked="{{ old('draft_events_default', $role->draft_events_default) }}"
-                                    help="{{ __('messages.draft_events_default_help') }}" />
-                                <x-input-error class="mt-2" :messages="$errors->get('draft_events_default')" />
+                                <x-input-label for="first_day_of_week" :value="__('messages.first_day_of_week')" />
+                                <select name="first_day_of_week" id="first_day_of_week"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    @foreach ([0 => 'sunday', 1 => 'monday', 2 => 'tuesday', 3 => 'wednesday', 4 => 'thursday', 5 => 'friday', 6 => 'saturday'] as $value => $dayName)
+                                    <option value="{{ $value }}" {{ old('first_day_of_week', $role->first_day_of_week ?? 0) == $value ? 'selected' : '' }}>
+                                        {{ __('messages.' . $dayName) }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                                <x-input-error class="mt-2" :messages="$errors->get('first_day_of_week')" />
                             </div>
 
                             <div class="mb-6">
@@ -2739,8 +2739,7 @@
                                         <option value="{{ $id }}" {{ old('default_category_id', $role->default_category_id) == $id ? 'selected' : '' }}>{{ $label }}</option>
                                     @endforeach
                                 </select>
-                                <div class="mt-4 flex items-start justify-between">
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.default_category_help') }}</p>
+                                <div class="mt-4 flex items-start justify-end">
                                     @if ($role->exists && $role->subdomain)
                                     <div class="flex items-center gap-2">
                                         <span id="update-all-categories-result" style="display: none;" class="text-sm text-green-600 dark:text-green-400"></span>
@@ -2770,14 +2769,6 @@
                                 @endforeach
                             </div>
                         @endif
-
-                        <div class="mb-6">
-                            <x-toggle name="direct_registration"
-                                label="{{ __('messages.direct_registration') }}"
-                                checked="{{ old('direct_registration', $role->direct_registration) }}"
-                                help="{{ __('messages.direct_registration_help') }}" />
-                            <x-input-error class="mt-2" :messages="$errors->get('direct_registration')" />
-                        </div>
 
                         @if (config('app.hosted') || config('app.is_testing'))
                         <div class="mb-6" id="import_form_fields_section">
