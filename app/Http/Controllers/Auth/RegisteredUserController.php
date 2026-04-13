@@ -245,7 +245,7 @@ class RegisteredUserController extends Controller
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
             'password' => ['required', 'string', 'min:8'],
-            'language_code' => ['nullable', 'string', 'in:'.implode(',', array_keys(config('app.supported_languages', ['en' => 'english'])))],
+            'language_code' => ['nullable', 'string', 'max:5'],
             'cf-turnstile-response' => [new ValidTurnstile],
         ];
 
@@ -267,6 +267,12 @@ class RegisteredUserController extends Controller
                     'verification_code' => [__('messages.code_invalid')],
                 ]);
             }
+        }
+
+        // Default to English if browser language is not supported
+        $languageCode = $request->language_code;
+        if (! $languageCode || ! array_key_exists($languageCode, config('app.supported_languages', ['en' => 'english']))) {
+            $languageCode = 'en';
         }
 
         $utmParams = session('utm_params', []);
@@ -291,8 +297,8 @@ class RegisteredUserController extends Controller
                 'name' => $request->name,
                 'password' => Hash::make($request->password),
                 'timezone' => $request->timezone ?? 'America/New_York',
-                'language_code' => $request->language_code ?? 'en',
-                'use_24_hour_time' => detect_24_hour_time($request->timezone, $request->language_code),
+                'language_code' => $languageCode,
+                'use_24_hour_time' => detect_24_hour_time($request->timezone, $languageCode),
                 'utm_source' => $utmParams['utm_source'] ?? null,
                 'utm_medium' => $utmParams['utm_medium'] ?? null,
                 'utm_campaign' => $utmParams['utm_campaign'] ?? null,
@@ -308,8 +314,8 @@ class RegisteredUserController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'timezone' => $request->timezone ?? 'America/New_York',
-                'language_code' => $request->language_code ?? 'en',
-                'use_24_hour_time' => detect_24_hour_time($request->timezone, $request->language_code),
+                'language_code' => $languageCode,
+                'use_24_hour_time' => detect_24_hour_time($request->timezone, $languageCode),
                 'utm_source' => $utmParams['utm_source'] ?? null,
                 'utm_medium' => $utmParams['utm_medium'] ?? null,
                 'utm_campaign' => $utmParams['utm_campaign'] ?? null,
