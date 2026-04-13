@@ -3318,7 +3318,7 @@ class RoleController extends Controller
 
         // Schedules using the booking form get the simplified booking request form
         if ($role->usesBookingForm()) {
-            return redirect(app_url(route('event.booking_request', ['subdomain' => $role->subdomain], false)));
+            return redirect(route('event.booking_request', ['subdomain' => $role->subdomain]));
         }
 
         if (! auth()->user()) {

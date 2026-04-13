@@ -270,7 +270,7 @@
                         </button>
                       </a>
                     @else
-                      <a href="{{ app_url(route('role.follow', ['subdomain' => $each->subdomain], false)) }}"
+                      <a href="{{ route('role.follow', ['subdomain' => $each->subdomain]) }}"
                         class="inline-flex items-center justify-center">
                         <button type="button" name="follow"
                           style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
