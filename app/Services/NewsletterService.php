@@ -198,6 +198,19 @@ class NewsletterService
             $allRecipients = $allRecipients->merge($segment->resolveRecipients());
         }
 
+        // Always include schedule members (owner, admin, viewer)
+        $members = $role->members()
+            ->select('users.id', 'users.email', 'users.name', 'users.is_subscribed')
+            ->where('users.is_subscribed', true)
+            ->whereNotNull('users.email_verified_at')
+            ->get()
+            ->map(fn ($user) => (object) [
+                'user_id' => $user->id,
+                'email' => strtolower($user->email),
+                'name' => $user->name,
+            ]);
+        $allRecipients = $allRecipients->merge($members);
+
         // If no segments found and no segmentIds, fall back to followers
         if ($allRecipients->isEmpty() && empty($segmentIds)) {
             $allRecipients = $role->followers()
