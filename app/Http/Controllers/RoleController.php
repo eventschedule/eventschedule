@@ -1283,7 +1283,7 @@ class RoleController extends Controller
 
         $sortBy = $request->input('sort_by', 'created_at');
         $sortDir = strtolower($request->input('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
-        if (! in_array($sortBy, ['created_at', 'action', 'ip_address', 'metadata', 'user_id'])) {
+        if (! in_array($sortBy, ['created_at', 'action', 'metadata', 'user_id'])) {
             $sortBy = 'created_at';
         }
 
@@ -1344,8 +1344,7 @@ class RoleController extends Controller
             $search = str_replace(['%', '_'], ['\\%', '\\_'], $request->input('search'));
             $query->where(function ($q) use ($search) {
                 $q->where('action', 'like', "%{$search}%")
-                    ->orWhere('metadata', 'like', "%{$search}%")
-                    ->orWhere('ip_address', 'like', "%{$search}%");
+                    ->orWhere('metadata', 'like', "%{$search}%");
             });
         }
 
@@ -1685,7 +1684,7 @@ class RoleController extends Controller
             Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
         }
 
-        AuditService::log(AuditService::SCHEDULE_MEMBER_ADD, auth()->id(), 'Role', $role->id, null, null, $sendSms ? 'sms:'.$user->phone : $user->email);
+        AuditService::log(AuditService::SCHEDULE_MEMBER_ADD, auth()->id(), 'Role', $role->id, null, null, $user->name);
 
         $redirect = redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']));
 

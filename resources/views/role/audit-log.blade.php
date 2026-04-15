@@ -54,7 +54,6 @@
                             <x-sortable-header column="created_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.time') }}</x-sortable-header>
                             <x-sortable-header column="user_id" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.user') }}</x-sortable-header>
                             <x-sortable-header column="action" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.action') }}</x-sortable-header>
-                            <x-sortable-header column="ip_address" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.ip_address') }}</x-sortable-header>
                             <x-sortable-header column="metadata" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.details') }}</x-sortable-header>
                         </tr>
                     </thead>
@@ -120,9 +119,6 @@
                                     {{ $actionLabel }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap font-mono">
-                                {{ $log->ip_address }}
-                            </td>
                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
                                 @php
                                     $actionPrefix = explode('.', $log->action)[0] ?? '';
@@ -155,7 +151,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                            <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
                                 {{ __('messages.no_audit_log_entries') }}
                             </td>
                         </tr>
