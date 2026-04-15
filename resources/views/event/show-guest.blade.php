@@ -1078,9 +1078,17 @@
             function showPanelsBelow() {
                 var els = form.parentNode.querySelectorAll('[data-hidden-by-form]');
                 for (var i = 0; i < els.length; i++) {
-                    els[i].removeAttribute('data-hidden-by-form');
-                    els[i].style.display = '';
+                    var el = els[i];
+                    el.removeAttribute('data-hidden-by-form');
+                    el.style.opacity = '0';
+                    el.style.display = '';
                 }
+                requestAnimationFrame(function() {
+                    for (var i = 0; i < els.length; i++) {
+                        els[i].style.transition = 'opacity 0.2s ease';
+                        els[i].style.opacity = '1';
+                    }
+                });
             }
 
             function showForm() {
@@ -1105,14 +1113,14 @@
             function hideForm() {
                 form.style.opacity = '0';
                 form.style.transform = 'translateY(-8px)';
-                setTimeout(function() {
-                    form.style.display = 'none';
-                }, 200);
-                showCta();
-                showPanelsBelow();
                 var url = new URL(window.location);
                 url.searchParams.delete(paramKey);
                 history.replaceState(null, '', url);
+                setTimeout(function() {
+                    form.style.display = 'none';
+                    showCta();
+                    showPanelsBelow();
+                }, 200);
             }
 
             window.addEventListener('show-event-form', showForm);
