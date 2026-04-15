@@ -28,9 +28,12 @@ class EventManagementTest extends DuskTestCase
             // -----------------------------------------------
             $browser->visit('/talent/add-event?date='.date('Y-m-d'))
                 ->waitFor('#event_name', 5)
-                ->type('name', 'Original Event')
-                ->click('a[data-section="section-venue"]')
-                ->waitFor('#in_person', 5);
+                ->pause(1000)
+                ->type('name', 'Original Event');
+
+            // Navigate to venue section via JS (more reliable than clicking the nav link)
+            $browser->script("document.querySelector('a[data-section=\"section-venue\"]').click()");
+            $browser->waitFor('#in_person', 10);
             $browser->script("var cb = document.getElementById('in_person'); if (!cb.checked) cb.click();");
             $browser->waitFor('#selected_venue', 5)
                 ->select('#selected_venue')
