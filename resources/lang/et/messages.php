@@ -1669,6 +1669,7 @@ return [
     'confirm_import' => 'Kinnitage import',
     'emails_imported' => ':count imporditud meilid',
     'no_valid_emails' => 'Ühtegi kehtivat meiliaadressi ei leitud',
+    'emails_already_in_segment' => 'Kõik meiliaadressid on selles segmendis juba olemas',
     'row_count' => 'ridu kokku',
     'create_new_segment' => 'Loo uus segment',
     'add_to_existing_segment' => 'Lisa olemasolevale segmendile',

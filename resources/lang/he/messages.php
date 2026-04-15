@@ -1656,6 +1656,7 @@ return [
     'confirm_import' => 'אישור ייבוא',
     'emails_imported' => ':count כתובות דוא"ל יובאו',
     'no_valid_emails' => 'לא נמצאו כתובות דוא"ל תקינות',
+    'emails_already_in_segment' => 'כל כתובות הדוא"ל כבר קיימות בקטע זה',
     'row_count' => 'סה"כ שורות',
     'create_new_segment' => 'יצירת קטע חדש',
     'add_to_existing_segment' => 'הוספה לקטע קיים',

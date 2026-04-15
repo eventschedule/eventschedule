@@ -1683,6 +1683,7 @@ return [
     'confirm_import' => 'Confirm Import',
     'emails_imported' => ':count emails imported',
     'no_valid_emails' => 'No valid email addresses found',
+    'emails_already_in_segment' => 'All email addresses already exist in this segment',
     'row_count' => 'Total rows',
     'create_new_segment' => 'Create new segment',
     'add_to_existing_segment' => 'Add to existing segment',

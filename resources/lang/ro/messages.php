@@ -1684,6 +1684,7 @@ return [
     'confirm_import' => 'Confirmă Importul',
     'emails_imported' => ':count emailuri importate',
     'no_valid_emails' => 'Nicio adresă de email validă găsită',
+    'emails_already_in_segment' => 'Toate adresele de email există deja în acest segment',
     'row_count' => 'Total rânduri',
     'create_new_segment' => 'Creează segment nou',
     'add_to_existing_segment' => 'Adaugă la segmentul existent',

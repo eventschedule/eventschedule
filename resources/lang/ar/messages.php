@@ -1655,6 +1655,7 @@ return [
     'confirm_import' => 'تأكيد الاستيراد',
     'emails_imported' => 'تم استيراد :count بريد إلكتروني',
     'no_valid_emails' => 'لم يتم العثور على عناوين بريد إلكتروني صالحة',
+    'emails_already_in_segment' => 'جميع عناوين البريد الإلكتروني موجودة بالفعل في هذا القسم',
     'row_count' => 'إجمالي الصفوف',
     'create_new_segment' => 'إنشاء شريحة جديدة',
     'add_to_existing_segment' => 'إضافة إلى شريحة موجودة',

@@ -1153,7 +1153,7 @@ class NewsletterController extends Controller
                 ->firstOrFail();
         }
 
-        $imported = DB::transaction(function () use ($segment, $validated, $role) {
+        $result = DB::transaction(function () use ($segment, $validated, $role) {
             $existingEmails = $segment->segmentUsers()
                 ->pluck('email')
                 ->map(fn ($e) => strtolower($e))
@@ -1165,10 +1165,13 @@ class NewsletterController extends Controller
                 ->whereIn('user_id', $existingUsers->pluck('id'))->pluck('user_id')->flip();
 
             $imported = 0;
+            $duplicates = 0;
             $seen = [];
             foreach ($validated['entries'] as $entry) {
                 $email = strtolower(trim($entry['email']));
                 if (in_array($email, $seen) || in_array($email, $existingEmails)) {
+                    $duplicates++;
+
                     continue;
                 }
                 $seen[] = $email;
@@ -1198,15 +1201,19 @@ class NewsletterController extends Controller
                 $imported++;
             }
 
-            return $imported;
+            return ['imported' => $imported, 'duplicates' => $duplicates];
         });
 
-        if ($imported === 0) {
-            return back()->with('error', __('messages.no_valid_emails'));
+        if ($result['imported'] === 0) {
+            $message = $result['duplicates'] > 0
+                ? __('messages.emails_already_in_segment')
+                : __('messages.no_valid_emails');
+
+            return back()->with('error', $message);
         }
 
         return redirect()->route('newsletter.segments', $this->roleIdParam($role))
-            ->with('status', __('messages.emails_imported', ['count' => $imported]));
+            ->with('status', __('messages.emails_imported', ['count' => $result['imported']]));
     }
 
     // ── Newsletter Templates ────────────────────────────────────────

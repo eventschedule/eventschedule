@@ -1663,6 +1663,7 @@ return [
     'confirm_import' => 'Conferma importazione',
     'emails_imported' => ':count email importate',
     'no_valid_emails' => 'Nessun indirizzo email valido trovato',
+    'emails_already_in_segment' => 'Tutti gli indirizzi email esistono già in questo segmento',
     'row_count' => 'Righe totali',
     'create_new_segment' => 'Crea nuovo segmento',
     'add_to_existing_segment' => 'Aggiungi a segmento esistente',

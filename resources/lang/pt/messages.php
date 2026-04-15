@@ -1662,6 +1662,7 @@ return [
     'confirm_import' => 'Confirmar importação',
     'emails_imported' => ':count e-mails importados',
     'no_valid_emails' => 'Nenhum endereço de e-mail válido encontrado',
+    'emails_already_in_segment' => 'Todos os endereços de e-mail já existem neste segmento',
     'row_count' => 'Total de linhas',
     'create_new_segment' => 'Criar novo segmento',
     'add_to_existing_segment' => 'Adicionar a segmento existente',

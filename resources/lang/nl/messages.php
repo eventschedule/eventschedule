@@ -1661,6 +1661,7 @@ return [
     'confirm_import' => 'Import bevestigen',
     'emails_imported' => ':count e-mails geïmporteerd',
     'no_valid_emails' => 'Geen geldige e-mailadressen gevonden',
+    'emails_already_in_segment' => 'Alle e-mailadressen bestaan al in dit segment',
     'row_count' => 'Totaal rijen',
     'create_new_segment' => 'Nieuw segment aanmaken',
     'add_to_existing_segment' => 'Toevoegen aan bestaand segment',
