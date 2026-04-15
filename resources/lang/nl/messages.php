@@ -2368,6 +2368,7 @@ return [
     'ip_address' => 'IP-adres',
     'no_audit_log_entries' => 'Geen audit-logvermeldingen gevonden.',
     'search_audit_log' => 'Actie, IP, metadata...',
+    'search_action_or_details' => 'Actie, details...',
     'total_entries' => 'Totaal vermeldingen',
     'entries_today' => 'Vermeldingen vandaag',
     'failed_auth_today' => 'Mislukte authenticaties vandaag',

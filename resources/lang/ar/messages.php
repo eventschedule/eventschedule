@@ -2371,6 +2371,7 @@ return [
     'ip_address' => 'عنوان IP',
     'no_audit_log_entries' => 'لم يتم العثور على سجلات تدقيق.',
     'search_audit_log' => 'إجراء، IP، بيانات وصفية...',
+    'search_action_or_details' => 'إجراء، تفاصيل...',
     'total_entries' => 'إجمالي السجلات',
     'entries_today' => 'سجلات اليوم',
     'failed_auth_today' => 'محاولات المصادقة الفاشلة اليوم',

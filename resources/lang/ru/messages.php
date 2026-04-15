@@ -2389,6 +2389,7 @@ return [
     'ip_address' => 'IP-адрес',
     'no_audit_log_entries' => 'Записи в журнале аудита не найдены.',
     'search_audit_log' => 'Действие, IP, метаданные...',
+    'search_action_or_details' => 'Действие, подробности...',
     'total_entries' => 'Всего записей',
     'entries_today' => 'Записей сегодня',
     'failed_auth_today' => 'Неудачных авторизаций сегодня',

@@ -2370,6 +2370,7 @@ return [
     'ip_address' => 'Indirizzo IP',
     'no_audit_log_entries' => 'Nessuna voce nel registro di audit trovata.',
     'search_audit_log' => 'Azione, IP, metadati...',
+    'search_action_or_details' => 'Azione, dettagli...',
     'total_entries' => 'Voci totali',
     'entries_today' => 'Voci oggi',
     'failed_auth_today' => 'Autenticazioni fallite oggi',

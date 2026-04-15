@@ -2374,6 +2374,7 @@ return [
     'ip_address' => 'IP-Adresse',
     'no_audit_log_entries' => 'Keine Audit-Log-Einträge gefunden.',
     'search_audit_log' => 'Aktion, IP, Metadaten...',
+    'search_action_or_details' => 'Aktion, Details...',
     'total_entries' => 'Einträge gesamt',
     'entries_today' => 'Einträge heute',
     'failed_auth_today' => 'Fehlgeschlagene Authentifizierungen heute',

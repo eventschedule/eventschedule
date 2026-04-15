@@ -2363,6 +2363,7 @@ return [
     'ip_address' => 'כתובת IP',
     'no_audit_log_entries' => 'לא נמצאו רשומות יומן ביקורת.',
     'search_audit_log' => 'פעולה, IP, מטא-נתונים...',
+    'search_action_or_details' => 'פעולה, פרטים...',
     'total_entries' => 'סה"כ רשומות',
     'entries_today' => 'רשומות היום',
     'failed_auth_today' => 'אימותים שנכשלו היום',

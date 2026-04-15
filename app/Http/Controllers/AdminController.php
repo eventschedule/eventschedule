@@ -2127,7 +2127,7 @@ class AdminController extends Controller
 
         $logs = $query->paginate(50)->withQueryString();
 
-        $categories = ['auth', 'profile', 'api', 'schedule', 'event', 'sale', 'subscription', 'boost', 'webhook', 'google_calendar', 'admin', 'stripe'];
+        $categories = ['admin', 'api', 'auth', 'boost', 'event', 'google_calendar', 'profile', 'sale', 'schedule', 'stripe', 'subscription', 'webhook'];
 
         return view('admin.audit-log', compact('logs', 'categories', 'totalEntries', 'entriesToday', 'failedAuthToday', 'uniqueIpsToday', 'sortBy', 'sortDir'));
     }

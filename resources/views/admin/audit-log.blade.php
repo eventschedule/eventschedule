@@ -64,7 +64,14 @@
                         <select name="category" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
                             <option value="">@lang('messages.all')</option>
                             @foreach ($categories as $cat)
-                                <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ ucfirst($cat) }}</option>
+                                @php
+                                    $catLabel = match($cat) {
+                                        'api' => 'API',
+                                        'google_calendar' => 'Google Calendar',
+                                        default => ucfirst($cat),
+                                    };
+                                @endphp
+                                <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ $catLabel }}</option>
                             @endforeach
                         </select>
                     </div>

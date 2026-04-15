@@ -2369,6 +2369,7 @@ return [
     'ip_address' => 'Endereço IP',
     'no_audit_log_entries' => 'Nenhuma entrada no registro de auditoria encontrada.',
     'search_audit_log' => 'Ação, IP, metadados...',
+    'search_action_or_details' => 'Ação, detalhes...',
     'total_entries' => 'Total de entradas',
     'entries_today' => 'Entradas hoje',
     'failed_auth_today' => 'Autenticações falhadas hoje',

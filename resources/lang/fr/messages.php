@@ -2373,6 +2373,7 @@ return [
     'ip_address' => 'Adresse IP',
     'no_audit_log_entries' => 'Aucune entrée de journal d\'audit trouvée.',
     'search_audit_log' => 'Action, IP, métadonnées...',
+    'search_action_or_details' => 'Action, détails...',
     'total_entries' => 'Total des entrées',
     'entries_today' => 'Entrées aujourd\'hui',
     'failed_auth_today' => 'Échecs d\'authentification aujourd\'hui',

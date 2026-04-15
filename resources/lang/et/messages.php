@@ -2386,6 +2386,7 @@ return [
     'ip_address' => 'IP-aadress',
     'no_audit_log_entries' => 'Auditilogist ei leitud kirjeid.',
     'search_audit_log' => 'Tegevus, IP, metaandmed...',
+    'search_action_or_details' => 'Tegevus, üksikasjad...',
     'total_entries' => 'Kirjeid kokku',
     'entries_today' => 'Tänased kirjed',
     'failed_auth_today' => 'Tänased ebaõnnestunud autentimised',

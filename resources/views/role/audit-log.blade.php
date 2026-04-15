@@ -16,7 +16,7 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.category') }}</label>
                         <select name="category" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
                             <option value="">{{ __('messages.all') }}</option>
-                            @foreach (['schedule', 'event', 'sale', 'subscription', 'boost'] as $cat)
+                            @foreach (['boost', 'event', 'sale', 'schedule', 'subscription'] as $cat)
                                 <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ ucfirst($cat) }}</option>
                             @endforeach
                         </select>
@@ -31,7 +31,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.search') }}</label>
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search_audit_log') }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search_action_or_details') }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
                     </div>
                 </div>
                 <div class="flex items-end gap-2 shrink-0">

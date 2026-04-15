@@ -2347,6 +2347,7 @@ return [
     'ip_address' => 'IP Address',
     'no_audit_log_entries' => 'No audit log entries found.',
     'search_audit_log' => 'Action, IP, metadata...',
+    'search_action_or_details' => 'Action, details...',
     'total_entries' => 'Total Entries',
     'entries_today' => 'Entries Today',
     'failed_auth_today' => 'Failed Auth Today',

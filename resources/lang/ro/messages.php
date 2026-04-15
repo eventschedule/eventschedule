@@ -2348,6 +2348,7 @@ return [
     'ip_address' => 'Adresă IP',
     'no_audit_log_entries' => 'Nicio intrare în jurnalul de audit găsită.',
     'search_audit_log' => 'Acțiune, IP, metadate...',
+    'search_action_or_details' => 'Acțiune, detalii...',
     'total_entries' => 'Total Intrări',
     'entries_today' => 'Intrări Azi',
     'failed_auth_today' => 'Autentificări Eșuate Azi',

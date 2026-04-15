@@ -2370,6 +2370,7 @@ return [
     'ip_address' => 'Dirección IP',
     'no_audit_log_entries' => 'No se encontraron entradas en el registro de auditoría.',
     'search_audit_log' => 'Acción, IP, metadatos...',
+    'search_action_or_details' => 'Acción, detalles...',
     'total_entries' => 'Total de entradas',
     'entries_today' => 'Entradas hoy',
     'failed_auth_today' => 'Autenticaciones fallidas hoy',
