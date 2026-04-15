@@ -321,6 +321,16 @@
                                     {{ __('messages.embed_schedule') }}
                                 </div>
                             </a>
+                            @if (auth()->user()->isEditor($role->subdomain))
+                            <a href="{{ route('role.audit_log', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                                <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+                                </svg>
+                                <div>
+                                    {{ __('messages.audit_log') }}
+                                </div>
+                            </a>
+                            @endif
                             @if ($role->exists && $role->user_id == auth()->user()->id && !is_demo_role($role))
                             <div class="py-2" role="none">
                                 <div class="border-t border-gray-100 dark:border-gray-700"></div>

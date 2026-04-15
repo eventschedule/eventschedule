@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Webhook;
 use App\Models\WebhookDelivery;
+use App\Services\AuditService;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -38,12 +39,14 @@ class WebhookSettingsController extends Controller
             $eventTypes = null;
         }
 
-        auth()->user()->webhooks()->create([
+        $webhook = auth()->user()->webhooks()->create([
             'url' => $url,
             'secret' => $secret,
             'description' => $request->description,
             'event_types' => $eventTypes,
         ]);
+
+        AuditService::log(AuditService::WEBHOOK_CREATE, auth()->id(), 'Webhook', $webhook->id, null, null, $url);
 
         return redirect()->to(route('profile.edit').'#section-webhooks')
             ->with('message', __('messages.webhook_created'))
@@ -89,6 +92,8 @@ class WebhookSettingsController extends Controller
             'event_types' => $eventTypes,
         ]);
 
+        AuditService::log(AuditService::WEBHOOK_UPDATE, auth()->id(), 'Webhook', $webhook->id, null, null, $url);
+
         return redirect()->to(route('profile.edit').'#section-webhooks')
             ->with('message', __('messages.webhook_updated'));
     }
@@ -106,7 +111,11 @@ class WebhookSettingsController extends Controller
             abort(403);
         }
 
+        $webhookId = $webhook->id;
+        $webhookUrl = $webhook->url;
         $webhook->delete();
+
+        AuditService::log(AuditService::WEBHOOK_DELETE, auth()->id(), 'Webhook', $webhookId, null, null, $webhookUrl);
 
         return redirect()->to(route('profile.edit').'#section-webhooks')
             ->with('message', __('messages.webhook_deleted'));
@@ -127,6 +136,9 @@ class WebhookSettingsController extends Controller
 
         $webhook->update(['is_active' => ! $webhook->is_active]);
 
+        AuditService::log(AuditService::WEBHOOK_TOGGLE, auth()->id(), 'Webhook', $webhook->id,
+            null, ['is_active' => $webhook->is_active], $webhook->url);
+
         return redirect()->to(route('profile.edit').'#section-webhooks')
             ->with('message', $webhook->is_active ? __('messages.webhook_enabled') : __('messages.webhook_disabled'));
     }
@@ -146,6 +158,8 @@ class WebhookSettingsController extends Controller
 
         $secret = bin2hex(random_bytes(32));
         $webhook->update(['secret' => $secret]);
+
+        AuditService::log(AuditService::WEBHOOK_REGENERATE_SECRET, auth()->id(), 'Webhook', $webhook->id, null, null, $webhook->url);
 
         return redirect()->to(route('profile.edit').'#section-webhooks')
             ->with('message', __('messages.webhook_secret_regenerated'))

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\AuditService;
 use App\Services\GoogleCalendarService;
 use App\Utils\UrlUtils;
 use Illuminate\Http\RedirectResponse;
@@ -82,6 +83,8 @@ class GoogleCalendarController extends Controller
                 'google_refresh_token' => $token['refresh_token'] ?? null,
                 'google_token_expires_at' => now()->addSeconds($token['expires_in']),
             ]);
+
+            AuditService::log(AuditService::GOOGLE_CALENDAR_CONNECT, $user->id, 'User', $user->id);
 
             return redirect()->to(route('profile.edit').'#section-google-calendar')
                 ->with('message', 'Google Calendar connected successfully!');
@@ -165,6 +168,8 @@ class GoogleCalendarController extends Controller
             'google_refresh_token' => null,
             'google_token_expires_at' => null,
         ]);
+
+        AuditService::log(AuditService::GOOGLE_CALENDAR_DISCONNECT, $user->id, 'User', $user->id);
 
         return redirect()->to(route('profile.edit').'#section-google-calendar')
             ->with('message', 'Google Calendar disconnected successfully.');
@@ -389,6 +394,8 @@ class GoogleCalendarController extends Controller
                     break;
             }
 
+            AuditService::log(AuditService::GOOGLE_CALENDAR_SYNC, $user->id, 'Role', $role->id, null, null, $syncDirection);
+
             return response()->json([
                 'message' => __('messages.events_synced'),
                 'sync_direction' => $syncDirection,
@@ -440,6 +447,8 @@ class GoogleCalendarController extends Controller
                 // Enable sync
                 $roleUser->update(['google_calendar_id' => $googleCalendarId]);
 
+                AuditService::log(AuditService::GOOGLE_CALENDAR_MEMBER_SYNC, $user->id, 'Role', $role->id, null, null, 'enabled');
+
                 return response()->json([
                     'message' => __('messages.member_sync_enabled'),
                 ]);
@@ -482,6 +491,8 @@ class GoogleCalendarController extends Controller
                 }
 
                 $roleUser->update(['google_calendar_id' => null]);
+
+                AuditService::log(AuditService::GOOGLE_CALENDAR_MEMBER_SYNC, $user->id, 'Role', $role->id, null, null, 'disabled');
 
                 return response()->json([
                     'message' => __('messages.member_sync_disabled'),

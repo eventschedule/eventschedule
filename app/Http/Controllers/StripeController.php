@@ -173,6 +173,9 @@ class StripeController extends Controller
                             $sale->transaction_reference = $paymentIntent->id;
                             $sale->save();
 
+                            AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                                ['status' => 'unpaid'], ['status' => 'amount_mismatch'], 'stripe_amount_mismatch:event_id:'.$sale->event_id);
+
                             return;
                         }
 
@@ -180,6 +183,9 @@ class StripeController extends Controller
                         $sale->status = 'paid';
                         $sale->transaction_reference = $paymentIntent->id;
                         $sale->save();
+
+                        AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                            ['status' => 'unpaid'], ['status' => 'paid'], 'stripe:event_id:'.$sale->event_id);
 
                         AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
                         if ($sale->group_id && $sale->isPrimarySale()) {
@@ -252,6 +258,9 @@ class StripeController extends Controller
                                 $sale->transaction_reference = $session->payment_intent;
                                 $sale->save();
 
+                                AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                                    ['status' => 'unpaid'], ['status' => 'amount_mismatch'], 'stripe_checkout_amount_mismatch:event_id:'.$sale->event_id);
+
                                 return;
                             }
 
@@ -259,6 +268,9 @@ class StripeController extends Controller
                             $sale->status = 'paid';
                             $sale->transaction_reference = $session->payment_intent;
                             $sale->save();
+
+                            AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                                ['status' => 'unpaid'], ['status' => 'paid'], 'stripe_checkout:event_id:'.$sale->event_id);
 
                             UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
 

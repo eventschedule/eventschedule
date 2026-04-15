@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Sale;
+use App\Services\AuditService;
 use Illuminate\Console\Command;
 
 class ReleaseTickets extends Command
@@ -48,6 +49,9 @@ class ReleaseTickets extends Command
                 $sale->status = 'expired';
                 $sale->save();
             });
+
+            AuditService::log(AuditService::SALE_EXPIRED, null, 'Sale', $sale->id,
+                ['status' => 'unpaid'], ['status' => 'expired'], 'auto_expire:event_id:'.$sale->event_id);
         }
     }
 }

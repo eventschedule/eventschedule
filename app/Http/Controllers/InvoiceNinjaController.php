@@ -6,6 +6,7 @@ use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
 use App\Models\Sale;
 use App\Models\User;
+use App\Services\AuditService;
 use App\Services\WebhookService;
 use App\Utils\InvoiceNinja;
 use App\Utils\UrlUtils;
@@ -122,12 +123,18 @@ class InvoiceNinjaController extends Controller
                 $sale->transaction_reference = $invoiceId;
                 $sale->save();
 
+                AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                    ['status' => 'unpaid'], ['status' => 'amount_mismatch'], 'invoiceninja_amount_mismatch:event_id:'.$sale->event_id);
+
                 return;
             }
 
             $sale->payment_amount = $webhookAmount;
             $sale->status = 'paid';
             $sale->save();
+
+            AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                ['status' => 'unpaid'], ['status' => 'paid'], 'invoiceninja:event_id:'.$sale->event_id);
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
             if ($sale->group_id && $sale->isPrimarySale()) {
@@ -179,6 +186,9 @@ class InvoiceNinjaController extends Controller
 
             $sale->status = 'paid';
             $sale->save();
+
+            AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                ['status' => 'unpaid'], ['status' => 'paid'], 'invoiceninja_purchase:event_id:'.$sale->event_id);
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
             if ($sale->group_id && $sale->isPrimarySale()) {
@@ -336,6 +346,9 @@ class InvoiceNinjaController extends Controller
 
             $sale->status = 'paid';
             $sale->save();
+
+            AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                ['status' => 'unpaid'], ['status' => 'paid'], 'invoiceninja_event_purchase:event_id:'.$sale->event_id);
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
             if ($sale->group_id && $sale->isPrimarySale()) {

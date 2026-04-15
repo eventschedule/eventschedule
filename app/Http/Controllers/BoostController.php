@@ -8,6 +8,7 @@ use App\Models\BoostBillingRecord;
 use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\Role;
+use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\MetaAdsService;
 use App\Utils\UrlUtils;
@@ -511,6 +512,8 @@ class BoostController extends Controller
         // Update status and dispatch campaign creation job
         $campaign->update(['status' => 'active']);
 
+        AuditService::log(AuditService::BOOST_CREATE, auth()->id(), 'BoostCampaign', $campaign->id, null, null, 'role_id:'.$campaign->role_id);
+
         CreateBoostCampaign::dispatch($campaign);
 
         $url = route('boost.show', ['hash' => $campaign->hashedId()]);
@@ -570,6 +573,8 @@ class BoostController extends Controller
                         $campaign->update(['status' => 'paused', 'meta_status' => 'PAUSED']);
                     }
                 });
+
+                AuditService::log(AuditService::BOOST_PAUSE, auth()->id(), 'BoostCampaign', $campaign->id, null, null, 'role_id:'.$campaign->role_id);
             }
 
             return back()->with($success ? 'success' : 'error',
@@ -585,6 +590,8 @@ class BoostController extends Controller
                         $campaign->update(['status' => 'active', 'meta_status' => 'ACTIVE', 'budget_alert_sent_at' => null]);
                     }
                 });
+
+                AuditService::log(AuditService::BOOST_RESUME, auth()->id(), 'BoostCampaign', $campaign->id, null, null, 'role_id:'.$campaign->role_id);
             }
 
             return back()->with($success ? 'success' : 'error',
@@ -629,6 +636,8 @@ class BoostController extends Controller
         if (! $cancelled) {
             return back()->with('error', __('messages.boost_cannot_cancel'));
         }
+
+        AuditService::log(AuditService::BOOST_CANCEL, auth()->id(), 'BoostCampaign', $campaign->id, null, null, 'role_id:'.$campaign->role_id);
 
         if ($campaign->meta_campaign_id) {
             $metaService = $this->getMetaService();

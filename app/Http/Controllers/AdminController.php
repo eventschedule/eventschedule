@@ -2088,7 +2088,13 @@ class AdminController extends Controller
         $failedAuthToday = AuditLog::where('action', 'like', 'auth.%fail%')->whereDate('created_at', today())->count();
         $uniqueIpsToday = AuditLog::whereDate('created_at', today())->distinct('ip_address')->count('ip_address');
 
-        $query = AuditLog::with('user')->orderBy('created_at', 'desc');
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDir = strtolower($request->input('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        if (! in_array($sortBy, ['created_at', 'action', 'ip_address', 'metadata', 'user_id'])) {
+            $sortBy = 'created_at';
+        }
+
+        $query = AuditLog::with('user')->orderBy($sortBy, $sortDir);
 
         // Filter by action category
         if ($request->filled('category')) {
@@ -2121,9 +2127,9 @@ class AdminController extends Controller
 
         $logs = $query->paginate(50)->withQueryString();
 
-        $categories = ['auth', 'profile', 'api', 'schedule', 'event', 'sale', 'admin', 'stripe'];
+        $categories = ['auth', 'profile', 'api', 'schedule', 'event', 'sale', 'subscription', 'boost', 'webhook', 'google_calendar', 'admin', 'stripe'];
 
-        return view('admin.audit-log', compact('logs', 'categories', 'totalEntries', 'entriesToday', 'failedAuthToday', 'uniqueIpsToday'));
+        return view('admin.audit-log', compact('logs', 'categories', 'totalEntries', 'entriesToday', 'failedAuthToday', 'uniqueIpsToday', 'sortBy', 'sortDir'));
     }
 
     /**

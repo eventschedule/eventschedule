@@ -15,6 +15,7 @@ use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsReferrersDaily;
 use App\Models\AnalyticsSocialClicksDaily;
 use App\Models\AnalyticsUtmDaily;
+use App\Models\AuditLog;
 use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\PageView;
@@ -1263,6 +1264,94 @@ class RoleController extends Controller
         }
 
         return $this->buildCalendarResponse($events, collect(), false, $role, $subdomain, (int) $month, (int) $year, $timezone, $firstDayOfWeek);
+    }
+
+    public function auditLog(Request $request, $subdomain)
+    {
+        if (! auth()->user()->isEditor($subdomain)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $request->validate([
+            'from' => 'nullable|date',
+            'to' => 'nullable|date',
+            'category' => 'nullable|string',
+            'search' => 'nullable|string|max:200',
+        ]);
+
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDir = strtolower($request->input('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        if (! in_array($sortBy, ['created_at', 'action', 'ip_address', 'metadata', 'user_id'])) {
+            $sortBy = 'created_at';
+        }
+
+        $eventIds = $role->events()->pluck('events.id');
+
+        $query = AuditLog::with('user')
+            ->where(function ($q) use ($eventIds, $role) {
+                // Schedule and subscription entries for this role
+                $q->where(function ($sq) use ($role) {
+                    $sq->where(function ($pq) {
+                        $pq->where('action', 'like', 'schedule.%')
+                            ->orWhere('action', 'like', 'subscription.%');
+                    })
+                        ->where('model_type', 'Role')
+                        ->where('model_id', $role->id);
+                });
+
+                // Boost entries for this role's campaigns
+                $q->orWhere(function ($sq) use ($role) {
+                    $sq->where('action', 'like', 'boost.%')
+                        ->where('metadata', 'like', '%role_id:'.$role->id);
+                });
+
+                if ($eventIds->isNotEmpty()) {
+                    // Event entries for this schedule's events
+                    $q->orWhere(function ($sq) use ($eventIds) {
+                        $sq->where('action', 'like', 'event.%')
+                            ->where('model_type', 'Event')
+                            ->whereIn('model_id', $eventIds);
+                    });
+
+                    // Sale entries scoped by event_id in metadata
+                    $q->orWhere(function ($sq) use ($eventIds) {
+                        $sq->where('action', 'like', 'sale.%')
+                            ->where(function ($ssq) use ($eventIds) {
+                                foreach ($eventIds as $eventId) {
+                                    $ssq->orWhere('metadata', 'like', '%event_id:'.$eventId);
+                                }
+                            });
+                    });
+                }
+            })
+            ->orderBy($sortBy, $sortDir);
+
+        if ($request->filled('category')) {
+            $category = str_replace(['%', '_'], ['\\%', '\\_'], $request->input('category'));
+            $query->where('action', 'like', $category.'.%');
+        }
+
+        if ($request->filled('from')) {
+            $query->where('created_at', '>=', $request->input('from'));
+        }
+        if ($request->filled('to')) {
+            $query->where('created_at', '<=', Carbon::parse($request->input('to'))->endOfDay());
+        }
+
+        if ($request->filled('search')) {
+            $search = str_replace(['%', '_'], ['\\%', '\\_'], $request->input('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('action', 'like', "%{$search}%")
+                    ->orWhere('metadata', 'like', "%{$search}%")
+                    ->orWhere('ip_address', 'like', "%{$search}%");
+            });
+        }
+
+        $logs = $query->paginate(50)->withQueryString();
+
+        return view('role.audit-log', compact('role', 'logs', 'sortBy', 'sortDir'));
     }
 
     public function viewAdmin(Request $request, $subdomain, $tab = 'schedule')

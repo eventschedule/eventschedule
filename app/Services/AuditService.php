@@ -68,9 +68,15 @@ class AuditService
     // Sales actions
     const SALE_CHECKOUT = 'sale.checkout';
 
+    const SALE_PAID = 'sale.paid';
+
+    const SALE_CANCEL = 'sale.cancel';
+
     const SALE_REFUND = 'sale.refund';
 
     const SALE_CHECKIN = 'sale.checkin';
+
+    const SALE_EXPIRED = 'sale.expired';
 
     // Admin actions
     const ADMIN_PLAN_UPDATE = 'admin.plan_update';
@@ -86,6 +92,44 @@ class AuditService
     const ADMIN_BOOST_CREDIT = 'admin.boost_credit';
 
     const ADMIN_BOOST_LIMIT = 'admin.boost_limit';
+
+    // Subscription actions
+    const SUBSCRIPTION_CREATE = 'subscription.create';
+
+    const SUBSCRIPTION_SWAP = 'subscription.swap';
+
+    const SUBSCRIPTION_CANCEL = 'subscription.cancel';
+
+    const SUBSCRIPTION_RESUME = 'subscription.resume';
+
+    // Boost actions
+    const BOOST_CREATE = 'boost.create';
+
+    const BOOST_PAUSE = 'boost.pause';
+
+    const BOOST_RESUME = 'boost.resume';
+
+    const BOOST_CANCEL = 'boost.cancel';
+
+    // Webhook actions
+    const WEBHOOK_CREATE = 'webhook.create';
+
+    const WEBHOOK_UPDATE = 'webhook.update';
+
+    const WEBHOOK_DELETE = 'webhook.delete';
+
+    const WEBHOOK_TOGGLE = 'webhook.toggle';
+
+    const WEBHOOK_REGENERATE_SECRET = 'webhook.regenerate_secret';
+
+    // Google Calendar actions
+    const GOOGLE_CALENDAR_CONNECT = 'google_calendar.connect';
+
+    const GOOGLE_CALENDAR_DISCONNECT = 'google_calendar.disconnect';
+
+    const GOOGLE_CALENDAR_SYNC = 'google_calendar.sync';
+
+    const GOOGLE_CALENDAR_MEMBER_SYNC = 'google_calendar.member_sync';
 
     // Payment actions
     const STRIPE_LINK = 'stripe.link';

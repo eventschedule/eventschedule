@@ -2006,6 +2006,11 @@ class TicketController extends Controller
             return true;
         });
 
+        if ($cancelled) {
+            AuditService::log(AuditService::SALE_CANCEL, $sale->user_id, 'Sale', $sale->id,
+                ['status' => 'unpaid'], ['status' => 'cancelled'], 'guest_cancel:event_id:'.$sale->event_id);
+        }
+
         $event = $sale->event;
         $cancelRedirectUrl = $event->getGuestUrl($subdomain, $sale->event_date).'?tickets=true';
 
@@ -2035,6 +2040,9 @@ class TicketController extends Controller
             $sale->status = 'paid';
             $sale->transaction_reference = __('messages.manual_payment');
             $sale->save();
+
+            AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                ['status' => 'unpaid'], ['status' => 'paid'], 'payment_url:event_id:'.$sale->event_id);
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
             if ($sale->group_id && $sale->isPrimarySale()) {
@@ -2076,14 +2084,21 @@ class TicketController extends Controller
             abort(403, 'Invalid secret');
         }
 
-        DB::transaction(function () use ($sale) {
+        $cancelled = DB::transaction(function () use ($sale) {
             $sale = Sale::lockForUpdate()->find($sale->id);
             if ($sale->status !== 'unpaid') {
-                return;
+                return false;
             }
             $sale->status = 'cancelled';
             $sale->save();
+
+            return true;
         });
+
+        if ($cancelled) {
+            AuditService::log(AuditService::SALE_CANCEL, $sale->user_id, 'Sale', $sale->id,
+                ['status' => 'unpaid'], ['status' => 'cancelled'], 'payment_url_cancel:event_id:'.$sale->event_id);
+        }
 
         $cancelUrl = $event->getGuestUrl($sale->subdomain, $sale->event_date).'?tickets=true';
 
@@ -2431,6 +2446,9 @@ class TicketController extends Controller
         $event = $sale->event;
 
         if ($cancelled) {
+            AuditService::log(AuditService::SALE_CANCEL, $sale->user_id, 'Sale', $sale->id,
+                ['status' => 'paid'], ['status' => 'cancelled'], 'rsvp_cancel:event_id:'.$sale->event_id);
+
             WebhookService::dispatch('sale.cancelled', $sale);
             if ($sale->group_id && $sale->isPrimarySale()) {
                 foreach (Sale::where('group_id', $sale->id)->where('id', '!=', $sale->id)->get() as $gs) {

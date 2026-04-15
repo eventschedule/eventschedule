@@ -57,29 +57,31 @@
 
         {{-- Filters --}}
         <form method="GET" action="{{ route('admin.audit_log') }}" class="ap-card rounded-xl shadow p-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.category')</label>
-                    <select name="category" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
-                        <option value="">@lang('messages.all')</option>
-                        @foreach ($categories as $cat)
-                            <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ ucfirst($cat) }}</option>
-                        @endforeach
-                    </select>
+            <div class="flex flex-col lg:flex-row gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-1 min-w-0">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.category')</label>
+                        <select name="category" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
+                            <option value="">@lang('messages.all')</option>
+                            @foreach ($categories as $cat)
+                                <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ ucfirst($cat) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.from')</label>
+                        <input type="text" name="from" value="{{ request('from') }}" class="datepicker-filter w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm" placeholder="@lang('messages.from')" autocomplete="off">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.to')</label>
+                        <input type="text" name="to" value="{{ request('to') }}" class="datepicker-filter w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm" placeholder="@lang('messages.to')" autocomplete="off">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.search')</label>
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search_audit_log') }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.from')</label>
-                    <input type="date" name="from" value="{{ request('from') }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.to')</label>
-                    <input type="date" name="to" value="{{ request('to') }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.search')</label>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search_audit_log') }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
-                </div>
-                <div class="flex items-end gap-2">
+                <div class="flex items-end gap-2 shrink-0">
                     <x-brand-button type="submit">
                         @lang('messages.filter')
                     </x-brand-button>
@@ -96,11 +98,11 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-900">
                         <tr>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">@lang('messages.time')</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">@lang('messages.user')</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">@lang('messages.action')</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">@lang('messages.ip_address')</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">@lang('messages.details')</th>
+                            <x-sortable-header column="created_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">@lang('messages.time')</x-sortable-header>
+                            <x-sortable-header column="user_id" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">@lang('messages.user')</x-sortable-header>
+                            <x-sortable-header column="action" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">@lang('messages.action')</x-sortable-header>
+                            <x-sortable-header column="ip_address" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">@lang('messages.ip_address')</x-sortable-header>
+                            <x-sortable-header column="metadata" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">@lang('messages.details')</x-sortable-header>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -165,5 +167,33 @@
             @endif
         </div>
     </div>
+
+    <script {!! nonce_attr() !!}>
+        document.addEventListener('DOMContentLoaded', function() {
+            var fpLocale = window.flatpickrLocales ? window.flatpickrLocales[window.appLocale] : null;
+            var localeConfig = fpLocale ? { locale: fpLocale } : {};
+            document.querySelectorAll('.datepicker-filter').forEach(function(el) {
+                flatpickr(el, Object.assign({
+                    allowInput: true,
+                    enableTime: false,
+                    altInput: true,
+                    altFormat: "M j, Y",
+                    dateFormat: "Y-m-d",
+                }, localeConfig));
+            });
+        });
+        document.addEventListener('click', function(e) {
+            var header = e.target.closest('[data-sort]');
+            if (header) {
+                var url = new URL(window.location.href);
+                var currentSort = url.searchParams.get('sort_by') || 'created_at';
+                var currentDir = url.searchParams.get('sort_dir') || 'desc';
+                var sortBy = header.getAttribute('data-sort');
+                url.searchParams.set('sort_by', sortBy);
+                url.searchParams.set('sort_dir', currentSort === sortBy && currentDir === 'asc' ? 'desc' : 'asc');
+                window.location.href = url.toString();
+            }
+        });
+    </script>
 
 </x-app-admin-layout>
