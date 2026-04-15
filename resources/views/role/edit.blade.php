@@ -824,6 +824,8 @@
         @endif
     </div>
 
+    @php $scheduleUrl = $role->custom_domain ?: $role->getGuestUrl(); @endphp
+
     <form method="post"
         action="{{ $role->exists ? route('role.update', ['subdomain' => $role->subdomain]) : route('role.store') }}"
         enctype="multipart/form-data"
@@ -1832,7 +1834,7 @@
                                                 <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ \App\Utils\UrlUtils::clean($link->url) }}</p>
                                             </a>
                                             @if ($linkPlatform !== 'website')
-                                            @php $vanityUrl = $role->getGuestUrl(true) . '/' . $linkPlatform; @endphp
+                                            @php $vanityUrl = $scheduleUrl . '/' . $linkPlatform; @endphp
                                             <div class="flex items-center gap-1.5 mt-1">
                                                 <p class="text-xs text-gray-400 dark:text-gray-500 truncate">{{ preg_replace('/^https?:\/\//', '', $vanityUrl) }}</p>
                                                 <button type="button" data-action="copy-vanity-url" class="flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-[var(--brand-blue)] transition-colors" data-url="{{ $vanityUrl }}" title="{{ __('messages.copy') }}">
@@ -2026,10 +2028,10 @@
                                             @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
                                             <div class="mb-4" id="group-url-display-{{ is_object($group) ? $group->id : $i }}">
                                                 <p class="text-sm text-gray-500 flex items-center gap-2">
-                                                    <x-link href="{{ $role->getGuestUrl(true) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank" class="min-w-0 break-all">
-                                                        {{ \App\Utils\UrlUtils::clean($role->getGuestUrl(true)) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}
+                                                    <x-link href="{{ $scheduleUrl }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank" class="min-w-0 break-all">
+                                                        {{ \App\Utils\UrlUtils::clean($scheduleUrl) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}
                                                     </x-link>
-                                                    <button type="button" data-action="copy-group-url" data-copy-url="{{ $role->getGuestUrl(true) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" class="flex-shrink-0 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
+                                                    <button type="button" data-action="copy-group-url" data-copy-url="{{ $scheduleUrl }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" class="flex-shrink-0 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
                                                         </svg>
@@ -2454,15 +2456,27 @@
                         <div class="mb-6" id="url-display">
                             <x-input-label :value="__('messages.schedule_url')" />
                             <p class="text-sm text-gray-500 flex items-center gap-2 mt-1">
-                                <x-link href="{{ $role->getGuestUrl(true) }}" target="_blank" class="min-w-0 break-all">
-                                    {{ \App\Utils\UrlUtils::clean($role->getGuestUrl(true)) }}
+                                <x-link href="{{ $scheduleUrl }}" target="_blank" class="min-w-0 break-all">
+                                    {{ \App\Utils\UrlUtils::clean($scheduleUrl) }}
                                 </x-link>
                                 <button type="button" data-action="copy-role-url" class="flex-shrink-0 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
                                     </svg>
                                 </button>
-                                </button>
+                                @if ($role->custom_domain && $role->custom_domain_mode === 'direct' && $role->custom_domain_status && $role->custom_domain_status !== 'active')
+                                    @if ($role->custom_domain_status === 'pending')
+                                        <span class="flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                                            <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                            {{ __('messages.domain_pending') }}
+                                        </span>
+                                    @elseif ($role->custom_domain_status === 'failed')
+                                        <span class="flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                            {{ __('messages.domain_failed') }}
+                                        </span>
+                                    @endif
+                                @endif
                             </p>
                             <x-secondary-button type="button" data-action="toggle-subdomain-edit" class="mt-3">
                                 {{ __('messages.edit') }}
@@ -3925,7 +3939,7 @@ function copyHostname(button) {
 }
 
 function copyRoleUrl(button) {
-    const url = '{{ $role->exists ? $role->getGuestUrl(true) : "" }}';
+    const url = '{{ $role->exists ? $scheduleUrl : "" }}';
     navigator.clipboard.writeText(url).then(() => {
         const originalHTML = button.innerHTML;
         button.innerHTML = `
@@ -6582,7 +6596,7 @@ document.addEventListener('DOMContentLoaded', function() {
             payment_links: JSON.parse(document.getElementById('payment_links_data').value || '[]')
         };
         var currentLinkType = '';
-        var guestUrl = @json($role->getGuestUrl(true));
+        var guestUrl = @json($scheduleUrl);
 
         // Helper: update hidden input and trigger unsaved changes warning
         function updateLinkInput(linkType) {

@@ -41,6 +41,17 @@
                                 if (event.exception.values[i].value && event.exception.values[i].value.indexOf('webkit.messageHandlers') !== -1) {
                                     return null;
                                 }
+                                if (event.exception.values[i].value && event.exception.values[i].value.indexOf('contentWindow') !== -1) {
+                                    return null;
+                                }
+                                if (event.exception.values[i].stacktrace && event.exception.values[i].stacktrace.frames) {
+                                    var frames = event.exception.values[i].stacktrace.frames;
+                                    for (var j = 0; j < frames.length; j++) {
+                                        if (frames[j].filename && frames[j].filename.indexOf('cloudflare-static') !== -1) {
+                                            return null;
+                                        }
+                                    }
+                                }
                             }
                         }
                         return event;
