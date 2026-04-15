@@ -783,7 +783,10 @@ class AdminController extends Controller
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
             ->where('subdomain', 'not like', 'demo-%');
 
-        $googleCalendarEnabled = (clone $baseRoleQuery)->whereNotNull('google_calendar_id')->count();
+        $googleCalendarEnabled = \App\Models\RoleUser::where('level', 'owner')
+            ->whereNotNull('google_calendar_id')
+            ->whereIn('role_id', (clone $baseRoleQuery)->select('id'))
+            ->count();
         $stripeConnected = (clone $baseRoleQuery)->whereHas('user', function ($q) {
             $q->whereNotNull('stripe_account_id');
         })->count();

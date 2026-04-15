@@ -122,11 +122,11 @@ class GoogleCalendarController extends Controller
     {
         $user = Auth::user();
 
-        // Clean up any active webhooks before disconnecting
+        // Clean up any active webhooks before disconnecting (owned roles only)
         try {
-            $roles = $user->roles()->whereNotNull('google_webhook_id')->get();
+            $ownedRoles = $user->owner()->whereNotNull('google_webhook_id')->get();
 
-            foreach ($roles as $role) {
+            foreach ($ownedRoles as $role) {
                 if ($role->google_webhook_id && $role->google_webhook_resource_id) {
                     // Ensure user has valid token before deleting webhook
                     if ($this->googleCalendarService->ensureValidToken($user)) {
@@ -141,17 +141,17 @@ class GoogleCalendarController extends Controller
                     ]);
                 }
             }
-            // Clear selected calendar and sync settings from all roles
-            $user->roles()->update([
-                'google_calendar_id' => null,
-                'sync_direction' => null,
-            ]);
+            // Clear sync direction on owned roles only
+            $user->owner()->update(['sync_direction' => null]);
 
-            // Clear Google event IDs from all event-role pivots
-            \DB::table('event_role')
-                ->whereIn('role_id', $user->roles()->pluck('roles.id'))
-                ->whereNotNull('google_event_id')
-                ->update(['google_event_id' => null]);
+            // Clear all calendar sync records for this user
+            \App\Models\CalendarSync::where('user_id', $user->id)->delete();
+
+            // Clear calendar settings for this user (all roles)
+            \DB::table('role_user')
+                ->where('user_id', $user->id)
+                ->whereNotNull('google_calendar_id')
+                ->update(['google_calendar_id' => null]);
         } catch (\Exception $e) {
             Log::warning('Failed to clean up webhooks during Google Calendar disconnect', [
                 'user_id' => $user->id,
@@ -235,14 +235,20 @@ class GoogleCalendarController extends Controller
                 return response()->json(['error' => 'Role not found'], 404);
             }
 
-            $googleEventId = $event->getGoogleEventIdForRole($role->id);
+            $sync = \App\Models\CalendarSync::where('user_id', $user->id)
+                ->where('event_id', $event->id)
+                ->where('role_id', $role->id)
+                ->first();
 
-            if ($googleEventId) {
-                $googleEvent = $this->googleCalendarService->updateEvent($event, $googleEventId, $role);
+            if ($sync?->google_event_id) {
+                $googleEvent = $this->googleCalendarService->updateEvent($event, $sync->google_event_id, $role);
             } else {
                 $googleEvent = $this->googleCalendarService->createEvent($event, $role);
                 if ($googleEvent) {
-                    $event->setGoogleEventIdForRole($role->id, $googleEvent->getId());
+                    \App\Models\CalendarSync::updateOrCreate(
+                        ['user_id' => $user->id, 'event_id' => $event->id, 'role_id' => $role->id],
+                        ['google_event_id' => $googleEvent->getId()]
+                    );
                 }
             }
 
@@ -295,16 +301,19 @@ class GoogleCalendarController extends Controller
                 return response()->json(['error' => 'Role not found'], 404);
             }
 
-            $googleEventId = $event->getGoogleEventIdForRole($role->id);
+            $sync = \App\Models\CalendarSync::where('user_id', $user->id)
+                ->where('event_id', $event->id)
+                ->where('role_id', $role->id)
+                ->first();
 
-            if ($googleEventId) {
+            if ($sync?->google_event_id) {
                 // Ensure user has valid token before deleting
                 if (! $this->googleCalendarService->ensureValidToken($user)) {
                     return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
                 }
 
-                $this->googleCalendarService->deleteEvent($googleEventId, $role->getGoogleCalendarId(), $role->id);
-                $event->setGoogleEventIdForRole($role->id, null);
+                $this->googleCalendarService->deleteEvent($sync->google_event_id, $role->getGoogleCalendarId(), $role->id);
+                $sync->delete();
             }
 
             return response()->json(['message' => 'Event removed from Google Calendar']);
@@ -395,6 +404,98 @@ class GoogleCalendarController extends Controller
             ]);
 
             return response()->json(['error' => 'Failed to sync events'], 500);
+        }
+    }
+
+    /**
+     * Enable or disable member calendar sync for the current user
+     */
+    public function memberSync(Request $request, $subdomain)
+    {
+        $user = Auth::user();
+
+        if (! $user->google_token) {
+            return response()->json(['error' => __('messages.google_calendar_not_connected')], 400);
+        }
+
+        try {
+            $role = \App\Models\Role::subdomain($subdomain)->firstOrFail();
+
+            // Must be a member but not the owner
+            if ($role->user_id == $user->id) {
+                return response()->json(['error' => __('messages.not_authorized')], 403);
+            }
+
+            $roleUser = \App\Models\RoleUser::where('user_id', $user->id)
+                ->where('role_id', $role->id)
+                ->first();
+
+            if (! $roleUser) {
+                return response()->json(['error' => __('messages.not_authorized')], 403);
+            }
+
+            $googleCalendarId = $request->input('google_calendar_id');
+
+            if ($googleCalendarId) {
+                // Enable sync
+                $roleUser->update(['google_calendar_id' => $googleCalendarId]);
+
+                return response()->json([
+                    'message' => __('messages.member_sync_enabled'),
+                ]);
+            } else {
+                // Disable sync - delete synced events from Google Calendar
+                $oldCalendarId = $roleUser->google_calendar_id;
+
+                if ($oldCalendarId) {
+                    // Ensure valid token
+                    if ($this->googleCalendarService->ensureValidToken($user)) {
+                        $this->googleCalendarService->setAccessToken([
+                            'access_token' => $user->google_token,
+                            'refresh_token' => $user->google_refresh_token,
+                            'expires_in' => $this->calculateExpiresIn($user->google_token_expires_at),
+                        ]);
+
+                        // Delete synced events from member's Google Calendar
+                        $syncs = \App\Models\CalendarSync::where('user_id', $user->id)
+                            ->where('role_id', $role->id)
+                            ->whereNotNull('google_event_id')
+                            ->get();
+
+                        foreach ($syncs as $sync) {
+                            try {
+                                $this->googleCalendarService->deleteEvent($sync->google_event_id, $oldCalendarId, $role->id);
+                            } catch (\Exception $e) {
+                                Log::warning('Failed to delete member synced event from Google Calendar', [
+                                    'user_id' => $user->id,
+                                    'event_id' => $sync->event_id,
+                                    'error' => $e->getMessage(),
+                                ]);
+                            }
+                        }
+                    }
+
+                    // Clean up sync records
+                    \App\Models\CalendarSync::where('user_id', $user->id)
+                        ->where('role_id', $role->id)
+                        ->delete();
+                }
+
+                $roleUser->update(['google_calendar_id' => null]);
+
+                return response()->json([
+                    'message' => __('messages.member_sync_disabled'),
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Failed to update member calendar sync', [
+                'user_id' => $user->id,
+                'subdomain' => $subdomain,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json(['error' => __('messages.sync_error')], 500);
         }
     }
 

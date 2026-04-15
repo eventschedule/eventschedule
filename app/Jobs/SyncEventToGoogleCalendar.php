@@ -2,8 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Models\CalendarSync;
 use App\Models\Event;
 use App\Models\Role;
+use App\Models\User;
 use App\Services\GoogleCalendarService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -19,16 +21,22 @@ class SyncEventToGoogleCalendar implements ShouldQueue
 
     protected $action; // 'create', 'update', 'delete'
 
+    protected $user; // Optional: specific user (defaults to role owner)
+
+    protected $calendarId; // Optional: specific calendar (defaults to owner's calendar)
+
     public $deleteWhenMissingModels = true;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(Event $event, Role $role, string $action = 'create')
+    public function __construct(Event $event, Role $role, string $action = 'create', ?User $user = null, ?string $calendarId = null)
     {
         $this->event = $event;
         $this->role = $role;
         $this->action = $action;
+        $this->user = $user;
+        $this->calendarId = $calendarId;
     }
 
     /**
@@ -48,12 +56,28 @@ class SyncEventToGoogleCalendar implements ShouldQueue
     }
 
     /**
+     * Get the user whose credentials should be used for this sync
+     */
+    private function getSyncUser(): User
+    {
+        return $this->user ?? $this->role->user;
+    }
+
+    /**
+     * Get the calendar ID to sync with
+     */
+    private function getSyncCalendarId(): string
+    {
+        return $this->calendarId ?? $this->role->getGoogleCalendarId();
+    }
+
+    /**
      * Execute the job.
      */
     public function handle(GoogleCalendarService $googleCalendarService): void
     {
         try {
-            $user = $this->role->user;
+            $user = $this->getSyncUser();
 
             if (! $user->google_token) {
                 Log::warning('User does not have Google Calendar connected', [
@@ -96,7 +120,7 @@ class SyncEventToGoogleCalendar implements ShouldQueue
         } catch (\Exception $e) {
             Log::error('Failed to sync event to Google Calendar', [
                 'event_id' => $this->event->id,
-                'user_id' => $this->role->user->id ?? null,
+                'user_id' => $this->getSyncUser()?->id,
                 'action' => $this->action,
                 'error' => $e->getMessage(),
             ]);
@@ -107,15 +131,40 @@ class SyncEventToGoogleCalendar implements ShouldQueue
     }
 
     /**
+     * Get the stored Google event ID for this sync
+     */
+    private function getGoogleEventId(): ?string
+    {
+        return CalendarSync::where('user_id', $this->getSyncUser()->id)
+            ->where('event_id', $this->event->id)
+            ->where('role_id', $this->role->id)
+            ->first()?->google_event_id;
+    }
+
+    /**
+     * Store the Google event ID for this sync
+     */
+    private function setGoogleEventId(?string $googleEventId): void
+    {
+        CalendarSync::updateOrCreate(
+            [
+                'user_id' => $this->getSyncUser()->id,
+                'event_id' => $this->event->id,
+                'role_id' => $this->role->id,
+            ],
+            ['google_event_id' => $googleEventId]
+        );
+    }
+
+    /**
      * Create event in Google Calendar
      */
     private function createEvent(GoogleCalendarService $googleCalendarService): void
     {
-        $calendarId = $this->role->getGoogleCalendarId();
-        $googleEvent = $googleCalendarService->createEvent($this->event, $this->role);
+        $googleEvent = $googleCalendarService->createEvent($this->event, $this->role, $this->getSyncCalendarId());
 
         if ($googleEvent) {
-            $this->event->setGoogleEventIdForRole($this->role->id, $googleEvent->getId());
+            $this->setGoogleEventId($googleEvent->getId());
         }
     }
 
@@ -124,21 +173,21 @@ class SyncEventToGoogleCalendar implements ShouldQueue
      */
     private function updateEvent(GoogleCalendarService $googleCalendarService): void
     {
-        $googleEventId = $this->event->getGoogleEventIdForRole($this->role->id);
+        $googleEventId = $this->getGoogleEventId();
 
         if (! $googleEventId) {
-            // If no Google event ID for this role, create a new event
+            // If no Google event ID, create a new event
             $this->createEvent($googleCalendarService);
 
             return;
         }
 
-        $googleEvent = $googleCalendarService->updateEvent(
+        $googleCalendarService->updateEvent(
             $this->event,
             $googleEventId,
-            $this->role
+            $this->role,
+            $this->getSyncCalendarId()
         );
-
     }
 
     /**
@@ -146,16 +195,19 @@ class SyncEventToGoogleCalendar implements ShouldQueue
      */
     private function deleteEvent(GoogleCalendarService $googleCalendarService): void
     {
-        $googleEventId = $this->event->getGoogleEventIdForRole($this->role->id);
+        $googleEventId = $this->getGoogleEventId();
 
         if (! $googleEventId) {
             return;
         }
 
-        $success = $googleCalendarService->deleteEvent($googleEventId, $this->role->getGoogleCalendarId(), $this->role->id);
+        $success = $googleCalendarService->deleteEvent($googleEventId, $this->getSyncCalendarId(), $this->role->id);
 
         if ($success) {
-            $this->event->setGoogleEventIdForRole($this->role->id, null);
+            CalendarSync::where('user_id', $this->getSyncUser()->id)
+                ->where('event_id', $this->event->id)
+                ->where('role_id', $this->role->id)
+                ->delete();
         }
     }
 }

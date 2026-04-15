@@ -117,6 +117,30 @@
                                         <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                                         @endif
 
+                                        @if (auth()->user()->google_token)
+                                        @if (isset($memberSyncCalendarIds[$role->id]))
+                                        <button @click="open = false; unsyncFromCalendar('{{ $role->subdomain }}')"
+                                                class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
+                                                role="menuitem">
+                                            <svg class="w-4 h-4 me-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                            <span>{{ __('messages.unsync_from_my_calendar') }}</span>
+                                        </button>
+                                        @else
+                                        <button @click="open = false; syncToCalendar('{{ $role->subdomain }}')"
+                                                class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
+                                                role="menuitem">
+                                            <svg class="w-4 h-4 me-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                            <span>{{ __('messages.sync_to_my_calendar') }}</span>
+                                        </button>
+                                        @endif
+
+                                        <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                                        @endif
+
                                         <button @click="open = false; if (confirm('{{ addslashes(__('messages.are_you_sure')) }}')) location.href = '{{ route('role.unfollow', ['subdomain' => $role->subdomain]) }}'"
                                                 class="flex items-center px-4 py-2 text-sm text-red-700 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
                                                 role="menuitem">
@@ -162,5 +186,62 @@ function copyFeedUrl(url, button) {
             svg.classList.remove('text-green-500');
         }, 2000);
     }).catch(() => {});
+}
+
+function syncToCalendar(subdomain) {
+    fetch('{{ url("/google-calendar/calendars") }}')
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            var calendars = (data.calendars && Array.isArray(data.calendars)) ? data.calendars : [];
+            if (!calendars.length) {
+                alert(@json(__('messages.google_calendar_not_connected')));
+                return;
+            }
+
+            var options = calendars.map(function(cal, i) { return (i + 1) + '. ' + cal.summary; }).join('\n');
+            var choice = prompt(@json(__('messages.select_your_calendar')) + ':\n\n' + options);
+
+            if (!choice) return;
+
+            var index = parseInt(choice) - 1;
+            if (isNaN(index) || index < 0 || index >= calendars.length) return;
+
+            var calendarId = calendars[index].id;
+
+            fetch('{{ url("/google-calendar/member-sync") }}/' + subdomain, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ google_calendar_id: calendarId }),
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                alert(data.message || data.error);
+                if (!data.error) location.reload();
+            })
+            .catch(function() { alert(@json(__('messages.sync_error'))); });
+        })
+        .catch(function() { alert(@json(__('messages.sync_error'))); });
+}
+
+function unsyncFromCalendar(subdomain) {
+    if (!confirm(@json(__('messages.are_you_sure')))) return;
+
+    fetch('{{ url("/google-calendar/member-sync") }}/' + subdomain, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ google_calendar_id: '' }),
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        alert(data.message || data.error);
+        if (!data.error) location.reload();
+    })
+    .catch(function() { alert(@json(__('messages.sync_error'))); });
 }
 </script>

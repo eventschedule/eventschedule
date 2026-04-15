@@ -294,7 +294,7 @@
                             </button>
                             @endif
                             @endif
-                            @if (auth()->user()->google_token && $role->google_calendar_id)
+                            @if (auth()->user()->google_token && $role->hasGoogleCalendarIntegration())
                             <a href="#" id="sync-events-link" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                 <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M12,18A6,6 0 0,1 6,12C6,11 6.25,10.03 6.7,9.2L5.24,7.74C4.46,8.97 4,10.43 4,12A8,8 0 0,0 12,20C13.57,20 15.03,19.54 16.26,18.76L14.8,17.3C13.97,17.75 13,18 12,18M20,12A8,8 0 0,0 12,4C10.43,4 8.97,4.46 7.74,5.24L9.2,6.7C10.03,6.25 11,6 12,6A6,6 0 0,1 18,12C18,13 17.75,13.97 17.3,14.8L18.76,16.26C19.54,15.03 20,13.57 20,12M14.8,17.3L16.26,18.76L18.76,16.26L17.3,14.8L14.8,17.3M9.2,6.7L7.74,5.24L5.24,7.74L6.7,9.2L9.2,6.7M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z" />
@@ -466,7 +466,7 @@ function handleEventsGraphicClick() {
 
 function syncEventsFromDropdown() {
     // Check if user has Google token and role has calendar ID
-    @if (!auth()->user()->google_token || !$role->google_calendar_id)
+    @if (!auth()->user()->google_token || !$role->hasGoogleCalendarIntegration())
         alert(@json(__("messages.google_calendar_not_connected")));
         return false;
     @endif

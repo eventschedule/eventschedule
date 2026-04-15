@@ -3395,6 +3395,94 @@
                                 {{ __('messages.connect_google_calendar') }}
                             </x-link>
                             @endif
+
+                            @if (auth()->id() != $role->user_id)
+                            <!-- Member Personal Calendar Sync -->
+                            <div class="border-t border-gray-200 dark:border-gray-700 mt-6 pt-6">
+                                <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.sync_to_my_calendar') }}</h4>
+
+                                @if (auth()->user()->google_token)
+                                <div class="space-y-4 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+                                    <div>
+                                        <x-input-label for="member-calendar-select" :value="__('messages.select_your_calendar')" />
+                                        <select id="member-calendar-select" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                            <option value="">{{ __('messages.no_sync') }}</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <x-brand-button type="button" id="save-member-sync-btn">
+                                            {{ __('messages.save') }}
+                                        </x-brand-button>
+                                        <span id="member-sync-status" class="ms-3 text-sm text-green-600 dark:text-green-400 hidden"></span>
+                                    </div>
+                                </div>
+
+                                <script {!! nonce_attr() !!}>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    var memberCalendarSelect = document.getElementById('member-calendar-select');
+                                    var memberCalendarId = @json($userCalendarId ?? '');
+
+                                    // Load calendars for member select
+                                    fetch('{{ url("/google-calendar/calendars") }}')
+                                        .then(function(response) { return response.json(); })
+                                        .then(function(data) {
+                                            memberCalendarSelect.innerHTML = '<option value="">{{ __("messages.no_sync") }}</option>';
+                                            if (data.calendars && Array.isArray(data.calendars)) {
+                                                data.calendars.forEach(function(cal) {
+                                                    var option = document.createElement('option');
+                                                    option.value = cal.id;
+                                                    option.textContent = cal.summary + (cal.primary ? ' (Primary)' : '');
+                                                    if (cal.id === memberCalendarId) {
+                                                        option.selected = true;
+                                                    }
+                                                    memberCalendarSelect.appendChild(option);
+                                                });
+                                            }
+                                        })
+                                        .catch(function() {
+                                            memberCalendarSelect.innerHTML = '<option value="">{{ __("messages.error_loading_calendars") }}</option>';
+                                        });
+
+                                    // Save member sync
+                                    document.getElementById('save-member-sync-btn').addEventListener('click', function() {
+                                        var calendarId = memberCalendarSelect.value;
+                                        var statusEl = document.getElementById('member-sync-status');
+
+                                        fetch('{{ url("/google-calendar/member-sync/" . $role->subdomain) }}', {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                                'Content-Type': 'application/json',
+                                            },
+                                            body: JSON.stringify({ google_calendar_id: calendarId }),
+                                        })
+                                        .then(function(response) { return response.json(); })
+                                        .then(function(data) {
+                                            statusEl.textContent = data.message || data.error;
+                                            statusEl.classList.remove('hidden');
+                                            statusEl.classList.toggle('text-green-600', !data.error);
+                                            statusEl.classList.toggle('dark:text-green-400', !data.error);
+                                            statusEl.classList.toggle('text-red-600', !!data.error);
+                                            statusEl.classList.toggle('dark:text-red-400', !!data.error);
+                                            setTimeout(function() { statusEl.classList.add('hidden'); }, 3000);
+                                        })
+                                        .catch(function() {
+                                            statusEl.textContent = @json(__('messages.sync_error'));
+                                            statusEl.classList.remove('hidden');
+                                            statusEl.classList.add('text-red-600', 'dark:text-red-400');
+                                            setTimeout(function() { statusEl.classList.add('hidden'); }, 3000);
+                                        });
+                                    });
+                                });
+                                </script>
+                                @else
+                                <x-link href="{{ route('profile.edit') }}#section-google-calendar" target="_blank">
+                                    {{ __('messages.connect_google_to_sync') }}
+                                </x-link>
+                                @endif
+                            </div>
+                            @endif
                         </div>
 
                         <!-- Tab Content: CalDAV -->
@@ -4166,7 +4254,7 @@ function loadGoogleCalendars() {
                     const option = document.createElement('option');
                     option.value = calendar.id;
                     option.textContent = calendar.summary + (calendar.primary ? ' (Primary)' : '');
-                    if (calendar.id === '{{ $role->google_calendar_id }}') {
+                    if (calendar.id === @json($userCalendarId ?? '')) {
                         option.selected = true;
                     }
                     select.appendChild(option);

@@ -1563,6 +1563,11 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_found'));
         }
 
+        // Clean up member calendar sync records
+        \App\Models\CalendarSync::where('user_id', $userId)
+            ->where('role_id', $role->id)
+            ->delete();
+
         $roleUser->delete();
 
         AuditService::log(AuditService::SCHEDULE_MEMBER_REMOVE, auth()->id(), 'Role', $role->id, null, null, 'user_id:'.$userId);
@@ -1636,10 +1641,17 @@ class RoleController extends Controller
 
         $roles = $query->orderBy($sortBy, $sortDir)->get();
 
+        // Get member calendar sync status for followed roles
+        $memberSyncCalendarIds = \App\Models\RoleUser::where('user_id', $user->id)
+            ->whereIn('role_id', $roleIds)
+            ->whereNotNull('google_calendar_id')
+            ->pluck('google_calendar_id', 'role_id');
+
         $data = [
             'roles' => $roles,
             'sortBy' => $sortBy,
             'sortDir' => $sortDir,
+            'memberSyncCalendarIds' => $memberSyncCalendarIds,
         ];
 
         if (request()->ajax()) {
@@ -1801,6 +1813,13 @@ class RoleController extends Controller
 
         $role->save();
 
+        // Attach owner with calendar ID before handling sync
+        $user->roles()->attach($role->id, [
+            'created_at' => now(),
+            'level' => 'owner',
+            'google_calendar_id' => $request->input('google_calendar_id'),
+        ]);
+
         AuditService::log(AuditService::SCHEDULE_CREATE, $user->id, 'Role', $role->id, null, null, $role->name);
 
         // Handle sync direction and calendar setup for new role
@@ -1854,8 +1873,6 @@ class RoleController extends Controller
                 }
             }
         }
-
-        $user->roles()->attach($role->id, ['created_at' => now(), 'level' => 'owner']);
 
         if (! $user->default_role_id) {
             $user->default_role_id = $role->id;
@@ -2044,6 +2061,7 @@ class RoleController extends Controller
             'approvedSubdomainNames' => $approvedSubdomainNames,
             'availableCurators' => $availableCurators,
             'notificationSettings' => $notificationSettings,
+            'userCalendarId' => $pivot?->google_calendar_id,
         ];
 
         return view('role/edit', $data);
@@ -2066,7 +2084,7 @@ class RoleController extends Controller
                 'new_subdomain' => $role->subdomain,
                 'custom_domain' => $role->custom_domain,
                 'custom_css' => $role->custom_css,
-                'google_calendar_id' => $role->google_calendar_id,
+                'google_calendar_id' => RoleUser::where('role_id', $role->id)->where('user_id', $role->user_id)->first()?->google_calendar_id,
                 'sync_direction' => $role->sync_direction,
                 'caldav_sync_direction' => $role->caldav_sync_direction,
                 'email_settings' => null,
@@ -2123,7 +2141,8 @@ class RoleController extends Controller
         // Handle sync_direction and calendar changes and webhook management
         $oldSyncDirection = $role->sync_direction;
         $newSyncDirection = $request->input('sync_direction');
-        $oldCalendarId = $role->google_calendar_id;
+        $ownerPivot = RoleUser::where('role_id', $role->id)->where('user_id', $role->user_id)->first();
+        $oldCalendarId = $ownerPivot?->google_calendar_id;
         $newCalendarId = $request->input('google_calendar_id');
 
         $role->fill($request->all());
@@ -2136,6 +2155,11 @@ class RoleController extends Controller
         }
         if ($request->has('payment_links')) {
             $role->payment_links = $request->input('payment_links') ?: null;
+        }
+
+        // Save calendar ID to owner's pivot
+        if ($oldCalendarId !== $newCalendarId) {
+            $ownerPivot?->update(['google_calendar_id' => $newCalendarId ?: null]);
         }
 
         // If sync_direction or calendar changed, handle webhook management

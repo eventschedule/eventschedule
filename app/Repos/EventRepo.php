@@ -4,6 +4,7 @@ namespace App\Repos;
 
 use App\Jobs\SendQueuedEmail;
 use App\Jobs\SendQueuedSms;
+use App\Jobs\SyncEventToGoogleCalendar;
 use App\Mail\ClaimRole;
 use App\Mail\ClaimVenue;
 use App\Models\Event;
@@ -1174,6 +1175,16 @@ class EventRepo
                 } else {
                     $event->syncToGoogleCalendar('update');
                 }
+            } elseif ($currentRole) {
+                // Sync for members even when owner sync is not enabled
+                $memberAction = $isNewOrJustPublished ? 'create' : 'update';
+                foreach ($currentRole->getMembersWithCalendarSync() as $member) {
+                    if ($member->google_token) {
+                        SyncEventToGoogleCalendar::dispatchSync(
+                            $event, $currentRole, $memberAction, $member, $member->pivot->google_calendar_id
+                        );
+                    }
+                }
             }
 
             // Sync to CalDAV for the current role
@@ -1194,6 +1205,15 @@ class EventRepo
             // Remove from external calendars when un-publishing
             if ($currentRole && $currentRole->syncsToGoogle()) {
                 $event->syncToGoogleCalendar('delete');
+            } elseif ($currentRole) {
+                // Delete from member calendars even when owner sync is not enabled
+                foreach ($currentRole->getMembersWithCalendarSync() as $member) {
+                    if ($member->google_token) {
+                        SyncEventToGoogleCalendar::dispatchSync(
+                            $event, $currentRole, 'delete', $member, $member->pivot->google_calendar_id
+                        );
+                    }
+                }
             }
             if ($currentRole && $currentRole->syncsToCalDAV()) {
                 $event->syncToCalDAV('delete');

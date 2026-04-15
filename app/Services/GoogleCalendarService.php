@@ -165,20 +165,16 @@ class GoogleCalendarService
     /**
      * Create a Google Calendar event from an Event model
      */
-    public function createEvent(Event $event, Role $role): ?GoogleEvent
+    public function createEvent(Event $event, Role $role, ?string $calendarId = null): ?GoogleEvent
     {
         try {
             if (! $this->calendarService) {
                 throw new \Exception('Calendar service not initialized');
             }
 
-            // Use the role's selected calendar or default to primary
-            $calendarId = $role->getGoogleCalendarId();
-
-            $user = $role->user;
-
-            if (! $user->google_token) {
-                throw new \Exception('User does not have Google Calendar connected');
+            // Use provided calendar ID, or fall back to role's selected calendar
+            if (! $calendarId) {
+                $calendarId = $role->getGoogleCalendarId();
             }
 
             if (! $calendarId) {
@@ -235,22 +231,18 @@ class GoogleCalendarService
     /**
      * Update a Google Calendar event
      */
-    public function updateEvent(Event $event, string $googleEventId, Role $role): ?GoogleEvent
+    public function updateEvent(Event $event, string $googleEventId, Role $role, ?string $calendarId = null): ?GoogleEvent
     {
         try {
             if (! $this->calendarService) {
                 throw new \Exception('Calendar service not initialized');
             }
 
-            $calendarId = $role->getGoogleCalendarId();
-
-            $user = $role->user;
-
-            if (! $user->google_token) {
-                throw new \Exception('User does not have Google Calendar connected');
+            // Use provided calendar ID, or fall back to role's selected calendar
+            if (! $calendarId) {
+                $calendarId = $role->getGoogleCalendarId();
             }
 
-            // Use the role's selected calendar or default to primary
             if (! $calendarId) {
                 $calendarId = 'primary';
             }
@@ -386,18 +378,22 @@ class GoogleCalendarService
 
         foreach ($events as $event) {
             try {
-                $googleEventId = $event->getGoogleEventIdForRole($role->id);
+                $existingSync = \App\Models\CalendarSync::where('user_id', $user->id)
+                    ->where('event_id', $event->id)
+                    ->where('role_id', $role->id)
+                    ->first();
 
-                if ($googleEventId) {
+                if ($existingSync?->google_event_id) {
                     // Skip events that already exist in Google Calendar
-                    // Updates should only happen when the specific event is changed in the app
-                    // (handled by SyncEventToGoogleCalendar job with 'update' action)
                     continue;
                 } else {
                     // Create new event
                     $googleEvent = $this->createEvent($event, $role);
                     if ($googleEvent) {
-                        $event->setGoogleEventIdForRole($role->id, $googleEvent->getId());
+                        \App\Models\CalendarSync::updateOrCreate(
+                            ['user_id' => $user->id, 'event_id' => $event->id, 'role_id' => $role->id],
+                            ['google_event_id' => $googleEvent->getId()]
+                        );
                         $results['created']++;
                     } else {
                         $results['errors']++;
@@ -566,11 +562,11 @@ class GoogleCalendarService
 
             foreach ($googleEvents as $googleEvent) {
                 try {
-                    // Check if this event already exists by looking for the google_event_id in event_role table
-                    $existingEvent = Event::whereHas('roles', function ($query) use ($googleEvent, $role) {
-                        $query->where('role_id', $role->id)
-                            ->where('google_event_id', $googleEvent['id']);
-                    })->first();
+                    // Check if this event already exists by looking for the google_event_id in calendar_syncs table
+                    $existingSync = \App\Models\CalendarSync::where('role_id', $role->id)
+                        ->where('google_event_id', $googleEvent['id'])
+                        ->first();
+                    $existingEvent = $existingSync ? Event::find($existingSync->event_id) : null;
 
                     // Also check for events with the same name and start time to prevent duplicates
                     if (! $existingEvent && isset($googleEvent['start'])) {
@@ -670,9 +666,16 @@ class GoogleCalendarService
 
         $event->save();
 
-        // Attach to the role with google_event_id
+        // Attach to the role
         $event->roles()->attach($role->id, [
             'is_accepted' => true,
+        ]);
+
+        // Track the google_event_id in calendar_syncs
+        \App\Models\CalendarSync::create([
+            'user_id' => $role->user_id,
+            'event_id' => $event->id,
+            'role_id' => $role->id,
             'google_event_id' => $googleEvent['id'],
         ]);
 

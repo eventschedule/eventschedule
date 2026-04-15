@@ -70,7 +70,6 @@ class Role extends Model implements MustVerifyEmail
         'custom_domain_host',
         'custom_domain_status',
         'event_layout',
-        'google_calendar_id',
         'sync_direction',
         'request_terms',
         'request_terms_en',
@@ -351,7 +350,7 @@ class Role extends Model implements MustVerifyEmail
     {
         return $this->belongsToMany(User::class)
             ->withTimestamps()
-            ->withPivot('level', 'dates_unavailable', 'notification_settings')
+            ->withPivot('level', 'dates_unavailable', 'notification_settings', 'google_calendar_id')
             ->orderBy('name');
     }
 
@@ -366,7 +365,7 @@ class Role extends Model implements MustVerifyEmail
     {
         return $this->belongsToMany(User::class)
             ->withTimestamps()
-            ->withPivot('level', 'dates_unavailable', 'notification_settings')
+            ->withPivot('level', 'dates_unavailable', 'notification_settings', 'google_calendar_id')
             ->where('level', '!=', 'follower')
             ->orderBy('name');
     }
@@ -375,9 +374,21 @@ class Role extends Model implements MustVerifyEmail
     {
         return $this->belongsToMany(User::class)
             ->withTimestamps()
-            ->withPivot('level')
+            ->withPivot('level', 'google_calendar_id')
             ->where('level', 'follower')
             ->orderBy('pivot_created_at', 'desc');
+    }
+
+    /**
+     * Get non-owner members who have Google Calendar sync enabled
+     */
+    public function getMembersWithCalendarSync()
+    {
+        return $this->belongsToMany(User::class)
+            ->withPivot('level', 'google_calendar_id')
+            ->whereNotNull('role_user.google_calendar_id')
+            ->where('level', '!=', 'owner')
+            ->get();
     }
 
     public function getEditorsWantingNotification(string $type): \Illuminate\Support\Collection
@@ -1554,7 +1565,11 @@ class Role extends Model implements MustVerifyEmail
      */
     public function getGoogleCalendarId()
     {
-        return $this->google_calendar_id ?: 'primary';
+        $pivot = RoleUser::where('role_id', $this->id)
+            ->where('user_id', $this->user_id)
+            ->first();
+
+        return $pivot?->google_calendar_id ?: 'primary';
     }
 
     /**
@@ -1562,7 +1577,11 @@ class Role extends Model implements MustVerifyEmail
      */
     public function hasGoogleCalendarIntegration()
     {
-        return ! is_null($this->google_calendar_id);
+        $pivot = RoleUser::where('role_id', $this->id)
+            ->where('user_id', $this->user_id)
+            ->first();
+
+        return ! is_null($pivot?->google_calendar_id);
     }
 
     /**

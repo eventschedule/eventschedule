@@ -250,6 +250,15 @@ class Event extends Model
                     }
                 }
 
+                // Delete from member Google Calendars
+                foreach ($role->getMembersWithCalendarSync() as $member) {
+                    if ($member->google_token) {
+                        SyncEventToGoogleCalendar::dispatchSync(
+                            $event, $role, 'delete', $member, $member->pivot->google_calendar_id
+                        );
+                    }
+                }
+
                 if ($role->syncsToCalDAV()) {
                     SyncEventToCalDAV::dispatchSync($event, $role, 'delete');
                 }
@@ -1786,39 +1795,48 @@ class Event extends Model
     }
 
     /**
-     * Get Google event ID for a specific role
+     * Get Google event ID for a specific role (uses owner's sync record)
      */
     public function getGoogleEventIdForRole($roleId)
     {
-        $eventRole = $this->roles->first(function ($role) use ($roleId) {
+        $role = $this->roles->first(function ($role) use ($roleId) {
             return $role->id == $roleId;
         });
 
-        return $eventRole ? $eventRole->pivot->google_event_id : null;
+        if (! $role) {
+            return null;
+        }
+
+        return CalendarSync::where('user_id', $role->user_id)
+            ->where('event_id', $this->id)
+            ->where('role_id', $roleId)
+            ->first()?->google_event_id;
     }
 
     /**
-     * Set Google event ID for a specific role
-     *
-     * @return bool True if the pivot was updated, false if not found
+     * Set Google event ID for a specific role (uses owner's sync record)
      */
     public function setGoogleEventIdForRole($roleId, $googleEventId)
     {
-        // Check if the pivot exists before updating
-        $exists = $this->roles()->where('roles.id', $roleId)->exists();
-        if (! $exists) {
-            \Log::warning('Cannot set Google event ID: pivot record does not exist', [
-                'event_id' => $this->id,
-                'role_id' => $roleId,
-                'google_event_id' => $googleEventId,
-            ]);
+        $role = $this->roles->first(function ($role) use ($roleId) {
+            return $role->id == $roleId;
+        });
 
-            return false;
+        if (! $role) {
+            return;
         }
 
-        $this->roles()->updateExistingPivot($roleId, ['google_event_id' => $googleEventId]);
-
-        return true;
+        if ($googleEventId) {
+            CalendarSync::updateOrCreate(
+                ['user_id' => $role->user_id, 'event_id' => $this->id, 'role_id' => $roleId],
+                ['google_event_id' => $googleEventId]
+            );
+        } else {
+            CalendarSync::where('user_id', $role->user_id)
+                ->where('event_id', $this->id)
+                ->where('role_id', $roleId)
+                ->delete();
+        }
     }
 
     /**
@@ -1852,11 +1870,23 @@ class Event extends Model
      */
     public function syncToGoogleCalendar($action = 'create')
     {
+        // Owner sync
         foreach ($this->roles as $role) {
             if ($role->syncsToGoogle()) {
                 $user = $role->user;
                 if ($user && $user->google_token) {
                     SyncEventToGoogleCalendar::dispatchSync($this, $role, $action);
+                }
+            }
+        }
+
+        // Member sync (admins/followers with personal calendar sync enabled)
+        foreach ($this->roles as $role) {
+            foreach ($role->getMembersWithCalendarSync() as $member) {
+                if ($member->google_token) {
+                    SyncEventToGoogleCalendar::dispatchSync(
+                        $this, $role, $action, $member, $member->pivot->google_calendar_id
+                    );
                 }
             }
         }
