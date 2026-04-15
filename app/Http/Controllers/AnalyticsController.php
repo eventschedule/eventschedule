@@ -136,6 +136,11 @@ class AnalyticsController extends Controller
         // Get top referrer domains
         $topReferrers = $analytics->getTopReferrerDomains($user, 10, $start, $end, $selectedRoleId);
 
+        // Get top UTM parameters
+        $topUtmSources = $analytics->getTopUtmParams($user, 'source', 10, $start, $end, $selectedRoleId);
+        $topUtmMediums = $analytics->getTopUtmParams($user, 'medium', 10, $start, $end, $selectedRoleId);
+        $topUtmCampaigns = $analytics->getTopUtmParams($user, 'campaign', 10, $start, $end, $selectedRoleId);
+
         // Get boost views by period for chart overlay
         $boostStats = $analytics->getBoostStats($user, $start, $end, $selectedRoleId);
         $boostViewsByPeriod = $boostStats['has_data']
@@ -167,7 +172,10 @@ class AnalyticsController extends Controller
             'trafficSources',
             'topReferrers',
             'boostViewsByPeriod',
-            'newsletterViewsByPeriod'
+            'newsletterViewsByPeriod',
+            'topUtmSources',
+            'topUtmMediums',
+            'topUtmCampaigns'
         ));
     }
 }

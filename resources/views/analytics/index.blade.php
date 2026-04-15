@@ -697,7 +697,7 @@
             </div>
 
             {{-- Bar Charts Grid --}}
-            @if ($topEvents->isNotEmpty() || ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1) || $topAppearances->isNotEmpty() || $topSchedulesAppearedOn->isNotEmpty() || $trafficSources->isNotEmpty())
+            @if ($topEvents->isNotEmpty() || ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1) || $topAppearances->isNotEmpty() || $topSchedulesAppearedOn->isNotEmpty() || $trafficSources->isNotEmpty() || $topUtmSources->isNotEmpty() || $topUtmMediums->isNotEmpty() || $topUtmCampaigns->isNotEmpty())
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {{-- Top Events Chart --}}
                 @if ($topEvents->isNotEmpty())
@@ -769,6 +769,36 @@
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_referrers') }}</h3>
                     <div class="h-64">
                         <canvas id="topReferrersChart"></canvas>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Top UTM Sources Chart --}}
+                @if ($topUtmSources->isNotEmpty())
+                <div class="ap-card rounded-xl p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_utm_sources') }}</h3>
+                    <div class="h-64">
+                        <canvas id="topUtmSourcesChart"></canvas>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Top UTM Mediums Chart --}}
+                @if ($topUtmMediums->isNotEmpty())
+                <div class="ap-card rounded-xl p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_utm_mediums') }}</h3>
+                    <div class="h-64">
+                        <canvas id="topUtmMediumsChart"></canvas>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Top UTM Campaigns Chart --}}
+                @if ($topUtmCampaigns->isNotEmpty())
+                <div class="ap-card rounded-xl p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_utm_campaigns') }}</h3>
+                    <div class="h-64">
+                        <canvas id="topUtmCampaignsChart"></canvas>
                     </div>
                 </div>
                 @endif
@@ -1313,6 +1343,144 @@
                     label: @json(__('messages.views')),
                     data: @json($topReferrers->pluck('view_count')->toArray()),
                     backgroundColor: '#F59E0B'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor,
+                            precision: 0
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor
+                        }
+                    }
+                }
+            }
+        });
+        @endif
+
+        @if ($topUtmSources->isNotEmpty())
+        // Top UTM Sources Chart
+        const utmSourcesCtx = document.getElementById('topUtmSourcesChart').getContext('2d');
+        new Chart(utmSourcesCtx, {
+            type: 'bar',
+            data: {
+                labels: @json($topUtmSources->pluck('param_value')->toArray()),
+                datasets: [{
+                    label: @json(__('messages.views')),
+                    data: @json($topUtmSources->pluck('view_count')->toArray()),
+                    backgroundColor: '#6366F1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor,
+                            precision: 0
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor
+                        }
+                    }
+                }
+            }
+        });
+        @endif
+
+        @if ($topUtmMediums->isNotEmpty())
+        // Top UTM Mediums Chart
+        const utmMediumsCtx = document.getElementById('topUtmMediumsChart').getContext('2d');
+        new Chart(utmMediumsCtx, {
+            type: 'bar',
+            data: {
+                labels: @json($topUtmMediums->pluck('param_value')->toArray()),
+                datasets: [{
+                    label: @json(__('messages.views')),
+                    data: @json($topUtmMediums->pluck('view_count')->toArray()),
+                    backgroundColor: '#0EA5E9'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor,
+                            precision: 0
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor
+                        }
+                    }
+                }
+            }
+        });
+        @endif
+
+        @if ($topUtmCampaigns->isNotEmpty())
+        // Top UTM Campaigns Chart
+        const utmCampaignsCtx = document.getElementById('topUtmCampaignsChart').getContext('2d');
+        new Chart(utmCampaignsCtx, {
+            type: 'bar',
+            data: {
+                labels: @json($topUtmCampaigns->pluck('param_value')->toArray()),
+                datasets: [{
+                    label: @json(__('messages.views')),
+                    data: @json($topUtmCampaigns->pluck('view_count')->toArray()),
+                    backgroundColor: '#D946EF'
                 }]
             },
             options: {

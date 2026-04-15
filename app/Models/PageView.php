@@ -287,6 +287,21 @@ class PageView
         }
         AnalyticsReferrersDaily::incrementView($role->id, $referrer, $role->custom_domain, $sourceOverride);
 
+        // Track UTM parameters
+        $utmParams = [
+            'source' => $request->query('utm_source'),
+            'medium' => $request->query('utm_medium'),
+            'campaign' => $request->query('utm_campaign'),
+            'content' => $request->query('utm_content'),
+            'term' => $request->query('utm_term'),
+        ];
+        foreach ($utmParams as $paramType => $paramValue) {
+            if ($paramValue !== null && $paramValue !== '') {
+                $paramValue = mb_substr(trim($paramValue), 0, 255);
+                AnalyticsUtmDaily::incrementView($role->id, $paramType, $paramValue);
+            }
+        }
+
         // Increment event-level analytics if event exists
         if ($event) {
             AnalyticsEventsDaily::incrementView($event->id, $deviceType);

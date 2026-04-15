@@ -6,6 +6,7 @@ use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\AnalyticsReferrersDaily;
+use App\Models\AnalyticsUtmDaily;
 use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\Newsletter;
@@ -591,6 +592,34 @@ class AnalyticsService
             ->map(fn ($item) => [
                 'domain' => $item->domain,
                 'source' => $item->source,
+                'view_count' => (int) $item->view_count,
+            ]);
+    }
+
+    /**
+     * Get top UTM parameter values for a given param type
+     */
+    public function getTopUtmParams(User $user, string $paramType, int $limit, Carbon $start, Carbon $end, ?int $roleId = null): Collection
+    {
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return collect();
+        }
+
+        return AnalyticsUtmDaily::select(
+            'param_value',
+            DB::raw('SUM(views) as view_count')
+        )
+            ->forRoles($roleIds)
+            ->inDateRange($start, $end)
+            ->byParamType($paramType)
+            ->groupBy('param_value')
+            ->orderByDesc('view_count')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($item) => [
+                'param_value' => $item->param_value,
                 'view_count' => (int) $item->view_count,
             ]);
     }
