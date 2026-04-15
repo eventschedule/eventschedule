@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\AnalyticsService;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AnalyticsController extends Controller
 {
@@ -15,13 +16,39 @@ class AnalyticsController extends Controller
         $roles = $user->roles()->wherePivot('level', '!=', 'follower')->get();
 
         // Get selected role for filtering (decode from URL-safe format)
+        // Auto-select when user has only one schedule
         $selectedRoleId = $request->role_id ? UrlUtils::decodeId($request->role_id) : null;
+        if (! $selectedRoleId && $roles->count() === 1) {
+            $selectedRoleId = $roles->first()->id;
+        }
 
         // Security: Validate that the selected role ID belongs to the authenticated user
         // This prevents enumeration attacks where attackers try to view analytics for other users' roles
         if ($selectedRoleId && ! $roleIds->contains($selectedRoleId)) {
             abort(403, 'Unauthorized access to analytics');
         }
+
+        // Get selected event for filtering (decode from URL-safe format)
+        $selectedEventId = $request->event_id ? UrlUtils::decodeId($request->event_id) : null;
+
+        // Security: Validate that the selected event belongs to the authenticated user's roles
+        if ($selectedEventId) {
+            $eventRoleIds = DB::table('event_role')
+                ->where('event_id', $selectedEventId)
+                ->pluck('role_id');
+
+            if ($eventRoleIds->intersect($roleIds)->isEmpty()) {
+                abort(403, 'Unauthorized access to analytics');
+            }
+
+            // If a schedule is selected, ensure the event belongs to it
+            if ($selectedRoleId && ! $eventRoleIds->contains($selectedRoleId)) {
+                $selectedEventId = null;
+            }
+        }
+
+        // Get events list for the dropdown (only when a schedule is selected)
+        $events = $selectedRoleId ? $analytics->getEventsForSchedule($selectedRoleId) : collect();
 
         // Tab selection
         $tab = $request->tab ?? 'web';
@@ -40,11 +67,13 @@ class AnalyticsController extends Controller
         };
 
         if ($tab === 'checkins') {
-            $checkinStats = $analytics->getCheckinStats($user, $start, $end, $selectedRoleId);
+            $checkinStats = $analytics->getCheckinStats($user, $start, $end, $selectedRoleId, $selectedEventId);
 
             return view('analytics.index', compact(
                 'roles',
                 'selectedRoleId',
+                'selectedEventId',
+                'events',
                 'range',
                 'tab',
                 'checkinStats'
@@ -53,15 +82,15 @@ class AnalyticsController extends Controller
 
         if ($tab === 'revenue') {
             // Get conversion stats
-            $conversionStats = $analytics->getConversionStats($user, $start, $end, $selectedRoleId);
+            $conversionStats = $analytics->getConversionStats($user, $start, $end, $selectedRoleId, $selectedEventId);
 
             // Get per-promo-code breakdown
             $promoCodeStats = $conversionStats['promo_sales'] > 0
-                ? $analytics->getPromoCodeStats($user, $start, $end, $selectedRoleId)
+                ? $analytics->getPromoCodeStats($user, $start, $end, $selectedRoleId, $selectedEventId)
                 : collect();
 
             // Get top events by revenue
-            $topEventsByRevenue = $analytics->getTopEventsByRevenue($user, 10, $start, $end);
+            $topEventsByRevenue = $analytics->getTopEventsByRevenue($user, 10, $start, $end, $selectedEventId);
 
             // Get boost stats
             $boostStats = $analytics->getBoostStats($user, $start, $end, $selectedRoleId);
@@ -72,6 +101,8 @@ class AnalyticsController extends Controller
             return view('analytics.index', compact(
                 'roles',
                 'selectedRoleId',
+                'selectedEventId',
+                'events',
                 'range',
                 'tab',
                 'conversionStats',
@@ -86,26 +117,28 @@ class AnalyticsController extends Controller
         $period = $request->period ?? 'daily';
 
         // Get month-over-month comparison (for fixed stats cards)
-        $momComparison = $analytics->getMonthOverMonthComparison($user, $selectedRoleId);
+        $momComparison = $analytics->getMonthOverMonthComparison($user, $selectedRoleId, $selectedEventId);
 
         // Get period comparison based on selected range (for dynamic comparison card)
         $periodComparison = $range !== 'all_time'
-            ? $analytics->getPeriodComparison($user, $range, $start, $end, $selectedRoleId)
+            ? $analytics->getPeriodComparison($user, $range, $start, $end, $selectedRoleId, $selectedEventId)
             : null;
 
         // Get total views (all time)
-        $totalViews = $analytics->getTotalViewsForRoles(
-            $selectedRoleId ? collect([$selectedRoleId]) : $roleIds
-        );
+        $totalViews = $selectedEventId
+            ? $analytics->getTotalViewsForEvent($selectedEventId)
+            : $analytics->getTotalViewsForRoles(
+                $selectedRoleId ? collect([$selectedRoleId]) : $roleIds
+            );
 
         // Get top events
-        $topEvents = $analytics->getTopEvents($user, 10, $start, $end);
+        $topEvents = $analytics->getTopEvents($user, 10, $start, $end, $selectedEventId);
 
         // Get views by period for chart
-        $viewsByPeriod = $analytics->getViewsByPeriod($user, $period, $start, $end, $selectedRoleId);
+        $viewsByPeriod = $analytics->getViewsByPeriod($user, $period, $start, $end, $selectedRoleId, $selectedEventId);
 
         // Get device breakdown
-        $deviceBreakdown = $analytics->getDeviceBreakdown($user, $start, $end, $selectedRoleId);
+        $deviceBreakdown = $analytics->getDeviceBreakdown($user, $start, $end, $selectedRoleId, $selectedEventId);
 
         // Get views by schedule
         $viewsBySchedule = $analytics->getViewsBySchedule($user, $start, $end, $selectedRoleId);
@@ -162,6 +195,8 @@ class AnalyticsController extends Controller
         return view('analytics.index', compact(
             'roles',
             'selectedRoleId',
+            'selectedEventId',
+            'events',
             'totalViews',
             'momComparison',
             'periodComparison',
